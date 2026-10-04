@@ -3994,6 +3994,7 @@ function itemWeaponGeometry(it) {
 // how a hand holds each kind: sword and axe point forward and up, the staff stands upright (tilted out from the body)
 const HOLD_ROT = [[0.22, 0, -0.1], [0.2, 0, -0.1], [0.1, 0, -0.06]];
 // where the hand closes on each weapon (measured from its origin): mid-handle for the sword, low on the haft for the axe, a third up the staff
+const HELD_WEAPONS = false;
 const GRIP_Y = [0.02, 0.05, 0.25];
 const HERO_GRIP_OFF = { orb: [0, -0.13, 0.03] };
 function weaponOffset(grip, style) { /* reserved for per-hero fine tuning (HERO_GRIP) */ }
@@ -4652,6 +4653,7 @@ AssetSlots.register('character', (o) => {
     if (o.gear && o.gear.boots) l.add(new THREE.Mesh(bootGeometry(o.gear.boots), mat));
   }
   const wPivot = new THREE.Group(); wPivot.position.set(0.56, 0.88, 0.12); pivot.add(wPivot);
+  wPivot.visible = HELD_WEAPONS; // hidden for now: separate weapons never sit right in these generated hands (comes back with heroes generated holding them)
   // the equipped weapon item, gripped in the fist (a generated 3D model replaces it when the item has one)
   const heldIt = heldItemFor(o), IW = itemWeaponGeometry(heldIt);
   const grip = new THREE.Group(); grip.rotation.fromArray(HOLD_ROT[IW.style]); wPivot.add(grip);
