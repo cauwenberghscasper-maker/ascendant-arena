@@ -4696,9 +4696,9 @@ AssetSlots.register('character', (o) => {
   let ring = null;
   if (o.ring) {
     const rg = new THREE.RingGeometry(0.78, 1.0, 40).rotateX(-Math.PI / 2);
-    if (o.xray) { const tri = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.22, 0, 1.08), new THREE.Vector3(0.22, 0, 1.08), new THREE.Vector3(0, 0, 1.42)]); tri.computeVertexNormals(); const merged = mergeKeepPos([rg, tri]); ring = new THREE.Mesh(merged, new THREE.MeshBasicMaterial({ color: o.ring, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false, side: THREE.DoubleSide })); }
+    if (o.xray) { const tri = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.22, 0, 1.08), new THREE.Vector3(0.22, 0, 1.08), new THREE.Vector3(0, 0, 1.42)]); tri.computeVertexNormals(); const merged = mergeKeepPos([rg, tri]); ring = new THREE.Mesh(merged, new THREE.MeshBasicMaterial({ color: o.ring, transparent: true, opacity: 0.5, depthWrite: false, depthTest: true, side: THREE.DoubleSide })); } // on the ground: the hero stands in front of it
     else ring = new THREE.Mesh(rg, new THREE.MeshBasicMaterial({ color: o.ring, transparent: true, opacity: 0.85, depthWrite: false }));
-    ring.position.y = 0.05; ring.renderOrder = o.xray ? 10 : 0; root.add(ring);
+    ring.position.y = 0.05; ring.renderOrder = 0; root.add(ring);
   }
   let phase = Math.random() * 6, deadT = 0, sq = 1;
   return {
@@ -4726,7 +4726,7 @@ AssetSlots.register('character', (o) => {
       if (o.xray) mat.userData.rimK.value = e.invulnT > 0 && e.dashT <= 0 ? 1.2 + Math.sin(t * 20) * 0.4 : 0.45;
       if (e.alive === false) { deadT += dt; const s = Math.max(0, 1 - deadT * 2.5); root.scale.setScalar(s); root.visible = s > 0; }
       else { deadT = 0; root.scale.setScalar(1); root.visible = true; }
-      if (ring) { if (o.xray) { ring.rotation.y = -root.rotation.y + e.facing; ring.material.opacity = 0.75 + Math.sin(t * 4) * 0.2; } else ring.rotation.y += dt * 0.6; }
+      if (ring) { if (o.xray) { ring.rotation.y = -root.rotation.y + e.facing; ring.material.opacity = 0.42 + Math.sin(t * 4) * 0.1; } else ring.rotation.y += dt * 0.6; }
       if (o.capeMesh) o.capeMesh.rotation.x = 0.12 + amt * 0.45 + Math.sin(t * 6) * 0.04 * (0.3 + amt);
       if (asc) asc.update(t, amt);
     },
