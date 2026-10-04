@@ -1537,7 +1537,7 @@ function defaultProfile() {
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
     essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0,
-    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: true, testSeen: true, calm: false, map: true, autoSalvage: 1, hq: true, bots: false, npcs: false, autoHunt: false },
+    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 1, hq: true, bots: false, npcs: false, autoHunt: false },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
   return prof;
@@ -1561,7 +1561,7 @@ function sanitizeProfile(p) {
   const out = Object.assign(d, p);
   out.stats = Object.assign(defaultProfile().stats, p.stats || {});
   out.settings = Object.assign(defaultProfile().settings, p.settings || {});
-  if (!(p.settings && p.settings.testSeen)) { out.settings.fastXp = true; out.settings.testSeen = true; } // test mode on while we playtest
+  if (!(p.settings && p.settings.testSeen)) { out.settings.fastXp = false; out.settings.testSeen = true; } // new players start in normal mode; Test mode stays a switch in Settings
   out.level = clamp(out.level | 0, 1, CFG.progression.cap);
   if (!CFG.brawlers[out.cls]) out.cls = 'bolt';
   if (!out.heroTree || !Array.isArray(out.heroTree.sets)) out.heroTree = newTreeState();
