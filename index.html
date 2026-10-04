@@ -860,19 +860,19 @@ const CFG = {
     // Five zones, each a long band. Monster level rises the deeper you go (RuneScape-style wilderness).
     zones: [
       { name: 'Sunny Meadow', minLevel: 1, z0: -90, z1: 95, enemy: 'slime', lvl: [1, 12], count: 34, alt: 'boar', boss: 'Ancient Golem', bossTint: 0x8d8a83, coreColor: 0xff8a2a,
-        fog: 0xcfe6fb, sky: [0x4a8fe7, 0xcfe9ff] },
+        fog: 0x5b7a5e, sky: [0x2a3d55, 0x7d9a86] },
       { name: 'Ashwood Forest', minLevel: 10, z0: 95, z1: 255, enemy: 'wolf', lvl: [10, 24], count: 34, alt: 'spider', boss: 'Thornback Golem', bossTint: 0x6b7a52, coreColor: 0x9cff5a,
-        fog: 0xbfdcc8, sky: [0x3f86c9, 0xcde8d6] },
+        fog: 0x3f5c48, sky: [0x1f2f40, 0x5e7a68] },
       { name: 'Frost Peaks', minLevel: 22, z0: 255, z1: 415, enemy: 'imp', lvl: [22, 38], count: 34, alt: 'yeti', boss: 'Frost Colossus', bossTint: 0xa9c4dc, coreColor: 0x7fe3ff,
-        fog: 0xe3eef8, sky: [0x5f9be0, 0xeef6ff] },
+        fog: 0x9fb3c4, sky: [0x3a5274, 0xb8c9d6] },
       { name: 'Ember Wastes', minLevel: 36, z0: 415, z1: 575, enemy: 'beetle', lvl: [36, 52], count: 34, alt: 'fireimp', boss: 'Magma Titan', bossTint: 0x4a3b36, coreColor: 0xff5a1f,
-        fog: 0xf0c9a8, sky: [0xd77a4a, 0xf7d6b8] },
+        fog: 0x7a4a3a, sky: [0x3a1f24, 0xa8644a] },
       { name: 'Starfall Ruins', minLevel: 50, z0: 575, z1: 745, enemy: 'wraith', lvl: [50, 65], count: 34, alt: 'sentinel', boss: 'Void Colossus', bossTint: 0x3b3566, coreColor: 0xc77dff,
-        fog: 0xc9c2ec, sky: [0x3b2f7a, 0xd4ccf5] },
+        fog: 0x4a4170, sky: [0x1a1636, 0x6a5f9c] },
       { name: 'Abyssal Depths', minLevel: 64, z0: 745, z1: 905, enemy: 'crawler', lvl: [65, 85], count: 36, alt: 'drowned', boss: 'Abyssal Leviathan', bossTint: 0x1d5560, coreColor: 0x2fffd0,
-        fog: 0x8fc9cc, sky: [0x0f3b4f, 0x9fd8d6] },
+        fog: 0x2f5f66, sky: [0x0b2230, 0x4f8a8c] },
       { name: 'Celestial Spire', minLevel: 84, z0: 905, z1: 1065, enemy: 'seraph', lvl: [85, 100], count: 36, alt: 'warden', boss: 'Celestial Colossus', bossTint: 0xe9dcb8, coreColor: 0xfff07a,
-        fog: 0xfbe9cf, sky: [0xe9a24a, 0xfff2da] },
+        fog: 0xc9a77a, sky: [0x7a5a3a, 0xf0d8b0] },
     ],
     // Monster dens: packed camps that respawn fast. Best XP per minute, but they hit back hard.
     dens: [
@@ -1537,7 +1537,7 @@ function defaultProfile() {
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
     essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0,
-    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 1, hq: true, bots: false, npcs: false, autoHunt: false },
+    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 1, hq: true, pixel: true, bots: false, npcs: false, autoHunt: false },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
   return prof;
@@ -3699,18 +3699,18 @@ const TestTools = {
 // 6. RENDER — Three.js scene, procedural assets behind AssetSlots
 // ---------------------------------------------------------------------
 const PALETTE = {
-  skyTop: 0x4a8fe7, skyHorizon: 0xcfe9ff, fog: 0xcfe6fb,
-  sun: 0xfff1d6, hemiSky: 0xdff1ff, hemiGround: 0x6f8a5a,
-  meadow: [0x8fd16f, 0x82c565, 0x9cda7b, 0x87cc69], forest: [0x4f9a5a, 0x468c50, 0x58a563, 0x4a9455],
-  frost: [0xe8f0f8, 0xd8e5f1, 0xf4f8fc, 0xdfeaf4], plaza: [0xe8d5a6, 0xe1cc99, 0xeddcb2],
-  ember: [0x6b4a3d, 0x5d4036, 0x76503f, 0x54392f], starfall: [0x4a4378, 0x544c86, 0x433d70, 0x5b5390],
+  skyTop: 0x2a3d55, skyHorizon: 0x7d9a86, fog: 0x5b7a5e,
+  sun: 0xffd9a8, hemiSky: 0xb4ccc8, hemiGround: 0x3a4a33,
+  meadow: [0x5d8a43, 0x55803e, 0x66944a, 0x4f7a3a], forest: [0x355c36, 0x2f5231, 0x3c663c, 0x2b4a2e],
+  frost: [0xc9d6df, 0xbac9d4, 0xd6e1e8, 0xb0c0cc], plaza: [0x8a8476, 0x7d786c, 0x958e7f],
+  ember: [0x5a3a30, 0x4d332b, 0x664235, 0x46302a], starfall: [0x3a3560, 0x433d6c, 0x332f56, 0x4a4378],
   emberPath: [0x9a7458, 0x8c6a51], starPath: [0x9d95c9, 0x8f87bd], deadTree: [0x3a2a24, 0x2e221d], crystal: [0xc77dff, 0x7fe3ff, 0xff9bf2],
-  path: [0xd2b07b, 0xc9a672], snowPath: [0xbfcfdf, 0xb4c6d8], outside: [0x6a8d58, 0x5f8150],
+  path: [0x8a7350, 0x7c6747], snowPath: [0xbfcfdf, 0xb4c6d8], outside: [0x6a8d58, 0x5f8150],
   abyss: [0x1f5a63, 0x23666f, 0x1b4f58, 0x2a7078], celestial: [0xf3e3bf, 0xeedab0, 0xf7ecd2, 0xe8d3a3], abyssPath: [0x5aa3a0, 0x4f9592], celestialPath: [0xfffaf0, 0xf1e7cf],
   coral: [0x2fffd0, 0x4cc9f0, 0xff7ab8], blossom: [0xffe08a, 0xffd36b, 0xfff3c4],
-  trunk: 0x7a5233, roundLeaf: [0x5cb85c, 0x6cc56a, 0x4fae57], pine: [0x2f7d46, 0x2a6e3e, 0x367f4a], snowPine: [0xe9f2fa, 0xd5e4f0],
-  rock: [0x9a9ea8, 0x8a8f99, 0xa8acb5], stone: 0x7f8590, roof: [0xc8553d, 0x3a6ea5, 0xd99a2b, 0x5b8c51], wall: 0xf3e6cc, wood: 0x9b6a3f,
-  fence: 0x8b6a45, gateLocked: 0xff4d5a, gateOpen: 0x58e08a, portal: 0xa36bff,
+  trunk: 0x5a3e2a, roundLeaf: [0x3f6b35, 0x4b7a3d, 0x56883f], pine: [0x24452e, 0x1f3d29, 0x2a4f34], snowPine: [0xe9f2fa, 0xd5e4f0],
+  rock: [0x6f7478, 0x63686d, 0x7b8084], stone: 0x5f6570, roof: [0x8e3f33, 0x3d5a7a, 0xa8792e, 0x4f6e42], wall: 0xc2b08e, wood: 0x7a5233,
+  fence: 0x6b5236, gateLocked: 0xff4d5a, gateOpen: 0x58e08a, portal: 0xa36bff,
   arenaA: 0xe7c48c, arenaB: 0xdcb67b, arenaRim: 0x9c7a4f, arenaWall: 0x6c5a8e, crate: 0xb47a46, crateBand: 0x7d4f2a, gas: 0x56e36b,
   skin: 0xf2c9a0, pants: 0x3a3f5c, hair: 0x5b3a29, eye: 0x1d1d2b, steel: 0xc9d1dc, gold: 0xf2c14e,
 };
@@ -3718,14 +3718,14 @@ const PALETTE = {
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance', canvas: document.getElementById('cv') });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 // neutral tone mapping keeps the saturated toy colours but rolls off blown highlights (gold, white hair, sand)
-renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.08;
+renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = true;
 renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); G.paused = true; }, false);
 renderer.domElement.addEventListener('webglcontextrestored', () => { G.paused = false; }, false);
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(PALETTE.fog, 50, 140);
 const camera = new THREE.PerspectiveCamera(55, 1, 0.5, 260);
-const hemi = new THREE.HemisphereLight(PALETTE.hemiSky, PALETTE.hemiGround, 1.55);
+const hemi = new THREE.HemisphereLight(PALETTE.hemiSky, PALETTE.hemiGround, 1.25);
 const sun = new THREE.DirectionalLight(PALETTE.sun, 2.7);
 sun.position.set(30, 60, 18);
 // one tight shadow map that follows the hero (High graphics only)
@@ -4803,6 +4803,94 @@ function npcMarkerState(def) {
 // --- hub world ---------------------------------------------------------------------
 const hubParts = { barriers: [], gateLabels: [], denLabels: [], portalDisc: null, portalRing: null, berryIM: null, wpIM: null, lavaIM: null, zoneMeshes: [] };
 function hashf(x, z) { const s = Math.sin(x * 127.1 + z * 311.7) * 43758.5453; return s - Math.floor(s); }
+// smooth value noise in 0..1 (bilinear between hashed lattice points)
+function vnoise(x, z) {
+  const ix = Math.floor(x), iz = Math.floor(z), fx = x - ix, fz = z - iz, ux = fx * fx * (3 - 2 * fx), uz = fz * fz * (3 - 2 * fz);
+  const a = hashf(ix, iz), b = hashf(ix + 1, iz), c = hashf(ix, iz + 1), d = hashf(ix + 1, iz + 1);
+  return a + (b - a) * ux + (c - a) * uz + (a - b - c + d) * ux * uz;
+}
+// ground: the zone colours plus a world-space texture of pixel-sized speckles, darker patches and
+// light grass tufts, so the floor reads like a painted pixel-art tileset instead of flat facets
+const matGround = new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: toonRamp });
+// Each zone gets its own floor pattern on top of the zone colours: grass clumps and dirt patches,
+// snow drifts, glowing lava cracks, broken flagstones, wet pebbles, marble terraces, and cobblestones
+// in the town plaza and along the road (all world-space, so it tiles forever without a texture file).
+matGround.userData.u = { uTown: { value: new THREE.Vector3() }, uZ: { value: [0, 0, 0, 0, 0, 0, 0] }, uRoad: { value: new THREE.Vector2() } };
+matGround.onBeforeCompile = (sh) => {
+  Object.assign(sh.uniforms, matGround.userData.u);
+  sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGW;')
+    .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvGW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+varying vec3 vGW;
+uniform vec3 uTown; uniform float uZ[7]; uniform vec2 uRoad;
+float gh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+vec2 gh2(vec2 p) { return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453); }
+float gn(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(gh(i), gh(i + vec2(1.0, 0.0)), f.x), mix(gh(i + vec2(0.0, 1.0)), gh(i + vec2(1.0, 1.0)), f.x), f.y); }
+// voronoi: x = distance to the cell border (mortar / cracks), y = random id of the cell (stone tone)
+vec2 vor(vec2 p) { vec2 i = floor(p), f = fract(p); float d1 = 8.0, d2 = 8.0; vec2 id = vec2(0.0);
+  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) { vec2 g = vec2(float(x), float(y)); vec2 o = g + gh2(i + g) * 0.85 - f; float d = dot(o, o);
+    if (d < d1) { d2 = d1; d1 = d; id = i + g; } else if (d < d2) d2 = d; }
+  return vec2(sqrt(d2) - sqrt(d1), gh(id)); }
+float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
+    .replace('#include <color_fragment>', `#include <color_fragment>
+{
+  vec2 w = vGW.xz; vec2 px = floor(w * 4.0) / 4.0;   // 25 cm texels keep every detail pixel-crisp
+  float zone = 0.0; for (int i = 1; i < 7; i++) if (w.y >= uZ[i]) zone = float(i);
+  float fine = gh(floor(w * 4.0));
+  float pat = gn(px * 0.35) * 0.6 + gn(px * 1.3) * 0.4;
+  vec3 c = diffuseColor.rgb * (0.86 + pat * 0.22 + (fine - 0.5) * 0.08);
+  float big = gn(px * 0.06);
+  if (zone < 1.5) {                                   // meadow + forest: grass clumps, blades, dirt patches
+    float clump = smoothstep(0.55, 0.75, gn(px * 0.5 + 7.0));
+    c *= 1.0 - clump * 0.16;
+    float blade = step(0.9, gh(floor(w * 4.0) + 3.0)) * step(0.45, gn(px * 0.8));
+    c = mix(c, c * vec3(1.3, 1.42, 1.12) + 0.015, blade * 0.85);
+    float dirt = smoothstep(0.66, 0.72, big + gn(px * 0.4) * 0.12);
+    c = mix(c, vec3(0.16, 0.11, 0.06) * (0.85 + fine * 0.3), dirt * 0.85);
+    c = mix(c, c * 0.55, step(0.985, gh(floor(w * 3.0) + 41.0)) * (0.4 + dirt));
+  } else if (zone < 2.5) {                            // frost: drifts with blue shade and sparkles
+    float drift = gn(px * 0.25);
+    c *= mix(vec3(0.78, 0.86, 1.0), vec3(1.08), smoothstep(0.3, 0.7, drift));
+    c += step(0.993, gh(floor(w * 4.0) + 9.0)) * 0.35;
+  } else if (zone < 3.5) {                            // ember: cracked basalt, some cracks glow
+    vec2 v = vor(px * 0.45);
+    c *= 0.8 + v.y * 0.35;
+    float crack = 1.0 - smoothstep(0.03, 0.08, v.x);
+    float hot = smoothstep(0.64, 0.78, gn(px * 0.12 + 3.0));
+    c = mix(c, vec3(0.04, 0.025, 0.02), crack * 0.9);
+    gGlow = crack * hot * 0.8; gGlowC = vec3(1.0, 0.33, 0.06);
+  } else if (zone < 4.5 || zone > 5.5) {             // starfall + celestial: broken flagstone terraces
+    float tile = zone > 5.5 ? 1.6 : 1.2;
+    vec2 t = px / tile; t.x += step(1.0, mod(floor(t.y), 2.0)) * 0.5;
+    vec2 f = fract(t), id = floor(t);
+    float paved = smoothstep(0.42, 0.5, gn(px * 0.07 + 11.0)) * step(0.12, gh(id + 5.0));
+    float mortar = 1.0 - step(0.05, min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y)) * tile);
+    vec3 stone = c * (0.88 + gh(id) * 0.26) * (zone > 5.5 ? 1.08 : 1.0);
+    c = mix(c, mix(stone, c * 0.45, mortar), paved);
+    if (zone > 5.5) c = mix(c, vec3(0.95, 0.78, 0.38), paved * mortar * step(0.7, gh(id + 2.0)) * 0.7);
+    else { gGlow = paved * mortar * step(0.94, gh(id + 3.0)) * 0.45; gGlowC = vec3(0.65, 0.4, 1.0); }
+  } else {                                            // abyss: wet pebbles with faint teal glints
+    vec2 v = vor(px * 1.1);
+    c *= 0.82 + v.y * 0.3;
+    c = mix(c, c * 0.5, 1.0 - smoothstep(0.04, 0.1, v.x));
+    gGlow = step(0.992, gh(floor(w * 4.0) + 21.0)); gGlowC = vec3(0.2, 1.0, 0.85);
+  }
+  // town plaza and the road: cobblestones like an old dungeon floor
+  float plaza = 1.0 - smoothstep(uTown.z - 3.0, uTown.z - 1.0, length(w - uTown.xy));
+  float road = (1.0 - smoothstep(uRoad.x - 0.6, uRoad.x + 0.4, abs(w.x))) * step(uTown.y, w.y) * step(w.y, uRoad.y);
+  float cob = max(plaza, road * (1.0 - smoothstep(0.62, 0.7, gn(px * 0.3 + 5.0)) * 0.6));
+  if (cob > 0.01) {
+    vec2 v = vor(px * 1.5);
+    vec3 st = diffuseColor.rgb * (0.82 + v.y * 0.36);
+    st = mix(st, diffuseColor.rgb * 0.42, 1.0 - smoothstep(0.05, 0.11, v.x));
+    c = mix(c, st, cob);
+  }
+  diffuseColor.rgb = c;
+}`)
+    .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += gGlowC * gGlow * 1.4;');
+};
+matGround.customProgramCacheKey = () => 'ground2';
 const ZONE_GROUND = () => [PALETTE.meadow, PALETTE.forest, PALETTE.frost, PALETTE.ember, PALETTE.starfall, PALETTE.abyss, PALETTE.celestial];
 const ZONE_PATH = () => [PALETTE.path, PALETTE.path, PALETTE.snowPath, PALETTE.emberPath, PALETTE.starPath, PALETTE.abyssPath, PALETTE.celestialPath];
 function groundColorAt(x, z, r) {
@@ -4817,11 +4905,12 @@ function groundColorAt(x, z, r) {
   const arr = ZONE_GROUND()[zi];
   return arr[Math.floor(r * arr.length)];
 }
-const ZONE_AMP = [0.22, 0.24, 0.45, 0.32, 0.3, 0.38, 0.16];
+const ZONE_AMP = [0.45, 0.5, 0.7, 0.5, 0.45, 0.55, 0.3];
 function buildHub() {
   const W = CFG.world, T = W.town, P2 = PALETTE, rng = mulberry32(1337);
   const grid = new Grid(6);
   // ground: one mesh per zone so the GPU can skip zones that are out of view
+  { const u = matGround.userData.u; u.uTown.value.set(T.x, T.z, T.r); u.uZ.value = W.zones.map((z2) => z2.z0); u.uRoad.value.set(2.8, W.maxZ - 6); }
   W.zones.forEach((zn, zi) => {
     const z0 = zi === 0 ? W.minZ - 20 : zn.z0, z1 = zi === W.zones.length - 1 ? W.maxZ + 20 : zn.z1;
     const gw = W.maxX - W.minX + 60, gd = z1 - z0;
@@ -4835,15 +4924,15 @@ function buildHub() {
       const amp = edge ? 2.6 : flat ? 0.02 : ZONE_AMP[zoneAt(z)];
       pos.setY(i, (hashf(x * 0.7, z * 0.7) - 0.5) * amp - (flat ? 0 : 0.08) + (edge ? 1.4 + Math.min(4, (Math.max(W.minX - x, x - W.maxX, 0)) * 0.12) : 0));
     }
-    g = g.toNonIndexed(); g.computeVertexNormals();
+    g.computeVertexNormals(); g = g.toNonIndexed(); // smooth rolling ground, not faceted triangles
     const gp = g.attributes.position, gc = new Float32Array(gp.count * 3);
     for (let i = 0; i < gp.count; i += 3) {
       const cx = (gp.getX(i) + gp.getX(i + 1) + gp.getX(i + 2)) / 3, cz = (gp.getZ(i) + gp.getZ(i + 1) + gp.getZ(i + 2)) / 3;
-      _col.set(groundColorAt(cx, cz, hashf(cx * 3.1, cz * 1.7)));
+      _col.set(groundColorAt(cx, cz, clamp(vnoise(cx * 0.07, cz * 0.07) * 1.15 - 0.07, 0, 0.999))); // soft patches, not a triangle checkerboard
       for (let k = 0; k < 3; k++) { gc[(i + k) * 3] = _col.r; gc[(i + k) * 3 + 1] = _col.g; gc[(i + k) * 3 + 2] = _col.b; }
     }
     g.setAttribute('color', new THREE.BufferAttribute(gc, 3)); g.deleteAttribute('uv');
-    const gm = new THREE.Mesh(g, matVC); gm.receiveShadow = true; hubGroup.add(gm); hubParts.zoneMeshes.push(gm);
+    const gm = new THREE.Mesh(g, matGround); gm.receiveShadow = true; hubGroup.add(gm); hubParts.zoneMeshes.push(gm);
   });
 
   // town: houses, fountain, stalls (one merged mesh)
@@ -4969,6 +5058,14 @@ function buildHub() {
   const spikeGeo = mergeParts([part(GEO.cone4, 0xffffff, [0, 0.9, 0], null, [0.45, 1.8, 0.45]), part(GEO.cone4, 0xffffff, [0.4, 0.5, 0.1], [0, 0, -0.3], [0.25, 1.0, 0.25])]);
   const tuftGeo = mergeParts([part(GEO.cone4, 0xffffff, [0, 0.22, 0], null, [0.12, 0.45, 0.12]), part(GEO.cone4, 0xffffff, [0.12, 0.18, 0.05], [0, 0, -0.35], [0.1, 0.36, 0.1]), part(GEO.cone4, 0xffffff, [-0.11, 0.17, -0.04], [0, 0, 0.35], [0.1, 0.34, 0.1])]);
   const flowerGeo = mergeParts([part(GEO.ico0, 0xffffff, [0, 0.3, 0], null, [0.13, 0.1, 0.13]), part(GEO.cyl7, 0x4f9a5a, [0, 0.13, 0], null, [0.025, 0.26, 0.025])]);
+  const bushGeo = mergeParts([part(GEO.dodec, 0xffffff, [0, 0.45, 0], null, [0.75, 0.55, 0.75]), part(GEO.dodec, 0xffffff, [0.5, 0.35, 0.15], null, [0.5, 0.4, 0.5]), part(GEO.dodec, 0xffffff, [-0.45, 0.32, -0.1], null, [0.48, 0.38, 0.48])]);
+  const logGeo = mergeParts([part(GEO.cyl7, 0xffffff, [0, 0.28, 0], [0, 0, Math.PI / 2], [0.28, 2.4, 0.28]), part(GEO.cyl7, 0xd9b98a, [1.21, 0.28, 0], [0, 0, Math.PI / 2], [0.22, 0.03, 0.22]), part(GEO.cyl7, 0xd9b98a, [-1.21, 0.28, 0], [0, 0, Math.PI / 2], [0.22, 0.03, 0.22])]);
+  const stumpGeo = mergeParts([part(GEO.cyl7, 0xffffff, [0, 0.3, 0], null, [0.42, 0.6, 0.42]), part(GEO.cyl7, 0xd9b98a, [0, 0.61, 0], null, [0.36, 0.02, 0.36])]);
+  const stemGeo = mergeParts([part(GEO.cyl7, 0xffffff, [0, 0.12, 0], null, [0.05, 0.24, 0.05])]);
+  const capGeo = mergeParts([part(GEO.cone7, 0xffffff, [0, 0.28, 0], null, [0.17, 0.12, 0.17])]);
+  const pillarGeo = mergeParts([part(GEO.box, 0xffffff, [0, 0.5, 0], null, [0.75, 1, 0.75]), part(GEO.box, 0xffffff, [0, 0.06, 0], null, [0.95, 0.12, 0.95])]);
+  const blockGeo = mergeParts([part(GEO.box, 0xffffff, [0, 0.25, 0], [0.1, 0, 0.15], [0.8, 0.5, 0.6])]);
+  const flies = [], ponds = [];
   const tintMat = new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: toonRamp });
   const glowTint = new THREE.MeshBasicMaterial({ vertexColors: true });
   function inst(geo, list, useColor, opts) {
@@ -4985,15 +5082,18 @@ function buildHub() {
     im.computeBoundingSphere(); im.castShadow = opts.shadow !== false; im.receiveShadow = !!opts.receive;
     hubGroup.add(im); return im;
   }
-  const treeCount = [70, 120, 80, 60, 50, 64, 60], rockCount = [24, 22, 40, 46, 30, 36, 28];
+  const treeCount = [190, 300, 200, 130, 110, 140, 150], rockCount = [50, 50, 80, 90, 60, 70, 50];
   const lava = [];
   W.zones.forEach((zn, zi) => {
     const trunks = [], tops = [], rocks = [], tufts = [], flowers = [], spikes = [];
     const z0 = Math.max(zn.z0, W.minZ), z1 = Math.min(zn.z1, W.maxZ);
     const rnd = () => ({ x: W.minX + 2 + rng() * (W.maxX - W.minX - 4), z: z0 + 2 + rng() * (z1 - z0 - 4) });
     let n = 0, tries = 0;
-    while (n < treeCount[zi] && tries++ < 3000) {
-      const { x, z } = rnd(); if (!placeOk(x, z, 2.2)) continue;
+    // most trees grow in groves around a few centres, leaving open glades in between
+    const groves = []; for (let g2 = 0; g2 < 9; g2++) groves.push(rnd());
+    const near = () => { const c = groves[Math.floor(rng() * groves.length)], a = rng() * 6.283, d = Math.sqrt(rng()) * 22; return { x: clamp(c.x + Math.sin(a) * d, W.minX + 2, W.maxX - 2), z: clamp(c.z + Math.cos(a) * d * 0.8, z0 + 2, z1 - 2) }; };
+    while (n < treeCount[zi] && tries++ < 6000) {
+      const { x, z } = rng() < 0.65 ? near() : rnd(); if (!placeOk(x, z, 1.9)) continue;
       const s = 0.8 + rng() * 0.7;
       if (zi === 4) tops.push({ x, z, s: s * 0.9, c: P2.crystal[Math.floor(rng() * 3)] });
       else if (zi === 5) tops.push({ x, z, s: s * 1.05, c: P2.coral[Math.floor(rng() * 3)] });
@@ -5010,11 +5110,48 @@ function buildHub() {
       grid.add({ x, z, r: 0.85 * s }); i++;
     }
     // grass tufts + flowers (no collision)
-    const tuftC = [[0x6fbf55, 0x7fcf61], [0x3f8a4c, 0x4f9a5a], [0xd7e6f2, 0xc5d8e8], [0x8a5a3c, 0x6b4a3d], [0x7f74c9, 0x6a5fb5], [0x3fa39b, 0x2f8f88], [0xf7e7b5, 0xfff8e6]][zi];
-    const tuftN = [520, 520, 260, 220, 300, 260, 300][zi];
+    const tuftC = [[0x6d9a4a, 0x82ad55], [0x3e6b3a, 0x4f7f45], [0xd7e6f2, 0xc5d8e8], [0x8a5a3c, 0x6b4a3d], [0x7f74c9, 0x6a5fb5], [0x3fa39b, 0x2f8f88], [0xf7e7b5, 0xfff8e6]][zi];
+    const tuftN = [1500, 1500, 700, 600, 800, 700, 900][zi];
     for (let i = 0; i < tuftN; i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r + 2 || Math.abs(x) < 3.5) continue; tufts.push({ x, z, s: 0.8 + rng() * 0.9, c: tuftC[i % 2], ry: rng() * 6 }); }
     if (zi === 0 || zi === 1 || zi === 6) for (let i = 0; i < (zi === 0 ? 260 : zi === 6 ? 200 : 120); i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r || Math.abs(x) < 3.5) continue; flowers.push({ x, z, s: 0.8 + rng() * 0.6, c: zi === 0 ? [0xff7aa8, 0xffd34a, 0xffffff, 0xb08cff][i % 4] : zi === 6 ? [0xffffff, 0xffd36b, 0xffb3c7][i % 3] : [0xff9b3d, 0xe9e3cf][i % 2] }); }
     if (zi === 3) for (let i = 0; i < 22; i++) { const { x, z } = rnd(); if (!placeOk(x, z, 3)) continue; lava.push({ x, z, s: 2 + rng() * 3 }); }
+    // undergrowth and points of interest so the ground never reads as an empty plain
+    const bushes = [], logs = [], stumps = [], stems = [], caps = [], pillars = [], blocks = [];
+    const leafC = [P2.roundLeaf, P2.pine, P2.snowPine, [0x3a2a24, 0x4a3328], [0x433d70, 0x534a86], [0x1f5a63, 0x2a7078], [0xd9c48f, 0xe8d3a3]][zi];
+    for (let i = 0; i < [220, 300, 120, 60, 90, 140, 160][zi]; i++) {
+      const { x, z } = rng() < 0.6 ? near() : rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r + 3 || Math.abs(x) < 4.5) continue;
+      bushes.push({ x, z, s: 0.55 + rng() * 0.7, c: leafC[Math.floor(rng() * leafC.length)] });
+    }
+    if (zi !== 4 && zi !== 5) for (let i = 0, k = 0; i < [16, 30, 10, 18, 0, 0, 8][zi] && k < 400; k++) {
+      const { x, z } = near(); if (!placeOk(x, z, 1.6)) continue;
+      if (rng() < 0.55) { logs.push({ x, z, s: 0.8 + rng() * 0.5, c: zi === 3 ? 0x3a2a24 : zi === 2 ? 0x6a5a4c : 0x5a3e2a, ry: rng() * 6 }); grid.add({ x, z, r: 0.9 }); }
+      else { stumps.push({ x, z, s: 0.8 + rng() * 0.6, c: zi === 3 ? 0x2e221d : 0x5a3e2a }); grid.add({ x, z, r: 0.5 }); }
+      i++;
+    }
+    if (zi === 0 || zi === 1 || zi === 5 || zi === 6) for (let i = 0; i < [60, 120, 0, 0, 0, 90, 40][zi]; i++) {
+      const { x, z } = near(); if (Math.abs(x) < 4.5) continue;
+      const s = 0.6 + rng() * 0.8, c = zi === 5 ? [0x2fffd0, 0x7fe3ff][i % 2] : zi === 6 ? 0xfff3c4 : [0xc23b3b, 0xd9a441, 0xe9e3cf][i % 3];
+      stems.push({ x, z, s, c: 0xe9e3cf }); caps.push({ x, z, s, c });
+    }
+    // ruins: a few broken colonnades per zone (forest shrines, starfall halls, celestial terraces)
+    for (let r = 0; r < [2, 3, 2, 3, 6, 4, 5][zi]; r++) {
+      const c = rnd(); if (!placeOk(c.x, c.z, 7)) continue;
+      const stoneC = zi === 4 ? 0x5b5390 : zi === 5 ? 0x2f5560 : zi === 6 ? 0xe3d8bd : zi === 3 ? 0x4a3a34 : zi === 2 ? 0xaab8c4 : 0x7d786c;
+      const cnt = 5 + Math.floor(rng() * 4), rad = 4 + rng() * 3, a0 = rng() * 6.283;
+      for (let k = 0; k < cnt; k++) {
+        const a = a0 + (k / cnt) * 6.283, x = c.x + Math.sin(a) * rad, z = c.z + Math.cos(a) * rad;
+        if (rng() < 0.7) { const h = 0.6 + rng() * 1.6; pillars.push({ x, z, s: 1, sy: h, c: stoneC, ry: rng() * 0.6 }); grid.add({ x, z, r: 0.6 }); }
+        else blocks.push({ x: x + rng() - 0.5, z: z + rng() - 0.5, s: 0.7 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
+      }
+      for (let k = 0; k < 4; k++) blocks.push({ x: c.x + (rng() - 0.5) * rad, z: c.z + (rng() - 0.5) * rad, s: 0.4 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
+    }
+    inst(bushGeo, bushes, true, { receive: true });
+    inst(logGeo, logs, true, { receive: true }); inst(stumpGeo, stumps, true);
+    inst(stemGeo, stems, true, { shadow: false }); inst(capGeo, caps, true, zi === 5 || zi === 6 ? { mat: glowTint, shadow: false } : { shadow: false });
+    inst(pillarGeo, pillars, true, { receive: true }); inst(blockGeo, blocks, true, { receive: true });
+    for (const st of caps) if (zi === 5 || zi === 1) flies.push({ x: st.x, z: st.z });
+    for (let i = 0; i < [70, 140, 0, 50, 90, 80, 70][zi]; i++) { const q2 = rng() < 0.7 ? near() : rnd(); flies.push(q2); }
+    if (zi <= 1) for (let i = 0, k = 0; i < (zi === 0 ? 6 : 4) && k < 200; k++) { const c = rnd(); if (!placeOk(c.x, c.z, 5)) continue; ponds.push({ x: c.x, z: c.z, s: 2.5 + rng() * 2.5 }); grid.add({ x: c.x, z: c.z, r: 1.5 }); i++; }
     if (zi <= 2 || zi === 6) inst(trunkGeo, trunks, false);
     inst(zi === 0 || zi === 6 ? roundGeo : zi <= 2 ? pineGeo : zi === 3 ? deadGeo : crystalGeo, tops, true, zi === 4 || zi === 5 ? { mat: glowTint } : null);
     inst(rockGeo, rocks, true, { receive: true }); inst(spikeGeo, spikes, true);
@@ -5026,12 +5163,31 @@ function buildHub() {
     lava.forEach((l, i) => { _m4.compose(_v3.set(l.x, 0.05, l.z), _q.identity(), _s3.set(l.s, 1, l.s * 0.8)); lim.setMatrixAt(i, _m4); });
     lim.computeBoundingSphere(); hubGroup.add(lim); hubParts.lavaIM = lim;
   }
-  // decorative border trees outside the play area
+  // ponds: dark water with a lighter rim and lily pads
+  if (ponds.length) {
+    const rimIM = new THREE.InstancedMesh(new THREE.CircleGeometry(1.12, 14).rotateX(-Math.PI / 2), new THREE.MeshToonMaterial({ color: 0x6a5f45, gradientMap: toonRamp }), ponds.length);
+    const wIM = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 14).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x2c5a63 }), ponds.length);
+    ponds.forEach((pd2, i) => { _m4.compose(_v3.set(pd2.x, 0.06, pd2.z), _q.identity(), _s3.set(pd2.s, 1, pd2.s * 0.75)); rimIM.setMatrixAt(i, _m4); _m4.compose(_v3.set(pd2.x, 0.09, pd2.z), _q.identity(), _s3.set(pd2.s, 1, pd2.s * 0.75)); wIM.setMatrixAt(i, _m4); });
+    rimIM.receiveShadow = true; rimIM.computeBoundingSphere(); wIM.computeBoundingSphere(); hubGroup.add(rimIM, wIM);
+    const pads = []; ponds.forEach((pd2) => { for (let k = 0; k < 4; k++) { const a = rng() * 6.283, d = rng() * pd2.s * 0.6; pads.push({ x: pd2.x + Math.sin(a) * d, z: pd2.z + Math.cos(a) * d * 0.75, s: 0.25 + rng() * 0.2, c: 0x4f7f45, y: 1.31 }); } });
+    inst(new THREE.CircleGeometry(1, 7).rotateX(-Math.PI / 2), pads, true, { shadow: false });
+  }
+  // fireflies: tiny glowing points that drift and blink (pixel-sized in pixel-art mode)
+  if (flies.length) {
+    const fp = new Float32Array(flies.length * 3), ph = new Float32Array(flies.length);
+    flies.forEach((f, i) => { fp[i * 3] = f.x + (rng() - 0.5) * 3; fp[i * 3 + 1] = 0.6 + rng() * 2.2; fp[i * 3 + 2] = f.z + (rng() - 0.5) * 3; ph[i] = rng() * 100; });
+    const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.BufferAttribute(fp, 3)); fg.setAttribute('phase', new THREE.BufferAttribute(ph, 1));
+    const fm = new THREE.ShaderMaterial({ uniforms: { t: { value: 0 }, px: { value: 2 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      vertexShader: 'uniform float t; uniform float px; attribute float phase; varying float vA; void main() { vec3 p = position; p.x += sin(t * 0.7 + phase) * 0.8; p.z += cos(t * 0.6 + phase * 1.3) * 0.8; p.y += sin(t * 1.1 + phase * 0.7) * 0.35; vA = 0.35 + 0.65 * pow(0.5 + 0.5 * sin(t * 2.3 + phase * 3.0), 3.0); vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = px; }',
+      fragmentShader: 'varying float vA; void main() { gl_FragColor = vec4(vec3(1.0, 0.92, 0.45) * 1.6 * vA, vA); }' });
+    const fl = new THREE.Points(fg, fm); fl.frustumCulled = false; hubGroup.add(fl); hubParts.flies = fm;
+  }
+  // a deep forest wall around the play area (several rows), so the world ends in woods, not a flat plain
   const bTrunks = [], bTops = [];
-  for (let i = 0; i < 220; i++) {
+  for (let i = 0; i < 1400; i++) {
     const side = i % 4; let x, z;
-    if (side < 2) { x = side ? W.maxX + 4 + rng() * 14 : W.minX - 4 - rng() * 14; z = W.minZ + rng() * (W.maxZ - W.minZ); }
-    else { z = side === 2 ? W.minZ - 4 - rng() * 8 : W.maxZ + 4 + rng() * 8; x = W.minX + rng() * (W.maxX - W.minX); }
+    if (side < 2) { x = side ? W.maxX + 3 + Math.pow(rng(), 0.7) * 34 : W.minX - 3 - Math.pow(rng(), 0.7) * 34; z = W.minZ - 20 + rng() * (W.maxZ - W.minZ + 40); }
+    else { z = side === 2 ? W.minZ - 3 - rng() * 26 : W.maxZ + 3 + rng() * 26; x = W.minX - 30 + rng() * (W.maxX - W.minX + 60); }
     const zi = zoneAt(z), s = 1 + rng() * 0.8;
     if (zi <= 2) { bTrunks.push({ x, z, s, y: 1.6 }); bTops.push({ x, z, s, y: 1.6, c: zi === 2 ? P2.snowPine[0] : P2.pine[Math.floor(rng() * 3)] }); }
     else bTops.push({ x, z, s: s * 1.2, y: 1.6, c: zi === 3 ? 0x2b1c17 : zi === 5 ? 0x1b4f58 : zi === 6 ? 0xe8d3a3 : 0x4a4378 });
@@ -5660,10 +5816,84 @@ function qualityTick(dt) {
 }
 function resize() {
   const w = window.innerWidth, h = window.innerHeight;
-  renderer.setSize(w, h, false);
+  if (Pixel.enabled()) Pixel.resize(w, h);
+  else { Pixel.off(); renderer.setPixelRatio(Q.dpr); renderer.setSize(w, h, false); }
   camera.aspect = w / h; Cam.portrait = w / h < 1;
   camera.fov = Cam.portrait ? 56 : 44; camera.updateProjectionMatrix();
 }
+// --- pixel-art presentation ------------------------------------------------------------------
+// The world renders at a low resolution (about 220 art pixels on the short side) into an HDR target,
+// then one post pass grades it (cool shadows, warm light, muted greens), adds a 1-pixel ink outline
+// from the depth buffer, quantizes the colours and draws it to a small canvas that the browser
+// scales up by a whole number of device pixels with hard edges. Cheaper than full-res rendering too.
+const Pixel = {
+  rt: null, mat: null, scene: null, cam: null, w: 2, h: 2, scale: 1, active: false,
+  enabled() { return !(G.profile && G.profile.settings.pixel === false); },
+  init() {
+    if (this.mat) return;
+    this.rt = new THREE.WebGLRenderTarget(2, 2, { type: THREE.HalfFloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: true });
+    this.rt.depthTexture = new THREE.DepthTexture(2, 2); this.rt.depthTexture.type = THREE.UnsignedIntType;
+    this.mat = new THREE.ShaderMaterial({
+      uniforms: { tColor: { value: this.rt.texture }, tDepth: { value: this.rt.depthTexture }, texel: { value: new THREE.Vector2() },
+        near: { value: camera.near }, far: { value: camera.far }, levels: { value: 28 }, ink: { value: new THREE.Color(0x15122a) } },
+      vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+      fragmentShader: `
+        uniform sampler2D tColor; uniform sampler2D tDepth; uniform vec2 texel; uniform float near; uniform float far; uniform float levels; uniform vec3 ink;
+        varying vec2 vUv;
+        float lin(vec2 uv) { float z = texture2D(tDepth, uv).x * 2.0 - 1.0; return 2.0 * near * far / (far + near - z * (far - near)); }
+        float bayer(vec2 p) { vec2 q = mod(floor(p), 4.0); int i = int(q.x + q.y * 4.0);
+          float m[16]; m[0]=0.;m[1]=8.;m[2]=2.;m[3]=10.;m[4]=12.;m[5]=4.;m[6]=14.;m[7]=6.;m[8]=3.;m[9]=11.;m[10]=1.;m[11]=9.;m[12]=15.;m[13]=7.;m[14]=13.;m[15]=5.;
+          for (int k = 0; k < 16; k++) if (k == i) return m[k] / 16.0 - 0.47; return 0.0; }
+        void main() {
+          vec4 c = texture2D(tColor, vUv);
+          // ink outline: this pixel sits clearly behind a neighbour, so it is the silhouette edge of something in front
+          float d = lin(vUv);
+          float dn = min(min(lin(vUv + vec2(texel.x, 0.0)), lin(vUv - vec2(texel.x, 0.0))), min(lin(vUv + vec2(0.0, texel.y)), lin(vUv - vec2(0.0, texel.y))));
+          float edge = smoothstep(0.06, 0.12, (d - dn) / max(dn, 0.001)) * step(dn, far * 0.9);
+          vec3 col = c.rgb;
+          // grade in linear light: a little less saturation, cool deep shadows, warm highlights
+          float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
+          col = mix(vec3(l), col, 0.82);
+          col = mix(col * vec3(0.78, 0.86, 1.08) + vec3(0.004, 0.006, 0.016), col, smoothstep(0.02, 0.45, l));
+          col *= mix(vec3(1.0), vec3(1.07, 1.0, 0.88), smoothstep(0.35, 1.2, l));
+          col = mix(col, ink * 0.35, edge * 0.85);
+          // soft vignette
+          vec2 v = vUv - 0.5; col *= 1.0 - dot(v, v) * 0.55;
+          gl_FragColor = vec4(col, 1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+          // posterize with a 4x4 ordered dither so gradients become clean pixel-art bands
+          gl_FragColor.rgb = floor(gl_FragColor.rgb * levels + 0.5 + bayer(gl_FragCoord.xy) * 0.6) / levels;
+        }`,
+      depthTest: false, depthWrite: false, toneMapped: true,
+    });
+    this.scene = new THREE.Scene();
+    const q = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.mat); q.frustumCulled = false; this.scene.add(q);
+    this.cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  },
+  resize(w, h) {
+    this.init();
+    const dpr = window.devicePixelRatio || 1, wd = Math.round(w * dpr), hd = Math.round(h * dpr);
+    // whole-number scale in device pixels so every art pixel is the same size
+    const target = Math.min(wd, hd) < 700 ? 180 : 220;
+    this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target));
+    this.w = Math.ceil(wd / this.scale); this.h = Math.ceil(hd / this.scale);
+    renderer.setPixelRatio(1); renderer.setSize(this.w, this.h, false);
+    const el = renderer.domElement; el.style.width = (this.w * this.scale / dpr) + 'px'; el.style.height = (this.h * this.scale / dpr) + 'px'; el.style.imageRendering = 'pixelated';
+    this.rt.setSize(this.w, this.h); this.mat.uniforms.texel.value.set(1 / this.w, 1 / this.h);
+    this.active = true;
+  },
+  off() {
+    if (!this.active) return; this.active = false;
+    const el = renderer.domElement; el.style.width = el.style.height = el.style.imageRendering = '';
+  },
+  render() {
+    if (!this.active) { renderer.render(scene, camera); return; }
+    this.mat.uniforms.near.value = camera.near; this.mat.uniforms.far.value = camera.far;
+    renderer.setRenderTarget(this.rt); renderer.render(scene, camera);
+    renderer.setRenderTarget(null); renderer.render(this.scene, this.cam);
+  },
+};
 
 
 // ---------------------------------------------------------------------
@@ -6476,6 +6706,7 @@ function openSettings() {
       <button class="ghost sm" data-act="tBoss">World boss now</button><button class="ghost sm" data-act="tUnlock">Unlock attacks</button>
       <button class="ghost sm" data-act="tLegend">Legendary item</button><button class="ghost sm" data-act="tFocus">Dragonsoul Focus (new 3D)</button></div>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
+    ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
     ${tg('calm', 'Reduce flashing', 'No red hit flash or screen shake, and a fixed render scale')}
@@ -6581,6 +6812,7 @@ function handleSettingChange(e) {
   if (k === 'mute') Sfx.setMute(e.target.checked);
   if (k === 'bots') { if (e.target.checked) addHubBots(); else removeHubBots(); }
   if (k === 'npcs') Coach.render();
+  if (k === 'pixel') resize();
   if (k === 'calm') { Q.locked = e.target.checked; Cam.shake = 0; $('vignette').dataset.o = '0'; }
 }
 
@@ -6747,6 +6979,7 @@ function dmgNumberPlayer(text, cls) { const f = G.player; dmgNumber(f.x, 2.8, f.
 let sparkleT = 0;
 function updateHubProps(t) {
   const p = G.profile;
+  if (hubParts.flies) { hubParts.flies.uniforms.t.value = t; hubParts.flies.uniforms.px.value = Pixel.active ? 2 : 3 * Math.min(2, Q.dpr); }
   // XP orbs: rebuild matrices only when one is eaten or respawns, plus a gentle shared bob via group offset
   const pim = hubParts.pelletIM;
   if (G.pelletsDirty) {
@@ -7843,7 +8076,7 @@ function frame(now) {
   updateProjectileMeshes(); updateParticles(dt); updateRings(dt); updateAim(dt);
   if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
   updateCamera(dt);
-  renderer.render(scene, camera);
+  Pixel.render();
   updateTags(); updateDmgNumbers(dt); updateHUD(dt);
   updateDoll();
   qualityTick(dt);
