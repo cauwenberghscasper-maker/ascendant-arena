@@ -3826,6 +3826,92 @@ const GEO = {
   sph: new THREE.SphereGeometry(1, 16, 12), cyl14: new THREE.CylinderGeometry(1, 1, 1, 14), torso: new THREE.CylinderGeometry(0.9, 1, 1, 16, 2), cap: new THREE.CapsuleGeometry(1, 2, 4, 10),
 };
 
+// find the right fist of a generated hero: the lowest blob of the arm that hangs furthest out on +x
+const _fv = new THREE.Vector3();
+function findFist(scene) {
+  const body = scene.getObjectByName('body'); if (!body || !body.geometry) return null;
+  const pa = body.geometry.attributes.position, m = body.matrixWorld, pts = [];
+  let maxX = -1e9, minY = 1e9, maxY = -1e9;
+  for (let i = 0; i < pa.count; i += 2) { _fv.fromBufferAttribute(pa, i).applyMatrix4(m); pts.push(_fv.x, _fv.y, _fv.z); if (_fv.x > maxX) maxX = _fv.x; if (_fv.y > maxY) maxY = _fv.y; if (_fv.y < minY) minY = _fv.y; }
+  const H = maxY - minY;
+  // the outer arm: vertices well out on +x in the lower 60% of the body
+  let oMin = 1e9; for (let i = 0; i < pts.length; i += 3) if (pts[i] > maxX * 0.7 && pts[i + 1] < minY + H * 0.6 && pts[i + 1] < oMin) oMin = pts[i + 1];
+  // the fist: that arm's lowest part (one fist-height), centred on its own bounding box
+  const lo = new THREE.Vector3(1e9, 1e9, 1e9), hi = new THREE.Vector3(-1e9, -1e9, -1e9);
+  for (let i = 0; i < pts.length; i += 3) if (pts[i] > maxX * 0.55 && pts[i + 1] < oMin + H * 0.13) { lo.min(_fv.set(pts[i], pts[i + 1], pts[i + 2])); hi.max(_fv); }
+  if (lo.x > hi.x) return null;
+  const c = lo.clone().add(hi).multiplyScalar(0.5);
+  c.y = Math.max(c.y, lo.y + (hi.x - lo.x) * 0.5); // fist centre sits one radius above its bottom
+  return c;
+}
+
+// --- held weapons: the hero holds the weapon item they have equipped ----------------------------
+// Edge = sword, Fang = axe, Focus = staff, painted in the item's rarity colours (the same main / trim /
+// metal / glow tones as its inventory icon). Modelled with the grip at the origin and the weapon
+// along +y, so the hand closes around the handle. Glowing gems are a separate unlit mesh.
+const weaponShapes = {
+  rbox: new THREE.BoxGeometry(1, 1, 1, 1, 1, 1),
+  // flat blade with a bevelled edge and a point, standing on its base along +y
+  blade(L, w) {
+    const sh = new THREE.Shape(); sh.moveTo(-w / 2, 0); sh.lineTo(-w / 2, L * 0.8); sh.lineTo(0, L); sh.lineTo(w / 2, L * 0.8); sh.lineTo(w / 2, 0); sh.lineTo(-w / 2, 0);
+    return new THREE.ExtrudeGeometry(sh, { depth: 0.03, bevelEnabled: true, bevelThickness: 0.018, bevelSize: 0.022, bevelSegments: 1 });
+  },
+  // crescent axe head in the y/z plane, cutting edge forward (+z)
+  axe(h) {
+    const sh = new THREE.Shape(); sh.moveTo(0, -h * 0.35); sh.quadraticCurveTo(h * 0.55, -h * 0.4, h * 0.85, -h); sh.quadraticCurveTo(h * 1.15, 0, h * 0.85, h); sh.quadraticCurveTo(h * 0.55, h * 0.4, 0, h * 0.35); sh.lineTo(0, -h * 0.35);
+    const g = new THREE.ExtrudeGeometry(sh, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.02, bevelSegments: 1 });
+    g.translate(0, 0, -0.0175); g.rotateY(-Math.PI / 2); return g;
+  },
+};
+const itemWeaponCache = new Map(), glowMatCache = new Map();
+function glowMat(c) { if (!glowMatCache.has(c)) glowMatCache.set(c, new THREE.MeshBasicMaterial({ color: c })); return glowMatCache.get(c); }
+function itemWeaponGeometry(it) {
+  const style = itemStyle(it), T = GEAR_TONES[it.rarity] || GEAR_TONES.common, R = rarIdx(it.rarity), plus = (it.up || 0) >= 5;
+  const key = it.rarity + '|' + style + (plus ? '+' : '');
+  if (itemWeaponCache.has(key)) return itemWeaponCache.get(key);
+  const P = [], Gl = [], wood = 0x6b4a2e, metal = T.metal, lightM = new THREE.Color(T.metal).lerp(new THREE.Color(0xffffff), 0.45).getHex();
+  if (style === 0) { // Edge: a broad sword with a fullered blade, crossguard, wrapped grip and a gem pommel
+    const L = 0.95 + R * 0.025, w = 0.13 + R * 0.006;
+    P.push(part(weaponShapes.blade(L, w), metal, [0, 0.2, -0.03], null, [1, 1, 1]));
+    P.push(part(GEO.box, lightM, [0, 0.2 + L * 0.42, 0], null, [0.035, L * 0.72, 0.075]));
+    P.push(part(weaponShapes.rbox, T.trim, [0, 0.17, 0], null, [0.46 + R * 0.02, 0.075, 0.1]));
+    for (const sx of [-1, 1]) P.push(part(GEO.sph, T.trim, [sx * (0.24 + R * 0.01), 0.17, 0], null, [0.055, 0.055, 0.055]));
+    P.push(part(GEO.cyl8, wood, [0, 0.02, 0], null, [0.05, 0.28, 0.05]));
+    for (let i = 0; i < 3; i++) P.push(part(GEO.cyl8, new THREE.Color(wood).multiplyScalar(0.7).getHex(), [0, -0.08 + i * 0.08, 0], [0.4, 0, 0], [0.055, 0.02, 0.055]));
+    if (R >= 3) for (const sx of [-1, 1]) P.push(part(GEO.cone4, T.trim, [sx * 0.2, 0.25, 0], [0, 0, sx * -0.6], [0.04, 0.14, 0.04]));
+    Gl.push(part(GEO.ico1, T.glow, [0, -0.17, 0], null, [0.065, 0.065, 0.065]));
+    if (R >= 4) Gl.push(part(GEO.ico0, T.glow, [0, 0.17, 0.06], null, [0.05, 0.05, 0.03]));
+  } else if (style === 1) { // Fang: a war axe with a crescent head, back spike and a gem in the socket
+    P.push(part(GEO.cyl8, wood, [0, 0.3, 0], null, [0.045, 1.05, 0.045]));
+    for (let i = 0; i < 2; i++) P.push(part(GEO.cyl8, T.trim, [0, -0.12 + i * 0.12, 0], null, [0.055, 0.03, 0.055]));
+    P.push(part(weaponShapes.axe(0.28 + R * 0.012), metal, [0, 0.66, 0.02], null, [1, 1, 1]));
+    P.push(part(GEO.cone4, metal, [0, 0.66, -0.12], [-Math.PI / 2, Math.PI / 4, 0], [0.055, 0.2, 0.035]));
+    P.push(part(weaponShapes.rbox, T.trim, [0, 0.66, 0], null, [0.1, 0.18, 0.12]));
+    P.push(part(GEO.cone4, metal, [0, 0.87, 0], [0, Math.PI / 4, 0], [0.04, 0.12, 0.04]));
+    Gl.push(part(GEO.ico1, T.glow, [0, 0.66, 0.065], null, [0.05, 0.05, 0.04]));
+    Gl.push(part(GEO.ico0, T.glow, [0, -0.2, 0], null, [0.045, 0.045, 0.045]));
+  } else { // Focus: a staff with a glowing orb held in a crown of prongs
+    P.push(part(GEO.cyl8, wood, [0, 0.42, 0], null, [0.042, 1.6, 0.042]));
+    for (let i = 0; i < 3; i++) P.push(part(GEO.cyl8, new THREE.Color(wood).multiplyScalar(0.72).getHex(), [0, 0.2 + i * 0.32, 0], null, [0.05, 0.03, 0.05]));
+    P.push(part(GEO.cyl8, T.trim, [0, 1.18, 0], null, [0.075, 0.09, 0.075]));
+    for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2 + 0.4; P.push(part(GEO.cone4, T.trim, [Math.sin(a) * 0.11, 1.34, Math.cos(a) * 0.11], [Math.cos(a) * 0.45, 0, -Math.sin(a) * 0.45], [0.035, 0.22, 0.035])); }
+    P.push(part(GEO.cyl8, T.trim, [0, -0.36, 0], null, [0.055, 0.06, 0.055]));
+    Gl.push(part(GEO.ico1, T.glow, [0, 1.36, 0], null, [0.13 + R * 0.006, 0.13 + R * 0.006, 0.13 + R * 0.006]));
+  }
+  if (plus) Gl.push(part(GEO.ico0, 0xffd34a, [0, style === 2 ? 0.95 : 0.22, 0.05], null, [0.03, 0.03, 0.03]));
+  const out = { geo: mergeParts(P), glow: mergeParts(Gl), glowColor: T.glow, style };
+  itemWeaponCache.set(key, out); return out;
+}
+// how a hand holds each kind: sword and axe point forward and up, the staff stands upright (tilted out from the body)
+const HOLD_ROT = [[0.62, 0, -0.24], [0.55, 0, -0.22], [0.4, 0, -0.16]];
+// the weapon a hero holds: the equipped weapon item, else a plain one that suits the brawler's attack
+function heldItemFor(o) {
+  if (o.gear && o.gear.weapon) return o.gear.weapon;
+  const k = CFG.attacks[o.cls] ? CFG.attacks[o.cls].kind : '';
+  const noun = ['orb', 'spark', 'missile', 'star'].includes(k) || /orb|chain|starfall|seeker/.test(o.cls) ? 'Focus' : ['wave', 'flame', 'pellet'].includes(k) ? 'Fang' : 'Edge';
+  return { slot: 'weapon', rarity: 'common', name: 'Worn ' + noun, up: 0 };
+}
+
 // --- AssetSlots: every visual goes through here --------------------------------
 // A builder returns a "view" { root, update(entity, dt, time), dispose() }.
 // To swap in a glTF model later, register a builder with the same key that
@@ -3960,6 +4046,7 @@ const AssetLibrary = {
       piv.updateMatrixWorld(true); piv.attach(leg);
     }
     scene.updateMatrixWorld(true);
+    if (id.startsWith('hero.')) def.fist = findFist(scene);
     const meshes = []; scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
     for (const o of meshes) {
       o.castShadow = true;
@@ -4342,7 +4429,7 @@ function bodyWithGear(o) {
   // a common helmet is hidden so the brawler's own head piece shows
   let gear2 = o.gear.helmet && o.gear.helmet.rarity === 'common' ? Object.assign({}, o.gear, { helmet: null }) : o.gear;
   // a generated weapon model shows its rarity itself, so drop the built-in rarity orb
-  const genWeapon = !!heldWeaponAsset(o.cls);
+  const genWeapon = true; // the held weapon model shows its rarity itself
   if (genWeapon) gear2 = Object.assign({}, gear2, { weapon: null });
   const gg = gearGeometry(gear2); if (!gg) return cg;
   const key = [o.cls, o.body, o.accent, o.hair].join('|') + '#' + gearSignature(o.gear) + (genWeapon ? '#gw' : '');
@@ -4430,10 +4517,14 @@ AssetSlots.register('character', (o) => {
     if (o.gear && o.gear.boots) l.add(new THREE.Mesh(bootGeometry(o.gear.boots), mat));
   }
   const wPivot = new THREE.Group(); wPivot.position.set(0.56, 0.88, 0.12); pivot.add(wPivot);
-  let weapon = new THREE.Mesh(weaponGeometry(o.cls, o.gear && o.gear.weapon ? o.gear.weapon.rarity : null), mat); wPivot.add(weapon);
+  // the equipped weapon item, gripped in the fist (a generated 3D model replaces it when the item has one)
+  const heldIt = heldItemFor(o), IW = itemWeaponGeometry(heldIt);
+  const grip = new THREE.Group(); grip.rotation.fromArray(HOLD_ROT[IW.style]); wPivot.add(grip);
+  let weapon = new THREE.Mesh(IW.geo, mat); weapon.castShadow = true; grip.add(weapon);
+  const weaponGlow = new THREE.Mesh(IW.glow, glowMat(IW.glowColor)); grip.add(weaponGlow);
   // generated models swap in once loaded: the brawler's body (legs swing on their own pivots) and the held weapon
   const hId = AssetLibrary.has('hero.' + o.cls) ? 'hero.' + o.cls : null;
-  const wId = heldWeaponAsset(o.cls);
+  const wId = AssetLibrary.idForItem(heldIt);
   let hero = null, heroLegs = null, aura = null, hDone = !hId, wDone = !wId;
   const swapModels = () => {
     if (!hDone) {
@@ -4443,8 +4534,9 @@ AssetSlots.register('character', (o) => {
         body.visible = bodyOl.visible = false; for (const l of legs) l.visible = false;
         const L = hero.getObjectByName('legLPivot'), R = hero.getObjectByName('legRPivot'); if (L && R) heroLegs = [L, R];
         const def = ASSET_MANIFEST[hId];
-        const hp = def.rig ? def.rig.hand : def.hand; // the weapon sits in the fist
-        if (hp) wPivot.position.set(hp[0] * def.size, hp[1] * def.size, hp[2] * def.size);
+        // the weapon's grip goes to the centre of the modelled fist (found in the mesh), else the stored hand point
+        const hp = def.rig ? def.rig.hand : def.hand;
+        if (def.fist) wPivot.position.copy(def.fist); else if (hp) wPivot.position.set(hp[0] * def.size, hp[1] * def.size, hp[2] * def.size);
         const ar = gearAuraRarity(o.gear);
         if (ar && !o.peer) {
           aura = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.3).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: auraTexture(), color: RAR_HEX[ar], transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
@@ -4455,7 +4547,7 @@ AssetSlots.register('character', (o) => {
     }
     if (!wDone) {
       const st = AssetLibrary.status(wId);
-      if (st === 'ready') { const m = AssetLibrary.instance(wId); wPivot.remove(weapon); weapon = m; wPivot.add(m); m.rotation.x = ASSET_MANIFEST[wId].hold === 'v' ? 0.3 : 0; }
+      if (st === 'ready') { const m = AssetLibrary.instance(wId); grip.remove(weapon); grip.remove(weaponGlow); weapon = m; grip.rotation.set(0.08, 0, -0.07); grip.add(m); }
       if (st === 'ready' || st === 'failed') wDone = true;
     }
   };
@@ -4835,11 +4927,11 @@ vec2 vor(vec2 p) { vec2 i = floor(p), f = fract(p); float d1 = 8.0, d2 = 8.0; ve
 float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     .replace('#include <color_fragment>', `#include <color_fragment>
 {
-  vec2 w = vGW.xz; vec2 px = floor(w * 4.0) / 4.0;   // 25 cm texels keep every detail pixel-crisp
+  vec2 w = vGW.xz; vec2 px = w;   // smooth world-space detail; the pixel pass adds the crisp edge
   float zone = 0.0; for (int i = 1; i < 7; i++) if (w.y >= uZ[i]) zone = float(i);
   float fine = gh(floor(w * 4.0));
   float pat = gn(px * 0.35) * 0.6 + gn(px * 1.3) * 0.4;
-  vec3 c = diffuseColor.rgb * (0.86 + pat * 0.22 + (fine - 0.5) * 0.08);
+  vec3 c = diffuseColor.rgb * (0.86 + pat * 0.22 + (fine - 0.5) * 0.03);
   float big = gn(px * 0.06);
   if (zone < 1.5) {                                   // meadow + forest: grass clumps, blades, dirt patches
     float clump = smoothstep(0.55, 0.75, gn(px * 0.5 + 7.0));
@@ -4881,9 +4973,10 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
   float road = (1.0 - smoothstep(uRoad.x - 0.6, uRoad.x + 0.4, abs(w.x))) * step(uTown.y, w.y) * step(w.y, uRoad.y);
   float cob = max(plaza, road * (1.0 - smoothstep(0.62, 0.7, gn(px * 0.3 + 5.0)) * 0.6));
   if (cob > 0.01) {
-    vec2 v = vor(px * 1.5);
-    vec3 st = diffuseColor.rgb * (0.82 + v.y * 0.36);
-    st = mix(st, diffuseColor.rgb * 0.42, 1.0 - smoothstep(0.05, 0.11, v.x));
+    vec2 v = vor(px * 1.05);
+    vec3 st = diffuseColor.rgb * (0.84 + v.y * 0.28) * (0.94 + gn(px * 3.0) * 0.12);
+    st = mix(st, diffuseColor.rgb * 0.45, 1.0 - smoothstep(0.03, 0.08, v.x));
+    st = mix(st, st * 1.12, smoothstep(0.12, 0.3, v.x) * 0.5); // rounded stone tops catch the light
     c = mix(c, st, cob);
   }
   diffuseColor.rgb = c;
