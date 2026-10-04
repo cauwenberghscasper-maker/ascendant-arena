@@ -822,6 +822,13 @@ body, button, input, select, textarea, .panel, .panel * { font-family: 'Pixelify
 .goldchip, .xpchip, .esschip { border-radius: 0 !important; background: #25222d !important; box-shadow: inset 0 0 0 2px #0a0914; }
 .bport img, img.pxp, .bport img.pxp { image-rendering: pixelated; }
 .bport { border-radius: 0 !important; }
+#bMelee { display: none !important; }
+.pre { border-radius: 0 !important; background: #25222d !important; color: #9b94a6 !important; box-shadow: inset 0 0 0 2px #0a0914; font-family: 'Pixelify Sans', monospace !important; }
+.pre.on { background: #3a3546 !important; color: #efe6cf !important; box-shadow: inset 0 0 0 2px #efe6cf; }
+.treeWrap { border-radius: 0 !important; background: #100e16 !important; }
+.tzoom button { border-radius: 0 !important; border: 6px solid transparent !important; border-image: var(--pxf-btn) 8 fill / 6px / 0 stretch !important; image-rendering: pixelated; background: transparent !important; }
+#nodeCard { border-radius: 0 !important; border: 8px solid transparent !important; border-image: var(--pxf-panel) 8 fill / 8px / 0 stretch !important; image-rendering: pixelated; background: transparent !important; }
+.thumb, .tile img, .dchip img, .item img, img.pxp { image-rendering: pixelated; }
 </style>
 
 <div id="app">
@@ -1315,18 +1322,19 @@ function buildTree(spec) {
     const P2 = (r, da) => ({ x: Math.cos(a + (da || 0)) * r, y: Math.sin(a + (da || 0)) * r });
     let prev = 'core';
     br.chain.forEach((kind, i) => {
-      const id = `${br.id}_c${i}`; add(Object.assign({ id, kind, max: br.max || 5 }, P2(2.1 + i * 1.8, (i % 2 ? 0.06 : -0.06)))); link(prev, id); prev = id;
-      if (br.sides && br.sides[i]) { const sid = `${br.id}_s${i}`; add(Object.assign({ id: sid, kind: br.sides[i], max: br.max || 5 }, P2(2.1 + i * 1.8 + 0.7, (i % 2 ? -1 : 1) * Math.min(0.42, 1.7 / (2.8 + i * 1.8))))); link(id, sid); }
+      const rc = 2.7 + i * 2.2, id = `${br.id}_c${i}`; add(Object.assign({ id, kind, max: br.max || 5 }, P2(rc, 0))); link(prev, id); prev = id;
+      // side nodes sit one step out and a fixed 1.25 units to the side (always the same side, so neighbours never meet)
+      if (br.sides && br.sides[i]) { const sid = `${br.id}_s${i}`, rs = rc + 0.9; add(Object.assign({ id: sid, kind: br.sides[i], max: br.max || 5 }, P2(rs, Math.atan2(1.25, rs)))); link(id, sid); }
     });
-    const rEnd = 2.1 + br.chain.length * 1.8 + 0.6, k = br.keys.length;
+    const rEnd = 2.7 + br.chain.length * 2.2 + 0.4, k = br.keys.length;
     br.keys.forEach((key, j) => {
-      const id = `${br.id}_k${j}`, da = k > 1 ? (j / (k - 1) - 0.5) * 0.62 : 0;
-      add(Object.assign({ id, key: key.key, tag: key.tag, max: 1, cost: 3, big: true }, P2(rEnd + (j === (k - 1) / 2 ? 0.9 : 0), da))); link(prev, id);
+      const id = `${br.id}_k${j}`, da = k > 1 ? (j / (k - 1) - 0.5) * (nb > 3 ? 0.42 : 0.5) : 0;
+      add(Object.assign({ id, key: key.key, tag: key.tag, max: 1, cost: 3, big: true }, P2(rEnd + (j === (k - 1) / 2 ? 1.3 : 0), da))); link(prev, id);
     });
   });
   if (spec.ring) spec.ring.forEach((kind, i) => {
     const a = ((i + 0.5) / nb) * Math.PI * 2 - Math.PI / 2, id = 'r' + i;
-    add({ id, kind, x: Math.cos(a) * 2.9, y: Math.sin(a) * 2.9, max: 10 });
+    add({ id, kind, x: Math.cos(a) * 1.7, y: Math.sin(a) * 1.7, max: 10 });
     link(id, `${spec.branches[i].id}_c0`); link(id, `${spec.branches[(i + 1) % nb].id}_c0`);
   });
   return nodes;
@@ -3917,13 +3925,13 @@ function findFist(scene) {
   const H = maxY - minY;
   // the outer arm: vertices well out on +x in the lower 60% of the body
   let oMin = 1e9; for (let i = 0; i < pts.length; i += 3) if (pts[i] > maxX * 0.7 && pts[i + 1] < minY + H * 0.6 && pts[i + 1] < oMin) oMin = pts[i + 1];
-  // the fist: that arm's lowest part (one fist-height), centred on its own bounding box
-  const lo = new THREE.Vector3(1e9, 1e9, 1e9), hi = new THREE.Vector3(-1e9, -1e9, -1e9);
-  for (let i = 0; i < pts.length; i += 3) if (pts[i] > maxX * 0.55 && pts[i + 1] < oMin + H * 0.13) { lo.min(_fv.set(pts[i], pts[i + 1], pts[i + 2])); hi.max(_fv); }
-  if (lo.x > hi.x) return null;
-  const c = lo.clone().add(hi).multiplyScalar(0.5);
-  c.y = Math.max(c.y, lo.y + (hi.x - lo.x) * 0.5); // fist centre sits one radius above its bottom
-  return c;
+  // the fist: the arm's lowest blob. x/z = the average of its bottom slice, y = one fist-radius above the lowest point
+  let sx = 0, sz = 0, nS = 0, xs = [];
+  for (let i = 0; i < pts.length; i += 3) if (pts[i] > maxX * 0.55 && pts[i + 1] < oMin + H * 0.09) { sx += pts[i]; sz += pts[i + 2]; nS++; xs.push(pts[i]); }
+  if (!nS) return null;
+  xs.sort((p, q) => p - q);
+  const fistW = xs[Math.floor(xs.length * 0.95)] - xs[Math.floor(xs.length * 0.05)];
+  return new THREE.Vector3(sx / nS, oMin + Math.max(H * 0.05, fistW * 0.42), sz / nS);
 }
 
 // --- held weapons: the hero holds the weapon item they have equipped ----------------------------
@@ -3984,7 +3992,11 @@ function itemWeaponGeometry(it) {
   itemWeaponCache.set(key, out); return out;
 }
 // how a hand holds each kind: sword and axe point forward and up, the staff stands upright (tilted out from the body)
-const HOLD_ROT = [[0.62, 0, -0.24], [0.55, 0, -0.22], [0.4, 0, -0.16]];
+const HOLD_ROT = [[0.22, 0, -0.1], [0.2, 0, -0.1], [0.1, 0, -0.06]];
+// where the hand closes on each weapon (measured from its origin): mid-handle for the sword, low on the haft for the axe, a third up the staff
+const GRIP_Y = [0.02, 0.05, 0.25];
+const HERO_GRIP_OFF = { orb: [0, -0.13, 0.03] };
+function weaponOffset(grip, style) { /* reserved for per-hero fine tuning (HERO_GRIP) */ }
 // the weapon a hero holds: the equipped weapon item, else a plain one that suits the brawler's attack
 function heldItemFor(o) {
   if (o.gear && o.gear.weapon) return o.gear.weapon;
@@ -4127,7 +4139,7 @@ const AssetLibrary = {
       piv.updateMatrixWorld(true); piv.attach(leg);
     }
     scene.updateMatrixWorld(true);
-    if (id.startsWith('hero.')) def.fist = findFist(scene);
+    if (id.startsWith('hero.') && !/hero\.(arrow)$/.test(id)) def.fist = findFist(scene); // Ayla's cape hides her arm: she keeps her measured hand point
     const meshes = []; scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
     for (const o of meshes) {
       o.castShadow = true;
@@ -4406,13 +4418,13 @@ function thumbInit() {
 // original shows; once done every <img> using it swaps over.
 const PixelPortraits = {
   N: 40, done: new Map(), busy: new Set(),
-  url(src) {
+  url(src, size, cut) {
     if (this.done.has(src)) return this.done.get(src);
-    if (!this.busy.has(src)) { this.busy.add(src); const im = new Image(); im.onload = () => { try { this.make(src, im); } catch (e) { this.done.set(src, src); } }; im.onerror = () => this.done.set(src, src); im.src = src; }
+    if (!this.busy.has(src)) { this.busy.add(src); const im = new Image(); im.onload = () => { try { this.make(src, im, size, cut); } catch (e) { this.done.set(src, src); } }; im.onerror = () => this.done.set(src, src); im.src = src; }
     return src;
   },
-  make(src, im) {
-    const N = this.N, c = document.createElement('canvas'); c.width = c.height = N;
+  make(src, im, size, cut) {
+    const N = size || this.N, c = document.createElement('canvas'); c.width = c.height = N;
     const x = c.getContext('2d', { willReadFrequently: true });
     x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, N, N);
     const d = x.getImageData(0, 0, N, N), o = d.data;
@@ -4420,8 +4432,15 @@ const PixelPortraits = {
     for (let i = 0; i < o.length; i += 4) {
       let r = o[i], g = o[i + 1], b = o[i + 2]; const l = 0.3 * r + 0.59 * g + 0.11 * b;
       r = l + (r - l) * 0.9; g = l + (g - l) * 0.9; b = l + (b - l) * 0.9;
-      const q = (v) => Math.max(0, Math.min(255, Math.round(((v - 128) * 1.12 + 128) / 51) * 51));
+      const st = cut ? 32 : 51, q = (v) => Math.max(0, Math.min(255, Math.round(((v - 128) * 1.12 + 128) / st) * st)); // items keep more tones so gradients don't band
       o[i] = q(r); o[i + 1] = q(g); o[i + 2] = q(b);
+    }
+    // cut-out art (items): hard alpha, then an ink outline around the silhouette
+    if (cut) {
+      for (let i = 0; i < o.length; i += 4) o[i + 3] = o[i + 3] > 110 ? 255 : 0;
+      const A = (i, j) => (i < 0 || j < 0 || i >= N || j >= N) ? 0 : o[(j * N + i) * 4 + 3];
+      const edge = []; for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) if (!A(i, j) && (A(i + 1, j) || A(i - 1, j) || A(i, j + 1) || A(i, j - 1))) edge.push((j * N + i) * 4);
+      for (const k of edge) { o[k] = 14; o[k + 1] = 12; o[k + 2] = 20; o[k + 3] = 255; }
     }
     // ink outline where tone jumps hard (silhouette and big shapes)
     const L = new Float32Array(N * N); for (let i = 0; i < N * N; i++) L[i] = 0.3 * o[i * 4] + 0.59 * o[i * 4 + 1] + 0.11 * o[i * 4 + 2];
@@ -4523,7 +4542,8 @@ function thumbFor(it) {
   if (ITEM_ICONS.includes(paint)) return 'assets/ui/items/' + paint + '.webp';
   const key = thumbKey(it);
   if (!Thumbs.cache.has(key)) { try { Thumbs.cache.set(key, ItemArt.url(it)); } catch (e) { Thumbs.cache.set(key, ''); } }
-  return Thumbs.cache.get(key);
+  const src = Thumbs.cache.get(key);
+  return src ? PixelPortraits.url(src, 32, true) : src;
 }
 const bodyGearCache = new Map();
 function mergeKeep(geos) {
@@ -4635,8 +4655,9 @@ AssetSlots.register('character', (o) => {
   // the equipped weapon item, gripped in the fist (a generated 3D model replaces it when the item has one)
   const heldIt = heldItemFor(o), IW = itemWeaponGeometry(heldIt);
   const grip = new THREE.Group(); grip.rotation.fromArray(HOLD_ROT[IW.style]); wPivot.add(grip);
-  let weapon = new THREE.Mesh(IW.geo, mat); weapon.castShadow = true; grip.add(weapon);
-  const weaponGlow = new THREE.Mesh(IW.glow, glowMat(IW.glowColor)); grip.add(weaponGlow);
+  weaponOffset(grip, IW.style);
+  let weapon = new THREE.Mesh(IW.geo, mat); weapon.castShadow = true; weapon.position.y = -GRIP_Y[IW.style]; grip.add(weapon);
+  const weaponGlow = new THREE.Mesh(IW.glow, glowMat(IW.glowColor)); weaponGlow.position.y = -GRIP_Y[IW.style]; grip.add(weaponGlow);
   // generated models swap in once loaded: the brawler's body (legs swing on their own pivots) and the held weapon
   const hId = AssetLibrary.has('hero.' + o.cls) ? 'hero.' + o.cls : null;
   const wId = AssetLibrary.idForItem(heldIt);
@@ -4652,6 +4673,7 @@ AssetSlots.register('character', (o) => {
         // the weapon's grip goes to the centre of the modelled fist (found in the mesh), else the stored hand point
         const hp = def.rig ? def.rig.hand : def.hand;
         if (def.fist) wPivot.position.copy(def.fist); else if (hp) wPivot.position.set(hp[0] * def.size, hp[1] * def.size, hp[2] * def.size);
+        const fo = HERO_GRIP_OFF[o.cls]; if (fo) wPivot.position.add(_v3.fromArray(fo)); // hand-tuned per hero where the mesh misleads
         const ar = gearAuraRarity(o.gear);
         if (ar && !o.peer) {
           aura = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.3).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: auraTexture(), color: RAR_HEX[ar], transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
@@ -7831,7 +7853,7 @@ function openSkills(which) {
 }
 const TZ_MIN = 6, TZ_MAX = 150;
 // the whole tree fits the canvas (with room for the labels around it)
-function treeFit(w, h) { return Math.min(w, h * 1.1) / 2 / (TreeView.which === 'hero' ? 13.2 : 11.2); }
+function treeFit(w, h) { return Math.min(w, h * 1.1) / 2 / (TreeView.which === 'hero' ? 15.8 : 14); }
 function treeZoom(how) {
   const cx = TreeView.w / 2, cy = TreeView.h / 2, wx = (cx - TreeView.ox) / TreeView.s, wy = (cy - TreeView.oy) / TreeView.s;
   if (how === 'fit') { TreeView.s = treeFit(TreeView.w, TreeView.h); TreeView.ox = TreeView.w / 2; TreeView.oy = TreeView.h / 2 + (TreeView.which === 'hero' ? 0 : 16); return; }
@@ -7870,57 +7892,63 @@ function setupTreeCanvas() {
 }
 const BRANCH_COL = { might: '#ff7a45', fort: '#58e08a', swift: '#5dd6ff', sorc: '#c77dff', carn: '#ff4d6d', storm: '#7fa8ff', pow: '#ff7a45', rhy: '#ffc94a', uti: '#5dd6ff', core: '#ffc94a', r0: '#ffd34a', r1: '#c77dff', r2: '#9fe8ff', r3: '#ffd34a', r4: '#c77dff', r5: '#9fe8ff' };
 const branchCol = (id) => BRANCH_COL[id.split('_')[0]] || '#ffc94a';
+// pixel tree: nodes are the game's pixel icon tiles (coloured by branch when learned, stone when not),
+// links are flat pixel bars, no glows; drawn with nearest-neighbour scaling so every tile stays crisp
+const BRANCH_FAM = { might: 'fire', fort: 'nature', swift: 'ice', sorc: 'arcane', carn: 'blood', storm: 'electric', pow: 'fire', rhy: 'gold', uti: 'ice', core: 'gold', r0: 'gold', r1: 'arcane', r2: 'ice', r3: 'gold', r4: 'arcane', r5: 'ice' };
+const branchFam = (id) => BRANCH_FAM[id.split('_')[0]] || 'gold';
+const treeImgs = new Map();
+function treeImg(url) { let im = treeImgs.get(url); if (!im) { im = new Image(); im.src = url; treeImgs.set(url, im); } return im; }
 function drawTree() {
   const cv = TreeView.cv, g = cv.getContext('2d'), dpr = TreeView.dpr, p = G.profile, which = TreeView.which;
   const T = treeOf(p, which), set = T.st.sets[T.st.active], free = treeFree(p, which), t = performance.now() / 1000;
-  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, TreeView.w, TreeView.h);
-  // backdrop: faint constellation rings
-  const S = TreeView.s, X = (x) => TreeView.ox + x * S, Y = (y) => TreeView.oy + y * S;
-  g.strokeStyle = 'rgba(159,168,255,.06)'; g.lineWidth = 1;
-  for (let r = 3; r <= 13; r += 2.5) { g.beginPath(); g.arc(X(0), Y(0), r * S, 0, Math.PI * 2); g.stroke(); }
-  // links
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.imageSmoothingEnabled = false;
+  g.fillStyle = '#100e16'; g.fillRect(0, 0, TreeView.w, TreeView.h);
+  const S = TreeView.s, X = (x) => Math.round(TreeView.ox + x * S), Y = (y) => Math.round(TreeView.oy + y * S);
+  // backdrop: a sparse field of pixel stars that moves with the tree
+  g.fillStyle = 'rgba(160,150,190,.18)';
+  for (let i = 0; i < 140; i++) { const hx = Math.sin(i * 12.9898) * 43758.5453, hy = Math.sin(i * 78.233) * 43758.5453; const wx = (hx - Math.floor(hx) - 0.5) * 36, wy = (hy - Math.floor(hy) - 0.5) * 36; g.fillRect(X(wx), Y(wy), 2, 2); }
+  // links: flat bars, bright when both ends are learned
   const owned = (id) => (set[id] || 0) > 0 || T.nodes[id].start;
+  const px = Math.max(2, Math.round(S * 0.09));
   for (const id in T.nodes) {
     const n = T.nodes[id];
     for (const l of n.links) {
       if (l < id) continue; const m = T.nodes[l];
       const both = owned(id) && owned(l), one = owned(id) || owned(l);
-      const bc = branchCol(n.start ? l : id);
-      g.lineWidth = both ? 5 : 3; g.strokeStyle = both ? bc : one ? 'rgba(255,233,170,.4)' : 'rgba(111,117,168,.35)';
-      if (both) { g.shadowColor = bc; g.shadowBlur = 10; }
-      g.beginPath(); g.moveTo(X(n.x), Y(n.y)); g.lineTo(X(m.x), Y(m.y)); g.stroke(); g.shadowBlur = 0;
+      const col = both ? PX_FAM[branchFam(n.start ? l : id)].ink[1] : null;
+      g.lineCap = 'butt'; g.lineWidth = both ? px + 2 : px;
+      g.strokeStyle = '#0a0910'; g.beginPath(); g.moveTo(X(n.x), Y(n.y)); g.lineTo(X(m.x), Y(m.y)); g.lineWidth += 2; g.stroke();
+      g.lineWidth -= 2; g.strokeStyle = both ? '#' + col.toString(16).padStart(6, '0') : one ? '#6e6878' : '#2c2834';
+      g.beginPath(); g.moveTo(X(n.x), Y(n.y)); g.lineTo(X(m.x), Y(m.y)); g.stroke();
     }
   }
   // nodes
+  const label = (txt, x, y, size, col) => { g.font = `700 ${size}px 'Pixelify Sans', monospace`; g.textAlign = 'center'; g.fillStyle = '#000'; g.fillText(txt, x, y + 2); g.fillStyle = col; g.fillText(txt, x, y); };
   for (const id in T.nodes) {
-    const n = T.nodes[id], info = nodeInfo(n), r0 = (n.start ? 0.62 : n.big ? 0.55 : 0.4) * S, cx = X(n.x), cy = Y(n.y);
-    if (cx < -60 || cy < -60 || cx > TreeView.w + 60 || cy > TreeView.h + 60) continue;
-    const rank = set[id] || 0, open = nodeOpen(T.nodes, set, id), can = open && rank < nodeMax(n) && free >= n.cost;
-    g.save(); g.translate(cx, cy);
-    const shape = () => { g.beginPath(); if (n.big) { g.moveTo(0, -r0 * 1.25); g.lineTo(r0 * 1.25, 0); g.lineTo(0, r0 * 1.25); g.lineTo(-r0 * 1.25, 0); g.closePath(); } else g.arc(0, 0, r0, 0, Math.PI * 2); };
-    const bc = n.start ? '#ffc94a' : branchCol(id), lit = rank > 0 || n.start;
-    if (lit) { g.shadowColor = bc; g.shadowBlur = n.big ? 18 + Math.sin(t * 2.5) * 6 : 10; }
-    shape();
-    if (lit) { const gr = g.createRadialGradient(-r0 * 0.3, -r0 * 0.4, r0 * 0.1, 0, 0, r0 * 1.3); gr.addColorStop(0, bc); gr.addColorStop(1, '#1a1c40'); g.fillStyle = gr; } else g.fillStyle = '#181a3a';
-    g.fill(); g.shadowBlur = 0;
-    g.lineWidth = n.big ? 4 : 3;
-    g.strokeStyle = lit ? (n.big ? '#fff3c4' : bc) : can ? `rgba(255,255,255,${0.55 + Math.sin(t * 4) * 0.3})` : open ? '#8d8aa6' : '#3a3f78';
-    shape(); g.stroke();
-    if (TreeView.sel === id) { g.lineWidth = 2; g.strokeStyle = '#9fe8ff'; g.beginPath(); g.arc(0, 0, r0 * (n.big ? 1.6 : 1.35), 0, Math.PI * 2); g.stroke(); }
-    const ip = iconPath(info.icon);
-    if (ip) { const k = (r0 * 1.15) / 512; g.save(); g.translate(-r0 * 0.575, -r0 * 0.575); g.scale(k, k); if (lit) { g.lineWidth = 40; g.strokeStyle = 'rgba(11,12,31,.75)'; g.lineJoin = 'round'; g.stroke(ip); } g.fillStyle = lit ? '#ffffff' : open ? '#c9cdf0' : '#5b6099'; g.fill(ip); g.restore(); }
-    if (!n.big && !n.start && S > 20) { g.font = `700 ${clamp(S * 0.24, 9, 15)}px Rubik, sans-serif`; g.textAlign = 'center'; g.fillStyle = rank > 0 ? '#ffe08a' : '#8d92c8'; g.fillText(n.max === Infinity ? `${rank}` : `${rank}/${n.max}`, 0, r0 + clamp(S * 0.3, 11, 18)); }
-    // zoomed in far enough: the node's name, so the tree reads without tapping
-    if (S > 46 && !n.start) { g.font = `600 ${clamp(S * 0.2, 10, 14)}px Rubik, sans-serif`; g.textAlign = 'center'; g.fillStyle = lit ? '#ffffff' : '#aab0e0'; g.fillText(info.name, 0, -r0 * (n.big ? 1.25 : 1) - 6); }
-    if (n.start && S > 18) { g.font = `700 ${Math.max(10, S * 0.28)}px Rubik, sans-serif`; g.textAlign = 'center'; g.fillStyle = '#ffe08a'; g.fillText(rank ? `×${rank}` : '∞', 0, r0 + Math.max(12, S * 0.34)); }
+    const n = T.nodes[id], info = nodeInfo(n), cx = X(n.x), cy = Y(n.y);
+    if (cx < -80 || cy < -80 || cx > TreeView.w + 80 || cy > TreeView.h + 80) continue;
+    const rank = set[id] || 0, open = nodeOpen(T.nodes, set, id), can = open && rank < nodeMax(n) && free >= n.cost, lit = rank > 0 || n.start;
+    const size = Math.max(16, Math.round((n.start ? 1.35 : n.big ? 1.2 : 0.86) * S / 8) * 8), h = size / 2;
+    const fam = lit ? (n.start ? 'gold' : branchFam(id)) : open ? 'steel' : 'parch';
+    const im = treeImg(PixelIcons.url(info.icon, fam));
+    g.save(); g.globalAlpha = lit || open ? 1 : 0.55;
+    if (im.complete) g.drawImage(im, cx - h, cy - h, size, size);
     g.restore();
+    // keystones: a second bone frame; buyable nodes blink a white frame; the selected node gets a cyan one
+    const frame = (col, pad, w) => { g.fillStyle = col; g.fillRect(cx - h - pad, cy - h - pad, size + pad * 2, w); g.fillRect(cx - h - pad, cy + h + pad - w, size + pad * 2, w); g.fillRect(cx - h - pad, cy - h - pad, w, size + pad * 2); g.fillRect(cx + h + pad - w, cy - h - pad, w, size + pad * 2); };
+    if (n.big) frame(lit ? '#efe6cf' : '#5a5466', 3, 3);
+    if (can && Math.sin(t * 6) > -0.2) frame('#ffffff', n.big ? 7 : 3, 2);
+    if (TreeView.sel === id) frame('#7fe3ff', n.big ? 10 : 6, 3);
+    const fs = clamp(Math.round(S * 0.26), 10, 16);
+    if (!n.big && !n.start && S > 18) label(n.max === Infinity ? `${rank}` : `${rank}/${n.max}`, cx, cy + h + fs + 3, fs, rank > 0 ? '#efe6cf' : '#8a8496');
+    if (S > 44 && !n.start) label(info.name, cx, cy - h - (n.big ? 9 : 6), clamp(Math.round(S * 0.22), 10, 15), lit ? '#ffffff' : '#a9a3b6');
+    if (n.start && S > 16) label(rank ? `×${rank}` : '∞', cx, cy + h + fs + 4, fs, '#efe6cf');
   }
   // branch names
   if (S > 7) {
-    g.font = `${clamp(S * 0.5, 13, 20)}px 'Lilita One', sans-serif`; g.textAlign = 'center'; g.fillStyle = 'rgba(201,205,240,.55)';
     const names = which === 'hero' ? ['Might', 'Fortitude', 'Swiftness', 'Sorcery', 'Carnage', 'Tempest'] : ['Power', 'Rhythm', 'Utility'];
     const angs = which === 'hero' ? names.map((_, i) => (i / 6) * Math.PI * 2 - Math.PI / 2) : [-Math.PI / 2, Math.PI / 6, Math.PI * 5 / 6];
-    names.forEach((nm, i) => { const r = which === 'hero' ? 12.4 : 10.6; g.fillText(nm, X(Math.cos(angs[i]) * r), Y(Math.sin(angs[i]) * r) + 5); });
+    names.forEach((nm, i) => { const r = which === 'hero' ? 15 : 13.4; label(nm.toUpperCase(), X(Math.cos(angs[i]) * r), Y(Math.sin(angs[i]) * r) + 5, clamp(Math.round(S * 0.5), 12, 20), '#6e6878'); });
   }
 }
 function renderNodeCard() {
