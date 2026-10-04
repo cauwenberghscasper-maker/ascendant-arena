@@ -6,7 +6,7 @@
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/ui/app-icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#11152c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lilita+One&family=Rubik:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Lilita+One&family=Pixelify+Sans:wght@400;500;700&family=Rubik:wght@400;500;700;800&display=swap">
 <style>
 /* Layout: full-bleed 3D canvas; HUD hugs the safe-area corners; menus are centered sheets.
    Single deliberate dark arcade look over a bright low-poly world. */
@@ -741,6 +741,87 @@ button.inl { margin-left: 8px; vertical-align: middle; }
 #bSuper { display: grid; place-items: center; } #bSuper .cic { position: absolute; z-index: 1; top: 14%; left: 50%; width: 38%; transform: translateX(-50%); }
 #bSuper span#bSuperLbl { display: grid; place-items: end center; box-sizing: border-box; padding-bottom: 11px; font: 800 8.5px/1 var(--body); letter-spacing: .06em; }
 .cbtn > span { font-family: var(--body); font-weight: 800; }
+
+/* ===== pixel-art UI theme: hard-edged bevelled frames (generated in PixelFrames), pixel icons, pixel display font ===== */
+:root { --display: 'Pixelify Sans', monospace; --myth: 'Pixelify Sans', monospace; --body: 'Pixelify Sans', monospace; --gl: linear-gradient(#ece3cc, #ece3cc);
+  --gold: #e9dfc6; --goldDeep: #6f6656; --text: #ece6d8; --muted: #9b94a6; --ink: #121019; --ink2: #1c1925; --ink3: #2a2633; --line: #3a3545; }
+body, button, input, select, textarea, .panel, .panel * { font-family: 'Pixelify Sans', monospace !important; letter-spacing: .01em; }
+.panel h2, .panel h3, .panel h4, .mtile b, .nameRow, .lvlBadge span, #banner b, .tinfo b, .heroHead .lv, .pts, .mtotal b, .riftFl b, .results .place { background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: #ece3cc !important; -webkit-text-stroke: 0 !important; filter: none !important; text-shadow: 0 2px 0 #000 !important; font-weight: 700 !important; }
+.eyebrow, .item .nm em, .tpts.hot, .mtile.hot small, .pts, #banner.gold b, .goldchip { color: #e9dfc6 !important; }
+.panel { background: #15131b !important; }
+#app { background: #121019; }
+.heroHead .lv, .lvlBadge { color: #ece3cc; }
+#title .logo, #title .logo span { font-family: 'Pixelify Sans', monospace !important; background: none !important; color: #ece3cc !important; -webkit-text-stroke: 0 !important; text-shadow: 0 4px 0 #000, 0 0 0 #000 !important; filter: none !important; letter-spacing: .02em; }
+#title .logo span { color: #d9c9a0 !important; }
+#title .badge { border-radius: 0; background: rgba(18,16,25,.85); border-color: #46414f; color: #d9d0bc; backdrop-filter: none; }
+.tile::after { color: #d9c9a0 !important; text-shadow: 0 1px 0 #000 !important; }
+.rdot, #heroDot { background: #d2463a !important; animation: none !important; }
+#bSuper { background: conic-gradient(rgba(214,120,70,.85) calc(var(--sc) * 360deg), rgba(16,14,28,.82) 0) !important; }
+#bSuper.ready span { background: #8a3a1e !important; }
+#atk { background: rgba(30,27,38,.6) !important; }
+.bar i { background: #5fae45; } .bar.xp i { background: #5f9fb8; }
+.gi.pxi { display: inline-block; background: var(--pb) center / contain no-repeat; image-rendering: pixelated; vertical-align: -0.22em; }
+.gi.pxi, .gi.pxi.lk { background-repeat: no-repeat !important; background-size: contain !important; background-position: center !important; }
+.gi.pxi.lk { background-color: transparent !important; border-radius: 0 !important; padding: 0 !important; filter: none !important; }
+.gi.pxi path { fill: none; }
+/* tiles that show the full framed icon */
+.mtile .gi.pxi, .aslot2 .gi.pxi, .acard .aic .gi.pxi, .nc .gi.pxi, .aurow .aic .gi.pxi, .bport > .gi.pxi:not(.lk), .caseArt .gi.pxi, .soon .gi.pxi.big, .npcHead .gi.pxi.hd, .tierHead .gi.pxi { background-image: var(--pf) !important; }
+.mtile .gi.pxi { width: 64px; height: 64px; padding: 0; border-radius: 0; background-color: transparent; box-shadow: none; filter: drop-shadow(0 4px 0 rgba(0,0,0,.45)); }
+.mtile::before { display: none; }
+.bport > .gi.pxi:not(.lk) { width: 70%; height: 70%; filter: none; }
+.bport .wchip .gi.pxi { filter: none !important; }
+.bport.locked .gi.pxi, .acard:not(.own) .aic .gi.pxi, .feat:not(.got) .gi.pxi, .krow.locked .gi.pxi { filter: grayscale(1) brightness(.55); }
+.gi.pxi.lk { background-image: var(--pb) !important; }
+/* frames */
+.panel, .card, .item, .mtile, .node, .feat, .kit div, .statgrid div, .stats3 div, .atk, .art, .aslot, .key, .tierc, .road, .mrow, .lk, .tgl, .savebox, .tools, .riftCard, .arenaCard, .mpbox, .classCard, #gearPrompt, .toast, #objective, .chip, .dchip, #arenaHud div, #streak, #respawn, #banner span, .xd {
+  border-radius: 0 !important; border-style: solid !important; border-color: transparent !important; border-image: var(--pxf-panel) 8 fill / 8px / 0 stretch !important; image-rendering: pixelated; box-shadow: none !important; background: transparent !important; }
+.panel { border-width: 12px !important; border-image-width: 12px !important; padding: 14px; }
+.card, .item, .mtile, .node, .atk, .art, .key, .tierc, .road, .mrow, .tgl, .savebox, .tools, .classCard, .feat, .kit div, .statgrid div, .stats3 div, .lk, .aslot, .riftCard, .arenaCard, .mpbox, #gearPrompt { border-width: 8px !important; }
+.toast, #objective, .chip, .dchip, #arenaHud div, #streak, #respawn, #banner span, .xd { border-width: 6px !important; border-image-width: 6px !important; }
+.atk.on, .art.on, .key.on, .tierc.on, .node.has, .aslot.full, .road.next, .tile.sel, .item.alert, .feat.got { border-image-source: var(--pxf-gold-src) !important; }
+.toast.good, .toast.mastery { border-image-source: var(--pxf-green-src) !important; } .toast.bad { border-image-source: var(--pxf-red-src) !important; }
+.panel button.primary, .panel button.ghost, .panel button.warn, .panel button.disabled, .tab, #gearPrompt button, #bAct, #coach, #coach button, #playBtn, .panel .x {
+  border-radius: 0 !important; border: 6px solid transparent !important; border-image: var(--pxf-btn) 8 fill / 6px / 0 stretch !important; image-rendering: pixelated; box-shadow: none !important; background: transparent !important; font-family: var(--display) !important; letter-spacing: .03em; }
+.panel button.primary, #gearPrompt button.primary, #bAct, #coach, #playBtn { border-image-source: var(--pxf-gold-src) !important; color: #ece3cc !important; }
+.panel button.warn { border-image-source: var(--pxf-red-src) !important; color: #fff !important; }
+.panel button.disabled { opacity: .55; }
+.tab.on { border-image-source: var(--pxf-gold-src) !important; color: #ece3cc !important; }
+.tabs { background: transparent !important; border-radius: 0 !important; }
+.panel button:active, .hbtn:active, .cbtn.press, #playBtn:active { transform: translateY(2px); }
+#playBtn { border-width: 10px !important; border-image-width: 10px !important; animation: none; } #playBtn::after { display: none; }
+/* HUD buttons, ability buttons and the attack stick */
+.hbtn, .hbtn.ic { border-radius: 0 !important; border: 6px solid transparent; border-image: var(--pxf-btn) 8 fill / 6px / 0 stretch; image-rendering: pixelated; background: transparent !important; box-shadow: none !important; }
+.hbtn.ic .gi.pxi { width: 28px; height: 28px; background-image: var(--pb) !important; }
+#bMap.on { border-image-source: var(--pxf-gold-src); }
+.cbtn { border-radius: 0 !important; border: 7px solid transparent !important; border-image: var(--pxf-round) 10 / 10px / 0 stretch !important; image-rendering: pixelated; background: rgba(16,14,28,.82) !important; box-shadow: none !important; }
+.cbtn::before { inset: 3px; }
+.cbtn .cic { width: 62%; } .cbtn .cic .gi.pxi { width: 100%; height: 100%; display: block; background-image: var(--pb) !important; }
+#bDash { border-image-source: var(--pxf-round-ice-src) !important; } #bSkill { border-image-source: var(--pxf-round-arc-src) !important; }
+#bSuper { border-image-source: var(--pxf-round-gold-src) !important; background: conic-gradient(rgba(255,155,61,.85) calc(var(--sc) * 360deg), rgba(16,14,28,.82) 0) !important; }
+#bSuper span { border-radius: 0 !important; background: rgba(16,14,28,.92) !important; }
+#bSuper.ready span { background: #b4481a !important; }
+#atk { border-radius: 0 !important; border: 8px solid transparent !important; border-image: var(--pxf-round-gold-src) 10 / 10px / 0 stretch !important; image-rendering: pixelated; background: rgba(60,40,10,.55) !important; }
+#atkKnob { border-radius: 0; background: transparent; box-shadow: none; width: 30px; height: 30px; left: 39px; top: 39px; border: 5px solid transparent; border-image: var(--pxf-gold-src) 8 fill / 5px / 0 stretch; image-rendering: pixelated; }
+#stickBase { border-radius: 0; border: 8px solid transparent; border-image: var(--pxf-round) 10 / 10px / 0 stretch; image-rendering: pixelated; background: rgba(255,255,255,.08); }
+#stickKnob { border-radius: 0; background: transparent; box-shadow: none; border: 6px solid transparent; border-image: var(--pxf-btn) 8 fill / 6px / 0 stretch; image-rendering: pixelated; }
+/* bars and badges */
+.bar { border-radius: 0 !important; border: 2px solid #0b0a16 !important; box-shadow: inset 0 2px 0 rgba(0,0,0,.35); } .bar i { border-radius: 0 !important; box-shadow: inset 0 -2px 0 rgba(0,0,0,.25), inset 0 2px 0 rgba(255,255,255,.3); }
+.lvlBadge { border-radius: 0 !important; border: 6px solid transparent; border-image: var(--pxf-gold-src) 8 fill / 6px / 0 stretch; image-rendering: pixelated; background: transparent !important; box-shadow: none !important; }
+.lvlBadge span { font-family: var(--display); }
+#hudTL { box-shadow: none !important; }
+.tag .tb { border-radius: 0; } .tag .tb i { border-radius: 0; }
+.rdot, #heroDot { border-radius: 0 !important; }
+.thumb, .tile { border-radius: 0 !important; }
+
+.panel::before, .mtile::after { display: none !important; }
+.panel h2, .panel h3, .panel h4, .mtile b { font-family: var(--display) !important; }
+
+.bport .gi.lk { display: none !important; }
+#coach, #coach button { color: #ece3cc !important; }
+.heroHead .lv { border-radius: 0 !important; background: transparent !important; border: 6px solid transparent; border-image: var(--pxf-gold-src) 8 fill / 6px / 0 stretch; image-rendering: pixelated; box-shadow: none !important; }
+.goldchip, .xpchip, .esschip { border-radius: 0 !important; background: #25222d !important; box-shadow: inset 0 0 0 2px #0a0914; }
+.bport img, img.pxp, .bport img.pxp { image-rendering: pixelated; }
+.bport { border-radius: 0 !important; }
 </style>
 
 <div id="app">
@@ -4086,7 +4167,7 @@ const AssetLibrary = {
     }
   },
 };
-if (typeof window !== 'undefined') { window.__assets = AssetLibrary; window.__THREE = THREE; window.__manifest = ASSET_MANIFEST; window.__lab = { slots: AssetSlots, heldWeaponAsset, itemIcon: (it) => thumbFor(it) }; } // for the in-browser test harness
+if (typeof window !== 'undefined') { window.__assets = AssetLibrary; window.__THREE = THREE; window.__manifest = ASSET_MANIFEST; window.__lab = { px: () => PixelIcons, gi: () => GI, slots: AssetSlots, heldWeaponAsset, itemIcon: (it) => thumbFor(it) }; } // for the in-browser test harness
 // best gear rarity worn on at least two slots, shown as an aura under generated heroes
 function gearAuraRarity(gear) {
   if (!gear) return null;
@@ -4320,9 +4401,43 @@ function thumbInit() {
   const dl = new THREE.DirectionalLight(0xffffff, 2.2); dl.position.set(2, 3, 4); Thumbs.scene.add(dl);
   Thumbs.cam = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
 }
+// pixel-art portraits: the painted portrait is redrawn at 40x40 with a limited palette, hard edges,
+// cel-shaded tone steps and a 1px ink outline, then shown scaled up crisp. Until it's ready the
+// original shows; once done every <img> using it swaps over.
+const PixelPortraits = {
+  N: 40, done: new Map(), busy: new Set(),
+  url(src) {
+    if (this.done.has(src)) return this.done.get(src);
+    if (!this.busy.has(src)) { this.busy.add(src); const im = new Image(); im.onload = () => { try { this.make(src, im); } catch (e) { this.done.set(src, src); } }; im.onerror = () => this.done.set(src, src); im.src = src; }
+    return src;
+  },
+  make(src, im) {
+    const N = this.N, c = document.createElement('canvas'); c.width = c.height = N;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, N, N);
+    const d = x.getImageData(0, 0, N, N), o = d.data;
+    // posterize: 5 steps per channel after a small contrast boost, a touch less saturation
+    for (let i = 0; i < o.length; i += 4) {
+      let r = o[i], g = o[i + 1], b = o[i + 2]; const l = 0.3 * r + 0.59 * g + 0.11 * b;
+      r = l + (r - l) * 0.9; g = l + (g - l) * 0.9; b = l + (b - l) * 0.9;
+      const q = (v) => Math.max(0, Math.min(255, Math.round(((v - 128) * 1.12 + 128) / 51) * 51));
+      o[i] = q(r); o[i + 1] = q(g); o[i + 2] = q(b);
+    }
+    // ink outline where tone jumps hard (silhouette and big shapes)
+    const L = new Float32Array(N * N); for (let i = 0; i < N * N; i++) L[i] = 0.3 * o[i * 4] + 0.59 * o[i * 4 + 1] + 0.11 * o[i * 4 + 2];
+    const out = new Uint8ClampedArray(o);
+    for (let j = 1; j < N - 1; j++) for (let i = 1; i < N - 1; i++) {
+      const k = j * N + i, here = L[k], mx = Math.max(L[k - 1], L[k + 1], L[k - N], L[k + N]);
+      if (mx - here > 95 && here < 110) { out[k * 4] = 18; out[k * 4 + 1] = 14; out[k * 4 + 2] = 24; }
+    }
+    d.data.set(out); x.putImageData(d, 0, 0);
+    const url = c.toDataURL('image/png'); this.done.set(src, url);
+    document.querySelectorAll('img').forEach((el) => { if (el.getAttribute('src') === src) { el.src = url; el.classList.add('pxp'); } });
+  },
+};
 // painted portrait (crop of the hero's concept art) when the brawler has a generated model, else a live 3D render
 function brawlerThumb(id) {
-  if (ASSET_MANIFEST['hero.' + id] && AssetLibrary.enabled) return 'assets/ui/portraits/' + id + '.webp';
+  if (ASSET_MANIFEST['hero.' + id] && AssetLibrary.enabled) return PixelPortraits.url('assets/ui/portraits/' + id + '.webp');
   const tint = G.profile ? badgeTint(G.profile, id) : null, key = 'br|' + id + '|' + (tint || '');
   if (Thumbs.cache.has(key)) return Thumbs.cache.get(key);
   try {
@@ -6074,7 +6189,50 @@ const Input = {
   sup: null, supShot: null,
 };
 const STICK_R = 56;
+
+// --- pixel UI frames: nine-slice PNGs drawn once, used as border-image on panels, buttons and HUD ---
+const PixelFrames = {
+  rgb(c) { return [(c >> 16) & 255, (c >> 8) & 255, c & 255]; },
+  // square frame (8px border) with a stepped corner: ink rim, light bevel top-left, dark bevel bottom-right, inner shadow, filled centre
+  square(edge, fill, round) {
+    const N = round ? 30 : 24, B = round ? 10 : 8, c = document.createElement('canvas'); c.width = c.height = N;
+    const x = c.getContext('2d'), img = x.createImageData(N, N), o = img.data;
+    const ink = [10, 9, 20], [hi, mid, lo, deep] = edge.map((v) => this.rgb(v)), F = fill == null ? null : this.rgb(fill);
+    const cut = round ? [5, 3, 2, 1, 1] : [2, 1]; // stepped corner profile, row by row
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const di = Math.min(i, N - 1 - i), dj = Math.min(j, N - 1 - j);
+      const k = (j * N + i) * 4; let col = null, a = 255;
+      // distance in from the stepped outline
+      let inset = Math.min(di, dj);
+      if (dj < cut.length && di < cut[dj]) { o[k + 3] = 0; continue; }
+      if (di < cut.length && dj < cut[di]) { o[k + 3] = 0; continue; }
+      const onEdge = (dj < cut.length && di === cut[dj]) || (di < cut.length && dj === cut[di]) || di === 0 || dj === 0;
+      if (onEdge) col = ink;
+      else if (inset <= 2) col = (i < N / 2 && j < N / 2) || (j < N / 2 && dj <= di) || (i < N / 2 && di <= dj && j < N - 3) ? (inset === 1 ? hi : mid) : (inset === 1 ? lo : deep);
+      else if (inset <= B - 4) col = inset === B - 4 ? deep : mid;
+      else if (inset === B - 3) col = ink;
+      else if (F) { col = F; if (inset === B - 2 && (j < N / 2 || i < N / 2) && (dj === B - 2 || di === B - 2) && (j < N / 2 ? dj === B - 2 : di === B - 2)) col = F.map((v) => Math.round(v * 0.6)); }
+      else { o[k + 3] = 0; continue; }
+      // a sparse rivet pattern on the mid band
+      if (inset === 3 && B === 8 && ((i === 3 && j === 3) || (i === N - 4 && j === 3) || (i === 3 && j === N - 4) || (i === N - 4 && j === N - 4))) col = hi;
+      o[k] = col[0]; o[k + 1] = col[1]; o[k + 2] = col[2]; o[k + 3] = a;
+    }
+    x.putImageData(img, 0, 0); return 'url(' + c.toDataURL('image/png') + ')';
+  },
+  apply() {
+    const r = document.documentElement.style, sq = (e, f, rd) => this.square(e, f, rd);
+    const stone = [0x6e6878, 0x46414f, 0x332f3b, 0x24212b], gold = [0xefe6cf, 0xb9ad92, 0x7a705e, 0x4a4438], green = [0xa9d39a, 0x5d8a52, 0x3d5c36, 0x263a22];
+    const red = [0xe0a49a, 0xa8463c, 0x6e2622, 0x441614], ice = [0xbfe3ef, 0x5f9fb8, 0x35667c, 0x1f3f4e], arc = [0xd9c8ef, 0x8f72b0, 0x5c477a, 0x3a2c50];
+    const panelFill = 0x15131b, btnFill = 0x25222d, goldFill = 0x2f2b38;
+    const set = (k, v) => { r.setProperty(k, v); r.setProperty(k + '-src', v); };
+    set('--pxf-panel', sq(stone, panelFill)); set('--pxf-btn', sq(stone, btnFill)); set('--pxf-gold', sq(gold, goldFill));
+    set('--pxf-green', sq(green, 0x1c2a1a)); set('--pxf-red', sq(red, 0x3a1614));
+    set('--pxf-round', sq(stone, null, true)); set('--pxf-round-gold', sq(gold, null, true)); set('--pxf-round-ice', sq(ice, null, true)); set('--pxf-round-arc', sq(arc, null, true));
+  },
+};
 function setupInput() {
+  try { PixelFrames.apply(); } catch (e) { console.warn('pixel frames', e); }
+  try { CFG.brawlerOrder.forEach((id) => brawlerThumb(id)); } catch (e) { /* portraits fall back to the painted art */ }
   const layer = $('input'), base = $('stickBase'), knob = $('stickKnob'), atk = $('atk'), atkKnob = $('atkKnob');
   layer.addEventListener('pointerdown', (e) => {
     if (!G.started || G.modal) return;
@@ -7380,7 +7538,108 @@ const METAL = ['bronze', 'silver', 'gold', 'diamond', 'mythic', 'legend'];
 // ability buttons show the game's own icons with a small caption underneath
 const BTN_ICON = { nova: 'n_burst', slam: 'k_aftershock', volley: 'b_arrow', meteor: 'k_comet', ironskin: 'n_armor', swift: 'n_speed', frostnova: 'a_frost', fire: 'a_ember', ice: 'a_frost', storm: 'k_storm', poison: 'a_rubber' };
 function setBtnIcon(id, key) { const el = $(id) && $(id).querySelector('.cic'); if (el && key && el.dataset.k !== key) { el.dataset.k = key; el.innerHTML = gi(key); } }
-function gi(key, cls) { const d = GI[key]; return d ? `<svg class="gi ${cls || ''}" viewBox="0 0 512 512" aria-hidden="true"><path d="${d}" stroke="#0b0c1f" stroke-width="26" stroke-linejoin="round" paint-order="stroke"/></svg>` : ''; }
+function gi(key, cls) {
+  if (!GI[key]) return '';
+  const fam = key === 'm_lock' ? 'steel' : null;
+  return `<i class="gi pxi ${cls || ''}" aria-hidden="true" style="--pf:url(${PixelIcons.url(key, fam)});--pb:url(${PixelIcons.url(key, fam, true)})"></i>`;
+}
+// --- pixel-art icons ------------------------------------------------------------------
+// Every icon is drawn as a 32x32 pixel tile: dark rim, bevelled edge, a shaded background in its
+// element's colour (fire, frost, venom, arcane, blood, steel, gold…) and the symbol on top, lit from
+// the top-left with a highlight edge, a shadow edge, an ink outline and a drop shadow.
+// Built once per icon on a tiny canvas and shown scaled up with hard pixel edges.
+const PX_FAM = {
+  fire: { bg: [0x220b07, 0x4a160b, 0x7a2a10, 0xa84616], ink: [0x8a2a08, 0xff8a1f, 0xffd36b, 0xfff3c4], glow: 0xff9b3d },
+  ice: { bg: [0x08162a, 0x10304f, 0x1c5276, 0x2c7aa0], ink: [0x2f6fae, 0x8fd6ff, 0xd8f4ff, 0xffffff], glow: 0x7fe3ff },
+  venom: { bg: [0x0b1a0a, 0x16340f, 0x255216, 0x3a741c], ink: [0x3f7a12, 0x9be33a, 0xd6ff8a, 0xf4ffd0], glow: 0xa7ff4a },
+  arcane: { bg: [0x150a2a, 0x2a1450, 0x45227a, 0x6638a8], ink: [0x6a2fc0, 0xc58cff, 0xeed6ff, 0xffffff], glow: 0xc77dff },
+  blood: { bg: [0x1c0608, 0x3c0c12, 0x63141c, 0x8c1f26], ink: [0x7a0f18, 0xff4d5a, 0xffa3a3, 0xffe2dc], glow: 0xff4d6d },
+  steel: { bg: [0x111522, 0x222a3a, 0x343f55, 0x4c5a72], ink: [0x5a6478, 0xb9c3d4, 0xe6ecf5, 0xffffff], glow: 0xdfe6f0 },
+  gold: { bg: [0x1e1406, 0x3e2a0a, 0x664410, 0x8c5e14], ink: [0x9a5a08, 0xffc94a, 0xffe9a0, 0xfffbe6], glow: 0xffd34a },
+  electric: { bg: [0x07182a, 0x0c2f4a, 0x124a6c, 0x1a6890], ink: [0x1f7fb0, 0x6fe8ff, 0xd8fbff, 0xffffff], glow: 0x6fe8ff },
+  tech: { bg: [0x0a1a1c, 0x13343a, 0x1d4e56, 0x2a6a72], ink: [0x2a7a80, 0x6fe0d0, 0xc8fff6, 0xffffff], glow: 0x5fe3c9 },
+  mythic: { bg: [0x1c0618, 0x3a0c32, 0x5c164e, 0x80226a], ink: [0x8a1a6a, 0xff6ad5, 0xffc2ee, 0xffffff], glow: 0xff7ab8 },
+  nature: { bg: [0x0c1a0c, 0x18341a, 0x274f27, 0x386a34], ink: [0x3f7a35, 0x8fd66a, 0xd2f5b0, 0xf6ffe8], glow: 0x9cff7a },
+  parch: { bg: [0x120e0b, 0x221a14, 0x302519, 0x3e3020], ink: [0x8a7a5a, 0xd9c8a0, 0xf1e6c8, 0xfff8e6], glow: 0xf1e6c8 },
+};
+const PX_KEY_FAM = {
+  b_bolt: 'arcane', b_smg: 'gold', b_scatter: 'fire', b_rail: 'ice', b_wave: 'steel', b_seeker: 'mythic', b_arrow: 'nature', b_cluster: 'fire', b_mortar: 'venom', b_disc: 'ice', b_orb: 'arcane', b_flamer: 'fire', b_chakram: 'gold', b_chain: 'electric', b_gatling: 'steel', b_starfall: 'arcane',
+  n_hp: 'blood', n_armor: 'steel', n_speed: 'nature', n_crit: 'gold', n_critDmg: 'blood', n_atkSpeed: 'gold', n_cdr: 'ice', n_lifesteal: 'blood', n_gold: 'gold', n_gems: 'arcane', n_dmg: 'fire', n_regen: 'nature', n_super: 'fire', n_xp: 'ice', n_range: 'nature', n_ammo: 'steel', n_aoe: 'fire', n_pierce: 'steel', n_burst: 'electric', n_core: 'arcane', n_start: 'gold', n_superPow: 'fire',
+  k_tempo: 'electric', k_conqueror: 'blood', k_grasp: 'venom', k_phase: 'arcane', k_secondWind: 'nature', k_execute: 'blood', k_electrocute: 'electric', k_comet: 'arcane', k_aftershock: 'steel', k_bloodthirst: 'blood', k_titan: 'steel', k_glass: 'ice', k_kraken: 'ice', k_sunfire: 'fire', k_storm: 'electric', k_infinity: 'arcane', k_undying: 'venom', k_ascend: 'gold',
+  m_gem: 'arcane', m_coin: 'gold', m_shard: 'arcane', m_rift: 'mythic', m_portal: 'arcane', m_asc: 'gold', m_arena: 'blood', m_lock: 'steel',
+  m_hero: 'gold', m_brawlers: 'fire', m_skills: 'arcane', m_artifacts: 'mythic', m_progress: 'nature', m_records: 'gold', m_feats: 'gold', m_case: 'gold', m_caseOpen: 'gold', m_vault: 'steel', m_exped: 'nature', m_auto: 'electric', m_idle: 'ice', m_menu: 'steel', m_players: 'ice', m_smith: 'fire', m_floor: 'arcane', m_tier: 'blood',
+};
+const PX_ART_FAM = { tech: 'tech', mythic: 'mythic', ice: 'ice', gold: 'gold', steel: 'steel', fire: 'fire', blood: 'blood', venom: 'venom', electric: 'electric' };
+function pxFamOf(key) {
+  if (PX_KEY_FAM[key]) return PX_KEY_FAM[key];
+  if (key.startsWith('a_')) return PX_ART_FAM[ART_FAM[key.slice(2)]] || 'tech';
+  if (key.startsWith('u_')) return 'gold';
+  return 'parch';
+}
+const PixelIcons = {
+  N: 32, cache: new Map(), cv: null,
+  rgb(c) { return [(c >> 16) & 255, (c >> 8) & 255, c & 255]; },
+  url(key, famOverride, bare) {
+    const fam = famOverride || pxFamOf(key), ck = key + '|' + fam + (bare ? '|b' : '');
+    if (this.cache.has(ck)) return this.cache.get(ck);
+    let out = '';
+    try { out = this.draw(GI[key], PX_FAM[fam] || PX_FAM.parch, bare); } catch (e) { out = ''; }
+    this.cache.set(ck, out); return out;
+  },
+  draw(d, F, bare) {
+    const N = this.N, S = 24, off = 4;
+    if (!this.cv) { this.cv = document.createElement('canvas'); this.cv.width = this.cv.height = N; }
+    const x = this.cv.getContext('2d', { willReadFrequently: true });
+    x.clearRect(0, 0, N, N);
+    // symbol mask: the 512x512 path rasterised into a 22x22 area, alpha thresholded to hard pixels
+    if (d) { x.save(); x.translate(off, off - 0.5); x.scale(S / 512, S / 512); x.fillStyle = '#fff'; x.fill(new Path2D(d)); x.restore(); }
+    const a = x.getImageData(0, 0, N, N).data, M = new Uint8Array(N * N);
+    for (let i = 0; i < N * N; i++) M[i] = a[i * 4 + 3] > 64 ? 1 : 0; // a low threshold keeps thin strokes
+    const m = (i, j) => (i < 0 || j < 0 || i >= N || j >= N) ? 0 : M[j * N + i];
+    const img = x.createImageData(N, N), o = img.data, bg = F.bg.map((c) => this.rgb(c)), ink = F.ink.map((c) => this.rgb(c)), dark = [11, 10, 22], gl = this.rgb(F.glow);
+    const hash = (i, j) => { const v = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return v - Math.floor(v); };
+    const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      let c;
+      const rim = i === 0 || j === 0 || i === N - 1 || j === N - 1;
+      const corner = (i <= 1 || i >= N - 2) && (j <= 1 || j >= N - 2);
+      if (corner && (i === 0 || i === N - 1) && (j === 0 || j === N - 1)) { o[(j * N + i) * 4 + 3] = 0; continue; }
+      if (bare) {
+        // symbol only, on transparency: same shading, ink outline and drop shadow
+        const k = (j * N + i) * 4; let cc = null;
+        if (m(i, j)) { const lit = !m(i - 1, j) || !m(i, j - 1), shade = !m(i + 1, j) || !m(i, j + 1); cc = lit && !shade ? ink[2] : shade ? ink[0] : ink[1]; }
+        else if (m(i + 1, j) || m(i - 1, j) || m(i, j + 1) || m(i, j - 1)) cc = dark;
+        else if (m(i - 1, j - 1) || m(i - 2, j - 1) || m(i - 1, j - 2)) { o[k] = 0; o[k + 1] = 0; o[k + 2] = 0; o[k + 3] = 110; continue; }
+        if (cc) { o[k] = cc[0]; o[k + 1] = cc[1]; o[k + 2] = cc[2]; o[k + 3] = 255; } else o[k + 3] = 0;
+        continue;
+      }
+      if (rim) c = dark;
+      else if (i === 1 || j === 1) c = bg[3];
+      else if (i === N - 2 || j === N - 2) c = bg[0];
+      else {
+        // background: light from the top-left, a soft vignette, a little painted texture, banded with an ordered dither
+        const dx = (i - 11) / N, dy = (j - 10) / N;
+        let v = 0.78 - Math.sqrt(dx * dx + dy * dy) * 1.25 + (hash(i >> 1, j >> 1) - 0.5) * 0.12;
+        v = Math.max(0, Math.min(0.999, v)) * 3 + (bayer[(j & 3) * 4 + (i & 3)] / 16 - 0.5) * 0.7;
+        c = bg[Math.max(0, Math.min(3, Math.floor(v)))];
+        // a soft glow of the element colour behind the symbol
+        let near = 0; for (let q = -2; q <= 2; q++) for (let r = -2; r <= 2; r++) near += m(i + q, j + r);
+        if (near && !m(i, j)) c = c.map((ch, k) => Math.round(ch + (gl[k] - ch) * Math.min(0.28, near * 0.02)));
+      }
+      if (!rim && !m(i, j) && m(i - 1, j - 1) && !(m(i + 1, j) || m(i - 1, j) || m(i, j + 1) || m(i, j - 1))) c = c.map((ch) => Math.round(ch * 0.55)); // drop shadow
+      if (m(i, j)) {
+        // symbol: highlight on edges facing the light, shadow on the far edges, mid tone inside
+        const lit = !m(i - 1, j) || !m(i, j - 1), shade = !m(i + 1, j) || !m(i, j + 1);
+        const deep = !m(i + 1, j + 1) && !lit;
+        c = lit && !shade ? ink[2] : shade ? (deep ? ink[0] : ink[0]) : ink[1];
+        if (lit && !m(i - 1, j - 1) && hash(i, j) > 0.55) c = ink[3];
+      } else if (!rim && (m(i + 1, j) || m(i - 1, j) || m(i, j + 1) || m(i, j - 1))) c = dark; // ink outline
+      const k = (j * N + i) * 4; o[k] = c[0]; o[k + 1] = c[1]; o[k + 2] = c[2]; o[k + 3] = 255;
+    }
+    x.putImageData(img, 0, 0);
+    return this.cv.toDataURL('image/png');
+  },
+};
 // each artifact has its own material family (fire, ice, blood, tech…)
 const ART_FAM = { mag: 'tech', splitter: 'mythic', frost: 'ice', seekerChip: 'tech', trigger: 'gold', pierce: 'steel', ember: 'fire', blast: 'fire', vamp: 'blood', rubber: 'venom', bigshot: 'gold', lens: 'ice', coil: 'electric', giant: 'blood', twin: 'steel', reaper: 'mythic' };
 const hex = (c) => '#' + (c >>> 0).toString(16).padStart(6, '0');
