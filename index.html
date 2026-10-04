@@ -3999,7 +3999,7 @@ const AssetLibrary = {
     }
   },
 };
-if (typeof window !== 'undefined') { window.__assets = AssetLibrary; window.__THREE = THREE; window.__manifest = ASSET_MANIFEST; window.__lab = { heldWeaponAsset, itemIcon: (it) => thumbFor(it) }; } // for the in-browser test harness
+if (typeof window !== 'undefined') { window.__assets = AssetLibrary; window.__THREE = THREE; window.__manifest = ASSET_MANIFEST; window.__lab = { slots: AssetSlots, heldWeaponAsset, itemIcon: (it) => thumbFor(it) }; } // for the in-browser test harness
 // best gear rarity worn on at least two slots, shown as an aura under generated heroes
 function gearAuraRarity(gear) {
   if (!gear) return null;
@@ -5835,7 +5835,7 @@ const Pixel = {
     this.rt.depthTexture = new THREE.DepthTexture(2, 2); this.rt.depthTexture.type = THREE.UnsignedIntType;
     this.mat = new THREE.ShaderMaterial({
       uniforms: { tColor: { value: this.rt.texture }, tDepth: { value: this.rt.depthTexture }, texel: { value: new THREE.Vector2() },
-        near: { value: camera.near }, far: { value: camera.far }, levels: { value: 28 }, ink: { value: new THREE.Color(0x15122a) } },
+        near: { value: camera.near }, far: { value: camera.far }, levels: { value: 48 }, ink: { value: new THREE.Color(0x15122a) } },
       vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
       fragmentShader: `
         uniform sampler2D tColor; uniform sampler2D tDepth; uniform vec2 texel; uniform float near; uniform float far; uniform float levels; uniform vec3 ink;
@@ -5858,12 +5858,12 @@ const Pixel = {
           col *= mix(vec3(1.0), vec3(1.07, 1.0, 0.88), smoothstep(0.35, 1.2, l));
           col = mix(col, ink * 0.35, edge * 0.85);
           // soft vignette
-          vec2 v = vUv - 0.5; col *= 1.0 - dot(v, v) * 0.55;
+          vec2 v = vUv - 0.5; col *= 1.0 - dot(v, v) * 0.45;
           gl_FragColor = vec4(col, 1.0);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
           // posterize with a 4x4 ordered dither so gradients become clean pixel-art bands
-          gl_FragColor.rgb = floor(gl_FragColor.rgb * levels + 0.5 + bayer(gl_FragCoord.xy) * 0.6) / levels;
+          gl_FragColor.rgb = floor(gl_FragColor.rgb * levels + 0.5 + bayer(gl_FragCoord.xy) * 0.35) / levels;
         }`,
       depthTest: false, depthWrite: false, toneMapped: true,
     });
@@ -5875,7 +5875,7 @@ const Pixel = {
     this.init();
     const dpr = window.devicePixelRatio || 1, wd = Math.round(w * dpr), hd = Math.round(h * dpr);
     // whole-number scale in device pixels so every art pixel is the same size
-    const target = Math.min(wd, hd) < 700 ? 180 : 220;
+    const target = Math.min(wd, hd) < 700 ? 300 : 380; // in between: a pixel-art touch on clean 3D
     this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target));
     this.w = Math.ceil(wd / this.scale); this.h = Math.ceil(hd / this.scale);
     renderer.setPixelRatio(1); renderer.setSize(this.w, this.h, false);
