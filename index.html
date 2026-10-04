@@ -4534,7 +4534,7 @@ const ITEM_ICONS = [];
 // </items-icons>
 // painted menu emblems (assets/ui/menu/<tile>.webp), same tool
 // <menu-icons>
-const MENU_EMBLEMS = ["idle"];
+const MENU_EMBLEMS = []; // painted emblems retired: every menu tile uses the pixel icon set
 // </menu-icons>
 // item thumbnails everywhere in the menus: the painted art when it exists, else the vector item art (cached per look)
 function thumbFor(it) {
@@ -7591,7 +7591,7 @@ const PX_KEY_FAM = {
   n_hp: 'blood', n_armor: 'steel', n_speed: 'nature', n_crit: 'gold', n_critDmg: 'blood', n_atkSpeed: 'gold', n_cdr: 'ice', n_lifesteal: 'blood', n_gold: 'gold', n_gems: 'arcane', n_dmg: 'fire', n_regen: 'nature', n_super: 'fire', n_xp: 'ice', n_range: 'nature', n_ammo: 'steel', n_aoe: 'fire', n_pierce: 'steel', n_burst: 'electric', n_core: 'arcane', n_start: 'gold', n_superPow: 'fire',
   k_tempo: 'electric', k_conqueror: 'blood', k_grasp: 'venom', k_phase: 'arcane', k_secondWind: 'nature', k_execute: 'blood', k_electrocute: 'electric', k_comet: 'arcane', k_aftershock: 'steel', k_bloodthirst: 'blood', k_titan: 'steel', k_glass: 'ice', k_kraken: 'ice', k_sunfire: 'fire', k_storm: 'electric', k_infinity: 'arcane', k_undying: 'venom', k_ascend: 'gold',
   m_gem: 'arcane', m_coin: 'gold', m_shard: 'arcane', m_rift: 'mythic', m_portal: 'arcane', m_asc: 'gold', m_arena: 'blood', m_lock: 'steel',
-  m_hero: 'gold', m_brawlers: 'fire', m_skills: 'arcane', m_artifacts: 'mythic', m_progress: 'nature', m_records: 'gold', m_feats: 'gold', m_case: 'gold', m_caseOpen: 'gold', m_vault: 'steel', m_exped: 'nature', m_auto: 'electric', m_idle: 'ice', m_menu: 'steel', m_players: 'ice', m_smith: 'fire', m_floor: 'arcane', m_tier: 'blood',
+  m_hero: 'gold', m_brawlers: 'fire', m_skills: 'arcane', m_artifacts: 'mythic', m_progress: 'nature', m_records: 'gold', m_feats: 'gold', m_case: 'gold', m_caseOpen: 'gold', m_vault: 'steel', m_exped: 'nature', m_auto: 'electric', m_idle: 'gold', m_menu: 'steel', m_players: 'ice', m_smith: 'fire', m_floor: 'arcane', m_tier: 'blood',
 };
 const PX_ART_FAM = { tech: 'tech', mythic: 'mythic', ice: 'ice', gold: 'gold', steel: 'steel', fire: 'fire', blood: 'blood', venom: 'venom', electric: 'electric' };
 function pxFamOf(key) {
