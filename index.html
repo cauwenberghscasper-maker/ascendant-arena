@@ -829,7 +829,29 @@ body, button, input, select, textarea, .panel, .panel * { font-family: 'Pixelify
 .tzoom button { border-radius: 0 !important; border: 6px solid transparent !important; border-image: var(--pxf-btn) 8 fill / 6px / 0 stretch !important; image-rendering: pixelated; background: transparent !important; }
 #nodeCard { border-radius: 0 !important; border: 8px solid transparent !important; border-image: var(--pxf-panel) 8 fill / 8px / 0 stretch !important; image-rendering: pixelated; background: transparent !important; }
 .thumb, .tile img, .dchip img, .item img, img.pxp { image-rendering: pixelated; }
+/* rarity auras: looping pixel particle overlays (assets/fx/aura_<rarity>.png, tools/bake_fx.py), screen-blended so they only add light.
+   rare = blue glints, epic = violet twinkles, legendary = rising gold embers, mythic = crimson flames,
+   ancient = teal motes orbiting, divine = turning light rays, halo and star sparkles */
+.rare { --aura: url(assets/fx/aura_rare.png); } .epic { --aura: url(assets/fx/aura_epic.png); } .legendary { --aura: url(assets/fx/aura_legendary.png); }
+.mythic { --aura: url(assets/fx/aura_mythic.png); } .ancient { --aura: url(assets/fx/aura_ancient.png); } .divine { --aura: url(assets/fx/aura_divine.png); }
+.thw { position: relative; display: block; flex: none; line-height: 0; }
+:is(.tile, .rcard, .thw, .dchip):is(.rare, .epic, .legendary, .mythic, .ancient, .divine)::before {
+  content: ''; position: absolute; inset: -4px; z-index: 1; pointer-events: none; background: var(--aura) 0 0 / 2400% 100% no-repeat;
+  image-rendering: pixelated; mix-blend-mode: screen; animation: auraRun 2s steps(24) infinite; }
+.dchip:is(.rare, .epic, .legendary, .mythic, .ancient, .divine)::before { inset: auto; left: -2px; top: 0; width: 40px; height: 38px; }
+:is(.tile, .rcard, .thw):is(.mythic, .ancient, .divine)::before { inset: -8px; animation-duration: 1.7s; }
+.rcard:is(.legendary, .mythic, .ancient, .divine).win::before { inset: -14px; }
+.tile .rdot, .tile .tu, .tile .ts, .dchip .rdot, .rcard small, .rcard i { z-index: 2; }
+.tile:is(.legendary, .mythic, .ancient, .divine) img, .thw:is(.legendary, .mythic, .ancient, .divine) img, .rcard:is(.legendary, .mythic, .ancient, .divine) img { animation: auraBob 2s ease-in-out infinite; }
+.tile.mythic img, .thw.mythic img, .rcard.mythic img { filter: drop-shadow(0 0 3px rgba(255,77,109,.85)); }
+.tile.ancient img, .thw.ancient img, .rcard.ancient img { filter: drop-shadow(0 0 3px rgba(47,255,208,.8)); }
+.tile.divine img, .thw.divine img, .rcard.divine img { filter: drop-shadow(0 0 4px rgba(255,243,160,.95)); }
+.tile.legendary img, .thw.legendary img, .rcard.legendary img { filter: drop-shadow(0 0 2px rgba(255,179,71,.7)); }
+@keyframes auraRun { to { background-position: 104.3478% 0; } }
+@keyframes auraBob { 50% { transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) { :is(.tile, .rcard, .thw, .dchip)::before, .tile img, .thw img, .rcard img { animation: none !important; } }
 </style>
+
 
 <div id="app">
   <canvas id="cv"></canvas>
@@ -2079,7 +2101,7 @@ function stepProjectiles(dt) {
       if (dx * dx + dz * dz < rr * rr) hitT = t;
     });
     if (hitT) {
-      const amt = dealDamage(hitT, p.dmg, p.owner, { charge: p.charge, canCrit: true, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: 1.5, primary: p.charge > 0, burn: p.burn, burnT: p.burnT });
+      const amt = dealDamage(hitT, p.dmg, p.owner, { charge: p.charge, canCrit: true, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: 1.5, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
       if (p.vamp && amt) { const o = G.ents.get(p.owner); if (o && o.alive) o.hp = Math.min(o.maxHp, o.hp + amt * p.vamp); }
       if (p.chain > 0) chainFrom(hitT, p.chain, p.dmg * 0.6, p.owner, p.team);
       if (p.pierce > 0) {
@@ -2177,7 +2199,7 @@ function dealDamage(t, amount, srcId, o) {
   }
   if (t.kind === 'boss') { t.dmgBy[srcId] = (t.dmgBy[srcId] || 0) + amt; t.total += amt; }
   if (t.kind === 'enemy' && src && src.isPlayer) t.tagged = true;
-  ev({ t: 'hit', x: t.x, z: t.z, y: t.kind === 'boss' ? 5.5 : 2.1, amt, crit, toPlayer: !!t.isPlayer, byPlayer: !!(src && src.isPlayer) });
+  ev({ t: 'hit', x: t.x, z: t.z, y: t.kind === 'boss' ? 5.5 : 2.1, amt, crit, toPlayer: !!t.isPlayer, byPlayer: !!(src && src.isPlayer), pk: o.pk, pc: o.pc, slow: !!o.slow, burnFx: !!o.burnFx, proc: !!o.proc }); // pk/pc/burnFx/proc: cosmetic only
   if (t.isPlayer || (src && src.isPlayer)) markCombat();
   if (sf && sf.isPlayer && amt > (G.profile.records.maxHit || 0)) G.profile.records.maxHit = amt;
   if (sf && sf !== t && amt > 0) {
@@ -2384,7 +2406,7 @@ function doMelee(f) {
     if (d > M.range + t.r) return;
     const dot = (dx * fx + dz * fz) / (d || 1);
     if (d > 1.0 && Math.acos(clamp(dot, -1, 1)) > M.arc) return;
-    dealDamage(t, f.dmg * mult * (tanky ? 1.1 : 1), f.id, { charge: 0.8, canCrit: true, knockX: dx, knockZ: dz, knock: M.knock });
+    dealDamage(t, f.dmg * mult * (tanky ? 1.1 : 1), f.id, { charge: 0.8, canCrit: true, knockX: dx, knockZ: dz, knock: M.knock, pk: 'melee' });
   });
   f.attackAnim = 1; f.lastAttack = G.time;
   ev({ t: 'melee', x: f.x + fx * 1.3, z: f.z + fz * 1.3, isPlayer: f.isPlayer });
@@ -5631,7 +5653,7 @@ const glowTex = radialTexture([[0, 0.9], [0.25, 0.55], [0.6, 0.12], [1, 0]]);
 const glowIM = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }), PROJ_MAX);
 glowIM.instanceMatrix.setUsage(THREE.DynamicDrawUsage); glowIM.frustumCulled = false; glowIM.count = 0; glowIM.setColorAt(0, _col.set(0xffffff)); glowIM.renderOrder = 5; dynGroup.add(glowIM);
 
-const PART_MAX = 420;
+const PART_MAX = 600;
 const partIM = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff }), PART_MAX);
 partIM.instanceMatrix.setUsage(THREE.DynamicDrawUsage); partIM.frustumCulled = false; partIM.count = 0; partIM.setColorAt(0, _col.set(0xffffff)); dynGroup.add(partIM);
 const PD = { x: new Float32Array(PART_MAX), y: new Float32Array(PART_MAX), z: new Float32Array(PART_MAX), vx: new Float32Array(PART_MAX), vy: new Float32Array(PART_MAX), vz: new Float32Array(PART_MAX),
@@ -5649,7 +5671,32 @@ function burst(x, y, z, n, color, speed, life, size, grav, up) {
 // --- baked pixel effects (assets/fx): sprite sheets generated offline frame by frame, Pixel-FX-Designer style.
 // explosion = fire core that rises into a smoke column (billboard, anchored at the ground), hit = flash + flying
 // shards (billboard), ring = shockwave (flat on the ground). Each comes in five colour themes.
-const FX_SHEETS = { explosion: { w: 64, h: 112, n: 22, fps: 26 }, hit: { w: 48, h: 48, n: 10, fps: 30 }, ring: { w: 64, h: 64, n: 12, fps: 26 } };
+// more kinds (tools/bake_fx.py): impact, crit, flame, shatter, slash, poof, dust, zap, bolt, nova, pillar, bubble.
+// pals = colour themes baked for that kind; base = 'bottom' anchors the sprite on the ground.
+const FX_SHEETS = {
+  explosion: { w: 64, h: 112, n: 22, fps: 26, base: 'bottom', pals: ['fire', 'frost', 'arcane', 'venom', 'blood'] },
+  hit: { w: 48, h: 48, n: 10, fps: 30, pals: ['fire', 'frost', 'arcane', 'venom', 'blood'] },
+  ring: { w: 64, h: 64, n: 12, fps: 26, flat: true, pals: ['fire', 'frost', 'arcane', 'venom', 'blood'] },
+  impact: { w: 40, h: 40, n: 8, fps: 30, pals: ['fire', 'frost', 'arcane', 'venom', 'blood', 'gold', 'white', 'storm'] },
+  crit: { w: 64, h: 64, n: 10, fps: 28, pals: ['gold', 'fire', 'arcane'] },
+  flame: { w: 40, h: 56, n: 14, fps: 24, base: 'bottom', pals: ['fire', 'venom', 'arcane', 'frost'] },
+  shatter: { w: 56, h: 56, n: 12, fps: 26, pals: ['frost', 'arcane', 'white'] },
+  slash: { w: 64, h: 64, n: 8, fps: 30, pals: ['white', 'fire', 'frost', 'arcane', 'venom', 'blood', 'gold'] },
+  poof: { w: 56, h: 72, n: 16, fps: 22, base: 'bottom', pals: ['fire', 'frost', 'arcane', 'venom', 'blood', 'gold', 'white'] },
+  dust: { w: 64, h: 32, n: 12, fps: 24, base: 'bottom', pals: ['dust'] },
+  zap: { w: 48, h: 48, n: 8, fps: 30, pals: ['storm', 'arcane'] },
+  bolt: { w: 40, h: 128, n: 10, fps: 26, base: 'bottom', pals: ['storm', 'gold', 'arcane'] },
+  nova: { w: 96, h: 96, n: 14, fps: 26, pals: ['gold', 'arcane', 'frost', 'fire', 'venom', 'blood'] },
+  pillar: { w: 48, h: 144, n: 20, fps: 24, base: 'bottom', pals: ['gold', 'frost', 'arcane', 'blood', 'venom'] },
+  bubble: { w: 48, h: 56, n: 14, fps: 20, base: 'bottom', pals: ['venom', 'arcane'] },
+};
+// nearest baked theme when a kind lacks the asked one (e.g. gold slash -> gold, storm hit -> frost)
+const FX_PAL_NEAR = { storm: ['frost', 'white'], gold: ['fire', 'white'], white: ['frost', 'gold'], blood: ['fire'], venom: ['fire'], arcane: ['frost'], frost: ['white', 'storm'], fire: ['gold'], dust: ['white'] };
+function fxPalFor(kind, pal) {
+  const P = FX_SHEETS[kind].pals; if (P.includes(pal)) return pal;
+  for (const q of FX_PAL_NEAR[pal] || []) if (P.includes(q)) return q;
+  return P[0];
+}
 const SpriteFX = {
   tex: new Map(), items: [], loader: new THREE.TextureLoader(),
   sheet(kind, pal) {
@@ -5660,7 +5707,7 @@ const SpriteFX = {
   item(flat) {
     let it = this.items.find((o) => !o.on && o.flat === flat);
     if (!it) {
-      if (this.items.length > 90) return null;
+      if (this.items.length > 140) return null;
       const mat = flat ? new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, alphaTest: 0.4, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -20 })
         : new THREE.SpriteMaterial({ transparent: true, depthWrite: false, alphaTest: 0.4, toneMapped: false });
       const obj = flat ? new THREE.Mesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), mat) : new THREE.Sprite(mat);
@@ -5670,13 +5717,14 @@ const SpriteFX = {
     return it;
   },
   play(kind, pal, x, y, z, size, opts) {
-    const S = FX_SHEETS[kind], it = this.item(kind === 'ring'); if (!it) return;
+    const S = FX_SHEETS[kind]; if (!S) return; pal = fxPalFor(kind, pal);
+    const it = this.item(!!S.flat); if (!it) return;
     const base = this.sheet(kind, pal);
     if (!it.map || it.map.source !== base.source) { if (it.map) it.map.dispose(); it.map = base.clone(); it.map.repeat.set(1 / S.n, 1); it.mat.map = it.map; it.mat.needsUpdate = true; }
     it.on = true; it.obj.visible = true; it.kind = kind; it.t = -(opts && opts.delay || 0); it.speed = (opts && opts.speed) || 1;
     const h = size, w = size * S.w / S.h;
     if (it.flat) { it.obj.position.set(x, 0.32, z); it.obj.scale.set(w, 1, h); it.obj.rotation.y = Math.random() * 6.28; }
-    else { it.obj.position.set(x, y, z); it.obj.scale.set(w, h, 1); it.obj.center.set(0.5, kind === 'explosion' ? 0.06 : 0.5); }
+    else { it.obj.position.set(x, y, z); it.obj.scale.set(w, h, 1); it.obj.center.set(0.5, S.base === 'bottom' ? 0.06 : 0.5); it.mat.rotation = opts && opts.rot != null ? opts.rot : 0; }
     it.map.offset.set(0, 0); it.obj.visible = it.t >= 0;
   },
   update(dt) {
@@ -5689,13 +5737,55 @@ const SpriteFX = {
     }
   },
 };
+// --- gear aura in the world: legendary+ gear makes the hero shed light (embers, flames, orbiting motes, sparkles) ---
+// Strength grows with how many pieces are legendary or better; the look follows the best piece.
+function mote(x, y, z, vx, vy, vz, life, size, grav, col) {
+  const k = partCursor; partCursor = (partCursor + 1) % PART_MAX;
+  PD.x[k] = x; PD.y[k] = y; PD.z[k] = z; PD.vx[k] = vx; PD.vy[k] = vy; PD.vz[k] = vz;
+  PD.life[k] = PD.max[k] = life; PD.size[k] = size; PD.grav[k] = grav; PD.col[k] = col;
+}
+const GearAura = { sig: '', best: -1, n: 0, acc: 0, twT: 0 };
+function updateGearAura(dt) {
+  const pl = G.player, p = G.profile; if (!pl || !p || !pl.alive || !G.started) return;
+  const gear = p.gear || {}, sig = gearSignature(gear);
+  if (sig !== GearAura.sig) {
+    GearAura.sig = sig; GearAura.best = -1; GearAura.n = 0;
+    for (const sl of CFG.gear.slots) { const it = gear[sl]; if (!it) continue; const r = rarIdx(it.rarity); if (r > GearAura.best) GearAura.best = r; if (r >= 4) GearAura.n++; }
+  }
+  const b = GearAura.best; if (b < 4) return;
+  const rar = RARITIES[b], gs = growthScale(pl), y0 = (Showcase.on ? Showcase.podium : 0);
+  const rate = (b === 4 ? 5 : b === 5 ? 9 : b === 6 ? 10 : 14) * (0.55 + 0.09 * GearAura.n);
+  GearAura.acc += dt * rate;
+  while (GearAura.acc >= 1) {
+    GearAura.acc -= 1;
+    const a = Math.random() * 6.283, r = (0.45 + Math.random() * 0.45) * gs, x = pl.x + Math.cos(a) * r, z = pl.z + Math.sin(a) * r;
+    if (b === 4) mote(x, y0 + 0.2 + Math.random() * 1.2 * gs, z, 0, 0.6, 0, 0.9 + Math.random() * 0.5, 0.13, -0.9, Math.random() < 0.3 ? 0xfff0a8 : 0xffb347);
+    else if (b === 5) { // mythic: crimson flame licks at the feet and embers that shoot up
+      mote(x, y0 + 0.15, z, (Math.random() - 0.5) * 0.4, 1.4 + Math.random(), (Math.random() - 0.5) * 0.4, 0.55 + Math.random() * 0.3, 0.2, -1.5, Math.random() < 0.25 ? 0xffb3bf : Math.random() < 0.5 ? 0xff4d6d : 0xa3122e);
+    } else if (b === 6) { // ancient: teal motes circling the hero
+      const R = 1.05 * gs, h = y0 + (0.6 + Math.random() * 1.1) * gs, sp = 2.4;
+      mote(pl.x + Math.cos(a) * R, h, pl.z + Math.sin(a) * R, -Math.sin(a) * sp, 0.15, Math.cos(a) * sp, 0.7 + Math.random() * 0.4, 0.14, 0, Math.random() < 0.3 ? 0xb5fff0 : 0x2fffd0);
+    } else { // divine: white-gold sparkles rising all round
+      mote(x, y0 + 0.2 + Math.random() * 1.6 * gs, z, 0, 0.9, 0, 1.1 + Math.random() * 0.5, Math.random() < 0.2 ? 0.2 : 0.12, -0.6, Math.random() < 0.5 ? 0xffffff : 0xfff3a0);
+    }
+  }
+  // the best tiers also twinkle a baked star now and then
+  if (b >= 5 && !Q.lowTier) {
+    GearAura.twT -= dt;
+    if (GearAura.twT <= 0) {
+      GearAura.twT = b === 7 ? 0.55 : 0.9 + Math.random() * 0.5;
+      const a = Math.random() * 6.283, r = 0.7 * gs;
+      SpriteFX.play(b === 7 ? 'crit' : b === 6 ? 'zap' : 'impact', b === 7 ? 'gold' : b === 6 ? 'storm' : 'blood', pl.x + Math.cos(a) * r, y0 + (0.8 + Math.random()) * gs, pl.z + Math.sin(a) * r, b === 7 ? 1.4 : 1.0);
+    }
+  }
+}
 // colour theme for an effect from its gameplay colour
 function fxPal(c) {
   const col = _col.set(c), hsl = {}; col.getHSL(hsl);
-  if (hsl.s < 0.2) return 'frost';
+  if (hsl.s < 0.2) return hsl.l > 0.7 ? 'white' : 'frost';
   const h = hsl.h * 360;
   if (h < 15 || h >= 335) return hsl.l < 0.45 ? 'blood' : 'fire';
-  if (h < 65) return 'fire'; if (h < 160) return 'venom'; if (h < 240) return 'frost'; return 'arcane';
+  if (h < 40) return 'fire'; if (h < 68) return 'gold'; if (h < 160) return 'venom'; if (h < 200) return 'storm'; if (h < 250) return 'frost'; return 'arcane';
 }
 function updateParticles(dt) {
   SpriteFX.update(dt);
@@ -6749,7 +6839,7 @@ const SLOT_LABEL = { weapon: 'Weapon', helmet: 'Helmet', chest: 'Armor', boots: 
 function itemRow(it, right, extra, opts) {
   opts = opts || {};
   const flag = opts.better ? '<span class="better">Better<i class="rdot in"></i></span>' : opts.upgrade ? '<span class="better up">Can upgrade<i class="rdot in"></i></span>' : '';
-  return `<div class="item ${it.rarity}${opts.better || opts.upgrade ? ' alert' : ''}"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><div class="meta">${flag}<div class="slot">${extra || it.slot}</div><div class="nm">${it.name} ${it.up ? `<em>+${it.up}${it.up >= 10 ? ' ' + '★'.repeat(Math.min(5, Math.floor(it.up / 10))) + (it.up >= 60 ? '+' : '') : ''}</em>` : ''} ${rarityChip(it.rarity)}</div><div class="st">${statLine(it)}</div>${it.aff && Object.keys(it.aff).length ? `<div class="st aff">${affixText(it)}</div>` : ''}${perkLine(it)}</div>${right || ''}</div>`;
+  return `<div class="item ${it.rarity}${opts.better || opts.upgrade ? ' alert' : ''}"><span class="thw ${it.rarity}"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""></span><div class="meta">${flag}<div class="slot">${extra || it.slot}</div><div class="nm">${it.name} ${it.up ? `<em>+${it.up}${it.up >= 10 ? ' ' + '★'.repeat(Math.min(5, Math.floor(it.up / 10))) + (it.up >= 60 ? '+' : '') : ''}</em>` : ''} ${rarityChip(it.rarity)}</div><div class="st">${statLine(it)}</div>${it.aff && Object.keys(it.aff).length ? `<div class="st aff">${affixText(it)}</div>` : ''}${perkLine(it)}</div>${right || ''}</div>`;
 }
 function openNpc(def) {
   UI.current = 'npc:' + def.id;
@@ -7173,6 +7263,47 @@ function handleSettingChange(e) {
   if (k === 'calm') { Q.locked = e.target.checked; Cam.shake = 0; $('vignette').dataset.o = '0'; }
 }
 
+// --- effect choice per event: each weapon and monster type gets its own look ---
+const DIE_COL = { slime: 0x6fdc5a, imp: 0x9fe3ff, wolf: 0x6d6a73, beetle: 0xff6a2b, wraith: 0xc77dff, boss: 0x8d8a83, boar: 0x8a5a3c, spider: 0x3f8a4c, yeti: 0xe8f0f8, fireimp: 0xff7a2b, sentinel: 0x9fe8ff, crawler: 0x2fbfae, drowned: 0x2fffd0, seraph: 0xfff07a, warden: 0xffc94a };
+const RAR_FX = { common: 'white', uncommon: 'venom', rare: 'frost', epic: 'arcane', legendary: 'gold', mythic: 'blood', ancient: 'storm', divine: 'gold' };
+let hitFxN = 0, hitFxT = 0;
+function hitFx(e) {
+  const y = Math.max(0.6, e.y * 0.6);
+  if (e.toPlayer) { SpriteFX.play('hit', 'blood', e.x, y, e.z, 1.35); return; }
+  // cap the sprite rate so gatlings and flamers don't flood the pool (crits always show)
+  if (G.time - hitFxT > 0.1) { hitFxT = G.time; hitFxN = 0; }
+  if (++hitFxN > 6 && !e.crit) return;
+  const pal = e.pc != null ? fxPal(e.pc) : 'white', k = e.pk;
+  if (e.gas) SpriteFX.play('bubble', 'venom', e.x, 0.1, e.z, 1.7);
+  else if (e.burnFx) SpriteFX.play('flame', 'fire', e.x, 0.1, e.z, 1.4);
+  else if (k === 'flame' || k === 'fire') SpriteFX.play('flame', pal === 'venom' || pal === 'arcane' || pal === 'frost' ? pal : 'fire', e.x, 0.1, e.z, 1.7);
+  else if (k === 'ice' || e.slow) SpriteFX.play('shatter', pal === 'arcane' ? 'arcane' : 'frost', e.x, y, e.z, 1.7);
+  else if (k === 'disc' || k === 'chakram' || k === 'melee' || k === 'wave') SpriteFX.play('slash', k === 'melee' ? 'white' : pal, e.x, y, e.z, 2.1, { rot: Math.random() * 6.28 });
+  else if (k === 'rail' || k === 'spark') SpriteFX.play('zap', 'storm', e.x, y, e.z, 1.8, { rot: Math.random() * 6.28 });
+  else if (k === 'orb' || k === 'star') SpriteFX.play('crit', pal === 'gold' ? 'gold' : 'arcane', e.x, y, e.z, 1.6);
+  else if (e.proc) SpriteFX.play('impact', 'gold', e.x, y, e.z, 1.3);
+  else SpriteFX.play(Math.random() < 0.35 ? 'hit' : 'impact', pal, e.x, y, e.z, 1.35);
+  if (e.crit) SpriteFX.play('crit', pal === 'arcane' ? 'arcane' : pal === 'fire' ? 'fire' : 'gold', e.x, y + 0.3, e.z, 2.7);
+}
+function boomFx(e) {
+  const pal = fxPal(e.color), R = Math.max(0.7, e.r || 1), sz = R * (e.big ? 4.2 : 3.2);
+  if (pal === 'frost' || pal === 'white') { SpriteFX.play('shatter', 'frost', e.x, 1, e.z, sz * 0.8); SpriteFX.play('ring', 'frost', e.x, 0, e.z, R * 2.6, { speed: 1.2 }); }
+  else if (pal === 'arcane') { SpriteFX.play('nova', 'arcane', e.x, 1, e.z, sz * 0.9); SpriteFX.play('ring', 'arcane', e.x, 0, e.z, R * 2.4, { speed: 1.2 }); }
+  else if (pal === 'storm') { SpriteFX.play('bolt', 'storm', e.x, 0, e.z, sz * 1.3); SpriteFX.play('ring', 'frost', e.x, 0, e.z, R * 2.6, { speed: 1.2 }); }
+  else if (pal === 'venom') { SpriteFX.play('explosion', 'venom', e.x, 0, e.z, sz); SpriteFX.play('bubble', 'venom', e.x, 0, e.z, sz * 0.6, { delay: 0.2 }); SpriteFX.play('ring', 'venom', e.x, 0, e.z, R * 2.6, { speed: 1.2 }); }
+  else { SpriteFX.play('explosion', pal, e.x, 0, e.z, sz); SpriteFX.play('ring', pal, e.x, 0, e.z, R * 2.6, { speed: 1.2 }); if (e.big) SpriteFX.play('dust', 'dust', e.x, 0, e.z, sz * 0.9, { delay: 0.1 }); }
+  burst(e.x, 0.6, e.z, e.big ? 8 : 4, e.color, e.big ? 8 : 5, 0.5, 0.25, 14, 0.8);
+}
+function dieFx(e) {
+  const dc = e.kind === 'fighter' ? 0xff4d6d : e.elite ? 0xffc94a : DIE_COL[e.kind] || 0xffd34a, pal = fxPal(dc);
+  burst(e.x, 1, e.z, e.kind === 'boss' ? 60 : e.elite ? 30 : 16, dc, e.kind === 'boss' ? 14 : 7, 0.8, 0.35, 16, 1);
+  const big = e.kind === 'boss' ? 2.6 : e.elite ? 1.6 : 1;
+  SpriteFX.play('poof', e.kind === 'fighter' ? 'blood' : pal, e.x, 0, e.z, 3 * big);
+  SpriteFX.play('impact', pal, e.x, 1, e.z, 2 * big);
+  if (big > 1) { SpriteFX.play('explosion', pal, e.x, 0, e.z, 3 * big, { delay: 0.05 }); SpriteFX.play('crit', 'gold', e.x, 1.4 * big, e.z, 3 * big, { delay: 0.1 }); }
+  if (e.kind === 'boss') { SpriteFX.play('nova', 'gold', e.x, 2, e.z, 12, { delay: 0.15 }); SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 14, { delay: 0.3 }); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 14); }
+}
+
 // --- event consumer: sim events -> sound, particles, UI ---
 function processEvents() {
   const evs = G.events;
@@ -7183,8 +7314,8 @@ function processEvents() {
       case 'hit':
         if (e.gas) dmgNumber(e.x, e.y, e.z, e.amt, 'gas');
         else dmgNumber(e.x, e.y, e.z, e.amt, e.toPlayer ? 'hurt' : e.crit ? 'crit' : e.byPlayer ? 'mine' : 'other');
-        SpriteFX.play('hit', e.toPlayer ? 'blood' : e.crit ? 'fire' : 'frost', e.x, Math.max(0.6, e.y * 0.6), e.z, e.crit ? 2.0 : 1.35);
-        if (e.crit) burst(e.x, e.y * 0.6, e.z, 4, 0xffc94a, 5, 0.3, 0.16, 14);
+        hitFx(e);
+        if (e.crit) burst(e.x, e.y * 0.6, e.z, 6, 0xffc94a, 6, 0.35, 0.18, 14);
         if (e.toPlayer) { Sfx.play('hurt', { gap: 0.08 }); if (!G.profile.settings.calm) { Cam.shake = Math.max(Cam.shake, 0.4); const vg = $('vignette'); vg.dataset.o = '0.32'; } }
         else if (e.byPlayer) { Sfx.play('hit', { gap: 0.03 }); if (!G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, e.crit ? 0.3 : 0.15); }
         break;
@@ -7192,12 +7323,12 @@ function processEvents() {
         if (e.kind === 'enemy') { if (near(e)) Sfx.play('enemyShot', { gap: 0.1 }); }
         else if (e.isPlayer || near(e, 18)) Sfx.play(e.kind, { gap: e.isPlayer ? (e.kind === 'tracer' ? 0.045 : 0.02) : 0.09 });
         break;
-      case 'melee': burst(e.x, 1, e.z, 6, 0xffffff, 6, 0.25, 0.2, 10); if (e.isPlayer || near(e, 15)) Sfx.play('melee'); break;
-      case 'dash': burst(e.x, 0.4, e.z, 10, 0xe8f4ff, 4, 0.35, 0.25, 2, 0.2); if (e.isPlayer || near(e, 15)) Sfx.play('dash', { gap: 0.05 }); break;
-      case 'boom': if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); { const pal = fxPal(e.color), R = Math.max(0.7, e.r || 1); SpriteFX.play('explosion', pal, e.x, 0, e.z, R * (e.big ? 4.2 : 3.2)); SpriteFX.play('ring', pal, e.x, 0, e.z, R * 2.6, { speed: 1.2 }); burst(e.x, 0.6, e.z, e.big ? 8 : 4, e.color, e.big ? 8 : 5, 0.5, 0.25, 14, 0.8); } if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
+      case 'melee': SpriteFX.play('slash', 'white', e.x, 1.1, e.z, 2.8, { rot: Math.random() * 6.28 }); burst(e.x, 1, e.z, 6, 0xffffff, 6, 0.25, 0.2, 10); if (e.isPlayer || near(e, 15)) Sfx.play('melee'); break;
+      case 'dash': SpriteFX.play('dust', 'dust', e.x, 0, e.z, 1.6); burst(e.x, 0.4, e.z, 10, 0xe8f4ff, 4, 0.35, 0.25, 2, 0.2); if (e.isPlayer || near(e, 15)) Sfx.play('dash', { gap: 0.05 }); break;
+      case 'boom': if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); boomFx(e); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
       case 'puff': burst(e.x, 1, e.z, 3, e.color, 3, 0.25, 0.15, 6); break;
-      case 'bounce': burst(e.x, 1, e.z, 4, 0xffffff, 3, 0.2, 0.14, 4); if (near(e, 16)) Sfx.play('bounce', { gap: 0.05 }); break;
-      case 'split': burst(e.x, 1, e.z, 8, e.color, 5, 0.3, 0.18, 6); if (near(e, 18)) Sfx.play('split', { gap: 0.05 }); break;
+      case 'bounce': SpriteFX.play('impact', 'white', e.x, 1, e.z, 1.1); burst(e.x, 1, e.z, 4, 0xffffff, 3, 0.2, 0.14, 4); if (near(e, 16)) Sfx.play('bounce', { gap: 0.05 }); break;
+      case 'split': SpriteFX.play('impact', fxPal(e.color), e.x, 1, e.z, 1.5); burst(e.x, 1, e.z, 8, e.color, 5, 0.3, 0.18, 6); if (near(e, 18)) Sfx.play('split', { gap: 0.05 }); break;
       case 'unlock': {
         if (e.what === 'brawler') showBanner('New brawler!', `${e.name} · ${e.role} · Menu › Brawlers`, 'gold');
         else showBanner('New artifact!', `${e.name} · Menu › Artifacts`, 'gold');
@@ -7207,17 +7338,17 @@ function processEvents() {
       case 'zap': {
         const n = 7;
         for (let k = 0; k <= n; k++) { const a = k / n; burst(lerp(e.x0, e.x1, a) + (Math.random() - 0.5) * 0.4, 1.2 + Math.random() * 0.4, lerp(e.z0, e.z1, a) + (Math.random() - 0.5) * 0.4, 2, 0x9fe8ff, 1.5, 0.25, 0.22, 0); }
+        SpriteFX.play('zap', 'storm', e.x1, 1.2, e.z1, 2.0, { rot: Math.random() * 6.28 });
         Sfx.play('zap', { gap: 0.05 }); break;
       }
       case 'forged': showToast(`Forged ${e.name}. ${e.perk}`, 'rare'); break;
       case 'die':
-        burst(e.x, 1, e.z, e.kind === 'boss' ? 60 : e.elite ? 30 : 16, e.elite ? 0xffc94a : ({ slime: 0x6fdc5a, imp: 0x9fe3ff, wolf: 0x6d6a73, beetle: 0xff6a2b, wraith: 0xc77dff, boss: 0x8d8a83, boar: 0x8a5a3c, spider: 0x3f8a4c, yeti: 0xe8f0f8, fireimp: 0xff7a2b, sentinel: 0x9fe8ff, crawler: 0x2fbfae, drowned: 0x2fffd0, seraph: 0xfff07a, warden: 0xffc94a })[e.kind] || 0xffd34a, e.kind === 'boss' ? 14 : 7, 0.8, 0.35, 16, 1);
-        { const dc = e.elite ? 0xffc94a : ({ slime: 0x6fdc5a, imp: 0x9fe3ff, wolf: 0x6d6a73, beetle: 0xff6a2b, wraith: 0xc77dff, boss: 0x8d8a83, boar: 0x8a5a3c, spider: 0x3f8a4c, yeti: 0xe8f0f8, fireimp: 0xff7a2b, sentinel: 0x9fe8ff, crawler: 0x2fbfae, drowned: 0x2fffd0, seraph: 0xfff07a, warden: 0xffc94a })[e.kind] || 0xffd34a; const big = e.kind === 'boss' ? 2.6 : e.elite ? 1.6 : 1; SpriteFX.play('hit', fxPal(dc), e.x, 1, e.z, 2.4 * big); if (big > 1) SpriteFX.play('explosion', fxPal(dc), e.x, 0, e.z, 3 * big, { delay: 0.05 }); }
+        dieFx(e);
         if (near(e, 22)) Sfx.play('die', { gap: 0.05 });
         if (e.kind === 'boss') Cam.shake = 1;
         break;
-      case 'super': if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } burst(e.x, 1, e.z, 14, 0xffb02e, 7, 0.5, 0.25, 6); break;
-      case 'skill': burst(e.x, 1, e.z, 12, e.kind === 'ironskin' ? 0xffd34a : e.kind === 'swift' ? 0x9cff9c : 0x9ae8ff, 5, 0.5, 0.22, 4); if (e.isPlayer) Sfx.play('super'); break;
+      case 'super': if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } burst(e.x, 1, e.z, 14, 0xffb02e, 7, 0.5, 0.25, 6); if (e.isPlayer || near(e, 20)) { SpriteFX.play('nova', 'gold', e.x, 1.2, e.z, 5.5); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 6, { speed: 1.1 }); } break;
+      case 'skill': { const pal = e.kind === 'ironskin' ? 'gold' : e.kind === 'swift' ? 'venom' : 'frost'; burst(e.x, 1, e.z, 12, e.kind === 'ironskin' ? 0xffd34a : e.kind === 'swift' ? 0x9cff9c : 0x9ae8ff, 5, 0.5, 0.22, 4); SpriteFX.play('pillar', pal, e.x, 0, e.z, 4.2); if (e.isPlayer) Sfx.play('super'); break; }
       case 'gold': if (e.amt > 0) Sfx.play('coin', { gap: 0.08 }); break;
       case 'xp': if (e.reason && e.reason !== 'kill') dmgNumberPlayer(`+${fmtK(e.amt)} XP`, 'xp'); XPDrops.add('xp', e.amt); break;
       case 'killXp': dmgNumber(e.x, 1.6, e.z, `+${fmtK(e.amt)} XP`, 'kxp'); break;
@@ -7238,20 +7369,21 @@ function processEvents() {
       case 'salvaged': Feed.add(`${gi('m_coin')} Salvaged ${e.n} · +${fmtK(e.gold)} gold${e.ess ? ` · +${e.ess} gems` : ''}`); break;
       case 'waypoint': Feed.add(`${gi('m_portal')} Waypoint found: <b>${e.name}</b>`, 'wp'); Sfx.play('unlock'); break;
       case 'tier': showBanner(`World Tier: ${e.name}`, e.tier ? `Monsters +${tierDef(e.tier).add} levels · richer drops` : 'Base difficulty', e.tier >= 2 ? 'red' : 'gold'); Sfx.play('horn'); break;
-      case 'riftStart': enterRiftView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; burst(e.x, 1, e.z, 40, 0xff5d8f, 7, 0.9, 0.3, 2, 1.6); Sfx.play('super'); showBanner(`The Rift · Floor ${e.floor}`, 'Clear every monster before time runs out', 'red'); break;
+      case 'riftStart': enterRiftView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; burst(e.x, 1, e.z, 40, 0xff5d8f, 7, 0.9, 0.3, 2, 1.6); SpriteFX.play('pillar', 'arcane', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`The Rift · Floor ${e.floor}`, 'Clear every monster before time runs out', 'red'); break;
       case 'champShield': ringFx(e.x, e.z, e.r, 0x5dd6ff, 2.2); break;
       case 'champCast': ringFx(e.x, e.z, e.r, e.color, 0.7); break;
-      case 'champBlink': ringFx(e.x, e.z, 2.4, e.out ? 0xa36bff : 0xff3b3b, e.out ? 0.5 : 0.8); if (e.out) burst(e.x, 1, e.z, 16, 0xa36bff, 5, 0.6, 0.25, 2, 1.2); break;
+      case 'champBlink': ringFx(e.x, e.z, 2.4, e.out ? 0xa36bff : 0xff3b3b, e.out ? 0.5 : 0.8); if (e.out) { burst(e.x, 1, e.z, 16, 0xa36bff, 5, 0.6, 0.25, 2, 1.2); SpriteFX.play('poof', 'arcane', e.x, 0, e.z, 3); } break;
       case 'riftWave': if (e.guard) { showBanner(`Floor ${e.floor} · Rift Lord!`, `Read the red warnings · dash through attacks`, 'red'); Sfx.play('horn'); } else if (e.champs) { Feed.add(`${gi('m_floor')} Floor <b>${e.floor}</b> · ${e.champs} champion${e.champs > 1 ? 's' : ''} · Lv ${e.lvl}`, 'rift'); } else Feed.add(`${gi('m_floor')} Floor <b>${e.floor}</b> · ${e.theme} · Lv ${e.lvl}`, 'rift'); break;
-      case 'riftClear': Feed.add(`${gi('m_rift')} <b class="grade g${e.grade}">${e.grade}</b> Floor ${e.floor}${e.grade === 'S' ? ' · flawless ×2' : e.grade === 'A' ? ' · ×1.5' : ''} · +${e.gems} gems · +${fmtK(e.gold)} gold${e.item ? ' · guardian item!' : ''}`, 'rift'); Sfx.play('job'); burst(G.player.x, 1, G.player.z, 24, 0xff7ab8, 6, 0.8, 0.25, 3, 1.3); break;
+      case 'riftClear': Feed.add(`${gi('m_rift')} <b class="grade g${e.grade}">${e.grade}</b> Floor ${e.floor}${e.grade === 'S' ? ' · flawless ×2' : e.grade === 'A' ? ' · ×1.5' : ''} · +${e.gems} gems · +${fmtK(e.gold)} gold${e.item ? ' · guardian item!' : ''}`, 'rift'); Sfx.play('job'); burst(G.player.x, 1, G.player.z, 24, 0xff7ab8, 6, 0.8, 0.25, 3, 1.3); SpriteFX.play('nova', e.grade === 'S' ? 'gold' : 'arcane', G.player.x, 1.2, G.player.z, 5); break;
       case 'riftEnd': enterRiftView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); break;
-      case 'teleport': burst(e.x, 1, e.z, 30, 0x9fe8ff, 6, 0.8, 0.3, 2, 1.5); Sfx.play('super'); Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; showToast(e.name); break;
-      case 'proc': burst(e.x, 1.2, e.z, 8, e.kind === 'grasp' ? 0x8dff6a : e.kind === 'kraken' ? 0x5dd6ff : 0xffe066, 4, 0.4, 0.22, 4); break;
-      case 'undying': burst(e.x, 1.2, e.z, 24, 0xff3b4a, 6, 0.8, 0.3, 2, 1.5); if (e.isPlayer) { showToast('Undying Rage!', 'bad'); Sfx.play('super'); } break;
-      case 'sunfire': ringFx(e.x, e.z, 4, 0xff7a2b, 0.4); break;
+      case 'teleport': burst(e.x, 1, e.z, 30, 0x9fe8ff, 6, 0.8, 0.3, 2, 1.5); SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 5.5); Sfx.play('super'); Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; showToast(e.name); break;
+      case 'proc': burst(e.x, 1.2, e.z, 8, e.kind === 'grasp' ? 0x8dff6a : e.kind === 'kraken' ? 0x5dd6ff : 0xffe066, 4, 0.4, 0.22, 4); SpriteFX.play(e.kind === 'kraken' ? 'zap' : 'impact', e.kind === 'grasp' ? 'venom' : e.kind === 'kraken' ? 'storm' : 'gold', e.x, 1.3, e.z, 1.9); break;
+      case 'undying': burst(e.x, 1.2, e.z, 24, 0xff3b4a, 6, 0.8, 0.3, 2, 1.5); SpriteFX.play('pillar', 'blood', e.x, 0, e.z, 5); SpriteFX.play('nova', 'blood', e.x, 1.2, e.z, 4.5); if (e.isPlayer) { showToast('Undying Rage!', 'bad'); Sfx.play('super'); } break;
+      case 'sunfire': ringFx(e.x, e.z, 4, 0xff7a2b, 0.4); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 8, { speed: 1.3 }); break;
       case 'streakEnd': if (e.n >= 10) showToast(`Streak ended at ${e.n} kills`); break;
       case 'levelup':
         Sfx.play('level'); burst(G.player.x, 1, G.player.z, 30, 0xffd34a, 6, 1, 0.3, 4, 1.5); ringFx(G.player.x, G.player.z, 4, 0xffd34a, 0.9);
+        SpriteFX.play('pillar', 'gold', G.player.x, 0, G.player.z, 7); SpriteFX.play('nova', 'gold', G.player.x, 1.4, G.player.z, 5, { delay: 0.12 });
         break;
       case 'levelPower': {
         const n = e.level - e.from, pts = (() => { let s = 0; for (let L = e.from + 1; L <= e.level; L++) s += 2 + (L % 10 === 0 ? 5 : 0); return s; })();
@@ -7272,24 +7404,25 @@ function processEvents() {
         const src = e.source === 'level' ? 'Level reward' : e.source === 'milestone' ? 'Milestone chest' : e.source === 'shrine' ? 'Shrine reward' : e.source === 'boss' ? 'Boss loot' : e.source === 'elite' ? 'Elite drop' : e.source === 'idle' ? 'While away' : 'Drop';
         if (!e.better) showToast(`${src}: ${CFG.gear.rarity[e.item.rarity].name} ${e.item.name} · in your bag`, e.item.rarity);
         Sfx.play('pickup'); UI.alertT = 0;
-        if (rarIdx(e.item.rarity) >= 4) { showBanner(CFG.gear.rarity[e.item.rarity].name + '!', e.item.name, rarIdx(e.item.rarity) >= 5 ? 'red' : 'gold'); Sfx.play('win'); if (rarIdx(e.item.rarity) >= 5) { burst(G.player.x, 1.2, G.player.z, 50, RAR_HEX[e.item.rarity], 8, 1.2, 0.35, 3, 1.8); ringFx(G.player.x, G.player.z, 5, RAR_HEX[e.item.rarity], 0.8); } }
+        if (rarIdx(e.item.rarity) >= 4) { showBanner(CFG.gear.rarity[e.item.rarity].name + '!', e.item.name, rarIdx(e.item.rarity) >= 5 ? 'red' : 'gold'); Sfx.play('win'); const rp = RAR_FX[e.item.rarity]; SpriteFX.play('pillar', rp, G.player.x, 0, G.player.z, 6.5); if (rarIdx(e.item.rarity) >= 5) { burst(G.player.x, 1.2, G.player.z, 50, RAR_HEX[e.item.rarity], 8, 1.2, 0.35, 3, 1.8); ringFx(G.player.x, G.player.z, 5, RAR_HEX[e.item.rarity], 0.8); SpriteFX.play('nova', rp, G.player.x, 1.4, G.player.z, 6, { delay: 0.1 }); } }
         break;
       }
-      case 'equipped': burst(G.player.x, 1.2, G.player.z, 18, 0xffd34a, 4, 0.6, 0.22, 3, 1.2); Sfx.play('job'); UI.alertT = 0; break;
-      case 'pellet': burst(e.x, 0.5, e.z, 3, e.color, 2.5, 0.3, 0.14, 6); Sfx.play('pellet', { gap: 0.03 }); break;
+      case 'equipped': burst(G.player.x, 1.2, G.player.z, 18, 0xffd34a, 4, 0.6, 0.22, 3, 1.2); SpriteFX.play('crit', 'gold', G.player.x, 1.4, G.player.z, 2.6); Sfx.play('job'); UI.alertT = 0; break;
+      case 'pellet': burst(e.x, 0.5, e.z, 3, e.color, 2.5, 0.3, 0.14, 6); SpriteFX.play('impact', fxPal(e.color), e.x, 0.6, e.z, 1.0); Sfx.play('pellet', { gap: 0.03 }); break;
       case 'bolt':
         for (let k = 0; k < 9; k++) burst(e.x + (Math.random() - 0.5) * 0.3, k * 0.8, e.z + (Math.random() - 0.5) * 0.3, 1, 0xe6dcff, 0.6, 0.3, 0.32, 0, 0.1);
+        SpriteFX.play('bolt', 'arcane', e.x, 0, e.z, 7);
         ringFx(e.x, e.z, 1.8, 0xc9b8ff, 0.35); if (near(e, 25)) { Sfx.play('storm', { gap: 0.05 }); Cam.shake = Math.max(Cam.shake, 0.3); }
         break;
-      case 'special': { const E = CFG.elements[e.el]; burst(e.x, 1.2, e.z, 14, E.color, 5, 0.5, 0.25, 4); if (e.isPlayer || near(e, 18)) Sfx.play(e.el); break; }
+      case 'special': { const E = CFG.elements[e.el]; burst(e.x, 1.2, e.z, 14, E.color, 5, 0.5, 0.25, 4); SpriteFX.play(e.el === 'storm' ? 'zap' : e.el === 'ice' ? 'shatter' : e.el === 'poison' ? 'bubble' : 'flame', fxPal(E.color), e.x, e.el === 'storm' || e.el === 'ice' ? 1.2 : 0, e.z, 3.2); if (e.isPlayer || near(e, 18)) Sfx.play(e.el); break; }
       case 'shrineStart': showBanner('Shrine challenge!', `Defeat ${e.n} enemies in ${e.secs}s. Stay near the shrine`, 'red'); Sfx.play('horn'); break;
       case 'shrineWin': showBanner('Challenge complete!', `+${e.gold} gold, XP and an item`, 'gold'); Sfx.play('win'); break;
       case 'shrineFail': showToast(`Challenge failed. The shrine recharges in ${CFG.shrines.cooldownFail}s`, 'bad'); Sfx.play('lose'); break;
       case 'upgrade': showToast(e.n > 1 ? `${e.name} +${e.n} upgrades → +${e.up}` : `${e.name} is now +${e.up}`, 'good'); break;
-      case 'pickup': burst(e.x, 0.6, e.z, 10, 0xff5fa2, 4, 0.5, 0.2, 8); Sfx.play('pickup'); break;
+      case 'pickup': burst(e.x, 0.6, e.z, 10, 0xff5fa2, 4, 0.5, 0.2, 8); SpriteFX.play('crit', 'arcane', e.x, 0.9, e.z, 1.8); Sfx.play('pickup'); break;
       case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.z)]; Feed.add(`${gi('m_progress')} Entered <b>${e.name}</b> · monsters Lv ${zn.lvl[0]}–${zn.lvl[1]}`, 'zone'); break; }
       case 'bossWarn': Sfx.play('horn'); break;
-      case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); break;
+      case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); SpriteFX.play('dust', 'dust', e.x, 0, e.z, 6); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 10); break;
       case 'bossDown': Feed.remove('boss'); Feed.add(`${gi('m_feats')} World boss defeated!`, 'boss'); Sfx.play('win'); break;
       case 'bossGone': Feed.remove('boss'); Feed.add(`${gi('k_titan')} ${e.name} sank back into the ground`, 'boss'); break;
       case 'telegraph': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w || 1.4, 0xff4d4d, 0.6); break;
@@ -7537,7 +7670,7 @@ function updateGearPrompt() {
   if (box.dataset.id === it.id && !box.hidden) return;
   const cur = p.gear[it.slot];
   box.dataset.id = it.id;
-  box.innerHTML = `<img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><div class="gp"><div class="gt">Better ${SLOT_LABEL[it.slot].toLowerCase()} found${G.gearPrompts.length > 1 ? ` · +${G.gearPrompts.length - 1} more` : ''}</div>
+  box.innerHTML = `<span class="thw ${it.rarity}"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""></span><div class="gp"><div class="gt">Better ${SLOT_LABEL[it.slot].toLowerCase()} found${G.gearPrompts.length > 1 ? ` · +${G.gearPrompts.length - 1} more` : ''}</div>
     <div class="gn">${it.name} ${rarityChip(it.rarity)}</div><div class="gc">${statLine(it)}${it.aff && Object.keys(it.aff).length ? ' · ' + affixText(it) : ''}</div><div class="gc was">Now: ${cur.name} (${CFG.gear.rarity[cur.rarity].name}) · ${statLine(cur)}</div>${rarIdx(it.rarity) > rarIdx(cur.rarity) && itemPower(it) < itemPower(cur) ? '<div class="gc note">Higher rarity. Some stats are lower until you level it up at the Smith</div>' : ''}</div>
     <div class="gb"><button class="primary" data-gp="equip">Equip</button><button class="ghost" data-gp="later">Later</button></div>`;
   box.hidden = false;
@@ -8539,7 +8672,7 @@ function frame(now) {
   const t = now / 1000;
   syncViews(dt, t);
   mpUpdate(dt);
-  updateProjectileMeshes(); updateParticles(dt); updateRings(dt); updateAim(dt);
+  updateGearAura(dt); updateProjectileMeshes(); updateParticles(dt); updateRings(dt); updateAim(dt);
   if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
   updateCamera(dt);
   Pixel.render();
