@@ -1,0 +1,943 @@
+{
+  "commit": "88a87d726bca422f4742535ee6c639eff237c00c",
+  "bossChecks": [
+    {
+      "proposed": false,
+      "zone": 0,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": false,
+      "zone": 1,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": false,
+      "zone": 2,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": false,
+      "zone": 3,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": false,
+      "zone": 4,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": false,
+      "zone": 5,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": false,
+      "zone": 6,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": true,
+      "zone": 0,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": true,
+      "zone": 1,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": true,
+      "zone": 2,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": true,
+      "zone": 3,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": true,
+      "zone": 4,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": true,
+      "zone": 5,
+      "visibleAfterMenu": true
+    },
+    {
+      "proposed": true,
+      "zone": 6,
+      "visibleAfterMenu": true
+    }
+  ],
+  "malformedSaves": [
+    {
+      "input": {
+        "v": 2,
+        "gear": null
+      },
+      "throws": false
+    },
+    {
+      "input": {
+        "v": 2,
+        "brawlers": {
+          "bolt": {
+            "tree": {
+              "sets": []
+            },
+            "artifacts": []
+          }
+        }
+      },
+      "throws": false
+    }
+  ],
+  "cancelledShots": [
+    {
+      "proposed": false,
+      "firedOnCancel": false
+    },
+    {
+      "proposed": true,
+      "firedOnCancel": false
+    }
+  ],
+  "totals": {
+    "models": 41,
+    "triangles": 528772,
+    "modelJsonBytes": 19320871,
+    "glbBytes": 14489528,
+    "textureBytes": 13434352,
+    "assetBytes": 33885044,
+    "byKind": {
+      "enemy": 14,
+      "gear": 1,
+      "hero": 16,
+      "weapon": 10
+    }
+  },
+  "assets": [
+    {
+      "path": "assets/enemy/beetle/model.json",
+      "jsonBytes": 511039,
+      "glbBytes": 383252,
+      "textureBytes": 534520,
+      "triangles": 13525,
+      "vertices": 15017,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/boar/model.json",
+      "jsonBytes": 349915,
+      "glbBytes": 262408,
+      "textureBytes": 325692,
+      "triangles": 8248,
+      "vertices": 10565,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/crawler/model.json",
+      "jsonBytes": 621007,
+      "glbBytes": 465728,
+      "textureBytes": 439748,
+      "triangles": 16371,
+      "vertices": 18287,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/drowned/model.json",
+      "jsonBytes": 336203,
+      "glbBytes": 252124,
+      "textureBytes": 369752,
+      "triangles": 8574,
+      "vertices": 9946,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/fireimp/model.json",
+      "jsonBytes": 639971,
+      "glbBytes": 479952,
+      "textureBytes": 282268,
+      "triangles": 15692,
+      "vertices": 19204,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/imp/model.json",
+      "jsonBytes": 268363,
+      "glbBytes": 201244,
+      "textureBytes": 263196,
+      "triangles": 6998,
+      "vertices": 7882,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/sentinel/model.json",
+      "jsonBytes": 474651,
+      "glbBytes": 355960,
+      "textureBytes": 261256,
+      "triangles": 12229,
+      "vertices": 14041,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/seraph/model.json",
+      "jsonBytes": 435555,
+      "glbBytes": 326640,
+      "textureBytes": 311874,
+      "triangles": 10830,
+      "vertices": 13003,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/slime/model.json",
+      "jsonBytes": 374463,
+      "glbBytes": 280820,
+      "textureBytes": 272390,
+      "triangles": 10680,
+      "vertices": 10756,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/spider/model.json",
+      "jsonBytes": 395547,
+      "glbBytes": 296632,
+      "textureBytes": 362338,
+      "triangles": 10851,
+      "vertices": 11495,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/warden/model.json",
+      "jsonBytes": 561907,
+      "glbBytes": 421404,
+      "textureBytes": 453644,
+      "triangles": 15077,
+      "vertices": 16470,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/wolf/model.json",
+      "jsonBytes": 276963,
+      "glbBytes": 207696,
+      "textureBytes": 379252,
+      "triangles": 7139,
+      "vertices": 8155,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/wraith/model.json",
+      "jsonBytes": 260123,
+      "glbBytes": 195064,
+      "textureBytes": 302882,
+      "triangles": 6997,
+      "vertices": 7566,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/enemy/yeti/model.json",
+      "jsonBytes": 849467,
+      "glbBytes": 637072,
+      "textureBytes": 313276,
+      "triangles": 19788,
+      "vertices": 25837,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/gear/weapon/dragonsoul-focus/model.json",
+      "jsonBytes": 146975,
+      "glbBytes": 110204,
+      "textureBytes": 96422,
+      "triangles": 5811,
+      "vertices": 6145,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero/ayla/model.json",
+      "jsonBytes": 474739,
+      "glbBytes": 356028,
+      "textureBytes": 376798,
+      "triangles": 13998,
+      "vertices": 13522,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/hero/boomer/model.json",
+      "jsonBytes": 539643,
+      "glbBytes": 404704,
+      "textureBytes": 283696,
+      "triangles": 16100,
+      "vertices": 15238,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/brick/model.json",
+      "jsonBytes": 612923,
+      "glbBytes": 459664,
+      "textureBytes": 403842,
+      "triangles": 17521,
+      "vertices": 17560,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/bruno/model.json",
+      "jsonBytes": 952523,
+      "glbBytes": 714364,
+      "textureBytes": 416822,
+      "triangles": 25299,
+      "vertices": 27960,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/dax/model.json",
+      "jsonBytes": 560223,
+      "glbBytes": 420140,
+      "textureBytes": 304856,
+      "triangles": 16350,
+      "vertices": 15934,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/ember/model.json",
+      "jsonBytes": 586779,
+      "glbBytes": 440056,
+      "textureBytes": 311940,
+      "triangles": 17149,
+      "vertices": 16690,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/gus/model.json",
+      "jsonBytes": 811535,
+      "glbBytes": 608624,
+      "textureBytes": 435384,
+      "triangles": 22723,
+      "vertices": 23446,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/kiko/model.json",
+      "jsonBytes": 757327,
+      "glbBytes": 567968,
+      "textureBytes": 337386,
+      "triangles": 21156,
+      "vertices": 21883,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/lumi/model.json",
+      "jsonBytes": 569147,
+      "glbBytes": 426832,
+      "textureBytes": 332488,
+      "triangles": 15372,
+      "vertices": 16652,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/hero/nova/model.json",
+      "jsonBytes": 585723,
+      "glbBytes": 439264,
+      "textureBytes": 295124,
+      "triangles": 17029,
+      "vertices": 16686,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/pip/model.json",
+      "jsonBytes": 534307,
+      "glbBytes": 400704,
+      "textureBytes": 335412,
+      "triangles": 16186,
+      "vertices": 15011,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/ren/model.json",
+      "jsonBytes": 655187,
+      "glbBytes": 491364,
+      "textureBytes": 408482,
+      "triangles": 18603,
+      "vertices": 18820,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/rico/model.json",
+      "jsonBytes": 543939,
+      "glbBytes": 407928,
+      "textureBytes": 300106,
+      "triangles": 16207,
+      "vertices": 15367,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/stella/model.json",
+      "jsonBytes": 509791,
+      "glbBytes": 382316,
+      "textureBytes": 292528,
+      "triangles": 15935,
+      "vertices": 14167,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/vex/model.json",
+      "jsonBytes": 555167,
+      "glbBytes": 416348,
+      "textureBytes": 364082,
+      "triangles": 16204,
+      "vertices": 15788,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/hero/volt/model.json",
+      "jsonBytes": 598843,
+      "glbBytes": 449104,
+      "textureBytes": 295198,
+      "triangles": 17112,
+      "vertices": 17153,
+      "meshes": 3,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body",
+        "legL",
+        "legR"
+      ]
+    },
+    {
+      "path": "assets/weapon/ayla/model.json",
+      "jsonBytes": 279295,
+      "glbBytes": 209444,
+      "textureBytes": 304534,
+      "triangles": 6598,
+      "vertices": 8412,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/weapon/boomer/model.json",
+      "jsonBytes": 255467,
+      "glbBytes": 191572,
+      "textureBytes": 210622,
+      "triangles": 6516,
+      "vertices": 7543,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/weapon/brick/model.json",
+      "jsonBytes": 220427,
+      "glbBytes": 165292,
+      "textureBytes": 205660,
+      "triangles": 5999,
+      "vertices": 6384,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/weapon/bruno/model.json",
+      "jsonBytes": 283343,
+      "glbBytes": 212480,
+      "textureBytes": 299360,
+      "triangles": 7440,
+      "vertices": 8311,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/weapon/dax/model.json",
+      "jsonBytes": 502115,
+      "glbBytes": 376560,
+      "textureBytes": 390716,
+      "triangles": 12883,
+      "vertices": 14882,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/weapon/kiko/model.json",
+      "jsonBytes": 428939,
+      "glbBytes": 321676,
+      "textureBytes": 334678,
+      "triangles": 11390,
+      "vertices": 12579,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/weapon/nova/model.json",
+      "jsonBytes": 248987,
+      "glbBytes": 186712,
+      "textureBytes": 241752,
+      "triangles": 6516,
+      "vertices": 7300,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/weapon/pip/model.json",
+      "jsonBytes": 226011,
+      "glbBytes": 169480,
+      "textureBytes": 263342,
+      "triangles": 5998,
+      "vertices": 6587,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/weapon/rico/model.json",
+      "jsonBytes": 225683,
+      "glbBytes": 169236,
+      "textureBytes": 356308,
+      "triangles": 6000,
+      "vertices": 6574,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    },
+    {
+      "path": "assets/weapon/vex/model.json",
+      "jsonBytes": 300659,
+      "glbBytes": 225468,
+      "textureBytes": 364726,
+      "triangles": 7678,
+      "vertices": 8882,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "emissive.webp",
+        "metalrough.webp"
+      ],
+      "nodeNames": [
+        "body"
+      ]
+    }
+  ]
+}
