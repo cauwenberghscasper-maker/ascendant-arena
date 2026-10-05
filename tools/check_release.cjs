@@ -76,13 +76,33 @@ check('adaptive quality reduces the actual pixel target on high-DPR screens',()=
   vm.runInContext('this.pixel={init(){},rt:{setSize(){}},mat:{uniforms:{texel:{value:{set(){}}}}},'+section('  resize(w, h) {','  off() {')+'};',c);
   c.pixel.resize(390,844);const full=c.pixel.w*c.pixel.h;c.Q.dpr=.6;c.pixel.resize(390,844);assert(c.pixel.w*c.pixel.h<full);
 });
+check('all equipment shapes and rarities use shipped static art without thumbnail rendering',()=>{
+  const c={};vm.createContext(c);
+  const module=fs.readFileSync(path.join(root,'assets/art/premium-icons.js'),'utf8').replace(/export /g,'');
+  vm.runInContext(module+'\n'+section('const ITEM_NAMES =','const RARITIES =')+
+    section('function itemStyle(it) {','function itemElement(it) {')+
+    section('function thumbFor(it) {','const bodyGearCache =')+
+    '\nthis.names=ITEM_NAMES;',c);
+  const manifest=JSON.parse(fs.readFileSync(path.join(root,'assets/ui/premium-v2/manifest.json'),'utf8'));
+  const registered=new Set(manifest.assets.map(a=>'assets/ui/premium-v2/'+a.file));
+  for(const [slot,nouns] of Object.entries(c.names))for(const noun of nouns)for(const rarity of ['common','uncommon','rare','epic','legendary','mythic','ancient','divine']){
+    const src=c.thumbFor({slot,name:'Test '+noun,rarity,up:30});
+    assert(registered.has(src),src);assert(fs.existsSync(path.join(root,src)),src);
+  }
+  c.CFG={};vm.runInContext(section('CFG.cases = {','const CASE_MAX ='),c);
+  for(const key of c.CFG.caseOrder){const src=c.caseIcon(key);assert(registered.has(src));assert(fs.existsSync(path.join(root,src)));}
+  assert.equal(c.thumbFor(null),'');assert.equal(c.equipmentIcon('weapon','unknown'),'');assert.equal(c.caseIcon('unknown'),'');
+  assert.equal(registered.size,20);assert(manifest.totalBytes<1_500_000,'menu icon transfer budget');
+});
 // Parse all inline JS as modules without resolving or executing CDN imports.
 const {spawnSync}=require('node:child_process');
-check('inline scripts and premium model module parse',()=>{
+check('inline scripts and premium art modules parse',()=>{
   for(const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)){
     if(/importmap|src\s*=/.test(match[1]))continue;
     const r=spawnSync(process.execPath,['--input-type=module','--check'],{input:match[2],encoding:'utf8'});assert.equal(r.status,0,r.stderr);
   }
-  const r=spawnSync(process.execPath,['--input-type=module','--check'],{input:fs.readFileSync(path.join(root,'assets/art/premium-models.js'),'utf8'),encoding:'utf8'});assert.equal(r.status,0,r.stderr);
+  for(const file of ['premium-models.js','premium-icons.js']){
+    const r=spawnSync(process.execPath,['--input-type=module','--check'],{input:fs.readFileSync(path.join(root,'assets/art',file),'utf8'),encoding:'utf8'});assert.equal(r.status,0,r.stderr);
+  }
 });
 console.log(`${passed} release checks passed.`);
