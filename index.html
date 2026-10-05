@@ -4575,7 +4575,7 @@ const ItemArt = {
   },
   url(it) { return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(this.svg(it)); },
 };
-// painted item art (assets/ui/items/<slot>-<style>.webp); the list is rewritten by tools/process_icons.py
+// pixel item art (assets/ui/items/<slot>-<noun>-<rarity>.png); the list is rewritten by tools/pixelize_items.py
 // <items-icons>
 const ITEM_ICONS = [];
 // </items-icons>
@@ -4586,8 +4586,10 @@ const MENU_EMBLEMS = []; // painted emblems retired: every menu tile uses the pi
 // item thumbnails everywhere in the menus: the painted art when it exists, else the vector item art (cached per look)
 function thumbFor(it) {
   if (!it) return '';
-  const paint = it.slot + '-' + (ITEM_NAMES[it.slot] ? ITEM_NAMES[it.slot][itemStyle(it)].toLowerCase() : '');
-  if (ITEM_ICONS.includes(paint)) return 'assets/ui/items/' + paint + '.webp';
+  // pixel-art painting per item shape and rarity (assets/ui/items/<slot>-<noun>-<rarity>.png, tools/pixelize_items.py)
+  const paint = it.slot + '-' + (ITEM_NAMES[it.slot] ? ITEM_NAMES[it.slot][itemStyle(it)].toLowerCase() : '') + '-' + it.rarity;
+  if (!thumbFor.set) thumbFor.set = new Set(ITEM_ICONS);
+  if (thumbFor.set.has(paint)) return 'assets/ui/items/' + paint + '.png';
   const key = thumbKey(it);
   if (!Thumbs.cache.has(key)) { try { Thumbs.cache.set(key, ItemArt.url(it)); } catch (e) { Thumbs.cache.set(key, ''); } }
   const src = Thumbs.cache.get(key);
