@@ -1,0 +1,142 @@
+[
+  {
+    "id": "crystal",
+    "stage": 1,
+    "triangles": 2016,
+    "meshes": 4,
+    "materials": 1
+  },
+  {
+    "id": "crystal",
+    "stage": 2,
+    "triangles": 2024,
+    "meshes": 4,
+    "materials": 1
+  },
+  {
+    "id": "crystal",
+    "stage": 3,
+    "triangles": 2072,
+    "meshes": 4,
+    "materials": 1
+  },
+  {
+    "id": "crystal",
+    "stage": 4,
+    "triangles": 2096,
+    "meshes": 4,
+    "materials": 1
+  },
+  {
+    "id": "crystal",
+    "stage": 5,
+    "triangles": 2124,
+    "meshes": 4,
+    "materials": 1
+  },
+  {
+    "id": "bull",
+    "stage": 1,
+    "triangles": 756,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "bull",
+    "stage": 2,
+    "triangles": 776,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "bull",
+    "stage": 3,
+    "triangles": 792,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "bull",
+    "stage": 4,
+    "triangles": 800,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "bull",
+    "stage": 5,
+    "triangles": 820,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "sprout",
+    "stage": 1,
+    "triangles": 808,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "sprout",
+    "stage": 2,
+    "triangles": 828,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "sprout",
+    "stage": 3,
+    "triangles": 844,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "sprout",
+    "stage": 4,
+    "triangles": 852,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "sprout",
+    "stage": 5,
+    "triangles": 872,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "slime",
+    "stage": 1,
+    "triangles": 400,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "slime",
+    "stage": 2,
+    "triangles": 420,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "slime",
+    "stage": 3,
+    "triangles": 436,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "slime",
+    "stage": 4,
+    "triangles": 444,
+    "meshes": 2,
+    "materials": 1
+  },
+  {
+    "id": "slime",
+    "stage": 5,
+    "triangles": 464,
+    "meshes": 2,
+    "materials": 1
+  }
+]

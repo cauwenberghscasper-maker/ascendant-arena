@@ -92,6 +92,8 @@ const fixture=()=>({v:2,level:1,cls:'bolt',gear:{weapon:{id:'default'}},stats:{}
 const sc={LOCAL_PREVIEW:false,defaultProfile:fixture,CFG:{progression:{cap:1000},brawlers:{bolt:{}},gear:{slots:['weapon']}},clamp:(x,a,b)=>Math.min(b,Math.max(a,x)),newTreeState:()=>({sets:[]}),newBrawlerState:()=>({tree:{sets:[]},artifacts:[]}),Date};
 vm.createContext(sc);
 if(!baseline)vm.runInContext(fs.readFileSync(path.join(root,'assets/data/loot-collection.js'),'utf8').replace(/export /g,''),sc);
+if(!baseline)vm.runInContext(fs.readFileSync(path.join(root,'assets/data/prestige.js'),'utf8').replace(/export /g,''),sc);
+if(!baseline)vm.runInContext(fs.readFileSync(path.join(root,'assets/data/companions.js'),'utf8').replace(/export /g,''),sc);
 vm.runInContext(section('function sanitizeProfile(p) {','const Store ='),sc);
 const malformed=[];
 for(const bad of [{v:2,gear:null},{v:2,brawlers:{other:null}}]){try{sc.sanitizeProfile(bad);malformed.push({input:bad,throws:false});}catch(e){malformed.push({input:bad,throws:true,error:e.message});}}

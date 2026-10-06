@@ -8,6 +8,8 @@ const ctx={Date,console,performance:{now:()=>0},LOCAL_PREVIEW:false,G:{gearPromp
 vm.createContext(ctx);
 const collectionModule=fs.readFileSync(path.join(root,'assets/data/loot-collection.js'),'utf8').replace(/export /g,'');
 vm.runInContext(collectionModule+'\nthis.collectionDefs=COLLECTION_ITEMS;',ctx);
+vm.runInContext(fs.readFileSync(path.join(root,'assets/data/prestige.js'),'utf8').replace(/export /g,''),ctx);
+vm.runInContext(fs.readFileSync(path.join(root,'assets/data/companions.js'),'utf8').replace(/export /g,''),ctx);
 vm.runInContext(section('const CFG = {','// 2. UTIL')+section('const clamp =','// 3. DATA')+
   section('const P = CFG.progression;','const salvageValue =')+
   section('function itemPower(it) {','function bestBagItem(')+
@@ -122,9 +124,9 @@ check('instance disposal frees owned materials once and retains shared resources
   let disposed=0;const mat={dispose(){disposed++;}},model={userData:{mats:[mat,mat]},geometry:{dispose(){throw Error('shared geometry disposed');}}};c.dispose(model);c.dispose(model);assert.equal(disposed,1);
 });
 check('adaptive quality reduces the actual pixel target on high-DPR screens',()=>{
-  const c={window:{devicePixelRatio:3},Q:{dpr:1},renderer:{setPixelRatio(){},setSize(){},domElement:{style:{}}}};vm.createContext(c);
+  const c={window:{devicePixelRatio:3},Showcase:{on:false},Q:{dpr:1},renderer:{setPixelRatio(){},setSize(){},domElement:{style:{}}}};vm.createContext(c);
   vm.runInContext('this.pixel={init(){},rt:{setSize(){}},mat:{uniforms:{texel:{value:{set(){}}}}},'+section('  resize(w, h) {','  off() {')+'};',c);
-  c.pixel.resize(390,844);const full=c.pixel.w*c.pixel.h;c.Q.dpr=.6;c.pixel.resize(390,844);assert(c.pixel.w*c.pixel.h<full);
+  c.pixel.resize(390,844);const full=c.pixel.w*c.pixel.h;c.Showcase.on=true;c.pixel.resize(390,844);assert(c.pixel.w*c.pixel.h>full);c.Showcase.on=false;c.pixel.resize(390,844);assert.equal(c.pixel.w*c.pixel.h,full);c.Q.dpr=.6;c.pixel.resize(390,844);assert(c.pixel.w*c.pixel.h<full);
 });
 check('all equipment shapes and rarities use shipped static art without thumbnail rendering',()=>{
   const c={};vm.createContext(c);
@@ -154,7 +156,7 @@ check('inline scripts and premium art modules parse',()=>{
     if(/importmap|src\s*=/.test(match[1]))continue;
     const r=spawnSync(process.execPath,['--input-type=module','--check'],{input:match[2],encoding:'utf8'});assert.equal(r.status,0,r.stderr);
   }
-  for(const file of ['premium-models.js','premium-icons.js']){
+  for(const file of ['premium-models.js','premium-icons.js','crystal-dragon.js','pet-companions.js','combat-feedback.js']){
     const r=spawnSync(process.execPath,['--input-type=module','--check'],{input:fs.readFileSync(path.join(root,'assets/art',file),'utf8'),encoding:'utf8'});assert.equal(r.status,0,r.stderr);
   }
   const r=spawnSync(process.execPath,['--input-type=module','--check'],{input:collectionModule,encoding:'utf8'});assert.equal(r.status,0,r.stderr);
