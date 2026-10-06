@@ -28,3 +28,9 @@ The four pet models are original code-built prototypes. They are not Hugging Fac
 Hero studio lighting/framing, stat benchmark ribbons and bounded animated combat numbers are included. Existing hero meshes remain unchanged. Physical iOS/Android FPS, native packaging, battery use and thermal behavior have not been tested. Browser frame-rate observations are not a device performance guarantee. Pet leveling costs and damage values need playtest tuning before store release.
 
 Rollback: revert the companion release commit. Preserve a current backup code first if reverting after players have earned pet progression, since the older code does not understand the new pet fields.
+
+## Player access
+
+Open Menu > Prestige & pet to review pet ownership, attack details, XP and equipment. A new profile has no pet until the first optional level-200 prestige. The first four prestiges unlock the four companion types; later prestiges continue their visual evolution. Only the equipped companion receives combat training. Pet XP and levels remain when another companion is equipped.
+
+The implementation and regression evidence were published in commit `22e1eee8f5ccd0fa27fdbc7b3abd3613497bc4db`. Before announcing the update as live, verify that GitHub Pages has deployed a commit containing it and that the served page loads `assets/data/companions.js`.
