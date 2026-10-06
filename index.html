@@ -294,8 +294,6 @@ button.primary.gold { background: linear-gradient(180deg, #ffd96a, #f0a91f); col
 .tile.sel { background: var(--ink3); box-shadow: 0 0 0 2px #fff inset; }
 /* paper-doll callouts on the hero */
 #doll { position: fixed; inset: 0; z-index: 11; pointer-events: none; }
-#dollLines { position: absolute; inset: 0; }
-#dollLines line { stroke-width: 2; stroke-dasharray: 4 3; opacity: .9; }
 .dchip { position: absolute; left: 0; top: 0; width: 128px; height: 40px; display: flex; align-items: center; gap: 6px; padding: 3px 8px 3px 3px; border-radius: 12px; border: 2px solid #3a3f68; background: rgba(20,22,43,.88); text-align: left; pointer-events: auto; }
 .dchip img { width: 32px; height: 32px; border-radius: 8px; background: #1a1d3a; flex: none; }
 .dchip b { display: block; font: 13px/1.05 var(--display); color: #fff; } .dchip small { font: 600 10px/1.1 var(--body); color: var(--muted); }
@@ -991,7 +989,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
       <div class="hint">Left thumb moves · right thumb aims</div>
     </div>
   </div>
-  <div id="doll" hidden><svg id="dollLines" width="100%" height="100%"></svg></div>
+  <div id="doll" hidden aria-label="Equipped gear"></div>
   <div id="spinHint">Drag beside the menu to turn your hero</div>
   <div id="bootErr" hidden></div>
 </div>
@@ -7824,27 +7822,14 @@ function onGearPrompt(e) {
 
 // --- paper doll: slot callouts pinned to the hero in the dressing room ---
 const DOLL_ORDER = ['helmet', 'weapon', 'chest', 'accessory', 'boots'];
-const Doll = { built: false, chips: {}, lines: {}, dots: {}, sig: '' };
-function dollAnchor(slot) {
-  const it = G.profile.gear[slot];
-  switch (slot) {
-    case 'helmet': return [0, 1.9, 0.05];
-    case 'weapon': return [0.62, 0.95, 0.4];
-    case 'chest': return [0, 1.05, 0.44];
-    case 'boots': return [0.15, 0.14, 0.12];
-    case 'accessory': { const st = itemStyle(it); return st === 0 ? [-0.36, 0.55, 0.32] : st === 1 ? [-0.56, 0.72, 0.12] : [0, 1.12, 0.44]; }
-  }
-  return [0, 1, 0];
-}
+const Doll = { built: false, chips: {} };
 function buildDoll() {
-  const root = $('doll'), svg = $('dollLines');
+  const root = $('doll');
   for (const s of DOLL_ORDER) {
     const c = document.createElement('button'); c.className = 'dchip'; c.dataset.slot = s;
     c.innerHTML = '<img alt=""><span><b></b><small></small></span><i class="rdot" hidden></i>';
     c.addEventListener('click', (e) => { e.stopPropagation(); Sfx.play('click'); UI.gearSlot = s; heroTab('Gear'); });
     root.appendChild(c); Doll.chips[s] = c;
-    const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line'); svg.appendChild(ln); Doll.lines[s] = ln;
-    const dt = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); dt.setAttribute('r', '4'); svg.appendChild(dt); Doll.dots[s] = dt;
   }
   Doll.built = true;
 }
@@ -7854,7 +7839,7 @@ function updateDoll() {
   if (!show) { if (!root.hidden) root.hidden = true; return; }
   if (!Doll.built) buildDoll();
   root.hidden = false;
-  const p = G.profile, pl = G.player, gs = growthScale(pl), yaw = Showcase.yaw, cs = Math.cos(yaw), sn = Math.sin(yaw);
+  const p = G.profile, pl = G.player, gs = growthScale(pl);
   const al = slotAlerts();
   const head = project(pl.x, (2.2 * gs) + Showcase.podium, pl.z), feet = project(pl.x, Showcase.podium, pl.z);
   if (!head || !feet) { root.hidden = true; return; }
@@ -7875,15 +7860,6 @@ function updateDoll() {
     c.classList.toggle('sel', UI.current === 'hero' && UI.heroTab === 'Gear' && UI.gearSlot === s);
     const y = top + step * i;
     c.style.transform = `translate(${colX.toFixed(0)}px, ${y.toFixed(0)}px)`;
-    const a = dollAnchor(s), lx = (a[0] * cs + a[2] * sn) * gs, lz = (-a[0] * sn + a[2] * cs) * gs;
-    const sp = project(pl.x + lx, a[1] * gs + Showcase.podium, pl.z + lz);
-    const ln = Doll.lines[s], dt = Doll.dots[s];
-    if (sp) {
-      ln.setAttribute('x1', colX + chipW); ln.setAttribute('y1', y + chipH / 2); ln.setAttribute('x2', sp[0]); ln.setAttribute('y2', sp[1]);
-      dt.setAttribute('cx', sp[0]); dt.setAttribute('cy', sp[1]);
-      const col = '#' + RAR_HEX[it.rarity].toString(16).padStart(6, '0');
-      ln.setAttribute('stroke', col); dt.setAttribute('fill', col);
-    }
   });
 }
 
