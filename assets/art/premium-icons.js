@@ -6,6 +6,7 @@ const shapes = {
   accessory: ['charm', 'ring', 'amulet'],
 };
 const cases = new Set(['milestone', 'rift', 'boss', 'treasure', 'hunter']);
+const regionalCases = new Set(['frost', 'ember', 'celestial']);
 const base = 'assets/ui/premium-v2/';
 
 export function equipmentIcon(slot, noun) {
@@ -13,5 +14,6 @@ export function equipmentIcon(slot, noun) {
   return shapes[slot]?.includes(shape) ? `${base}${slot}-${shape}.webp` : '';
 }
 export function caseIcon(key) {
+  if (regionalCases.has(key)) return `assets/ui/collection-v1/case-${key}.webp`;
   return cases.has(key) ? `${base}case-${key}.webp` : '';
 }

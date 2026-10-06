@@ -6,6 +6,8 @@ let passed=0;
 function check(name,fn){fn();passed++;console.log('PASS '+name);}
 const ctx={Date,console,performance:{now:()=>0},LOCAL_PREVIEW:false,G:{gearPrompts:[],mode:'hub'},masteryBonus:()=>0,addMastery(){},refreshPlayerStats(){},checkAchievements(){},ev(){},toast(){},onExpedition:()=>false};
 vm.createContext(ctx);
+const collectionModule=fs.readFileSync(path.join(root,'assets/data/loot-collection.js'),'utf8').replace(/export /g,'');
+vm.runInContext(collectionModule+'\nthis.collectionDefs=COLLECTION_ITEMS;',ctx);
 vm.runInContext(section('const CFG = {','// 2. UTIL')+section('const clamp =','// 3. DATA')+
   section('const P = CFG.progression;','const salvageValue =')+
   section('function itemPower(it) {','function bestBagItem(')+
@@ -17,6 +19,54 @@ vm.runInContext(section('const CFG = {','// 2. UTIL')+section('const clamp =','/
   '\nthis.config=CFG;this.mxp=mxpFor;this.plan=maxUpgradePlan;this.newProfile=defaultProfile;',ctx);
 const make=(id,slot='weapon',rarity='common',ilvl=1,up=0)=>({id,slot,rarity,ilvl,up,name:'Worn Edge',aff:{}});
 function fresh(){const p=ctx.newProfile();p.gold=1e7;p.essence=1e5;p.gear.weapon=make('target','weapon','rare',10);ctx.G.profile=p;ctx.G.gearPrompts=[];ctx.G.dirty=false;return p;}
+check('named items have unique ids and match existing equipment mesh nouns',()=>{
+  const ids=new Set();
+  vm.runInContext(section('function itemStyle(it) {','function itemElement(it) {'),ctx);
+  for(const d of ctx.collectionDefs){assert(!ids.has(d.id));ids.add(d.id);assert.equal(d.name.endsWith(' '+d.noun),true);assert(ctx.config.gear.slots.includes(d.slot));assert(ctx.config.gear.rarity[d.rarity]);assert.equal(ctx.itemStyle(d),vm.runInContext('ITEM_NAMES',ctx)[d.slot].indexOf(d.noun));}
+  assert.equal(ids.size,24);
+});
+check('fourth eligible drop guarantees a named item and preserves rolled stats',()=>{
+  const p=fresh();for(let i=0;i<3;i++){assert.equal(ctx.rollCollectionItem(p,make('miss'+i,'weapon','rare',10),()=>.99),false);assert.equal(p.collectionLuck['weapon|rare'],i+1);}
+  const it=make('win','weapon','rare',10,7);it.aff={dmg:12};it.locked=true;
+  assert.equal(ctx.rollCollectionItem(p,it,()=>.99),true);assert.equal(it.collectionId,'frostbite');assert.equal(it.id,'win');assert.equal(it.up,7);assert.equal(it.ilvl,10);assert.equal(it.locked,true);assert.equal(it.aff.dmg,12);assert.equal(p.collectionLuck['weapon|rare'],0);
+  assert.equal(ctx.rollCollectionItem(p,it,()=>.99),false);
+});
+check('eligible drop luck is isolated by rarity and slot; low levels do not advance it',()=>{
+  const p=fresh();assert.equal(ctx.rollCollectionItem(p,make('low','helmet','rare',9),()=>.99),false);assert.equal(p.collectionLuck['helmet|rare'],undefined);
+  ctx.rollCollectionItem(p,make('a','weapon','rare',10),()=>.99);ctx.rollCollectionItem(p,make('b','helmet','rare',10),()=>.99);ctx.rollCollectionItem(p,make('c','weapon','epic',22),()=>.99);
+  assert.equal(p.collectionLuck['weapon|rare'],1);assert.equal(p.collectionLuck['helmet|rare'],1);assert.equal(p.collectionLuck['weapon|epic'],1);
+  for(const d of ctx.collectionDefs){const it=make(d.id,d.slot,d.rarity,d.minLevel);assert.equal(ctx.rollCollectionItem(p,it,()=>0),true);assert.equal(it.collectionId,d.id);assert(ctx.collectionIcon(it).endsWith('/'+d.id+'.webp'));}
+});
+check('collection migration is idempotent and discovery survives gear consumption',()=>{
+  const p=fresh(),it={...make('named','weapon','rare',10),collectionId:'frostbite',name:'Frostbite Edge'};p.bag=[it];delete p.collection;delete p.collectionLuck;
+  ctx.migrateCollection(p);assert.equal(p.collection.frostbite.count,1);ctx.migrateCollection(p);assert.equal(p.collection.frostbite.count,1);
+  ctx.recordCollectionItem(p,it,123);assert.equal(p.collection.frostbite.count,2);p.bag=[];ctx.migrateCollection(p);assert.equal(p.collection.frostbite.count,2);
+  assert.equal(ctx.collectionIcon({...it,slot:'helmet'}),'');assert.equal(ctx.collectionIcon({...it,rarity:'divine'}),'');
+  p.collection={unknown:{count:9},frostbite:{count:Infinity}};p.collectionLuck={'weapon|rare':99,'bogus|rare':3};ctx.migrateCollection(p);assert.deepEqual(Object.keys(p.collection),[]);assert.equal(p.collectionLuck['weapon|rare'],3);assert.equal(p.collectionLuck['bogus|rare'],undefined);
+});
+ctx.curTier=()=>0;ctx.addEssence=()=>{};ctx.addGold=()=>{};
+vm.runInContext(section('CFG.cases = {','// --- Vault:')+section('function highestZone(level) {','// zone odds')+
+  section('function grantItem(it, source, context) {','// --- jobs'),ctx);
+check('regional boss cases use the killed boss zone and preserve existing rarity odds',()=>{
+  const p=fresh();p.level=100;ctx.G.zoneIdx=6;
+  for(const [zone,kind] of [[0,'boss'],[2,'frost'],[3,'ember'],[6,'celestial']]){
+    ctx.grantItem(make('reward'+zone,'weapon','epic',40),'boss',{zone});const c=p.cases.at(-1);assert.equal(c.k,kind);assert.equal(c.z,zone);assert.equal(c.f,'rare');
+    assert.deepEqual(JSON.parse(JSON.stringify(ctx.caseTable(c))),JSON.parse(JSON.stringify(ctx.caseTable({...c,k:'boss'}))));
+  }
+  assert.equal(ctx.regionBossCase('hunter',2),'hunter');assert.equal(ctx.regionBossCase('rift',6),'rift');assert.equal(Object.keys(p.collection).length,0);
+});
+check('case conversion and preview rolls cannot create phantom collection discoveries',()=>{
+  const p=fresh();p.level=100;ctx.G.zoneIdx=0;ctx.grantItem(make('packed','weapon','legendary',36),'monster');assert.equal(p.cases.length,1);assert.equal(p.cases[0].z,6,'non-boss case scaling stays compatible');assert.equal(Object.keys(p.collectionLuck).length,0);
+  for(let i=0;i<60;i++)ctx.makeItem('weapon','legendary',36);assert.equal(Object.keys(p.collection).length,0);assert.equal(Object.keys(p.collectionLuck).length,0);
+  p.collectionLuck['weapon|legendary']=3;
+  const it=make('opened','weapon','legendary',36);ctx.grantItem(it,'case');assert.equal(it.collectionId,'sunspike');assert.equal(p.collection.sunspike.count,1);assert(p.bag.includes(it));
+  p.collectionLuck['weapon|rare']=3;ctx.grantItem(make('debug','weapon','rare',10),'test');assert.equal(p.collectionLuck['weapon|rare'],3);assert.equal(p.collection.frostbite,undefined);
+});
+check('opening a saved regional case consumes it once and grants the actual named winner',()=>{
+  const p=fresh();p.cases=[{id:'saved-regional',k:'frost',l:40,t:0,z:2,f:'rare'}];
+  for(const rarity of ['rare','epic','legendary'])for(const slot of ctx.config.gear.slots)p.collectionLuck[slot+'|'+rarity]=3;
+  const r=ctx.openCase('saved-regional');assert(r);assert.equal(p.cases.length,0);assert.equal(p.stats.cases,1);assert(ctx.collectionItem(r.item));assert.equal(Object.keys(p.collection).length,1);assert.equal(r.kept,true);assert.equal(ctx.openCase('saved-regional'),null);
+});
 check('same slot, strictly weaker, unique and unprotected material selection',()=>{
   const p=fresh();p.bag=[make('weak'),make('weak'),make('other','helmet'),Object.assign(make('locked'),{locked:true}),make('strong','weapon','legendary'),make('equal','weapon','rare',10),{...p.gear.weapon},make('second','weapon','uncommon',2)];
   assert.deepEqual(Array.from(ctx.mergeCandidates(p.gear.weapon),m=>m.id),['weak','second']);
@@ -79,20 +129,23 @@ check('adaptive quality reduces the actual pixel target on high-DPR screens',()=
 check('all equipment shapes and rarities use shipped static art without thumbnail rendering',()=>{
   const c={};vm.createContext(c);
   const module=fs.readFileSync(path.join(root,'assets/art/premium-icons.js'),'utf8').replace(/export /g,'');
-  vm.runInContext(module+'\n'+section('const ITEM_NAMES =','const RARITIES =')+
+  vm.runInContext(collectionModule+'\n'+module+'\n'+section('const ITEM_NAMES =','const RARITIES =')+
     section('function itemStyle(it) {','function itemElement(it) {')+
     section('function thumbFor(it) {','const bodyGearCache =')+
     '\nthis.names=ITEM_NAMES;',c);
   const manifest=JSON.parse(fs.readFileSync(path.join(root,'assets/ui/premium-v2/manifest.json'),'utf8'));
   const registered=new Set(manifest.assets.map(a=>'assets/ui/premium-v2/'+a.file));
+  const expanded=JSON.parse(fs.readFileSync(path.join(root,'assets/ui/collection-v1/manifest.json'),'utf8'));
+  expanded.assets.forEach(a=>registered.add('assets/ui/collection-v1/'+a.file));
   for(const [slot,nouns] of Object.entries(c.names))for(const noun of nouns)for(const rarity of ['common','uncommon','rare','epic','legendary','mythic','ancient','divine']){
     const src=c.thumbFor({slot,name:'Test '+noun,rarity,up:30});
     assert(registered.has(src),src);assert(fs.existsSync(path.join(root,src)),src);
   }
   c.CFG={};vm.runInContext(section('CFG.cases = {','const CASE_MAX ='),c);
   for(const key of c.CFG.caseOrder){const src=c.caseIcon(key);assert(registered.has(src));assert(fs.existsSync(path.join(root,src)));}
+  for(const d of ctx.collectionDefs){const src=c.thumbFor({...d,collectionId:d.id});assert(registered.has(src));assert(fs.existsSync(path.join(root,src)));}
   assert.equal(c.thumbFor(null),'');assert.equal(c.equipmentIcon('weapon','unknown'),'');assert.equal(c.caseIcon('unknown'),'');
-  assert.equal(registered.size,20);assert(manifest.totalBytes<1_500_000,'menu icon transfer budget');
+  assert.equal(registered.size,47);assert(manifest.totalBytes+expanded.totalBytes<3_200_000,'menu icon transfer budget');
 });
 // Parse all inline JS as modules without resolving or executing CDN imports.
 const {spawnSync}=require('node:child_process');
@@ -104,5 +157,6 @@ check('inline scripts and premium art modules parse',()=>{
   for(const file of ['premium-models.js','premium-icons.js']){
     const r=spawnSync(process.execPath,['--input-type=module','--check'],{input:fs.readFileSync(path.join(root,'assets/art',file),'utf8'),encoding:'utf8'});assert.equal(r.status,0,r.stderr);
   }
+  const r=spawnSync(process.execPath,['--input-type=module','--check'],{input:collectionModule,encoding:'utf8'});assert.equal(r.status,0,r.stderr);
 });
 console.log(`${passed} release checks passed.`);

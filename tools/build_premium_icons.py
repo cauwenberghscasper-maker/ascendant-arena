@@ -1,6 +1,6 @@
 """Export generated transparent masters as small, lossless menu assets.
 
-Usage: python tools/build_premium_icons.py <generated-image-directory>
+Usage: python tools/build_premium_icons.py <generated-image-directory> [asset-folder]
 Pillow is used only for resizing/encoding, without repainting or removing alpha.
 The manifest retains each original generation prompt and filename.
 """
@@ -10,11 +10,12 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'assets/ui/premium-v2'
 
 def main():
     source_dir = Path(sys.argv[1]).resolve()
-    manifest_path = OUTPUT / 'manifest.json'
+    output = ROOT / 'assets/ui' / (sys.argv[2] if len(sys.argv) > 2 else 'premium-v2')
+    assert output.resolve().parent == (ROOT / 'assets/ui').resolve()
+    manifest_path = output / 'manifest.json'
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
     total = 0
     for asset in manifest['assets']:
@@ -26,13 +27,13 @@ def main():
             assert low == 0 and high >= 250, asset['id']
             # Export at 256px: sufficient for the largest 108px menu portrait.
             image = image.resize((256, 256), Image.Resampling.BOX)
-            image.save(OUTPUT / asset['file'], 'WEBP', lossless=True, method=6)
-        with Image.open(OUTPUT / asset['file']) as check:
+            image.save(output / asset['file'], 'WEBP', lossless=True, method=6)
+        with Image.open(output / asset['file']) as check:
             check.load()
             assert check.size == (256, 256)
             low, high = check.getchannel('A').getextrema()
             assert low == 0 and high >= 250
-        asset['bytes'] = (OUTPUT / asset['file']).stat().st_size
+        asset['bytes'] = (output / asset['file']).stat().st_size
         total += asset['bytes']
         print(f"{asset['id']}: {asset['bytes']:,} bytes")
     manifest['totalBytes'] = total
