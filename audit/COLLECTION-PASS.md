@@ -58,4 +58,3 @@ This pass verifies menu art and source behavior, not native iOS/Android packagin
 The collection provides a hunt ladder; retention and revenue improvement are hypotheses. Playtest normal XP progression to measure time to first named item, time to the next rarity, case-opening frequency, duplicate merge usage, collection progress across sessions, and abandonment around the mastery gate. Rebalance only after those observations. Do not sell these cases as part of this pass.
 
 Review changes on the existing `codex/mobile-release-polish` branch. Rolling back this expansion requires accounting for saves containing new regional case keys and collection records; preserve exported saves and map those case keys back to `boss` rather than discarding rewards.
-
