@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ascendant Arena — RPG hero model review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101820;color:#eaf3ef;font:15px/1.5 system-ui,sans-serif}main{max-width:1250px;margin:auto;padding:24px}h1{margin:0;font-size:28px}p{color:#a9bdba}a{color:#99e9cd}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}article{border:1px solid #37534e;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#304540,#182525 70%)}h2{font-size:18px;padding:14px 18px;margin:0}.view{height:550px;position:relative}.view img{width:100%;height:100%;object-fit:contain}.view canvas{width:100%;height:100%;display:block}.status{padding:12px 18px;min-height:72px;font-size:13px;color:#a9bdba}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}button{min-height:44px;padding:10px 16px;border:1px solid #699b86;border-radius:8px;background:#27483e;color:#f0fff8;font:inherit;cursor:pointer}button[aria-pressed=true]{background:#4c775e}@media(max-width:850px){.grid{grid-template-columns:1fr}.view{height:520px}main{padding:16px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
+<main>
+<h1>Adventure RPG hero review</h1>
+<p>Natural faces, layered armor and readable silhouettes. Compare the previous mesh, art reference and reviewed rig. Run and strike expose joint deformation; face view checks eye placement.</p>
+<label for="heroSelect">Hero </label><select id="heroSelect"><option value="pip">Pip</option><option value="brick">Brick</option><option value="ayla">Ayla</option><option value="lumi">Lumi</option></select><div class="controls"><button id="front" aria-pressed="true">Front</button><button id="back" aria-pressed="false">Back</button><button id="face" aria-pressed="false">Face close-up</button><button id="combat" aria-pressed="false">Combat camera</button><button id="rotate" aria-pressed="false">Rotate models</button><button id="idle" aria-pressed="true">Idle</button><button id="run" aria-pressed="false">Run</button><button id="attack" aria-pressed="false">Attack</button><button id="strike" aria-pressed="false">Strike pose</button></div>
+<div class="grid">
+<article><h2>Current 3D Pip</h2><div class="view" id="old"></div><div class="status" id="old-status">Loading current model…</div></article>
+<article><h2>Handcrafted style reference</h2><div class="view"><img src="../assets/concepts/rpg-heroes-v2/pip-reference-v3.png" alt="Compact natural-faced adventurer with faceted painted armor and stitched repairs"></div><div class="status">2D reference: compact proportions, matte painted facets, uneven armor and deliberate repairs. The game remains 3D with a pixel-art identity.</div></article>
+<article><h2>New 3D Pip pilot</h2><div class="view" id="new"></div><div class="status" id="new-status">Waiting for a downloaded and validated mesh.</div></article>
+</div><div class="controls"><button id="portrait">Render menu portrait</button></div><img id="portraitPreview" width="256" height="256" alt="Rendered menu portrait" hidden><p><a href="../assets/concepts/rpg-heroes-v2/STYLE-V3.md">Current art direction and mesh acceptance criteria</a></p>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {bindHeroMotion,animateHeroMotion} from '../assets/data/hero-animation.js';
+import {addHeroEyes} from '../assets/data/hero-eyes.js';
+let spin=false,mode='front',motion='idle',elapsed=0;const views=[]; const chosen = new URLSearchParams(location.search).get('hero') || 'pip'; const heroName = ['pip','brick','ayla','lumi'].includes(chosen) ? chosen : 'pip'; document.getElementById('heroSelect').value=heroName; document.querySelector('#old').previousElementSibling.textContent='Current 3D '+heroName;document.querySelector('#new').previousElementSibling.textContent='New 3D '+heroName+' pilot'; document.getElementById('heroSelect').onchange=e=>{location.href='?hero='+e.target.value;};document.querySelector('.view img').src='../assets/concepts/rpg-heroes-v2/'+heroName+'-reference-'+(['pip','lumi'].includes(heroName)?'v4':'v3')+'.png';
+async function view(id,path,format){
+ const el=document.getElementById(id),status=document.getElementById(id+'-status');
+ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;el.append(renderer.domElement);
+ const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,1,.01,30),controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=1.3;controls.maxDistance=6;
+ const pmrem=new THREE.PMREMGenerator(renderer),room=new RoomEnvironment();const env=pmrem.fromScene(room,.04).texture;scene.environment=env;room.dispose();pmrem.dispose();
+ scene.add(new THREE.HemisphereLight(0xd4e8ff,0x51462f,2));const key=new THREE.DirectionalLight(0xffedd0,2.3);key.position.set(-2,4,3);scene.add(key);
+ const floor=new THREE.Mesh(new THREE.CircleGeometry(.65,48),new THREE.MeshStandardMaterial({color:0x294236,roughness:1}));floor.rotation.x=-Math.PI/2;scene.add(floor);
+ const loader=new GLTFLoader();let model;
+ try{
+  if(format==='base64'){const r=await fetch(path);if(!r.ok)throw Error('HTTP '+r.status);const j=await r.json();const bytes=Uint8Array.from(atob(j.glb),c=>c.charCodeAt(0));model=(await loader.parseAsync(bytes.buffer,new URL(path.slice(0,path.lastIndexOf('/')+1),location.href).href)).scene;}
+  else model=(await loader.loadAsync(path)).scene;
+  if(id==='new'){const box0=new THREE.Box3().setFromObject(model),h=box0.max.y-box0.min.y,c=box0.getCenter(new THREE.Vector3());model.scale.setScalar(1/h);model.position.set(-c.x/h,-box0.min.y/h,-c.z/h);const normalized=new THREE.Group();normalized.add(model);model=normalized;const rr=await fetch('../assets/'+(heroName==='lumi'?'hero-v5':'hero-v4')+'/'+heroName+'/rig.json');if(rr.ok){const def=await rr.json();addHeroEyes(model,def,THREE);}}
+  const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());model.scale.setScalar(1.9/size.y);model.position.set(-center.x*model.scale.x,-box.min.y*model.scale.y,-center.z*model.scale.z);
+  scene.add(model);let tris=0,meshes=0;model.traverse(o=>{if(o.isMesh){meshes++;tris+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;}});status.textContent=`${Math.round(tris).toLocaleString()} triangles · ${meshes} meshes · textured 3D asset`;
+ }catch(e){status.textContent=id==='new'?'3D pilot not available yet. Reference is ready; live characters are unchanged.':'Could not load current model: '+e.message;}
+ const entry={id,renderer,scene,camera,controls,model,motion:model&&bindHeroMotion(model)};if(entry.motion)status.textContent+=' · 13 bones: shoulders, elbows, wrists, hips, knees and ankles';views.push(entry);setCamera(entry);new ResizeObserver(()=>{renderer.setSize(el.clientWidth,el.clientHeight);camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();}).observe(el);
+}
+function setCamera(v){v.camera.position.set(0,mode==='face'?1.67:mode==='combat'?3.8:1.2,mode==='face'?1.4:mode==='back'?-4.4:4.4);v.controls.target.set(0,mode==='face'?1.67:.96,0);v.controls.update();if(v.model)v.model.rotation.y=0;}
+for(const id of ['front','back','combat','face'])document.getElementById(id).onclick=()=>{mode=id;for(const k of ['front','back','combat','face'])document.getElementById(k).setAttribute('aria-pressed',String(k===id));for(const v of views)setCamera(v);};
+document.getElementById('rotate').onclick=e=>{spin=!spin;e.currentTarget.setAttribute('aria-pressed',String(spin));};
+for(const id of ['idle','run','attack','strike'])document.getElementById(id).onclick=()=>{motion=id;elapsed=0;for(const k of ['idle','run','attack','strike'])document.getElementById(k).setAttribute('aria-pressed',String(k===id));};
+await Promise.all([view('old','../assets/hero/'+heroName+'/model.json','base64'),view('new','../assets/'+(heroName==='lumi'?'hero-v5':'hero-v4')+'/'+heroName+'/packed/model.json','base64')]);
+document.getElementById('portrait').onclick=()=>{
+ const v=views.find(v=>v.id==='new');if(!v?.model)return;
+ const r=v.renderer, size=r.getSize(new THREE.Vector2()), ratio=r.getPixelRatio();r.setPixelRatio(1);r.setSize(512,512,false);
+ const c=new THREE.PerspectiveCamera(30,1,.01,30);c.position.set(0,1.62,1.65);c.lookAt(0,1.61,0);
+ const yaw=v.model.rotation.y;v.model.rotation.y=0;r.render(v.scene,c);v.model.rotation.y=yaw;
+ const image=document.getElementById('portraitPreview');image.src=r.domElement.toDataURL('image/png');image.hidden=false;r.setPixelRatio(ratio);r.setSize(size.x,size.y,false);
+};
+let last=performance.now();rendererLoop();function rendererLoop(){requestAnimationFrame(rendererLoop);const now=performance.now(),dt=Math.min((now-last)/1000,.05);last=now;if(document.hidden)return;elapsed+=dt;for(const v of views){if(spin&&v.model)v.model.rotation.y+=dt*.4;animateHeroMotion(v.motion,elapsed*11,motion==='run'?1:0,motion==='strike'?1:motion==='attack'?Math.max(0,1-(elapsed%1.2)*4):0,elapsed,dt);v.controls.update();v.renderer.render(v.scene,v.camera);}}
+</script>
+</html>

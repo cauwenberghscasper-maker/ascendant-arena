@@ -1,0 +1,14 @@
+{
+  "source_sha256": "3f93c06f3e3350444160b54faa3f325182c099c04205ccf0d7e0c3678077ba87",
+  "triangles": 8998,
+  "joints": 13,
+  "textures": [
+    {
+      "path": "basecolor.webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 155758
+    }
+  ],
+  "note": "Measured procedural shoulder/elbow/wrist and hip/knee/ankle rig. Not authored motion capture."
+}

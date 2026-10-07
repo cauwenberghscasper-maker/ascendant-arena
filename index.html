@@ -1039,6 +1039,9 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js';
 import { createPremiumPortraits } from './assets/art/premium-models.js';
+import { HERO_MODELS_V3 } from './assets/data/hero-models-v3.js';
+import { bindHeroMotion, animateHeroMotion } from './assets/data/hero-animation.js';
+import { addHeroEyes } from './assets/data/hero-eyes.js';
 import { equipmentIcon, caseIcon } from './assets/art/premium-icons.js';
 import { COLLECTION_ITEMS, COLLECTION_CHANCE, COLLECTION_GUARANTEE, collectionIcon, rollCollectionItem, recordCollectionItem, migrateCollection, regionBossCase } from './assets/data/loot-collection.js';
 import { PRESTIGE_LEVEL, prestigeCount, migratePrestige, prestigeBlock, prestigePlan, applyPrestige, statMilestone } from './assets/data/prestige.js';
@@ -4319,6 +4322,8 @@ const ASSET_MANIFEST = Object.assign({}, GENERATED_ASSETS, {
   'gear.weapon.dragonsoul.focus': { dir: 'assets/gear/weapon/dragonsoul-focus/', size: 1.78, at: [0, -0.62, 0.1], glow: 1.6, tris: 5811,
     source: 'TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, seed 7, 4 Oct 2026' },
 });
+// Reviewed four-hero batch. Other heroes continue using their existing assets.
+Object.assign(ASSET_MANIFEST, HERO_MODELS_V3);
 // which kind of weapon a brawler holds (mirrors weaponGeometry)
 function heldWeaponFamily(cls) {
   const A = CFG.attacks[cls], k = A ? A.kind : null;
@@ -4369,8 +4374,9 @@ const AssetLibrary = {
   // loader and a studio reflection map, fetched only when the first asset is needed (no WebAssembly decoders)
   init() {
     if (this.boot) return this.boot;
-    this.boot = Promise.all([import('three/addons/loaders/GLTFLoader.js'), import('three/addons/environments/RoomEnvironment.js')])
-      .then(([{ GLTFLoader }, { RoomEnvironment }]) => {
+    this.boot = Promise.all([import('three/addons/loaders/GLTFLoader.js'), import('three/addons/environments/RoomEnvironment.js'), import('three/addons/utils/SkeletonUtils.js')])
+      .then(([{ GLTFLoader }, { RoomEnvironment }, { clone }]) => {
+        this.cloneRig = clone;
         this.loader = new GLTFLoader();
         const pm = new THREE.PMREMGenerator(renderer); this.env = pm.fromScene(new RoomEnvironment(), 0.04).texture; pm.dispose();
       });
@@ -4378,6 +4384,7 @@ const AssetLibrary = {
   },
   prepare(scene, def, id) {
     const holder = new THREE.Group();
+    addHeroEyes(scene, def, THREE);
     scene.scale.setScalar(def.size); holder.add(scene);
     holder.position.fromArray(def.at || [0, 0, 0]); if (def.rot) holder.rotation.fromArray(def.rot);
     const outline = !!def.outline; // ink outlines look noisy on dense scanned meshes; a rim light gives the pop instead
@@ -4389,12 +4396,12 @@ const AssetLibrary = {
       piv.updateMatrixWorld(true); piv.attach(leg);
     }
     scene.updateMatrixWorld(true);
-    if (id.startsWith('hero.') && !/hero\.(arrow)$/.test(id)) def.fist = findFist(scene); // Ayla's cape hides her arm: she keeps her measured hand point
+    if (id.startsWith('hero.') && !def.measuredHand && !/hero\.(arrow)$/.test(id)) def.fist = findFist(scene); // Measured rigs keep their reviewed hand anchors.
     const meshes = []; scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
     for (const o of meshes) {
       o.castShadow = true;
       const m = o.material; m.envMap = this.env; m.envMapIntensity = 1.0;
-      m.roughness = Math.max(0.35, m.roughness); // soft, toy-like highlights
+      m.roughness = Math.max(def.style === 'painted-v3' ? 0.7 : 0.35, m.roughness);
       if (m.emissiveMap) { m.emissive.set(0xffffff); m.emissiveIntensity = def.glow || 1; }
       m.userData.baseEmissive = m.emissive.getHex(); m.userData.baseEmissiveI = m.emissiveIntensity; // plain values: clone() copies userData as JSON
       if (!/^gear\.|^weapon\./.test(id)) addRimLight(m, id.startsWith('hero.') ? 0.55 : 0.4);
@@ -4416,7 +4423,7 @@ const AssetLibrary = {
   // a fresh copy for one hero or monster: geometry and textures are shared, materials are per copy (hit flashes)
   instance(id) {
     const e = this.entries.get(id); if (!e || e.state !== 'ready') return null;
-    const c = e.model.clone(), mats = [];
+    const c = this.cloneRig(e.model), mats = [];
     c.traverse((o) => { if (o.isMesh && !o.userData.outline) { o.material = o.material.clone(); mats.push(o.material); } });
     c.userData.mats = mats;
     return c;
@@ -4426,6 +4433,8 @@ const AssetLibrary = {
     if (!model) return;
     for (const m of new Set(model.userData.mats || [])) m.dispose();
     model.userData.mats = [];
+    const skeletons = new Set(); model.traverse(o => { if (o.isSkinnedMesh) skeletons.add(o.skeleton); });
+    for (const skeleton of skeletons) skeleton.dispose(); // Instances own their cloned bone textures.
   },
   // tint a model instance for hit flashes and status effects (r,g,b added as emissive)
   flash(model, r, g, b) {
@@ -4713,6 +4722,8 @@ const PixelPortraits = {
 };
 // painted portrait (crop of the hero's concept art) when the brawler has a generated model, else a live 3D render
 function brawlerThumb(id) {
+  const reviewedPortrait = ASSET_MANIFEST['hero.' + id]?.portrait;
+  if (reviewedPortrait && AssetLibrary.enabled) return reviewedPortrait;
   if (ASSET_MANIFEST['hero.' + id] && AssetLibrary.enabled) return PixelPortraits.url('assets/ui/portraits/' + id + '.webp');
   const tint = G.profile ? badgeTint(G.profile, id) : null, key = 'br|' + id + '|' + (tint || '');
   if (Thumbs.cache.has(key)) return Thumbs.cache.get(key);
@@ -4892,9 +4903,9 @@ function addAscended(root, pivot, tier) {
     out.crown.position.y = 2.42; pivot.add(out.crown);
   }
   out.update = (t, amt) => {
-    out.pillar.rotation.y = t * 0.5; out.pillar.material.opacity = 0.14 + Math.sin(t * 2.4) * 0.05;
+    out.pillar.rotation.y = t * 0.5; out.pillar.material.opacity = Showcase.on ? .04 : 0.14 + Math.sin(t * 2.4) * 0.05;
     out.ring.rotation.y = -t * 0.8; out.ring.scale.setScalar(1 + Math.sin(t * 3) * 0.06);
-    if (out.wings) { const fl = 0.45 + Math.sin(t * (3 + amt * 5)) * (0.18 + amt * 0.2); out.wings[0].rotation.y = -fl; out.wings[1].rotation.y = fl; }
+    if (out.wings) { const fl = 0.45 + Math.sin(t * (3 + amt * 5)) * (0.18 + amt * 0.2); out.wings[0].rotation.y = -fl; out.wings[1].rotation.y = fl; for (const wing of out.wings) wing.scale.setScalar(Showcase.on ? .5 : 1); }
     if (out.crown) { out.crown.rotation.y = t * 1.1; out.crown.position.y = 2.42 + Math.sin(t * 2) * 0.05; }
   };
   return out;
@@ -4925,7 +4936,7 @@ AssetSlots.register('character', (o) => {
   // generated models swap in once loaded: the brawler's body (legs swing on their own pivots) and the held weapon
   const hId = AssetLibrary.has('hero.' + o.cls) ? 'hero.' + o.cls : null;
   const wId = AssetLibrary.idForItem(heldIt);
-  let hero = null, heroLegs = null, aura = null, hDone = !hId, wDone = !wId;
+  let hero = null, heroLegs = null, heroMotion = null, aura = null, hDone = !hId, wDone = !wId;
   const swapModels = () => {
     if (!hDone) {
       const st = AssetLibrary.status(hId);
@@ -4934,10 +4945,16 @@ AssetSlots.register('character', (o) => {
         body.visible = bodyOl.visible = false; for (const l of legs) l.visible = false;
         const L = hero.getObjectByName('legLPivot'), R = hero.getObjectByName('legRPivot'); if (L && R) heroLegs = [L, R];
         const def = ASSET_MANIFEST[hId];
+        heroMotion = def.armRig ? bindHeroMotion(hero) : null;
         // the weapon's grip goes to the centre of the modelled fist (found in the mesh), else the stored hand point
         const hp = def.rig ? def.rig.hand : def.hand;
         if (def.fist) wPivot.position.copy(def.fist); else if (hp) wPivot.position.set(hp[0] * def.size, hp[1] * def.size, hp[2] * def.size);
-        const fo = HERO_GRIP_OFF[o.cls]; if (fo) wPivot.position.add(_v3.fromArray(fo)); // hand-tuned per hero where the mesh misleads
+        const fo = HERO_GRIP_OFF[o.cls]; if (fo && !def.measuredHand) wPivot.position.add(_v3.fromArray(fo));
+        if (heroMotion) {
+          // The grip inherits wrist/arm motion instead of floating beside a static arm.
+          hero.updateMatrixWorld(true); heroMotion.handR.attach(wPivot);
+          wPivot.position.set(0, 0, 0); wPivot.rotation.set(0, 0, 0);
+        }
         const ar = gearAuraRarity(o.gear);
         if (ar && !o.peer) {
           aura = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.3).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: auraTexture(), color: RAR_HEX[ar], transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
@@ -4977,8 +4994,9 @@ AssetSlots.register('character', (o) => {
       pivot.position.y = Math.abs(Math.sin(phase)) * 0.09 * amt + (amt < 0.1 ? Math.sin(t * 2 + phase) * 0.015 : 0);
       if (!hDone || !wDone) swapModels();
       if (heroLegs) { heroLegs[0].rotation.x = Math.sin(phase) * 0.7 * amt; heroLegs[1].rotation.x = -Math.sin(phase) * 0.7 * amt; hero.rotation.x = amt * 0.06; }
+      if (heroMotion) { animateHeroMotion(heroMotion, phase, amt, e.attackAnim || 0, t, dt); pivot.position.y = Math.abs(Math.sin(phase)) * 0.006 * amt + (amt < 0.1 ? Math.sin(t * 2 + phase) * 0.005 : 0); }
       if (aura) { const k = 0.5 + aura.userData.k * 0.06; aura.material.opacity = k * (0.8 + Math.sin(t * 3) * 0.2); aura.rotation.y = t * 0.4; }
-      wPivot.rotation.x = -(e.attackAnim || 0) * 1.4;
+      if (!heroMotion) wPivot.rotation.x = -(e.attackAnim || 0) * 1.4;
       const tsq = e.dashT > 0 ? 0.78 : 1; sq = lerp(sq, tsq, 1 - Math.exp(-dt * 20));
       pivot.scale.set(1 + (1 - sq) * 0.6, sq, 1 + (1 - sq) * 0.6);
       const f = e.flashT > 0 ? 0.9 : 0;

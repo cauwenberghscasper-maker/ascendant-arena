@@ -15,4 +15,5 @@ photoreal pores, porcelain skin, identical decorative straps, tiny filigree,
 glossy toy surfaces, clown-red noses and baby mascot proportions.
 
 The previous four-model recovery job was cancelled after this correction.
-No new hero model has been enabled on the live website yet.
+The accepted first batch uses Pip v4, Brick v3, Ayla v3 and Lumi v4 references.
+See `audit/hero-rig-release.md` for measured rig checks and remaining work.

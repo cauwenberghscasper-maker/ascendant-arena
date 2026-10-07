@@ -122,7 +122,7 @@ check('60 Hz scheduler preserves cadence on 60/90/120/144/165 Hz displays',()=>{
 });
 check('instance disposal frees owned materials once and retains shared resources',()=>{
   const code=section('  disposeInstance(model) {','  // tint a model');const c={};vm.createContext(c);vm.runInContext('const lib={'+code+'};this.dispose=lib.disposeInstance;',c);
-  let disposed=0;const mat={dispose(){disposed++;}},model={userData:{mats:[mat,mat]},geometry:{dispose(){throw Error('shared geometry disposed');}}};c.dispose(model);c.dispose(model);assert.equal(disposed,1);
+  let disposed=0,boneTextures=0;const mat={dispose(){disposed++;}},skeleton={texture:true,dispose(){if(this.texture){boneTextures++;this.texture=false;}}},model={userData:{mats:[mat,mat]},geometry:{dispose(){throw Error('shared geometry disposed');}},traverse(fn){fn({isSkinnedMesh:true,skeleton});fn({isSkinnedMesh:true,skeleton});}};c.dispose(model);c.dispose(model);assert.equal(disposed,1);assert.equal(boneTextures,1);
 });
 check('adaptive quality reduces the actual pixel target on high-DPR screens',()=>{
   const c={window:{devicePixelRatio:3},Showcase:{on:false},Q:{dpr:1},renderer:{setPixelRatio(){},setSize(){},domElement:{style:{}}}};vm.createContext(c);
