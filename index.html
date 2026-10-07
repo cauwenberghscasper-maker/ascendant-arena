@@ -941,6 +941,10 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
   #mapBox { top: calc(136px + var(--sat)); }
   #fps { top: 104px; }
 }
+/* Legendary rarity stays gold even under the shared stone-frame and upgrade-alert theme. */
+.dchip.legendary, .item.legendary { border-image-source:var(--pxf-legendary-src) !important; }
+.tile.legendary { border-image:var(--pxf-legendary-src) 8 fill / 3px / 0 stretch !important; }
+.dchip.legendary.sel, .tile.legendary.sel { outline:2px solid #fff2c6; outline-offset:1px; }
 /* Town shortcuts and a menu that fits one screen. Content pages retain their own scrolling. */
 #hubShortcuts { position:absolute; top:calc(140px + var(--sat)); left:calc(14px + var(--sal)); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; width:214px; }
 #hubShortcuts button { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-height:62px; padding:4px; border:6px solid transparent; border-image:var(--pxf-btn) 8 fill / 6px / 0 stretch; background:transparent; color:var(--text); font:700 13px var(--display); text-align:center; touch-action:manipulation; }
@@ -6753,6 +6757,7 @@ const PixelFrames = {
     const panelFill = 0x15131b, btnFill = 0x25222d, goldFill = 0x2f2b38;
     const set = (k, v) => { r.setProperty(k, v); r.setProperty(k + '-src', v); };
     set('--pxf-panel', sq(stone, panelFill)); set('--pxf-btn', sq(stone, btnFill)); set('--pxf-gold', sq(gold, goldFill));
+    set('--pxf-legendary', sq([0xffe9a3, 0xffb347, 0xc4741a, 0x6c3814], panelFill));
     set('--pxf-green', sq(green, 0x1c2a1a)); set('--pxf-red', sq(red, 0x3a1614));
     set('--pxf-round', sq(stone, null, true)); set('--pxf-round-gold', sq(gold, null, true)); set('--pxf-round-ice', sq(ice, null, true)); set('--pxf-round-arc', sq(arc, null, true));
   },
