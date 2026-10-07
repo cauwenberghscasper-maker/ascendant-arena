@@ -968,6 +968,9 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 @media (max-width:620px) and (min-height:421px) {
   .menuPanel .mtiles { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
+@media (min-aspect-ratio:1/1) and (min-height:591px) {
+  #hubShortcuts { left:calc(112px + var(--sal)); }
+}
 @media (max-height:590px) {
   #hubShortcuts { top:calc(100px + var(--sat)); left:auto; right:calc(248px + var(--sar)); width:auto; grid-template-columns:repeat(4,88px); }
   #hubShortcuts button { flex-direction:column; gap:2px; font-size:12px; }

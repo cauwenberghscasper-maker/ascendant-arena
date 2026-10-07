@@ -20,6 +20,7 @@ opening cases. Both menu sections were measured at 360x640, 390x844, 568x320 and
 viewport, and a minimum touch target of 44px. Screenshots were inspected in portrait
 and landscape. The shortcut dock was adjusted to avoid the minimap and tutorial tips;
 the boss pointer's top boundary respects the dock while it is present.
+The 1280x720 desktop dock was also measured clear of the left-side minimap.
 
 Gear, Skills, Artifacts and Cases opened through the shortcuts. Content pages retain
 their independent scrolling, section selection retains keyboard focus and closing
