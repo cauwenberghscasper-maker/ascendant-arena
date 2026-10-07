@@ -1,0 +1,12 @@
+{
+  "name": "ascendant-arena-asset-tools",
+  "private": true,
+  "description": "Offline asset processing and regression checks; not shipped into the browser bundle",
+  "engines": { "node": ">=22.12" },
+  "dependencies": {
+    "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
+    "meshoptimizer": "1.3.0",
+    "three": "0.186.1"
+  }
+}

@@ -1,6 +1,6 @@
 // Offline, measured-rig skinning. Source mesh/UVs are preserved; no runtime dependency.
 const fs=require('node:fs'),path=require('node:path');
-const {NodeIO}=require(path.resolve(__dirname,'../../.asset-tools/node_modules/@gltf-transform/core'));
+const {NodeIO}=require(path.join(require('./asset-deps.cjs'),'@gltf-transform/core'));
 const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 async function main(){
  const [source,output,rigPath]=process.argv.slice(2);

@@ -1,9 +1,10 @@
-// Offline asset tool; install glTF Transform and meshoptimizer in ../.asset-tools.
+// Offline asset tool; install dependencies with npm install --prefix tools.
 // Leaves the generated source untouched. No runtime dependency is added to the game.
 const path=require('node:path');
-const {NodeIO}=require(path.resolve(__dirname,'../../.asset-tools/node_modules/@gltf-transform/core'));
-const {weld,simplify}=require(path.resolve(__dirname,'../../.asset-tools/node_modules/@gltf-transform/functions'));
-const {MeshoptSimplifier}=require(path.resolve(__dirname,'../../.asset-tools/node_modules/meshoptimizer'));
+const deps=require('./asset-deps.cjs');
+const {NodeIO}=require(path.join(deps,'@gltf-transform/core'));
+const {weld,simplify}=require(path.join(deps,'@gltf-transform/functions'));
+const {MeshoptSimplifier}=require(path.join(deps,'meshoptimizer'));
 async function main(){
  const [source,output,limitArg]=process.argv.slice(2),limit=Number(limitArg||11500);
  if(!source||!output||path.resolve(source)===path.resolve(output))throw Error('Use separate source and output GLB paths');

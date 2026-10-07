@@ -1,7 +1,7 @@
 // Validate exported skin, rest-pose integrity, motion, and skeleton isolation.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {pathToFileURL}=require('node:url');
-const deps=path.resolve(__dirname,'../../.asset-tools/node_modules');
+const deps=require('./asset-deps.cjs');
 const {NodeIO}=require(path.join(deps,'@gltf-transform/core'));
 async function main(){
  const THREE=await import(pathToFileURL(path.join(deps,'three/build/three.module.js')).href);
