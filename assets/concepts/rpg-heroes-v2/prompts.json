@@ -1,0 +1,23 @@
+[
+  {
+    "name": "brick",
+    "prompt": "Use case: stylized-concept. Generate a new original full-body premium mobile adventure RPG MMO hero, Brick the bastion knight. The provided Pip image is a STYLE REFERENCE ONLY: match its painterly high-end 3D character rendering, material craftsmanship, natural human face, and mature heroic proportions. Brick is a distinct broad-shouldered adult man with dark hair, a short trimmed beard, warm tan skin, stern but honorable natural face and a normal skin-colored nose. Heavy weathered silver plate armor over burnt terracotta cloth, antique brass borders, large squared pauldrons, burgundy short split cape, readable chunky gauntlets and armored boots. No weapon or shield: empty gently closed hands for attaching the game's signature weapon separately. Front-facing full-body relaxed symmetrical A-pose, arms 20 degrees away from torso, feet apart, entire silhouette clearly visible with generous clear edges. Stylized broad detail readable on a phone, realistic metal versus matte cloth contrast, no noisy tiny filigree. Transparent background, no floor, no shadow, no scenery, no text, no logo. No red nose, no clown, no blush spots, no baby or chibi mascot, no baseball cap, no giant eyes, no toy plastic. Exactly one character.",
+    "mode": "built-in image generation",
+    "reference": "pip-reference.png",
+    "transparent_background": true
+  },
+  {
+    "name": "ayla",
+    "prompt": "Use case: stylized-concept. New original premium mobile adventure RPG MMO hero reference: Ayla, the woodland ranger, an adult female elf with warm brown skin, subtly pointed ears, composed natural face, normal skin-colored nose, deep green eyes, auburn hair tied in a practical braid. The attached Pip is a style reference ONLY: match its crafted painterly high-end 3D presentation and mature heroic proportions, not its identity. Elegant agile full-body silhouette, layered moss-green hooded cloak with the hood lowered, brown leather ranger cuirass, ivory undersleeves, copper clasps, jade rune clasp, leaf-shaped shoulder guards, sturdy fitted boots. Broad readable shapes, restrained ornament, clear distinct green palette. Front-facing symmetrical relaxed A-pose, arms 20 degrees away from torso, separate legs, EMPTY hands (no bow, quiver, arrows or weapon; weapons attach separately in game). Entire figure including both boots visible, generous clear margin. Transparent background, no shadow, no floor, no scenery, no text or logo. No red nose, blush spots, giant eyes, baby mascot, chibi, toy gloss, photoreal pores or modern clothing. Exactly one character.",
+    "mode": "built-in image generation",
+    "reference": "pip-reference.png",
+    "transparent_background": true
+  },
+  {
+    "name": "lumi",
+    "prompt": "Use case: stylized-concept. New original full-body premium mobile adventure RPG MMO character reference: Lumi the lunar arcanist, an adult female mage with cool ivory skin, natural small skin-colored nose, intelligent violet eyes of natural size, straight silver-white hair in a high practical braid and a calm confident face. Attached Pip is a STYLE REFERENCE ONLY for crafted painterly high-end 3D rendering, natural face, mature heroic proportions and coherent materials. Give Lumi a clearly different spellcaster silhouette: fitted indigo and violet layered cloth robes with a short split skirt over visible leggings, silver crescent pauldrons, a sculpted small lunar circlet (not tall wizard hat), subtle cyan rune stones, wrapped forearm cuffs and pointed sturdy blue leather boots. Broad readable material planes, restrained ornament, polished premium adventure character rather than baby cartoon. Front-facing full body, symmetric relaxed A-pose, arms 20 degrees away from torso, empty gently closed hands, legs visibly separated so walking animation is possible. No staff, no orb, no weapon, no separate effects. Transparent background; entire figure and both boots with clear margins. No floor, shadows, scenery, text or logo. No clown/red nose, blush spots, huge eyes, baseball cap, toy gloss, photoreal pores or baby body. Exactly one character.",
+    "mode": "built-in image generation",
+    "reference": "pip-reference.png",
+    "transparent_background": true
+  }
+]
