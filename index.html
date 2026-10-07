@@ -941,6 +941,50 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
   #mapBox { top: calc(136px + var(--sat)); }
   #fps { top: 104px; }
 }
+/* Town shortcuts and a menu that fits one screen. Content pages retain their own scrolling. */
+#hubShortcuts { position:absolute; top:calc(140px + var(--sat)); left:calc(14px + var(--sal)); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; width:214px; }
+#hubShortcuts button { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-height:62px; padding:4px; border:6px solid transparent; border-image:var(--pxf-btn) 8 fill / 6px / 0 stretch; background:transparent; color:var(--text); font:700 13px var(--display); text-align:center; touch-action:manipulation; }
+#hubShortcuts .quickIcon, #hubShortcuts img { width:24px; height:24px; flex-shrink:0; object-fit:contain; }
+#hubShortcuts .quickIcon .gi { display:block; width:100%; height:100%; }
+#hubShortcuts .rdot { position:absolute; top:-4px; right:-4px; }
+#hubShortcuts b { position:absolute; top:-7px; right:-5px; padding:2px 4px; background:#d7b565; color:#211a25; font:700 11px var(--numbers); }
+#hubShortcuts button:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+#hubShortcuts button:active { transform:translateY(2px); }
+.panel.menuPanel { width:min(680px,100%); overflow:hidden; gap:10px; padding:12px; touch-action:manipulation; }
+.menuPanel .menuHead { min-height:42px; }
+.menuPanel .menuHead h3 { margin:0 0 4px; }
+.menuPanel .menuHead small { font:12px var(--numbers); }
+.menuSections { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.menuSections button { position:relative; min-height:44px; border:6px solid transparent; border-image:var(--pxf-btn) 8 fill / 6px / 0 stretch; background:transparent; color:var(--muted); font:700 16px var(--display); }
+.menuSections button[aria-pressed="true"] { border-image-source:var(--pxf-gold-src); color:var(--text); }
+.menuSections .rdot { position:absolute; top:3px; right:5px; }
+.menuPanel .mtiles { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.menuPanel .mtile { min-height:92px; padding:8px 6px; gap:6px; justify-content:center; }
+.menuPanel .mtile .gi.pxi { width:32px; height:32px; margin:0; flex-shrink:0; }
+.menuTileText { display:flex; flex-direction:column; gap:4px; min-width:0; }
+.menuPanel .mtile b { margin:0; font-size:16px; line-height:1.15; letter-spacing:0; }
+.menuPanel .mtile small { font:11px/1.25 var(--numbers); }
+.menuPanel .mtile .rdot { top:4px; right:4px; }
+@media (max-width:620px) and (min-height:421px) {
+  .menuPanel .mtiles { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-height:590px) {
+  #hubShortcuts { top:calc(100px + var(--sat)); left:auto; right:calc(248px + var(--sar)); width:auto; grid-template-columns:repeat(4,88px); }
+  #hubShortcuts button { flex-direction:column; gap:2px; font-size:12px; }
+  #hubShortcuts .quickIcon, #hubShortcuts img { width:24px; height:24px; }
+}
+@media (max-height:590px) and (max-width:759px) { #hubShortcuts { display:none; } }
+@media (max-height:420px) {
+  .panel.menuPanel { gap:6px; padding:8px; }
+  .menuPanel .menuHead { min-height:44px; }
+  .menuPanel .menuHead h3 { font-size:19px; margin:0; }
+  .menuPanel .menuHead small { font-size:11px; }
+  .menuPanel .mtiles { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+  .menuPanel .mtile { min-height:66px; flex-direction:row; gap:7px; text-align:left; padding:5px; }
+  .menuPanel .mtile .gi.pxi { width:26px; height:26px; }
+  .menuPanel .mtile b { font-size:14px; }
+  .menuPanel .mtile small { font-size:10px; }
+}
 </style>
 
 
@@ -986,6 +1030,12 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
       <button class="hbtn ic" id="bSet" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
       <div id="fps" hidden></div>
     </div>
+    <nav id="hubShortcuts" aria-label="Hero upgrades" hidden>
+      <button data-quick="gear"><span class="quickIcon" data-icon="m_hero" aria-hidden="true"></span><span>Gear</span><i id="navGearDot" class="rdot" hidden></i></button>
+      <button data-quick="skills"><span class="quickIcon" data-icon="m_skills" aria-hidden="true"></span><span>Skills</span><i id="navSkillsDot" class="rdot" hidden></i></button>
+      <button data-quick="artifacts"><span class="quickIcon" data-icon="m_artifacts" aria-hidden="true"></span><span>Artifacts</span><i id="navArtifactsDot" class="rdot" hidden></i></button>
+      <button data-quick="cases"><img src="assets/ui/premium-v2/case-treasure.webp" alt=""><span>Cases</span><b id="navCasesCount" hidden></b></button>
+    </nav>
     <div id="hudTop">
       <div id="objective" hidden><span id="objArrow">▲</span><span id="objText"></span></div>
       <div id="bossBar" hidden><div class="bn"><span id="bossName"></span><span id="bossTime"></span></div><div class="bb"><i id="bossHp"></i></div></div>
@@ -6841,7 +6891,7 @@ const ICON = {
   trophy: '<svg viewBox="0 0 20 20" class="ic"><path d="M5 3h10v4a5 5 0 0 1-10 0z" fill="#ffd34a" stroke="#a8781a" stroke-width="1.5"/><path d="M5 5H2.5a2.5 2.5 0 0 0 3 3.5M15 5h2.5a2.5 2.5 0 0 1-3 3.5" fill="none" stroke="#a8781a" stroke-width="1.5"/><rect x="8.5" y="11" width="3" height="4" fill="#a8781a"/><rect x="6" y="15" width="8" height="2.5" rx="1" fill="#a8781a"/></svg>',
 };
 ICON.ess = '<svg viewBox="0 0 20 20" class="ic"><path d="M10 1.5l6 7-6 10-6-10z" fill="#c77dff" stroke="#6b2fa8" stroke-width="1.5"/><path d="M10 1.5v17M4 8.5h12" stroke="#f0d9ff" stroke-width="1" opacity=".7"/></svg>';
-const UI = { closable: true, current: null, hud: {} };
+const UI = { closable: true, current: null, menuSection: 'upgrades', hud: {} };
 function costHTML(gold, ess) { return `${ICON.coin}${fmtK(gold)}${ess ? ` <span class="essc">${ICON.ess}${fmtK(ess)}</span>` : ''}`; }
 
 // --- pooled world-anchored DOM (nametags, damage numbers) ---
@@ -7005,6 +7055,10 @@ function updateHUD(dt) {
   const sp = skillPointsFree(p);
   UI.alertT = (UI.alertT || 0) - dt;
   if (UI.alertT <= 0) { UI.alertT = 0.3; UI.anyAlert = Object.values(slotAlerts()).some((a) => a.better || a.canUpgrade); updateGearPrompt(); $('feed').classList.toggle('up', !$('gearPrompt').hidden); }
+  setHidden('hubShortcuts', !hubShortcutsAvailable());
+  setHidden('navGearDot', !UI.anyAlert); setHidden('navSkillsDot', sp <= 0);
+  setHidden('navArtifactsDot', !p.newUnlocks.some(u => u.startsWith('r:')));
+  setHidden('navCasesCount', !p.cases.length); setText('navCasesCount', String(p.cases.length));
   setHidden('heroDot', !UI.anyAlert);
   setHidden('menuDot', !(sp > 0 || UI.anyAlert || p.newUnlocks.length > 0 || p.cases.length > 0));
   Feed.update(dt);
@@ -7490,6 +7544,7 @@ function handlePanelClick(e) {
     case 'tZoom': treeZoom(b.dataset.z); break;
     case 'mSmith': openSmith('Upgrade'); break;
     case 'mMenu': openMenu(); break;
+    case 'menuSection': openMenu(b.dataset.section); $('panel').querySelector(`[data-section="${UI.menuSection}"]`).focus({preventScroll:true}); break;
     case 'mCases': case 'cases': openCases(); break;
     case 'mCollection': openCollection(); break;
     case 'mPrestige': openPrestige(); break;
@@ -7530,6 +7585,7 @@ function handlePanelClick(e) {
     case 'tab': heroTab(b.dataset.tab); break;
     case 'openMenu': openMenu(); break;
     case 'mHero': heroTab('Stats'); break;
+    case 'mGear': heroTab('Gear'); break;
     case 'mBrawlers': openBrawlers(); break;
     case 'mSkills': openSkills(treeFree(G.profile, 'hero') > 0 ? 'hero' : G.profile.cls); break;
     case 'mArtifacts': openArtifacts('Equip'); break;
@@ -7983,7 +8039,9 @@ function updateBossTracker() {
   const pl = G.player, W = window.innerWidth, H = window.innerHeight, m = 44;
   const s = project(tx, 2, tz), d = Math.hypot(tx - pl.x, tz - pl.z);
   // keep the pointer clear of the top HUD stack and the bottom controls
-  const yMin = Cam.portrait ? 240 : 132, yMax = H - (Cam.portrait ? 310 : 60), xMin = m + 20, xMax = W - m - 20;
+  // Match the two-row town dock and its wide, short-screen variant; keep boss labels below it.
+  const quickDock = hubShortcutsAvailable() && (H > 590 || W >= 760);
+  const yMin = quickDock ? (H > 590 ? 286 : 176) : (Cam.portrait ? 240 : 132), yMax = H - (Cam.portrait ? 310 : 60), xMin = m + 20, xMax = W - m - 20;
   if (s && s[0] > 0 && s[0] < W && s[1] > 30 && s[1] < H - 20) { setHidden('bossPtr', true); return; }
   let dx = -(tx - pl.x), dy = -(tz - pl.z); const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
   const cx = W / 2, cy = (yMin + yMax) / 2;
@@ -8235,28 +8293,45 @@ function menuAlerts() {
     artifacts: p.newUnlocks.some((u) => u.startsWith('r:')), progress: false,
   };
 }
-function openMenu() {
+function hubShortcutsAvailable() {
+  return G.started && !G.modal && G.mode === 'hub' && !G.rift && G.player.alive && inTown();
+}
+function openQuickUpgrade(action) {
+  if (!hubShortcutsAvailable()) return;
+  Sfx.play('click');
+  if (action === 'gear') heroTab('Gear');
+  else if (action === 'skills') openSkills(treeFree(G.profile, 'hero') > 0 ? 'hero' : G.profile.cls);
+  else if (action === 'artifacts') openArtifacts('Equip');
+  else if (action === 'cases') openCases();
+}
+function openMenu(section) {
   UI.current = 'menu';
+  if (section === 'upgrades' || section === 'adventure') UI.menuSection = section;
   const p = G.profile, A = menuAlerts(), own = ownedBrawlers(p).length;
   const hp = treeFree(p, 'hero'), bp = treeFree(p, p.cls);
-  const emb = (icon) => { const k = icon.replace(/^m_/, ''); return MENU_EMBLEMS.includes(k) ? `<img class="emb" src="assets/ui/menu/${k}.webp" alt="">` : gi(icon); };
-  const tile = (act, icon, title, sub, dot, cls) => `<button class="mtile ${cls || ''}${MENU_EMBLEMS.includes(icon.replace(/^m_/, '')) ? ' painted' : ''}" data-act="${act}">${emb(icon)}<b>${title}</b><small>${sub}</small>${dot ? '<i class="rdot"></i>' : ''}</button>`;
-  openModal(`<div class="menuHead"><span class="lv">${p.level}</span><div><h3>${CFG.brawlers[p.cls].name}</h3><small>${CFG.classes[p.cls].role} · ${CFG.attacks[p.cls].name}</small></div></div>
-    <div class="mtiles">
-      ${tile('mHero', 'm_hero', 'Hero', `Stats and gear · score ${fmt(Math.round(gearTotals(p.gear).score))}`, A.hero)}
-      ${tile('mBrawlers', 'm_brawlers', 'Brawlers', `${own} of ${CFG.brawlerOrder.length} unlocked`, A.brawlers)}
-      ${tile('mSkills', 'm_skills', 'Skill trees', hp + bp > 0 ? `${hp + bp} points to spend` : 'All points spent', A.skills, hp + bp > 0 ? 'hot' : '')}
-      ${tile('mArtifacts', 'm_artifacts', 'Artifacts', `${p.artifacts.length}/${artifactSlotsFor(p)} equipped · ${p.unlocked.artifacts.length} owned`, A.artifacts)}
-      ${tile('mProgress', 'm_progress', 'Progress', 'Level Road, records and feats', A.progress)}
-      ${tile('mCases', 'm_case', 'Cases', p.cases.length ? `${p.cases.length} to open` : 'Earned from loot', p.cases.length > 0, p.cases.length ? 'hot' : '')}
-      ${tile('mCollection', 'm_hero', 'Collection', `${Object.keys(p.collection || {}).length}/${COLLECTION_ITEMS.length} named items found`, false)}
-      ${tile('mPrestige', 'm_asc', 'Prestige & pet', `Prestige ${prestigeCount(p)} · ${prestigeCount(p) ? petProgress(p).name : `unlock at level ${PRESTIGE_LEVEL}`}`, !prestigeBlocked())}
-      ${tile('mIdle', 'm_idle', 'Idle', 'Vault, expeditions, auto hunt', idleAlert())}
-      ${tile('mPlayers', 'm_players', 'Players', mpSummary())}
-      ${tile('mSmith', 'm_smith', 'Smith', 'Merge gear, gems and forge', UI.anyAlert)}
-      ${tile('mArena', 'm_arena', 'Showdown', `${fmt(p.trophies)} trophies · 9 computer rivals`)}
-    </div>`);
-  $('panel').classList.add('wide');
+  const tile = (act, icon, title, sub, dot) => `<button class="mtile" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${sub}</small></span>${dot ? '<i class="rdot"></i>' : ''}</button>`;
+  const upgrades = [
+    tile('mGear', 'm_hero', 'Gear', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, A.hero),
+    tile('mSkills', 'm_skills', 'Skills', hp + bp > 0 ? `${fmt(hp + bp)} points to spend` : 'All points spent', A.skills),
+    tile('mArtifacts', 'm_artifacts', 'Artifacts', `${p.artifacts.length}/${artifactSlotsFor(p)} equipped`, A.artifacts),
+    tile('mCases', 'm_case', 'Cases', p.cases.length ? `${p.cases.length} to open` : 'Earned from loot', p.cases.length > 0),
+    tile('mBrawlers', 'm_brawlers', 'Brawlers', `${own}/${CFG.brawlerOrder.length} unlocked`, A.brawlers),
+    tile('mSmith', 'm_smith', 'Smith', 'Merge & forge', UI.anyAlert),
+  ];
+  const adventure = [
+    tile('mProgress', 'm_progress', 'Progress', 'Rewards & records', A.progress),
+    tile('mCollection', 'm_hero', 'Collection', `${Object.keys(p.collection || {}).length}/${COLLECTION_ITEMS.length} found`, false),
+    tile('mPrestige', 'm_asc', 'Pets & prestige', `Prestige ${prestigeCount(p)}`, !prestigeBlocked()),
+    tile('mIdle', 'm_idle', 'Idle', 'Vault & hunts', idleAlert()),
+    tile('mPlayers', 'm_players', 'Players', mpSummary()),
+    tile('mArena', 'm_arena', 'Showdown', '9 computer rivals', false),
+  ];
+  openModal(`<div class="menuHead"><div><h3>Menu</h3><small>${CFG.brawlers[p.cls].name} · Level ${fmt(p.level)}</small></div></div>
+    <div class="menuSections" role="group" aria-label="Menu sections">
+      <button data-act="menuSection" data-section="upgrades" aria-pressed="${UI.menuSection === 'upgrades'}">Upgrades${Object.values(A).some(Boolean) || p.cases.length ? '<i class="rdot"></i>' : ''}</button>
+      <button data-act="menuSection" data-section="adventure" aria-pressed="${UI.menuSection === 'adventure'}">Adventure</button>
+    </div><div class="mtiles">${(UI.menuSection === 'adventure' ? adventure : upgrades).join('')}</div>`);
+  $('panel').classList.remove('scroll'); $('panel').classList.add('menuPanel');
 }
 
 // --- Prestige: reviewed reset, permanent companion and bounded world bonuses ---------------------------
@@ -9217,6 +9292,8 @@ function boot(hotData) {
   $('modal').addEventListener('pointerup', endSpin); $('modal').addEventListener('pointercancel', endSpin);
   $('bHero').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); heroTab('Stats'); } });
   $('bMenu').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openMenu(); } });
+  for (const icon of $('hubShortcuts').querySelectorAll('[data-icon]')) icon.innerHTML = gi(icon.dataset.icon);
+  $('hubShortcuts').addEventListener('click', e => { const button = e.target.closest('[data-quick]'); if (button) openQuickUpgrade(button.dataset.quick); });
   for (const [id, key] of [['bHero', 'm_hero']]) $(id).querySelector('svg').outerHTML = gi(key); // the game's own icon set
   $('bSet').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openSettings(); } });
   $('coachX').addEventListener('click', () => { G.profile.tut = Coach.steps.length; G.dirty = true; Coach.render(); });
