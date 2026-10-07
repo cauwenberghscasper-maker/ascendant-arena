@@ -40,7 +40,7 @@ check('targets skip idle, dead, returning, retreating, distant and obstructed en
   const boss={...enemy(7),kind:'boss',state:undefined,dmgBy:{1:1}};assert.equal(c.findPetTarget([],boss,player,origin,10,()=>true),boss);
 });
 let rewards=0,ended=0,blocked=false,town=false,refreshes=0,events=[];
-Object.assign(c,{G:{profile:profile(1),player,mode:'hub',started:true,modal:false,paused:false,menuSafe:0,time:0,enemies:[],boss:null,ents:new Map([[1,player]])},
+Object.assign(c,{TEST_MODE:false,G:{profile:profile(1),player,mode:'hub',started:true,modal:false,paused:false,menuSafe:0,time:0,enemies:[],boss:null,ents:new Map([[1,player]])},
   CFG:{combat:{variance:0,hitFlash:.1,critChance:1,critMult:99},world:{enemyRespawn:5,eliteRespawn:5,denRespawn:5}},
   inTown:()=>town,rayLen:(x,z,a,d)=>({d:blocked?0:d}),ev:e=>events.push(e),markCombat(){},refreshPlayerStats(){refreshes++;},
   rewardEnemyKill(){rewards++;c.awardPetCombatXp(50);},endBoss(){ended++;c.G.boss=null;},angDiff:(a,b)=>b-a,clamp:(n,a,b)=>Math.min(b,Math.max(a,n)),

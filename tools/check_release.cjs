@@ -4,8 +4,9 @@ const root = path.resolve(__dirname, '..'), html = fs.readFileSync(path.join(roo
 function section(a,b) { const i=html.indexOf(a),j=html.indexOf(b,i+a.length); assert(i>=0&&j>i,a);return html.slice(i,j); }
 let passed=0;
 function check(name,fn){fn();passed++;console.log('PASS '+name);}
-const ctx={Date,console,performance:{now:()=>0},LOCAL_PREVIEW:false,G:{gearPrompts:[],mode:'hub'},masteryBonus:()=>0,addMastery(){},refreshPlayerStats(){},checkAchievements(){},ev(){},toast(){},onExpedition:()=>false};
+const ctx={Date,console,performance:{now:()=>0},LOCAL_PREVIEW:false,TEST_MODE:false,G:{gearPrompts:[],mode:'hub'},masteryBonus:()=>0,addMastery(){},refreshPlayerStats(){},checkAchievements(){},ev(){},toast(){},onExpedition:()=>false};
 vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(path.join(root,'assets/data/test-mode.js'),'utf8').replace(/export /g,''),ctx);
 const collectionModule=fs.readFileSync(path.join(root,'assets/data/loot-collection.js'),'utf8').replace(/export /g,'');
 vm.runInContext(collectionModule+'\nthis.collectionDefs=COLLECTION_ITEMS;',ctx);
 vm.runInContext(fs.readFileSync(path.join(root,'assets/data/prestige.js'),'utf8').replace(/export /g,''),ctx);

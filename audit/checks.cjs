@@ -89,8 +89,9 @@ const totals={models:assets.length,triangles:assets.reduce((s,a)=>s+a.triangles,
 for(const a of assets){const kind=a.path.split('/')[1];totals.byKind[kind]=(totals.byKind[kind]||0)+1;}
 // Two confirmed data-corruption paths in the real sanitizer, using its default factory dependency as a fixture.
 const fixture=()=>({v:2,level:1,cls:'bolt',gear:{weapon:{id:'default'}},stats:{},settings:{},brawlers:{bolt:{tree:{sets:[]},artifacts:[]}},unlocked:{attacks:[],artifacts:[]}});
-const sc={LOCAL_PREVIEW:false,defaultProfile:fixture,CFG:{progression:{cap:1000},brawlers:{bolt:{}},gear:{slots:['weapon']}},clamp:(x,a,b)=>Math.min(b,Math.max(a,x)),newTreeState:()=>({sets:[]}),newBrawlerState:()=>({tree:{sets:[]},artifacts:[]}),Date};
+const sc={LOCAL_PREVIEW:false,TEST_MODE:false,defaultProfile:fixture,CFG:{progression:{cap:1000},brawlers:{bolt:{}},gear:{slots:['weapon']}},clamp:(x,a,b)=>Math.min(b,Math.max(a,x)),newTreeState:()=>({sets:[]}),newBrawlerState:()=>({tree:{sets:[]},artifacts:[]}),Date};
 vm.createContext(sc);
+if(!baseline)vm.runInContext(fs.readFileSync(path.join(root,'assets/data/test-mode.js'),'utf8').replace(/export /g,''),sc);
 if(!baseline)vm.runInContext(fs.readFileSync(path.join(root,'assets/data/loot-collection.js'),'utf8').replace(/export /g,''),sc);
 if(!baseline)vm.runInContext(fs.readFileSync(path.join(root,'assets/data/prestige.js'),'utf8').replace(/export /g,''),sc);
 if(!baseline)vm.runInContext(fs.readFileSync(path.join(root,'assets/data/companions.js'),'utf8').replace(/export /g,''),sc);

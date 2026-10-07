@@ -39,12 +39,12 @@ export function choosePet(p,id) {
   if(!Object.hasOwn(PET_DEFS,id) || prestige(p)<PET_DEFS[id].unlock || !p.pets || !Object.hasOwn(p.pets,id))return false;
   p.activePet=id;return true;
 }
-export function grantPetXp(p,amount) {
+export function grantPetXp(p,amount,multiplier=1) {
   const id=equippedPet(p), s=id && p.pets[id];
   if(!s || !Number.isSafeInteger(amount) || amount<=0)return {id,levels:0,gained:0};
   const from=s.level;s.kills=Math.min(Number.MAX_SAFE_INTEGER,s.kills+1);
   if(s.level>=PET_MAX_LEVEL)return {id,levels:0,gained:0};
-  const gained=Math.min(amount,10000);s.xp+=gained;
+  const gained=Math.min(amount,10000)*(multiplier===100 ? 100 : 1);s.xp+=gained;
   while(s.level<PET_MAX_LEVEL && s.xp>=petXpToNext(s.level)){s.xp-=petXpToNext(s.level);s.level++;}
   if(s.level===PET_MAX_LEVEL)s.xp=0;
   return {id,levels:s.level-from,gained};
