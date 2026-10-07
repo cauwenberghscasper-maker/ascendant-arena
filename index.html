@@ -312,8 +312,8 @@ button.primary.gold { background: linear-gradient(180deg, #ffd96a, #f0a91f); col
 /* settings: save status + testing tools */
 .lvlBadge { position: relative; }
 #testBadge { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font: 800 10px/1 var(--body); white-space: nowrap; font-style: normal; background: #ff5d6c; color: #fff; padding: 3px 5px; border-radius: 5px; }
-.savebox { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; background: var(--ink2); border-radius: 14px; padding: 11px 12px; border-left: 4px solid #8d8aa6; }
-.savebox.on { border-left-color: var(--good); } .savebox b { font: 16px/1.2 var(--display); } .savebox small { grid-column: 1; font-size: 12px; color: var(--muted); } .savebox button { grid-row: 1 / span 2; grid-column: 2; }
+.savebox { display: flex; flex-direction: column; gap: 8px; align-items: stretch; background: var(--ink2); border-radius: 14px; padding: 11px 12px; border-left: 4px solid #8d8aa6; }
+.savebox.on { border-left-color: var(--good); } .savebox b { font: 16px/1.2 var(--display); } .savebox small { font-size: 12px; color: var(--muted); } .savebox button { min-height: 44px; }
 .savebox.playtest { display: flex; flex-direction: column; align-items: stretch; gap: 8px; border-left-color: var(--gold); }
 .savebox.playtest button, .tools button { min-height: 44px; }
 .tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: var(--ink2); border-radius: 14px; padding: 10px 12px; }
