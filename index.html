@@ -1096,7 +1096,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js';
 import { createPremiumPortraits } from './assets/art/premium-models.js';
-import { HERO_MODELS_V3 } from './assets/data/hero-models-v3.js';
+
 import { bindHeroMotion, animateHeroMotion } from './assets/data/hero-animation.js';
 import { addHeroEyes } from './assets/data/hero-eyes.js';
 import { equipmentIcon, caseIcon } from './assets/art/premium-icons.js';
@@ -4379,8 +4379,7 @@ const ASSET_MANIFEST = Object.assign({}, GENERATED_ASSETS, {
   'gear.weapon.dragonsoul.focus': { dir: 'assets/gear/weapon/dragonsoul-focus/', size: 1.78, at: [0, -0.62, 0.1], glow: 1.6, tris: 5811,
     source: 'TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, seed 7, 4 Oct 2026' },
 });
-// Reviewed four-hero batch. Other heroes continue using their existing assets.
-Object.assign(ASSET_MANIFEST, HERO_MODELS_V3);
+// Original rounded hero roster retained as the visual baseline.
 // which kind of weapon a brawler holds (mirrors weaponGeometry)
 function heldWeaponFamily(cls) {
   const A = CFG.attacks[cls], k = A ? A.kind : null;
