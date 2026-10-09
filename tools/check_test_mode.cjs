@@ -64,5 +64,20 @@ function session(test,storage=new Map()){
   await check('testing shortcuts grant one, five or 100 levels through the actual level reward path',()=>{
     const c=session(true);c.G.player.mods.xpFind=.25;c.tools.levelUp();assert.equal(c.G.profile.level,2);c.tools.levels5();assert.equal(c.G.profile.level,7);c.tools.levels100();assert.equal(c.G.profile.level,107);
   });
+  await check('overlapping forced cloud saves serialize and send the latest reward snapshot',async()=>{
+    const c=session(false),sent=[],resolves=[];
+    c.Cloud.doc={set(data){sent.push(JSON.parse(data.profile));return new Promise(resolve=>resolves.push(resolve));}};
+    c.saveNow(true);c.G.profile.bag.push({id:'reward-one'});c.saveNow(true);c.G.profile.bag.push({id:'reward-two'});c.saveNow(true);
+    assert.equal(sent.length,1);assert.equal(c.Cloud.pending,true);
+    assert.equal(JSON.parse(c.localStorage.getItem(c.profileSaveKey(false))).bag.length,2);
+    resolves.shift()();await new Promise(r=>setImmediate(r));assert.equal(sent.length,2);assert.equal(sent[1].bag.length,2);
+    resolves.shift()();await new Promise(r=>setImmediate(r));assert.equal(c.Cloud.pushing,false);assert.equal(c.Cloud.pending,false);
+  });
+  await check('a delayed cloud load cannot replace a newly earned local reward',async()=>{
+    const c=session(false);let finish;const old=JSON.parse(JSON.stringify(c.G.profile));old.savedAt=1;
+    c.window.claude={use:async name=>name==='user'?{id:async()=> 'test'}:{doc:()=>({get:()=>new Promise(r=>finish=r),set:()=>Promise.resolve()})}};
+    const load=c.cloudInit();await new Promise(r=>setImmediate(r));c.G.profile.bag.push({id:'fresh-reward'});c.saveNow(true);
+    finish({exists:true,data:()=>({profile:JSON.stringify(old)})});await load;assert.equal(c.G.profile.bag[0].id,'fresh-reward');
+  });
   console.log(`${passed} test-mode checks passed.`);
 })().catch(e=>{console.error(e);process.exitCode=1;});

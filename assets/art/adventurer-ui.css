@@ -1,0 +1,19 @@
+/* Softer fantasy framing, retaining the responsive layout and rarity accents. */
+:root{--display:'Rubik',system-ui,sans-serif;--myth:var(--display);--body:var(--display);--numbers:var(--display);--gold:#e5c67f;--text:#f0eee3;--muted:#abc0bc;--ink:#102329;--ink2:#193337;--ink3:#264443;--line:#42605a}
+.panel,.mtile,.item,.tile,.atk,.art,.key,.tierc,.node,.road,.feat,.stat,.kit div,.statgrid div,.stats3 div,.lk,.aslot,.riftCard,.arenaCard,.mpbox,#gearPrompt,#nodeCard,.toast,#objective,.chip,.dchip,#arenaHud div,#streak,#respawn,#banner span,.xd{border-image:none!important;border:1px solid #49635b!important;border-radius:14px!important;background:linear-gradient(145deg,#233b3c,#13272e)!important;box-shadow:0 8px 24px #06161940!important;image-rendering:auto!important}
+.panel{border-radius:22px!important;background:#13272ef5!important}
+.panel button.primary,.panel button.ghost,.panel button.warn,.panel button.disabled,.tab,#gearPrompt button,#bAct,#coach,#coach button,#playBtn,.panel .x,.hbtn,.hbtn.ic,.tzoom button{border-image:none!important;border:1px solid #597269!important;border-radius:11px!important;background:#294440!important;box-shadow:inset 0 1px #ffffff12!important;image-rendering:auto!important}
+.panel button.primary,#playBtn,#bAct,.tab.on{background:linear-gradient(#ddc28a,#b3945b)!important;color:#17292a!important;border-color:#eddaa4!important}
+.panel button.warn{background:#663e3b!important;border-color:#a57066!important}
+.atk.on,.art.on,.key.on,.tierc.on,.node.has,.aslot.full,.road.next,.tile.sel,.item.alert,.feat.got{border-color:#d9bc78!important}
+.toast.bad{border-color:#d98d79!important}.toast.good,.toast.mastery{border-color:#8abb91!important}
+.cbtn,#atk,#stickBase,#stickKnob,#atkKnob{border-image:none!important;border:2px solid #c5b582a6!important;border-radius:50%!important;background:#173437bb!important;box-shadow:inset 0 1px 5px #ffffff24!important;image-rendering:auto!important}
+#bSuper span{border-radius:50%!important}#stickKnob,#atkKnob{background:#7e9d91c7!important}
+.lvlBadge,.heroHead .lv{border-image:none!important;border:1px solid #c2ab71!important;border-radius:12px!important;background:#304641!important}
+.bport,.thumb,.tile,.bar,.bar i,.tag .tb,.tag .tb i,.goldchip,.xpchip,.esschip,.treeWrap{border-radius:9px!important}
+.bport img,img.pxp,.thumb,.tile img,.dchip img,.item img,.caseArt img,.mergePreview img,.collectionCard img,.collectionFocus img{image-rendering:auto!important}
+#title .badge{border-radius:20px;background:#173437dc;border-color:#8c9d76}
+#title .logo,#title .logo span{font-family:var(--display)!important;text-shadow:0 4px 18px #04181e!important}
+.tabs{gap:6px}.rdot,#heroDot{border-radius:50%!important}
+
+#hubShortcuts button{border-image:none!important;border:1px solid #779486!important;border-radius:12px!important;background:#173437ee!important;box-shadow:0 3px 12px #06191c33!important}

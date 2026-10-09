@@ -21,6 +21,7 @@ vm.runInContext(section('const CFG = {','// 2. UTIL')+section('const clamp =','/
   section('const FRAME_MS =','  let dt = (now - lastFrame)')+'\n}\n'+
   '\nthis.config=CFG;this.mxp=mxpFor;this.plan=maxUpgradePlan;this.newProfile=defaultProfile;',ctx);
 const make=(id,slot='weapon',rarity='common',ilvl=1,up=0)=>({id,slot,rarity,ilvl,up,name:'Worn Edge',aff:{}});
+vm.runInContext(html.split('\n').filter(l=>l.startsWith('const salvageValue =')||l.startsWith('const salvageEssence =')).join('\n'),ctx);
 function fresh(){const p=ctx.newProfile();p.gold=1e7;p.essence=1e5;p.gear.weapon=make('target','weapon','rare',10);ctx.G.profile=p;ctx.G.gearPrompts=[];ctx.G.dirty=false;return p;}
 check('named items have unique ids and match existing equipment mesh nouns',()=>{
   const ids=new Set();
@@ -47,7 +48,8 @@ check('collection migration is idempotent and discovery survives gear consumptio
   assert.equal(ctx.collectionIcon({...it,slot:'helmet'}),'');assert.equal(ctx.collectionIcon({...it,rarity:'divine'}),'');
   p.collection={unknown:{count:9},frostbite:{count:Infinity}};p.collectionLuck={'weapon|rare':99,'bogus|rare':3};ctx.migrateCollection(p);assert.deepEqual(Object.keys(p.collection),[]);assert.equal(p.collectionLuck['weapon|rare'],3);assert.equal(p.collectionLuck['bogus|rare'],undefined);
 });
-ctx.curTier=()=>0;ctx.addEssence=()=>{};ctx.addGold=()=>{};
+ctx.curTier=()=>0;ctx.addEssence=()=>{};ctx.addGold=()=>{};let savedRewardProfile=null;
+ctx.saveNow=()=>{savedRewardProfile=JSON.parse(JSON.stringify(ctx.G.profile));};
 vm.runInContext(section('CFG.cases = {','// --- Vault:')+section('function highestZone(level) {','// zone odds')+
   section('function grantItem(it, source, context) {','// --- jobs'),ctx);
 check('regional boss cases use the killed boss zone and preserve existing rarity odds',()=>{
@@ -69,6 +71,26 @@ check('opening a saved regional case consumes it once and grants the actual name
   const p=fresh();p.cases=[{id:'saved-regional',k:'frost',l:40,t:0,z:2,f:'rare'}];
   for(const rarity of ['rare','epic','legendary'])for(const slot of ctx.config.gear.slots)p.collectionLuck[slot+'|'+rarity]=3;
   const r=ctx.openCase('saved-regional');assert(r);assert.equal(p.cases.length,0);assert.equal(p.stats.cases,1);assert(ctx.collectionItem(r.item));assert.equal(Object.keys(p.collection).length,1);assert.equal(r.kept,true);assert.equal(ctx.openCase('saved-regional'),null);
+});
+check('full bag leaves case, luck, inventory and opening count untouched',()=>{
+  const p=fresh();p.bag=Array.from({length:ctx.config.gear.bagMax},(_,i)=>make('full'+i));
+  p.cases=[{id:'full-case',k:'treasure',l:40,t:0,z:2,f:'rare'}];
+  const before=JSON.stringify(p);savedRewardProfile=null;
+  assert.equal(ctx.openCase('full-case'),null);assert.equal(JSON.stringify(p),before);assert.equal(savedRewardProfile,null);
+});
+check('case reward and consumption survive an immediate save reload',()=>{
+  const p=fresh();p.settings.autoSalvage=3;p.cases=[{id:'reload-case',k:'treasure',l:40,t:0,z:2,f:'rare'}];
+  const result=ctx.openCase('reload-case');assert(result.kept);assert(savedRewardProfile);
+  const reloaded=ctx.sanitizeProfile(savedRewardProfile);
+  assert.equal(reloaded.cases.length,0);assert(reloaded.bag.some(i=>i.id===result.item.id));assert.equal(reloaded.stats.cases,1);
+  ctx.G.profile=reloaded;assert.equal(ctx.openCase('reload-case'),null);
+});
+check('fast opening stops at remaining capacity and later drops cannot evict its rewards',()=>{
+  const p=fresh();p.bag=Array.from({length:ctx.config.gear.bagMax-1},(_,i)=>make('existing'+i));
+  p.cases=['one','two','three'].map(id=>({id,k:'treasure',l:10,t:0,z:0}));
+  const result=ctx.openCase('one');assert(result.kept);assert.equal(ctx.openCase('two'),null);
+  const ids=p.bag.map(i=>i.id);ctx.grantItem(make('powerful','weapon','divine',300),'test');
+  assert.deepEqual(p.bag.map(i=>i.id),ids);assert.equal(p.cases.length,2);assert(p.bag.some(i=>i.id===result.item.id));
 });
 check('same slot, strictly weaker, unique and unprotected material selection',()=>{
   const p=fresh();p.bag=[make('weak'),make('weak'),make('other','helmet'),Object.assign(make('locked'),{locked:true}),make('strong','weapon','legendary'),make('equal','weapon','rare',10),{...p.gear.weapon},make('second','weapon','uncommon',2)];
