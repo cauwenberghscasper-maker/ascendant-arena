@@ -19,7 +19,7 @@ async function readPack(dir) {
 }
 
 (async () => {
-  const { HERO_V4 } = await import(path.join(ROOT, 'assets/data/hero-models-v4.js'));
+  const { HERO_V4 } = await import(require('node:url').pathToFileURL(path.join(ROOT, 'assets/data/hero-models-v4.js')).href);
   const clips = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/animation/adventurer-clips.json'), 'utf8'));
   const needed = ['Idle', 'Running_A', 'Running_Strafe_Left', 'Running_Strafe_Right', 'Walking_Backwards', '1H_Ranged_Shoot', '1H_Melee_Attack_Slice_Horizontal', 'Spellcast_Shoot', 'Spellcast_Raise', 'Hit_A', 'Dodge_Forward', 'Death_A'];
   for (const n of needed) assert(clips.clips.some((c) => c.name === n), 'clip ' + n);

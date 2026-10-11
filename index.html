@@ -22,7 +22,7 @@
   --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px);
 }
 html, body { height: 100%; margin: 0; overflow: hidden; background: var(--ink); color: var(--text); font-family: var(--body);
-  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: none; overscroll-behavior: none; }
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; overscroll-behavior: none; }
 #app { position: fixed; inset: 0; overflow: hidden; background: #cfe6fb; }
 #cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 #input { position: absolute; inset: 0; z-index: 1; touch-action: none; }
@@ -954,7 +954,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 #hubShortcuts b { position:absolute; top:-7px; right:-5px; padding:2px 4px; background:#d7b565; color:#211a25; font:700 11px var(--numbers); }
 #hubShortcuts button:focus-visible { outline:3px solid #fff; outline-offset:2px; }
 #hubShortcuts button:active { transform:translateY(2px); }
-.panel.menuPanel { width:min(680px,100%); overflow:hidden; gap:10px; padding:12px; touch-action:manipulation; }
+.panel.menuPanel { width:min(680px,100%); overflow-y:auto; gap:10px; padding:12px; touch-action:pan-y; }
 .menuPanel .menuHead { min-height:42px; }
 .menuPanel .menuHead h3 { margin:0 0 4px; }
 .menuPanel .menuHead small { font:12px var(--numbers); }
@@ -992,6 +992,51 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
   .menuPanel .mtile b { font-size:14px; }
   .menuPanel .mtile small { font-size:10px; }
 }
+/* Each sheet owns its scroll area; flex children must retain their natural height. */
+#modal { min-height:0; touch-action:pan-y; }
+.panel { min-height:0; max-height:calc(100dvh - 24px - var(--sat) - var(--sab)); overscroll-behavior:contain; }
+.panel > * { flex-shrink:0; }
+.panel.treePanel > .treeWrap { flex-shrink:1; }
+.panel .tabs { touch-action:pan-x pan-y; }
+.panel .heroHead { padding-right:38px; flex-wrap:wrap; }
+.panel .heroHead > div { min-width:0; flex:1; }
+.panel .heroHead .hm { margin-left:0; }
+.panel .heroHead > div { flex:1 1 150px; }
+.panel .heroHead .hm { min-height:44px; }
+.panel .heroHead .lv { flex:none; min-width:48px; font:700 24px/1 var(--body); }
+.agrid { grid-template-columns:repeat(auto-fit,minmax(min(125px,100%),1fr)); }
+.aslots2 { grid-template-columns:repeat(auto-fit,minmax(min(100px,100%),1fr)); }
+.acard,.aslot2 { min-width:0; overflow-wrap:anywhere; }
+.aurow { grid-template-columns:52px minmax(0,1fr) auto; }
+.aum b,.aum small { overflow-wrap:anywhere; }
+.panel .npcHead { flex-wrap:wrap; }
+.panel .npcHead .own { flex-basis:100%; margin-left:0; }
+.tiles { grid-template-columns:repeat(auto-fit,minmax(68px,1fr)); }
+.tiles .tile { min-width:0; }
+.tiles .ts { font:600 11px/1.2 var(--body); letter-spacing:0; }
+@media(max-width:440px) {
+  .aurow { grid-template-columns:44px minmax(0,1fr); gap:8px; }
+  .aurow .aic { width:40px; height:40px; }
+  .aurow > button { grid-column:2; width:100%; min-height:44px; }
+  .heroHead .lv { width:40px; height:40px; font-size:24px; }
+  .panel .heroHead { gap:8px; }
+  .panel .heroHead .hm { flex-basis:100%; }
+}
+#doll { inset:auto; display:flex; flex-direction:column; gap:7px; overflow-y:auto; overflow-x:hidden; padding:3px; pointer-events:auto; touch-action:pan-y; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+#doll[hidden] { display:none; }
+#doll .dchip { position:relative; width:100%; min-height:60px; height:auto; flex:none; padding:6px; gap:7px; touch-action:pan-y; }
+#doll .dchip img { width:40px; height:40px; object-fit:contain; }
+#doll .dchip b { font-size:13px; line-height:1.2; }
+#doll .dchip small { font-size:11px; line-height:1.3; }
+#doll .dchip span { min-width:0; overflow-wrap:anywhere; }
+.tile.empty { min-height:72px; justify-content:center; }
+.tile .emptySlot { font:25px var(--body); color:var(--muted); }
+@media (max-aspect-ratio:1/1) {
+  #spinHint { left:auto; right:8px; width:calc(100vw - 152px); transform:none; font-size:10px; }
+  #modal.room .panel { max-height:calc(57dvh - 12px - var(--sab)); }
+  #doll .dchip { min-height:54px; padding:4px; gap:5px; }
+  #doll .dchip img { width:32px; height:32px; }
+}
 </style>
 <link rel="stylesheet" href="assets/art/adventurer-ui.css">
 <link rel="stylesheet" href="assets/art/runescape-ui.css">
@@ -1002,7 +1047,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .panel.dock > .pBody > * { flex-shrink: 0; }
 .pBar { flex: none; display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.14); }
 .pBtns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-.pBtns > button { flex: 1 1 0; min-width: 0; white-space: normal; text-align: center; line-height: 1.1; }
+.pBtns > button { flex: 1 1 100px; min-width: 0; flex-wrap: wrap; white-space: normal; overflow-wrap: anywhere; text-align: center; line-height: 1.1; }
 .pBtns > button.ghost.sm { flex: 0 1 auto; }
 .pNote { font: 600 12px/1.35 var(--body); color: #c9c3d6; margin: 0; }
 .pNote b { color: #ffe08a; }
@@ -1160,9 +1205,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.m
 import { createPremiumPortraits } from './assets/art/premium-models.js';
 
 import { bindHeroMotion, animateHeroMotion } from './assets/data/hero-animation.js';
-import { prepareOriginalAdventurer } from './assets/art/original-adventurers.js';
+import { prepareOriginalAdventurer, equipOriginalAdventurer } from './assets/art/original-adventurers.js';
 import { createKayKitMotion } from './assets/data/kaykit-motion.js';
-import { applyHeroV4, heroV4Clips, gripV4Weapon } from './assets/data/hero-models-v4.js';
+import { applyHeroV4, heroV4Clips, gripV4Weapon, prepareV4Equipment, equipV4Hero } from './assets/data/hero-models-v4.js';
 import { addHeroEyes } from './assets/data/hero-eyes.js';
 import { equipmentIcon, caseIcon } from './assets/art/premium-icons.js';
 import { COLLECTION_ITEMS, COLLECTION_CHANCE, COLLECTION_GUARANTEE, collectionIcon, rollCollectionItem, recordCollectionItem, migrateCollection, regionBossCase } from './assets/data/loot-collection.js';
@@ -1200,8 +1245,8 @@ const CFG = {
     zones: [], // WORLD_AREAS, filled in below
     // Monster dens: packed camps that respawn fast (one per area, built below). Best XP per minute, but they hit back hard.
     dens: [],
-    denRespawn: 4, denLevelBonus: 2, denXp: 1.15, elitesPerZone: 1, eliteRespawn: 50,
-    enemyRespawn: 9, berryCount: 14, berryRespawn: 18,
+    denRespawn: 7, denLevelBonus: 2, denXp: 1.15, elitesPerZone: 1, eliteRespawn: 50,
+    enemyRespawn: 11, spawnGap: 0.2, spawnSafeRadius: 12, patrolDensity: 1.25, catchupGap: 4, berryCount: 14, berryRespawn: 18,
   },
   progression: {
     cap: 100000, xpBase: 55, xpExp: 1.45, xpGrowth: 1.025, classAt: 5,
@@ -1287,7 +1332,7 @@ const CFG = {
     seraph: { name: 'Seraph', hp: 58, atk: 10, speed: 4.6, r: 0.75, aggro: 14, leash: 28, attack: 'shoot', cd: 1.4, gold: [6, 11], shotSpeed: 14, keep: 10, shots: 2, spread: 0.3, shotColor: 0xfff07a },
     warden: { name: 'Gilded Warden', hp: 135, atk: 17, speed: 3.6, r: 1.05, aggro: 10, leash: 24, attack: 'touch', cd: 1.4, gold: [7, 12], heavy: true, charge: true },
     sentinel: { name: 'Star Sentinel', hp: 90, atk: 9, speed: 1.8, r: 0.9, aggro: 15, leash: 20, attack: 'shoot', cd: 2.2, gold: [5, 10], shotSpeed: 10, keep: 11, shots: 5, spread: 0.9, shotColor: 0x9fe8ff },
-    hpGrowth: 1.105, atkGrowth: 1.098, goldGrowth: 1.06,
+    hpGrowth: 1.105, atkGrowth: 1.105, goldGrowth: 1.06,
     elite: { hp: 7, atk: 1.6, r: 1.35, xp: 6, gold: 5, drop: 0.5, essence: [3, 8], shards: [2, 4] },
   },
   boss: {
@@ -2105,8 +2150,11 @@ function sanitizeProfile(p) {
     out.treeVersion = 9;
   }
   delete out.heroTree;
-  for (const s of CFG.gear.slots) if (!out.gear[s]) out.gear[s] = d.gear[s];
+  // Explicit null is an intentionally unequipped slot; missing legacy slots retain starter gear.
+  for (const s of CFG.gear.slots) if (out.gear[s] === undefined) out.gear[s] = d.gear[s];
   if (!Array.isArray(out.bag)) out.bag = [];
+  const ownedIds = new Set(Object.values(out.gear).filter(Boolean).map(it => it.id));
+  out.bag = out.bag.filter(it => { if (!it || !it.id || ownedIds.has(it.id)) return false; ownedIds.add(it.id); return true; });
   migrateCollection(out);
   migratePrestige(out);
   migratePets(out);
@@ -2150,7 +2198,7 @@ const Store = {
       return null;
     } catch (e) { return null; }
   },
-  save(p) { if (!TEST_MODE && isTestProfile(p)) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(p)); } catch (e) { /* storage unavailable: play on */ } },
+  save(p) { if (!TEST_MODE && isTestProfile(p)) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(p)); return true; } catch (e) { return false; } },
   clear() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ } },
 };
 // --- skill trees -----------------------------------------------------------------------
@@ -3208,13 +3256,22 @@ function upgradeItem(slot, expected) { return upgradeItemMax(slot, expected && O
 function equipItem(id) {
   const p = G.profile, i = p.bag.findIndex((x) => x.id === id); if (i < 0) return false;
   const it = p.bag[i], old = p.gear[it.slot];
-  p.bag.splice(i, 1); p.gear[it.slot] = it; if (old) p.bag.push(old);
+  if (!CFG.gear.slots.includes(it.slot) || Object.values(p.gear).some(x => x && x.id === id)) return false;
+  p.bag = p.bag.filter(x => x.id !== id && (!old || x.id !== old.id)); p.gear[it.slot] = it; if (old) p.bag.push(old);
   G.gearPrompts = G.gearPrompts.filter((x) => x !== id);
   ev({ t: 'equipped', item: it });
   refreshPlayerStats(false); checkAchievements(); G.dirty = true; return true;
 }
+function unequipItem(slot) {
+  const p = G.profile, it = p.gear[slot];
+  if (!CFG.gear.slots.includes(slot) || !it) return false;
+  if (p.bag.length >= CFG.gear.bagMax) { toast('Make room in your bag before unequipping.', 'bad'); return false; }
+  p.bag = p.bag.filter(x => x.id !== it.id); p.bag.push(it); p.gear[slot] = null;
+  refreshPlayerStats(false); G.dirty = true; return true;
+}
 function salvageItem(id) {
   const p = G.profile, i = p.bag.findIndex((x) => x.id === id); if (i < 0) return false;
+  if (Object.values(p.gear).some(x => x && x.id === id)) return false;
   const it = p.bag[i]; if (it.locked) { toast('Protected gear cannot be salvaged', 'bad'); return false; } const v = salvageValue(it); p.bag.splice(i, 1); addGold(v); addEssence(salvageEssence(it));
   addMastery('smith', 4 + rarIdx(it.rarity) * 5);
   G.gearPrompts = G.gearPrompts.filter((x) => x !== id); return true;
@@ -3329,6 +3386,7 @@ function turnInJob() {
 function abandonJob() { G.profile.job = null; G.dirty = true; }
 
 // --- hub world population ---------------------------------------------------
+function patrolCountFor(zi) { const Z = CFG.world.zones[zi]; return Z.safe ? 0 : Math.ceil(Z.count * CFG.world.patrolDensity); }
 function zoneAt(z) { const Z = CFG.world.zones; for (let i = Z.length - 1; i >= 0; i--) if (z >= Z[i].z0) return i; return 0; }
 function distToTown(x, z) { const T = CFG.world.town; return Math.hypot(x - T.x, z - T.z); }
 function randomPointInZone(zi, avoidTown) {
@@ -3348,7 +3406,18 @@ function areaLevel(zi, z) {
   const Z = CFG.world.zones[zi], z0 = Math.max(Z.z0, CFG.world.town.z + CFG.world.town.r), k = clamp((z - z0) / (Z.z1 - z0), 0, 1);
   return Math.round(lerp(Z.lvl[0], Z.lvl[1], k));
 }
-function enemySpot(e) {
+function enemySpawnClear(e, x, z, respawning) {
+  const W = CFG.world, Z = W.zones[e.zone], pad = e.r + 0.45;
+  if (x < W.minX + pad || x > W.maxX - pad || z < Math.max(Z.z0, W.minZ) + pad || z > Math.min(Z.z1, W.maxZ) - pad) return false;
+  if (distToTown(x, z) < W.town.r + 12) return false;
+  if (W.waypoints.some(w => Math.hypot(x - w.x, z - w.z) < 10)) return false;
+  if (W.lairList.some(l => Math.hypot(x - l.x, z - l.z) < 10)) return false;
+  // Test the padded body, including obstacles whose centres occupy another grid cell.
+  if (G.obstacles && G.obstacles.list.some(o => Math.hypot(x - o.x, z - o.z) < o.r + pad)) return false;
+  if (respawning && G.player.alive && Math.hypot(x - G.player.x, z - G.player.z) < W.spawnSafeRadius) return false;
+  return true;
+}
+function enemySpot(e, respawning = false) {
   const W = CFG.world;
   if (e.rift) {
     const pl = G.player;
@@ -3357,16 +3426,36 @@ function enemySpot(e) {
   }
   if (e.den != null) {
     const D = W.dens[e.den];
-    if (e.elite) return { x: D.x + rand(-2, 2), z: D.z + rand(-2, 2) };
-    for (let i = 0; i < 20; i++) { const a = rand(0, Math.PI * 2), r = D.r * Math.sqrt(Math.random()) * 0.92, x = D.x + Math.sin(a) * r, z = D.z + Math.cos(a) * r; if (!pointBlocked(x, z, 1)) return { x, z }; }
-    return { x: D.x, z: D.z };
+    for (let i = 0; i < 40; i++) { const a = rand(0, Math.PI * 2), r = D.r * Math.sqrt(Math.random()) * 0.92, x = D.x + Math.sin(a) * r, z = D.z + Math.cos(a) * r; if (enemySpawnClear(e, x, z, respawning)) return { x, z }; }
+    // A camp occupied by the hero stays cleared until there is room to reappear safely.
+    if (respawning) return null;
   }
-  return randomPointInZone(e.zone, true);
+  const Z = W.zones[e.zone], z0 = e.zone === 0 ? W.town.z + W.town.r + 12 : Z.z0 + 5, z1 = Math.min(Z.z1, W.maxZ) - 5;
+  if (e.patrol != null) {
+    // Six lanes cover the road and flanks; depth bands scale with each area’s population.
+    const lanes = [-104, -62, -18, 18, 62, 104], row = Math.floor(e.patrol / lanes.length), dz = (z1 - z0) / Math.ceil(patrolCountFor(e.zone) / lanes.length);
+    for (let i = 0; i < 48; i++) {
+      const x = lanes[e.patrol % lanes.length] + rand(-10, 10), z = z0 + (row + 0.5) * dz + rand(-dz * 0.4, dz * 0.4);
+      if (enemySpawnClear(e, x, z, respawning)) return { x, z };
+    }
+    if (respawning) return null;
+  }
+  for (let i = 0; i < 80; i++) {
+    const pt = randomPointInZone(e.zone, true);
+    if (enemySpawnClear(e, pt.x, pt.z, respawning)) return pt;
+  }
+  // The main road is kept clear of scenery; scan it instead of returning an unchecked point.
+  for (let z = z0 + 2; z < z1; z += 3) if (enemySpawnClear(e, 0, z, respawning)) return { x: 0, z };
+  return null;
 }
 function enemyLevelFor(e) {
   if (e.rift) return e.riftLvl + (e.elite ? 2 : 0);
   const Z = CFG.world.zones[e.zone];
   let L = clamp(areaLevel(e.zone, e.z) + randInt(-1, 1), Z.lvl[0], Z.lvl[1]);
+  // Keep a beginner practice area outside town. Elsewhere unlocked regions trail
+  // the hero by at most four levels; gear still helps and difficulty never changes mid-fight.
+  const practice = Z.minLevel <= 1 && e.den == null && distToTown(e.x, e.z) < 48;
+  if (!practice && G.profile.level >= Z.minLevel) L = Math.max(L, G.profile.level - CFG.world.catchupGap - tierAdd());
   if (e.den != null) L += CFG.world.denLevelBonus;
   if (e.elite) L += 3;
   return L + tierAdd();
@@ -3397,12 +3486,14 @@ const egrow = (g, L) => Math.pow(g, Math.min(L, 100) - 1) * Math.pow(1.095, Math
 function zoneType(zi, den) { const Z = CFG.world.zones[zi]; return Z.alt && Math.random() < (den ? 0.25 : 0.35) ? Z.alt : Z.enemy; }
 function makeEnemy(type, zi, o) {
   o = o || {};
-  const e = { id: nextId++, kind: 'enemy', type, zone: zi, team: 'mob', x: 0, z: 0, hx: 0, hz: 0, r: CFG.enemies[type].r, den: o.den != null ? o.den : null, elite: !!o.elite,
+  const e = { id: nextId++, kind: 'enemy', type, zone: zi, team: 'mob', x: 0, z: 0, hx: 0, hz: 0, r: CFG.enemies[type].r, den: o.den != null ? o.den : null, patrol: o.patrol, elite: !!o.elite,
     lvl: 1, hp: 1, maxHp: 1, atk: 1, alive: true, state: 'idle', wanderT: rand(0, 3), wx: 0, wz: 0,
     atkCd: 0, flashT: 0, slowT: 0, invulnT: 0, armorT: 0, respawnT: 0, tagged: false, facing: rand(0, 6.28), moveAmt: 0, lungeT: 0, lungeCd: 0, windT: 0, lastHurt: -99 };
   if (o.rift) { e.rift = true; e.riftLvl = o.lvl; e.guardian = !!o.guardian; e.state = 'chase'; if (e.guardian) e.r *= 1.2; }
   if (e.elite) e.r *= CFG.enemies.elite.r;
-  const pt = enemySpot(e); e.x = e.hx = e.wx = pt.x; e.z = e.hz = e.wz = pt.z;
+  const pt = enemySpot(e);
+  if (!pt) throw new Error('No clear enemy spawn in zone ' + zi);
+  e.x = e.hx = e.wx = pt.x; e.z = e.hz = e.wz = pt.z;
   setEnemyLevel(e, enemyLevelFor(e));
   G.ents.set(e.id, e);
   return e;
@@ -3413,8 +3504,12 @@ function setEnemyLevel(e, lvl) {
   e.atk = d.atk * egrow(CFG.enemies.atkGrowth, lvl) * (e.elite ? E.atk : 1);
 }
 function respawnEnemy(e) {
-  const pt = enemySpot(e);
+  if (G.time < (G.enemySpawnAt || 0)) return;
+  const pt = enemySpot(e, true);
+  if (!pt) { e.respawnT = 1; return; }
+  G.enemySpawnAt = G.time + CFG.world.spawnGap;
   e.x = e.hx = e.wx = pt.x; e.z = e.hz = e.wz = pt.z; e.alive = true; e.state = 'idle'; e.tagged = false; e.slowT = 0; e.burnT = 0; e.windT = 0;
+  e.lungeT = 0; e.lungeCd = rand(1, 2); e.atkCd = rand(0.7, 1.3); e.attackAnim = 0; e.lastHurt = -99; e.cx = e.cz = null;
   setEnemyLevel(e, enemyLevelFor(e));
   ev({ t: 'spawn', x: e.x, z: e.z, elite: e.elite });
 }
@@ -3653,7 +3748,7 @@ function initHubWorld() {
   // enemies
   G.enemies = [];
   W.zones.forEach((zn, zi) => {
-    for (let i = 0; i < zn.count; i++) G.enemies.push(makeEnemy(zoneType(zi), zi));
+    for (let i = 0; i < patrolCountFor(zi); i++) G.enemies.push(makeEnemy(zoneType(zi), zi, { patrol: i }));
     if (!zn.safe) for (let i = 0; i < W.elitesPerZone; i++) G.enemies.push(makeEnemy(zoneType(zi), zi, { elite: true }));
   });
   W.dens.forEach((D, di) => {
@@ -3807,15 +3902,18 @@ function stepEnemy(e, dt) {
       const dx = pl.x - e.x, dz = pl.z - e.z, dd = dp || 1;
       if (d.attack === 'touch') {
         mx = dx / dd; mz = dz / dd; sp = d.speed;
-        if (d.lunge && dd < 5 && e.lungeCd <= 0) { e.lungeT = 0.35; e.lungeCd = 2.4; }
-        // beetles wind up (telegraphed) and then charge in a straight line
-        if (d.charge) {
-          if (e.windT > 0) { e.windT -= dt; sp = 0; if (e.windT <= 0) { e.lungeT = 0.55; e.cx = dx / dd; e.cz = dz / dd; } }
-          else if (dd < 9 && dd > 3 && e.lungeCd <= 0) { e.windT = 0.6; e.lungeCd = 3.2; ev({ t: 'telegraph', x: e.x, z: e.z, a: Math.atan2(dx, dz), len: 8, w: e.r * 2 }); }
+        // All burst movement warns first, then follows the displayed lane. Moving
+        // sideways or dashing during the windup must not cause the attack to track you.
+        if (d.charge || d.lunge) {
+          if (e.windT > 0) { e.windT -= dt; sp = 0; if (e.windT <= 0) e.lungeT = d.charge ? 0.55 : 0.35; }
+          else if (dd < (d.charge ? 9 : 5) && dd > 2 && e.lungeCd <= 0) {
+            e.windT = d.charge ? 0.6 : 0.45; e.lungeCd = d.charge ? 3.2 : 2.4; e.cx = dx / dd; e.cz = dz / dd; sp = 0;
+            ev({ t: 'telegraph', x: e.x, z: e.z, a: Math.atan2(dx, dz), len: d.charge ? 8 : 5, w: e.r * 2 });
+          }
           if (e.lungeT > 0 && e.cx != null) { mx = e.cx; mz = e.cz; }
         }
         if (e.lungeT > 0) sp *= d.charge ? 3 : 2.3;
-        if (dd < e.r + pl.r + 0.35 && e.atkCd <= 0) {
+        if (dd < e.r + pl.r + 0.35 && e.atkCd <= 0 && e.windT <= 0) {
           e.atkCd = d.cd; e.attackAnim = 1;
           dealDamage(pl, e.atk * (e.lungeT > 0 && d.charge ? 1.5 : 1), e.id, { knockX: dx, knockZ: dz, knock: d.heavy ? 12 : 4, burn: d.burn ? e.atk * d.burn : 0, burnT: 2 });
           if (d.heavy) ev({ t: 'boom', x: pl.x, z: pl.z, r: 1.6, color: 0xdfeaf4 });
@@ -4714,6 +4812,7 @@ const AssetLibrary = {
     if (def.original) prepareOriginalAdventurer(scene, def, THREE);
     else scene.scale.setScalar(def.size);
     if (def.v4) {
+      prepareV4Equipment(THREE, scene);
       scene.traverse((o) => { if (o.isSkinnedMesh) o.frustumCulled = false; }); // clips move limbs past the bind-pose bounds
       if (def.weaponScene) gripV4Weapon(THREE, scene, def, def.weaponScene);
     }
@@ -5213,7 +5312,7 @@ function ascGeos() {
   return ASC;
 }
 function addAscended(root, pivot, tier) {
-  const A = ascGeos(), mats = [], out = { tier, mats };
+  const A = ascGeos(), mats = [], out = { tier, mats, attached: false, scale: 1 };
   const add = (m) => { mats.push(m); return m; };
   out.pillar = new THREE.Mesh(A.pillar, add(new THREE.MeshBasicMaterial({ color: tier >= 3 ? 0xffe6a0 : 0xffc94a, map: fadeTex(), transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })));
   root.add(out.pillar);
@@ -5234,11 +5333,25 @@ function addAscended(root, pivot, tier) {
     out.crown = new THREE.Mesh(A.crown, add(new THREE.MeshBasicMaterial({ vertexColors: true })));
     out.crown.position.y = 2.42; pivot.add(out.crown);
   }
+  out.bindHero = (hero, def) => {
+    const back = hero.getObjectByName('heroBackSocket'), head = hero.getObjectByName('heroCrownSocket');
+    if (!back || !head) return;
+    out.attached = true; out.scale = 1 / def.size;
+    if (out.wings) out.wings.forEach((wing, i) => {
+      back.add(wing); wing.position.set((i ? -1 : 1) * .045, 0, 0);
+      wing.scale.setScalar(out.scale); wing.rotation.x = -.35;
+    });
+    if (out.crown) {
+      head.add(out.crown); out.crown.position.set(0, 0, 0); out.crown.rotation.set(0, 0, 0);
+      const radius = def.rig ? def.rig.head.r : hero.getObjectByProperty('type', 'SkinnedMesh')?.parent.userData.equipmentFit?.headRadius || .15;
+      out.crown.scale.setScalar(Math.min(.85, Math.max(.4, radius * 2.7)));
+    }
+  };
   out.update = (t, amt) => {
     out.pillar.rotation.y = t * 0.5; out.pillar.material.opacity = Showcase.on ? .04 : 0.14 + Math.sin(t * 2.4) * 0.05;
     out.ring.rotation.y = -t * 0.8; out.ring.scale.setScalar(1 + Math.sin(t * 3) * 0.06);
-    if (out.wings) { const fl = 0.45 + Math.sin(t * (3 + amt * 5)) * (0.18 + amt * 0.2); out.wings[0].rotation.y = -fl; out.wings[1].rotation.y = fl; for (const wing of out.wings) wing.scale.setScalar(Showcase.on ? .5 : 1); }
-    if (out.crown) { out.crown.rotation.y = t * 1.1; out.crown.position.y = 2.42 + Math.sin(t * 2) * 0.05; }
+    if (out.wings) { const fl = 0.45 + Math.sin(t * (3 + amt * 5)) * (0.18 + amt * 0.2); out.wings[0].rotation.y = -fl; out.wings[1].rotation.y = fl; for (const wing of out.wings) wing.scale.setScalar(out.scale * (Showcase.on ? .5 : 1)); }
+    if (out.crown && !out.attached) { out.crown.rotation.y = t * 1.1; out.crown.position.y = 2.42 + Math.sin(t * 2) * 0.05; }
   };
   return out;
 }
@@ -5268,7 +5381,8 @@ AssetSlots.register('character', (o) => {
   // generated models swap in once loaded: the brawler's body (legs swing on their own pivots) and the held weapon
   const hId = AssetLibrary.has('hero.' + o.cls) ? 'hero.' + o.cls : null;
   const wId = ASSET_MANIFEST[hId]?.animated ? null : AssetLibrary.idForItem(heldIt);
-  let hero = null, heroLegs = null, heroMotion = null, clipMotion = null, aura = null, hDone = !hId, wDone = !wId;
+  let hero = null, heroLegs = null, heroMotion = null, clipMotion = null, gearDispose = null, aura = null, hDone = !hId, wDone = !wId;
+  const asc = o.asc ? addAscended(root, pivot, o.asc) : null;
   const swapModels = () => {
     if (!hDone) {
       const st = AssetLibrary.status(hId);
@@ -5277,6 +5391,9 @@ AssetSlots.register('character', (o) => {
         body.visible = bodyOl.visible = false; for (const l of legs) l.visible = false;
         const L = hero.getObjectByName('legLPivot'), R = hero.getObjectByName('legRPivot'); if (L && R) heroLegs = [L, R];
         const def = ASSET_MANIFEST[hId];
+        if (def.original) gearDispose = equipOriginalAdventurer(hero, def, o.gear, THREE);
+        else if (def.v4) gearDispose = equipV4Hero(hero, o.gear, THREE);
+        if (asc) asc.bindHero(hero, def);
         if (def.animated) {
           clipMotion = createKayKitMotion(THREE, hero, hero.animations, def);
           wPivot.visible = false;
@@ -5308,7 +5425,6 @@ AssetSlots.register('character', (o) => {
   };
   if (hId) AssetLibrary.request(hId); if (wId) AssetLibrary.request(wId);
   swapModels();
-  const asc = o.asc ? addAscended(root, pivot, o.asc) : null;
   let ring = null;
   if (o.ring) {
     ring = pxRingMesh(0.82, 1.0, { color: o.ring, transparent: true, opacity: o.xray ? 0.5 : 0.85, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -40 });
@@ -5352,7 +5468,7 @@ AssetSlots.register('character', (o) => {
       if (o.capeMesh) o.capeMesh.rotation.x = 0.12 + amt * 0.45 + Math.sin(t * 6) * 0.04 * (0.3 + amt);
       if (asc) asc.update(t, amt);
     },
-    dispose() { if (clipMotion) clipMotion.dispose(); AssetLibrary.disposeInstance(hero); AssetLibrary.disposeInstance(weapon); weaponGlow.material.dispose(); mat.dispose(); if (aura) { aura.geometry.dispose(); aura.material.dispose(); } if (ring) { ring.geometry.dispose(); ring.material.dispose(); if (ring.userData.tm) ring.userData.tm.dispose(); } if (asc) for (const m of asc.mats) m.dispose(); },
+    dispose() { if (clipMotion) clipMotion.dispose(); AssetLibrary.disposeInstance(hero); if(gearDispose)gearDispose(); AssetLibrary.disposeInstance(weapon); weaponGlow.material.dispose(); mat.dispose(); if (aura) { aura.geometry.dispose(); aura.material.dispose(); } if (ring) { ring.geometry.dispose(); ring.material.dispose(); if (ring.userData.tm) ring.userData.tm.dispose(); } if (asc) for (const m of asc.mats) m.dispose(); },
   };
 });
 
@@ -6664,7 +6780,7 @@ const views = new Map();
 // everything that changes how your hero looks; the view is rebuilt when this changes
 function playerViewSig(cls) {
   const p = G.profile;
-  return gearSignature(p.gear) + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level));
+  return gearSignature(p.gear) + Object.values(p.gear).map(it=>it?it.id+':'+it.up:'-').join('|') + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level));
 }
 function viewFor(e) {
   let v = views.get(e);
@@ -6792,7 +6908,7 @@ function updateCamera(dt) {
   if (sb > 0) {
     // side view: camera east of the hero at chest height
     const gs = growthScale(G.player);
-    const dist = (Cam.portrait ? 8.4 : 5.4) * gs;
+    const dist = (Cam.portrait ? 8.4 : 5.4) * gs * (ascTier(G.profile.level) >= 3 ? 1.18 : 1);
     const dx = 1, dz = 0.3, dl = Math.hypot(dx, dz);
     const sx = Showcase.x, sz = Showcase.z;
     _cp.lerp(_v3.set(sx + dx / dl * dist, 1.55 * gs, sz + dz / dl * dist), sb);
@@ -6808,7 +6924,7 @@ function updateCamera(dt) {
   // in the dressing room, shift the picture so the hero sits beside the menu
   if (sb > 0.001) {
     const w = window.innerWidth, h = window.innerHeight;
-    camera.setViewOffset(w, h, Cam.portrait ? 0 : w * 0.22 * sb, Cam.portrait ? h * 0.27 * sb : 0, w, h);
+    camera.setViewOffset(w, h, Cam.portrait ? -w * .17 * sb : w * 0.22 * sb, Cam.portrait ? h * 0.27 * sb : 0, w, h);
   } else if (camera.view && camera.view.enabled) camera.clearViewOffset();
   const k = 1 - Math.exp(-dt * (G.started ? (Showcase.on || sb > 0 ? 7 : 9) : 3));
   Cam.pos.lerp(_cp, k); Cam.look.lerp(_cl, k);
@@ -7174,7 +7290,7 @@ function setupInput() {
   });
   window.addEventListener('keyup', (e) => Input.keys.delete(e.key.toLowerCase()));
   // block page gestures
-  document.addEventListener('touchmove', (e) => { if (!e.target.closest('.scroll')) e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', (e) => { if (!e.target.closest('.scroll, .pBody, .pMore, #doll')) e.preventDefault(); }, { passive: false });
   document.addEventListener('gesturestart', (e) => e.preventDefault());
   document.addEventListener('contextmenu', (e) => e.preventDefault());
   document.addEventListener('dblclick', (e) => e.preventDefault());
@@ -7612,7 +7728,9 @@ function openSmith(tab) {
   let body;
   if (tab === 'Upgrade') {
     body = `<p class="say">“Bring me weaker gear of the same slot and I’ll melt it into the piece you wear. Each level adds 12% to its stats. Past +5 I need gems too; every 10 levels earns a star.”</p><div class="list">` + CFG.gear.slots.map((s) => {
-      const it = p.gear[s], cost = upgradeCost(it), ess = upgradeEssence(it), max = it.up >= CFG.gear.maxUp, can = maxUpgradePlan(it, 1).n > 0;
+      const it = p.gear[s];
+      if (!it) return `<div class="item"><div class="meta"><div class="nm">${SLOT_LABEL[s]} · empty</div><div class="st">Equip a piece to merge upgrades.</div></div><button class="ghost" data-act="slot" data-slot="${s}">Choose gear</button></div>`;
+      const cost = upgradeCost(it), ess = upgradeEssence(it), max = it.up >= CFG.gear.maxUp, can = maxUpgradePlan(it, 1).n > 0;
       const mp = maxUpgradePlan(it);
       return itemRow(it, `<div class="col"><button class="${can ? 'primary' : 'ghost'}" data-act="${mp.n > 1 ? 'upgradeMax2' : 'upgrade'}" data-slot="${s}" ${max ? 'disabled' : ''}>${max ? 'Max' : mp.n > 1 ? `Reforge… +${mp.n}` : `Reforge… ${costHTML(cost, ess)}`}</button>${mergeCostHTML(it)}</div>`, null, { upgrade: can });
     }).join('') + '</div>';
@@ -7720,32 +7838,35 @@ function heroTab(tab) {
     const sel = UI.gearSlot || firstAlert || 'weapon'; UI.gearSlot = sel;
     if (UI.gearPickSlot !== sel) { UI.gearPick = null; UI.gearPickSlot = sel; }
     const tiles = order.map((x) => { const it = p.gear[x], a = al[x];
-      return `<button class="tile ${it.rarity} ${x === sel ? 'sel' : ''}" data-act="slot" data-slot="${x}" aria-label="${SLOT_LABEL[x]}"><img src="${thumbFor(it)}" alt=""><span class="ts">${SLOT_LABEL[x]}</span>${it.up ? `<span class="tu">+${it.up}</span>` : ''}${a.better || a.canUpgrade ? '<i class="rdot"></i>' : ''}</button>`; }).join('');
-    const cur = p.gear[sel], a = al[sel], max = cur.up >= CFG.gear.maxUp;
-    const can = a.canUpgrade && p.essence >= upgradeEssence(cur);
-    const one = maxUpgradePlan(cur, 1), mp = maxUpgradePlan(cur), next = new Set(one.materials), all = new Set(mp.materials);
-    const pieces = p.bag.filter((b) => b.slot === sel).sort((x, y) => (isBetter(y, x) ? 1 : isBetter(x, y) ? -1 : 0));
+      return `<button class="tile ${it ? it.rarity : 'empty'} ${x === sel ? 'sel' : ''}" data-act="slot" data-slot="${x}" aria-label="${SLOT_LABEL[x]} · ${it ? 'equipped' : 'empty'}" aria-pressed="${x === sel}">${it ? `<img src="${thumbFor(it)}" alt="">` : '<span class="emptySlot">+</span>'}<span class="ts">${SLOT_LABEL[x]}</span>${it && it.up ? `<span class="tu">+${it.up}</span>` : ''}${a.better || a.canUpgrade ? '<i class="rdot"></i>' : ''}</button>`; }).join('');
+    const cur = p.gear[sel], a = al[sel], max = cur && cur.up >= CFG.gear.maxUp;
+    const can = !!cur && a.canUpgrade && p.essence >= upgradeEssence(cur);
+    const one = cur ? maxUpgradePlan(cur, 1) : {n:0,materials:[]}, mp = cur ? maxUpgradePlan(cur) : {n:0,materials:[]}, next = new Set(one.materials), all = new Set(mp.materials);
+    const equippedIds = new Set(Object.values(p.gear).filter(Boolean).map(it => it.id));
+    const pieces = p.bag.filter((b) => b.slot === sel && !equippedIds.has(b.id)).sort((x, y) => (isBetter(y, x) ? 1 : isBetter(x, y) ? -1 : 0));
     const pick = pieces.find((b) => b.id === UI.gearPick) || null; if (!pick) UI.gearPick = null;
     const mark = (it) => isBetter(it, cur) ? { cls: 'up', text: '▲', label: 'better than equipped' } : next.has(it.id) ? { cls: 'mat1', text: '+1', label: 'used by the next merge' } : all.has(it.id) ? { cls: 'mat', text: 'max', label: 'used by Merge max' } : null;
     const worse = p.bag.filter((b) => !b.locked && !isBetter(b, p.gear[b.slot]) && rarIdx(b.rarity) < 4).length;
     const L = p.luck, Pi = CFG.loot.pity;
-    const reroll = rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '';
+    const reroll = cur && rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '';
     body = `<div class="tiles">${tiles}</div>
       <div class="subRow"><h4 class="sub">${SLOT_LABEL[sel]}s in your bag · ${pieces.length}</h4><small>bag ${p.bag.length}/${CFG.gear.bagMax}</small>${worse ? `<button class="ghost sm" data-act="salvageAll" aria-label="High-alch ${worse} weaker pieces">Alch ${worse}</button>` : ''}</div>
       ${pieces.length ? `<div class="ilegend"><span><i class="up">▲</i>better</span><span><i class="m1">+1</i>next reforge</span><span><i class="mm">max</i>reforge max</span><span>${gi('m_lock')} kept</span></div>` : ''}
       ${itemGrid(pieces, { act: 'gpick', sel: UI.gearPick, mark, empty: `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
-      <h4 class="sub">${SLOT_LABEL[sel]} · worn</h4><div class="list">${itemRow(cur, reroll, null, { upgrade: can })}</div>
+      <h4 class="sub">${SLOT_LABEL[sel]} · worn</h4><div class="list">${cur ? itemRow(cur, reroll, null, { upgrade: can }) : '<p class="fine">Nothing equipped. Choose a piece from your bag above.</p>'}</div>
       <h4 class="sub">Luck</h4><div class="luck">${['rare', 'epic', 'legendary'].concat(HIGH_RAR.filter((h) => highWeights(curTier(), 6)[h] > 0)).map((r) => `<div class="lk ${r}"><span>${CFG.gear.rarity[r].name} guaranteed in</span><b>${Math.max(1, Pi[r] - L[r])} drops</b><i style="--v:${Math.round(L[r] / Pi[r] * 100)}%"></i></div>`).join('')}</div>`;
     if (pick) {
       const better = isBetter(pick, cur), se = salvageEssence(pick);
       bar = selBar(itemSummary(pick, `${better ? '<span style="color:#58e08a">Better than equipped</span> · ' : ''}Alch: ${ICON.coin}${fmtK(salvageValue(pick))}${se ? ` ${ICON.ess}${se}` : ''}`) + `<button class="pMoreBtn" data-act="gpick" data-id="" aria-label="Deselect">✕</button>`,
         `<button class="ghost" data-act="protectGear" data-id="${escapeHTML(pick.id)}">${pick.locked ? 'Unprotect' : 'Protect'}</button>`
         + `<button class="ghost" data-act="salvage" data-id="${escapeHTML(pick.id)}" ${pick.locked ? 'disabled' : ''}>Alch</button><button class="primary" data-act="equip" data-id="${escapeHTML(pick.id)}">${wearWord(pick.slot)}</button>`,
-        `<div class="list">${itemRow(pick, '', 'In your bag', { better })}${itemRow(cur, '', 'Worn now')}</div>`);
+        `<div class="list">${itemRow(pick, '', 'In your bag', { better })}${cur ? itemRow(cur, '', 'Worn now') : '<p class="fine">Empty slot</p>'}</div>`);
+    } else if (!cur) {
+      bar = selBar('', '', '', 'Choose a piece from your bag to equip it.');
     } else {
       const note = max ? 'This piece is at its maximum level.' : one.n ? '' : `${mergeCostHTML(cur)} · tap a piece to wear, protect or alch it`;
       bar = selBar('', `<button class="${can && !max ? 'primary' : 'ghost'}" data-act="upgradeHere" data-slot="${sel}" ${max ? 'disabled' : ''}>${max ? 'Max level' : `Reforge +1 ${costHTML(upgradeCost(cur), upgradeEssence(cur))}`}</button>`
-        + `<button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Reforge max${mp.n > 1 ? ` +${mp.n}` : ''}</button>`, '', note);
+        + `<button class="ghost" data-act="unequip" data-slot="${sel}">Unequip</button><button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Reforge max${mp.n > 1 ? ` +${mp.n}` : ''}</button>`, '', note);
     }
   } else if (tab === 'Attacks') {
     const cur = resolvedAttack(p), av = availableAttacks(p), fresh = new Set(p.newUnlocks);
@@ -7989,6 +8110,7 @@ function handlePanelClick(e) {
     case 'equip': equipItem(b.dataset.id); UI.gearPick = null; Showcase.spin = 0; heroTab('Gear'); break;
     case 'gpick': UI.gearPick = b.dataset.id && UI.gearPick !== b.dataset.id ? b.dataset.id : null; heroTab('Gear'); break;
     case 'pMore': UI.moreOpen = !UI.moreOpen; syncMore(); break;
+    case 'unequip': if (unequipItem(b.dataset.slot)) { Showcase.spin = 0; heroTab('Gear'); } break;
     case 'slot': UI.gearSlot = b.dataset.slot; heroTab('Gear'); break;
     case 'equipAtk': equipAttack(b.dataset.id); openBrawlers(); break;
     case 'toggleArt': toggleArtifact(b.dataset.id); Sfx.play('job'); openArtifacts('Equip'); break;
@@ -8456,7 +8578,7 @@ function updateGearPrompt() {
   const cur = p.gear[it.slot];
   box.dataset.id = it.id;
   box.innerHTML = `<span class="thw ${it.rarity}"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""></span><div class="gp"><div class="gt">Better ${SLOT_LABEL[it.slot].toLowerCase()} found${G.gearPrompts.length > 1 ? ` · +${G.gearPrompts.length - 1} more` : ''}</div>
-    <div class="gn">${it.name} ${rarityChip(it.rarity)}</div><div class="gc">${statLine(it)}${it.aff && Object.keys(it.aff).length ? ' · ' + affixText(it) : ''}</div><div class="gc was">Now: ${cur.name} (${CFG.gear.rarity[cur.rarity].name}) · ${statLine(cur)}</div>${rarIdx(it.rarity) > rarIdx(cur.rarity) && itemPower(it) < itemPower(cur) ? '<div class="gc note">Higher rarity. Some stats are lower until you level it up at the Smith</div>' : ''}</div>
+    <div class="gn">${it.name} ${rarityChip(it.rarity)}</div><div class="gc">${statLine(it)}${it.aff && Object.keys(it.aff).length ? ' · ' + affixText(it) : ''}</div><div class="gc was">Now: ${cur ? `${cur.name} (${CFG.gear.rarity[cur.rarity].name}) · ${statLine(cur)}` : 'Empty slot'}</div>${cur && rarIdx(it.rarity) > rarIdx(cur.rarity) && itemPower(it) < itemPower(cur) ? '<div class="gc note">Higher rarity. Some stats are lower until you level it up at the Smith</div>' : ''}</div>
     <div class="gb"><button class="primary" data-gp="equip">${wearWord(it.slot)}</button><button class="ghost" data-gp="later">Later</button></div>`;
   box.hidden = false;
 }
@@ -8493,25 +8615,25 @@ function updateDoll() {
   const al = Doll.alerts;
   const head = project(pl.x, (2.2 * gs) + Showcase.podium, pl.z), feet = project(pl.x, Showcase.podium, pl.z);
   if (!head || !feet) { root.hidden = true; return; }
-  const W = window.innerWidth, chipW = 128, chipH = 44;
-  const colX = Cam.portrait ? 10 : Math.max(10, Math.min(head[0] - chipW - 70, W * 0.32 - chipW));
-  const top = Math.max(60, head[1] - 10), bottom = Math.min(Cam.portrait ? window.innerHeight * 0.42 : window.innerHeight - 50, feet[1] - chipH + 10);
-  // on phones the callouts must stay above the menu; if there is no room, the slot tiles in the menu do the job
-  if (Cam.portrait) { const pt = $('panel').getBoundingClientRect().top; if (Math.min(bottom, pt - chipH - 6) - top < (DOLL_ORDER.length - 1) * 34) { root.hidden = true; return; } }
-  const step = (Math.min(bottom, Cam.portrait ? $('panel').getBoundingClientRect().top - chipH - 6 : bottom) - top) / (DOLL_ORDER.length - 1);
+  const W = window.innerWidth, H = window.innerHeight, panel = $('panel').getBoundingClientRect();
+  const chipW = Cam.portrait ? Math.min(138, Math.max(124, W * .34)) : Math.min(158, W * .19);
+  const colX = Cam.portrait ? 8 : Math.max(8, Math.min(head[0] - chipW - 48, panel.left - chipW - 100));
+  const bottom = Cam.portrait ? panel.top - 10 : H - 16;
+  const top = Math.max(12, Math.min(head[1] - 10, bottom - 340));
+  root.style.left = `${colX}px`; root.style.top = `${top}px`; root.style.width = `${chipW}px`; root.style.maxHeight = `${Math.max(54, bottom - top)}px`;
   DOLL_ORDER.forEach((s, i) => {
     const it = p.gear[s], c = Doll.chips[s];
-    const sig = it.id + it.up;
+    const sig = it ? it.id + it.up : 'empty';
     if (c.dataset.sig !== sig) {
-      c.dataset.sig = sig; c.className = 'dchip ' + it.rarity;
-      c.querySelector('img').src = thumbFor(it);
+      c.dataset.sig = sig; c.className = 'dchip ' + (it ? it.rarity : 'empty');
+      const img = c.querySelector('img'); img.hidden = !it; if (it) img.src = thumbFor(it); else img.removeAttribute('src');
       c.querySelector('b').textContent = SLOT_LABEL[s];
-      c.querySelector('small').textContent = `${CFG.gear.rarity[it.rarity].name}${it.up ? ' +' + it.up : ''}`;
+      c.querySelector('small').textContent = it ? `${CFG.gear.rarity[it.rarity].name}${it.up ? ' +' + it.up : ''}` : 'Empty · equip';
+      c.setAttribute('aria-label', `${SLOT_LABEL[s]} · ${it ? it.name + ' · inspect and upgrade' : 'empty'}`);
     }
     c.querySelector('.rdot').hidden = !(al[s].better || al[s].canUpgrade);
     c.classList.toggle('sel', UI.current === 'hero' && UI.heroTab === 'Gear' && UI.gearSlot === s);
-    const y = top + step * i;
-    c.style.transform = `translate(${colX.toFixed(0)}px, ${y.toFixed(0)}px)`;
+    c.setAttribute('aria-pressed', String(UI.current === 'hero' && UI.heroTab === 'Gear' && UI.gearSlot === s));
   });
 }
 
@@ -8719,7 +8841,7 @@ function openMenu(section) {
       <button data-act="menuSection" data-section="upgrades" aria-pressed="${UI.menuSection === 'upgrades'}">Hero${Object.values(A).some(Boolean) || p.cases.length ? '<i class="rdot"></i>' : ''}</button>
       <button data-act="menuSection" data-section="adventure" aria-pressed="${UI.menuSection === 'adventure'}">World</button>
     </div><div class="mtiles">${(UI.menuSection === 'adventure' ? adventure : upgrades).join('')}</div>`);
-  $('panel').classList.remove('scroll'); $('panel').classList.add('menuPanel');
+  $('panel').classList.add('menuPanel');
 }
 
 // --- Prestige: reviewed reset, permanent companion and bounded world bonuses ---------------------------
@@ -9276,7 +9398,7 @@ CFG.cases = {
   celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
 };
 CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial'];
-const CASE_MAX = 60, CASE_LUCK = { legendary: 30, mythic: 120 };
+const CASE_LUCK = { legendary: 30, mythic: 120 };
 // these drop sources hand out a case instead of the item itself (Epic and up, or always for big loot)
 const CASE_SRC = { monster: 'hunter', elite: 'hunter', level: 'hunter', shrine: 'hunter', idle: 'treasure', boss: 'boss', rift: 'rift', milestone: 'milestone' };
 function caseTable(c) {
@@ -9299,9 +9421,10 @@ function caseTable(c) {
 function caseOdds(c) { const w = caseTable(c); let tot = 0; for (const k in w) tot += w[k]; return RARITIES.filter((r) => w[r]).map((r) => [r, w[r] / tot]); }
 function addCase(k, o) {
   const p = G.profile; o = o || {};
-  if (p.cases.length >= CASE_MAX) { const g = 10 + Math.floor((o.l || p.level) / 10); addEssence(g); toast(`Your chest hoard is full: +${g} gems instead`); return null; }
   const c = { id: 'c' + Date.now().toString(36) + (itemSeq++), k, l: o.l || p.level, t: o.t != null ? o.t : curTier(), z: o.z != null ? o.z : lootTier(highestZone(p.level)), n: o.n || 0, f: o.f || null };
-  p.cases.push(c); G.dirty = true; ev({ t: 'caseGot', k, src: o.src }); return c;
+  p.cases.push(c); G.dirty = true;
+  saveNow(true); // Save newly earned chests before announcing them, including interrupted sessions.
+  ev({ t: 'caseGot', k, src: o.src }); return c;
 }
 function rollCase(c) {
   const p = G.profile, w = caseTable(c); let r = rollRarity(w), lucky = false;
@@ -9428,7 +9551,7 @@ function openCases(sel) {
       <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
     bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost" data-act="caseFast" data-k="${sel}">Open ${Math.min(10, groups[sel].length)} fast</button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
-  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length}/${CASE_MAX}</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Open the Collection Log</button></div>`, bar));
+  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Open the Collection Log</button></div>`, bar));
   $('panel').classList.add('wide');
 }
 // the CS:GO-style reel: a long strip of items slides past a golden marker and slows down on your item
@@ -9593,7 +9716,9 @@ function supaDoc(dev) {
 }
 function saveNow(force) {
   const p = G.profile; p.savedAt = Date.now();
-  Store.save(p);
+  const localSaved = Store.save(p);
+  if (localSaved === false && !G.localSaveFailed) toast('Device save unavailable. Keep this session open and export a backup in Settings.', 'bad');
+  G.localSaveFailed = localSaved === false;
   if (TEST_MODE || isTestProfile(p)) return;
   if (!Cloud.doc || Cloud.state === 'readonly') return;
   if (Cloud.pushing) { Cloud.pending = true; G.dirty = true; return; }
@@ -9709,7 +9834,7 @@ function boot(hotData) {
     try { window.claude.hot.snapshot(() => ({ profile: G.profile })); } catch (e) { /* optional */ }
   }
   window.addEventListener('pagehide', () => saveNow(true));
-  if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn };
+  if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage };
   window.__gameBooted = true;
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
   if (LOCAL_PREVIEW) window.__dbg = { renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };

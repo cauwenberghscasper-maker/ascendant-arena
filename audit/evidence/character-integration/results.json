@@ -1,0 +1,2213 @@
+{
+  "report": [
+    {
+      "id": "arrow",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "arrow",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "arrow",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "mortar",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "mortar",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "mortar",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "wave",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "wave",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "wave",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "scatter",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "scatter",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "scatter",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "cluster",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "cluster",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "cluster",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "flamer",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "flamer",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "flamer",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "gatling",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "gatling",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "gatling",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "disc",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "disc",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "disc",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "orb",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "orb",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "orb",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "seeker",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "seeker",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "seeker",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "bolt",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "bolt",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "bolt",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "chakram",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "chakram",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "chakram",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "smg",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "smg",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "smg",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "starfall",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "starfall",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "starfall",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "rail",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "rail",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "rail",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "chain",
+      "rarity": "legendary",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "chain",
+      "rarity": "rare",
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    },
+    {
+      "id": "chain",
+      "rarity": null,
+      "samples": [
+        {
+          "mode": "idle",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "run",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "attack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "runAttack",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "dash",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "hurt",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "death",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        },
+        {
+          "mode": "respawn",
+          "crownParent": "head",
+          "wingsParent": "chest"
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

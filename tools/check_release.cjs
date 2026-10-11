@@ -61,6 +61,11 @@ check('regional boss cases use the killed boss zone and preserve existing rarity
   }
   assert.equal(ctx.regionBossCase('hunter',2),'hunter');assert.equal(ctx.regionBossCase('rift',6),'rift');assert.equal(Object.keys(p.collection).length,0);
 });
+check('every earned chest is persisted immediately, including beyond the old 60-chest limit',()=>{
+ const p=fresh(),ess=p.essence;const ids=[];
+ for(let i=0;i<75;i++){const c=ctx.addCase(i%2?'milestone':'treasure',{l:20,src:'regression'});assert(c);ids.push(c.id);assert(savedRewardProfile.cases.some(x=>x.id===c.id));}
+ assert.equal(new Set(ids).size,75);assert.equal(p.essence,ess);assert.equal(ctx.sanitizeProfile(savedRewardProfile).cases.length,75);
+});
 check('case conversion and preview rolls cannot create phantom collection discoveries',()=>{
   const p=fresh();p.level=100;ctx.G.zoneIdx=0;ctx.grantItem(make('packed','weapon','legendary',36),'monster');assert.equal(p.cases.length,1);assert.equal(p.cases[0].z,ctx.lootTier(ctx.highestZone(100)),'non-boss case scaling follows the best open area');assert.equal(Object.keys(p.collectionLuck).length,0);
   for(let i=0;i<60;i++)ctx.makeItem('weapon','legendary',36);assert.equal(Object.keys(p.collection).length,0);assert.equal(Object.keys(p.collectionLuck).length,0);
@@ -194,7 +199,7 @@ check('all equipment shapes and rarities use shipped static art without thumbnai
     const src=c.thumbFor({slot,name:'Test '+noun,rarity,up:30});
     assert(registered.has(src),src);assert(fs.existsSync(path.join(root,src)),src);
   }
-  c.CFG={};vm.runInContext(section('CFG.cases = {','const CASE_MAX ='),c);
+  c.CFG={};vm.runInContext(section('CFG.cases = {','const CASE_LUCK ='),c);
   for(const key of c.CFG.caseOrder){const src=c.caseIcon(key);assert(registered.has(src));assert(fs.existsSync(path.join(root,src)));}
   for(const d of ctx.collectionDefs){const src=c.thumbFor({...d,collectionId:d.id});assert(registered.has(src));assert(fs.existsSync(path.join(root,src)));}
   assert.equal(c.thumbFor(null),'');assert.equal(c.equipmentIcon('weapon','unknown'),'');assert.equal(c.caseIcon('unknown'),'');

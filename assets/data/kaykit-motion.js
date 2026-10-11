@@ -8,7 +8,15 @@ export function createKayKitMotion(THREE, model, clips, def) {
     if (actions.has(key)) return actions.get(key);
     const clip = source.get(name);
     if (!clip) return null;
-    const tracks = clip.tracks.filter(t => mask === 'full' || (mask === 'upper' ? upper(t) : !upper(t)));
+    const tracks = clip.tracks.filter(t => mask === 'full' || (mask === 'upper' ? upper(t) : !upper(t))).map(t => {
+      // Short, broad original arms need a firmer wrist than the source's long limbs.
+      // Keep the mesh and its grip on the same bone; damp rotation, never translations.
+      if (!def.original || !/^(hand|lowerarm).*\.quaternion$/.test(t.name)) return t;
+      const copy=t.clone(), q=new THREE.Quaternion(), rest=new THREE.Quaternion();
+      const strength=t.name.startsWith('hand')?.4:.8;
+      for(let i=0;i<copy.values.length;i+=4){q.fromArray(copy.values,i);q.slerp(rest,1-strength).toArray(copy.values,i)}
+      return copy;
+    });
     const filtered = new THREE.AnimationClip(key, clip.duration, tracks);
     const a = mixer.clipAction(filtered); actions.set(key, a); return a;
   }
@@ -25,6 +33,8 @@ export function createKayKitMotion(THREE, model, clips, def) {
   function trigger(name, duration) {
     const next = action(name, 'upper');
     if (!next) return;
+    // Rapid fire must finish the visible recoil instead of restarting the arm every shot.
+    if (overlay === next && overlayAge < overlayDuration * .65) return;
     if (overlay && overlay !== next) overlay.stop();
     overlay = next; overlayAge = 0; overlayDuration = duration;
     overlay.reset().setLoop(THREE.LoopOnce, 1); overlay.clampWhenFinished = true;
