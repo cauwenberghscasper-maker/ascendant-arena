@@ -73,4 +73,13 @@ check('animated numbers respect reduced motion and a bounded priority pool',()=>
   d.updateDmgNumbers(2);assert(d.dmgPool.every(n=>n.el.hidden));d.G.profile.settings.calm=true;d.dmgNumber(0,1,0,12.8,'pet mine');d.updateDmgNumbers(.1);assert.equal(d.dmgPool[0].el.textContent,'13');assert(d.dmgPool[0].el.style.transform.includes('scale(1.000)'));
   assert.equal(d.damageMotion(1,1,true,true).opacity,0);assert.equal(d.damageMotion(1,1,true,true).rise,12);
 });
+const leech=(hp,maxHp)=>{const f={id:60,x:0,z:0,team:'hero',kind:'fighter',alive:true,dmg:100,hp,maxHp,keys:{},ks:{},arts:{},lifesteal:1};c.G.ents.set(60,f);return f;};
+check('lifesteal is capped per second: 20 hits within 1s heal at most the cap plus the stored budget',()=>{
+  const f=leech(10,1000),t={...enemy(20),hp:1e9,maxHp:1e9};for(let i=0;i<20;i++){c.G.time+=.05;c.dealDamage(t,30,60,{canCrit:false});}
+  assert(f.hp-10>=30,'lifesteal still heals');assert(f.hp-10<=1000*.04*2,`healed ${f.hp-10}`);
+});
+check('an overkill hit heals only from the target health it actually removed',()=>{
+  const f=leech(10,1000);f.lsBudget=1e9;const t={...enemy(21),hp:5};c.dealDamage(t,500,60,{canCrit:false});assert.equal(t.alive,false);assert(f.hp-10<=5,`healed ${f.hp-10}`);
+  const g=leech(10,1000);g.lsBudget=1e9;c.dealDamage({...enemy(22),hp:5},500,60,{canCrit:false,vamp:.5});assert(g.hp-10<=5*1.5,'Vampire Fang is clamped too');
+});
 console.log(`${passed} companion checks passed.`);

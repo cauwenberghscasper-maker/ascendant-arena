@@ -15,7 +15,10 @@ function addXp(amount, reason) {
   }
   if (p.level >= P.cap) p.xp = 0;
   if (leveled) {
-    refreshPlayerStats(true);
+    // hardcore: a level-up mid-fight is a partial heal, not a free reset
+    const fight = G.player && G.time - G.lastCombat < CFG.combat.combatLinger;
+    refreshPlayerStats(!fight);
+    if (fight && G.player.alive) G.player.hp = Math.min(G.player.maxHp, G.player.hp + G.player.maxHp * P.levelUpHeal);
     while (G.levelRewards.length) {
       const L = G.levelRewards.shift(), ms = milestoneAt(L);
       let r = rollRarity('levelUp', L); if (ms && rarIdx(r) < rarIdx(ms)) r = ms;

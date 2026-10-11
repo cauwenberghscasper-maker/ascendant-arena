@@ -112,14 +112,18 @@ function makeEnemy(type, zi, o) {
   return e;
 }
 // shared combat contract: a reference hero's HP/damage at a level, and the one place enemy damage is resolved
-function refHp(L) { const P = CFG.progression; return P.hpBase * Math.pow(P.hpGrowth, L - 1); }
-function refDmg(L) { const P = CFG.progression; return P.atkBase * Math.pow(P.atkGrowth, L - 1); }
-function mobDmg(e, mult, t) { return e.atk * (mult || 1); }
+// log-linear lookup in a [[level, value], ...] table (flat below the first row, extends the last segment above)
+function lerpTable(T, L) { let i = 1; while (i < T.length - 1 && L > T[i][0]) i++; const [a, x] = T[i - 1], [b, y] = T[i], k = Math.max(0, (L - a) / (b - a)); return x * Math.pow(y / x, k); }
+function refHp(L) { const P = CFG.progression; return P.hpBase * Math.pow(P.hpGrowth, L - 1) * lerpTable(CFG.enemies.refHpMult, L); }
+function refDmg(L) { const P = CFG.progression; return P.atkBase * Math.pow(P.atkGrowth, L - 1) * lerpTable(CFG.enemies.refDmgMult, L); }
+// tankier heroes take bigger hits (sqrt), so stacking HP helps but never makes you unkillable
+function mobDmg(e, mult, t) { const b = t && t.maxHp > 0 ? clamp(Math.sqrt(t.maxHp / refHp(e.lvl)), 0.6, 3) : 1; return e.atk * (mult == null ? 1 : mult) * b; }
 function inInstance() { return !!(G.rift || G.dungeon); }
+// hits scale with the reference hero's HP, health with its damage: equal-level fights feel the same at 1 and 210
 function setEnemyLevel(e, lvl) {
-  const d = CFG.enemies[e.type], E = CFG.enemies.elite;
-  e.lvl = lvl; e.maxHp = Math.round(d.hp * egrow(CFG.enemies.hpGrowth, lvl) * (e.elite ? E.hp : 1) * (e.guardian ? 2.5 : 1)); e.hp = e.maxHp;
-  e.atk = d.atk * egrow(CFG.enemies.atkGrowth, lvl) * (e.elite ? E.atk : 1);
+  const d = CFG.enemies[e.type], E = CFG.enemies;
+  e.lvl = lvl; e.maxHp = Math.round(d.hp * E.hpPerDmg * refDmg(lvl) * (e.elite ? E.elite.hp : 1) * (e.guardian ? 2.5 : 1)); e.hp = e.maxHp;
+  e.atk = d.atk * E.atkFrac * refHp(lvl) * (e.elite ? E.elite.atk : 1);
 }
 function respawnEnemy(e) {
   if (G.time < (G.enemySpawnAt || 0)) return;
@@ -484,15 +488,17 @@ function hubBotThink(b, dt) {
   }
 }
 
-function separate(a, b, both) {
+// mass-based push: a moves by mB/(mA+mB) of the overlap, b by the rest (heavy monsters shove the hero)
+function separate(a, b) {
   const dx = a.x - b.x, dz = a.z - b.z, min = a.r + b.r;
   if (Math.abs(dx) > min || Math.abs(dz) > min) return;
   const d = Math.hypot(dx, dz);
   if (d >= min) return;
   const nx = d > 1e-4 ? dx / d : 1, nz = d > 1e-4 ? dz / d : 0, push = min - d;
-  if (both) { a.x += nx * push * 0.5; a.z += nz * push * 0.5; b.x -= nx * push * 0.5; b.z -= nz * push * 0.5; }
-  else { a.x += nx * push; a.z += nz * push; }
+  const ma = bodyMass(a), mb = bodyMass(b), k = mb / (ma + mb);
+  a.x += nx * push * k; a.z += nz * push * k; b.x -= nx * push * (1 - k); b.z -= nz * push * (1 - k);
 }
+const bodyMass = (e) => { const M = CFG.enemies.mass; return e.kind === 'enemy' ? (M[(CFG.enemies[e.type] || {}).kit || 'legacy'] || 1) * (e.elite ? M.elite : 1) : M.player; };
 function stepEnemy(e, dt) {
   if (!e.alive) { if (e.rift) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
   const d = CFG.enemies[e.type], pl = G.player, Z = CFG.world.zones[e.zone];
@@ -519,12 +525,12 @@ function stepEnemy(e, dt) {
       markCombat();
       const dx = pl.x - e.x, dz = pl.z - e.z, dd = dp || 1;
       if (d.attack === 'touch') {
-        mx = dx / dd; mz = dz / dd; sp = d.speed;
+        mx = dx / dd; mz = dz / dd; sp = dd < e.r + pl.r + 0.15 ? 0 : d.speed; // hold at arm's length instead of grinding into the hero
         // All burst movement warns first, then follows the displayed lane. Moving
         // sideways or dashing during the windup must not cause the attack to track you.
         if (d.charge || d.lunge) {
           if (e.windT > 0) { e.windT -= dt; sp = 0; if (e.windT <= 0) e.lungeT = d.charge ? 0.55 : 0.35; }
-          else if (dd < (d.charge ? 9 : 5) && dd > 2 && e.lungeCd <= 0) {
+          else if (dd < (d.charge ? 9 : 5) && e.lungeCd <= 0) {
             e.windT = d.charge ? 0.6 : 0.45; e.lungeCd = d.charge ? 3.2 : 2.4; e.cx = dx / dd; e.cz = dz / dd; sp = 0;
             ev({ t: 'telegraph', x: e.x, z: e.z, a: Math.atan2(dx, dz), len: d.charge ? 8 : 5, w: e.r * 2 });
           }
@@ -533,7 +539,7 @@ function stepEnemy(e, dt) {
         if (e.lungeT > 0) sp *= d.charge ? 3 : 2.3;
         if (dd < e.r + pl.r + 0.35 && e.atkCd <= 0 && e.windT <= 0) {
           e.atkCd = d.cd; e.attackAnim = 1;
-          dealDamage(pl, e.atk * (e.lungeT > 0 && d.charge ? 1.5 : 1), e.id, { knockX: dx, knockZ: dz, knock: d.heavy ? 12 : 4, burn: d.burn ? e.atk * d.burn : 0, burnT: 2 });
+          dealDamage(pl, mobDmg(e, (e.lungeT > 0 && d.charge ? 1.5 : 1) * (d.heavy ? CFG.enemies.heavyMult : 1), pl), e.id, { knockX: dx, knockZ: dz, knock: d.heavy ? 12 : 4, burn: d.burn ? mobDmg(e, d.burn, pl) : 0, burnT: 2 });
           if (d.heavy) ev({ t: 'boom', x: pl.x, z: pl.z, r: 1.6, color: 0xdfeaf4 });
         }
       } else {
@@ -547,7 +553,7 @@ function stepEnemy(e, dt) {
           const a0 = Math.atan2(lx - e.x, lz - e.z), n = (d.shots || 1) + (e.elite ? 2 : 0), spr = d.spread || 0.35;
           for (let k = 0; k < n; k++) {
             const a = n > 1 ? a0 + (k / (n - 1) - 0.5) * spr * (e.elite ? 1.4 : 1) : a0;
-            spawnProjectile({ x: e.x, z: e.z, vx: Math.sin(a) * d.shotSpeed, vz: Math.cos(a) * d.shotSpeed, life: (d.aggro + 6) / d.shotSpeed, r: e.elite ? 0.5 : 0.4, dmg: e.atk, team: 'mob', owner: e.id, kind: 'orb', color: d.shotColor || 0x7fe3ff, y: 1.4, burn: d.burn ? e.atk * d.burn : 0, burnT: d.burn ? 2 : 0 });
+            spawnProjectile({ x: e.x, z: e.z, vx: Math.sin(a) * d.shotSpeed, vz: Math.cos(a) * d.shotSpeed, life: (d.aggro + 6) / d.shotSpeed, r: e.elite ? 0.5 : 0.4, dmg: mobDmg(e, 1, pl), team: 'mob', owner: e.id, kind: 'orb', color: d.shotColor || 0x7fe3ff, y: 1.4, burn: d.burn ? mobDmg(e, d.burn, pl) : 0, burnT: d.burn ? 2 : 0 });
           }
           ev({ t: 'shoot', kind: 'enemy', x: e.x, z: e.z });
         }
@@ -567,8 +573,8 @@ function stepEnemy(e, dt) {
   e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
   trackVel(e, dt);
   // keep bodies apart: enemy vs player and vs other enemies
-  if (pl.alive) separate(e, pl, false);
-  for (let i = 0; i < G.enemies.length; i++) { const o = G.enemies[i]; if (o !== e && o.alive && o.zone === e.zone) separate(e, o, true); }
+  if (pl.alive) separate(e, pl);
+  for (let i = 0; i < G.enemies.length; i++) { const o = G.enemies[i]; if (o !== e && o.alive && o.zone === e.zone) separate(e, o); }
   collideObstacles(e);
   if (e.rift) { riftClamp(e, e.r); return; }
   // stay in own zone and out of town

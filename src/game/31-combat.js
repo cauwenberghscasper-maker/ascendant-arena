@@ -103,8 +103,7 @@ function stepProjectiles(dt) {
       if (dx * dx + dz * dz < rr * rr) hitT = t;
     });
     if (hitT) {
-      const amt = dealDamage(hitT, p.dmg, p.owner, { pet:p.pet, proc:p.pet, charge: p.charge, canCrit: !p.pet, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: 1.5, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
-      if (p.vamp && amt) { const o = G.ents.get(p.owner); if (o && o.alive) o.hp = Math.min(o.maxHp, o.hp + amt * p.vamp); }
+      dealDamage(hitT, p.dmg, p.owner, { pet:p.pet, proc:p.pet, vamp: p.vamp, charge: p.charge, canCrit: !p.pet, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: 1.5, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
       if (p.chain > 0) chainFrom(hitT, p.chain, p.dmg * 0.6, p.owner, p.team);
       if (p.pierce > 0) {
         p.pierce--; p.hits.push(hitT.id);
@@ -183,18 +182,21 @@ function dealDamage(t, amount, srcId, o) {
   if (o.canCrit && Math.random() < CFG.combat.critChance + (src && src.critBonus ? src.critBonus : 0)) { amt *= CFG.combat.critMult + (sf ? sf.critDmg : 0); crit = true; }
   if (t.armorT > 0) amt *= 1 - CFG.skills.ironskin.reduce;
   if (t.armor) amt *= 1 - Math.min(0.6, t.armor);
-  if (t.ks && t.ks.afterT > 0) amt *= 0.6;
+  if (t.ks && t.ks.afterT > 0) amt *= CFG.combat.afterReduce ?? 0.75;
   amt = Math.max(1, Math.round(amt));
   // Undying Rage: survive one lethal hit per minute
   if (t.kind === 'fighter' && t.keys && t.keys.undying && t.ks.undyCd <= 0 && t.hp - amt <= 0) {
     amt = Math.max(0, Math.round(t.hp - 1)); t.ks.undyCd = 60; t.invulnT = 1.5; ev({ t: 'undying', x: t.x, z: t.z, isPlayer: t.isPlayer });
   }
+  const hpBefore = Math.max(0, t.hp);
   t.hp -= amt; t.flashT = CFG.combat.hitFlash; t.lastHurt = G.time;
   if (o.slow) t.slowT = Math.max(t.slowT || 0, o.slow);
   if (o.burn) { t.burnT = o.burnT || 3; t.burnDmg = o.burn; t.burnSrc = srcId; if (!(t.burnTick > 0)) t.burnTick = 0.5; }
-  if (o.knock && t.kind !== 'boss') {
-    const d = Math.hypot(o.knockX, o.knockZ) || 1;
-    t.x += (o.knockX / d) * o.knock * 0.12; t.z += (o.knockZ / d) * o.knock * 0.12;
+  // monster poise: knockback is scaled down and lands at most once per knockGap, so bullets cannot stunlock melee
+  if (o.knock && t.kind !== 'boss' && (t.kind !== 'enemy' || G.time - (t.knockAt ?? -99) >= (CFG.enemies?.knockGap ?? 0.4))) {
+    const d = Math.hypot(o.knockX, o.knockZ) || 1, KR = CFG.enemies?.knockRes, res = t.kind === 'enemy' && KR ? (t.elite ? KR.elite : KR[(CFG.enemies[t.type] || {}).kit] ?? KR.other) : 0;
+    if (t.kind === 'enemy') t.knockAt = G.time;
+    t.x += (o.knockX / d) * o.knock * 0.12 * (1 - res); t.z += (o.knockZ / d) * o.knock * 0.12 * (1 - res);
   }
   if (src && src.kind === 'fighter' && o.charge) {
     src.superCharge = Math.min(1, src.superCharge + CFG.combat.superPerHit * o.charge * (1 + src.mods.superGain + src.gearSuper));
@@ -205,12 +207,15 @@ function dealDamage(t, amount, srcId, o) {
   if (t.isPlayer || (src && src.isPlayer)) markCombat();
   if (sf && sf.isPlayer && amt > (G.profile.records.maxHit || 0)) G.profile.records.maxHit = amt;
   if (sf && sf !== t && amt > 0) {
-    if (sf.lifesteal > 0 && sf.alive) sf.hp = Math.min(sf.maxHp, sf.hp + amt * sf.lifesteal * (o.proc ? 0.5 : 1));
-    if (o.canCrit && !o.proc) onHitProcs(sf, t, amt);
+    // heal only from damage that landed (no overkill), through the shared per-second budget
+    const eff = Math.min(amt, hpBefore); sf.lastDealt = G.time;
+    if (sf.lifesteal > 0 && sf.alive) healCapped(sf, eff * sf.lifesteal * (o.proc ? 0.5 : 1));
+    if (o.vamp && sf.alive) healCapped(sf, eff * o.vamp);
+    if (o.canCrit && !o.proc) onHitProcs(sf, t, eff);
   }
   if (t.hp <= 0) { if (t.alive) { t.hp = 0; killEntity(t, src, !!o.pet); } }
   else if (t.kind === 'fighter' && t.perks && t.perks.retaliate && t.retalCd <= 0 && src && src !== t) {
-    const R = CFG.perks.chest; t.retalCd = t.perks.retaliate;
+    const R = CFG.perks.chest; t.retalCd = Math.max(R.minCd ?? 2.5, t.perks.retaliate);
     ev({ t: 'boom', x: t.x, z: t.z, r: R.r, color: 0x7fd8ff });
     aoeDamage(t.x, t.z, R.r, t.dmg * R.mult, t.team, t.id, { knock: 7 });
   }
@@ -230,14 +235,19 @@ function dealDamage(t, amount, srcId, o) {
   }
   return amt;
 }
+// every on-hit heal draws from f.lsBudget (refilled by regenTick at lsCap x max HP per second, holding at most 1s worth)
+function healCapped(f, x) {
+  const cap = f.maxHp * (CFG.combat.lsCap ?? 0.04); if (f.lsBudget == null) f.lsBudget = cap;
+  const h = Math.max(0, Math.min(x, f.lsBudget, f.maxHp - f.hp)); f.lsBudget -= h; f.hp += h; return h;
+}
 
 // keystone and artifact effects on a direct hit
 function onHitProcs(f, t, amt) {
   const K = f.keys, ks = f.ks;
   if (K.tempo) { ks.tempo = Math.min(6, ks.tempo + 1); ks.tempoT = 4; }
-  if (K.conqueror) { ks.conq = Math.min(10, ks.conq + 1); ks.conqT = 5; if (ks.conq >= 10) f.hp = Math.min(f.maxHp, f.hp + amt * 0.08); }
+  if (K.conqueror) { ks.conq = Math.min(10, ks.conq + 1); ks.conqT = 5; if (ks.conq >= 10) healCapped(f, amt * 0.08); }
   if (K.grasp && ks.graspCd <= 0 && t.alive) {
-    ks.graspCd = 4; f.hp = Math.min(f.maxHp, f.hp + f.maxHp * 0.03);
+    ks.graspCd = 4; healCapped(f, f.maxHp * 0.03);
     ev({ t: 'proc', kind: 'grasp', x: t.x, z: t.z }); dealDamage(t, f.maxHp * 0.04, f.id, { proc: true });
   }
   if (K.phase) { ks.hits.push(G.time); while (ks.hits.length && G.time - ks.hits[0] > 3) ks.hits.shift(); if (ks.hits.length >= 3 && ks.phaseT <= 0) { ks.phaseT = 2; ks.hits.length = 0; ev({ t: 'proc', kind: 'phase', x: f.x, z: f.z, isPlayer: f.isPlayer }); } }
@@ -270,7 +280,7 @@ function killEntity(t, src, pet = false) {
     if (t.tagged) rewardEnemyKill(t);
     if (src && src.kind === 'fighter' && !pet) {
       if (src.keys.storm) { aoeDamage(t.x, t.z, 3, src.dmg * 0.6, src.team, src.id, { proc: true, knock: 3 }); ev({ t: 'boom', x: t.x, z: t.z, r: 3, color: 0x9fd7ff }); }
-      if (src.arts && src.arts.reaper) { src.ammo = Math.min(src.ammoMax, src.ammo + 1); src.hp = Math.min(src.maxHp, src.hp + src.maxHp * artVal('reaper', src.arts.reaper)); }
+      if (src.arts && src.arts.reaper) { src.ammo = Math.min(src.ammoMax, src.ammo + 1); healCapped(src, src.maxHp * artVal('reaper', src.arts.reaper)); }
     }
   } else if (t.kind === 'boss') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'boss' });
@@ -501,6 +511,15 @@ function stepClouds(dt) {
     if (c.t <= 0) G.clouds.splice(i, 1);
   }
 }
+// regen waits after being hit and (in the world) after dealing damage; the heal budget refills here too
+function regenTick(f, dt, ctx) {
+  const cap = f.maxHp * (CFG.combat.lsCap ?? 0.04); f.lsBudget = Math.min(cap, (f.lsBudget ?? cap) + cap * dt);
+  const regen = (ctx === 'arena' ? CFG.arena.regen : P.regenHub) * (f.keys.secondWind ? 2 : 1) * (f.regenMult || 1);
+  const delay = f.keys.secondWind ? 1.5 : ctx === 'arena' ? CFG.arena.regenDelay : P.regenDelay;
+  if (f.hp < f.maxHp && G.time - f.lastHurt > delay && G.time - f.lastAttack > (ctx === 'arena' ? 1.5 : 0) && (ctx === 'arena' || G.time - (f.lastDealt ?? -99) > P.regenAfterHit)) {
+    f.hp = Math.min(f.maxHp, f.hp + f.maxHp * regen * dt);
+  }
+}
 function stepFighter(f, dt, ctx) {
   if (!f.alive) return;
   const it = f.intent, w = weaponOf(f), C = CFG.combat;
@@ -574,12 +593,7 @@ function stepFighter(f, dt, ctx) {
     doSpecial(f, dx, dz, it.specialDir ? it.specialDist : 0);
   }
 
-  // regen
-  const regen = (ctx === 'arena' ? CFG.arena.regen : P.regenHub) * (f.keys.secondWind ? 2 : 1) * (f.regenMult || 1);
-  const delay = f.keys.secondWind ? 1.5 : ctx === 'arena' ? CFG.arena.regenDelay : P.regenDelay;
-  if (f.hp < f.maxHp && G.time - f.lastHurt > delay && G.time - f.lastAttack > (ctx === 'arena' ? 1.5 : 0)) {
-    f.hp = Math.min(f.maxHp, f.hp + f.maxHp * regen * dt);
-  }
+  regenTick(f, dt, ctx);
   trackVel(f, dt);
   clearOneShots(it);
 }

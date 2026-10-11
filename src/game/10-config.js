@@ -35,15 +35,19 @@ const CFG = {
     milestones: { 5: 'rare', 10: 'rare', 15: 'epic', 20: 'epic', 25: 'epic', 30: 'legendary', 35: 'epic', 40: 'legendary', 45: 'epic', 50: 'legendary', 55: 'legendary', 60: 'legendary', 65: 'legendary' },
     keystoneLevels: [10, 20, 30, 40, 50, 60], artifactSlotAt: { 30: 3, 100: 4, 150: 5 }, ascendAt: [100, 150, 200],
     offline: { minMinutes: 3, capHours: 8, killsPerMin: 1.5, itemEveryMin: 45, maxItems: 8 },
-    fastXpMult: 5, testGoldMult: 3, testBossFirst: 20, testBossInterval: 60, testShrineCd: 0.25, regenHub: 0.06, regenDelay: 3.5,
+    fastXpMult: 5, testGoldMult: 3, testBossFirst: 20, testBossInterval: 60, testShrineCd: 0.25, regenHub: 0.025, regenDelay: 5,
+    // hardcore: regen also waits this long after you last dealt damage; a level-up in combat heals only this share
+    regenAfterHit: 3, levelUpHeal: 0.35,
   },
   jobs: { xpFrac: 0.55, goldBase: 24, goldPerLevel: 9 },
   player: { speed: 6.4, radius: 0.55, respawn: 3 },
   combat: {
-    dash: { dist: 6.5, time: 0.17, invuln: 0.32, cd: 2.6 },
+    dash: { dist: 6.5, time: 0.17, invuln: 0.26, cd: 2.6 },
     melee: { range: 2.5, arc: 1.15, cd: 0.6, mult: 1.35, knock: 6 },
     superPerHit: 0.12, critChance: 0.08, critMult: 1.6, variance: 0.1,
     combatLinger: 3.5, hitFlash: 0.12,
+    // all on-hit healing (lifesteal, Vampire Fang, Conqueror, Grasp, Soul Reaper) draws from a budget refilling at this share of max HP per second
+    lsCap: 0.04, afterReduce: 0.75,
   },
   classes: {
     novice: { name: 'Novice', role: 'Balanced starter', hpMult: 1, atkMult: 1, speedMult: 1, arenaHp: 2800, arenaDmg: 450,
@@ -111,7 +115,15 @@ const CFG = {
     warden: { name: 'Gilded Warden', hp: 135, atk: 17, speed: 3.6, r: 1.05, aggro: 10, leash: 24, attack: 'touch', cd: 1.4, gold: [7, 12], heavy: true, charge: true },
     sentinel: { name: 'Star Sentinel', hp: 90, atk: 9, speed: 1.8, r: 0.9, aggro: 15, leash: 20, attack: 'shoot', cd: 2.2, gold: [5, 10], shotSpeed: 10, keep: 11, shots: 5, spread: 0.9, shotColor: 0x9fe8ff },
     hpGrowth: 1.105, atkGrowth: 1.105, goldGrowth: 1.06,
-    elite: { hp: 7, atk: 1.6, r: 1.35, xp: 6, gold: 5, drop: 0.5, essence: [3, 8], shards: [2, 4] },
+    elite: { hp: 5, atk: 1.4, r: 1.35, xp: 6, gold: 5, drop: 0.5, essence: [3, 8], shards: [2, 4] },
+    // Hardcore scaling against a reference hero (rare gear at the level, +L/4 upgrades, all points in the core, mastery L/10).
+    // refHpMult/refDmgMult: that hero's HP/damage over the bare level curve, measured by tools/check_hardcore.cjs.
+    refHpMult: [[1, 1.47], [10, 1.82], [20, 2.18], [50, 4.16], [100, 9.51], [150, 19.62], [200, 46.79]],
+    refDmgMult: [[1, 1.61], [10, 2.13], [20, 2.69], [50, 5.90], [100, 15.30], [150, 34.04], [200, 86.02]],
+    atkFrac: 0.009, hpPerDmg: 0.057, heavyMult: 1.3,
+    // contact pushing: heavier bodies shove lighter ones; poise scales incoming knockback, at most once per knockGap
+    mass: { swarm: 0.6, charger: 1, brute: 2.5, ambusher: 1.5, shooter: 0.8, spray: 0.8, turret: 1.5, legacy: 1, player: 1, elite: 2 },
+    knockRes: { brute: 0.8, elite: 0.8, other: 0.4 }, knockGap: 0.4,
   },
   boss: {
     name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 25, duration: 120,
@@ -153,7 +165,7 @@ const CFG = {
   perks: {
     weapon: { id: 'twin', name: 'Twin Shot', rare: 0.5, epic: 0.75, legendary: 1.0, mythic: 1.2, ancient: 1.4, divine: 1.7 },
     helmet: { id: 'focus', name: 'Focus Crest', rare: 1, epic: 1, legendary: 1, mythic: 1, ancient: 1, divine: 1, epicReload: 0.15 },
-    chest: { id: 'retaliate', name: 'Shock Plate', rare: 5, epic: 3.5, legendary: 2.5, mythic: 2, ancient: 1.6, divine: 1.2, r: 3.4, mult: 0.9 },
+    chest: { id: 'retaliate', name: 'Shock Plate', rare: 5, epic: 3.5, legendary: 2.5, mythic: 2, ancient: 1.6, divine: 1.2, r: 3.4, mult: 0.6, minCd: 2.5 },
     boots: { id: 'dashStrike', name: 'Comet Dash', rare: 1.0, epic: 1.6, legendary: 2.2, mythic: 2.8, ancient: 3.4, divine: 4.2 },
     accessory: { id: 'element', name: 'Element', rare: 1, epic: 1.35, legendary: 1.8, mythic: 2.2, ancient: 2.6, divine: 3.2 },
   },

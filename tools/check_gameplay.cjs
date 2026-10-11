@@ -62,11 +62,12 @@ const balance = [];
 check('stationary unprotected targets can die at early and late levels; armor remains useful', () => {
   for (const level of [1, 5, 10, 25, 50, 100, 200]) {
     reset(level); const e = c.makeEnemy('slime', 1, { patrol: 14 }); c.setEnemyLevel(e, Math.max(1, level - 4));
-    const hp = 100 * Math.pow(1.095, level - 1), fraction = e.atk / hp;
-    assert(fraction > .05 && fraction < .15, 'unarmored single hit remains meaningful without oneshots');
+    // the hero is the reference hero of its level (see tools/check_hardcore.cjs); hits go through mobDmg like in play
+    const hp = c.refHp(level), fraction = c.mobDmg(e, 1, { maxHp: hp }) / hp;
+    assert(fraction > .04 && fraction < .12, 'unarmored single hit remains meaningful without oneshots');
     const results = [];
     for (const armor of [0, .3]) {
-      const p = c.G.player; Object.assign(p, { alive: true, hp, armor, x: 80, z: 50 }); Object.assign(e, { x: 78.7, z: 50, hx: 78.7, hz: 50, state: 'chase', atkCd: 0 }); c.G.enemies = [e];
+      const p = c.G.player; Object.assign(p, { alive: true, hp, maxHp: hp, armor, x: 80, z: 50 }); Object.assign(e, { x: 78.7, z: 50, hx: 78.7, hz: 50, state: 'chase', atkCd: 0 }); c.G.enemies = [e];
       let seconds = 0; while (p.alive && seconds < 60) { c.stepEnemy(e, 1 / 60); seconds += 1 / 60; }
       assert(!p.alive); results.push(Number(seconds.toFixed(2)));
     }
