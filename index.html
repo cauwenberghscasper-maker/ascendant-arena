@@ -1130,43 +1130,22 @@ const CFG = {
   sim: { step: 1 / 60, maxSteps: 5 },
   quality: { maxDpr: 2, minDpr: 0.6, downFps: 50, upFps: 58, sampleSec: 1.5, cullFar: 72, cullNear: 46 },
   world: {
-    minX: -130, maxX: 130, minZ: -90, maxZ: 1062,
+    minX: -130, maxX: 130, minZ: -90, maxZ: 1062, // set from the areas below
     town: { x: 0, z: -58, r: 20 },
     spawn: { x: 0, z: -49 },
-    // Five zones, each a long band. Monster level rises the deeper you go (RuneScape-style wilderness).
-    zones: [
-      { name: 'Sunny Meadow', minLevel: 1, z0: -90, z1: 95, enemy: 'slime', lvl: [1, 12], count: 34, alt: 'boar', boss: 'Ancient Golem', bossTint: 0x8d8a83, coreColor: 0xff8a2a,
-        fog: 0x5b7a5e, sky: [0x2a3d55, 0x7d9a86] },
-      { name: 'Ashwood Forest', minLevel: 10, z0: 95, z1: 255, enemy: 'wolf', lvl: [10, 24], count: 34, alt: 'spider', boss: 'Thornback Golem', bossTint: 0x6b7a52, coreColor: 0x9cff5a,
-        fog: 0x3f5c48, sky: [0x1f2f40, 0x5e7a68] },
-      { name: 'Frost Peaks', minLevel: 22, z0: 255, z1: 415, enemy: 'imp', lvl: [22, 38], count: 34, alt: 'yeti', boss: 'Frost Colossus', bossTint: 0xa9c4dc, coreColor: 0x7fe3ff,
-        fog: 0x9fb3c4, sky: [0x3a5274, 0xb8c9d6] },
-      { name: 'Ember Wastes', minLevel: 36, z0: 415, z1: 575, enemy: 'beetle', lvl: [36, 52], count: 34, alt: 'fireimp', boss: 'Magma Titan', bossTint: 0x4a3b36, coreColor: 0xff5a1f,
-        fog: 0x7a4a3a, sky: [0x3a1f24, 0xa8644a] },
-      { name: 'Starfall Ruins', minLevel: 50, z0: 575, z1: 745, enemy: 'wraith', lvl: [50, 65], count: 34, alt: 'sentinel', boss: 'Void Colossus', bossTint: 0x3b3566, coreColor: 0xc77dff,
-        fog: 0x4a4170, sky: [0x1a1636, 0x6a5f9c] },
-      { name: 'Abyssal Depths', minLevel: 64, z0: 745, z1: 905, enemy: 'crawler', lvl: [65, 85], count: 36, alt: 'drowned', boss: 'Abyssal Leviathan', bossTint: 0x1d5560, coreColor: 0x2fffd0,
-        fog: 0x2f5f66, sky: [0x0b2230, 0x4f8a8c] },
-      { name: 'Celestial Spire', minLevel: 84, z0: 905, z1: 1065, enemy: 'seraph', lvl: [85, 100], count: 36, alt: 'warden', boss: 'Celestial Colossus', bossTint: 0xe9dcb8, coreColor: 0xfff07a,
-        fog: 0xc9a77a, sky: [0x7a5a3a, 0xf0d8b0] },
-    ],
-    // Monster dens: packed camps that respawn fast. Best XP per minute, but they hit back hard.
-    dens: [
-      { name: 'Slime Pools', zone: 0, x: -62, z: 2, r: 13, n: 14 }, { name: 'Gooey Hollow', zone: 0, x: 66, z: 58, r: 13, n: 16 },
-      { name: 'Howling Glade', zone: 1, x: -70, z: 140, r: 14, n: 14 }, { name: 'Wolf Den', zone: 1, x: 72, z: 205, r: 14, n: 16 },
-      { name: 'Imp Nest', zone: 2, x: 70, z: 300, r: 14, n: 14 }, { name: 'Frozen Spire', zone: 2, x: -72, z: 372, r: 14, n: 16 },
-      { name: 'Cinder Pit', zone: 3, x: -68, z: 460, r: 14, n: 14 }, { name: 'Scorched Hive', zone: 3, x: 70, z: 535, r: 15, n: 17 },
-      { name: 'Rift Scar', zone: 4, x: 66, z: 620, r: 15, n: 12 }, { name: 'Void Altar', zone: 4, x: -66, z: 700, r: 15, n: 14 },
-      { name: 'Sunken Reef', zone: 5, x: -68, z: 790, r: 15, n: 15 }, { name: 'Trench Mouth', zone: 5, x: 70, z: 865, r: 16, n: 17 },
-      { name: 'Halo Court', zone: 6, x: 68, z: 950, r: 15, n: 15 }, { name: 'Gilded Steps', zone: 6, x: -70, z: 1025, r: 16, n: 17 },
-    ],
-    denRespawn: 4, denLevelBonus: 2, denXp: 1.15, elitesPerZone: 2, eliteRespawn: 50,
+    // Base Camp plus 29 areas in 6 biomes, each a band of the road north (see WORLD_AREAS above).
+    // Monster level rises the deeper you go inside an area (RuneScape-style wilderness).
+    zones: [], // WORLD_AREAS, filled in below
+    // Monster dens: packed camps that respawn fast (one per area, built below). Best XP per minute, but they hit back hard.
+    dens: [],
+    denRespawn: 4, denLevelBonus: 2, denXp: 1.15, elitesPerZone: 1, eliteRespawn: 50,
     enemyRespawn: 9, berryCount: 14, berryRespawn: 18,
   },
   progression: {
     cap: 100000, xpBase: 55, xpExp: 1.45, xpGrowth: 1.025, classAt: 5,
     hpBase: 100, hpGrowth: 1.095, atkBase: 10, atkGrowth: 1.095,
-    killsPerLevel: 20, killsPerLevelGrowth: 3.2, killsPerLevelSq: 0.025, streakWindow: 4, streakStep: 0.01, streakMax: 0.3,
+    // v9: about 1.6x more kills per level than v8 (slower, longer climb to 210)
+    killsPerLevel: 32, killsPerLevelGrowth: 5.1, killsPerLevelSq: 0.04, streakWindow: 4, streakStep: 0.01, streakMax: 0.3,
     // Level Road: every level drops an item; every 5th level is a milestone chest with a guaranteed minimum rarity.
     milestones: { 5: 'rare', 10: 'rare', 15: 'epic', 20: 'epic', 25: 'epic', 30: 'legendary', 35: 'epic', 40: 'legendary', 45: 'epic', 50: 'legendary', 55: 'legendary', 60: 'legendary', 65: 'legendary' },
     keystoneLevels: [10, 20, 30, 40, 50, 60], artifactSlotAt: { 30: 3, 100: 4, 150: 5 }, ascendAt: [100, 150, 200],
@@ -1277,7 +1256,7 @@ const CFG = {
       // endgame rarities: only from World Tiers, deep Rift floors, high-tier bosses and late Level Road chests
       mythic: { name: 'Mythic', mult: 2.4, affixes: 4 }, ancient: { name: 'Ancient', mult: 2.95, affixes: 4 }, divine: { name: 'Divine', mult: 3.6, affixes: 5 },
     },
-    maxUp: Infinity, upStep: 0.12, starEvery: 10, starBonus: 0.3, upCostBase: 30, upCostExp: 1.5, upCostGrowth: 1.06, bagMax: 30,
+    maxUp: Infinity, upStep: 0.12, starEvery: 10, starBonus: 0.3, upCostBase: 30, upCostExp: 1.5, upCostGrowth: 1.06, bagMax: 50,
     essenceFrom: 6, // upgrades from +6 to +15 also cost essence (salvage Rare+ items to get it)
     salvageEssence: { common: 0, uncommon: 1, rare: 6, epic: 15, legendary: 36, mythic: 80, ancient: 160, divine: 320 },
     // share of a same-level hero's base attack / HP that one item of this slot adds (x rarity x upgrades)
@@ -1402,8 +1381,182 @@ const CFG = {
   economy: { premiumCurrency: null },
 };
 
-CFG.world.lairs = CFG.world.zones.map((zn, i) => ({ x: 0, z: Math.round(zn.z0 + (zn.z1 - zn.z0) * (i === 0 ? 0.62 : 0.5)), name: ['Standing Stones', 'Ashwood Hollow', 'Glacier Throne', 'Molten Caldera', 'Void Gate', 'Leviathan Trench', 'Throne of Dawn'][i] }));
-CFG.world.waypoints = [{ name: 'Willowcross Town', x: 9, z: -46, zone: 0 }].concat(CFG.world.zones.slice(1).map((zn, i) => ({ name: zn.name + ' Gate', x: 9, z: zn.z0 + 9, zone: i + 1 })));
+// ---- World v9 (Espaahhh's map): Base Camp + 29 areas in 6 biomes, levels 1-210 ----------------------
+// Every area is one band of the long road north. theme = floor/decoration style (0 meadow, 1 forest,
+// 2 frost, 3 ember, 4 arcane, 5 deep water, 6 celestial); colours and props are tuned per area below.
+const BIOMES = [
+  { name: 'Starting Woodlands', boss: 'Ancient Golem', bossTint: 0x8d8a83, coreColor: 0xff8a2a, bossAcc: 0x6fae4f, region: -1 },
+  { name: 'Mountain Peaks', boss: 'Frost Colossus', bossTint: 0xa9c4dc, coreColor: 0x7fe3ff, bossAcc: 0xe9f2fa, region: 2 },
+  { name: 'Volcanic Underworld', boss: 'Magma Titan', bossTint: 0x4a3b36, coreColor: 0xff5a1f, bossAcc: 0x24160f, region: 3 },
+  { name: 'Arcane Ruins', boss: 'Void Colossus', bossTint: 0x3b3566, coreColor: 0xc77dff, bossAcc: 0x8d7bff, region: -1 },
+  { name: 'Ocean Depths', boss: 'Abyssal Leviathan', bossTint: 0x1d5560, coreColor: 0x2fffd0, bossAcc: 0x2fffd0, region: -1 },
+  { name: 'Celestial Ascension', boss: 'Celestial Colossus', bossTint: 0xe9dcb8, coreColor: 0xfff07a, bossAcc: 0xfff07a, region: 6 },
+];
+// [name, biome, levels, theme, main monster, second monster, den, lair, look]
+const AREA_ROWS = [
+  ['Base Camp', 0, [1, 1], 0, null, null, null, null, { ground: [0x7a9a55, 0x6f8f4d, 0x86a65e, 0x6a8a4a], fog: 0x5b7a5e, sky: [0x2a3d55, 0x7d9a86], mm: '#b9d98a', deco: { trees: 110, tufts: 900, flowers: 160, bushes: 120, ponds: 2, fungi: 30 } }],
+  ['Sunny Meadow', 0, [1, 10], 0, 'thistlehare', 'hornet', 'Hornet Hives', 'Standing Stones', { ground: 'meadow', fog: 0x5b7a5e, sky: [0x2a3d55, 0x7d9a86], mm: '#86c96a', deco: { tufts: 2000, flowers: 300 } }],
+  ['Funky Forest', 0, [10, 20], 1, 'truffleboar', 'myconid', 'Glowcap Ring', 'Mushroom Throne', { ground: [0x2f4a3a, 0x2a4434, 0x36503f, 0x263e30], fog: 0x2f3f4a, sky: [0x1a1f3a, 0x4a5a7a], mm: '#3f7a5c', glow: [0.9, 0.3, 1.0],
+    deco: { tree: 'round', treeC: [0x3f6a3a, 0x355f36, 0x4a7a40], fungi: 300, fungiC: [0xff4fd8, 0x4fffe0, 0xb6ff4f, 0xffb14f], fungiS: 2.2, glowCaps: true, flies: 170 } }],
+  ['Gnarly Grove', 0, [20, 25], 1, 'bramble', 'barkviper', 'Root Maze', 'Hollow Oak', { ground: [0x3e3a2a, 0x47402e, 0x38331f, 0x4f4632], fog: 0x3a3a2e, sky: [0x1f2420, 0x5a5a48], mm: '#6a6a3e',
+    deco: { tree: 'dead', treeC: [0x4a3a2c, 0x3b2e24], trees: 260, logs: 45, fungi: 30, ponds: 0, bushes: 200, leafC: [0x4a4a2a, 0x3a3a22] } }],
+  ['Shady Shrubland', 0, [25, 30], 1, 'thornbeetle', 'gloompanther', 'Gloom Thicket', 'Shadow Circle', { ground: [0x24342c, 0x1f2e26, 0x2a3a30, 0x1b2922], fog: 0x1c2430, sky: [0x0f1426, 0x3a3f5a], mm: '#2c4a3e',
+    deco: { tree: 'round', treeC: [0x23362e, 0x1e2f28, 0x2a4034], bushes: 560, leafC: [0x1e2f28, 0x23362e, 0x2a4034], flies: 130, ponds: 0 } }],
+  ['Feisty Foothills', 1, [30, 35], 0, 'craggoat', 'dustharpy', 'Goat Ledges', 'Windy Cairn', { ground: [0x8a8a72, 0x7f7f68, 0x96957c, 0x75735f], fog: 0x8a96a0, sky: [0x4a6a8a, 0xb8c4c8], mm: '#a8a68a', amp: 0.8,
+    deco: { tree: 'pine', trees: 50, rocks: 170, tufts: 700, tuftC: [0x8a9a5a, 0x9aa66a], flowers: 0, bushes: 60, ponds: 0, fungi: 0, flies: 20 } }],
+  ['Heinous Hilltop', 1, [35, 40], 0, 'bouldermimic', 'galeweaver', 'Boulder Field', 'Crag Crown', { ground: [0x6f6a60, 0x655f56, 0x7a756a, 0x5c564e], fog: 0x7a8088, sky: [0x3a4a6a, 0xa0a8b0], mm: '#8a857a', amp: 1.0,
+    deco: { tree: 'pine', trees: 30, rocks: 330, spikes: 0.3, spikeC: 0x8a8478, tufts: 400, tuftC: [0x7a7a5a, 0x8a8a66], flowers: 0, bushes: 40, ponds: 0, fungi: 0, flies: 10 } }],
+  ['Pretending Plateau', 1, [40, 45], 0, 'miragestalker', 'pitfallwurm', 'Shimmer Flats', 'Mirage Stones', { ground: [0xc2b07a, 0xb8a670, 0xccbb86, 0xae9c68], fog: 0xc8b48a, sky: [0x6a8ab0, 0xe8d8b0], mm: '#d8c88a', amp: 0.15,
+    deco: { tree: 'round', trees: 20, treeC: [0x8a9a4a, 0x7a8a40], rocks: 40, tufts: 900, tuftC: [0xc8b878, 0xd8c890], flowers: 30, flowerC: [0xffe08a, 0xffffff], bushes: 40, leafC: [0x9aa055, 0x8a9048], ponds: 0, fungi: 0, ruins: 2, flies: 10 } }],
+  ['Malicious Mountain', 1, [45, 50], 2, 'frostgargoyle', 'chillbanshee', 'Black Crags', 'Avalanche Altar', { ground: [0x3a3a44, 0x33333c, 0x42424e, 0x2c2c34], fog: 0x5a6478, sky: [0x1a2236, 0x7a8aa0], mm: '#4a4a58', amp: 0.9,
+    deco: { tree: 'snowPine', trees: 40, spikes: 0.55, spikeC: 0x2a2a32, rocks: 140, rockC: [0x3a3a44, 0x4a4a56], tufts: 300, tuftC: [0xd7e6f2, 0x9aa8b4] } }],
+  ['Frost Peaks', 1, [50, 60], 2, 'glacialtroll', 'iceshard', 'Whiteout Summit', 'Glacier Throne', { ground: 'frost', fog: 0x9fb3c4, sky: [0x3a5274, 0xb8c9d6], mm: '#dbe7f2' }],
+  ['Grumbling Descent', 2, [60, 65], 5, 'screecrawler', 'echobat', 'Echo Cavern', 'Fissure Mouth', { ground: [0x4a4440, 0x423c38, 0x54504a, 0x3a3430], fog: 0x2a2622, sky: [0x0e0c0a, 0x3a342e], mm: '#5a524a', glow: [1.0, 0.75, 0.4],
+    deco: { tree: 'none', spikes: 1.0, spikeC: 0x5a524a, rocks: 170, rockC: [0x5a524a, 0x4a443e], tufts: 250, tuftC: [0x5a524a, 0x4a443e], fungi: 40, fungiC: [0xffb14f, 0xffd88a], glowCaps: true, flies: 0, bushes: 0, ponds: 0 } }],
+  ['Brimstone Bogs', 2, [65, 70], 3, 'sulfurslime', 'fumetoad', 'Sulfur Pits', 'Bubbling Cauldron', { ground: [0x5a5a2a, 0x4f4f24, 0x666630, 0x45451f], fog: 0x6a6a3a, sky: [0x2a2a14, 0x8a8a4a], mm: '#7a7a3a', glow: [1.0, 0.85, 0.2],
+    deco: { tree: 'dead', trees: 60, treeC: [0x3a3a24, 0x2e2e1c], ponds: 10, lava: 16, lavaC: 0xd8d040, tufts: 400, tuftC: [0x6a6a30, 0x7a7a3a], bushes: 60, leafC: [0x5a5a28, 0x4a4a20] } }],
+  ['Slaggy Terraces', 2, [70, 75], 3, 'magmahound', 'cinderelemental', 'Slag Stairs', 'Molten Caldera', { ground: [0x2a2226, 0x241c20, 0x32282c, 0x1e171a], fog: 0x5a2a1e, sky: [0x2a0f0e, 0x9a4a2a], mm: '#5a2a2a',
+    deco: { tree: 'none', lava: 32, ruins: 5, ruinC: 0x1e1a22, rocks: 110, rockC: [0x241c20, 0x32282c] } }],
+  ['Charred Threshold', 2, [75, 80], 3, 'ashstalker', 'emberwraith', 'Ashfall Hollow', 'Cinder Gate', { ground: [0x5a5654, 0x4f4b49, 0x66625f, 0x45413f], fog: 0x6a6664, sky: [0x2a2828, 0x8a8480], mm: '#6a6664', glow: [0.9, 0.35, 0.1],
+    deco: { tree: 'dead', trees: 90, treeC: [0x1e1a18, 0x2a2422], lava: 6, tufts: 500, tuftC: [0x6a6664, 0x7a7674], rockC: [0x4f4b49, 0x5a5654] } }],
+  ['Ember Wastes', 2, [80, 85], 3, 'scoriascorpion', 'flamewyrm', 'Fire Dunes', 'Ember Throne', { ground: 'ember', fog: 0x7a4a3a, sky: [0x3a1f24, 0xa8644a], mm: '#7a5444', deco: { lava: 34 } }],
+  ['Sapphire Coals', 3, [85, 90], 3, 'manaleech', 'azuregolem', 'Azure Kiln', 'Cold Fire Altar', { ground: [0x1e2a44, 0x1a243c, 0x24324e, 0x161f34], fog: 0x1e2a5a, sky: [0x0a0f2a, 0x3a5aaa], mm: '#2a4a8a', glow: [0.25, 0.55, 1.0],
+    deco: { tree: 'crystal', trees: 70, treeC: [0x3a7aff, 0x5a9aff, 0x2a5adf], lava: 24, lavaC: 0x3a8aff, spikes: 0.4, spikeC: 0x2a5aaa, rockC: [0x1e2a44, 0x2a3a5a] } }],
+  ['Fractural Ley', 3, [90, 95], 4, 'riftspider', 'geodrone', 'Shear Lines', 'Ley Nexus', { ground: [0x3a2a5a, 0x34264f, 0x44326a, 0x2e2246], fog: 0x3a2a6a, sky: [0x140a2a, 0x6a4aaa], mm: '#5a3a8a',
+    deco: { tree: 'crystal', trees: 130, treeC: [0x9a5aff, 0xc77dff, 0x7a3aef], ruins: 6, ruinC: 0x5b3a90 } }],
+  ['Inverted Abyss', 3, [95, 100], 4, 'voidray', 'asteroidhermit', 'Floating Rocks', 'Gravity Well', { ground: [0x14142a, 0x101024, 0x1a1a34, 0x0c0c1e], fog: 0x0a0a1e, sky: [0x02020a, 0x1a1a4a], mm: '#1a1a3a', glow: [0.4, 0.8, 1.0],
+    deco: { tree: 'crystal', trees: 50, treeC: [0x6ac8ff, 0x9ae8ff], rocks: 170, rockC: [0x4a4466, 0x3a3456], flies: 260, tufts: 300, tuftC: [0x2a2a4a, 0x343456] } }],
+  ['Glassfall Labyrinth', 3, [100, 105], 4, 'prismmimic', 'glassminotaur', 'Mirror Halls', 'Prism Heart', { ground: [0xc8d8e8, 0xb8c8da, 0xd8e6f2, 0xa8b8ca], fog: 0x9ab8d0, sky: [0x4a6a9a, 0xd8e8f8], mm: '#c8d8e8', glow: [0.7, 0.95, 1.0],
+    deco: { tree: 'crystal', trees: 170, treeC: [0xbff0ff, 0xffd0f8, 0xd0ffe8], ruins: 11, ruinC: 0xa8d8f0, rockC: [0xb8c8da, 0xd8e6f2], tufts: 300, tuftC: [0xd8e6f2, 0xbfd8ea] } }],
+  ['Starfall Ruins', 3, [105, 110], 4, 'starsentry', 'astronomer', 'Fallen Observatory', 'Void Gate', { ground: 'starfall', fog: 0x4a4170, sky: [0x1a1636, 0x6a5f9c], mm: '#544c86', deco: { ruins: 9 } }],
+  ['Drowned Constellations', 4, [110, 120], 5, 'nebulajelly', 'kelpie', 'Starlit Lake', 'Sunken Star', { ground: [0x2a2a5a, 0x24244f, 0x32326a, 0x1e1e46], fog: 0x2a2a5a, sky: [0x0a0a2a, 0x4a4a9a], mm: '#4a4a8a', glow: [0.75, 0.5, 1.0],
+    deco: { tree: 'coral', trees: 70, treeC: [0x8a6aff, 0xc77dff, 0x6a8aff], ponds: 14, flies: 170 } }],
+  ['Twilight Aquifers', 4, [120, 130], 5, 'rapidsiren', 'thrasher', 'White Rapids', 'River Fork', { ground: [0x1e3a5a, 0x1a344f, 0x24446a, 0x162e46], fog: 0x1e3a5a, sky: [0x0a1a2e, 0x3a6a9a], mm: '#2a5a8a', glow: [0.4, 0.8, 1.0],
+    deco: { tree: 'coral', trees: 50, treeC: [0x2a6a9a, 0x3a8aba], ponds: 18, rocks: 130, rockC: [0x2a3a4a, 0x34465a] } }],
+  ['Luminous Grottos', 4, [130, 140], 5, 'sporeurchin', 'angler', 'Glowing Grotto', 'Lantern Pool', { ground: [0x0e2a2a, 0x0b2424, 0x123232, 0x081e1e], fog: 0x0e2a2a, sky: [0x020a0a, 0x1e4a4a], mm: '#1e4a4a', glow: [0.4, 1.0, 0.6],
+    deco: { tree: 'coral', trees: 90, treeC: [0x1f8a7a, 0x2fbfa0], fungi: 230, fungiC: [0x4fffb0, 0x4fd8ff, 0xb0ff4f], fungiS: 1.8, glowCaps: true, flies: 220 } }],
+  ['Midnight Shelf', 4, [140, 150], 5, 'trenchcrawler', 'pressuresquid', 'Basalt Ledge', 'Cliff Edge', { ground: [0x101418, 0x0c1014, 0x14181e, 0x080c10], fog: 0x080a10, sky: [0x000000, 0x10141e], mm: '#14181e', glow: [0.3, 0.5, 1.0],
+    deco: { tree: 'none', spikes: 0.6, spikeC: 0x1a1e24, rocks: 170, rockC: [0x1a1e24, 0x22262e], flies: 60, fungi: 20, tuftC: [0x1a1e24, 0x22262e] } }],
+  ['Abyssal Depths', 4, [150, 160], 5, 'leviathan', 'abyssphantom', 'Heartbeat Trench', 'Leviathan Trench', { ground: 'abyss', fog: 0x2f5f66, sky: [0x0b2230, 0x4f8a8c], mm: '#2a7078' }],
+  ['Abyssal Upwelling', 5, [160, 170], 5, 'boilcrab', 'steamelemental', 'Thermal Vents', 'Steam Geyser', { ground: [0x3a3a3e, 0x343438, 0x424248, 0x2c2c30], fog: 0x8a8a90, sky: [0x2a2a30, 0xb0b0b8], mm: '#5a5a62', glow: [1.0, 0.5, 0.15],
+    deco: { tree: 'none', ponds: 12, lava: 14, lavaC: 0xff8a3a, spikes: 0.4, spikeC: 0x4a4a50, rockC: [0x3a3a3e, 0x4a4a50], tuftC: [0x5a5a62, 0x4a4a50] } }],
+  ['Obsidian Chimney', 5, [170, 180], 3, 'shaftvulture', 'obsidiangargoyle', 'Glass Shaft', 'Updraft Ring', { ground: [0x14101a, 0x100c16, 0x1a1422, 0x0c0812], fog: 0x1a1428, sky: [0x06040a, 0x3a2a5a], mm: '#241c2e', glow: [0.7, 0.3, 1.0],
+    deco: { tree: 'crystal', trees: 40, treeC: [0x8a3aff, 0x6a2adf], spikes: 0.8, spikeC: 0x1a1422, rocks: 130, rockC: [0x1a1422, 0x241c2e], lava: 0, tuftC: [0x241c2e, 0x1a1422] } }],
+  ['Zenith Supercell', 5, [180, 190], 6, 'lightningwyvern', 'cyclone', 'Eye of the Storm', 'Thunder Spire', { ground: [0x8a94a8, 0x7f8a9e, 0x96a0b4, 0x748094], fog: 0x5a6478, sky: [0x1a2030, 0x7a8aa0], mm: '#8a94a8',
+    deco: { tree: 'none', rocks: 130, rockC: [0x6a7488, 0x7a8498], flowers: 0, fungi: 0, flies: 140, tuftC: [0x9aa4b8, 0x8a94a8], bushes: 40, leafC: [0x6a7488, 0x7a8498] } }],
+  ['Aetherial Threshold', 5, [190, 200], 6, 'aetherray', 'halosentinel', 'Starlight Bridge', 'Twilight Arch', { ground: [0xb8a8d8, 0xae9ece, 0xc4b4e4, 0xa494c4], fog: 0x8a7ab0, sky: [0x2a1a4a, 0xc8a8d8], mm: '#b8a8d8',
+    deco: { tree: 'blossom', trees: 70, treeC: [0xd8c8ff, 0xffd8f0, 0xc8e8ff], flowers: 140, flowerC: [0xffffff, 0xd8c8ff, 0xffd8f0], tuftC: [0xc4b4e4, 0xd4c4f0], leafC: [0xc8b8e8, 0xd8c8f8] } }],
+  ['Celestial Spire', 5, [200, 210], 6, 'archon', 'cosmicweaver', 'Spire Gates', 'Throne of Dawn', { ground: 'celestial', fog: 0xc9a77a, sky: [0x7a5a3a, 0xf0d8b0], mm: '#efe0bb', deco: { ruins: 8 } }],
+];
+const AREA_PATH = { 0: 'path', 1: 'path', 2: 'snowPath', 3: 'emberPath', 4: 'starPath', 5: 'abyssPath', 6: 'celestialPath' };
+function buildWorldAreas() {
+  let z = -90; const out = [];
+  AREA_ROWS.forEach(([name, biome, lvl, theme, enemy, alt, den, lair, look], i) => {
+    const B = BIOMES[biome], len = i === 0 ? 70 : (lvl[1] - lvl[0] >= 10 ? 110 : 90);
+    out.push(Object.assign({ name, biome, biomeName: B.name, theme, minLevel: lvl[0], lvl: lvl.slice(), z0: z, z1: z + len, len,
+      enemy: enemy || 'thistlehare', alt: alt || null, count: i === 0 ? 0 : (len >= 110 ? 24 : 20), safe: i === 0, denName: den, lairName: lair,
+      boss: B.boss, bossTint: B.bossTint, coreColor: B.coreColor, bossAcc: B.bossAcc, region: B.region, loot: Math.min(6, Math.floor(lvl[1] / 30)),
+      path: AREA_PATH[theme], glow: null, amp: null, deco: {} }, look));
+    z += len;
+  });
+  return out;
+}
+const WORLD_AREAS = buildWorldAreas();
+CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length - 1].z1 - 3;
+{
+  const W = CFG.world, Z = W.zones;
+  // one boss lair per area (not in Base Camp), waypoint at every area gate, one den per area on alternating sides
+  W.lairs = Z.map((zn, i) => zn.safe ? null : { x: 0, z: Math.round(zn.z0 + zn.len * 0.5), name: zn.lairName, zone: i });
+  W.lairList = W.lairs.filter(Boolean);
+  W.waypoints = [{ name: 'Base Camp', x: 9, z: -46, zone: 0 }].concat(Z.slice(1).map((zn, i) => ({ name: zn.name + ' Gate', x: 9, z: zn.z0 + 9, zone: i + 1 })));
+  W.dens = [];
+  Z.forEach((zn, i) => { if (!zn.safe) W.dens.push({ name: zn.denName, zone: i, x: (i % 2 ? -1 : 1) * 66, z: Math.round(zn.z0 + zn.len * 0.62), r: 13, n: zn.len >= 110 ? 13 : 11 }); });
+  // two challenge shrines per biome (second and fourth area)
+  CFG.shrines.list = [];
+  BIOMES.forEach((B, bi) => { const ids = Z.map((zn, i) => (zn.biome === bi && !zn.safe ? i : -1)).filter((i) => i >= 0); [ids[1], ids[3]].forEach((i, k) => { if (i == null) return; const zn = Z[i]; CFG.shrines.list.push({ x: k ? 40 : -40, z: Math.round(zn.z0 + zn.len * 0.3) }); }); });
+  CFG.pellets.perZone = Z.map((zn) => (zn.safe ? 20 : Math.round(zn.len * 0.36)));
+  CFG.pellets.zoneMult = Z.map((zn, i) => 1 + 1.6 * i / (Z.length - 1));
+}
+const lootTier = (zi) => ((CFG.world.zones[zi] || CFG.world.zones[0]).loot | 0);
+const zoneIndex = (name) => CFG.world.zones.findIndex((zn) => zn.name === name);
+// ---- v9 monsters: two per area (see the area guide). Each reuses a body ("base") from the 14 sculpted
+// monsters with its own tint, size and fighting style until it gets bespoke art. ------------------------
+const MON_KIT = {
+  swarm: { hp: 44, atk: 9, speed: 6.0, r: 0.7, aggro: 12, leash: 26, attack: 'touch', cd: 0.75, gold: [3, 6], lunge: true },
+  charger: { hp: 74, atk: 12, speed: 4.4, r: 0.85, aggro: 10, leash: 24, attack: 'touch', cd: 1.1, gold: [3, 7], charge: true },
+  brute: { hp: 125, atk: 16, speed: 3.3, r: 1.0, aggro: 9, leash: 24, attack: 'touch', cd: 1.45, gold: [5, 9], heavy: true },
+  ambusher: { hp: 92, atk: 15, speed: 4.2, r: 0.9, aggro: 6, leash: 22, attack: 'touch', cd: 1.2, gold: [4, 8], lunge: true, heavy: true },
+  shooter: { hp: 56, atk: 9, speed: 4.0, r: 0.72, aggro: 13, leash: 26, attack: 'shoot', cd: 1.5, gold: [3, 7], shotSpeed: 12, keep: 8, shots: 1 },
+  spray: { hp: 62, atk: 8, speed: 4.2, r: 0.75, aggro: 13, leash: 28, attack: 'shoot', cd: 1.8, gold: [4, 8], shotSpeed: 11, keep: 9, shots: 3, spread: 0.5 },
+  turret: { hp: 90, atk: 9, speed: 1.8, r: 0.9, aggro: 15, leash: 20, attack: 'shoot', cd: 2.2, gold: [4, 9], shotSpeed: 10, keep: 11, shots: 5, spread: 0.9 },
+};
+// id: [name, kit, base body, tint, size, extra]
+const MON_ROWS = {
+  thistlehare: ['Thistle-Hare', 'spray', 'boar', 0xe8cf98, 0.72, { hp: 40, atk: 7, aggro: 8, keep: 7, cd: 2.0, shots: 2, shotSpeed: 12, shotColor: 0xe8e0a0, spread: 0.36 }],
+  hornet: ['Sun-Drunk Hornet', 'swarm', 'imp', 0xffd23a, 0.78, { hp: 38, atk: 7, aggro: 7, speed: 6.2 }],
+  truffleboar: ['Truffle-Grubbing Boar', 'charger', 'boar', 0xa07858, 1.05, { hp: 86 }],
+  myconid: ['Myconid Spore-Tosser', 'shooter', 'slime', 0xd77cff, 1.2, { aggro: 9, burn: 0.25, shotColor: 0xd77cff, shots: 2, spread: 0.4 }],
+  bramble: ['Bramble-Lasher', 'brute', 'spider', 0x6a7a3a, 1.25, { speed: 1.6, aggro: 6, cd: 1.1 }],
+  barkviper: ['Bark-Scale Viper', 'ambusher', 'crawler', 0x8a6a48, 0.95, { speed: 5.2 }],
+  thornbeetle: ['Thorn-Carapace Beetle', 'charger', 'beetle', 0x7f9a5a, 1.1, { hp: 110, heavy: true }],
+  gloompanther: ['Gloom-Panther', 'swarm', 'wolf', 0x3a3456, 1.05, { hp: 58, atk: 12, speed: 6.6, aggro: 10 }],
+  craggoat: ['Crag-Goat', 'charger', 'boar', 0xc8c0b0, 0.95, { heavy: true }],
+  dustharpy: ['Dust-Harpy', 'shooter', 'fireimp', 0xd8b080, 1.0, { atk: 12, shotSpeed: 10, cd: 1.7, shotColor: 0xa08a70 }],
+  bouldermimic: ['Boulder-Mimic', 'ambusher', 'crawler', 0x9a9a92, 1.25, { hp: 150, speed: 3.2, aggro: 5 }],
+  galeweaver: ['Gale-Weaver', 'spray', 'spider', 0xdfe6ee, 1.0, { shotColor: 0xe6f2ff, shots: 2, spread: 0.6 }],
+  miragestalker: ['Mirage-Stalker', 'swarm', 'wolf', 0xe8c890, 1.0, { hp: 52, atk: 11 }],
+  pitfallwurm: ['Pitfall-Wurm', 'charger', 'crawler', 0xc89a7a, 1.15, { hp: 96 }],
+  frostgargoyle: ['Frost-Gargoyle', 'ambusher', 'imp', 0x5a6a80, 1.2, {}],
+  chillbanshee: ['Chill-Banshee', 'spray', 'wraith', 0xbfe6ff, 1.0, { shotColor: 0x9fe8ff }],
+  glacialtroll: ['Glacial-Troll', 'brute', 'yeti', 0xd8f0ff, 1.08, { hp: 140 }],
+  iceshard: ['Ice-Shard Elemental', 'turret', 'sentinel', 0x9fe8ff, 0.95, { shotColor: 0xbff4ff }],
+  screecrawler: ['Scree-Crawler', 'swarm', 'crawler', 0x9a8a7a, 1.0, { hp: 54 }],
+  echobat: ['Echo-Bat', 'spray', 'fireimp', 0x6a5a88, 0.85, { shotColor: 0xc8a8ff, shotSpeed: 14 }],
+  sulfurslime: ['Sulfur-Slime', 'brute', 'slime', 0xe0d84a, 1.25, { speed: 3.0, burn: 0.35 }],
+  fumetoad: ['Fume-Toad', 'spray', 'slime', 0x8a9a3a, 1.5, { burn: 0.3, shotColor: 0xb8d040, shotSpeed: 9 }],
+  magmahound: ['Magma-Hound', 'swarm', 'wolf', 0xff7a3a, 1.05, { burn: 0.3 }],
+  cinderelemental: ['Cinder-Elemental', 'brute', 'fireimp', 0xe8e0d8, 1.2, { burn: 0.35 }],
+  ashstalker: ['Ash-Stalker', 'ambusher', 'wolf', 0x8a8480, 1.1, {}],
+  emberwraith: ['Ember-Wraith', 'spray', 'wraith', 0xff8a3a, 1.0, { burn: 0.25, shotColor: 0xff8a3a }],
+  scoriascorpion: ['Scoria-Scorpion', 'charger', 'beetle', 0xff9a6a, 1.35, { hp: 120, burn: 0.3, heavy: true }],
+  flamewyrm: ['Flame-Wyrm', 'spray', 'fireimp', 0xff5a2a, 1.3, { burn: 0.3, shotColor: 0xff6a1f }],
+  manaleech: ['Mana-Leech', 'swarm', 'crawler', 0x4a8aff, 0.85, { hp: 48 }],
+  azuregolem: ['Azure-Golem', 'brute', 'warden', 0x6a9aff, 1.05, { charge: true, hp: 150 }],
+  riftspider: ['Rift-Spider', 'swarm', 'spider', 0xa06aff, 1.1, { speed: 7.0 }],
+  geodrone: ['Geometry-Drone', 'turret', 'sentinel', 0xb08aff, 1.0, { shotColor: 0xc77dff }],
+  voidray: ['Void-Ray', 'spray', 'wraith', 0x2a5a7a, 1.15, { shotColor: 0x4fd8ff }],
+  asteroidhermit: ['Asteroid-Hermit', 'brute', 'crawler', 0x7a7088, 1.4, { hp: 175, speed: 2.6 }],
+  prismmimic: ['Prism-Mimic', 'ambusher', 'slime', 0xd0f4ff, 1.0, { speed: 5.6 }],
+  glassminotaur: ['Glass-Minotaur', 'charger', 'yeti', 0xbfe8ff, 1.1, { hp: 140, heavy: true }],
+  starsentry: ['Starlight-Sentry', 'brute', 'warden', 0xfff0c0, 1.0, { charge: true }],
+  astronomer: ['Fallen-Astronomer', 'spray', 'wraith', 0x6a5fc9, 1.05, { shots: 2, spread: 0.36, shotColor: 0xc77dff }],
+  nebulajelly: ['Nebula-Jellyfish', 'turret', 'sentinel', 0xff9bf2, 0.95, { speed: 2.4, shotColor: 0xff9bf2 }],
+  kelpie: ['Ruins-Kelpie', 'charger', 'boar', 0x2fbfa0, 1.1, {}],
+  rapidsiren: ['Rapids-Siren', 'spray', 'drowned', 0x7fd0ff, 1.0, { shotColor: 0x7fd0ff }],
+  thrasher: ['Current-Thrasher', 'charger', 'crawler', 0x5a7a9a, 1.15, { speed: 5.0 }],
+  sporeurchin: ['Spore-Urchin', 'brute', 'slime', 0x4fffb0, 1.1, { burn: 0.3, speed: 2.4 }],
+  angler: ['Grotto-Angler', 'ambusher', 'beetle', 0x2a4a8a, 1.2, {}],
+  trenchcrawler: ['Trench-Crawler', 'swarm', 'crawler', 0x2a3a4a, 1.0, { hp: 60, burn: 0.15 }],
+  pressuresquid: ['Pressure-Squid', 'shooter', 'drowned', 0x7a3a9a, 1.05, { shotSpeed: 17, atk: 13, shotColor: 0x3a1a5a }],
+  leviathan: ['Eldritch-Leviathan', 'charger', 'crawler', 0x1a3a40, 1.6, { hp: 160, heavy: true }],
+  abyssphantom: ['Abyssal-Phantom', 'spray', 'wraith', 0x2fffd0, 1.0, { shotColor: 0x2fffd0 }],
+  boilcrab: ['Boil-Crab', 'brute', 'crawler', 0xff6a4a, 1.3, { burn: 0.3 }],
+  steamelemental: ['Steam-Elemental', 'spray', 'wraith', 0xf0f0f4, 1.1, { burn: 0.3, shotColor: 0xffffff }],
+  shaftvulture: ['Shaft-Vulture', 'swarm', 'imp', 0x4a3a30, 1.1, { speed: 7.0 }],
+  obsidiangargoyle: ['Obsidian-Gargoyle', 'charger', 'fireimp', 0x2a2236, 1.2, { heavy: true, hp: 120 }],
+  lightningwyvern: ['Lightning-Wyvern', 'shooter', 'imp', 0xfff04a, 1.25, { shotSpeed: 18, shots: 2, spread: 0.3, shotColor: 0xfff04a }],
+  cyclone: ['Cyclone-Elemental', 'turret', 'sentinel', 0xd8e0ea, 1.1, { speed: 3.2, shots: 6, spread: 1.4, shotColor: 0xe6f2ff }],
+  aetherray: ['Aether-Ray', 'spray', 'seraph', 0xc8b8ff, 1.0, { shotColor: 0xc8b8ff }],
+  halosentinel: ['Halo-Sentinel', 'turret', 'sentinel', 0xffd86a, 1.05, { shotColor: 0xffd86a }],
+  archon: ['Spire-Archon', 'shooter', 'seraph', 0xffffff, 1.2, { shots: 3, spread: 0.3, atk: 11, shotColor: 0xfff07a }],
+  cosmicweaver: ['Cosmic-Weaver', 'brute', 'warden', 0x9a7aff, 1.1, { charge: true, hp: 160 }],
+};
+for (const k in CFG.enemies) if (CFG.enemies[k] && CFG.enemies[k].hp) CFG.enemies[k].legacy = true; // the old monsters stay for saves, Rift themes and records
+for (const id in MON_ROWS) {
+  const [name, kit, base, tint, scale, extra] = MON_ROWS[id];
+  CFG.enemies[id] = Object.assign({}, MON_KIT[kit], { name, kit, base, tint, scale, r: +(MON_KIT[kit].r * Math.sqrt(scale)).toFixed(2) }, extra);
+}
+const enemyBase = (type) => (CFG.enemies[type] && CFG.enemies[type].base) || type;
 for (const c in CFG.signatures) {
   const sg = CFG.signatures[c];
   CFG.attacks[sg.id] = Object.assign({ signature: c, name: sg.name, role: sg.role, desc: 'Signature attack of the ' + CFG.classes[c].name }, CFG.classes[c].weapon);
@@ -1741,29 +1894,29 @@ function treeMods(cls, tree) {
 const NPC_DEFS = [
   { id: 'ida', name: 'Farmer Ida', role: 'job', x: -7, z: -50, body: 0xe0a64a, accent: 0x6d4b2a, minLevel: 1,
     jobs: [
-      { title: 'Slime Trouble', type: 'kill', target: 'slime', count: 8, text: 'Slimes are eating my turnips! Clear out eight of them in the meadow.' },
+      { title: 'Hare Trouble', type: 'kill', target: 'thistlehare', count: 8, text: 'Thistle-hares are shredding my turnips with their quills! Clear out eight of them in the meadow.' },
       { title: 'Glowberry Harvest', type: 'collect', target: 'berry', count: 5, text: 'Pick five glowberries for me. They shine pink in the grass.' },
-      { title: 'Slime Pools', type: 'kill', target: 'slime', count: 20, text: 'The Slime Pools west of town are overflowing. Pop twenty of them.' },
+      { title: 'Hornet Hives', type: 'kill', target: 'hornet', count: 20, text: 'The sun-drunk hornets by the Hornet Hives are waking up. Swat twenty of them.' },
     ] },
   { id: 'bo', name: 'Scout Bo', role: 'job', x: 7, z: -50, body: 0x4f8f6a, accent: 0x2b4d39, minLevel: 10,
     jobs: [
-      { title: 'Wolf Pack', type: 'kill', target: 'wolf', count: 12, text: 'Wolves in Ashwood Forest are getting bold. Thin the pack: twelve wolves.' },
-      { title: 'Howling Glade', type: 'kill', target: 'wolf', count: 25, text: 'A whole pack sleeps in the Howling Glade. Take down twenty-five.' },
+      { title: 'Truffle Thieves', type: 'kill', target: 'truffleboar', count: 12, text: 'Armored boars are tearing up the Funky Forest for truffles. Drive off twelve of them.' },
+      { title: 'Spore Patrol', type: 'kill', target: 'myconid', count: 25, text: 'Myconids keep bursting into dizzy spores around the Glowcap Ring. Pop twenty-five.' },
     ] },
-  { id: 'mira', name: 'Sage Mira', role: 'job', x: -10, z: -61, body: 0x7fb6e8, accent: 0x2d4f7a, minLevel: 22,
+  { id: 'mira', name: 'Sage Mira', role: 'job', x: -10, z: -61, body: 0x7fb6e8, accent: 0x2d4f7a, minLevel: 30,
     jobs: [
-      { title: 'Frost Imps', type: 'kill', target: 'imp', count: 15, text: 'Frost imps are freezing the mountain pass. Break fifteen of them.' },
-      { title: 'Imp Nest', type: 'kill', target: 'imp', count: 30, text: 'Their nest is on the east ridge. Thirty imps, and the pass is safe.' },
+      { title: 'Goat Problems', type: 'kill', target: 'craggoat', count: 15, text: 'Crag-goats keep knocking climbers off the Feisty Foothills. Stop fifteen of them.' },
+      { title: 'Harpy Roost', type: 'kill', target: 'dustharpy', count: 30, text: 'Dust-harpies drop stones on anyone on the gravel. Thirty of them, and the climb is safe.' },
     ] },
-  { id: 'vex', name: 'Ranger Vex', role: 'job', x: -13, z: -53, body: 0xb5512e, accent: 0x3a1f16, minLevel: 36,
+  { id: 'vex', name: 'Ranger Vex', role: 'job', x: -13, z: -53, body: 0xb5512e, accent: 0x3a1f16, minLevel: 65,
     jobs: [
-      { title: 'Ember Beetles', type: 'kill', target: 'beetle', count: 18, text: 'Ember beetles charge anything that moves. Watch the red line, then strike. Eighteen of them.' },
-      { title: 'Scorched Hive', type: 'kill', target: 'beetle', count: 35, text: 'Burn out the Scorched Hive: thirty-five beetles.' },
+      { title: 'Bog Cleanup', type: 'kill', target: 'sulfurslime', count: 18, text: 'Sulfur-slimes eat armor in the Brimstone Bogs. Melt eighteen of them before they melt you.' },
+      { title: 'Hound Hunt', type: 'kill', target: 'magmahound', count: 35, text: 'Magma-hounds track every traveller on the Slaggy Terraces. Watch the red line, then strike. Thirty-five of them.' },
     ] },
-  { id: 'lumi', name: 'Oracle Lumi', role: 'job', x: 13, z: -53, body: 0x6b4fd1, accent: 0x2a1f5a, minLevel: 50,
+  { id: 'lumi', name: 'Oracle Lumi', role: 'job', x: 13, z: -53, body: 0x6b4fd1, accent: 0x2a1f5a, minLevel: 85,
     jobs: [
-      { title: 'Void Wraiths', type: 'kill', target: 'wraith', count: 20, text: 'Wraiths drift out of the rift. Banish twenty.' },
-      { title: 'Close the Altar', type: 'kill', target: 'wraith', count: 40, text: 'The Void Altar keeps calling more. Forty wraiths should silence it.' },
+      { title: 'Leech Plague', type: 'kill', target: 'manaleech', count: 20, text: 'Mana-leeches are draining every mage in the Sapphire Coals. Squash twenty.' },
+      { title: 'Drone Purge', type: 'kill', target: 'geodrone', count: 40, text: 'Geometry-drones slice anything alive on the Fractural Ley. Forty of them should restore some chaos.' },
     ] },
   { id: 'garo', name: 'Smith Garo', role: 'smith', x: 10, z: -61, body: 0x8a5a3c, accent: 0x3a2a20, minLevel: 1, jobs: [] },
   { id: 'rho', name: 'Arena Master Rho', role: 'arena', x: 0, z: -68, body: 0xc0392b, accent: 0xf1c40f, minLevel: 1, jobs: [] },
@@ -1773,7 +1926,7 @@ const PORTAL = { x: 0, z: -73 };
 const ACHIEVEMENTS = [
   { id: 'first_blood', name: 'First Blood', desc: 'Defeat your first monster', xp: 0.5, check: (p) => p.stats.kills >= 1 },
   { id: 'first_job', name: 'Helping Hand', desc: 'Finish a job', xp: 0.5, check: (p) => p.stats.jobs >= 1 },
-  { id: 'slime_25', name: 'Slime Sweeper', desc: 'Defeat 25 slimes', xp: 0.8, check: (p) => p.stats.slimes >= 25 },
+  { id: 'slime_25', name: 'Hare Hunter', desc: 'Defeat 25 thistle-hares', xp: 0.8, check: (p) => p.stats.slimes >= 25 || ((p.stats.killsBy || {}).thistlehare || 0) >= 25 },
   { id: 'jobs_10', name: 'Town Hero', desc: 'Finish 10 jobs', xp: 1, check: (p) => p.stats.jobs >= 10 },
   { id: 'class', name: 'Recruiter', desc: 'Unlock a second brawler', xp: 0.6, check: (p) => p.unlocked.attacks.length >= 1 },
   { id: 'squad', name: 'Full Squad', desc: 'Unlock 8 brawlers', xp: 1, check: (p) => p.unlocked.attacks.length >= 7 },
@@ -1782,8 +1935,8 @@ const ACHIEVEMENTS = [
   { id: 'boss', name: 'Giant Slayer', desc: 'Help defeat a world boss', xp: 1, check: (p) => p.stats.bosses >= 1 },
   { id: 'arena', name: 'Arena Debut', desc: 'Play a Showdown match', xp: 0.5, check: (p) => p.stats.matches >= 1 },
   { id: 'arena_win', name: 'Last One Standing', desc: 'Win a Showdown match', xp: 1, check: (p) => p.stats.wins >= 1 },
-  { id: 'zone2', name: 'Into the Woods', desc: 'Enter Ashwood Forest', xp: 0.5, check: (p) => p.stats.zone >= 1 },
-  { id: 'zone3', name: 'Peak Climber', desc: 'Enter Frost Peaks', xp: 0.7, check: (p) => p.stats.zone >= 2 },
+  { id: 'zone2', name: 'Into the Woods', desc: 'Enter the Funky Forest', xp: 0.5, check: (p) => p.stats.zone >= zoneIndex('Funky Forest') },
+  { id: 'zone3', name: 'Peak Climber', desc: 'Enter Frost Peaks', xp: 0.7, check: (p) => p.stats.zone >= zoneIndex('Frost Peaks') },
   { id: 'shrine', name: 'Shrine Breaker', desc: 'Complete a challenge shrine', xp: 0.6, check: (p) => (p.stats.shrines || 0) >= 1 },
   { id: 'shrine6', name: 'Champion of Shrines', desc: 'Complete 6 challenge shrines', xp: 1, check: (p) => (p.stats.shrines || 0) >= 6 },
   { id: 'legend', name: 'Living Legend', desc: 'Wear a Legendary item', xp: 0.8, check: (p) => CFG.gear.slots.some((s) => p.gear[s] && rarIdx(p.gear[s].rarity) >= 4) },
@@ -1792,8 +1945,8 @@ const ACHIEVEMENTS = [
   { id: 'divine', name: 'Touched by Gods', desc: 'Wear a Divine item', xp: 1, check: (p) => CFG.gear.slots.some((s) => p.gear[s] && rarIdx(p.gear[s].rarity) >= 7) },
   { id: 'element', name: 'Elemental', desc: 'Equip an accessory with a special attack', xp: 0.5, check: (p) => !!itemElement(p.gear.accessory) },
   { id: 'lvl15', name: 'Seasoned', desc: 'Reach level 15', xp: 0.5, check: (p) => p.level >= 15 },
-  { id: 'zone4', name: 'Into the Fire', desc: 'Enter the Ember Wastes', xp: 0.7, check: (p) => p.stats.zone >= 3 },
-  { id: 'zone5', name: 'Starwalker', desc: 'Enter the Starfall Ruins', xp: 0.8, check: (p) => p.stats.zone >= 4 },
+  { id: 'zone4', name: 'Into the Fire', desc: 'Enter the Ember Wastes', xp: 0.7, check: (p) => p.stats.zone >= zoneIndex('Ember Wastes') },
+  { id: 'zone5', name: 'Starwalker', desc: 'Enter the Starfall Ruins', xp: 0.8, check: (p) => p.stats.zone >= zoneIndex('Starfall Ruins') },
   { id: 'elite10', name: 'Elite Hunter', desc: 'Defeat 10 elite monsters', xp: 1, check: (p) => (p.stats.elites || 0) >= 10 },
   { id: 'kills1k', name: 'Thousand Cuts', desc: 'Defeat 1,000 monsters', xp: 1, check: (p) => p.stats.kills >= 1000 },
   { id: 'streak50', name: 'Unstoppable', desc: 'Reach a 50 kill streak', xp: 0.8, check: (p) => (p.stats.bestStreak || 0) >= 50 },
@@ -1802,8 +1955,8 @@ const ACHIEVEMENTS = [
   { id: 'm50', name: 'Dedicated', desc: 'Reach level 50 in any mastery', xp: 1, check: (p) => Object.values(p.mastery || {}).some((x) => masteryLevel(x) >= 50) },
   { id: 'm99', name: 'Skillcape', desc: 'Reach level 99 in any mastery', xp: 0, check: (p) => Object.values(p.mastery || {}).some((x) => masteryLevel(x) >= 99) },
   { id: 'lvl65', name: 'Ascendant', desc: 'Reach level 65', xp: 0.5, check: (p) => p.level >= 65 },
-  { id: 'zone6', name: 'Abyss Diver', desc: 'Enter the Abyssal Depths', xp: 0.8, check: (p) => p.stats.zone >= 5 },
-  { id: 'zone7', name: 'Skyward', desc: 'Enter the Celestial Spire', xp: 0.8, check: (p) => p.stats.zone >= 6 },
+  { id: 'zone6', name: 'Abyss Diver', desc: 'Enter the Abyssal Depths', xp: 0.8, check: (p) => p.stats.zone >= zoneIndex('Abyssal Depths') },
+  { id: 'zone7', name: 'Skyward', desc: 'Enter the Celestial Spire', xp: 0.8, check: (p) => p.stats.zone >= zoneIndex('Celestial Spire') },
   { id: 'lvl100', name: 'Ascended', desc: 'Reach level 100 and awaken your aura', xp: 0.5, check: (p) => p.level >= 100 },
   { id: 'lvl150', name: 'Winged', desc: 'Reach level 150 and grow wings', xp: 0.5, check: (p) => p.level >= 150 },
   { id: 'lvl200', name: 'Crowned', desc: 'Reach level 200 and claim the crown', xp: 0.5, check: (p) => p.level >= 200 },
@@ -1833,7 +1986,7 @@ function defaultProfile() {
     heroTree: newTreeState(), brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
-    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0,
+    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 9, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0,
     job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, pixel: false, bots: false, npcs: false, autoHunt: false },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
@@ -1889,6 +2042,15 @@ function sanitizeProfile(p) {
   if (!out.caseLuck) out.caseLuck = { legendary: 0, mythic: 0 };
 
   if (!Array.isArray(out.waypoints)) out.waypoints = [0];
+  if ((p.worldVersion | 0) < 9) {
+    // v9 map: the old seven zones became 29 areas. Gates you can already enter are open as waypoints.
+    const Z = (CFG.world && CFG.world.zones) || [], open = Z.map((zn, i) => i).filter((i) => i > 0 && out.level >= Z[i].minLevel);
+    if (p.worldVersion == null && p.savedAt) { out.waypoints = [0].concat(open); out.stats.zone = open.length ? open[open.length - 1] : 0; }
+    const JOB = { slime: 'thistlehare', boar: 'hornet', wolf: 'truffleboar', spider: 'myconid', imp: 'craggoat', yeti: 'dustharpy', beetle: 'sulfurslime', fireimp: 'magmahound', wraith: 'manaleech', sentinel: 'geodrone', crawler: 'leviathan', drowned: 'abyssphantom', seraph: 'archon', warden: 'cosmicweaver' };
+    if (out.job && out.job.type === 'kill' && JOB[out.job.target]) out.job = Object.assign({}, out.job, { target: JOB[out.job.target] });
+    out.worldVersion = 9;
+  }
+  if (CFG.world && CFG.world.waypoints) out.waypoints = out.waypoints.filter((i) => Number.isInteger(i) && i >= 0 && i < CFG.world.waypoints.length);
   out.essence = Math.max(0, out.essence | 0);
   if (!out.artStars || typeof out.artStars !== 'object') out.artStars = {};
   if (!out.shards || typeof out.shards !== 'object') out.shards = {};
@@ -1968,7 +2130,7 @@ CFG.rift = { gate: { x: -9, z: -44 }, unlock: 15, r: 22, time: 70, intro: 2.4, c
 const G = {
   mode: 'hub', started: false, time: 0, paused: false, modal: false,
   profile: null, player: null, hubFighters: [], enemies: [], npcs: [], berries: [],
-  boss: null, bossTimer: CFG.boss.firstSpawn, bossWarned: false, bossLair: 0,
+  boss: null, bossTimer: CFG.boss.firstSpawn, bossWarned: false, bossLair: 1,
   arena: null, pendingAoE: [], clouds: [], events: [], ents: new Map(), pellets: [], pelletsDirty: true, shrines: [],
   lastCombat: -99, zoneIdx: 0, interact: null, respawnT: 0, gateToastT: 0, dirty: false,
   obstacles: null, hubObstacles: null, arenaObstacles: null,
@@ -2891,10 +3053,10 @@ function highestZone(level) { let zi = 0; CFG.world.zones.forEach((zn, i) => { i
 // zone odds + a luck guarantee so long dry streaks always end
 function rollLoot(zi, bump) {
   const L = G.profile.luck, Pi = CFG.loot.pity;
-  const Zs = CFG.loot.zones, idx = zi + (bump ? 1 : 0) + curTier(), over = Math.max(0, idx - (Zs.length - 1));
+  const lt = lootTier(zi), Zs = CFG.loot.zones, idx = lt + (bump ? 1 : 0) + curTier(), over = Math.max(0, idx - (Zs.length - 1));
   const tbl = Object.assign({}, Zs[clamp(idx, 0, Zs.length - 1)]);
   if (over) { tbl.legendary *= 1 + 0.35 * over; tbl.epic *= 1 + 0.15 * over; tbl.common *= Math.pow(0.5, over); tbl.uncommon *= Math.pow(0.8, over); }
-  const HW = highWeights(curTier(), zi + (bump ? 1 : 0)); Object.assign(tbl, HW);
+  const HW = highWeights(curTier(), lt + (bump ? 1 : 0)); Object.assign(tbl, HW);
   let r = rollRarity(tbl);
   // luck guarantee, also for the endgame rarities once this hunting ground can drop them
   const open = (T) => !HIGH_RAR.includes(T) || HW[T] > 0;
@@ -3030,9 +3192,9 @@ function grantItem(it, source, context) {
   const p = G.profile;
   // Epic and better loot (and all boss, Rift and Level Road loot) arrives as a case you open with the reel
   const zone = context && context.zone != null ? context.zone : G.zoneIdx || 0;
-  const ck = regionBossCase(CASE_SRC[source], zone);
+  const ck = regionBossCase(CASE_SRC[source], (CFG.world.zones[zone] || {}).region);
   if (ck && (rarIdx(it.rarity) >= 3 || CASE_SRC[source] === 'boss' || ck === 'rift' || ck === 'milestone')) {
-    addCase(ck, { l: it.ilvl, z: CASE_SRC[source] === 'boss' ? zone : undefined, src: source, f: ck === 'milestone' ? it.rarity : CASE_SRC[source] === 'boss' ? 'rare' : ck === 'rift' ? 'epic' : null, n: ck === 'rift' && G.rift ? G.rift.floor : 0 });
+    addCase(ck, { l: it.ilvl, z: CASE_SRC[source] === 'boss' ? lootTier(zone) : undefined, src: source, f: ck === 'milestone' ? it.rarity : CASE_SRC[source] === 'boss' ? 'rare' : ck === 'rift' ? 'epic' : null, n: ck === 'rift' && G.rift ? G.rift.floor : 0 });
     return;
   }
   if (['monster', 'elite', 'shrine', 'level', 'idle', 'case', 'rift', 'boss', 'milestone'].includes(source)) {
@@ -3047,9 +3209,9 @@ function grantItem(it, source, context) {
     const acc = G.salvageAcc || (G.salvageAcc = { n: 0, gold: 0, ess: 0, t: 0 }); acc.n++; acc.gold += g; acc.ess += e; acc.t = 1.2;
     ev({ t: 'autoSalvage', item: it }); return;
   }
-  if (p.bag.length >= CFG.gear.bagMax) {
+  if (p.bag.length >= CFG.gear.bagMax && source !== 'case') {
     // Existing gear is never silently replaced by a later drop.
-    // Case openings reserve space before consuming the case below.
+    // Case rewards may overflow the bag (see openCase), so a case never fails to open.
     addGold(salvageValue(it)); addEssence(salvageEssence(it));
     toast(`Bag full: new drop ${it.name} salvaged`); return;
   }
@@ -3095,7 +3257,7 @@ function randomPointInZone(zi, avoidTown) {
     const x = rand(W.minX + 4, W.maxX - 4), z = rand(Math.max(Z.z0, W.minZ) + 4, Math.min(Z.z1, W.maxZ) - 4);
     if (avoidTown && distToTown(x, z) < W.town.r + 8) continue;
     if (pointBlocked(x, z, 1.2)) continue;
-    let nearLair = false; for (const l of W.lairs) if (Math.hypot(x - l.x, z - l.z) < 9) nearLair = true;
+    let nearLair = false; for (const l of W.lairList) if (Math.hypot(x - l.x, z - l.z) < 9) nearLair = true;
     if (nearLair) continue;
     return { x, z };
   }
@@ -3319,7 +3481,7 @@ function makeChampion(type, zi, lvl, nMods, lord) {
   return e;
 }
 function spawnRiftWave() {
-  const r = G.rift, n = r.floor, lvl = riftWaveLevel(n), Zs = CFG.world.zones, zi = (n - 1) % Zs.length, Z = Zs[zi];
+  const r = G.rift, n = r.floor, lvl = riftWaveLevel(n), Zs = CFG.world.zones, zi = 1 + (n - 1) % (Zs.length - 1), Z = Zs[zi];
   const C = riftComposition(n);
   r.wave = []; r.lastHp = G.player.hp; r.hits = 0;
   const add = (e) => { G.enemies.push(e); r.wave.push(e); ev({ t: 'spawn', x: e.x, z: e.z, elite: e.elite }); };
@@ -3412,7 +3574,7 @@ function initHubWorld() {
   G.enemies = [];
   W.zones.forEach((zn, zi) => {
     for (let i = 0; i < zn.count; i++) G.enemies.push(makeEnemy(zoneType(zi), zi));
-    for (let i = 0; i < W.elitesPerZone; i++) G.enemies.push(makeEnemy(zoneType(zi), zi, { elite: true }));
+    if (!zn.safe) for (let i = 0; i < W.elitesPerZone; i++) G.enemies.push(makeEnemy(zoneType(zi), zi, { elite: true }));
   });
   W.dens.forEach((D, di) => {
     const type = W.zones[D.zone].enemy;
@@ -3429,7 +3591,7 @@ function initHubWorld() {
   G.shrines = CFG.shrines.list.map((sp, i) => ({ i, x: sp.x, z: sp.z, zone: zoneAt(sp.z), state: 'ready', t: 0, cd: 0, wave: [] }));
   // berries
   G.berries = [];
-  for (let i = 0; i < W.berryCount; i++) { const pt = randomPointInZone(0, true); G.berries.push({ x: pt.x, z: pt.z, active: true, respawnT: 0, seed: Math.random() * 10 }); }
+  for (let i = 0; i < W.berryCount; i++) { const pt = randomPointInZone(1, true); G.berries.push({ x: pt.x, z: pt.z, active: true, respawnT: 0, seed: Math.random() * 10 }); }
 }
 
 // --- hub step -----------------------------------------------------------------
@@ -3679,7 +3841,7 @@ function stepBossTimer(dt) {
   if (!G.bossWarned && G.bossTimer <= CFG.boss.warn) {
     G.bossWarned = true;
     // the boss rises in the zone you are in (or your highest open zone)
-    G.bossLair = Math.min(zoneAt(G.player.z), highestZone(G.profile.level));
+    G.bossLair = Math.max(1, Math.min(zoneAt(G.player.z), highestZone(G.profile.level)));
     ev({ t: 'bossWarn', lair: currentLair().name, secs: Math.ceil(G.bossTimer) });
   }
   if (G.bossTimer <= 0) spawnBoss();
@@ -3751,7 +3913,7 @@ function endBoss(killed) {
       const ct = curTier(), myth = ct >= 1 ? Math.min(0.35, 0.06 * ct) * (0.5 + contrib) : 0;
       let rarity = r < legChance ? 'legendary' : r < legChance + loot.epicChance ? 'epic' : 'rare';
       if (Math.random() < myth) rarity = ct >= 3 && Math.random() < 0.06 * (ct - 2) ? (ct >= 4 && Math.random() < 0.15 ? 'divine' : 'ancient') : 'mythic';
-      loot.caseKind = regionBossCase('boss', b.zone);
+      loot.caseKind = regionBossCase('boss', (CFG.world.zones[b.zone] || {}).region);
       loot.item = makeItem(pick(CFG.gear.slots), rarity, b.lvl); grantItem(loot.item, 'boss', { zone: b.zone });
     }
     loot.essence = Math.round((randInt(L.essence[0], L.essence[1]) + Math.floor(b.lvl / 5)) * tierMul(curTier()).gems); addEssence(loot.essence);
@@ -5243,27 +5405,41 @@ function buildEnemyGeos() {
 }
 buildEnemyGeos();
 
+// v9 monsters share sculpted bodies: recolour the texture toward the monster's own tint (keeps its shading)
+function tintMonsterMaterial(m, tint, k) {
+  const u = { uTint: { value: tint.clone() }, uTintK: { value: k } };
+  m.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, u);
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec3 uTint; uniform float uTintK;')
+      .replace('#include <map_fragment>', '#include <map_fragment>\n  { float lum = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114)); diffuseColor.rgb = mix(diffuseColor.rgb, uTint * (0.3 + lum * 1.45), uTintK); }')
+      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  float rimF = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 2.6);\n  totalEmissiveRadiance += vec3(1.0, 0.97, 0.9) * rimF * 0.40;');
+  };
+  m.customProgramCacheKey = () => 'rimtint';
+  m.needsUpdate = true;
+}
 AssetSlots.register('enemy', (o) => {
   const root = new THREE.Group();
-  const shadow = new THREE.Mesh(geoShadow, matShadow); shadow.scale.setScalar(o.type === 'wolf' || o.type === 'beetle' ? 0.9 : 0.75); shadow.position.y = 0.03; root.add(shadow);
+  const ED = CFG.enemies[o.type] || {}, bt = enemyBase(o.type), tint = ED.tint != null ? new THREE.Color(ED.tint) : null, esz = ED.scale || 1;
+  const shadow = new THREE.Mesh(geoShadow, matShadow); shadow.scale.setScalar((bt === 'wolf' || bt === 'beetle' ? 0.9 : 0.75) * esz); shadow.position.y = 0.03; root.add(shadow);
   const pivot = new THREE.Group(); root.add(pivot);
   const mat = flashMaterial();
   // every monster is a little different: tint and size vary per spawn
-  const vs = 0.9 + Math.random() * 0.2, tj = Math.random() * 0.16; mat.color.setRGB(1 - tj * 0.6, 1 - tj * 0.2, 1 - tj);
-  const body = new THREE.Mesh(enemyGeo[o.type] || enemyGeo.slime, mat); body.castShadow = true; pivot.add(body);
-  const bodyOl = addOutline(pivot, enemyGeo[o.type] || enemyGeo.slime, o.elite ? matOutlineElite : matOutline);
+  const vs = (0.9 + Math.random() * 0.2) * esz, tj = Math.random() * 0.16; mat.color.setRGB(1 - tj * 0.6, 1 - tj * 0.2, 1 - tj); if (tint) mat.color.lerp(tint, 0.6);
+  const body = new THREE.Mesh(enemyGeo[bt] || enemyGeo.slime, mat); body.castShadow = true; pivot.add(body);
+  const bodyOl = addOutline(pivot, enemyGeo[bt] || enemyGeo.slime, o.elite ? matOutlineElite : matOutline);
   // generated monster model, swapped in once loaded (same pivot, so every bob/lunge/squash still applies)
-  const mId = AssetLibrary.has('enemy.' + o.type) ? 'enemy.' + o.type : null;
+  const mId = AssetLibrary.has('enemy.' + bt) ? 'enemy.' + bt : null;
   let model = null, mDone = !mId;
   const swapModel = () => {
     const st = AssetLibrary.status(mId);
-    if (st === 'ready') { model = AssetLibrary.instance(mId); pivot.add(model); body.visible = bodyOl.visible = false; }
+    if (st === 'ready') { model = AssetLibrary.instance(mId); pivot.add(model); body.visible = bodyOl.visible = false;
+      if (tint) for (const m of model.userData.mats) tintMonsterMaterial(m, tint, ED.tintK || 0.72); }
     if (st === 'ready' || st === 'failed') mDone = true;
   };
   if (mId) { AssetLibrary.request(mId); swapModel(); }
   let crown = null, aura = null;
   if (o.elite) {
-    crown = new THREE.Mesh(enemyGeo.crown, matVC); crown.position.y = ({ wolf: 1.55, beetle: 1.2, wraith: 2.45, imp: 2.05, fireimp: 2.05, boar: 1.5, spider: 1.05, yeti: 2.65, sentinel: 2.7, crawler: 1.25, drowned: 2.45, seraph: 2.5, warden: 2.95 })[o.type] || 1.3; pivot.add(crown);
+    crown = new THREE.Mesh(enemyGeo.crown, matVC); crown.position.y = esz * ({ wolf: 1.55, beetle: 1.2, wraith: 2.45, imp: 2.05, fireimp: 2.05, boar: 1.5, spider: 1.05, yeti: 2.65, sentinel: 2.7, crawler: 1.25, drowned: 2.45, seraph: 2.5, warden: 2.95 })[bt] || 1.3; pivot.add(crown);
     aura = pxRingMesh(0.88, 1.05, { color: 0xffc94a, transparent: true, opacity: 0.6, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -40 }, 8, 0.62); aura.position.y = 0.25; root.add(aura);
   }
   let phase = Math.random() * 6, deadT = 0;
@@ -5274,18 +5450,18 @@ AssetSlots.register('enemy', (o) => {
       if (!mDone) swapModel();
       root.rotation.y += angDiff(root.rotation.y, e.facing) * (1 - Math.exp(-dt * 10));
       phase += dt * (2 + (e.moveAmt || 0) * 8);
-      if (o.type === 'slime') { const b = Math.abs(Math.sin(phase)); pivot.scale.set(1 + (1 - b) * 0.18, 0.8 + b * 0.3, 1 + (1 - b) * 0.18); pivot.position.y = b * 0.25 * (e.moveAmt || 0.2); }
-      else if (o.type === 'wolf') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.12 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
-      else if (o.type === 'beetle') { pivot.position.y = Math.abs(Math.sin(phase * 2)) * 0.05 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.25 + Math.sin(t * 40) * 0.05 : 0; pivot.rotation.z = Math.sin(phase * 2) * 0.04 * (e.moveAmt || 0); }
-      else if (o.type === 'wraith') { pivot.position.y = Math.sin(t * 2.2 + phase) * 0.25 + 0.35; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
-      else if (o.type === 'boar') { pivot.position.y = Math.abs(Math.sin(phase * 1.5)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.2 + Math.sin(t * 40) * 0.04 : 0; }
-      else if (o.type === 'spider') { pivot.position.y = Math.abs(Math.sin(phase * 2.5)) * 0.05; pivot.rotation.z = Math.sin(phase * 2.5) * 0.06 * (e.moveAmt || 0); }
-      else if (o.type === 'yeti') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.15 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.35; pivot.rotation.z = Math.sin(phase * 0.8) * 0.06 * (e.moveAmt || 0); }
-      else if (o.type === 'crawler') { pivot.position.y = Math.abs(Math.sin(phase * 3)) * 0.04; pivot.rotation.z = Math.sin(phase * 3) * 0.08 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.25; }
-      else if (o.type === 'drowned') { pivot.position.y = Math.sin(t * 1.9 + phase) * 0.22 + 0.3; pivot.rotation.z = Math.sin(t * 1.3 + phase) * 0.1; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
-      else if (o.type === 'seraph') { pivot.position.y = Math.sin(t * 2.4 + phase) * 0.25 + 0.35; pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
-      else if (o.type === 'warden') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.22 + Math.sin(t * 40) * 0.04 : (e.attackAnim || 0) * -0.3; }
-      else if (o.type === 'sentinel') { pivot.position.y = Math.sin(t * 1.6 + phase) * 0.2 + 0.25; pivot.rotation.y = t * 0.8; }
+      if (bt === 'slime') { const b = Math.abs(Math.sin(phase)); pivot.scale.set(1 + (1 - b) * 0.18, 0.8 + b * 0.3, 1 + (1 - b) * 0.18); pivot.position.y = b * 0.25 * (e.moveAmt || 0.2); }
+      else if (bt === 'wolf') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.12 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'beetle') { pivot.position.y = Math.abs(Math.sin(phase * 2)) * 0.05 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.25 + Math.sin(t * 40) * 0.05 : 0; pivot.rotation.z = Math.sin(phase * 2) * 0.04 * (e.moveAmt || 0); }
+      else if (bt === 'wraith') { pivot.position.y = Math.sin(t * 2.2 + phase) * 0.25 + 0.35; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'boar') { pivot.position.y = Math.abs(Math.sin(phase * 1.5)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.2 + Math.sin(t * 40) * 0.04 : 0; }
+      else if (bt === 'spider') { pivot.position.y = Math.abs(Math.sin(phase * 2.5)) * 0.05; pivot.rotation.z = Math.sin(phase * 2.5) * 0.06 * (e.moveAmt || 0); }
+      else if (bt === 'yeti') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.15 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.35; pivot.rotation.z = Math.sin(phase * 0.8) * 0.06 * (e.moveAmt || 0); }
+      else if (bt === 'crawler') { pivot.position.y = Math.abs(Math.sin(phase * 3)) * 0.04; pivot.rotation.z = Math.sin(phase * 3) * 0.08 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.25; }
+      else if (bt === 'drowned') { pivot.position.y = Math.sin(t * 1.9 + phase) * 0.22 + 0.3; pivot.rotation.z = Math.sin(t * 1.3 + phase) * 0.1; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'seraph') { pivot.position.y = Math.sin(t * 2.4 + phase) * 0.25 + 0.35; pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'warden') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.22 + Math.sin(t * 40) * 0.04 : (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'sentinel') { pivot.position.y = Math.sin(t * 1.6 + phase) * 0.2 + 0.25; pivot.rotation.y = t * 0.8; }
       else { pivot.position.y = Math.sin(t * 3 + phase) * 0.2 + 0.2; pivot.rotation.z = Math.sin(t * 2 + phase) * 0.08; }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
@@ -5305,9 +5481,9 @@ const ringGeoE = new THREE.RingGeometry(0.9, 1.05, 32).rotateX(-Math.PI / 2);
 // World boss: one golem body, tinted per zone, with a glowing core and a rune circle
 const golemCache = new Map();
 function golemGeos(zi) {
-  if (golemCache.has(zi)) return golemCache.get(zi);
+  const bkey = (CFG.world.zones[zi] || CFG.world.zones[0]).biome; if (golemCache.has(bkey)) return golemCache.get(bkey);
   const Z = CFG.world.zones[zi] || CFG.world.zones[0], tint = new THREE.Color(Z.bossTint), dark = tint.clone().multiplyScalar(0.75).getHex(), light = tint.clone().lerp(new THREE.Color(0xffffff), 0.18).getHex();
-  const acc = [0x6fae4f, 0x2f6a3c, 0xe9f2fa, 0x24160f, 0x8d7bff, 0x2fffd0, 0xfff07a][zi] || 0x6fae4f;
+  const acc = Z.bossAcc || 0x6fae4f;
   const body = mergeParts([
     part(GEO.dodec, Z.bossTint, [0, 1.75, 0], null, [1.05, 0.95, 0.8]),
     part(GEO.box, dark, [0, 1.0, 0], null, [1.2, 0.5, 0.8]),
@@ -5325,7 +5501,7 @@ function golemGeos(zi) {
     part(GEO.ico0, 0xffffff, [0, 1.85, 0.78], null, [0.32, 0.36, 0.2]),
     part(GEO.box, 0xffffff, [0.55, 1.5, 0.62], [0, 0, 0.4], [0.05, 0.4, 0.03]), part(GEO.box, 0xffffff, [-0.6, 1.9, 0.6], [0, 0, -0.5], [0.05, 0.35, 0.03]),
   ]);
-  const out = { body, arm, glow }; golemCache.set(zi, out); return out;
+  const out = { body, arm, glow }; golemCache.set(bkey, out); return out;
 }
 AssetSlots.register('boss', (o) => {
   const zi = o.zone || 0, Z = CFG.world.zones[zi] || CFG.world.zones[0], G3 = golemGeos(zi);
@@ -5410,14 +5586,14 @@ const matGround = new THREE.MeshStandardMaterial({ vertexColors: true, roughness
 // Each zone gets its own floor pattern on top of the zone colours: grass clumps and dirt patches,
 // snow drifts, glowing lava cracks, broken flagstones, wet pebbles, marble terraces, and cobblestones
 // in the town plaza and along the road (all world-space, so it tiles forever without a texture file).
-matGround.userData.u = { uTown: { value: new THREE.Vector3() }, uZ: { value: [0, 0, 0, 0, 0, 0, 0] }, uRoad: { value: new THREE.Vector2() } };
+matGround.userData.u = { uTown: { value: new THREE.Vector3() }, uRoad: { value: new THREE.Vector2() } };
 matGround.onBeforeCompile = (sh) => {
   Object.assign(sh.uniforms, matGround.userData.u);
-  sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGW;')
-    .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvGW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+  sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGW; attribute float aTh; attribute vec3 aGc; varying float vTh; varying vec3 vGc;')
+    .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvGW = (modelMatrix * vec4(transformed, 1.0)).xyz; vTh = aTh; vGc = aGc;');
   sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
 varying vec3 vGW;
-uniform vec3 uTown; uniform float uZ[7]; uniform vec2 uRoad;
+uniform vec3 uTown; uniform vec2 uRoad; varying float vTh; varying vec3 vGc;
 float gh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 vec2 gh2(vec2 p) { return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453); }
 float gn(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -5431,7 +5607,7 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     .replace('#include <color_fragment>', `#include <color_fragment>
 {
   vec2 w = vGW.xz; vec2 px = w;   // smooth world-space detail; the pixel pass adds the crisp edge
-  float zone = 0.0; for (int i = 1; i < 7; i++) if (w.y >= uZ[i]) zone = float(i);
+  float zone = floor(vTh + 0.5); vec3 zgc = vGc;   // floor style and glow of this area (per ground mesh)
   float fine = gh(floor(w * 4.0));
   float pat = gn(px * 0.35) * 0.6 + gn(px * 1.3) * 0.4;
   vec3 c = diffuseColor.rgb * (0.86 + pat * 0.22 + (fine - 0.5) * 0.03);
@@ -5454,7 +5630,7 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     float crack = 1.0 - smoothstep(0.03, 0.08, v.x);
     float hot = smoothstep(0.64, 0.78, gn(px * 0.12 + 3.0));
     c = mix(c, vec3(0.04, 0.025, 0.02), crack * 0.9);
-    gGlow = crack * hot * 0.8; gGlowC = vec3(1.0, 0.33, 0.06);
+    gGlow = crack * hot * 0.8; gGlowC = zgc;
   } else if (zone < 4.5 || zone > 5.5) {             // starfall + celestial: broken flagstone terraces
     float tile = zone > 5.5 ? 1.6 : 1.2;
     vec2 t = px / tile; t.x += step(1.0, mod(floor(t.y), 2.0)) * 0.5;
@@ -5464,12 +5640,12 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     vec3 stone = c * (0.88 + gh(id) * 0.26) * (zone > 5.5 ? 1.08 : 1.0);
     c = mix(c, mix(stone, c * 0.45, mortar), paved);
     if (zone > 5.5) c = mix(c, vec3(0.95, 0.78, 0.38), paved * mortar * step(0.7, gh(id + 2.0)) * 0.7);
-    else { gGlow = paved * mortar * step(0.94, gh(id + 3.0)) * 0.45; gGlowC = vec3(0.65, 0.4, 1.0); }
+    else { gGlow = paved * mortar * step(0.94, gh(id + 3.0)) * 0.45; gGlowC = zgc; }
   } else {                                            // abyss: wet pebbles with faint teal glints
     vec2 v = vor(px * 1.1);
     c *= 0.82 + v.y * 0.3;
     c = mix(c, c * 0.5, 1.0 - smoothstep(0.04, 0.1, v.x));
-    gGlow = step(0.992, gh(floor(w * 4.0) + 21.0)); gGlowC = vec3(0.2, 1.0, 0.85);
+    gGlow = step(0.992, gh(floor(w * 4.0) + 21.0)); gGlowC = zgc;
   }
   // town plaza and the road: cobblestones like an old dungeon floor
   float plaza = 1.0 - smoothstep(uTown.z - 3.0, uTown.z - 1.0, length(w - uTown.xy));
@@ -5486,28 +5662,31 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
 }`)
     .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += gGlowC * gGlow * 1.4;');
 };
-matGround.customProgramCacheKey = () => 'ground3';
+matGround.customProgramCacheKey = () => 'ground4';
 const worldArt = createWorldArt({THREE, GEO, part, mergeParts});
-const ZONE_GROUND = () => [PALETTE.meadow, PALETTE.forest, PALETTE.frost, PALETTE.ember, PALETTE.starfall, PALETTE.abyss, PALETTE.celestial];
-const ZONE_PATH = () => [PALETTE.path, PALETTE.path, PALETTE.snowPath, PALETTE.emberPath, PALETTE.starPath, PALETTE.abyssPath, PALETTE.celestialPath];
+const zoneGround = (zi) => { const g = CFG.world.zones[zi].ground; return typeof g === 'string' ? PALETTE[g] : g; };
+const zonePath = (zi) => PALETTE[CFG.world.zones[zi].path] || PALETTE.path;
 function groundColorAt(x, z, r) {
   const W = CFG.world, T = W.town, P2 = PALETTE;
   const zi = zoneAt(z);
-  if (x < W.minX - 1 || x > W.maxX + 1 || z < W.minZ - 1 || z > W.maxZ + 1) { const o = ZONE_GROUND()[zi]; return new THREE.Color(o[r < 0.5 ? 0 : 1]).multiplyScalar(0.72).getHex(); }
+  if (x < W.minX - 1 || x > W.maxX + 1 || z < W.minZ - 1 || z > W.maxZ + 1) { const o = zoneGround(zi); return new THREE.Color(o[r < 0.5 ? 0 : 1]).multiplyScalar(0.72).getHex(); }
   const dt = Math.hypot(x - T.x, z - T.z);
   if (dt < T.r - 2) return P2.plaza[Math.floor(r * 3)];
-  if (Math.abs(x + Math.sin(z * 0.03) * 0) < 2.8 && z > T.z && z < W.maxZ - 6) return ZONE_PATH()[zi][r < 0.5 ? 0 : 1];
-  for (const l of W.lairs) { const d = Math.hypot(x - l.x, z - l.z); if (d < 8) return new THREE.Color(ZONE_GROUND()[zi][0]).multiplyScalar(0.8).getHex(); }
-  for (const D of W.dens) { const d = Math.hypot(x - D.x, z - D.z); if (d < D.r + 1) return new THREE.Color(ZONE_GROUND()[zi][Math.floor(r * 4)]).multiplyScalar(d < D.r - 1 ? 0.7 : 0.82).getHex(); }
-  const arr = ZONE_GROUND()[zi];
+  if (Math.abs(x + Math.sin(z * 0.03) * 0) < 2.8 && z > T.z && z < W.maxZ - 6) return zonePath(zi)[r < 0.5 ? 0 : 1];
+  { const l = W.lairs[zi]; if (l && Math.hypot(x - l.x, z - l.z) < 8) return new THREE.Color(zoneGround(zi)[0]).multiplyScalar(0.8).getHex(); }
+  for (const D of W.dens) { if (D.zone !== zi) continue; const d = Math.hypot(x - D.x, z - D.z); if (d < D.r + 1) return new THREE.Color(zoneGround(zi)[Math.floor(r * 4)]).multiplyScalar(d < D.r - 1 ? 0.7 : 0.82).getHex(); }
+  const arr = zoneGround(zi);
   return arr[Math.floor(r * arr.length)];
 }
-const ZONE_AMP = [0.45, 0.5, 0.7, 0.5, 0.45, 0.55, 0.3];
+const THEME_AMP = [0.45, 0.5, 0.7, 0.5, 0.45, 0.55, 0.3];
+const zoneAmp = (zi) => { const zn = CFG.world.zones[zi]; return zn.amp != null ? zn.amp : THEME_AMP[zn.theme]; };
 function buildHub() {
   const W = CFG.world, T = W.town, P2 = PALETTE, rng = mulberry32(1337);
   const grid = new Grid(6);
   // ground: one mesh per zone so the GPU can skip zones that are out of view
-  { const u = matGround.userData.u; u.uTown.value.set(T.x, T.z, T.r); u.uZ.value = W.zones.map((z2) => z2.z0); u.uRoad.value.set(2.8, W.maxZ - 6); }
+  { const u = matGround.userData.u; u.uTown.value.set(T.x, T.z, T.r); u.uRoad.value.set(2.8, W.maxZ - 6);
+  }
+  const TG = [[1, 0.33, 0.06], [1, 0.33, 0.06], [1, 0.33, 0.06], [1, 0.33, 0.06], [0.65, 0.4, 1.0], [0.2, 1.0, 0.85], [1, 0.85, 0.4]];
   W.zones.forEach((zn, zi) => {
     const z0 = zi === 0 ? W.minZ - 20 : zn.z0, z1 = zi === W.zones.length - 1 ? W.maxZ + 20 : zn.z1;
     const gw = W.maxX - W.minX + 60, gd = z1 - z0;
@@ -5518,7 +5697,7 @@ function buildHub() {
       const x = pos.getX(i), z = pos.getZ(i);
       const flat = Math.hypot(x - T.x, z - T.z) < T.r + 2 || Math.abs(x) < 4 || Math.abs(z - zn.z0) < 1 || Math.abs(z - zn.z1) < 1;
       const edge = x < W.minX || x > W.maxX || z < W.minZ || z > W.maxZ;
-      const amp = edge ? 2.6 : flat ? 0.02 : ZONE_AMP[zoneAt(z)];
+      const amp = edge ? 2.6 : flat ? 0.02 : zoneAmp(zoneAt(z));
       pos.setY(i, (hashf(x * 0.7, z * 0.7) - 0.5) * amp - (flat ? 0 : 0.08) + (edge ? 1.4 + Math.min(4, (Math.max(W.minX - x, x - W.maxX, 0)) * 0.12) : 0));
     }
     g.computeVertexNormals(); g = g.toNonIndexed(); // smooth rolling ground, not faceted triangles
@@ -5529,6 +5708,9 @@ function buildHub() {
       gc[i * 3] = _col.r; gc[i * 3 + 1] = _col.g; gc[i * 3 + 2] = _col.b;
     }
     g.setAttribute('color', new THREE.BufferAttribute(gc, 3)); g.deleteAttribute('uv');
+    { const gl = zn.glow || TG[zn.theme], th = new Float32Array(gp.count).fill(zn.theme), gcl = new Float32Array(gp.count * 3);
+      for (let i = 0; i < gp.count; i++) gcl.set(gl, i * 3);
+      g.setAttribute('aTh', new THREE.BufferAttribute(th, 1)); g.setAttribute('aGc', new THREE.BufferAttribute(gcl, 3)); }
     const gm = new THREE.Mesh(g, matGround); gm.receiveShadow = true; hubGroup.add(gm); hubParts.zoneMeshes.push(gm);
   });
 
@@ -5570,8 +5752,8 @@ function buildHub() {
     tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x - 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4])); tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x + 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4]));
     grid.add({ x: RG.x - 1.9, z: RG.z, r: 0.5 }); grid.add({ x: RG.x + 1.9, z: RG.z, r: 0.5 }); }
   // lair standing stones (one ring per zone)
-  W.lairs.forEach((l, li) => {
-    const stone = [P2.stone, 0x5f6b4f, 0xa9bcd0, 0x3b2f2b, 0x4a4378, 0x2f5d64, 0xeadfc0][li] || P2.stone;
+  W.lairList.forEach((l) => {
+    const stone = [P2.stone, 0x5f6b4f, 0xa9bcd0, 0x3b2f2b, 0x4a4378, 0x2f5d64, 0xeadfc0][W.zones[l.zone].theme] || P2.stone;
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2 + Math.PI / 8, x = l.x + Math.sin(a) * 9.5, z = l.z + Math.cos(a) * 9.5;
       tParts.push(part(GEO.box, stone, [x, 1.3, z], [0, a, 0.05 * (i % 3)], [1.1, 2.6, 0.8]));
@@ -5587,12 +5769,13 @@ function buildHub() {
     tParts.push(part(GEO.box, 0x585d67, [0, 4.6, gz], null, [7.4, 0.8, 1.0]));
     tParts.push(part(GEO.cone4, 0xffc94a, [-3.2, 4.9, gz], [0, Math.PI / 4, 0], [0.6, 0.6, 0.6])); tParts.push(part(GEO.cone4, 0xffc94a, [3.2, 4.9, gz], [0, Math.PI / 4, 0], [0.6, 0.6, 0.6]));
     grid.add({ x: -3.2, z: gz, r: 0.6 }); grid.add({ x: 3.2, z: gz, r: 0.6 });
-    for (let x = W.minX; x <= W.maxX; x += 3) {
+    const fence = zi === 1 || zn.biome !== W.zones[zi - 1].biome;
+    if (fence) for (let x = W.minX; x <= W.maxX; x += 3) {
       if (Math.abs(x) < 4) continue;
       tParts.push(part(GEO.box, P2.fence, [x, 0.7, gz], [0, 0, 0], [0.24, 1.4, 0.24]));
     }
-    tParts.push(part(GEO.box, P2.fence, [(W.minX - 4) / 2, 1.0, gz], null, [-W.minX - 4, 0.12, 0.12]));
-    tParts.push(part(GEO.box, P2.fence, [(W.maxX + 4) / 2, 1.0, gz], null, [W.maxX - 4, 0.12, 0.12]));
+    if (fence) { tParts.push(part(GEO.box, P2.fence, [(W.minX - 4) / 2, 1.0, gz], null, [-W.minX - 4, 0.12, 0.12]));
+    tParts.push(part(GEO.box, P2.fence, [(W.maxX + 4) / 2, 1.0, gz], null, [W.maxX - 4, 0.12, 0.12])); }
     const bm = new THREE.Mesh(new THREE.PlaneGeometry(W.maxX - W.minX, 5), new THREE.MeshBasicMaterial({ color: P2.gateLocked, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
     bm.position.set(0, 2.5, gz); hubGroup.add(bm);
     hubParts.barriers.push({ mesh: bm, zone: zi });
@@ -5600,7 +5783,7 @@ function buildHub() {
   }
   // monster dens: a ring of bones, rocks and banners so the camp reads from far away
   W.dens.forEach((D, di) => {
-    const zc = [0x8a8f99, 0x5b4a3a, 0xbfd3e6, 0x3a2622, 0x3b3566, 0x2b6f6a, 0xd9c48a][D.zone];
+    const zc = [0x8a8f99, 0x5b4a3a, 0xbfd3e6, 0x3a2622, 0x3b3566, 0x2b6f6a, 0xd9c48a][W.zones[D.zone].theme];
     for (let i = 0; i < 12; i++) {
       const a = (i / 12) * Math.PI * 2 + di, x = D.x + Math.sin(a) * (D.r + 1.2), z = D.z + Math.cos(a) * (D.r + 1.2);
       if (i % 4 === 0) { tParts.push(part(GEO.box, 0x5a4632, [x, 1.4, z], null, [0.18, 2.8, 0.18])); tParts.push(part(GEO.box, 0xc23b3b, [x + 0.45, 2.3, z], null, [0.8, 0.9, 0.05])); }
@@ -5619,7 +5802,7 @@ function buildHub() {
   });
   worldArt.town(tParts, T, houseAngles, P2);
   const townMesh = new THREE.Mesh(mergeParts(tParts), worldArt.material); townMesh.castShadow = true; townMesh.receiveShadow = true; hubGroup.add(townMesh);
-  W.zones.forEach((zn, zi) => worldArt.zoneLandmarks(hubGroup, W, zi));
+  W.zones.forEach((zn, zi) => worldArt.zoneLandmarks(hubGroup, W, zi, REGION_ART[zn.theme]));
   {
     const wim = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.45, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }), W.waypoints.length);
     wim.instanceMatrix.setUsage(THREE.DynamicDrawUsage); wim.frustumCulled = false; wim.setColorAt(0, _col.set(0xffffff)); hubGroup.add(wim); hubParts.wpIM = wim;
@@ -5640,7 +5823,7 @@ function buildHub() {
     if (Math.hypot(x - T.x, z - T.z) < T.r + 5) return false;
     if (Math.abs(x) < 5.5) return false;
     for (let zi = 1; zi < W.zones.length; zi++) if (Math.abs(z - W.zones[zi].z0) < 3) return false;
-    for (const l of W.lairs) if (Math.hypot(x - l.x, z - l.z) < 13) return false;
+    for (const l of W.lairList) if (Math.hypot(x - l.x, z - l.z) < 13) return false;
     for (const D of W.dens) if (Math.hypot(x - D.x, z - D.z) < D.r + 3) return false;
     for (const w of W.waypoints) if (Math.hypot(x - w.x, z - w.z) < 4) return false;
     if (Math.hypot(x - CFG.rift.gate.x, z - CFG.rift.gate.z) < 5) return false;
@@ -5683,85 +5866,101 @@ function buildHub() {
     im.computeBoundingSphere(); im.castShadow = opts.shadow !== false; im.receiveShadow = !!opts.receive;
     hubGroup.add(im); return im;
   }
-  const treeCount = [190, 300, 200, 130, 110, 140, 150], rockCount = [50, 50, 80, 90, 60, 70, 50];
+  // Props per area: the theme sets the defaults (counts per 160 m of road), each area's look overrides them.
+  const THEME_DECO = [
+    { tree: 'round', trees: 190, rocks: 50, tufts: 1500, tuftC: [0x6d9a4a, 0x82ad55], flowers: 260, flowerC: [0xff7aa8, 0xffd34a, 0xffffff, 0xb08cff], bushes: 220, logs: 16, fungi: 60, ruins: 2, flies: 70, ponds: 6 },
+    { tree: 'pine', trees: 300, rocks: 50, tufts: 1500, tuftC: [0x3e6b3a, 0x4f7f45], flowers: 120, flowerC: [0xff9b3d, 0xe9e3cf], bushes: 300, logs: 30, fungi: 120, ruins: 3, flies: 140, ponds: 4 },
+    { tree: 'snowPine', trees: 200, rocks: 80, spikes: 0.45, spikeC: 0xcfe6f7, tufts: 700, tuftC: [0xd7e6f2, 0xc5d8e8], flowers: 0, bushes: 120, logs: 10, fungi: 0, ruins: 2, flies: 0, ponds: 0 },
+    { tree: 'dead', trees: 130, rocks: 90, rockC: [0x4a3a34], spikes: 0.45, spikeC: 0x2b1c17, tufts: 600, tuftC: [0x8a5a3c, 0x6b4a3d], flowers: 0, bushes: 60, logs: 18, fungi: 0, ruins: 3, flies: 50, ponds: 0, lava: 22 },
+    { tree: 'crystal', trees: 110, rocks: 60, rockC: [0x5b5390], tufts: 800, tuftC: [0x7f74c9, 0x6a5fb5], flowers: 0, bushes: 90, logs: 0, fungi: 0, ruins: 6, flies: 90, ponds: 0 },
+    { tree: 'coral', trees: 140, rocks: 70, rockC: [0x2f4f55], spikes: 0.45, spikeC: 0x14393f, tufts: 700, tuftC: [0x3fa39b, 0x2f8f88], flowers: 0, bushes: 140, logs: 0, fungi: 90, fungiC: [0x2fffd0, 0x7fe3ff], glowCaps: true, ruins: 4, flies: 80, ponds: 0 },
+    { tree: 'blossom', trees: 150, rocks: 50, rockC: [0xf4efe2, 0xe3d8bd, 0xd8cfb8], tufts: 900, tuftC: [0xf7e7b5, 0xfff8e6], flowers: 200, flowerC: [0xffffff, 0xffd36b, 0xffb3c7], bushes: 160, logs: 8, fungi: 40, fungiC: [0xfff3c4], glowCaps: true, ruins: 5, flies: 70, ponds: 0 },
+  ];
+  const THEME_LEAF = [P2.roundLeaf, P2.pine, P2.snowPine, [0x3a2a24, 0x4a3328], [0x433d70, 0x534a86], [0x1f5a63, 0x2a7078], [0xd9c48f, 0xe8d3a3]];
+  const THEME_RUIN = [0x7d786c, 0x7d786c, 0xaab8c4, 0x4a3a34, 0x5b5390, 0x2f5560, 0xe3d8bd];
+  const TREE_TOP = { round: 'roundLeaf', pine: 'pine', snowPine: 'snowPine', dead: 'deadTree', crystal: 'crystal', coral: 'coral', blossom: 'blossom' };
   const lava = [];
   W.zones.forEach((zn, zi) => {
+    const th = zn.theme, D = Object.assign({}, THEME_DECO[th], zn.deco || {}), k = zn.len / 160, cnt = (v) => Math.round((v || 0) * k);
     const trunks = [], tops = [], rocks = [], tufts = [], flowers = [], spikes = [];
     const z0 = Math.max(zn.z0, W.minZ), z1 = Math.min(zn.z1, W.maxZ);
     const rnd = () => ({ x: W.minX + 2 + rng() * (W.maxX - W.minX - 4), z: z0 + 2 + rng() * (z1 - z0 - 4) });
     let n = 0, tries = 0;
     // most trees grow in groves around a few centres, leaving open glades in between
-    const groves = []; for (let g2 = 0; g2 < 9; g2++) groves.push(rnd());
+    const groves = []; for (let g2 = 0; g2 < Math.max(4, Math.round(9 * k)); g2++) groves.push(rnd());
     const near = () => { const c = groves[Math.floor(rng() * groves.length)], a = rng() * 6.283, d = Math.sqrt(rng()) * 22; return { x: clamp(c.x + Math.sin(a) * d, W.minX + 2, W.maxX - 2), z: clamp(c.z + Math.cos(a) * d * 0.8, z0 + 2, z1 - 2) }; };
-    while (n < treeCount[zi] && tries++ < 6000) {
+    const tree = D.tree, topC = D.treeC || P2[TREE_TOP[tree]] || P2.roundLeaf;
+    while (tree !== 'none' && n < cnt(D.trees) && tries++ < 6000) {
       const { x, z } = rng() < 0.65 ? near() : rnd(); if (!placeOk(x, z, 1.9)) continue;
-      const s = 0.8 + rng() * 0.7;
-      if (zi === 4) tops.push({ x, z, s: s * 0.9, c: P2.crystal[Math.floor(rng() * 3)] });
-      else if (zi === 5) tops.push({ x, z, s: s * 1.05, c: P2.coral[Math.floor(rng() * 3)] });
-      else if (zi === 6) { trunks.push({ x, z, s }); tops.push({ x, z, s: s * 1.05, c: P2.blossom[Math.floor(rng() * 3)] }); }
-      else if (zi === 3) tops.push({ x, z, s: s * 1.1, c: P2.deadTree[Math.floor(rng() * 2)] });
-      else { trunks.push({ x, z, s }); tops.push({ x, z, s, c: zi === 0 ? P2.roundLeaf[Math.floor(rng() * 3)] : zi === 1 ? P2.pine[Math.floor(rng() * 3)] : P2.snowPine[Math.floor(rng() * 2)] }); }
+      const s = 0.8 + rng() * 0.7, c = topC[Math.floor(rng() * topC.length)];
+      if (tree === 'crystal') tops.push({ x, z, s: s * 0.9, c });
+      else if (tree === 'coral') tops.push({ x, z, s: s * 1.05, c });
+      else if (tree === 'blossom') { trunks.push({ x, z, s }); tops.push({ x, z, s: s * 1.05, c }); }
+      else if (tree === 'dead') tops.push({ x, z, s: s * 1.1, c });
+      else { trunks.push({ x, z, s }); tops.push({ x, z, s, c }); }
       grid.add({ x, z, r: 0.55 * s }); n++;
     }
-    for (let i = 0, k = 0; i < rockCount[zi] && k < 1500; k++) {
+    const rockC = D.rockC || P2.rock;
+    for (let i = 0, kk = 0; i < cnt(D.rocks) && kk < 3000; kk++) {
       const { x, z } = rnd(); if (!placeOk(x, z, 1.5)) continue;
       const s = 0.6 + rng() * 1.1;
-      if ((zi === 2 || zi === 3 || zi === 5) && rng() < 0.45) spikes.push({ x, z, s: s * 0.9, c: zi === 2 ? 0xcfe6f7 : zi === 5 ? 0x14393f : 0x2b1c17 });
-      else rocks.push({ x, z, s, c: zi === 3 ? 0x4a3a34 : zi === 4 ? 0x5b5390 : zi === 5 ? 0x2f4f55 : zi === 6 ? [0xf4efe2, 0xe3d8bd, 0xd8cfb8][Math.floor(rng() * 3)] : P2.rock[Math.floor(rng() * 3)], ry: rng() * 6 });
+      if (D.spikes && rng() < D.spikes) spikes.push({ x, z, s: s * 0.9, c: D.spikeC });
+      else rocks.push({ x, z, s, c: rockC[Math.floor(rng() * rockC.length)], ry: rng() * 6 });
       grid.add({ x, z, r: 0.85 * s }); i++;
     }
     // grass tufts + flowers (no collision)
-    const tuftC = [[0x6d9a4a, 0x82ad55], [0x3e6b3a, 0x4f7f45], [0xd7e6f2, 0xc5d8e8], [0x8a5a3c, 0x6b4a3d], [0x7f74c9, 0x6a5fb5], [0x3fa39b, 0x2f8f88], [0xf7e7b5, 0xfff8e6]][zi];
-    const tuftN = [1500, 1500, 700, 600, 800, 700, 900][zi];
-    for (let i = 0; i < tuftN; i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r + 2 || Math.abs(x) < 3.5) continue; tufts.push({ x, z, s: 0.8 + rng() * 0.9, c: tuftC[i % 2], ry: rng() * 6 }); }
-    if (zi === 0 || zi === 1 || zi === 6) for (let i = 0; i < (zi === 0 ? 260 : zi === 6 ? 200 : 120); i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r || Math.abs(x) < 3.5) continue; flowers.push({ x, z, s: 0.8 + rng() * 0.6, c: zi === 0 ? [0xff7aa8, 0xffd34a, 0xffffff, 0xb08cff][i % 4] : zi === 6 ? [0xffffff, 0xffd36b, 0xffb3c7][i % 3] : [0xff9b3d, 0xe9e3cf][i % 2] }); }
-    if (zi === 3) for (let i = 0; i < 22; i++) { const { x, z } = rnd(); if (!placeOk(x, z, 3)) continue; lava.push({ x, z, s: 2 + rng() * 3 }); }
+    const tuftC = D.tuftC;
+    for (let i = 0; i < cnt(D.tufts); i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r + 2 || Math.abs(x) < 3.5) continue; tufts.push({ x, z, s: 0.8 + rng() * 0.9, c: tuftC[i % tuftC.length], ry: rng() * 6 }); }
+    for (let i = 0; i < cnt(D.flowers); i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r || Math.abs(x) < 3.5) continue; flowers.push({ x, z, s: 0.8 + rng() * 0.6, c: D.flowerC[i % D.flowerC.length] }); }
+    for (let i = 0; i < cnt(D.lava); i++) { const { x, z } = rnd(); if (!placeOk(x, z, 3)) continue; lava.push({ x, z, s: 2 + rng() * 3, c: D.lavaC || 0xff6a1f }); }
     // undergrowth and points of interest so the ground never reads as an empty plain
     const bushes = [], logs = [], stumps = [], stems = [], caps = [], pillars = [], blocks = [];
-    const leafC = [P2.roundLeaf, P2.pine, P2.snowPine, [0x3a2a24, 0x4a3328], [0x433d70, 0x534a86], [0x1f5a63, 0x2a7078], [0xd9c48f, 0xe8d3a3]][zi];
-    for (let i = 0; i < [220, 300, 120, 60, 90, 140, 160][zi]; i++) {
+    const leafC = D.leafC || THEME_LEAF[th];
+    for (let i = 0; i < cnt(D.bushes); i++) {
       const { x, z } = rng() < 0.6 ? near() : rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r + 3 || Math.abs(x) < 4.5) continue;
       bushes.push({ x, z, s: 0.55 + rng() * 0.7, c: leafC[Math.floor(rng() * leafC.length)] });
     }
-    if (zi !== 4 && zi !== 5) for (let i = 0, k = 0; i < [16, 30, 10, 18, 0, 0, 8][zi] && k < 400; k++) {
+    for (let i = 0, kk = 0; i < cnt(D.logs) && kk < 400; kk++) {
       const { x, z } = near(); if (!placeOk(x, z, 1.6)) continue;
-      if (rng() < 0.55) { logs.push({ x, z, s: 0.8 + rng() * 0.5, c: zi === 3 ? 0x3a2a24 : zi === 2 ? 0x6a5a4c : 0x5a3e2a, ry: rng() * 6 }); grid.add({ x, z, r: 0.9 }); }
-      else { stumps.push({ x, z, s: 0.8 + rng() * 0.6, c: zi === 3 ? 0x2e221d : 0x5a3e2a }); grid.add({ x, z, r: 0.5 }); }
+      if (rng() < 0.55) { logs.push({ x, z, s: 0.8 + rng() * 0.5, c: th === 3 ? 0x3a2a24 : th === 2 ? 0x6a5a4c : 0x5a3e2a, ry: rng() * 6 }); grid.add({ x, z, r: 0.9 }); }
+      else { stumps.push({ x, z, s: 0.8 + rng() * 0.6, c: th === 3 ? 0x2e221d : 0x5a3e2a }); grid.add({ x, z, r: 0.5 }); }
       i++;
     }
-    if (zi === 0 || zi === 1 || zi === 5 || zi === 6) for (let i = 0; i < [60, 120, 0, 0, 0, 90, 40][zi]; i++) {
+    const fungiC = D.fungiC || [0xc23b3b, 0xd9a441, 0xe9e3cf], fs = D.fungiS || 1;
+    for (let i = 0; i < cnt(D.fungi); i++) {
       const { x, z } = near(); if (Math.abs(x) < 4.5) continue;
-      const s = 0.6 + rng() * 0.8, c = zi === 5 ? [0x2fffd0, 0x7fe3ff][i % 2] : zi === 6 ? 0xfff3c4 : [0xc23b3b, 0xd9a441, 0xe9e3cf][i % 3];
-      stems.push({ x, z, s, c: 0xe9e3cf }); caps.push({ x, z, s, c });
+      const s = (0.6 + rng() * 0.8) * (fs > 1 ? 1 + rng() * (fs - 1) : 1);
+      stems.push({ x, z, s, c: 0xe9e3cf }); caps.push({ x, z, s, c: fungiC[i % fungiC.length] });
     }
-    // ruins: a few broken colonnades per zone (forest shrines, starfall halls, celestial terraces)
-    for (let r = 0; r < [2, 3, 2, 3, 6, 4, 5][zi]; r++) {
+    // ruins: a few broken colonnades per area (forest shrines, starfall halls, celestial terraces)
+    for (let r = 0; r < Math.max(D.ruins ? 1 : 0, cnt(D.ruins)); r++) {
       const c = rnd(); if (!placeOk(c.x, c.z, 7)) continue;
-      const stoneC = zi === 4 ? 0x5b5390 : zi === 5 ? 0x2f5560 : zi === 6 ? 0xe3d8bd : zi === 3 ? 0x4a3a34 : zi === 2 ? 0xaab8c4 : 0x7d786c;
-      const cnt = 5 + Math.floor(rng() * 4), rad = 4 + rng() * 3, a0 = rng() * 6.283;
-      for (let k = 0; k < cnt; k++) {
-        const a = a0 + (k / cnt) * 6.283, x = c.x + Math.sin(a) * rad, z = c.z + Math.cos(a) * rad;
+      const stoneC = D.ruinC || THEME_RUIN[th];
+      const cn = 5 + Math.floor(rng() * 4), rad = 4 + rng() * 3, a0 = rng() * 6.283;
+      for (let q = 0; q < cn; q++) {
+        const a = a0 + (q / cn) * 6.283, x = c.x + Math.sin(a) * rad, z = c.z + Math.cos(a) * rad;
         if (rng() < 0.7) { const h = 0.6 + rng() * 1.6; pillars.push({ x, z, s: 1, sy: h, c: stoneC, ry: rng() * 0.6 }); grid.add({ x, z, r: 0.6 }); }
         else blocks.push({ x: x + rng() - 0.5, z: z + rng() - 0.5, s: 0.7 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
       }
-      for (let k = 0; k < 4; k++) blocks.push({ x: c.x + (rng() - 0.5) * rad, z: c.z + (rng() - 0.5) * rad, s: 0.4 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
+      for (let q = 0; q < 4; q++) blocks.push({ x: c.x + (rng() - 0.5) * rad, z: c.z + (rng() - 0.5) * rad, s: 0.4 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
     }
     inst(bushGeo, bushes, true, { receive: true });
     inst(logGeo, logs, true, { receive: true }); inst(stumpGeo, stumps, true);
-    inst(stemGeo, stems, true, { shadow: false }); inst(capGeo, caps, true, zi === 5 || zi === 6 ? { mat: glowTint, shadow: false } : { shadow: false });
+    inst(stemGeo, stems, true, { shadow: false }); inst(capGeo, caps, true, D.glowCaps ? { mat: glowTint, shadow: false } : { shadow: false });
     inst(pillarGeo, pillars, true, { receive: true }); inst(blockGeo, blocks, true, { receive: true });
-    for (const st of caps) if (zi === 5 || zi === 1) flies.push({ x: st.x, z: st.z });
-    for (let i = 0; i < [70, 140, 0, 50, 90, 80, 70][zi]; i++) { const q2 = rng() < 0.7 ? near() : rnd(); flies.push(q2); }
-    if (zi <= 1) for (let i = 0, k = 0; i < (zi === 0 ? 6 : 4) && k < 200; k++) { const c = rnd(); if (!placeOk(c.x, c.z, 5)) continue; ponds.push({ x: c.x, z: c.z, s: 2.5 + rng() * 2.5 }); grid.add({ x: c.x, z: c.z, r: 1.5 }); i++; }
-    if (zi <= 2 || zi === 6) inst(trunkGeo, trunks, false);
-    inst(zi === 0 || zi === 6 ? roundGeo : zi <= 2 ? pineGeo : zi === 3 ? deadGeo : zi === 5 ? worldArt.coralGeo : crystalGeo, tops, true, zi === 4 || zi === 5 ? { mat: glowTint } : null);
+    if (D.glowCaps || th === 1) for (const st of caps) flies.push({ x: st.x, z: st.z });
+    for (let i = 0; i < cnt(D.flies); i++) { const q2 = rng() < 0.7 ? near() : rnd(); flies.push(q2); }
+    for (let i = 0, kk = 0; i < Math.round((D.ponds || 0) * Math.max(k, 0.6)) && kk < 300; kk++) { const c = rnd(); if (!placeOk(c.x, c.z, 5)) continue; ponds.push({ x: c.x, z: c.z, s: 2.5 + rng() * 2.5 }); grid.add({ x: c.x, z: c.z, r: 1.5 }); i++; }
+    if (tree === 'round' || tree === 'pine' || tree === 'snowPine' || tree === 'blossom') inst(trunkGeo, trunks, false);
+    const topGeo = { round: roundGeo, blossom: roundGeo, pine: pineGeo, snowPine: pineGeo, dead: deadGeo, coral: worldArt.coralGeo, crystal: crystalGeo }[tree];
+    if (topGeo) inst(topGeo, tops, true, tree === 'crystal' || tree === 'coral' ? { mat: glowTint } : null);
     inst(rockGeo, rocks, true, { receive: true }); inst(spikeGeo, spikes, true);
     inst(tuftGeo, tufts, true, { shadow: false }); inst(flowerGeo, flowers, true, { shadow: false });
   });
   // glowing lava pools in the Ember Wastes (decor)
   if (lava.length) {
-    const lim = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 10).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xff6a1f }), lava.length);
-    lava.forEach((l, i) => { _m4.compose(_v3.set(l.x, 0.05, l.z), _q.identity(), _s3.set(l.s, 1, l.s * 0.8)); lim.setMatrixAt(i, _m4); });
+    const lim = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 10).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff }), lava.length);
+    lava.forEach((l, i) => { _m4.compose(_v3.set(l.x, 0.05, l.z), _q.identity(), _s3.set(l.s, 1, l.s * 0.8)); lim.setMatrixAt(i, _m4); lim.setColorAt(i, _col.set(l.c)); });
     lim.computeBoundingSphere(); hubGroup.add(lim); hubParts.lavaIM = lim;
   }
   // ponds: dark water with a lighter rim and lily pads
@@ -5785,11 +5984,11 @@ function buildHub() {
   }
   // a deep forest wall around the play area (several rows), so the world ends in woods, not a flat plain
   const bTrunks = [], bTops = [];
-  for (let i = 0; i < 1400; i++) {
+  for (let i = 0; i < Math.round(1400 * (W.maxZ - W.minZ) / 1150); i++) {
     const side = i % 4; let x, z;
     if (side < 2) { x = side ? W.maxX + 3 + Math.pow(rng(), 0.7) * 34 : W.minX - 3 - Math.pow(rng(), 0.7) * 34; z = W.minZ - 20 + rng() * (W.maxZ - W.minZ + 40); }
     else { z = side === 2 ? W.minZ - 3 - rng() * 26 : W.maxZ + 3 + rng() * 26; x = W.minX - 30 + rng() * (W.maxX - W.minX + 60); }
-    const zi = zoneAt(z), s = 1 + rng() * 0.8;
+    const zi = W.zones[zoneAt(z)].theme, s = 1 + rng() * 0.8;
     if (zi <= 2) { bTrunks.push({ x, z, s, y: 1.6 }); bTops.push({ x, z, s, y: 1.6, c: zi === 2 ? P2.snowPine[0] : P2.pine[Math.floor(rng() * 3)] }); }
     else bTops.push({ x, z, s: s * 1.2, y: 1.6, c: zi === 3 ? 0x2b1c17 : zi === 5 ? 0x1b4f58 : zi === 6 ? 0xe8d3a3 : 0x4a4378 });
   }
@@ -6405,7 +6604,7 @@ function syncViews(dt, t) {
     if (old && e.kind === 'fighter' && (old.cls !== e.cls || (e.isPlayer && old.sig !== playerViewSig(e.cls)))) { dynGroup.remove(old.root); old.dispose(); views.delete(e); }
     if (Showcase.on && e !== G.player) { const v = views.get(e); if (v) v.root.visible = false; seen.add(e); return; }
     const d = Math.hypot(e.x - cx, e.z - cz);
-    if (d > far && !(e.kind === 'boss')) { const v = views.get(e); if (v) v.root.visible = false; seen.add(e); return; }
+    if (d > far && !(e.kind === 'boss')) { const v = views.get(e); if (v) v.root.visible = false; if (!(e.kind === 'enemy' && d > far * 2.4)) seen.add(e); return; }
     const v = viewFor(e); v.update(e, dt, t); seen.add(e);
     if (e.kind === 'fighter' && e.alive) v.root.scale.setScalar(growthScale(e));
     if (Showcase.on && e === G.player) {
@@ -7073,7 +7272,7 @@ function updateHUD(dt) {
     const zi = zoneAt(G.player.z), zn = CFG.world.zones[zi], town = distToTown(G.player.x, G.player.z) < CFG.world.town.r + 2;
     const ct = curTier(), al = areaLevel(zi, G.player.z) + tierAdd(), ts = ct ? ` · ${tierDef(ct).short}` : '';
     if (G.rift) setText('zoneChip', `Rift · Floor ${G.rift.floor} · Lv ${riftWaveLevel(G.rift.floor)}`);
-    else setText('zoneChip', town ? `Willowcross · safe${ts}` : `${zn.name} · Lv ${al}${ts}`);
+    else setText('zoneChip', town || zn.safe ? `Willowcross Base Camp · safe${ts}` : `${zn.name} · Lv ${al}${ts}`);
     setStyle('zoneChip', '--zc', al > p.level + 4 ? '#ff5d6c' : al > p.level + 1 ? '#ffb347' : '#8fe3a0');
   }
   setHidden('zoneChip', inArena || !G.started);
@@ -7162,7 +7361,7 @@ function updateObjective() {
     if (j.progress >= j.count) { text = `Return to ${npc.name}`; tx = npc.x; tz = npc.z; }
     else {
       text = `${j.title}: ${j.progress}/${j.count}`;
-      const zi = Math.max(0, CFG.world.zones.findIndex((zn) => zn.enemy === j.target));
+      const zi = Math.max(1, CFG.world.zones.findIndex((zn) => zn.enemy === j.target || zn.alt === j.target));
       if (zoneAt(pl.z) !== zi || distToTown(pl.x, pl.z) < CFG.world.town.r + 4) { const D = CFG.world.dens.find((d) => d.zone === zi); tx = D ? D.x : 0; tz = D ? D.z : CFG.world.zones[zi].z0 + 25; }
     }
   } else if (G.started) {
@@ -7450,7 +7649,7 @@ function heroTab(tab) {
     };
     const av = availableAttacks(p);
     const wpn = Object.keys(CFG.attacks).filter((id) => av.includes(id) || p.mastery['w:' + id]).sort((x, y) => (p.mastery['w:' + y] || 0) - (p.mastery['w:' + x] || 0)).map((id) => row('w:' + id, `+${((masteryLevel(p.mastery['w:' + id] || 0) - 1) * 0.4).toFixed(1)}% damage with ${CFG.attacks[id].name}`)).join('');
-    const slay = Object.keys(CFG.enemies).filter((k) => CFG.enemies[k].hp).map((k) => { const L = masteryLevel(p.mastery['s:' + k] || 0); return row('s:' + k, `+${((L - 1) * 0.3).toFixed(1)}% damage and +${((L - 1) * 0.5).toFixed(0)}% drop chance vs ${CFG.enemies[k].name}s`); }).join('');
+    const slay = Object.keys(CFG.enemies).filter((k) => CFG.enemies[k].hp && (!CFG.enemies[k].legacy || (p.mastery['s:' + k] || 0) > 0)).map((k) => { const L = masteryLevel(p.mastery['s:' + k] || 0); return row('s:' + k, `+${((L - 1) * 0.3).toFixed(1)}% damage and +${((L - 1) * 0.5).toFixed(0)}% drop chance vs ${CFG.enemies[k].name}s`); }).join('');
     const skills = Object.keys(CFG.mastery.skills).map((k) => row(k, CFG.mastery.skills[k].desc)).join('');
     body = `<div class="mtotal"><b>${fmt(totalMastery(p))}</b><span>Total mastery level</span></div><p class="fine">Masteries level from 1 to 99 on the classic curve: level 92 is halfway to 99. Reach 99 in anything to earn a skillcape.</p>
       <h4 class="sub">Weapons</h4><div class="mlist">${wpn}</div><h4 class="sub">Slayer</h4><div class="mlist">${slay}</div><h4 class="sub">Skills</h4><div class="mlist">${skills}</div>`;
@@ -7461,7 +7660,7 @@ function heroTab(tab) {
       const r = [];
       const ms = milestoneAt(L);
       r.push(ms ? `<span class="rw chest ${ms}">${CFG.gear.rarity[ms].name} chest + ${Math.ceil(L / 5) * 3} gems</span>` : '<span class="rw">Gear drop</span>');
-      CFG.world.zones.forEach((zn) => { if (zn.minLevel === L) r.push(`<span class="rw zone">${zn.name} opens</span>`); });
+      CFG.world.zones.forEach((zn) => { if (zn.minLevel === L && !zn.safe) r.push(`<span class="rw zone">${zn.name} opens</span>`); });
       const ki = P.keystoneLevels.indexOf(L); if (ki >= 0) r.push('<span class="rw key">Keystone choice</span>');
       if (P.artifactSlotAt[L]) r.push('<span class="rw art">3rd artifact slot</span>');
       if (L === P.classAt) r.push('<span class="rw key">Choose your class</span>');
@@ -7479,10 +7678,12 @@ function openWaypoints() {
   UI.current = 'waypoints';
   const p = G.profile, here = G.interact && G.interact.kind === 'waypoint' ? G.interact.i : -1;
   const ta = tierAdd();
+  let lastBiome = -1;
   const rows = CFG.world.waypoints.map((w, i) => {
     const zn = CFG.world.zones[w.zone], have = p.waypoints.includes(i), lvl = p.level >= zn.minLevel;
+    const head = zn.biome !== lastBiome ? `<h4 class="sub">${zn.biomeName}</h4>` : ''; lastBiome = zn.biome;
     const btn = i === here ? '<span class="tagged">You are here</span>' : have && lvl ? `<button class="primary" data-act="travel" data-i="${i}">Travel</button>` : `<span class="tagged">${!lvl ? 'Level ' + zn.minLevel : 'Not found yet'}</span>`;
-    return `<div class="item wp"><div class="meta"><div class="slot">${zn.name} · monsters Lv ${zn.lvl[0] + ta}–${zn.lvl[1] + ta}</div><div class="nm">${w.name}</div></div>${btn}</div>`;
+    return `${head}<div class="item wp"><div class="meta"><div class="slot">${zn.safe ? 'Safe camp · no monsters' : `${zn.name} · monsters Lv ${zn.lvl[0] + ta}–${zn.lvl[1] + ta}`}</div><div class="nm">${w.name}</div></div>${btn}</div>`;
   }).join('');
   openModal(`<div class="npcHead"><span class="dotc" style="background:#9fe8ff"></span><h3>Waypoint</h3></div>${tierPicker()}<p class="say">Touch a waypoint once to unlock it. Then travel between them for free.</p><div class="list">${rows}</div>`);
 }
@@ -7852,7 +8053,8 @@ function processEvents() {
       case 'shrineFail': showToast(`Challenge failed. The shrine recharges in ${CFG.shrines.cooldownFail}s`, 'bad'); Sfx.play('lose'); break;
       case 'upgrade': showToast(e.n > 1 ? `${e.name} +${e.n} upgrades → +${e.up}` : `${e.name} is now +${e.up}`, 'good'); break;
       case 'pickup': burst(e.x, 0.6, e.z, 10, 0xff5fa2, 4, 0.5, 0.2, 8); SpriteFX.play('crit', 'arcane', e.x, 0.9, e.z, 1.8); Sfx.play('pickup'); break;
-      case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.z)]; Feed.add(`${gi('m_progress')} Entered <b>${e.name}</b> · monsters Lv ${zn.lvl[0]}–${zn.lvl[1]}`, 'zone'); break; }
+      case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.z)]; const prevB = Feed.lastBiome; Feed.lastBiome = zn.biome;
+        Feed.add(zn.safe ? `${gi('m_progress')} Back at <b>${e.name}</b> · safe` : prevB != null && prevB !== zn.biome ? `${gi('m_progress')} <b>${zn.biomeName}</b> › ${e.name} · Lv ${zn.lvl[0]}–${zn.lvl[1]}` : `${gi('m_progress')} Entered <b>${e.name}</b> · Lv ${zn.lvl[0]}–${zn.lvl[1]}`, 'zone'); break; }
       case 'bossWarn': Sfx.play('horn'); break;
       case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); SpriteFX.play('dust', 'dust', e.x, 0, e.z, 6); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 10); break;
       case 'bossDown': Feed.remove('boss'); Feed.add(`${gi('m_feats')} World boss defeated!`, 'boss'); Sfx.play('win'); break;
@@ -7976,13 +8178,12 @@ const mmY = (z) => (CFG.world.maxZ - z);
 function mmBuildBase() {
   const c = document.createElement('canvas'); c.width = MW; c.height = MH;
   const g = c.getContext('2d'), W = CFG.world;
-  const cols = ['#86c96a', '#3f8a4c', '#dbe7f2', '#7a5444', '#544c86', '#2a7078', '#efe0bb'];
-  W.zones.forEach((zn, i) => { const y0 = mmY(Math.min(zn.z1, W.maxZ)), y1 = mmY(Math.max(zn.z0, W.minZ)); g.fillStyle = cols[i]; g.fillRect(0, y0, MW, y1 - y0); });
+  W.zones.forEach((zn, i) => { const y0 = mmY(Math.min(zn.z1, W.maxZ)), y1 = mmY(Math.max(zn.z0, W.minZ)); g.fillStyle = zn.mm; g.fillRect(0, y0, MW, y1 - y0); });
   g.strokeStyle = 'rgba(210,176,123,.9)'; g.lineWidth = 4; g.beginPath(); g.moveTo(mmX(0), mmY(W.town.z)); g.lineTo(mmX(0), mmY(W.maxZ - 6)); g.stroke();
   g.fillStyle = '#e8d5a6'; g.beginPath(); g.arc(mmX(W.town.x), mmY(W.town.z), W.town.r, 0, Math.PI * 2); g.fill();
   g.fillStyle = '#8f8aa8'; g.beginPath(); g.arc(mmX(PORTAL.x), mmY(PORTAL.z), 3, 0, Math.PI * 2); g.fill();
   g.fillStyle = '#ff5d8f'; g.beginPath(); g.arc(mmX(CFG.rift.gate.x), mmY(CFG.rift.gate.z), 3, 0, Math.PI * 2); g.fill();
-  for (const l of W.lairs) { g.fillStyle = 'rgba(40,35,50,.4)'; g.beginPath(); g.arc(mmX(l.x), mmY(l.z), 10, 0, Math.PI * 2); g.fill(); }
+  for (const l of W.lairList) { g.fillStyle = 'rgba(40,35,50,.4)'; g.beginPath(); g.arc(mmX(l.x), mmY(l.z), 10, 0, Math.PI * 2); g.fill(); }
   for (const D of W.dens) { g.fillStyle = 'rgba(160,30,40,.35)'; g.beginPath(); g.arc(mmX(D.x), mmY(D.z), D.r, 0, Math.PI * 2); g.fill(); }
   MM.base = c;
 }
@@ -8053,7 +8254,7 @@ function drawMinimap() {
   g.fillStyle = '#ffc94a'; g.fill(); g.lineWidth = 1.5 * u; g.strokeStyle = '#3a2400'; g.stroke();
   if (MM.big) {
     g.font = `bold ${10 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.fillStyle = 'rgba(20,22,43,.85)';
-    W.zones.forEach((zn) => { const y = mmY(Math.min(zn.z1, W.maxZ)) + 14 * u; g.fillText(`${zn.name} · ${zn.lvl[0]}–${zn.lvl[1]}`, MW / 2, y); });
+    W.zones.forEach((zn) => { const y = mmY(Math.min(zn.z1, W.maxZ)) + 14 * u; g.fillText(zn.safe ? zn.name : `${zn.name} · ${zn.lvl[0]}–${zn.lvl[1]}`, MW / 2, y); });
   }
 }
 function setMap(open) { G.profile.settings.map = open; G.dirty = true; $('mapBox').hidden = !open; $('bMap').classList.toggle('on', open); MM.t = 0; }
@@ -8533,7 +8734,7 @@ function openProgress(tab) {
     for (let L = 2; L <= Math.max(100, Math.ceil((p.level + 30) / 10) * 10); L++) {
       const r = [], ms = milestoneAt(L);
       r.push(ms ? `<span class="rw chest ${ms}">${CFG.gear.rarity[ms].name} chest + ${Math.ceil(L / 5) * 3} gems</span>` : '<span class="rw">Gear drop</span>');
-      CFG.world.zones.forEach((zn) => { if (zn.minLevel === L) r.push(`<span class="rw zone">${zn.name} opens</span>`); });
+      CFG.world.zones.forEach((zn) => { if (zn.minLevel === L && !zn.safe) r.push(`<span class="rw zone">${zn.name} opens</span>`); });
       if (P.artifactSlotAt[L]) r.push(`<span class="rw art">${ORD[P.artifactSlotAt[L]]} artifact slot</span>`);
       const ai = P.ascendAt.indexOf(L); if (ai >= 0) r.push(`<span class="rw asc">${gi('m_asc')} Ascended: ${['golden aura', 'wings + super power', 'crown + trail'][ai]}</span>`);
       for (let t = 1; t <= maxTier(L) + 1; t++) if (tierDef(t).req === L) r.push(`<span class="rw tier">${gi('m_tier')} World Tier ${tierDef(t).name}</span>`);
@@ -8547,7 +8748,7 @@ function openProgress(tab) {
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   } else if (tab === 'Records') {
     const s = p.stats, rec = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
-    const kills = Object.keys(CFG.enemies).filter((k) => CFG.enemies[k].hp).map((k) => rec(CFG.enemies[k].name + ' kills', fmtK((s.killsBy || {})[k] || (k === 'slime' ? s.slimes : 0)))).join('');
+    const kills = Object.keys(CFG.enemies).filter((k) => CFG.enemies[k].hp && (!CFG.enemies[k].legacy || ((s.killsBy || {})[k] || (k === 'slime' ? s.slimes : 0)) > 0)).map((k) => rec(CFG.enemies[k].name + ' kills', fmtK((s.killsBy || {})[k] || (k === 'slime' ? s.slimes : 0)))).join('');
     const R = p.records, hm = (t) => `${Math.floor(t / 3600)}h ${Math.floor(t / 60) % 60}m`;
     body = `<div class="statgrid">${rec('Biggest hit', fmtK(R.maxHit || 0))}${rec('Fastest boss kill', R.fastBoss ? R.fastBoss + 's' : '—')}${rec('Best Showdown place', R.bestPlace ? '#' + R.bestPlace : '—')}${rec('Best Rift floor', R.bestRift || 0)}${rec('Highest World Tier', tierDef(R.bestTier || 0).name)}${rec('Play time', hm(R.time || 0))}</div><h4 class="sub">Totals</h4><div class="statgrid">${rec('Highest level', p.level)}${rec('Monsters defeated', fmtK(s.kills))}${rec('Elites defeated', fmtK(s.elites || 0))}${rec('Best kill streak', fmt(s.bestStreak || 0))}
       ${rec('World bosses', fmt(s.bosses || 0))}${rec('Shrines cleared', fmt(s.shrines || 0))}${rec('Jobs done', fmt(s.jobs || 0))}${rec('Total mastery', fmt(totalMastery(p)))}
@@ -8924,9 +9125,9 @@ CFG.cases = {
   boss: { name: 'Colossus Case', sub: 'World boss loot', col: '#ff7a45', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
   rift: { name: 'Rift Case', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 46, legendary: 40 }, hi: 14 },
   milestone: { name: 'Milestone Case', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0 },
-  frost: { name: 'Frostbound Case', sub: 'Frost Colossus · Frost Peaks · level 22+', col: '#8cecff', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  ember: { name: 'Cinderforge Case', sub: 'Magma Titan · Ember Wastes · level 36+', col: '#ff913b', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  celestial: { name: 'Seraphic Case', sub: 'Celestial Colossus · Celestial Spire · level 84+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  frost: { name: 'Frostbound Case', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  ember: { name: 'Cinderforge Case', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  celestial: { name: 'Seraphic Case', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
 };
 CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial'];
 const CASE_MAX = 60, CASE_LUCK = { legendary: 30, mythic: 120 };
@@ -8953,7 +9154,7 @@ function caseOdds(c) { const w = caseTable(c); let tot = 0; for (const k in w) t
 function addCase(k, o) {
   const p = G.profile; o = o || {};
   if (p.cases.length >= CASE_MAX) { const g = 10 + Math.floor((o.l || p.level) / 10); addEssence(g); toast(`Case storage full: +${g} gems instead`); return null; }
-  const c = { id: 'c' + Date.now().toString(36) + (itemSeq++), k, l: o.l || p.level, t: o.t != null ? o.t : curTier(), z: o.z != null ? o.z : highestZone(p.level), n: o.n || 0, f: o.f || null };
+  const c = { id: 'c' + Date.now().toString(36) + (itemSeq++), k, l: o.l || p.level, t: o.t != null ? o.t : curTier(), z: o.z != null ? o.z : lootTier(highestZone(p.level)), n: o.n || 0, f: o.f || null };
   p.cases.push(c); G.dirty = true; ev({ t: 'caseGot', k, src: o.src }); return c;
 }
 function rollCase(c) {
@@ -8968,7 +9169,7 @@ function rollCase(c) {
 // opening grants the item at once (so closing mid-spin never loses it); the reel only shows it
 function openCase(id) {
   const p = G.profile, i = p.cases.findIndex((c) => c.id === id); if (i < 0) return null;
-  if (p.bag.length >= CFG.gear.bagMax) { toast('Bag full. Make room in Gear; your case is still unopened.', 'bad'); return null; }
+  // Case rewards are always kept: when the bag is full they overflow it instead of blocking the case.
   const c = p.cases.splice(i, 1)[0], { r, lucky } = rollCase(c);
   const it = makeItem(pick(CFG.gear.slots), r, c.l);
   p.stats.cases = (p.stats.cases || 0) + 1;
@@ -9120,8 +9321,8 @@ function reelFinish(card) {
   const it = res.item, ri = rarIdx(it.rarity), p = G.profile, better = res.kept && isBetter(it, p.gear[it.slot]);
   Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
   if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
-  const left = p.cases.filter((c) => c.k === res.c.k);
-  $('reelOut').innerHTML = `<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
+  const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
+  $('reelOut').innerHTML = `${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Salvage weaker gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
     <div class="row end">${res.kept ? `<button class="ghost" data-act="salvage2" data-id="${it.id}">Salvage ${ICON.coin}${fmtK(salvageValue(it))}</button>${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">Equip</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
     ${left.length ? `<button class="primary gold" data-act="caseOpen" data-id="${left[0].id}">Open next (${left.length})</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
@@ -9133,7 +9334,7 @@ function openCasesFast(k) {
   const best = out[0] ? rarIdx(out[0].item.rarity) : 0; Sfx.play(best >= 4 ? 'win' : 'unlock');
   UI.current = 'caseFast';
   openModal(`<div class="npcHead">${gi('m_caseOpen', 'hd')}<h3>${out.length} cases opened</h3></div><div class="fastGrid">${out.map((r) => `<div class="rcard ${r.item.rarity} ${r === out[0] ? 'win' : ''}"><img src="${thumbFor(r.item)}" alt=""><i></i><small>${CFG.gear.rarity[r.item.rarity].name}</small></div>`).join('')}</div>
-    <p class="fine">All ${out.length} rewards are saved in your bag.${out.length < ids.length ? ' Your remaining cases are unopened. Make room in Gear to continue.' : ''} Check Hero › Gear for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button><button class="primary" data-act="close">Done</button></div>`);
+    <p class="fine">All ${out.length} rewards are saved in your bag.${p.bag.length > CFG.gear.bagMax ? ` Your bag is over its limit (${p.bag.length}/${CFG.gear.bagMax}); salvage weaker gear so new drops are kept.` : ''} Check Hero › Gear for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button><button class="primary" data-act="close">Done</button></div>`);
   $('panel').classList.add('wide');
 }
 function openIdle(tab) {
@@ -9363,7 +9564,7 @@ function boot(hotData) {
   window.addEventListener('pagehide', () => saveNow(true));
   if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn };
   window.__gameBooted = true;
-  if (LOCAL_PREVIEW) window.__dbg = { openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
+  if (LOCAL_PREVIEW) window.__dbg = { renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
   const btn = $('playBtn'), label = btn.textContent;

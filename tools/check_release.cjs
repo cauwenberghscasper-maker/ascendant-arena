@@ -19,7 +19,7 @@ vm.runInContext(section('const CFG = {','// 2. UTIL')+section('const clamp =','/
   section('function salvageItem(id) {','const rerollCost =')+
   section('function buyForge(slot) {','// How good an item')+
   section('const FRAME_MS =','  let dt = (now - lastFrame)')+'\n}\n'+
-  '\nthis.config=CFG;this.mxp=mxpFor;this.plan=maxUpgradePlan;this.newProfile=defaultProfile;',ctx);
+  '\nthis.config=CFG;this.zoneIndex=zoneIndex;this.lootTier=lootTier;this.mxp=mxpFor;this.plan=maxUpgradePlan;this.newProfile=defaultProfile;',ctx);
 const make=(id,slot='weapon',rarity='common',ilvl=1,up=0)=>({id,slot,rarity,ilvl,up,name:'Worn Edge',aff:{}});
 vm.runInContext(html.split('\n').filter(l=>l.startsWith('const salvageValue =')||l.startsWith('const salvageEssence =')).join('\n'),ctx);
 function fresh(){const p=ctx.newProfile();p.gold=1e7;p.essence=1e5;p.gear.weapon=make('target','weapon','rare',10);ctx.G.profile=p;ctx.G.gearPrompts=[];ctx.G.dirty=false;return p;}
@@ -54,14 +54,15 @@ vm.runInContext(section('CFG.cases = {','// --- Vault:')+section('function highe
   section('function grantItem(it, source, context) {','// --- jobs'),ctx);
 check('regional boss cases use the killed boss zone and preserve existing rarity odds',()=>{
   const p=fresh();p.level=100;ctx.G.zoneIdx=6;
-  for(const [zone,kind] of [[0,'boss'],[2,'frost'],[3,'ember'],[6,'celestial']]){
-    ctx.grantItem(make('reward'+zone,'weapon','epic',40),'boss',{zone});const c=p.cases.at(-1);assert.equal(c.k,kind);assert.equal(c.z,zone);assert.equal(c.f,'rare');
+  for(const [name,kind] of [['Sunny Meadow','boss'],['Frost Peaks','frost'],['Ember Wastes','ember'],['Starfall Ruins','boss'],['Celestial Spire','celestial']]){
+    const zone=ctx.zoneIndex(name);assert(zone>0,name);
+    ctx.grantItem(make('reward'+zone,'weapon','epic',40),'boss',{zone});const c=p.cases.at(-1);assert.equal(c.k,kind);assert.equal(c.z,ctx.lootTier(zone));assert.equal(c.f,'rare');
     assert.deepEqual(JSON.parse(JSON.stringify(ctx.caseTable(c))),JSON.parse(JSON.stringify(ctx.caseTable({...c,k:'boss'}))));
   }
   assert.equal(ctx.regionBossCase('hunter',2),'hunter');assert.equal(ctx.regionBossCase('rift',6),'rift');assert.equal(Object.keys(p.collection).length,0);
 });
 check('case conversion and preview rolls cannot create phantom collection discoveries',()=>{
-  const p=fresh();p.level=100;ctx.G.zoneIdx=0;ctx.grantItem(make('packed','weapon','legendary',36),'monster');assert.equal(p.cases.length,1);assert.equal(p.cases[0].z,6,'non-boss case scaling stays compatible');assert.equal(Object.keys(p.collectionLuck).length,0);
+  const p=fresh();p.level=100;ctx.G.zoneIdx=0;ctx.grantItem(make('packed','weapon','legendary',36),'monster');assert.equal(p.cases.length,1);assert.equal(p.cases[0].z,ctx.lootTier(ctx.highestZone(100)),'non-boss case scaling follows the best open area');assert.equal(Object.keys(p.collectionLuck).length,0);
   for(let i=0;i<60;i++)ctx.makeItem('weapon','legendary',36);assert.equal(Object.keys(p.collection).length,0);assert.equal(Object.keys(p.collectionLuck).length,0);
   p.collectionLuck['weapon|legendary']=3;
   const it=make('opened','weapon','legendary',36);ctx.grantItem(it,'case');assert.equal(it.collectionId,'sunspike');assert.equal(p.collection.sunspike.count,1);assert(p.bag.includes(it));
@@ -72,11 +73,11 @@ check('opening a saved regional case consumes it once and grants the actual name
   for(const rarity of ['rare','epic','legendary'])for(const slot of ctx.config.gear.slots)p.collectionLuck[slot+'|'+rarity]=3;
   const r=ctx.openCase('saved-regional');assert(r);assert.equal(p.cases.length,0);assert.equal(p.stats.cases,1);assert(ctx.collectionItem(r.item));assert.equal(Object.keys(p.collection).length,1);assert.equal(r.kept,true);assert.equal(ctx.openCase('saved-regional'),null);
 });
-check('full bag leaves case, luck, inventory and opening count untouched',()=>{
-  const p=fresh();p.bag=Array.from({length:ctx.config.gear.bagMax},(_,i)=>make('full'+i));
-  p.cases=[{id:'full-case',k:'treasure',l:40,t:0,z:2,f:'rare'}];
-  const before=JSON.stringify(p);savedRewardProfile=null;
-  assert.equal(ctx.openCase('full-case'),null);assert.equal(JSON.stringify(p),before);assert.equal(savedRewardProfile,null);
+check('full bag still opens a case and keeps the reward (overflow, nothing lost)',()=>{
+  const p=fresh();p.bag=Array.from({length:ctx.config.gear.bagMax},(_,i)=>make('full'+i));const ids=p.bag.map(i=>i.id);
+  p.cases=[{id:'full-case',k:'treasure',l:40,t:0,z:2,f:'rare'}];savedRewardProfile=null;
+  const r=ctx.openCase('full-case');assert(r&&r.kept);assert.equal(p.cases.length,0);assert.equal(p.bag.length,ctx.config.gear.bagMax+1);
+  assert(ids.every(id=>p.bag.some(i=>i.id===id)));assert(savedRewardProfile);
 });
 check('case reward and consumption survive an immediate save reload',()=>{
   const p=fresh();p.settings.autoSalvage=3;p.cases=[{id:'reload-case',k:'treasure',l:40,t:0,z:2,f:'rare'}];
@@ -85,12 +86,23 @@ check('case reward and consumption survive an immediate save reload',()=>{
   assert.equal(reloaded.cases.length,0);assert(reloaded.bag.some(i=>i.id===result.item.id));assert.equal(reloaded.stats.cases,1);
   ctx.G.profile=reloaded;assert.equal(ctx.openCase('reload-case'),null);
 });
-check('fast opening stops at remaining capacity and later drops cannot evict its rewards',()=>{
+check('fast opening never stops on a full bag and later drops cannot evict its rewards',()=>{
   const p=fresh();p.bag=Array.from({length:ctx.config.gear.bagMax-1},(_,i)=>make('existing'+i));
   p.cases=['one','two','three'].map(id=>({id,k:'treasure',l:10,t:0,z:0}));
-  const result=ctx.openCase('one');assert(result.kept);assert.equal(ctx.openCase('two'),null);
+  const a=ctx.openCase('one'),b=ctx.openCase('two'),c=ctx.openCase('three');assert(a.kept&&b.kept&&c.kept);assert.equal(p.cases.length,0);
   const ids=p.bag.map(i=>i.id);ctx.grantItem(make('powerful','weapon','divine',300),'test');
-  assert.deepEqual(p.bag.map(i=>i.id),ids);assert.equal(p.cases.length,2);assert(p.bag.some(i=>i.id===result.item.id));
+  assert.deepEqual(p.bag.map(i=>i.id),ids);
+});
+check('v8 saves move onto the 29-area map: open gates, remapped jobs, no lost progress',()=>{
+  const old={...ctx.newProfile(),level:60,savedAt:Date.now()-1000,waypoints:[0,1,2,3],job:{npc:'mira',type:'kill',target:'imp',count:15,progress:4},stats:{...ctx.newProfile().stats,zone:4,kills:999}};delete old.worldVersion;
+  const p=ctx.sanitizeProfile(JSON.parse(JSON.stringify(old)));const Z=ctx.config.world.zones;
+  assert.equal(p.worldVersion,9);assert.equal(p.level,60);assert.equal(p.stats.kills,999);
+  assert.deepEqual(Array.from(p.waypoints),[0].concat(Array.from(Z.map((z,i)=>i).filter(i=>i>0&&Z[i].minLevel<=60))));
+  assert.equal(Z[p.stats.zone].name,'Grumbling Descent');assert.equal(p.job.target,'craggoat');assert.equal(p.job.progress,4);
+  const again=ctx.sanitizeProfile(JSON.parse(JSON.stringify(p)));assert.deepEqual(Array.from(again.waypoints),Array.from(p.waypoints));
+  const fresh2=ctx.sanitizeProfile(JSON.parse(JSON.stringify(ctx.newProfile())));assert.deepEqual(Array.from(fresh2.waypoints),[0]);
+  assert.equal(Z.length,30);assert(Z.every((z,i)=>!i||z.z0===Z[i-1].z1));assert.equal(Z.at(-1).lvl[1],210);
+  for(const z of Z.slice(1)){assert(ctx.config.enemies[z.enemy]&&ctx.config.enemies[z.alt],z.name);}
 });
 check('same slot, strictly weaker, unique and unprotected material selection',()=>{
   const p=fresh();p.bag=[make('weak'),make('weak'),make('other','helmet'),Object.assign(make('locked'),{locked:true}),make('strong','weapon','legendary'),make('equal','weapon','rare',10),{...p.gear.weapon},make('second','weapon','uncommon',2)];
