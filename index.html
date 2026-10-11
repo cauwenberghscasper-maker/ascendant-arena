@@ -994,6 +994,63 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 }
 </style>
 <link rel="stylesheet" href="assets/art/adventurer-ui.css">
+<style>
+/* v9 panels: fixed header, scrolling middle, action bar that is always visible (never scroll to confirm) */
+.panel.dock { overflow: hidden; }
+.panel.dock > .pBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; display: flex; flex-direction: column; gap: 10px; margin: 0 -6px; padding: 2px 6px 8px; }
+.panel.dock > .pBody > * { flex-shrink: 0; }
+.pBar { flex: none; display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.14); }
+.pBtns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.pBtns > button { flex: 1 1 0; min-width: 0; white-space: normal; text-align: center; line-height: 1.1; }
+.pBtns > button.ghost.sm { flex: 0 1 auto; }
+.pNote { font: 600 12px/1.35 var(--body); color: #c9c3d6; margin: 0; }
+.pNote b { color: #ffe08a; }
+.pSel { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.pSel .sx { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.pSel .sx b { font: 15px/1.15 var(--display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pSel .sx small { font: 600 11.5px/1.3 var(--body); color: #c9c3d6; }
+.pSel > img { width: 46px; height: 46px; object-fit: contain; border-radius: 10px; border: 2px solid var(--rc, #3a3f68); background: rgba(0,0,0,.25); flex: none; }
+.pSel .bport { flex: none; }
+.pMoreBtn { flex: none; min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.07); color: inherit; font: 700 12px/1 var(--body); }
+.pMore { display: none; max-height: 34vh; overflow-y: auto; overscroll-behavior: contain; }
+.pBar.open .pMore { display: flex; flex-direction: column; gap: 8px; }
+/* every piece of one gear slot at once */
+.igrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 8px 6px; padding-top: 4px; }
+.igt { position: relative; aspect-ratio: 1; border-radius: 12px; border: 2px solid var(--rc); background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--rc) 24%, transparent), rgba(0,0,0,.28) 78%); padding: 4px; display: grid; place-items: center; color: inherit; cursor: pointer; }
+.igt img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.igt .iu { position: absolute; left: 4px; bottom: 3px; font: 11px/1 var(--display); color: #ffe08a; text-shadow: 0 1px 0 #000, 0 0 3px #000; }
+.igt .ilk { position: absolute; right: 2px; bottom: 2px; display: grid; } .igt .ilk .gi { width: 14px; height: 14px; }
+.igt .ib { position: absolute; top: -7px; left: -5px; min-width: 20px; padding: 2px 4px; border-radius: 7px; font: 800 10px/1 var(--body); background: #3b3f55; color: #fff; box-shadow: 0 1px 0 rgba(0,0,0,.5); }
+.igt.up .ib { background: #58e08a; color: #0c2a17; }
+.igt.mat1 .ib, .igt.use .ib { background: #ffc94a; color: #3a2400; }
+.igt.mat .ib { background: #9a7a3a; color: #fff3cf; }
+.igt.use { box-shadow: 0 0 0 2px #ffc94a, 0 0 12px rgba(255,201,74,.45); }
+.igt.kept { opacity: .5; }
+.igt.sel { outline: 3px solid #7fe3ff; outline-offset: 2px; }
+.ilegend .gi { width: 12px; height: 12px; vertical-align: -2px; }
+.ilegend { display: flex; flex-wrap: wrap; gap: 6px 10px; font: 600 11px/1.2 var(--body); color: #c9c3d6; }
+.ilegend i { font-style: normal; display: inline-block; min-width: 18px; padding: 2px 4px; border-radius: 6px; text-align: center; font-weight: 800; margin-right: 3px; }
+.ilegend .up { background: #58e08a; color: #0c2a17; } .ilegend .m1 { background: #ffc94a; color: #3a2400; } .ilegend .mm { background: #9a7a3a; color: #fff3cf; }
+.subRow { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; min-width: 0; } .subRow h4 { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .subRow small { flex: none; } .subRow h4 { margin: 0; } .subRow small { color: var(--muted); font: 600 11px/1 var(--body); }
+.subRow .ghost.sm { margin-left: auto; }
+/* compact hero picker */
+.panel.dock .bgrid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; }
+.panel.dock .bcard { padding: 6px 2px 5px; } .panel.dock .bcard b { font-size: 12px; } .panel.dock .bcard small { font-size: 9.5px; }
+.panel.dock .bdet { padding: 10px; gap: 8px; }
+.panel .pBtns > button.primary, .panel .pBtns > button.ghost, .panel .pBtns > button.disabled { padding: 0 10px; font-size: 16px; }
+.pSel .pMoreBtn + .pMoreBtn { margin-left: -4px; }
+@media (max-aspect-ratio: 1/1) and (max-height: 760px) { #modal.room .panel { max-height: 77%; } }
+@media (max-width: 400px) { .panel .pBtns > button.primary, .panel .pBtns > button.ghost, .panel .pBtns > button.disabled { font-size: 14px; padding: 0 8px; } .igrid { grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); } }
+@media (max-aspect-ratio: 1/1) { #modal.room .panel { max-height: 70%; } #modal.room { background: linear-gradient(180deg, rgba(8,9,22,0) 22%, rgba(8,9,22,.6) 34%); } }
+.panel.dock .tiles .tile { padding: 4px 2px 3px; } .panel.dock .tiles .tile img { max-width: 44px; }
+@media (max-aspect-ratio: 1/1) {
+  .panel.dock { gap: 8px; }
+  .panel.dock .heroHead .lv { transform: scale(.85); } .panel.dock .heroHead h3 { font-size: 17px; } .panel.dock .heroHead small { font-size: 11px; }
+  .panel.dock .tabs .tab { min-height: 34px; }
+  .panel.dock .tiles .tile img { max-width: 36px; } .panel.dock .tiles .tile .ts { font-size: 9px; }
+  .panel.dock .subRow h4 { font-size: 14px; }
+}
+</style>
 
 
 <div id="app">
@@ -7414,15 +7471,44 @@ function interact() {
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
   const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + UI.gearSlot : UI.current === 'collection' ? '|' + UI.collectionSlot : '');
-  const scroll = UI.panelKind === panelKind ? $('panel').scrollTop : 0; UI.panelKind = panelKind;
+  const prevBody = $('panel').querySelector(':scope > .pBody'), same = UI.panelKind === panelKind;
+  const scroll = same ? (prevBody ? prevBody.scrollTop : $('panel').scrollTop) : 0; UI.panelKind = panelKind;
+  if (!same) UI.moreOpen = false;
   $('panel').className = 'panel scroll';
   setShowcase(!!showcase);
   $('modal').classList.toggle('room', !!showcase);
   $('panel').innerHTML = html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
   $('modal').hidden = false;
-  $('panel').scrollTop = scroll;
+  const body = $('panel').querySelector(':scope > .pBody');
+  if (body) { $('panel').classList.remove('scroll'); $('panel').classList.add('dock'); body.scrollTop = scroll; syncMore(); }
+  else $('panel').scrollTop = scroll;
   Input.move.id = null; Input.move.active = false; Input.move.sx = Input.move.sy = 0; $('stickBase').classList.remove('on');
   Input.atk.id = null; Input.atk.aiming = false; Input.atk.active = false; $('atkKnob').style.transform = 'translate(0px,0px)';
+}
+// --- Reusable panel parts ------------------------------------------------------------------------
+// dock(): the header stays on top, the middle scrolls, and the action bar is always on screen.
+function dock(head, body, bar) { return `${head || ''}<div class="pBody">${body}</div>${bar ? `<div class="pBar">${bar}</div>` : ''}`; }
+// selBar(): a short summary of the selection; "Details" opens more information in place, above the buttons.
+function selBar(summary, buttons, more, note) {
+  return `${summary ? `<div class="pSel">${summary}${more ? '<button class="pMoreBtn" data-act="pMore" aria-expanded="false">Details</button>' : ''}</div>` : ''}${more ? `<div class="pMore">${more}</div>` : ''}${note ? `<p class="pNote">${note}</p>` : ''}${buttons ? `<div class="pBtns">${buttons}</div>` : ''}`;
+}
+function syncMore() {
+  const bar = $('panel').querySelector('.pBar'), b = bar && bar.querySelector('[data-act="pMore"]'); if (!bar) return;
+  bar.classList.toggle('open', !!UI.moreOpen); if (b) { b.textContent = UI.moreOpen ? 'Less' : 'Details'; b.setAttribute('aria-expanded', !!UI.moreOpen); }
+}
+const rarCol = (r) => '#' + RAR_HEX[r].toString(16).padStart(6, '0');
+// itemGrid(): every piece of one gear slot at once, as small tiles. mark(it) adds a corner badge and a state.
+function itemGrid(items, o) {
+  o = o || {};
+  if (!items.length) return `<p class="fine">${o.empty || 'Nothing here yet.'}</p>`;
+  return `<div class="igrid">${items.map((it) => { const m = (o.mark && o.mark(it)) || {};
+    const label = `${escapeHTML(it.name)}${it.up ? ' +' + it.up : ''}, ${CFG.gear.rarity[it.rarity].name}${it.locked ? ', protected' : ''}${m.label ? ', ' + m.label : ''}`;
+    return `<button class="igt ${it.rarity} ${o.sel === it.id ? 'sel' : ''} ${m.cls || ''}" ${o.act ? `data-act="${o.act}" data-id="${escapeHTML(it.id)}"` : 'tabindex="-1"'} style="--rc:${rarCol(it.rarity)}" aria-label="${label}" title="${label}">`
+      + `<img src="${thumbFor(it)}" alt="">${it.up ? `<span class="iu">+${it.up}</span>` : ''}${it.locked ? `<span class="ilk">${gi('m_lock')}</span>` : ''}${m.text ? `<span class="ib">${m.text}</span>` : ''}</button>`; }).join('')}</div>`;
+}
+// one-line item summary for an action bar
+function itemSummary(it, extra) {
+  return `<img src="${thumbFor(it)}" alt="" style="--rc:${rarCol(it.rarity)}"><div class="sx"><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b><small>${CFG.gear.rarity[it.rarity].name} · ${SLOT_LABEL[it.slot]} · item level ${it.ilvl}</small><small>${extra || statLine(it)}</small></div>`;
 }
 UI.close = function () { $('modal').hidden = true; G.modal = false; setShowcase(false); UI.gearSlot = null; UI.current = null; UI.panelKind = null; UI.mergePlan = null; UI.afterClose && UI.afterClose(); UI.afterClose = null; };
 const RAR_HEX = { common: 0xcfd6e0, uncommon: 0x8ee06a, rare: 0x58b4ff, epic: 0xc77dff, legendary: 0xffb347, mythic: 0xff4d6d, ancient: 0x2fffd0, divine: 0xfff3a0 };
@@ -7437,19 +7523,23 @@ function perkLine(it) { const t = perkText(it); return t ? `<div class="perk">${
 const SLOT_LABEL = { weapon: 'Weapon', helmet: 'Helmet', chest: 'Armor', boots: 'Boots', accessory: 'Accessory' };
 const escapeHTML = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function openMerge(slot, bulk, back) {
-  const it = G.profile.gear[slot]; if (!it) return;
+  const p = G.profile, it = p.gear[slot]; if (!it) return;
   const plan = maxUpgradePlan(it, bulk ? 500 : 1), need = mergeRequired(it), available = mergeCandidates(it);
   UI.current = 'merge'; UI.mergePlan = Object.assign({ slot, bulk: !!bulk, back: back || 'hero' }, plan);
-  const chosen = plan.materials.map(id => G.profile.bag.find(m => m.id === id));
-  const materials = chosen.length ? chosen.map(m => itemRow(m, '', 'Will be consumed')).join('') : '<p class="fine">No materials selected. Keep weaker gear from this equipment slot in your bag.</p>';
+  const used = new Set(plan.materials), cand = new Set(available.map((m) => m.id));
+  const pieces = p.bag.filter((m) => m.slot === slot).sort((x, y) => (used.has(y.id) - used.has(x.id)) || rarIdx(x.rarity) - rarIdx(y.rarity));
+  const mark = (m) => used.has(m.id) ? { cls: 'use', text: '✓', label: 'will be consumed' } : m.locked ? { cls: 'kept', label: 'protected, kept' } : !cand.has(m.id) ? { cls: 'kept', text: '▲', label: 'better or equal, kept' } : { cls: 'kept', label: 'not needed, kept' };
   const after = Object.assign({}, it, { up: it.up + plan.n });
-  openModal(`<div class="npcHead"><h3>Merge ${SLOT_LABEL[slot]}</h3></div>
-    <div class="mergePreview"><img src="${thumbFor(it)}" alt=""><div><b>+${it.up} → +${after.up}</b><p class="fine">${statLine(it)}<br>→ ${statLine(after)}</p></div></div>
-    <p class="mergeNotice">Weaker gear from the same slot fuels each level. Protected and equipped gear is excluded. The pieces below will be consumed permanently; rarity and perks of your equipped item stay the same.</p>
-    <h4 class="sub">Materials · ${chosen.length} selected</h4><div class="mergeMaterials">${materials}</div>
-    <p class="fine">Next level needs ${need} weaker ${SLOT_LABEL[slot].toLowerCase()} piece${need > 1 ? 's' : ''} · ${available.length} available.<br>${plan.n ? `Cost: ${costHTML(plan.gold, plan.ess)}` : `Need: ${costHTML(upgradeCost(it), upgradeEssence(it))}`}</p>
-    <div class="row end"><button class="ghost" data-act="mergeBack">Back</button><button class="${plan.n ? 'primary' : 'disabled'}" data-act="mergeConfirm" ${plan.n ? '' : 'disabled'}>${plan.n ? `Merge ${chosen.length} gear · +${plan.n} level${plan.n > 1 ? 's' : ''}` : it.up >= CFG.gear.maxUp ? 'Maximum level' : 'Need materials or currency'}</button></div>`, true, true);
-  $('panel').scrollTop = 0;
+  const head = `<div class="npcHead"><h3>Merge ${SLOT_LABEL[slot]}</h3></div>`;
+  const body = `<div class="mergePreview"><img src="${thumbFor(it)}" alt=""><div><b>+${it.up} → +${after.up}</b><p class="fine">${statLine(it)}<br>→ ${statLine(after)}</p></div></div>
+    <div class="subRow"><h4 class="sub">Your ${SLOT_LABEL[slot].toLowerCase()} pieces · ${pieces.length}</h4></div>
+    <div class="ilegend"><span><i class="m1">✓</i>consumed (${plan.materials.length})</span><span><i class="up">▲</i>better or equal, kept</span><span>${gi('m_lock')} protected, kept</span><span>faded: kept</span></div>
+    ${itemGrid(pieces, { mark, empty: `No other ${SLOT_LABEL[slot].toLowerCase()} pieces in your bag.` })}
+    <p class="mergeNotice">Only weaker pieces of the same slot are used, weakest first. Protected and equipped gear is never used. Rarity and perks of your equipped item stay the same.</p>`;
+  const note = plan.n ? `Uses <b>${plan.materials.length}</b> piece${plan.materials.length === 1 ? '' : 's'} (marked ✓) · ${costHTML(plan.gold, plan.ess)}`
+    : `Next level needs ${need} weaker piece${need > 1 ? 's' : ''} (${available.length} available) · ${costHTML(upgradeCost(it), upgradeEssence(it))}`;
+  const btn = `<button class="ghost" data-act="mergeBack">Back</button><button class="${plan.n ? 'primary' : 'disabled'}" data-act="mergeConfirm" ${plan.n ? '' : 'disabled'}>${plan.n ? `Merge · +${plan.n} level${plan.n > 1 ? 's' : ''}` : it.up >= CFG.gear.maxUp ? 'Maximum level' : 'Need materials or currency'}</button>`;
+  openModal(dock(head, body, selBar('', btn, '', note)), true, true);
 }
 function mergeReturn(back) { UI.mergePlan = null; if (back === 'smith') openSmith('Upgrade'); else heroTab('Gear'); }
 function itemRow(it, right, extra, opts) {
@@ -7495,7 +7585,7 @@ function openSmith(tab) {
     body = `<p class="say">“Merge weaker gear of the same slot to level up your equipped item. Each level adds 12% to its stats. Past +5 I need gems too; every 10 levels earns a star.”</p><div class="list">` + CFG.gear.slots.map((s) => {
       const it = p.gear[s], cost = upgradeCost(it), ess = upgradeEssence(it), max = it.up >= CFG.gear.maxUp, can = maxUpgradePlan(it, 1).n > 0;
       const mp = maxUpgradePlan(it);
-      return itemRow(it, `<div class="col"><button class="ghost" data-act="upgrade" data-slot="${s}" ${max ? 'disabled' : ''}>${max ? 'Max' : `Merge +1 ${costHTML(cost, ess)}`}</button>${mergeCostHTML(it)}<button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax2" data-slot="${s}" ${mp.n > 1 ? '' : 'disabled'}>Merge max${mp.n > 1 ? ` +${mp.n}` : ''}</button></div>`, null, { upgrade: can });
+      return itemRow(it, `<div class="col"><button class="${can ? 'primary' : 'ghost'}" data-act="${mp.n > 1 ? 'upgradeMax2' : 'upgrade'}" data-slot="${s}" ${max ? 'disabled' : ''}>${max ? 'Max' : mp.n > 1 ? `Merge… +${mp.n}` : `Merge… ${costHTML(cost, ess)}`}</button>${mergeCostHTML(it)}</div>`, null, { upgrade: can });
     }).join('') + '</div>';
   } else if (tab === 'Gems') {
     const pr = gemPrice(p), row = (n) => { let c = 0; for (let i = 0; i < n; i++) c += Math.round(30 * Math.pow(CFG.enemies.goldGrowth, p.level - 1) * Math.pow(1.03, (p.gemBuys || 0) + i)); return `<button class="${p.gold >= c ? 'primary' : 'disabled'}" data-act="gems" data-n="${n}" ${p.gold >= c ? '' : 'aria-disabled="true"'}>${ICON.ess}${n} for ${ICON.coin}${fmtK(c)}</button>`; };
@@ -7510,8 +7600,8 @@ function openSmith(tab) {
   }
   const upAlert = Object.values(slotAlerts()).some((a) => a.canUpgrade);
   const tabs = ['Upgrade', 'Gems', 'Forge'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${t}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
-  openModal(`<div class="npcHead"><span class="dotc" style="background:#8a5a3c"></span><h3>Smith Garo</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
-    <div class="tabs">${tabs}</div><div class="tabBody">${body}</div>`, true, true);
+  openModal(dock(`<div class="npcHead"><span class="dotc" style="background:#8a5a3c"></span><h3>Smith Garo</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
+    <div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, tab === 'Upgrade' ? selBar('', '', '', 'Each Merge… opens a review that shows every piece it will use before you confirm.') : ''), true, true);
 }
 function openArenaPanel() {
   UI.current = 'arena';
@@ -7568,7 +7658,7 @@ function heroTab(tab) {
   const gearAlert = Object.values(slotAlerts()).some((a) => a.better || a.canUpgrade);
   const dots = { Gear: gearAlert };
   const tabs = ['Stats', 'Gear'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="tab" data-tab="${t}">${t}${dots[t] ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
-  let body = '';
+  let body = '', bar = '';
   const pct = (x) => `${Math.round(x * 100)}%`;
   if (tab === 'Stats') {
     const g = gearTotals(p.gear);
@@ -7599,24 +7689,35 @@ function heroTab(tab) {
     const order = ['helmet', 'weapon', 'chest', 'accessory', 'boots'];
     const firstAlert = order.find((x) => al[x].better || al[x].canUpgrade);
     const sel = UI.gearSlot || firstAlert || 'weapon'; UI.gearSlot = sel;
+    if (UI.gearPickSlot !== sel) { UI.gearPick = null; UI.gearPickSlot = sel; }
     const tiles = order.map((x) => { const it = p.gear[x], a = al[x];
       return `<button class="tile ${it.rarity} ${x === sel ? 'sel' : ''}" data-act="slot" data-slot="${x}" aria-label="${SLOT_LABEL[x]}"><img src="${thumbFor(it)}" alt=""><span class="ts">${SLOT_LABEL[x]}</span>${it.up ? `<span class="tu">+${it.up}</span>` : ''}${a.better || a.canUpgrade ? '<i class="rdot"></i>' : ''}</button>`; }).join('');
-    const cur = p.gear[sel], a = al[sel], cost = upgradeCost(cur), ess = upgradeEssence(cur), max = cur.up >= CFG.gear.maxUp;
-    const can = a.canUpgrade && p.essence >= ess;
-    const nextStar = cur.up % 10 === 9 ? ' <span class="star">★ next</span>' : '';
-    const mp = maxUpgradePlan(cur);
-    const upBtn = `<button class="${can ? 'primary' : 'ghost'}" data-act="upgradeHere" data-slot="${sel}" ${max ? 'disabled' : ''}>${max ? 'Max level' : `Merge +1 ${costHTML(cost, ess)}${nextStar}`}</button>${mergeCostHTML(cur)}`
-      + `<button class="${mp.n > 1 ? 'primary gold' : 'disabled'} maxb" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Merge max${mp.n > 1 ? ` +${mp.n}<small>${costHTML(mp.gold, mp.ess)}</small>` : ''}</button>`
-      + (rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '');
-    const cands = p.bag.filter((b) => b.slot === sel).sort((x, y) => (isBetter(y, x) ? 1 : isBetter(x, y) ? -1 : 0));
-    const list = cands.length ? cands.map((b) => { const se = salvageEssence(b); return itemRow(b, `<div class="col"><button class="primary" data-act="equip" data-id="${escapeHTML(b.id)}">Equip</button><button class="ghost sm" data-act="protectGear" data-id="${escapeHTML(b.id)}">${b.locked ? 'Protected · unlock' : 'Protect'}</button><button class="ghost sm" data-act="salvage" data-id="${escapeHTML(b.id)}" ${b.locked ? 'disabled' : ''}>Salvage ${ICON.coin}${fmtK(salvageValue(b))}${se ? ` ${ICON.ess}${se}` : ''}</button></div>`, `${SLOT_LABEL[sel]} · item level ${b.ilvl}${b.locked ? ' · protected' : isBetter(cur, b) ? ' · merge material' : ''}`, { better: isBetter(b, cur) }); }).join('')
-      : `<p class="fine">No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper zones roll rarer items.</p>`;
+    const cur = p.gear[sel], a = al[sel], max = cur.up >= CFG.gear.maxUp;
+    const can = a.canUpgrade && p.essence >= upgradeEssence(cur);
+    const one = maxUpgradePlan(cur, 1), mp = maxUpgradePlan(cur), next = new Set(one.materials), all = new Set(mp.materials);
+    const pieces = p.bag.filter((b) => b.slot === sel).sort((x, y) => (isBetter(y, x) ? 1 : isBetter(x, y) ? -1 : 0));
+    const pick = pieces.find((b) => b.id === UI.gearPick) || null; if (!pick) UI.gearPick = null;
+    const mark = (it) => isBetter(it, cur) ? { cls: 'up', text: '▲', label: 'better than equipped' } : next.has(it.id) ? { cls: 'mat1', text: '+1', label: 'used by the next merge' } : all.has(it.id) ? { cls: 'mat', text: 'max', label: 'used by Merge max' } : null;
     const worse = p.bag.filter((b) => !b.locked && !isBetter(b, p.gear[b.slot]) && rarIdx(b.rarity) < 4).length;
     const L = p.luck, Pi = CFG.loot.pity;
+    const reroll = rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '';
     body = `<div class="tiles">${tiles}</div>
-      <h4 class="sub">${SLOT_LABEL[sel]} · equipped</h4><div class="list">${itemRow(cur, `<div class="col">${upBtn}</div>`, null, { upgrade: can })}</div>
-      <h4 class="sub">Swap ${SLOT_LABEL[sel].toLowerCase()} · bag ${p.bag.length}/${CFG.gear.bagMax} ${worse ? `<button class="ghost sm inl" data-act="salvageAll">Salvage ${worse} weaker</button>` : ''}</h4><div class="list">${list}</div>
+      <div class="subRow"><h4 class="sub">All ${SLOT_LABEL[sel].toLowerCase()} pieces · ${pieces.length}</h4><small>bag ${p.bag.length}/${CFG.gear.bagMax}</small>${worse ? `<button class="ghost sm" data-act="salvageAll" aria-label="Salvage ${worse} weaker pieces">Salvage ${worse}</button>` : ''}</div>
+      ${pieces.length ? `<div class="ilegend"><span><i class="up">▲</i>better</span><span><i class="m1">+1</i>next merge</span><span><i class="mm">max</i>merge max</span><span>${gi('m_lock')} kept</span></div>` : ''}
+      ${itemGrid(pieces, { act: 'gpick', sel: UI.gearPick, mark, empty: `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
+      <h4 class="sub">${SLOT_LABEL[sel]} · equipped</h4><div class="list">${itemRow(cur, reroll, null, { upgrade: can })}</div>
       <h4 class="sub">Luck</h4><div class="luck">${['rare', 'epic', 'legendary'].concat(HIGH_RAR.filter((h) => highWeights(curTier(), 6)[h] > 0)).map((r) => `<div class="lk ${r}"><span>${CFG.gear.rarity[r].name} guaranteed in</span><b>${Math.max(1, Pi[r] - L[r])} drops</b><i style="--v:${Math.round(L[r] / Pi[r] * 100)}%"></i></div>`).join('')}</div>`;
+    if (pick) {
+      const better = isBetter(pick, cur), se = salvageEssence(pick);
+      bar = selBar(itemSummary(pick, `${better ? '<span style="color:#58e08a">Better than equipped</span> · ' : ''}Salvage: ${ICON.coin}${fmtK(salvageValue(pick))}${se ? ` ${ICON.ess}${se}` : ''}`) + `<button class="pMoreBtn" data-act="gpick" data-id="" aria-label="Deselect">✕</button>`,
+        `<button class="ghost" data-act="protectGear" data-id="${escapeHTML(pick.id)}">${pick.locked ? 'Unprotect' : 'Protect'}</button>`
+        + `<button class="ghost" data-act="salvage" data-id="${escapeHTML(pick.id)}" ${pick.locked ? 'disabled' : ''}>Salvage</button><button class="primary" data-act="equip" data-id="${escapeHTML(pick.id)}">Equip</button>`,
+        `<div class="list">${itemRow(pick, '', 'In your bag', { better })}${itemRow(cur, '', 'Equipped now')}</div>`);
+    } else {
+      const note = max ? 'This piece is at its maximum level.' : one.n ? '' : `${mergeCostHTML(cur)} · tap a piece for its options`;
+      bar = selBar('', `<button class="${can && !max ? 'primary' : 'ghost'}" data-act="upgradeHere" data-slot="${sel}" ${max ? 'disabled' : ''}>${max ? 'Max level' : `Merge +1 ${costHTML(upgradeCost(cur), upgradeEssence(cur))}`}</button>`
+        + `<button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Merge max${mp.n > 1 ? ` +${mp.n}` : ''}</button>`, '', note);
+    }
   } else if (tab === 'Attacks') {
     const cur = resolvedAttack(p), av = availableAttacks(p), fresh = new Set(p.newUnlocks);
     const sig = CFG.signatures[p.cls || 'novice'].id, nSlots = artifactSlotsFor(p);
@@ -7690,7 +7791,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div><button class="ghost sm hm" data-act="openMenu">${gi('m_menu')} Menu</button></div><div class="tabs">${tabs}</div><div class="tabBody">${body}</div>`, true, true);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div><button class="ghost sm hm" data-act="openMenu">${gi('m_menu')} Menu</button></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
 }
 function openWaypoints() {
   UI.current = 'waypoints';
@@ -7856,7 +7957,9 @@ function handlePanelClick(e) {
     case 'tSpend': { const n = +b.dataset.n || 1, mx = nodeMax(treeOf(G.profile, TreeView.which).nodes[TreeView.sel]); if (spendNode(G.profile, TreeView.which, TreeView.sel, n >= 5 && mx !== Infinity ? 99 : n)) { Sfx.play('pickup'); TreeView.keep = true; openSkills(TreeView.which); } break; }
     case 'credits': creditsPanel(); break;
     case 'openSettings': openSettings(); break;
-    case 'equip': equipItem(b.dataset.id); Showcase.spin = 0; heroTab('Gear'); break;
+    case 'equip': equipItem(b.dataset.id); UI.gearPick = null; Showcase.spin = 0; heroTab('Gear'); break;
+    case 'gpick': UI.gearPick = b.dataset.id && UI.gearPick !== b.dataset.id ? b.dataset.id : null; heroTab('Gear'); break;
+    case 'pMore': UI.moreOpen = !UI.moreOpen; syncMore(); break;
     case 'slot': UI.gearSlot = b.dataset.slot; heroTab('Gear'); break;
     case 'equipAtk': equipAttack(b.dataset.id); openBrawlers(); break;
     case 'toggleArt': toggleArtifact(b.dataset.id); Sfx.play('job'); openArtifacts('Equip'); break;
@@ -7866,7 +7969,7 @@ function handlePanelClick(e) {
     case 'mergeConfirm': { const plan = UI.mergePlan; if (!plan) break; if (upgradeItemMax(plan.slot, plan)) { Sfx.play('win'); toast(`Merged ${plan.materials.length} gear · +${plan.n} level${plan.n > 1 ? 's' : ''}`, 'good'); mergeReturn(plan.back); } else { toast('Inventory or cost changed. Review the refreshed merge.', 'bad'); openMerge(plan.slot, plan.bulk, plan.back); } break; }
     case 'mergeBack': mergeReturn(UI.mergePlan && UI.mergePlan.back); break;
     case 'protectGear': { const it = G.profile.bag.find(m => m.id === b.dataset.id); if (it) { it.locked = !it.locked; G.dirty = true; heroTab('Gear'); } break; }
-    case 'salvage': salvageItem(b.dataset.id); heroTab('Gear'); break;
+    case 'salvage': salvageItem(b.dataset.id); UI.gearPick = null; heroTab('Gear'); break;
     case 'spend': if (spendSkillPoint(b.dataset.node)) heroTab('Build'); break;
     case 'saveNow': saveNow(true); toast(Cloud.state === 'on' || Cloud.state === 'connecting' ? 'Progress saved' : 'Saved on this device'); break;
     case 'tLevel': TestTools.levelUp(); break;
@@ -8364,7 +8467,9 @@ function updateDoll() {
   const W = window.innerWidth, chipW = 128, chipH = 44;
   const colX = Cam.portrait ? 10 : Math.max(10, Math.min(head[0] - chipW - 70, W * 0.32 - chipW));
   const top = Math.max(60, head[1] - 10), bottom = Math.min(Cam.portrait ? window.innerHeight * 0.42 : window.innerHeight - 50, feet[1] - chipH + 10);
-  const step = (bottom - top) / (DOLL_ORDER.length - 1);
+  // on phones the callouts must stay above the menu; if there is no room, the slot tiles in the menu do the job
+  if (Cam.portrait) { const pt = $('panel').getBoundingClientRect().top; if (Math.min(bottom, pt - chipH - 6) - top < (DOLL_ORDER.length - 1) * 34) { root.hidden = true; return; } }
+  const step = (Math.min(bottom, Cam.portrait ? $('panel').getBoundingClientRect().top - chipH - 6 : bottom) - top) / (DOLL_ORDER.length - 1);
   DOLL_ORDER.forEach((s, i) => {
     const it = p.gear[s], c = Doll.chips[s];
     const sig = it.id + it.up;
@@ -8599,14 +8704,14 @@ function openPrestige() {
   const p=G.profile, pet=petProgress(p), bonus=petBonuses(p), attack=petAttackSpec(p), blocked=prestigeBlocked();
   const cards=Object.entries(PET_DEFS).map(([id,d])=>{const owned=!!p.pets[id], selected=id===pet.id;
     return `<button class="ghost ${selected?'equipped':''}" data-act="petEquip" data-pet="${id}" ${owned?'':'disabled'} aria-pressed="${selected}"><b>${d.name}</b><small>${owned?`Level ${p.pets[id].level} / ${PET_MAX_LEVEL}`:`Unlocks at prestige ${d.unlock}`}<br>${d.attack} · ${d.kind==='slam'?'close range, up to 3 enemies':d.slow?'ranged + slow':'ranged'}<br>${selected?'Equipped':owned?'Tap to equip':'Locked'}</small></button>`;}).join('');
-  openModal(`<h3>Pets & prestige</h3><div class="prestigeHero"><div><b>Prestige ${prestigeCount(p)}</b><small>${pet.id ? `${pet.name} · Level ${pet.level} / ${PET_MAX_LEVEL} · Evolution ${pet.stage} / 5` : 'Your first dragon awaits'}<br>${pet.id ? `World damage +${petPercent(bonus.damage)} · HP +${petPercent(bonus.hp)}` : `Reach hero level ${PRESTIGE_LEVEL} to earn your first companion`}</small></div></div>
+  openModal(`<h3>Pets & prestige</h3><div class="pBody"><div class="prestigeHero"><div><b>Prestige ${prestigeCount(p)}</b><small>${pet.id ? `${pet.name} · Level ${pet.level} / ${PET_MAX_LEVEL} · Evolution ${pet.stage} / 5` : 'Your first dragon awaits'}<br>${pet.id ? `World damage +${petPercent(bonus.damage)} · HP +${petPercent(bonus.hp)}` : `Reach hero level ${PRESTIGE_LEVEL} to earn your first companion`}</small></div></div>
     ${pet.id?`<div class="petXP"><b>${pet.nextXp?`${fmt(pet.xp)} / ${fmt(pet.nextXp)} pet XP`:'Max pet level'}</b><div class="vbar sm"><i style="width:${pet.nextXp?Math.round(pet.xp/pet.nextXp*100):100}%"></i></div></div><div class="mergeNotice"><b>${attack.attack}</b> · ${petPercent(attack.mult)} of hero damage · every ${attack.cooldown.toFixed(2)}s · range ${attack.range}m<br>${attack.slow?'Slows targets briefly. ':''}${attack.targets>1?'Hits up to 3 nearby enemies. ':''}Assists your fights automatically.</div>`:''}
     <h4 class="sub">Your companions</h4><div class="petCards">${cards}</div>
     <p class="fine">One pet fights at a time. Each pet trains independently to level 99. Nearby monster kills award 10 + 2 × monster level XP (level contribution capped at 100); elites give triple. Eligible world bosses award 150 + 4 × boss level XP, capped at level 100. Pet kills earn normal hero loot and XP. Idle rewards and XP orbs do not train pets.</p>
     <p class="fine">Training improves pet damage and attack speed. Prestige unlocks pets and upgrades their visual evolution through five forms. All pet levels and XP survive prestige. Pet attacks and bonuses apply only in world play, including Rifts, and never in Showdown. Pets rest in town and menus.</p>
     <p class="fine">World stat bonuses grow gradually toward +10% damage and +20% HP. Your equipped pet appears beside your hero in the studio.</p>
-    <p class="say">Prestige is optional. At level ${PRESTIGE_LEVEL}, return to Willowcross Town to review a restart at level 1. Your gear, mastery and collections carry forward.</p>
-    <div class="row end"><button class="ghost" data-act="mMenu">Menu</button><button class="primary" data-act="prestigeReview" ${blocked?'disabled':''}>${blocked || `Review prestige ${prestigeCount(p)+1}`}</button></div>`,true,true);
+    <p class="say">Prestige is optional. At level ${PRESTIGE_LEVEL}, return to Willowcross Town to review a restart at level 1. Your gear, mastery and collections carry forward.</p></div>
+    <div class="pBar">${selBar('', `<button class="ghost" data-act="mMenu">Menu</button><button class="primary" data-act="prestigeReview" ${blocked?'disabled':''}>${blocked || `Review prestige ${prestigeCount(p)+1}`}</button>`)}</div>`,true,true);
 }
 function equipCompanion(id) {
   if(!choosePet(G.profile,id))return;
@@ -8615,11 +8720,10 @@ function equipCompanion(id) {
 function openPrestigeReview() {
   const blocked=prestigeBlocked();if(blocked){showToast(blocked,'bad');return openPrestige();}
   UI.current='prestigeReview';UI.prestigePlan=prestigePlan(G.profile);
-  openModal(`<h3>Review prestige ${UI.prestigePlan.prestige+1}</h3><p class="say">Restart at level 1, unlock new companions and evolve your pets.</p>
-    <div class="mergeNotice"><b>Restarts</b><br>Hero level and XP, Hero skill tree presets, Level Road, waypoints, World Tier, current job and job cycle.<br><br>
-    <b>Kept</b><br>All gear and inventory, protected items, gold and gems, cases, brawlers, mastery, Brawler trees, artifact unlocks and slots, pets and their training XP, collections, records, trophies, feats and settings.</div>
-    <p class="fine">This restart cannot be undone in-game. Save a backup before confirming if you want a recovery copy.</p>
-    <div class="row"><button class="ghost" data-act="saveCode">Backup code</button><button class="ghost" data-act="mPrestige">Cancel</button><button class="primary" data-act="prestigeConfirm">Restart · earn prestige ${UI.prestigePlan.prestige+1}</button></div>`);
+  openModal(dock(`<h3>Review prestige ${UI.prestigePlan.prestige+1}</h3>`, `<p class="say">Restart at level 1, unlock new companions and evolve your pets.</p>
+    <div class="mergeNotice"><b>Restarts</b><br>Hero level and XP, Level Road, waypoints, World Tier, current job and job cycle. Every hero's skill tree is refunded: level points restart at level 1, mastery points stay to spend again.<br><br>
+    <b>Kept</b><br>All gear and inventory, protected items, gold and gems, cases, brawlers, mastery, artifact unlocks and slots, pets and their training XP, collections, records, trophies, feats and settings.</div>`,
+    selBar('', `<button class="ghost sm" data-act="saveCode">Backup code</button><button class="ghost" data-act="mPrestige">Cancel</button><button class="primary" data-act="prestigeConfirm">Restart · prestige ${UI.prestigePlan.prestige+1}</button>`, '', 'This restart cannot be undone in-game. Save a backup code first if you want a recovery copy.')));
 }
 function confirmPrestige() {
   const blocked=prestigeBlocked();
@@ -8682,30 +8786,28 @@ function openBrawlers(sel) {
   const cards = CFG.brawlerOrder.filter((id) => !onlyOwned || owned.includes(id)).map((id) => {
     const B = CFG.brawlers[id], have = owned.includes(id), L = masteryOf(p, id);
     return `<button class="bcard ${have ? 'own' : 'locked'} ${id === sel ? 'sel' : ''} ${id === p.cls ? 'cur' : ''}" data-act="bSel" data-id="${id}">
-      ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have)}
+      ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have, 52)}
       <b>${B.name}</b><small>${have ? `Mastery ${L}` : 'Locked'}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
   }).join('');
   const B = CFG.brawlers[sel], A = CFG.attacks[sel], C = CFG.classes[sel], have = owned.includes(sel);
   const first = p.starterBrawler || 'bolt', firstLevel = masteryOf(p, first), switchReady = canSwitchBrawler(p, sel);
-  const gate = firstLevel < BRAWLER_SWITCH_MASTERY ? `<p class="mergeNotice">Master ${CFG.brawlers[first].name} first: ${firstLevel}/${BRAWLER_SWITCH_MASTERY}. Reach mastery ${BRAWLER_SWITCH_MASTERY} of 99 to unlock changing brawlers. Level Road requirements still apply.</p>` : '';
+  const gateOld = firstLevel < BRAWLER_SWITCH_MASTERY ? `<p class="mergeNotice">Master ${CFG.brawlers[first].name} first: ${firstLevel}/${BRAWLER_SWITCH_MASTERY}. Reach mastery ${BRAWLER_SWITCH_MASTERY} of 99 to unlock changing brawlers. Level Road requirements still apply.</p>` : '';
   const xp = (p.mastery || {})['w:' + sel] || 0, L = masteryLevel(xp), a0 = mxpFor(L), a1 = mxpFor(Math.min(99, L + 1)), f = L >= 99 ? 1 : (xp - a0) / Math.max(1, a1 - a0);
   const t = tierOf(L), next = CFG.badges.find((b) => L < b.lvl);
   const badges = CFG.badges.map((b, i) => `<div class="bdg ${L >= b.lvl ? 'got' : ''}">${badgeSVG(L >= b.lvl ? i : -1, 'b_' + sel, { static: L < b.lvl })}<small>${b.name}<br>${b.lvl}</small></div>`).join('');
   const sup = CFG.supers[C.super], sk = CFG.skills[C.skill];
-  const pts = brawlerPointsTotal(p, sel), free = have ? treeFree(p, sel) : 0;
-  const detail = `<div class="bdet">
-    <div class="bhero">${badgeSVG(t, 'b_' + sel, { cls: 'big' })}<div><h3>${B.name}</h3><small class="role">${C.role} · ${A.name}</small>
-      ${t >= 0 ? `<em class="btitle ${METAL[t]}">${CFG.badges[t].title} ${B.name}</em>` : ''}</div></div>
-    <p class="bdesc">${A.desc}.</p>
+  const free = have ? treeFree(p, sel) : 0, tp = have ? treeOf(p, sel).total : 0;
+  const summary = `${brawlerPortrait(sel, have, 46)}<div class="sx"><b>${B.name}${sel === p.cls ? ' · playing' : ''}</b><small>${C.role} · ${A.name}</small><small>${have ? `Mastery ${L}${t >= 0 ? ' · ' + CFG.badges[t].title : ''} · ${free > 0 ? `<span style="color:#ffc94a">${free} tree points free</span>` : `${tp} tree points`}` : `${gi('m_lock')} ${unlockText(A.unlock)}`}</small></div>`;
+  const more = `<p class="bdesc">${A.desc}.</p>
     <div class="kit"><div><span>Super</span><b>${sup.name}</b><small>Tap to auto-aim, drag to aim</small></div><div><span>Skill</span><b>${sk ? sk.name : '—'}</b><small>${sk ? sk.desc : ''}</small></div></div>
     ${have ? `<div class="mast"><div class="mrowh"><b>Mastery ${L}</b><span>${L >= 99 ? 'Maxed' : next ? `${next.name} badge at ${next.lvl}` : ''}</span></div><span class="mbar"><i style="--v:${(f * 100).toFixed(1)}%"></i></span>
-      <small>${fmtK(xp)} xp · ${pts} tree points (${free} free) · badges give +3% damage and +2% HP each</small></div>` : `<p class="req">${gi('m_lock')} ${unlockText(A.unlock)}</p>`}
-    <div class="bdgs">${badges}</div>
-    <div class="row end">${have ? `<button class="ghost" data-act="bTree" data-id="${sel}">${gi('m_skills')} Skill tree${free > 0 ? '<i class="rdot in"></i>' : ''}</button>${sel === p.cls ? '<button class="disabled" aria-disabled="true">Playing</button>' : switchReady ? `<button class="primary" data-act="bPlay" data-id="${sel}">Play as ${B.name}</button>` : `<button class="disabled" disabled>Mastery ${BRAWLER_SWITCH_MASTERY} required</button>`}` : ''}</div>
-  </div>`;
-  openModal(`<div class="npcHead">${gi('m_brawlers', 'hd')}<h3>Brawlers</h3><span class="cnt">${owned.length}/${CFG.brawlerOrder.length}</span>
-    <label class="own"><input type="checkbox" data-act="ownedOnly" ${onlyOwned ? 'checked' : ''}> Owned only</label></div>
-    ${gate}<div class="bwrap"><div class="bgrid">${cards}</div>${detail}</div>`);
+      <small>${fmtK(xp)} xp · badges give +3% damage and +2% HP each</small></div>` : ''}
+    <div class="bdgs">${badges}</div>`;
+  const btns = have ? `<button class="ghost" data-act="bTree" data-id="${sel}">${gi('m_skills')} Skill tree${free > 0 ? '<i class="rdot in"></i>' : ''}</button>${sel === p.cls ? '<button class="disabled" aria-disabled="true">Playing</button>' : switchReady ? `<button class="primary" data-act="bPlay" data-id="${sel}">Play as ${B.name}</button>` : `<button class="disabled" disabled>Mastery ${BRAWLER_SWITCH_MASTERY} required</button>`}` : '<button class="disabled" disabled>Locked</button>';
+  const note = firstLevel < BRAWLER_SWITCH_MASTERY ? `Master ${CFG.brawlers[first].name} to ${BRAWLER_SWITCH_MASTERY} to switch heroes (${firstLevel}/${BRAWLER_SWITCH_MASTERY}).` : '';
+  openModal(dock(`<div class="npcHead">${gi('m_brawlers', 'hd')}<h3>Brawlers</h3><span class="cnt">${owned.length}/${CFG.brawlerOrder.length}</span>
+    <label class="own"><input type="checkbox" data-act="ownedOnly" ${onlyOwned ? 'checked' : ''}> Owned only</label></div>`,
+    `<div class="bgrid">${cards}</div>`, selBar(summary, btns, more, note)));
   $('panel').classList.add('wide');
   setTimeout(() => { p.newUnlocks = p.newUnlocks.filter((u) => !u.startsWith('a:')); G.dirty = true; }, 0);
 }
@@ -9284,7 +9386,7 @@ const powerOf = (f) => Math.round(Math.sqrt(Math.max(1, f.dmg) * Math.max(1, f.m
 function caseArt(k, cls) { const K = CFG.cases[k]; return `<span class="caseArt ${cls || ''}" style="--cc:${K.col}"><img src="${caseIcon(k) || PremiumPortraits.case(k)}" width="256" height="256" alt=""></span>`; }
 function openCases(sel) {
   UI.current = 'cases';
-  const p = G.profile, groups = {}; for (const c of p.cases) (groups[c.k] = groups[c.k] || []).push(c);
+  const p = G.profile, groups = {}; let bar = ''; for (const c of p.cases) (groups[c.k] = groups[c.k] || []).push(c);
   const kinds = CFG.caseOrder.filter((k) => groups[k]);
   sel = sel && groups[sel] ? sel : kinds[0];
   const tiles = CFG.caseOrder.map((k) => { const n = (groups[k] || []).length; return `<button class="ctile ${k === sel ? 'sel' : ''} ${n ? '' : 'none'}" data-act="caseSel" data-k="${k}" style="--cc:${CFG.cases[k].col}">${caseArt(k)}<b>${CFG.cases[k].name}</b><small>${n ? '×' + n : 'none yet'}</small></button>`; }).join('');
@@ -9294,10 +9396,10 @@ function openCases(sel) {
     const c = groups[sel][0], odds = caseOdds(c), L = p.caseLuck || { legendary: 0, mythic: 0 };
     body = `<div class="caseHero" style="--cc:${CFG.cases[sel].col}">${caseArt(sel, 'big')}<div><b>${CFG.cases[sel].name}</b><small>${CFG.cases[sel].sub} · item level ${c.l}${c.f ? ` · at least ${CFG.gear.rarity[c.f].name}` : ''}</small></div></div>
       <div class="odds">${odds.map(([r, x]) => `<div class="od ${r}"><span>${CFG.gear.rarity[r].name}</span><b>${x >= 0.01 ? (x * 100).toFixed(1) : (x * 100).toFixed(2)}%</b></div>`).join('')}</div>
-      <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} cases${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Cases are earned in play only and can never be bought.</p>
-      <div class="row end">${groups[sel].length > 1 ? `<button class="ghost" data-act="caseFast" data-k="${sel}">Open ${Math.min(10, groups[sel].length)} fast</button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open case</button></div>`;
+      <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} cases${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Cases are earned in play only and can never be bought.</p>`;
+    bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost" data-act="caseFast" data-k="${sel}">Open ${Math.min(10, groups[sel].length)} fast</button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
-  openModal(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Cases</h3><span class="cnt">${p.cases.length}/${CASE_MAX}</span></div><div class="ctiles">${tiles}</div>${body}<div class="row end"><button class="ghost" data-act="mCollection">Explore the item collection</button></div>`);
+  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Cases</h3><span class="cnt">${p.cases.length}/${CASE_MAX}</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Explore the item collection</button></div>`, bar));
   $('panel').classList.add('wide');
 }
 // the CS:GO-style reel: a long strip of items slides past a golden marker and slows down on your item
@@ -9356,16 +9458,17 @@ function openIdle(tab) {
   tab = tab || UI.idleTab || 'Vault'; UI.idleTab = tab; UI.current = 'idle';
   const p = G.profile, now = Date.now();
   const tabs = ['Vault', 'Expeditions', 'Auto Hunt'].map((t) => `<button class="tab ${t === tab ? 'on' : ''}" data-act="idleTab" data-tab="${t}">${t}</button>`).join('');
-  let body = '';
+  let body = '', bar = '';
   if (tab === 'Vault') {
     const v = vaultState(now), R = vaultRates(p), lv = vaultLv(p), cost = vaultUpCost(p), pct = Math.round(v.mins / v.cap * 100);
     const hm = (m) => `${Math.floor(m / 60)}h ${Math.floor(m % 60)}m`;
     body = `<div class="vaultBox"><div class="vbar"><i style="width:${pct}%"></i><span>${pct}% · ${hm(v.mins)} of ${vaultCapH(p)}h${v.full ? ' · FULL' : ''}</span></div>
       <div class="stats3"><div><b>${ICON.coin}${fmtK(v.gold)}</b><span>Gold</span></div><div><b>+${fmtK(v.xp)}</b><span>XP (max 2 levels)</span></div><div><b>${ICON.ess}${v.gems}</b><span>Gems</span></div></div>
       <div class="stats3"><div><b>${v.shards}</b><span>Artifact shards</span></div><div><b>${v.cases}</b><span>Treasure Cases</span></div><div><b>${fmtK(R.gold * 60)}/h</b><span>Gold rate</span></div></div>
-      <div class="row end"><button class="${v.mins >= 1 ? 'primary big' : 'disabled'}" data-act="vaultCollect" ${v.mins >= 1 ? '' : 'aria-disabled="true"'}>Collect</button></div></div>
+</div>
       <h4 class="sub">Vault level ${lv}/${VAULT_MAX_LV}</h4><p class="fine">The Vault fills while you play and while you are away, up to ${vaultCapH(p)} hours. Each level adds +12% to everything and +1 hour of storage. Rates follow your level, your best open zone and your World Tier.</p>
-      <div class="row end"><button class="${lv < VAULT_MAX_LV && p.gold >= cost ? 'primary gold' : 'disabled'}" data-act="vaultUp" ${lv < VAULT_MAX_LV && p.gold >= cost ? '' : 'aria-disabled="true"'}>${lv >= VAULT_MAX_LV ? 'Max level' : `Upgrade ${ICON.coin}${fmtK(cost)}`}</button></div>`;
+`;
+    bar = selBar('', `<button class="${lv < VAULT_MAX_LV && p.gold >= cost ? 'ghost' : 'disabled'}" data-act="vaultUp" ${lv < VAULT_MAX_LV && p.gold >= cost ? '' : 'aria-disabled="true"'}>${lv >= VAULT_MAX_LV ? 'Max level' : `Upgrade ${ICON.coin}${fmtK(cost)}`}</button><button class="${v.mins >= 1 ? 'primary big' : 'disabled'}" data-act="vaultCollect" ${v.mins >= 1 ? '' : 'aria-disabled="true"'}>Collect</button>`);
   } else if (tab === 'Expeditions') {
     const slots = expSlots(p), rows = p.exp.map((e, i) => {
       const done = expDone(e, now), left = Math.max(0, e.s + e.d * 60000 - now), r = expReward(p, e), k = Math.min(1, (now - e.s) / (e.d * 60000));
@@ -9382,7 +9485,7 @@ function openIdle(tab) {
     body = `<label class="tgl"><input type="checkbox" data-set="autoHunt" ${p.settings.autoHunt ? 'checked' : ''}><span class="sw"></span><span><b>Auto Hunt</b><small>Your hero walks to monsters at your level, fights, dashes away when hurt and uses supers. Touch the move stick to take over; it resumes after a moment.</small></span></label>
       <p class="fine">Auto Hunt works in the open world (not in the Rift or Showdown). Monsters more than 3 levels above you are skipped, so it stays safe. Turn it on, put the phone down, and check back.</p>`;
   }
-  openModal(`<div class="npcHead">${gi('m_idle', 'hd')}<h3>Idle</h3><span class="cnt">${vaultState(now).full ? 'Vault full' : ''}</span></div><div class="tabs">${tabs}</div><div class="tabBody">${body}</div>`);
+  openModal(dock(`<div class="npcHead">${gi('m_idle', 'hd')}<h3>Idle</h3><span class="cnt">${vaultState(now).full ? 'Vault full' : ''}</span></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar));
 }
 function idleAlert() { const p = G.profile, now = Date.now(); return vaultState(now).mins >= 60 || p.exp.some((e) => expDone(e, now)); }
 
@@ -9579,6 +9682,7 @@ function boot(hotData) {
   window.addEventListener('pagehide', () => saveNow(true));
   if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn };
   window.__gameBooted = true;
+  if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
   if (LOCAL_PREVIEW) window.__dbg = { renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
