@@ -5,7 +5,7 @@ on:
     paths: ['pipeline/requests.json', 'pipeline/*.py', '.github/workflows/relay.yml']
 permissions:
   contents: write
-concurrency: { group: relay, cancel-in-progress: false }
+concurrency: { group: asset-drop, cancel-in-progress: false }
 jobs:
   relay:
     runs-on: ubuntu-latest

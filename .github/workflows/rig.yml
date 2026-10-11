@@ -1,0 +1,40 @@
+name: blender weights
+on:
+  push:
+    branches: [asset-pipeline]
+    paths: ['pipeline/rig/**', 'pipeline/blender_weights.py', '.github/workflows/rig.yml']
+permissions:
+  contents: write
+concurrency: { group: asset-drop, cancel-in-progress: false }
+jobs:
+  weights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with: { path: ~/blender, key: blender-4.2.3-linux }
+      - name: install blender
+        run: |
+          if [ ! -x ~/blender/blender ]; then curl -sSL https://download.blender.org/release/Blender4.2/blender-4.2.3-linux-x64.tar.xz | tar -xJ -C ~ && mv ~/blender-4.2.3-linux-x64 ~/blender; fi
+          sudo apt-get -qq update && sudo apt-get -qq install -y libxi6 libxkbcommon0 libgl1 libegl1 libsm6 libxrender1 libxfixes3 libxxf86vm1 >/dev/null
+          ~/blender/blender -b --version | head -1
+      - name: weights
+        run: |
+          git fetch -q origin asset-drop || true
+          mkdir -p out
+          for d in pipeline/rig/*/; do
+            n=$(basename "$d")
+            if git cat-file -e "origin/asset-drop:drop/rig/$n/weights.json" 2>/dev/null && [ ! -f "$d/redo" ]; then echo "skip $n"; continue; fi
+            mkdir -p "out/$n"
+            ~/blender/blender -b -P pipeline/blender_weights.py -- "$d/clean.glb" "$d/joints.json" "out/$n/weights.json" > "out/$n/blender.log" 2>&1 || echo "FAILED $n"
+            tail -5 "out/$n/blender.log"
+          done
+      - name: publish
+        run: |
+          git config user.name "asset-relay"; git config user.email "actions@users.noreply.github.com"
+          mkdir -p /tmp/o && cp -r out/. /tmp/o/
+          git checkout -q -B asset-drop origin/asset-drop
+          mkdir -p drop/rig && cp -r /tmp/o/. drop/rig/
+          git add drop/rig && git commit -qm "weights $(date -u +%H%M%S)" || exit 0
+          for i in 1 2 3; do git push -q origin asset-drop && break; git pull -q --rebase origin asset-drop; done
