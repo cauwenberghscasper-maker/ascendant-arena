@@ -1,0 +1,4 @@
+{"batch": "pilot-pip-1", "files": [
+ {"name": "pip_t1.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/9236854245d7f1f3b5c3267b40727a77bb43f73f21b04e83e5781b237d0c9a9a/trellis_output_2026-10-11T153738.glb"},
+ {"name": "pip_concept.webp", "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/4bd94dd234ea12f3a18bd814d6038c4889fccd5fce8c61fa5b30cc26a25c3517/image.webp"}
+]}

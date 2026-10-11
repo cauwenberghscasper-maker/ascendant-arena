@@ -1,0 +1,44 @@
+name: asset relay
+on:
+  push:
+    branches: [asset-pipeline]
+    paths: ['pipeline/requests.json', 'pipeline/*.py', '.github/workflows/relay.yml']
+permissions:
+  contents: write
+concurrency: { group: relay, cancel-in-progress: false }
+jobs:
+  relay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: download requested files
+        run: |
+          mkdir -p out
+          python3 - <<'PY'
+          import json, urllib.request, os, hashlib, time
+          req = json.load(open('pipeline/requests.json'))
+          log = []
+          for it in req['files']:
+              dst = os.path.join('out', it['name'])
+              ok = False
+              for attempt in range(3):
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(it['url'], headers={'User-Agent': 'asset-relay'}), timeout=120) as r, open(dst, 'wb') as f:
+                          f.write(r.read())
+                      ok = True; break
+                  except Exception as e:
+                      err = str(e); time.sleep(5)
+              log.append({'name': it['name'], 'ok': ok, 'bytes': os.path.getsize(dst) if ok else 0, 'sha256': hashlib.sha256(open(dst,'rb').read()).hexdigest() if ok else None, 'error': None if ok else err})
+          json.dump({'batch': req.get('batch'), 'files': log}, open('out/relay-log.json', 'w'), indent=1)
+          print(json.dumps(log, indent=1))
+          PY
+      - name: publish to asset-drop
+        run: |
+          git config user.name "asset-relay"; git config user.email "actions@users.noreply.github.com"
+          B=$(python3 -c "import json;print(json.load(open('pipeline/requests.json')).get('batch','misc'))")
+          git fetch origin asset-drop || true
+          mkdir -p /tmp/drop && cp -r out/. /tmp/drop/
+          if git rev-parse --verify -q origin/asset-drop; then git checkout -q -B asset-drop origin/asset-drop; else git checkout -q --orphan asset-drop; git rm -rq --cached . ; rm -rf ./* .github; fi
+          mkdir -p "drop/$B" && cp -r /tmp/drop/. "drop/$B/"
+          git add "drop/$B" && git commit -qm "relay $B" && git push -q origin asset-drop
