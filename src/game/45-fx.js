@@ -215,6 +215,8 @@ function updateProjectileMeshes() {
 }
 
 // rings: explosions + telegraphs
+// telegraph colours: red is always a threat to the player, gold is the player's own
+const TELE_MOB = 0xff3b3b, TELE_PLAYER = 0xffc94a;
 const RING_MAX = 20, rings = [];
 for (let i = 0; i < RING_MAX; i++) {
   const ring = pxRingMesh(0.9, 1, { color: 0xffffff, transparent: true, depthWrite: false });

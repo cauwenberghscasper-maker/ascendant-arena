@@ -2,10 +2,12 @@
   "name": "ascendant-arena",
   "private": true,
   "description": "Ascendant Arena: web game (index.html, built from src/) and its iOS/Android shells (Capacitor)",
-  "engines": { "node": ">=22.12" },
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "build": "node tools/build.cjs",
-    "check": "node tools/check_release.cjs && node tools/check_test_mode.cjs && node tools/check_companions.cjs && node tools/check_gameplay.cjs && node audit/checks.cjs",
+    "check": "node tools/check_release.cjs && node tools/check_test_mode.cjs && node tools/check_companions.cjs && node tools/check_gameplay.cjs && node audit/checks.cjs && node tools/check_hardcore.cjs && node tools/check_moves.cjs && node tools/check_world_layout.cjs && node tools/check_dungeon.cjs",
     "app": "node tools/build.cjs --app && cap sync"
   },
   "dependencies": {

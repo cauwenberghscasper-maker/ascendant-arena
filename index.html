@@ -1575,6 +1575,8 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
   W.lairList = W.lairs.filter(Boolean);
   W.waypoints = [{ name: 'Base Camp Lodestone', x: 9, z: -46, zone: 0 }].concat(Z.slice(1).map((zn, i) => ({ name: zn.name + ' Lodestone', x: 9, z: zn.z0 + 9, zone: i + 1 })));
   W.dens = [];
+  // points of interest: { id: 'a07:dungeon:0', zone, x, z, r, kind: landmark|secret|dungeon|node, name, art, lvl, hidden }
+  W.pois = [];
   Z.forEach((zn, i) => { if (!zn.safe) W.dens.push({ name: zn.denName, zone: i, x: (i % 2 ? -1 : 1) * 66, z: Math.round(zn.z0 + zn.len * 0.62), r: 13, n: zn.len >= 110 ? 13 : 11 }); });
   // two challenge shrines per biome (second and fourth area)
   CFG.shrines.list = [];
@@ -2094,7 +2096,7 @@ function defaultProfile() {
     treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
-    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 9, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0,
+    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 9, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {},
     job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, pixel: false, bots: false, npcs: false, autoHunt: false },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
@@ -2248,7 +2250,7 @@ const RC = { x: 0, z: -1400 }; // rift sanctum centre
 CFG.rift = { gate: { x: -9, z: -44 }, unlock: 15, r: 22, time: 70, intro: 2.4, clear: 2.8, lvlBase: 4, lvlPer: 2.5, bossEvery: 5 };
 const G = {
   mode: 'hub', started: false, time: 0, paused: false, modal: false,
-  profile: null, player: null, hubFighters: [], enemies: [], npcs: [], berries: [],
+  profile: null, player: null, hubFighters: [], enemies: [], npcs: [], berries: [], dungeon: null, nodes: [],
   boss: null, bossTimer: CFG.boss.firstSpawn, bossWarned: false, bossLair: 1,
   arena: null, pendingAoE: [], clouds: [], events: [], ents: new Map(), pellets: [], pelletsDirty: true, shrines: [],
   lastCombat: -99, zoneIdx: 0, interact: null, respawnT: 0, gateToastT: 0, dirty: false,
@@ -3484,6 +3486,11 @@ function makeEnemy(type, zi, o) {
   G.ents.set(e.id, e);
   return e;
 }
+// shared combat contract: a reference hero's HP/damage at a level, and the one place enemy damage is resolved
+function refHp(L) { const P = CFG.progression; return P.hpBase * Math.pow(P.hpGrowth, L - 1); }
+function refDmg(L) { const P = CFG.progression; return P.atkBase * Math.pow(P.atkGrowth, L - 1); }
+function mobDmg(e, mult, t) { return e.atk * (mult || 1); }
+function inInstance() { return !!(G.rift || G.dungeon); }
 function setEnemyLevel(e, lvl) {
   const d = CFG.enemies[e.type], E = CFG.enemies.elite;
   e.lvl = lvl; e.maxHp = Math.round(d.hp * egrow(CFG.enemies.hpGrowth, lvl) * (e.elite ? E.hp : 1) * (e.guardian ? 2.5 : 1)); e.hp = e.maxHp;
@@ -3944,6 +3951,9 @@ function stepEnemy(e, dt) {
   const T = CFG.world.town, td = distToTown(e.x, e.z), minT = T.r + 1.5;
   if (td < minT) { e.x = T.x + (e.x - T.x) / (td || 1) * minT; e.z = T.z + (e.z - T.z) / (td || 1) * minT; }
 }
+
+// --- monster moves
+// --- end monster moves
 
 // --- Rift champions: every big attack is shown first (red circles, lanes, glow) and can be dodged or dashed through
 function champTick(e, dt, pl, dp) {
@@ -6557,6 +6567,8 @@ function updateProjectileMeshes() {
 }
 
 // rings: explosions + telegraphs
+// telegraph colours: red is always a threat to the player, gold is the player's own
+const TELE_MOB = 0xff3b3b, TELE_PLAYER = 0xffc94a;
 const RING_MAX = 20, rings = [];
 for (let i = 0; i < RING_MAX; i++) {
   const ring = pxRingMesh(0.9, 1, { color: 0xffffff, transparent: true, depthWrite: false });

@@ -111,6 +111,11 @@ function makeEnemy(type, zi, o) {
   G.ents.set(e.id, e);
   return e;
 }
+// shared combat contract: a reference hero's HP/damage at a level, and the one place enemy damage is resolved
+function refHp(L) { const P = CFG.progression; return P.hpBase * Math.pow(P.hpGrowth, L - 1); }
+function refDmg(L) { const P = CFG.progression; return P.atkBase * Math.pow(P.atkGrowth, L - 1); }
+function mobDmg(e, mult, t) { return e.atk * (mult || 1); }
+function inInstance() { return !!(G.rift || G.dungeon); }
 function setEnemyLevel(e, lvl) {
   const d = CFG.enemies[e.type], E = CFG.enemies.elite;
   e.lvl = lvl; e.maxHp = Math.round(d.hp * egrow(CFG.enemies.hpGrowth, lvl) * (e.elite ? E.hp : 1) * (e.guardian ? 2.5 : 1)); e.hp = e.maxHp;
@@ -571,6 +576,9 @@ function stepEnemy(e, dt) {
   const T = CFG.world.town, td = distToTown(e.x, e.z), minT = T.r + 1.5;
   if (td < minT) { e.x = T.x + (e.x - T.x) / (td || 1) * minT; e.z = T.z + (e.z - T.z) / (td || 1) * minT; }
 }
+
+// --- monster moves
+// --- end monster moves
 
 // --- Rift champions: every big attack is shown first (red circles, lanes, glow) and can be dodged or dashed through
 function champTick(e, dt, pl, dp) {

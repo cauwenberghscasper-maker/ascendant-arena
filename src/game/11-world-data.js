@@ -87,6 +87,8 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
   W.lairList = W.lairs.filter(Boolean);
   W.waypoints = [{ name: 'Base Camp Lodestone', x: 9, z: -46, zone: 0 }].concat(Z.slice(1).map((zn, i) => ({ name: zn.name + ' Lodestone', x: 9, z: zn.z0 + 9, zone: i + 1 })));
   W.dens = [];
+  // points of interest: { id: 'a07:dungeon:0', zone, x, z, r, kind: landmark|secret|dungeon|node, name, art, lvl, hidden }
+  W.pois = [];
   Z.forEach((zn, i) => { if (!zn.safe) W.dens.push({ name: zn.denName, zone: i, x: (i % 2 ? -1 : 1) * 66, z: Math.round(zn.z0 + zn.len * 0.62), r: 13, n: zn.len >= 110 ? 13 : 11 }); });
   // two challenge shrines per biome (second and fourth area)
   CFG.shrines.list = [];
