@@ -530,7 +530,7 @@ function creditsPanel() {
   const by = {}; for (const k in GI_SRC) { const [n, a] = GI_SRC[k]; (by[a] = by[a] || []).push(n); }
   const rows = Object.keys(by).sort().map((a) => `<div class="cr"><b>${a}</b><small>${by[a].join(', ')}</small></div>`).join('');
   openModal(`<h3>Credits</h3><p class="fine">Skeletal animations adapted from KayKit by Kay Lousberg (CC0 1.0). Original character meshes retained, with fitted fantasy equipment. See assets/animation/LICENSE.txt.</p><p class="fine">Icons from <b>game-icons.net</b>, licensed under Creative Commons BY 3.0 (creativecommons.org/licenses/by/3.0). Made by:</p><div class="credits">${rows}</div>
-    <p class="fine">Most 3D models, effects and sounds are made in code for this game. Engine: three.js (MIT).</p>
+    <p class="fine">Most 3D models, effects and sounds are made in code for this game. Engine: three.js (MIT). Fonts: Cinzel, Lilita One, Pixelify Sans and Rubik (SIL Open Font License 1.1, see assets/fonts).</p>
     <p class="fine">Generated 3D models: Microsoft TRELLIS.2 (MIT) from concept images made with Z-Image-Turbo by Tongyi-MAI (Apache 2.0).</p><div class="row end"><button class="primary" data-act="openSettings">Back</button></div>`);
 }
 function openV8Intro() {

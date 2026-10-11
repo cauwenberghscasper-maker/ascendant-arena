@@ -8,7 +8,8 @@
 // ---------------------------------------------------------------------
 // 1. CONFIG — every tunable number lives here
 // ---------------------------------------------------------------------
-const LOCAL_PREVIEW = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+// the store apps also run on localhost, so a native build never counts as a local preview
+const LOCAL_PREVIEW = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) && !window.Capacitor?.isNativePlatform?.();
 const TEST_MODE = isTestMode(location.search);
 const CFG = {
   sim: { step: 1 / 60, maxSteps: 5 },

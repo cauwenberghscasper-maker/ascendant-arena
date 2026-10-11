@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js';
+import * as THREE from 'three';
 import { createPremiumPortraits } from './assets/art/premium-models.js';
 
 import { bindHeroMotion, animateHeroMotion } from './assets/data/hero-animation.js';
