@@ -296,6 +296,14 @@ function buildHub() {
     im.computeBoundingSphere(); im.castShadow = opts.shadow !== false; im.receiveShadow = !!opts.receive;
     hubGroup.add(im); return im;
   }
+  // every area's props share one list per geometry/material, so a 64 m cell costs one call even where areas meet
+  const batches = new Map();
+  function bat(geo, list, useColor, opts) {
+    if (!list.length) return;
+    const key = geo.uuid + (useColor ? 'c' : '') + (opts ? (opts.mat ? opts.mat.uuid : '') + opts.shadow + opts.receive : '');
+    let b = batches.get(key); if (!b) batches.set(key, b = { geo, list: [], useColor, opts });
+    for (const it of list) b.list.push(it);
+  }
   // Props per area: the theme sets the defaults (counts per 160 m of road), each area's look overrides them.
   const THEME_DECO = [
     { tree: 'round', trees: 190, rocks: 50, tufts: 1500, tuftC: [0x6d9a4a, 0x82ad55], flowers: 260, flowerC: [0xff7aa8, 0xffd34a, 0xffffff, 0xb08cff], bushes: 220, logs: 16, fungi: 60, ruins: 2, flies: 70, ponds: 6 },
@@ -374,19 +382,20 @@ function buildHub() {
       }
       for (let q = 0; q < 4; q++) blocks.push({ x: c.x + (rng() - 0.5) * rad, z: c.z + (rng() - 0.5) * rad, s: 0.4 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
     }
-    inst(bushGeo, bushes, true, { receive: true });
-    inst(logGeo, logs, true, { receive: true }); inst(stumpGeo, stumps, true);
-    inst(stemGeo, stems, true, { shadow: false }); inst(capGeo, caps, true, D.glowCaps ? { mat: glowTint, shadow: false } : { shadow: false });
-    inst(pillarGeo, pillars, true, { receive: true }); inst(blockGeo, blocks, true, { receive: true });
+    bat(bushGeo, bushes, true, { receive: true });
+    bat(logGeo, logs, true, { receive: true }); bat(stumpGeo, stumps, true);
+    bat(stemGeo, stems, true, { shadow: false }); bat(capGeo, caps, true, D.glowCaps ? { mat: glowTint, shadow: false } : { shadow: false });
+    bat(pillarGeo, pillars, true, { receive: true }); bat(blockGeo, blocks, true, { receive: true });
     if (D.glowCaps || th === 1) for (const st of caps) flies.push({ x: st.x, z: st.z });
     for (let i = 0; i < cnt(D.flies); i++) { const q2 = rng() < 0.7 ? near() : rnd(); flies.push(q2); }
     for (let i = 0, kk = 0; i < Math.round((D.ponds || 0) * Math.max(k, 0.6)) && kk < 300; kk++) { const c = rnd(); if (!placeOk(c.x, c.z, 5)) continue; ponds.push({ x: c.x, z: c.z, s: 2.5 + rng() * 2.5 }); grid.add({ x: c.x, z: c.z, r: 1.5 }); i++; }
-    if (tree === 'round' || tree === 'pine' || tree === 'snowPine' || tree === 'blossom') inst(trunkGeo, trunks, false);
+    if (tree === 'round' || tree === 'pine' || tree === 'snowPine' || tree === 'blossom') bat(trunkGeo, trunks, false);
     const topGeo = { round: roundGeo, blossom: roundGeo, pine: pineGeo, snowPine: pineGeo, dead: deadGeo, coral: worldArt.coralGeo, crystal: crystalGeo }[tree];
-    if (topGeo) inst(topGeo, tops, true, tree === 'crystal' || tree === 'coral' ? { mat: glowTint } : null);
-    inst(rockGeo, rocks, true, { receive: true }); inst(spikeGeo, spikes, true);
-    inst(tuftGeo, tufts, true, { shadow: false }); inst(flowerGeo, flowers, true, { shadow: false });
+    if (topGeo) bat(topGeo, tops, true, tree === 'crystal' || tree === 'coral' ? { mat: glowTint } : null);
+    bat(rockGeo, rocks, true, { receive: true }); bat(spikeGeo, spikes, true);
+    bat(tuftGeo, tufts, true, { shadow: false }); bat(flowerGeo, flowers, true, { shadow: false });
   });
+  for (const b of batches.values()) inst(b.geo, b.list, b.useColor, b.opts);
   // glowing lava pools in the Ember Wastes (decor)
   if (lava.length) {
     const lim = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 10).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff }), lava.length);
