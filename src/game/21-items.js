@@ -246,6 +246,7 @@ const ACHIEVEMENTS = [
   { id: 'case100', name: 'Treasure Hunter', desc: 'Open 100 treasure chests', xp: 1, check: (p) => (p.stats.cases || 0) >= 100 },
   { id: 'exped10', name: 'Expedition Leader', desc: 'Bring back 10 expeditions', xp: 0.8, check: (p) => (p.stats.expeds || 0) >= 10 },
   { id: 'kills10k', name: 'Ten Thousand', desc: 'Defeat 10,000 monsters', xp: 1, check: (p) => p.stats.kills >= 10000 },
+  { id: 'secret', name: 'Secret Seeker', desc: 'Find a hidden secret location', xp: 0.6, check: (p) => Object.keys(p.secrets || {}).length >= 1 },
 ];
 const BOT_NAMES = ['Kaito', 'Mira', 'Ren', 'Sora', 'Yuki', 'Haru', 'Nova', 'Leo', 'Aiko', 'Taro', 'Rin', 'Zed', 'Kiko', 'Juno', 'Hiro', 'Mei', 'Dax', 'Lumi', 'Riku', 'Ayla', 'Toma', 'Suki', 'Vex', 'Nori'];
 const BOT_COLORS = [0xe76f51, 0x2a9d8f, 0xe9c46a, 0x8ab17d, 0xf4a261, 0x6d597a, 0x4d908e, 0xb56576, 0x277da1, 0xf94144, 0x90be6d, 0x577590];

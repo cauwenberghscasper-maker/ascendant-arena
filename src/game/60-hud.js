@@ -241,7 +241,7 @@ function updateObjective() {
     else {
       text = `${j.title}: ${j.progress}/${j.count}`;
       const zi = Math.max(1, CFG.world.zones.findIndex((zn) => zn.enemy === j.target || zn.alt === j.target));
-      if (zoneAt(pl.z) !== zi || distToTown(pl.x, pl.z) < CFG.world.town.r + 4) { const D = CFG.world.dens.find((d) => d.zone === zi); tx = D ? D.x : 0; tz = D ? D.z : CFG.world.zones[zi].z0 + 25; }
+      if (zoneAt(pl.z) !== zi || distToTown(pl.x, pl.z) < CFG.world.town.r + 4) { let D = null, bd = 1e9; for (const d of CFG.world.dens) { const k = d.zone === zi ? Math.hypot(d.x - pl.x, d.z - pl.z) : 1e9; if (k < bd) { bd = k; D = d; } } tx = D ? D.x : 0; tz = D ? D.z : CFG.world.zones[zi].z0 + 25; }
     }
   } else if (G.started) {
     const avail = NPC_DEFS.find((n) => n.role === 'job' && p.level >= n.minLevel && n.id === 'ida') || null;

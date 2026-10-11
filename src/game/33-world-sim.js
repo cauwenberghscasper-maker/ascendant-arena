@@ -25,11 +25,13 @@ function enemySpawnClear(e, x, z, respawning) {
   if (distToTown(x, z) < W.town.r + 12) return false;
   if (W.waypoints.some(w => Math.hypot(x - w.x, z - w.z) < 10)) return false;
   if (W.lairList.some(l => Math.hypot(x - l.x, z - l.z) < 10)) return false;
+  if (W.pois.some(q => q.zone === e.zone && Math.hypot(x - q.x, z - q.z) < q.r)) return false; // landmarks, caves and secret pockets stay monster-free
   // Test the padded body, including obstacles whose centres occupy another grid cell.
   if (G.obstacles && G.obstacles.list.some(o => Math.hypot(x - o.x, z - o.z) < o.r + pad)) return false;
   if (respawning && G.player.alive && Math.hypot(x - G.player.x, z - G.player.z) < W.spawnSafeRadius) return false;
   return true;
 }
+const PATROL_LANES = [-0.8, -0.5, -0.17, 0.17, 0.5, 0.8]; // × maxX
 function enemySpot(e, respawning = false) {
   const W = CFG.world;
   if (e.rift) {
@@ -46,7 +48,7 @@ function enemySpot(e, respawning = false) {
   const Z = W.zones[e.zone], z0 = e.zone === 0 ? W.town.z + W.town.r + 12 : Z.z0 + 5, z1 = Math.min(Z.z1, W.maxZ) - 5;
   if (e.patrol != null) {
     // Six lanes cover the road and flanks; depth bands scale with each area’s population.
-    const lanes = [-104, -62, -18, 18, 62, 104], row = Math.floor(e.patrol / lanes.length), dz = (z1 - z0) / Math.ceil(patrolCountFor(e.zone) / lanes.length);
+    const lanes = PATROL_LANES.map((k) => k * W.maxX), row = Math.floor(e.patrol / lanes.length), dz = (z1 - z0) / Math.ceil(patrolCountFor(e.zone) / lanes.length);
     for (let i = 0; i < 48; i++) {
       const x = lanes[e.patrol % lanes.length] + rand(-10, 10), z = z0 + (row + 0.5) * dz + rand(-dz * 0.4, dz * 0.4);
       if (enemySpawnClear(e, x, z, respawning)) return { x, z };
@@ -374,10 +376,12 @@ function initHubWorld() {
     if (!zn.safe) for (let i = 0; i < W.elitesPerZone; i++) G.enemies.push(makeEnemy(zoneType(zi), zi, { elite: true }));
   });
   W.dens.forEach((D, di) => {
-    const type = W.zones[D.zone].enemy;
     for (let i = 0; i < D.n; i++) G.enemies.push(makeEnemy(zoneType(D.zone, true), D.zone, { den: di }));
-    G.enemies.push(makeEnemy(type, D.zone, { den: di, elite: true }));
+    G.enemies.push(makeEnemy(W.zones[D.zone].enemy, D.zone, { den: di, elite: true }));
   });
+  // per-zone buckets: body separation only scans the monsters of the same area (zones never change on respawn)
+  G.enemiesByZone = W.zones.map(() => []);
+  for (const e of G.enemies) { e.zb = true; G.enemiesByZone[e.zone].push(e); }
   // NPCs
   G.npcsAll = G.npcs = NPC_DEFS.map((d) => ({ id: d.id, def: d, x: d.x, z: d.z, facing: Math.atan2(W.town.x - d.x, W.town.z - d.z), kind: 'npc', moveAmt: 0, alive: true }));
   // XP orbs (agar.io style)
@@ -416,6 +420,7 @@ function stepHub(dt) {
   if (pl.alive) CFG.world.waypoints.forEach((w, i) => {
     if (!G.profile.waypoints.includes(i) && Math.hypot(pl.x - w.x, pl.z - w.z) < 7) { G.profile.waypoints.push(i); G.dirty = true; ev({ t: 'waypoint', name: w.name }); }
   });
+  if (pl.alive) for (const sc of W.secrets) if (!G.profile.secrets[sc.id] && Math.abs(pl.z - sc.z) < 4 && Math.hypot(pl.x - sc.x, pl.z - sc.z) < 4) findSecret(sc);
   // XP orbs and challenge shrines
   stepPellets(dt);
   stepShrines(dt);
@@ -445,6 +450,15 @@ function stepHub(dt) {
   if (G.boss && Math.hypot(pl.x - G.boss.x, pl.z - G.boss.z) < 22) markCombat();
 }
 
+// secrets: first visit pays an epic+ item, gems, shards and a permanent +0.5% XP (progressionXpMultiplier)
+function findSecret(sc) {
+  const p = G.profile, gems = 15 + sc.zone;
+  p.secrets[sc.id] = Date.now(); G.dirty = true;
+  grantItem(makeItem(pick(CFG.gear.slots), Math.random() < 0.2 ? 'legendary' : 'epic', sc.lvl + 2 + tierAdd()), 'shrine', { zone: sc.zone });
+  addEssence(gems); dropShards(2);
+  toast(`Secret found: ${sc.name}! +${gems} gems · +0.5% XP for good`, 'good');
+  ev({ t: 'secret', id: sc.id, x: sc.x, z: sc.z }); checkAchievements();
+}
 function hubBotThink(b, dt) {
   const ai = b.ai, it = b.intent, W = CFG.world;
   it.mx = it.mz = 0; it.aiming = false;
@@ -568,14 +582,15 @@ function stepEnemy(e, dt) {
     e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.3 * dt);
     if (!plSafe && dp < d.aggro * 0.6) e.state = 'chase';
   }
-  e.x += mx * sp * slow * dt; e.z += mz * sp * slow * dt;
+  const spm = e.rift ? 1 : CFG.enemies.speedMult || 1; e.x += mx * sp * slow * spm * dt; e.z += mz * sp * slow * spm * dt;
   e.moveAmt = lerp(e.moveAmt || 0, sp > 0 ? Math.min(1, sp / d.speed) : 0, 1 - Math.exp(-dt * 10));
   if (sp > 0 && e.state !== 'chase') e.facing = Math.atan2(mx, mz);
   e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
   trackVel(e, dt);
   // keep bodies apart: enemy vs player and vs other enemies
   if (pl.alive) separate(e, pl);
-  for (let i = 0; i < G.enemies.length; i++) { const o = G.enemies[i]; if (o !== e && o.alive && o.zone === e.zone) separate(e, o); }
+  const near = e.zb && G.enemiesByZone ? G.enemiesByZone[e.zone] : G.enemies;
+  for (let i = 0; i < near.length; i++) { const o = near[i]; if (o !== e && o.alive && o.zone === e.zone) separate(e, o); }
   collideObstacles(e);
   if (e.rift) { riftClamp(e, e.r); return; }
   // stay in own zone and out of town

@@ -21,12 +21,12 @@ check('all combat areas have distributed, valid patrol slots with road and flank
   for (let run = 0; run < 12; run++) {
     reset();
     // Padded edge crosses a spatial-grid boundary; validate against complete obstacle circles.
-    for (let zi = 0; zi < W.zones.length; zi++) { const Z = W.zones[zi]; for (let n = 0; n < 60; n++) c.G.obstacles.add({ x: -120 + math.random() * 240, z: Z.z0 + 10 + math.random() * (Z.z1 - Z.z0 - 20), r: 1 + math.random() * 2 }); }
+    for (let zi = 0; zi < W.zones.length; zi++) { const Z = W.zones[zi]; for (let n = 0; n < 60; n++) c.G.obstacles.add({ x: -(W.maxX - 10) + math.random() * 2 * (W.maxX - 10), z: Z.z0 + 10 + math.random() * (Z.z1 - Z.z0 - 20), r: 1 + math.random() * 2 }); }
     for (let zi = 0; zi < W.zones.length; zi++) {
       if(W.zones[zi].safe) { assert.equal(c.patrolCountFor(zi),0); continue; }
       const row = [];
       for (let n = 0; n < c.patrolCountFor(zi); n++) { const e = c.makeEnemy(W.zones[zi].enemy, zi, { patrol: n }); c.G.enemies.push(e); row.push(e); assert(c.enemySpawnClear(e, e.x, e.z, false)); }
-      assert(row.filter(e => Math.abs(e.x) < 30).length >= Math.floor(row.length/6)*2-1); assert(row.some(e => e.x < -90)); assert(row.some(e => e.x > 90));
+      assert(row.filter(e => Math.abs(e.x) < W.maxX * 0.25).length >= Math.floor(row.length/6)*2-1); assert(row.some(e => e.x < -0.7 * W.maxX)); assert(row.some(e => e.x > 0.7 * W.maxX));
       const zMin = zi === 0 ? -26 : W.zones[zi].z0 + 5, zMax = Math.min(W.zones[zi].z1, W.maxZ) - 5;
       for (let band = 0; band < 4; band++) assert(row.some(e => e.z >= zMin + (zMax - zMin) * band / 4 && e.z < zMin + (zMax - zMin) * (band + 1) / 4));
     }

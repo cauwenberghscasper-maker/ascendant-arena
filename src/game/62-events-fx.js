@@ -283,12 +283,13 @@ function updateArenaProps(t) {
 }
 // --- minimap: a window that follows you over the big world (tap to enlarge) ---
 const MM = { base: null, t: 0, big: false };
-const MW = CFG.world.maxX - CFG.world.minX, MH = CFG.world.maxZ - CFG.world.minZ; // one pixel per world unit
+// Map units are metres; the static base canvas is stored at MS px/m (≈190×1600 for the 3.5 km road) and stretched on draw.
+const MS = CFG.world.mmScale || 1, MW = CFG.world.maxX - CFG.world.minX, MH = CFG.world.maxZ - CFG.world.minZ;
 const mmX = (x) => (CFG.world.maxX - x); // screen-right is world -x in our top view
 const mmY = (z) => (CFG.world.maxZ - z);
 function mmBuildBase() {
-  const c = document.createElement('canvas'); c.width = MW; c.height = MH;
-  const g = c.getContext('2d'), W = CFG.world;
+  const c = document.createElement('canvas'); c.width = Math.ceil(MW * MS); c.height = Math.ceil(MH * MS);
+  const g = c.getContext('2d'), W = CFG.world; g.scale(MS, MS);
   W.zones.forEach((zn, i) => { const y0 = mmY(Math.min(zn.z1, W.maxZ)), y1 = mmY(Math.max(zn.z0, W.minZ)); g.fillStyle = zn.mm; g.fillRect(0, y0, MW, y1 - y0); });
   g.strokeStyle = 'rgba(210,176,123,.9)'; g.lineWidth = 4; g.beginPath(); g.moveTo(mmX(0), mmY(W.town.z)); g.lineTo(mmX(0), mmY(W.maxZ - 6)); g.stroke();
   g.fillStyle = '#e8d5a6'; g.beginPath(); g.arc(mmX(W.town.x), mmY(W.town.z), W.town.r, 0, Math.PI * 2); g.fill();
@@ -296,6 +297,7 @@ function mmBuildBase() {
   g.fillStyle = '#ff5d8f'; g.beginPath(); g.arc(mmX(CFG.rift.gate.x), mmY(CFG.rift.gate.z), 3, 0, Math.PI * 2); g.fill();
   for (const l of W.lairList) { g.fillStyle = 'rgba(40,35,50,.4)'; g.beginPath(); g.arc(mmX(l.x), mmY(l.z), 10, 0, Math.PI * 2); g.fill(); }
   for (const D of W.dens) { g.fillStyle = 'rgba(160,30,40,.35)'; g.beginPath(); g.arc(mmX(D.x), mmY(D.z), D.r, 0, Math.PI * 2); g.fill(); }
+  for (const q of W.pois) if (!q.hidden) { g.fillStyle = q.kind === 'dungeon' ? 'rgba(20,14,10,.7)' : 'rgba(60,50,40,.35)'; g.beginPath(); g.arc(mmX(q.x), mmY(q.z), q.kind === 'dungeon' ? 6 : q.major ? 7 : 4, 0, Math.PI * 2); g.fill(); }
   MM.base = c;
 }
 function mmStar(g, x, y, r, fill) {
@@ -329,14 +331,21 @@ function drawMinimap() {
   }
   if (!MM.base) mmBuildBase();
   const W = CFG.world, pl = G.player;
-  const winW = MM.big ? 240 : 106, winH = winW * H2 / W2, sc = W2 / winW, u = winW / 172;
+  const winW = MM.big ? 300 : 120, winH = winW * H2 / W2, sc = W2 / winW, u = winW / 172;
   const ox = clamp(mmX(pl.x) - winW / 2, 0, MW - winW), oy = clamp(mmY(pl.z) - winH * 0.62, 0, Math.max(0, MH - winH));
   g.setTransform(sc, 0, 0, sc, -ox * sc, -oy * sc);
-  g.drawImage(MM.base, 0, 0);
+  g.drawImage(MM.base, 0, 0, MW, MH);
   for (let i = 1; i < W.zones.length; i++) {
     const zn = W.zones[i], y = mmY(zn.z0), locked = p.level < zn.minLevel;
     g.strokeStyle = locked ? '#ff4d5a' : '#58e08a'; g.lineWidth = 2 * u; g.setLineDash(locked ? [5 * u, 3 * u] : []);
     g.beginPath(); g.moveTo(0, y); g.lineTo(MW, y); g.stroke(); g.setLineDash([]);
+  }
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const q of W.pois) {
+    if (q.hidden && !p.secrets[q.id]) continue; // undiscovered secrets never show
+    if (Math.abs(q.z - pl.z) > winH) continue;
+    g.font = `bold ${(q.major || q.kind === 'dungeon' ? 9 : 7) * u}px Rubik, sans-serif`; g.fillStyle = q.kind === 'dungeon' ? '#ffb347' : q.kind === 'secret' ? '#fff07a' : '#e8d5a6';
+    g.fillText(q.kind === 'dungeon' ? '⛫' : q.kind === 'secret' ? '✦' : q.major ? '★' : '•', mmX(q.x), mmY(q.z));
   }
   for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('☠', mmX(D.x), mmY(D.z)); }
   for (const e of mpVisible()) { g.fillStyle = '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }

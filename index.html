@@ -1235,16 +1235,16 @@ const CFG = {
   sim: { step: 1 / 60, maxSteps: 5 },
   quality: { maxDpr: 2, minDpr: 0.6, downFps: 50, upFps: 58, sampleSec: 1.5, cullFar: 72, cullNear: 46 },
   world: {
-    minX: -130, maxX: 130, minZ: -90, maxZ: 1062, // set from the areas below
+    minX: -210, maxX: 210, minZ: -90, maxZ: 1062, // maxZ set from the areas below; every x layout scales with maxX
     town: { x: 0, z: -58, r: 20 },
     spawn: { x: 0, z: -49 },
     // Base Camp plus 29 areas in 6 biomes, each a band of the road north (see WORLD_AREAS above).
     // Monster level rises the deeper you go inside an area (RuneScape-style wilderness).
     zones: [], // WORLD_AREAS, filled in below
-    // Monster dens: packed camps that respawn fast (one per area, built below). Best XP per minute, but they hit back hard.
+    // Monster dens: packed camps that respawn fast (two per area, built below). Best XP per minute, but they hit back hard.
     dens: [],
     denRespawn: 7, denLevelBonus: 2, denXp: 1.15, elitesPerZone: 1, eliteRespawn: 50,
-    enemyRespawn: 11, spawnGap: 0.2, spawnSafeRadius: 12, patrolDensity: 1.25, catchupGap: 4, berryCount: 14, berryRespawn: 18,
+    enemyRespawn: 11, spawnGap: 0.2, spawnSafeRadius: 12, patrolDensity: 1.5, catchupGap: 4, berryCount: 14, berryRespawn: 18,
   },
   progression: {
     cap: 100000, xpBase: 55, xpExp: 1.45, xpGrowth: 1.025, classAt: 5,
@@ -1260,9 +1260,9 @@ const CFG = {
     regenAfterHit: 3, levelUpHeal: 0.35,
   },
   jobs: { xpFrac: 0.55, goldBase: 24, goldPerLevel: 9 },
-  player: { speed: 6.4, radius: 0.55, respawn: 3 },
+  player: { speed: 8.0, radius: 0.55, respawn: 3 },
   combat: {
-    dash: { dist: 6.5, time: 0.17, invuln: 0.26, cd: 2.6 },
+    dash: { dist: 7.5, time: 0.17, invuln: 0.26, cd: 2.6 },
     melee: { range: 2.5, arc: 1.15, cd: 0.6, mult: 1.35, knock: 6 },
     superPerHit: 0.12, critChance: 0.08, critMult: 1.6, variance: 0.1,
     combatLinger: 3.5, hitFlash: 0.12,
@@ -1344,6 +1344,7 @@ const CFG = {
     // contact pushing: heavier bodies shove lighter ones; poise scales incoming knockback, at most once per knockGap
     mass: { swarm: 0.6, charger: 1, brute: 2.5, ambusher: 1.5, shooter: 0.8, spray: 0.8, turret: 1.5, legacy: 1, player: 1, elite: 2 },
     knockRes: { brute: 0.8, elite: 0.8, other: 0.4 }, knockGap: 0.4,
+    speedMult: 1.15, // world monsters keep pace with the faster v10 hero
   },
   boss: {
     name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 25, duration: 120,
@@ -1498,7 +1499,7 @@ const CFG = {
   economy: { premiumCurrency: null },
 };
 
-// ---- World v9 (Espaahhh's map): Base Camp + 29 areas in 6 biomes, levels 1-210 ----------------------
+// ---- World v10 (Espaahhh's map, widened): Base Camp + 29 areas in 6 biomes, levels 1-210 ----------------------
 // Every area is one band of the long road north. theme = floor/decoration style (0 meadow, 1 forest,
 // 2 frost, 3 ember, 4 arcane, 5 deep water, 6 celestial); colours and props are tuned per area below.
 const BIOMES = [
@@ -1566,12 +1567,21 @@ const AREA_ROWS = [
   ['Celestial Spire', 5, [200, 210], 6, 'archon', 'cosmicweaver', 'Spire Gates', 'Throne of Dawn', { ground: 'celestial', fog: 0xc9a77a, sky: [0x7a5a3a, 0xf0d8b0], mm: '#efe0bb', deco: { ruins: 8 } }],
 ];
 const AREA_PATH = { 0: 'path', 1: 'path', 2: 'snowPath', 3: 'emberPath', 4: 'starPath', 5: 'abyssPath', 6: 'celestialPath' };
+// One hero landmark per area (art id in POI_ART, world-art.js) so every band of the road has its own silhouette.
+const AREA_LANDMARKS = [['windmill', 'Old Windmill'], ['bell', 'Sunken Bell'], ['fairyRing', 'Fairy Ring'], ['elderStump', 'Elder Stump'], ['ribcage', "Giant's Ribcage"],
+  ['windArch', 'Wind Arch'], ['colossus', 'Broken Colossus'], ['sundial', 'Mirage Sundial'], ['blackSpire', 'Black Spire'], ['frozenFall', 'Frozen Waterfall'],
+  ['mineHead', 'Old Mine Lift'], ['cauldron', "Witch's Cauldron"], ['forge', 'Lava Forge'], ['chapel', 'Burnt Chapel'], ['dragonSkull', 'Dragon Skull'],
+  ['brazier', 'Sapphire Brazier'], ['crystalArch', 'Crystal Arch'], ['invertedTower', 'Upturned Tower'], ['mirrors', 'Mirror Maze'], ['crashedStar', 'Crashed Star'],
+  ['ghostShip', 'Ghost Ship'], ['waterwheel', 'Old Waterwheel'], ['clam', 'Pearl Clam'], ['lighthouse', 'Dark Lighthouse'], ['spine', 'Leviathan Spine'],
+  ['geyser', 'Great Geyser'], ['chimney', 'Glass Chimney'], ['stormRod', 'Storm Rod'], ['moonGate', 'Moon Gate'], ['skyAltar', 'Sky Altar']];
+const MINOR_POIS = [['camp', "Hunter's Camp"], ['tower', 'Ruined Tower'], ['statue', 'Old Statue'], ['well', 'Wishing Well'], ['cart', 'Broken Cart'], ['graves', 'Graveyard'], ['obelisk', 'Rune Obelisk'], ['shack', 'Hermit Shack']];
 function buildWorldAreas() {
   let z = -90; const out = [];
   AREA_ROWS.forEach(([name, biome, lvl, theme, enemy, alt, den, lair, look], i) => {
-    const B = BIOMES[biome], len = i === 0 ? 70 : (lvl[1] - lvl[0] >= 10 ? 110 : 90);
+    // v10: wider and longer bands (70 / 110 / 135 m) so there is room to explore between camps
+    const B = BIOMES[biome], len = i === 0 ? 70 : (lvl[1] - lvl[0] >= 10 ? 135 : 110);
     out.push(Object.assign({ name, biome, biomeName: B.name, theme, minLevel: lvl[0], lvl: lvl.slice(), z0: z, z1: z + len, len,
-      enemy: enemy || 'thistlehare', alt: alt || null, count: i === 0 ? 0 : (len >= 110 ? 24 : 20), safe: i === 0, denName: den, lairName: lair,
+      enemy: enemy || 'thistlehare', alt: alt || null, count: i === 0 ? 0 : (len >= 135 ? 24 : 20), safe: i === 0, denName: den, lairName: lair,
       boss: B.boss, bossTint: B.bossTint, coreColor: B.coreColor, bossAcc: B.bossAcc, region: B.region, loot: Math.min(6, Math.floor(lvl[1] / 30)),
       path: AREA_PATH[theme], glow: null, amp: null, deco: {} }, look));
     z += len;
@@ -1581,18 +1591,38 @@ function buildWorldAreas() {
 const WORLD_AREAS = buildWorldAreas();
 CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length - 1].z1 - 3;
 {
-  const W = CFG.world, Z = W.zones;
-  // one boss lair per area (not in Base Camp), waypoint at every area gate, one den per area on alternating sides
+  const W = CFG.world, Z = W.zones, M = W.maxX;
+  const jit = (i, k) => { const v = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return v - Math.floor(v) - 0.5; }; // stable −0.5..0.5
+  // one boss lair per area (not in Base Camp), waypoint at every area gate
   W.lairs = Z.map((zn, i) => zn.safe ? null : { x: 0, z: Math.round(zn.z0 + zn.len * 0.5), name: zn.lairName, zone: i });
   W.lairList = W.lairs.filter(Boolean);
   W.waypoints = [{ name: 'Base Camp Lodestone', x: 9, z: -46, zone: 0 }].concat(Z.slice(1).map((zn, i) => ({ name: zn.name + ' Lodestone', x: 9, z: zn.z0 + 9, zone: i + 1 })));
+  // two dens per area on opposite flanks: A near the gate, B deep in the area (sides alternate per area)
   W.dens = [];
+  Z.forEach((zn, i) => { if (zn.safe) return; const s = i % 2 ? -1 : 1, n = zn.len >= 135 ? 12 : 10;
+    W.dens.push({ name: zn.denName, zone: i, x: s * M * 0.5, z: Math.round(zn.z0 + zn.len * 0.3), r: 13, n });
+    W.dens.push({ name: zn.denName + ' Deep', zone: i, x: -s * M * 0.5, z: Math.round(zn.z0 + zn.len * 0.72), r: 13, n }); });
   // points of interest: { id: 'a07:dungeon:0', zone, x, z, r, kind: landmark|secret|dungeon|node, name, art, lvl, hidden }
+  // ids are stable save keys (profile.secrets / pois / dungeons): never renumber. Resource nodes will use a${zi}:node:${n} (G.nodes).
   W.pois = [];
-  Z.forEach((zn, i) => { if (!zn.safe) W.dens.push({ name: zn.denName, zone: i, x: (i % 2 ? -1 : 1) * 66, z: Math.round(zn.z0 + zn.len * 0.62), r: 13, n: zn.len >= 110 ? 13 : 11 }); });
+  Z.forEach((zn, i) => {
+    const s = i % 2 ? -1 : 1, L = zn.len, z0 = zn.z0, id = (k, n) => `a${String(i).padStart(2, '0')}:${k}:${n}`;
+    const add = (kind, n, x, z, r, name, art, o) => W.pois.push(Object.assign({ id: id(kind, n), zone: i, x: Math.round(x), z: Math.round(z), r, kind, name, art, lvl: zn.lvl[1], hidden: kind === 'secret' }, o));
+    const [art, name] = AREA_LANDMARKS[i], m1 = MINOR_POIS[(i * 3) % MINOR_POIS.length], m2 = MINOR_POIS[(i * 3 + 5) % MINOR_POIS.length];
+    add('landmark', 0, -s * M * (0.4 + jit(i, 1) * 0.1), z0 + L * (0.42 + jit(i, 2) * 0.08), 10, name, art, { major: true });
+    add('landmark', 1, s * M * (0.25 + jit(i, 3) * 0.08), z0 + L * (0.84 + jit(i, 4) * 0.04), 6, m1[1], m1[0]);
+    add('landmark', 2, -s * M * (0.78 + jit(i, 5) * 0.06), z0 + L * (0.17 + jit(i, 6) * 0.04), 6, m2[1], m2[0]);
+    // secrets: a walled pocket against the border forest, entered through one narrow gap (gap = +1 north / −1 south)
+    add('secret', 0, -s * (M - 9), z0 + L * 0.5, 9, 'Hidden Cache', 'cache', { gap: jit(i, 7) < 0 ? -1 : 1 });
+    if (L >= 135) add('secret', 1, s * (M - 9), z0 + L * 0.38, 9, 'Forgotten Hoard', 'cache', { gap: jit(i, 8) < 0 ? -1 : 1 });
+    // cave entrance from area 3 on (Agent D: dungeon instances); the mouth faces the road, the rock mound sits outward
+    if (i >= 3) add('dungeon', 0, s * M * 0.8, z0 + L * 0.72, 9, zn.denName + ' Caves', 'cave', { face: -s });
+  });
+  W.secrets = W.pois.filter((q) => q.kind === 'secret');
+  W.mmScale = Math.min(1, 1600 / (W.maxZ - W.minZ)); // minimap base canvas px per metre
   // two challenge shrines per biome (second and fourth area)
   CFG.shrines.list = [];
-  BIOMES.forEach((B, bi) => { const ids = Z.map((zn, i) => (zn.biome === bi && !zn.safe ? i : -1)).filter((i) => i >= 0); [ids[1], ids[3]].forEach((i, k) => { if (i == null) return; const zn = Z[i]; CFG.shrines.list.push({ x: k ? 40 : -40, z: Math.round(zn.z0 + zn.len * 0.3) }); }); });
+  BIOMES.forEach((B, bi) => { const ids = Z.map((zn, i) => (zn.biome === bi && !zn.safe ? i : -1)).filter((i) => i >= 0); [ids[1], ids[3]].forEach((i, k) => { if (i == null) return; const zn = Z[i]; CFG.shrines.list.push({ x: Math.round((k ? 1 : -1) * M * 0.2), z: Math.round(zn.z0 + zn.len * 0.3) }); }); });
   CFG.pellets.perZone = Z.map((zn) => (zn.safe ? 20 : Math.round(zn.len * 0.36)));
   CFG.pellets.zoneMult = Z.map((zn, i) => 1 + 1.6 * i / (Z.length - 1));
 }
@@ -2107,6 +2137,7 @@ const ACHIEVEMENTS = [
   { id: 'case100', name: 'Treasure Hunter', desc: 'Open 100 treasure chests', xp: 1, check: (p) => (p.stats.cases || 0) >= 100 },
   { id: 'exped10', name: 'Expedition Leader', desc: 'Bring back 10 expeditions', xp: 0.8, check: (p) => (p.stats.expeds || 0) >= 10 },
   { id: 'kills10k', name: 'Ten Thousand', desc: 'Defeat 10,000 monsters', xp: 1, check: (p) => p.stats.kills >= 10000 },
+  { id: 'secret', name: 'Secret Seeker', desc: 'Find a hidden secret location', xp: 0.6, check: (p) => Object.keys(p.secrets || {}).length >= 1 },
 ];
 const BOT_NAMES = ['Kaito', 'Mira', 'Ren', 'Sora', 'Yuki', 'Haru', 'Nova', 'Leo', 'Aiko', 'Taro', 'Rin', 'Zed', 'Kiko', 'Juno', 'Hiro', 'Mei', 'Dax', 'Lumi', 'Riku', 'Ayla', 'Toma', 'Suki', 'Vex', 'Nori'];
 const BOT_COLORS = [0xe76f51, 0x2a9d8f, 0xe9c46a, 0x8ab17d, 0xf4a261, 0x6d597a, 0x4d908e, 0xb56576, 0x277da1, 0xf94144, 0x90be6d, 0x577590];
@@ -2123,7 +2154,7 @@ function defaultProfile() {
     treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
-    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 9, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {},
+    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {},
     job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, pixel: false, bots: false, npcs: false, autoHunt: false },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
@@ -2197,6 +2228,11 @@ function sanitizeProfile(p) {
     if (out.job && out.job.type === 'kill' && JOB[out.job.target]) out.job = Object.assign({}, out.job, { target: JOB[out.job.target] });
     out.worldVersion = 9;
   }
+  if ((out.worldVersion | 0) < 10) {
+    // v10: same 30 areas in the same order (waypoint/zone indices stay valid), just wider; adds secrets, POIs and dungeons
+    out.worldVersion = 10;
+  }
+  for (const k of ['secrets', 'pois', 'dungeons']) if (!out[k] || typeof out[k] !== 'object' || Array.isArray(out[k])) out[k] = {};
   if (CFG.world && CFG.world.waypoints) out.waypoints = out.waypoints.filter((i) => Number.isInteger(i) && i >= 0 && i < CFG.world.waypoints.length);
   out.essence = Math.max(0, out.essence | 0);
   if (!out.artStars || typeof out.artStars !== 'object') out.artStars = {};
@@ -3144,7 +3180,7 @@ function boundFighter(f, ctx) {
 }
 
 // --- progression ---------------------------------------------------------
-function progressionXpMultiplier(p) { return TEST_MODE ? 100 : (p.settings.fastXp ? P.fastXpMult : 1); }
+function progressionXpMultiplier(p) { return (TEST_MODE ? 100 : (p.settings.fastXp ? P.fastXpMult : 1)) * (1 + 0.005 * Object.keys(p.secrets || {}).length); } // +0.5% per secret found
 function addXp(amount, reason) {
   const p = G.profile;
   if (p.level >= P.cap) return;
@@ -3444,11 +3480,13 @@ function enemySpawnClear(e, x, z, respawning) {
   if (distToTown(x, z) < W.town.r + 12) return false;
   if (W.waypoints.some(w => Math.hypot(x - w.x, z - w.z) < 10)) return false;
   if (W.lairList.some(l => Math.hypot(x - l.x, z - l.z) < 10)) return false;
+  if (W.pois.some(q => q.zone === e.zone && Math.hypot(x - q.x, z - q.z) < q.r)) return false; // landmarks, caves and secret pockets stay monster-free
   // Test the padded body, including obstacles whose centres occupy another grid cell.
   if (G.obstacles && G.obstacles.list.some(o => Math.hypot(x - o.x, z - o.z) < o.r + pad)) return false;
   if (respawning && G.player.alive && Math.hypot(x - G.player.x, z - G.player.z) < W.spawnSafeRadius) return false;
   return true;
 }
+const PATROL_LANES = [-0.8, -0.5, -0.17, 0.17, 0.5, 0.8]; // × maxX
 function enemySpot(e, respawning = false) {
   const W = CFG.world;
   if (e.rift) {
@@ -3465,7 +3503,7 @@ function enemySpot(e, respawning = false) {
   const Z = W.zones[e.zone], z0 = e.zone === 0 ? W.town.z + W.town.r + 12 : Z.z0 + 5, z1 = Math.min(Z.z1, W.maxZ) - 5;
   if (e.patrol != null) {
     // Six lanes cover the road and flanks; depth bands scale with each area’s population.
-    const lanes = [-104, -62, -18, 18, 62, 104], row = Math.floor(e.patrol / lanes.length), dz = (z1 - z0) / Math.ceil(patrolCountFor(e.zone) / lanes.length);
+    const lanes = PATROL_LANES.map((k) => k * W.maxX), row = Math.floor(e.patrol / lanes.length), dz = (z1 - z0) / Math.ceil(patrolCountFor(e.zone) / lanes.length);
     for (let i = 0; i < 48; i++) {
       const x = lanes[e.patrol % lanes.length] + rand(-10, 10), z = z0 + (row + 0.5) * dz + rand(-dz * 0.4, dz * 0.4);
       if (enemySpawnClear(e, x, z, respawning)) return { x, z };
@@ -3793,10 +3831,12 @@ function initHubWorld() {
     if (!zn.safe) for (let i = 0; i < W.elitesPerZone; i++) G.enemies.push(makeEnemy(zoneType(zi), zi, { elite: true }));
   });
   W.dens.forEach((D, di) => {
-    const type = W.zones[D.zone].enemy;
     for (let i = 0; i < D.n; i++) G.enemies.push(makeEnemy(zoneType(D.zone, true), D.zone, { den: di }));
-    G.enemies.push(makeEnemy(type, D.zone, { den: di, elite: true }));
+    G.enemies.push(makeEnemy(W.zones[D.zone].enemy, D.zone, { den: di, elite: true }));
   });
+  // per-zone buckets: body separation only scans the monsters of the same area (zones never change on respawn)
+  G.enemiesByZone = W.zones.map(() => []);
+  for (const e of G.enemies) { e.zb = true; G.enemiesByZone[e.zone].push(e); }
   // NPCs
   G.npcsAll = G.npcs = NPC_DEFS.map((d) => ({ id: d.id, def: d, x: d.x, z: d.z, facing: Math.atan2(W.town.x - d.x, W.town.z - d.z), kind: 'npc', moveAmt: 0, alive: true }));
   // XP orbs (agar.io style)
@@ -3835,6 +3875,7 @@ function stepHub(dt) {
   if (pl.alive) CFG.world.waypoints.forEach((w, i) => {
     if (!G.profile.waypoints.includes(i) && Math.hypot(pl.x - w.x, pl.z - w.z) < 7) { G.profile.waypoints.push(i); G.dirty = true; ev({ t: 'waypoint', name: w.name }); }
   });
+  if (pl.alive) for (const sc of W.secrets) if (!G.profile.secrets[sc.id] && Math.abs(pl.z - sc.z) < 4 && Math.hypot(pl.x - sc.x, pl.z - sc.z) < 4) findSecret(sc);
   // XP orbs and challenge shrines
   stepPellets(dt);
   stepShrines(dt);
@@ -3864,6 +3905,15 @@ function stepHub(dt) {
   if (G.boss && Math.hypot(pl.x - G.boss.x, pl.z - G.boss.z) < 22) markCombat();
 }
 
+// secrets: first visit pays an epic+ item, gems, shards and a permanent +0.5% XP (progressionXpMultiplier)
+function findSecret(sc) {
+  const p = G.profile, gems = 15 + sc.zone;
+  p.secrets[sc.id] = Date.now(); G.dirty = true;
+  grantItem(makeItem(pick(CFG.gear.slots), Math.random() < 0.2 ? 'legendary' : 'epic', sc.lvl + 2 + tierAdd()), 'shrine', { zone: sc.zone });
+  addEssence(gems); dropShards(2);
+  toast(`Secret found: ${sc.name}! +${gems} gems · +0.5% XP for good`, 'good');
+  ev({ t: 'secret', id: sc.id, x: sc.x, z: sc.z }); checkAchievements();
+}
 function hubBotThink(b, dt) {
   const ai = b.ai, it = b.intent, W = CFG.world;
   it.mx = it.mz = 0; it.aiming = false;
@@ -3987,14 +4037,15 @@ function stepEnemy(e, dt) {
     e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.3 * dt);
     if (!plSafe && dp < d.aggro * 0.6) e.state = 'chase';
   }
-  e.x += mx * sp * slow * dt; e.z += mz * sp * slow * dt;
+  const spm = e.rift ? 1 : CFG.enemies.speedMult || 1; e.x += mx * sp * slow * spm * dt; e.z += mz * sp * slow * spm * dt;
   e.moveAmt = lerp(e.moveAmt || 0, sp > 0 ? Math.min(1, sp / d.speed) : 0, 1 - Math.exp(-dt * 10));
   if (sp > 0 && e.state !== 'chase') e.facing = Math.atan2(mx, mz);
   e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
   trackVel(e, dt);
   // keep bodies apart: enemy vs player and vs other enemies
   if (pl.alive) separate(e, pl);
-  for (let i = 0; i < G.enemies.length; i++) { const o = G.enemies[i]; if (o !== e && o.alive && o.zone === e.zone) separate(e, o); }
+  const near = e.zb && G.enemiesByZone ? G.enemiesByZone[e.zone] : G.enemies;
+  for (let i = 0; i < near.length; i++) { const o = near[i]; if (o !== e && o.alive && o.zone === e.zone) separate(e, o); }
   collideObstacles(e);
   if (e.rift) { riftClamp(e, e.r); return; }
   // stay in own zone and out of town
@@ -6126,7 +6177,8 @@ function buildHub() {
   });
   worldArt.town(tParts, T, houseAngles, P2);
   const townMesh = new THREE.Mesh(mergeParts(tParts), worldArt.material); townMesh.castShadow = true; townMesh.receiveShadow = true; hubGroup.add(townMesh);
-  W.zones.forEach((zn, zi) => worldArt.zoneLandmarks(hubGroup, W, zi, REGION_ART[zn.theme]));
+  // per-area art: gate trims, lair ring, skyline and this area's points of interest (their colliders join the grid first)
+  W.zones.forEach((zn, zi) => { for (const o of worldArt.zoneLandmarks(hubGroup, W, zi, REGION_ART[zn.theme])) grid.add(o); });
   {
     const wim = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.45, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }), W.waypoints.length);
     wim.instanceMatrix.setUsage(THREE.DynamicDrawUsage); wim.frustumCulled = false; wim.setColorAt(0, _col.set(0xffffff)); hubGroup.add(wim); hubParts.wpIM = wim;
@@ -6152,6 +6204,8 @@ function buildHub() {
     for (const w of W.waypoints) if (Math.hypot(x - w.x, z - w.z) < 4) return false;
     if (Math.hypot(x - CFG.rift.gate.x, z - CFG.rift.gate.z) < 5) return false;
     for (const sp of CFG.shrines.list) if (Math.hypot(x - sp.x, z - sp.z) < 8) return false;
+    // POIs keep a ring of open ground; secret pockets get extra so nothing plugs the gap from outside
+    for (const q of W.pois) { const r = q.r + (q.kind === 'secret' ? 5 : 2); if (Math.abs(z - q.z) < r && Math.hypot(x - q.x, z - q.z) < r) return false; }
     let hit = false; grid.query(x, z, (o) => { if (Math.hypot(x - o.x, z - o.z) < o.r + pad) hit = true; });
     return !hit;
   }
@@ -6203,9 +6257,9 @@ function buildHub() {
   const THEME_LEAF = [P2.roundLeaf, P2.pine, P2.snowPine, [0x3a2a24, 0x4a3328], [0x433d70, 0x534a86], [0x1f5a63, 0x2a7078], [0xd9c48f, 0xe8d3a3]];
   const THEME_RUIN = [0x7d786c, 0x7d786c, 0xaab8c4, 0x4a3a34, 0x5b5390, 0x2f5560, 0xe3d8bd];
   const TREE_TOP = { round: 'roundLeaf', pine: 'pine', snowPine: 'snowPine', dead: 'deadTree', crystal: 'crystal', coral: 'coral', blossom: 'blossom' };
-  const lava = [];
+  const lava = [], WK = (W.maxX - W.minX) / 260 * 0.8; // counts were tuned for a 260 m wide map; v10 is a bit more open per m²
   W.zones.forEach((zn, zi) => {
-    const th = zn.theme, D = Object.assign({}, THEME_DECO[th], zn.deco || {}), k = zn.len / 160, cnt = (v) => Math.round((v || 0) * k);
+    const th = zn.theme, D = Object.assign({}, THEME_DECO[th], zn.deco || {}), k = zn.len / 160 * WK, cnt = (v) => Math.round((v || 0) * k);
     const trunks = [], tops = [], rocks = [], tufts = [], flowers = [], spikes = [];
     const z0 = Math.max(zn.z0, W.minZ), z1 = Math.min(zn.z1, W.maxZ);
     const rnd = () => ({ x: W.minX + 2 + rng() * (W.maxX - W.minX - 4), z: z0 + 2 + rng() * (z1 - z0 - 4) });
@@ -6308,7 +6362,7 @@ function buildHub() {
   }
   // a deep forest wall around the play area (several rows), so the world ends in woods, not a flat plain
   const bTrunks = [], bTops = [];
-  for (let i = 0; i < Math.round(1400 * (W.maxZ - W.minZ) / 1150); i++) {
+  for (let i = 0; i < Math.min(4500, Math.round(1400 * (W.maxZ - W.minZ) / 1150)); i++) {
     const side = i % 4; let x, z;
     if (side < 2) { x = side ? W.maxX + 3 + Math.pow(rng(), 0.7) * 34 : W.minX - 3 - Math.pow(rng(), 0.7) * 34; z = W.minZ - 20 + rng() * (W.maxZ - W.minZ + 40); }
     else { z = side === 2 ? W.minZ - 3 - rng() * 26 : W.maxZ + 3 + rng() * 26; x = W.minX - 30 + rng() * (W.maxX - W.minX + 60); }
@@ -7686,7 +7740,7 @@ function updateObjective() {
     else {
       text = `${j.title}: ${j.progress}/${j.count}`;
       const zi = Math.max(1, CFG.world.zones.findIndex((zn) => zn.enemy === j.target || zn.alt === j.target));
-      if (zoneAt(pl.z) !== zi || distToTown(pl.x, pl.z) < CFG.world.town.r + 4) { const D = CFG.world.dens.find((d) => d.zone === zi); tx = D ? D.x : 0; tz = D ? D.z : CFG.world.zones[zi].z0 + 25; }
+      if (zoneAt(pl.z) !== zi || distToTown(pl.x, pl.z) < CFG.world.town.r + 4) { let D = null, bd = 1e9; for (const d of CFG.world.dens) { const k = d.zone === zi ? Math.hypot(d.x - pl.x, d.z - pl.z) : 1e9; if (k < bd) { bd = k; D = d; } } tx = D ? D.x : 0; tz = D ? D.z : CFG.world.zones[zi].z0 + 25; }
     }
   } else if (G.started) {
     const avail = NPC_DEFS.find((n) => n.role === 'job' && p.level >= n.minLevel && n.id === 'ida') || null;
@@ -8552,12 +8606,13 @@ function updateArenaProps(t) {
 }
 // --- minimap: a window that follows you over the big world (tap to enlarge) ---
 const MM = { base: null, t: 0, big: false };
-const MW = CFG.world.maxX - CFG.world.minX, MH = CFG.world.maxZ - CFG.world.minZ; // one pixel per world unit
+// Map units are metres; the static base canvas is stored at MS px/m (≈190×1600 for the 3.5 km road) and stretched on draw.
+const MS = CFG.world.mmScale || 1, MW = CFG.world.maxX - CFG.world.minX, MH = CFG.world.maxZ - CFG.world.minZ;
 const mmX = (x) => (CFG.world.maxX - x); // screen-right is world -x in our top view
 const mmY = (z) => (CFG.world.maxZ - z);
 function mmBuildBase() {
-  const c = document.createElement('canvas'); c.width = MW; c.height = MH;
-  const g = c.getContext('2d'), W = CFG.world;
+  const c = document.createElement('canvas'); c.width = Math.ceil(MW * MS); c.height = Math.ceil(MH * MS);
+  const g = c.getContext('2d'), W = CFG.world; g.scale(MS, MS);
   W.zones.forEach((zn, i) => { const y0 = mmY(Math.min(zn.z1, W.maxZ)), y1 = mmY(Math.max(zn.z0, W.minZ)); g.fillStyle = zn.mm; g.fillRect(0, y0, MW, y1 - y0); });
   g.strokeStyle = 'rgba(210,176,123,.9)'; g.lineWidth = 4; g.beginPath(); g.moveTo(mmX(0), mmY(W.town.z)); g.lineTo(mmX(0), mmY(W.maxZ - 6)); g.stroke();
   g.fillStyle = '#e8d5a6'; g.beginPath(); g.arc(mmX(W.town.x), mmY(W.town.z), W.town.r, 0, Math.PI * 2); g.fill();
@@ -8565,6 +8620,7 @@ function mmBuildBase() {
   g.fillStyle = '#ff5d8f'; g.beginPath(); g.arc(mmX(CFG.rift.gate.x), mmY(CFG.rift.gate.z), 3, 0, Math.PI * 2); g.fill();
   for (const l of W.lairList) { g.fillStyle = 'rgba(40,35,50,.4)'; g.beginPath(); g.arc(mmX(l.x), mmY(l.z), 10, 0, Math.PI * 2); g.fill(); }
   for (const D of W.dens) { g.fillStyle = 'rgba(160,30,40,.35)'; g.beginPath(); g.arc(mmX(D.x), mmY(D.z), D.r, 0, Math.PI * 2); g.fill(); }
+  for (const q of W.pois) if (!q.hidden) { g.fillStyle = q.kind === 'dungeon' ? 'rgba(20,14,10,.7)' : 'rgba(60,50,40,.35)'; g.beginPath(); g.arc(mmX(q.x), mmY(q.z), q.kind === 'dungeon' ? 6 : q.major ? 7 : 4, 0, Math.PI * 2); g.fill(); }
   MM.base = c;
 }
 function mmStar(g, x, y, r, fill) {
@@ -8598,14 +8654,21 @@ function drawMinimap() {
   }
   if (!MM.base) mmBuildBase();
   const W = CFG.world, pl = G.player;
-  const winW = MM.big ? 240 : 106, winH = winW * H2 / W2, sc = W2 / winW, u = winW / 172;
+  const winW = MM.big ? 300 : 120, winH = winW * H2 / W2, sc = W2 / winW, u = winW / 172;
   const ox = clamp(mmX(pl.x) - winW / 2, 0, MW - winW), oy = clamp(mmY(pl.z) - winH * 0.62, 0, Math.max(0, MH - winH));
   g.setTransform(sc, 0, 0, sc, -ox * sc, -oy * sc);
-  g.drawImage(MM.base, 0, 0);
+  g.drawImage(MM.base, 0, 0, MW, MH);
   for (let i = 1; i < W.zones.length; i++) {
     const zn = W.zones[i], y = mmY(zn.z0), locked = p.level < zn.minLevel;
     g.strokeStyle = locked ? '#ff4d5a' : '#58e08a'; g.lineWidth = 2 * u; g.setLineDash(locked ? [5 * u, 3 * u] : []);
     g.beginPath(); g.moveTo(0, y); g.lineTo(MW, y); g.stroke(); g.setLineDash([]);
+  }
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const q of W.pois) {
+    if (q.hidden && !p.secrets[q.id]) continue; // undiscovered secrets never show
+    if (Math.abs(q.z - pl.z) > winH) continue;
+    g.font = `bold ${(q.major || q.kind === 'dungeon' ? 9 : 7) * u}px Rubik, sans-serif`; g.fillStyle = q.kind === 'dungeon' ? '#ffb347' : q.kind === 'secret' ? '#fff07a' : '#e8d5a6';
+    g.fillText(q.kind === 'dungeon' ? '⛫' : q.kind === 'secret' ? '✦' : q.major ? '★' : '•', mmX(q.x), mmY(q.z));
   }
   for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('☠', mmX(D.x), mmY(D.z)); }
   for (const e of mpVisible()) { g.fillStyle = '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }

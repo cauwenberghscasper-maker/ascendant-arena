@@ -229,7 +229,8 @@ function buildHub() {
   });
   worldArt.town(tParts, T, houseAngles, P2);
   const townMesh = new THREE.Mesh(mergeParts(tParts), worldArt.material); townMesh.castShadow = true; townMesh.receiveShadow = true; hubGroup.add(townMesh);
-  W.zones.forEach((zn, zi) => worldArt.zoneLandmarks(hubGroup, W, zi, REGION_ART[zn.theme]));
+  // per-area art: gate trims, lair ring, skyline and this area's points of interest (their colliders join the grid first)
+  W.zones.forEach((zn, zi) => { for (const o of worldArt.zoneLandmarks(hubGroup, W, zi, REGION_ART[zn.theme])) grid.add(o); });
   {
     const wim = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.45, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }), W.waypoints.length);
     wim.instanceMatrix.setUsage(THREE.DynamicDrawUsage); wim.frustumCulled = false; wim.setColorAt(0, _col.set(0xffffff)); hubGroup.add(wim); hubParts.wpIM = wim;
@@ -255,6 +256,8 @@ function buildHub() {
     for (const w of W.waypoints) if (Math.hypot(x - w.x, z - w.z) < 4) return false;
     if (Math.hypot(x - CFG.rift.gate.x, z - CFG.rift.gate.z) < 5) return false;
     for (const sp of CFG.shrines.list) if (Math.hypot(x - sp.x, z - sp.z) < 8) return false;
+    // POIs keep a ring of open ground; secret pockets get extra so nothing plugs the gap from outside
+    for (const q of W.pois) { const r = q.r + (q.kind === 'secret' ? 5 : 2); if (Math.abs(z - q.z) < r && Math.hypot(x - q.x, z - q.z) < r) return false; }
     let hit = false; grid.query(x, z, (o) => { if (Math.hypot(x - o.x, z - o.z) < o.r + pad) hit = true; });
     return !hit;
   }
@@ -306,9 +309,9 @@ function buildHub() {
   const THEME_LEAF = [P2.roundLeaf, P2.pine, P2.snowPine, [0x3a2a24, 0x4a3328], [0x433d70, 0x534a86], [0x1f5a63, 0x2a7078], [0xd9c48f, 0xe8d3a3]];
   const THEME_RUIN = [0x7d786c, 0x7d786c, 0xaab8c4, 0x4a3a34, 0x5b5390, 0x2f5560, 0xe3d8bd];
   const TREE_TOP = { round: 'roundLeaf', pine: 'pine', snowPine: 'snowPine', dead: 'deadTree', crystal: 'crystal', coral: 'coral', blossom: 'blossom' };
-  const lava = [];
+  const lava = [], WK = (W.maxX - W.minX) / 260 * 0.8; // counts were tuned for a 260 m wide map; v10 is a bit more open per m²
   W.zones.forEach((zn, zi) => {
-    const th = zn.theme, D = Object.assign({}, THEME_DECO[th], zn.deco || {}), k = zn.len / 160, cnt = (v) => Math.round((v || 0) * k);
+    const th = zn.theme, D = Object.assign({}, THEME_DECO[th], zn.deco || {}), k = zn.len / 160 * WK, cnt = (v) => Math.round((v || 0) * k);
     const trunks = [], tops = [], rocks = [], tufts = [], flowers = [], spikes = [];
     const z0 = Math.max(zn.z0, W.minZ), z1 = Math.min(zn.z1, W.maxZ);
     const rnd = () => ({ x: W.minX + 2 + rng() * (W.maxX - W.minX - 4), z: z0 + 2 + rng() * (z1 - z0 - 4) });
@@ -411,7 +414,7 @@ function buildHub() {
   }
   // a deep forest wall around the play area (several rows), so the world ends in woods, not a flat plain
   const bTrunks = [], bTops = [];
-  for (let i = 0; i < Math.round(1400 * (W.maxZ - W.minZ) / 1150); i++) {
+  for (let i = 0; i < Math.min(4500, Math.round(1400 * (W.maxZ - W.minZ) / 1150)); i++) {
     const side = i % 4; let x, z;
     if (side < 2) { x = side ? W.maxX + 3 + Math.pow(rng(), 0.7) * 34 : W.minX - 3 - Math.pow(rng(), 0.7) * 34; z = W.minZ - 20 + rng() * (W.maxZ - W.minZ + 40); }
     else { z = side === 2 ? W.minZ - 3 - rng() * 26 : W.maxZ + 3 + rng() * 26; x = W.minX - 30 + rng() * (W.maxX - W.minX + 60); }

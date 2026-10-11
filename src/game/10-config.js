@@ -15,16 +15,16 @@ const CFG = {
   sim: { step: 1 / 60, maxSteps: 5 },
   quality: { maxDpr: 2, minDpr: 0.6, downFps: 50, upFps: 58, sampleSec: 1.5, cullFar: 72, cullNear: 46 },
   world: {
-    minX: -130, maxX: 130, minZ: -90, maxZ: 1062, // set from the areas below
+    minX: -210, maxX: 210, minZ: -90, maxZ: 1062, // maxZ set from the areas below; every x layout scales with maxX
     town: { x: 0, z: -58, r: 20 },
     spawn: { x: 0, z: -49 },
     // Base Camp plus 29 areas in 6 biomes, each a band of the road north (see WORLD_AREAS above).
     // Monster level rises the deeper you go inside an area (RuneScape-style wilderness).
     zones: [], // WORLD_AREAS, filled in below
-    // Monster dens: packed camps that respawn fast (one per area, built below). Best XP per minute, but they hit back hard.
+    // Monster dens: packed camps that respawn fast (two per area, built below). Best XP per minute, but they hit back hard.
     dens: [],
     denRespawn: 7, denLevelBonus: 2, denXp: 1.15, elitesPerZone: 1, eliteRespawn: 50,
-    enemyRespawn: 11, spawnGap: 0.2, spawnSafeRadius: 12, patrolDensity: 1.25, catchupGap: 4, berryCount: 14, berryRespawn: 18,
+    enemyRespawn: 11, spawnGap: 0.2, spawnSafeRadius: 12, patrolDensity: 1.5, catchupGap: 4, berryCount: 14, berryRespawn: 18,
   },
   progression: {
     cap: 100000, xpBase: 55, xpExp: 1.45, xpGrowth: 1.025, classAt: 5,
@@ -40,9 +40,9 @@ const CFG = {
     regenAfterHit: 3, levelUpHeal: 0.35,
   },
   jobs: { xpFrac: 0.55, goldBase: 24, goldPerLevel: 9 },
-  player: { speed: 6.4, radius: 0.55, respawn: 3 },
+  player: { speed: 8.0, radius: 0.55, respawn: 3 },
   combat: {
-    dash: { dist: 6.5, time: 0.17, invuln: 0.26, cd: 2.6 },
+    dash: { dist: 7.5, time: 0.17, invuln: 0.26, cd: 2.6 },
     melee: { range: 2.5, arc: 1.15, cd: 0.6, mult: 1.35, knock: 6 },
     superPerHit: 0.12, critChance: 0.08, critMult: 1.6, variance: 0.1,
     combatLinger: 3.5, hitFlash: 0.12,
@@ -124,6 +124,7 @@ const CFG = {
     // contact pushing: heavier bodies shove lighter ones; poise scales incoming knockback, at most once per knockGap
     mass: { swarm: 0.6, charger: 1, brute: 2.5, ambusher: 1.5, shooter: 0.8, spray: 0.8, turret: 1.5, legacy: 1, player: 1, elite: 2 },
     knockRes: { brute: 0.8, elite: 0.8, other: 0.4 }, knockGap: 0.4,
+    speedMult: 1.15, // world monsters keep pace with the faster v10 hero
   },
   boss: {
     name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 25, duration: 120,

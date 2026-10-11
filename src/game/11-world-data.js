@@ -1,4 +1,4 @@
-// ---- World v9 (Espaahhh's map): Base Camp + 29 areas in 6 biomes, levels 1-210 ----------------------
+// ---- World v10 (Espaahhh's map, widened): Base Camp + 29 areas in 6 biomes, levels 1-210 ----------------------
 // Every area is one band of the long road north. theme = floor/decoration style (0 meadow, 1 forest,
 // 2 frost, 3 ember, 4 arcane, 5 deep water, 6 celestial); colours and props are tuned per area below.
 const BIOMES = [
@@ -66,12 +66,21 @@ const AREA_ROWS = [
   ['Celestial Spire', 5, [200, 210], 6, 'archon', 'cosmicweaver', 'Spire Gates', 'Throne of Dawn', { ground: 'celestial', fog: 0xc9a77a, sky: [0x7a5a3a, 0xf0d8b0], mm: '#efe0bb', deco: { ruins: 8 } }],
 ];
 const AREA_PATH = { 0: 'path', 1: 'path', 2: 'snowPath', 3: 'emberPath', 4: 'starPath', 5: 'abyssPath', 6: 'celestialPath' };
+// One hero landmark per area (art id in POI_ART, world-art.js) so every band of the road has its own silhouette.
+const AREA_LANDMARKS = [['windmill', 'Old Windmill'], ['bell', 'Sunken Bell'], ['fairyRing', 'Fairy Ring'], ['elderStump', 'Elder Stump'], ['ribcage', "Giant's Ribcage"],
+  ['windArch', 'Wind Arch'], ['colossus', 'Broken Colossus'], ['sundial', 'Mirage Sundial'], ['blackSpire', 'Black Spire'], ['frozenFall', 'Frozen Waterfall'],
+  ['mineHead', 'Old Mine Lift'], ['cauldron', "Witch's Cauldron"], ['forge', 'Lava Forge'], ['chapel', 'Burnt Chapel'], ['dragonSkull', 'Dragon Skull'],
+  ['brazier', 'Sapphire Brazier'], ['crystalArch', 'Crystal Arch'], ['invertedTower', 'Upturned Tower'], ['mirrors', 'Mirror Maze'], ['crashedStar', 'Crashed Star'],
+  ['ghostShip', 'Ghost Ship'], ['waterwheel', 'Old Waterwheel'], ['clam', 'Pearl Clam'], ['lighthouse', 'Dark Lighthouse'], ['spine', 'Leviathan Spine'],
+  ['geyser', 'Great Geyser'], ['chimney', 'Glass Chimney'], ['stormRod', 'Storm Rod'], ['moonGate', 'Moon Gate'], ['skyAltar', 'Sky Altar']];
+const MINOR_POIS = [['camp', "Hunter's Camp"], ['tower', 'Ruined Tower'], ['statue', 'Old Statue'], ['well', 'Wishing Well'], ['cart', 'Broken Cart'], ['graves', 'Graveyard'], ['obelisk', 'Rune Obelisk'], ['shack', 'Hermit Shack']];
 function buildWorldAreas() {
   let z = -90; const out = [];
   AREA_ROWS.forEach(([name, biome, lvl, theme, enemy, alt, den, lair, look], i) => {
-    const B = BIOMES[biome], len = i === 0 ? 70 : (lvl[1] - lvl[0] >= 10 ? 110 : 90);
+    // v10: wider and longer bands (70 / 110 / 135 m) so there is room to explore between camps
+    const B = BIOMES[biome], len = i === 0 ? 70 : (lvl[1] - lvl[0] >= 10 ? 135 : 110);
     out.push(Object.assign({ name, biome, biomeName: B.name, theme, minLevel: lvl[0], lvl: lvl.slice(), z0: z, z1: z + len, len,
-      enemy: enemy || 'thistlehare', alt: alt || null, count: i === 0 ? 0 : (len >= 110 ? 24 : 20), safe: i === 0, denName: den, lairName: lair,
+      enemy: enemy || 'thistlehare', alt: alt || null, count: i === 0 ? 0 : (len >= 135 ? 24 : 20), safe: i === 0, denName: den, lairName: lair,
       boss: B.boss, bossTint: B.bossTint, coreColor: B.coreColor, bossAcc: B.bossAcc, region: B.region, loot: Math.min(6, Math.floor(lvl[1] / 30)),
       path: AREA_PATH[theme], glow: null, amp: null, deco: {} }, look));
     z += len;
@@ -81,18 +90,38 @@ function buildWorldAreas() {
 const WORLD_AREAS = buildWorldAreas();
 CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length - 1].z1 - 3;
 {
-  const W = CFG.world, Z = W.zones;
-  // one boss lair per area (not in Base Camp), waypoint at every area gate, one den per area on alternating sides
+  const W = CFG.world, Z = W.zones, M = W.maxX;
+  const jit = (i, k) => { const v = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return v - Math.floor(v) - 0.5; }; // stable −0.5..0.5
+  // one boss lair per area (not in Base Camp), waypoint at every area gate
   W.lairs = Z.map((zn, i) => zn.safe ? null : { x: 0, z: Math.round(zn.z0 + zn.len * 0.5), name: zn.lairName, zone: i });
   W.lairList = W.lairs.filter(Boolean);
   W.waypoints = [{ name: 'Base Camp Lodestone', x: 9, z: -46, zone: 0 }].concat(Z.slice(1).map((zn, i) => ({ name: zn.name + ' Lodestone', x: 9, z: zn.z0 + 9, zone: i + 1 })));
+  // two dens per area on opposite flanks: A near the gate, B deep in the area (sides alternate per area)
   W.dens = [];
+  Z.forEach((zn, i) => { if (zn.safe) return; const s = i % 2 ? -1 : 1, n = zn.len >= 135 ? 12 : 10;
+    W.dens.push({ name: zn.denName, zone: i, x: s * M * 0.5, z: Math.round(zn.z0 + zn.len * 0.3), r: 13, n });
+    W.dens.push({ name: zn.denName + ' Deep', zone: i, x: -s * M * 0.5, z: Math.round(zn.z0 + zn.len * 0.72), r: 13, n }); });
   // points of interest: { id: 'a07:dungeon:0', zone, x, z, r, kind: landmark|secret|dungeon|node, name, art, lvl, hidden }
+  // ids are stable save keys (profile.secrets / pois / dungeons): never renumber. Resource nodes will use a${zi}:node:${n} (G.nodes).
   W.pois = [];
-  Z.forEach((zn, i) => { if (!zn.safe) W.dens.push({ name: zn.denName, zone: i, x: (i % 2 ? -1 : 1) * 66, z: Math.round(zn.z0 + zn.len * 0.62), r: 13, n: zn.len >= 110 ? 13 : 11 }); });
+  Z.forEach((zn, i) => {
+    const s = i % 2 ? -1 : 1, L = zn.len, z0 = zn.z0, id = (k, n) => `a${String(i).padStart(2, '0')}:${k}:${n}`;
+    const add = (kind, n, x, z, r, name, art, o) => W.pois.push(Object.assign({ id: id(kind, n), zone: i, x: Math.round(x), z: Math.round(z), r, kind, name, art, lvl: zn.lvl[1], hidden: kind === 'secret' }, o));
+    const [art, name] = AREA_LANDMARKS[i], m1 = MINOR_POIS[(i * 3) % MINOR_POIS.length], m2 = MINOR_POIS[(i * 3 + 5) % MINOR_POIS.length];
+    add('landmark', 0, -s * M * (0.4 + jit(i, 1) * 0.1), z0 + L * (0.42 + jit(i, 2) * 0.08), 10, name, art, { major: true });
+    add('landmark', 1, s * M * (0.25 + jit(i, 3) * 0.08), z0 + L * (0.84 + jit(i, 4) * 0.04), 6, m1[1], m1[0]);
+    add('landmark', 2, -s * M * (0.78 + jit(i, 5) * 0.06), z0 + L * (0.17 + jit(i, 6) * 0.04), 6, m2[1], m2[0]);
+    // secrets: a walled pocket against the border forest, entered through one narrow gap (gap = +1 north / −1 south)
+    add('secret', 0, -s * (M - 9), z0 + L * 0.5, 9, 'Hidden Cache', 'cache', { gap: jit(i, 7) < 0 ? -1 : 1 });
+    if (L >= 135) add('secret', 1, s * (M - 9), z0 + L * 0.38, 9, 'Forgotten Hoard', 'cache', { gap: jit(i, 8) < 0 ? -1 : 1 });
+    // cave entrance from area 3 on (Agent D: dungeon instances); the mouth faces the road, the rock mound sits outward
+    if (i >= 3) add('dungeon', 0, s * M * 0.8, z0 + L * 0.72, 9, zn.denName + ' Caves', 'cave', { face: -s });
+  });
+  W.secrets = W.pois.filter((q) => q.kind === 'secret');
+  W.mmScale = Math.min(1, 1600 / (W.maxZ - W.minZ)); // minimap base canvas px per metre
   // two challenge shrines per biome (second and fourth area)
   CFG.shrines.list = [];
-  BIOMES.forEach((B, bi) => { const ids = Z.map((zn, i) => (zn.biome === bi && !zn.safe ? i : -1)).filter((i) => i >= 0); [ids[1], ids[3]].forEach((i, k) => { if (i == null) return; const zn = Z[i]; CFG.shrines.list.push({ x: k ? 40 : -40, z: Math.round(zn.z0 + zn.len * 0.3) }); }); });
+  BIOMES.forEach((B, bi) => { const ids = Z.map((zn, i) => (zn.biome === bi && !zn.safe ? i : -1)).filter((i) => i >= 0); [ids[1], ids[3]].forEach((i, k) => { if (i == null) return; const zn = Z[i]; CFG.shrines.list.push({ x: Math.round((k ? 1 : -1) * M * 0.2), z: Math.round(zn.z0 + zn.len * 0.3) }); }); });
   CFG.pellets.perZone = Z.map((zn) => (zn.safe ? 20 : Math.round(zn.len * 0.36)));
   CFG.pellets.zoneMult = Z.map((zn, i) => 1 + 1.6 * i / (Z.length - 1));
 }

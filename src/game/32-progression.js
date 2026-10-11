@@ -1,5 +1,5 @@
 // --- progression ---------------------------------------------------------
-function progressionXpMultiplier(p) { return TEST_MODE ? 100 : (p.settings.fastXp ? P.fastXpMult : 1); }
+function progressionXpMultiplier(p) { return (TEST_MODE ? 100 : (p.settings.fastXp ? P.fastXpMult : 1)) * (1 + 0.005 * Object.keys(p.secrets || {}).length); } // +0.5% per secret found
 function addXp(amount, reason) {
   const p = G.profile;
   if (p.level >= P.cap) return;
