@@ -18,6 +18,18 @@ The PDF had two range typos (Frost Peaks 55-60 after Malicious Mountain 45-50; I
 
 Each area: one boss lair, one den (alternating sides), a waypoint at its gate, 20 (5-level areas) or 24 (10-level areas) monsters plus an elite. Two challenge shrines per biome. World length 2,830 m (was 1,150 m).
 
+## World v10: wider map, two dens, points of interest (11 Oct 2026)
+- Bounds x ±210 (was ±130); area lengths 70 / 110 / 135 m (was 70 / 90 / 110); same 30 areas, order, names and levels. World length 3,557 m (maxZ 3,467).
+- Hero speed 8.0 (was 6.4), dash 7.5 m. `CFG.enemies.speedMult` exists (read in stepEnemy) but is held at 1.0: 1.15 drops check_hardcore pack time-to-death to 3.13 s at L75 / 3.15 s at L200 (floor 3.5 s).
+- Two dens per area: A at ±0.5·maxX, z0+0.3·len; B on the other flank at z0+0.72·len; r 13, 10 / 12 monsters + an elite each.
+- Patrol lanes [−.8, −.5, −.17, .17, .5, .8]·maxX, patrolDensity 1.5. Population 1,657 (was 1,186). Body separation scans only the monster's own area (`G.enemiesByZone`).
+- Points of interest (`CFG.world.pois`, ids `a07:dungeon:0`): per area one hero landmark with its own builder (`POI_ART` in world-art.js: windmill, sunken bell, fairy ring, giant's ribcage, broken colossus, frozen waterfall, lava forge, dragon skull, crystal arch, crashed star, ghost ship, lighthouse, storm rod, moon gate, sky altar, …), two minor POIs (camp, ruined tower, statue, well, cart, graveyard, obelisk, shack), one secret (two in 135 m areas) and from area 3 a cave entrance at ±0.8·maxX (`kind: 'dungeon'`, lvl = area max). 159 POIs in all.
+- Secrets: a ring of rocks and firs at |x| = maxX−9 with one narrow gap facing north or south. Hidden on the minimap until found; first visit gives an epic+ item (area max level +2), 15 + area gems, 2 shards, +0.5% XP for good, and the Secret Seeker feat. Saved in `profile.secrets[id]`.
+- Minimap base canvas is stored at 1600 / world length px per metre (189×1600) and shows both dens, landmarks, caves and found secrets.
+- Saves: `worldVersion: 10`; indices unchanged, migration only adds `secrets`, `pois`, `dungeons`.
+- Draw calls (Chromium/SwiftShader, 430×932): town 100 → 112, Sunny Meadow road 133 → 125, Foothills flank 120 → 92. Props of all areas now share one instanced list per geometry, chunked in 64 m cells.
+- Checks: `tools/check_world_layout.cjs` (dens, POI ids, clear spots, BFS reachability, sealed secrets, minimap size, population).
+
 ## Monsters
 58 new monsters, two per area, named and behaving as in the area guide (quill-spraying Thistle-Hares, lethargic Sun-Drunk Hornets that swarm when close, charging Truffle Boars, ambushing Boulder-Mimics, burning Magma-Hounds, Geometry-Drone turrets, and so on). Until bespoke art exists, each reuses one of the 14 sculpted bodies, recoloured in a shader toward its own tint and scaled to its own size. The old 14 monsters stay defined for saves, records and Slayer mastery.
 

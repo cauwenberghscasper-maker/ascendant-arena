@@ -124,7 +124,7 @@ const CFG = {
     // contact pushing: heavier bodies shove lighter ones; poise scales incoming knockback, at most once per knockGap
     mass: { swarm: 0.6, charger: 1, brute: 2.5, ambusher: 1.5, shooter: 0.8, spray: 0.8, turret: 1.5, legacy: 1, player: 1, elite: 2 },
     knockRes: { brute: 0.8, elite: 0.8, other: 0.4 }, knockGap: 0.4,
-    speedMult: 1.15, // world monsters keep pace with the faster v10 hero
+    speedMult: 1.0, // world monster move speed (v10 plan 1.15 to match the faster hero; held at 1 until check_hardcore pack timings are retuned)
   },
   boss: {
     name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 25, duration: 120,
