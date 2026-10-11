@@ -1,7 +1,9 @@
-const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('fs');
+const {chromium}=(()=>{try{return require('playwright')}catch{return require('./node_modules/playwright-core')}})(),assert=require('node:assert/strict'),fs=require('fs'),path=require('path');
 (async()=>{
- const browser=await chromium.launch({channel:'msedge',headless:true,args:['--enable-webgl','--ignore-gpu-blocklist']});
+ // PW_CHROMIUM=/path/to/chromium runs without Edge; LOCAL_THREE=1 serves three.js from tools/node_modules (offline sandboxes)
+ const browser=await chromium.launch(Object.assign(process.env.PW_CHROMIUM?{executablePath:process.env.PW_CHROMIUM}:{channel:'msedge'},{headless:true,args:['--enable-webgl','--ignore-gpu-blocklist','--use-angle=swiftshader','--enable-unsafe-swiftshader']}));
  const page=await browser.newPage({viewport:{width:1280,height:850}}),errors=[];
+ if(process.env.LOCAL_THREE)await page.route('https://cdn.jsdelivr.net/npm/three@0.186.1/**',r=>{const f=path.join(__dirname,'node_modules/three',r.request().url().split('three@0.186.1/')[1]);r.fulfill({status:fs.existsSync(f)?200:404,contentType:'application/javascript',body:fs.existsSync(f)?fs.readFileSync(f):''})});
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='warning'&&/PropertyBinding|not loaded/.test(m.text()))errors.push(m.text())});
  await page.goto('http://127.0.0.1:8766/');await page.waitForFunction(()=>window.__gameBooted,null,{timeout:60000});
  await page.locator('#playBtn').click();await page.waitForFunction(()=>window.__assets.status('hero.bolt')==='ready',null,{timeout:30000});
@@ -10,8 +12,8 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
  const full=await page.evaluate(()=>{const p=__game.profile,s=__sim;while(p.bag.length<s.CFG.gear.bagMax)p.bag.push(s.makeItem('weapon','common',1));s.addCase('treasure',{src:'test'});const c=p.cases.at(-1),n=p.bag.length,count=p.stats.cases,r=s.openCase(c.id);__dbg.saveNow(true);return {opened:!!r&&r.kept,consumed:!p.cases.some(i=>i.id===c.id),overflow:p.bag.length===n+1,count:count+1===p.stats.cases}});assert(Object.values(full).every(Boolean));
  console.log('PASS browser case save/reload and full bag',reward,full);
  await page.locator('#playBtn').click();await page.waitForTimeout(1000);
- const roster=await page.evaluate(async()=>{const ids=Object.keys(__manifest).filter(id=>id.startsWith('hero.'));ids.forEach(id=>__assets.request(id));while(ids.some(id=>__assets.status(id)==='loading'))await new Promise(r=>setTimeout(r,50));return ids.map(id=>({id,state:__assets.status(id),original:__manifest[id].original,clips:__assets.entries.get(id)?.model?.animations.length}))});
- assert(roster.every(r=>r.state==='ready'&&r.original&&r.clips===15));console.log('PASS all original hero assets',roster.length);
+ const roster=await page.evaluate(async()=>{const ids=Object.keys(__manifest).filter(id=>id.startsWith('hero.'));ids.forEach(id=>__assets.request(id));while(ids.some(id=>__assets.status(id)==='loading'))await new Promise(r=>setTimeout(r,50));return ids.map(id=>({id,state:__assets.status(id),v4:!!__manifest[id].v4,original:__manifest[id].original,clips:__assets.entries.get(id)?.model?.animations.length,weapon:!!__assets.entries.get(id)?.model?.getObjectByName('v4Grip')}))});
+ assert.equal(roster.length,16);assert(roster.every(r=>r.state==='ready'&&(r.v4?r.clips===17&&r.weapon:r.original&&r.clips===15)),JSON.stringify(roster));console.log('PASS all hero assets',roster.length,'v4:',roster.filter(r=>r.v4).length);
  const motion=await page.evaluate(async()=>{
   const {createKayKitMotion}=await import('./assets/data/kaykit-motion.js'),T=__THREE,a=__assets.instance('hero.bolt'),b=__assets.instance('hero.bolt'),controller=createKayKitMotion(T,a,a.animations,__manifest['hero.bolt']);
   const other=b.getObjectByName('upperarmr').quaternion.clone(),e={x:0,z:0,facing:0,moveAmt:1,alive:true,lastAttack:-99,lastHurt:-99,dashT:0,attackAnim:0};

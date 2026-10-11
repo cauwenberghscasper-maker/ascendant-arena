@@ -1162,6 +1162,7 @@ import { createPremiumPortraits } from './assets/art/premium-models.js';
 import { bindHeroMotion, animateHeroMotion } from './assets/data/hero-animation.js';
 import { prepareOriginalAdventurer } from './assets/art/original-adventurers.js';
 import { createKayKitMotion } from './assets/data/kaykit-motion.js';
+import { applyHeroV4, heroV4Clips, gripV4Weapon } from './assets/data/hero-models-v4.js';
 import { addHeroEyes } from './assets/data/hero-eyes.js';
 import { equipmentIcon, caseIcon } from './assets/art/premium-icons.js';
 import { COLLECTION_ITEMS, COLLECTION_CHANCE, COLLECTION_GUARANTEE, collectionIcon, rollCollectionItem, recordCollectionItem, migrateCollection, regionBossCase } from './assets/data/loot-collection.js';
@@ -1390,7 +1391,7 @@ const CFG = {
     chain: { name: 'Chain Lightning', role: 'Chainer', desc: 'A bolt that jumps to 3 more enemies when it hits', kind: 'spark', count: 1, speed: 28, range: 14, radius: 0.32, mult: 0.75, ammo: 3, reload: 1.15, cd: 0.36, chain: 3, color: 0xa8c8ff, unlock: { level: 26 } },
     gatling: { name: 'Gatling', role: 'Heavy SMG', desc: 'Long bursts of 12 bullets with a wide spray', kind: 'tracer', count: 1, burst: 12, burstGap: 0.045, jitter: 0.14, speed: 32, range: 13, radius: 0.2, mult: 0.13, ammo: 3, reload: 1.3, cd: 0.6, color: 0xffd34a, unlock: { level: 38 } },
     starfall: { name: 'Starfall', role: 'Artillery', desc: 'Lobs 3 stars that land in a line and explode', kind: 'lob', count: 3, spread: 0, lobLine: 1.6, speed: 12, range: 13, radius: 0.38, mult: 0.62, ammo: 2, reload: 1.6, cd: 0.6, lob: true, aoe: 2.0, aoeMult: 1.0, color: 0xc9a6ff, unlock: { level: 52 } },
-    chakram: { name: 'Chakram', role: 'Boomerang', desc: 'Flies out through everything and comes back', kind: 'chakram', count: 1, speed: 18, range: 11, radius: 0.48, mult: 0.85, ammo: 2, reload: 1.1, cd: 0.4, boomerang: true, pierce: 99, color: 0xffd34a, unlock: { bosses: 1 } },
+    chakram: { name: 'Chakram', role: 'Boomerang', desc: 'Flies out through everything and comes back', kind: 'chakram', count: 1, speed: 21, range: 18, radius: 0.48, mult: 0.85, ammo: 2, reload: 1.1, cd: 0.4, boomerang: true, pierce: 99, color: 0xffd34a, unlock: { bosses: 1 } },
   },
   signatures: { novice: { id: 'bolt', name: 'Arcane Bolt', role: 'Balanced' }, warrior: { id: 'wave', name: 'Blade Wave', role: 'Close range' }, ranger: { id: 'arrow', name: 'Longbow', role: 'Long range' }, mage: { id: 'orb', name: 'Arcane Orb', role: 'Area' } },
   // Artifacts add effects to your main attack (2 slots, like star powers / gadgets)
@@ -4631,6 +4632,8 @@ for (const [id, def] of Object.entries(ASSET_MANIFEST)) if (id.startsWith('hero.
   def.portrait = 'assets/ui/portraits/adventurers/' + def.character + '.png';
   def.attack = ['wave','scatter','gatling'].includes(def.character) ? '1H_Melee_Attack_Slice_Horizontal' : ['orb','seeker','flamer','starfall','chain'].includes(def.character) ? 'Spellcast_Shoot' : '1H_Ranged_Shoot';
 }
+// Hand-painted, fully rigged adventurers (v4) replace them; each keeps its old entry as a fallback.
+applyHeroV4(ASSET_MANIFEST);
 // which kind of weapon a brawler holds (mirrors weaponGeometry)
 function heldWeaponFamily(cls) {
   const A = CFG.attacks[cls], k = A ? A.kind : null;
@@ -4669,15 +4672,29 @@ const AssetLibrary = {
     if (!id || !this.has(id) || this.entries.has(id)) return;
     const e = { state: 'loading', model: null }; this.entries.set(id, e);
     const def = ASSET_MANIFEST[id];
-    this.init().then(() => fetch(def.dir + (def.file || 'model.json'))).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return def.file ? r.arrayBuffer() : r.json(); })
+    const load = (d) => fetch(d.dir + (d.file || 'model.json')).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return d.file ? r.arrayBuffer() : r.json(); })
       .then((pack) => {
-        if (def.file) return this.loader.parseAsync(pack, def.dir);
+        if (d.file) return this.loader.parseAsync(pack, d.dir);
         const bin = atob(pack.glb), bytes = new Uint8Array(bin.length);
         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        return this.loader.parseAsync(bytes.buffer, def.dir); // textures load from the same folder
+        return this.loader.parseAsync(bytes.buffer, d.dir); // textures load from the same folder
+      });
+    this.init().then(() => Promise.all([load(def), def.v4 && def.weapon ? load(def.weapon).catch(() => null) : null, def.v4 ? this.adventurerClips() : null]))
+      .then(([gltf, weapon, clips]) => {
+        if (def.v4) def.weaponScene = weapon ? weapon.scene : null;
+        e.model = this.prepare(gltf.scene, def, id);
+        e.model.animations = def.v4 ? heroV4Clips(THREE, clips, gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
       })
-      .then((gltf) => { e.model = this.prepare(gltf.scene, def, id); e.model.animations = def.original ? this.heroClips : gltf.animations; e.state = 'ready'; })
-      .catch((err) => { e.state = 'failed'; console.warn('3D asset not loaded, keeping the built-in model:', id, err); });
+      .catch((err) => {
+        // a v4 hero that fails falls back to the previous adventurer model
+        if (def.v4 && def.fallback && !def.fellBack) { def.fellBack = true; this.entries.delete(id); ASSET_MANIFEST[id] = def.fallback; console.warn('v4 hero not loaded, using the previous model:', id, err); this.request(id); return; }
+        e.state = 'failed'; console.warn('3D asset not loaded, keeping the built-in model:', id, err);
+      });
+  },
+  // shared KayKit clips for the v4 heroes, fetched once on first use
+  adventurerClips() {
+    if (!this.v4Clips) this.v4Clips = fetch('assets/animation/adventurer-clips.json').then((r) => { if (!r.ok) throw new Error('Clip load failed'); return r.json(); });
+    return this.v4Clips;
   },
   // loader and a studio reflection map, fetched only when the first asset is needed (no WebAssembly decoders)
   init() {
@@ -4696,6 +4713,10 @@ const AssetLibrary = {
     addHeroEyes(scene, def, THREE);
     if (def.original) prepareOriginalAdventurer(scene, def, THREE);
     else scene.scale.setScalar(def.size);
+    if (def.v4) {
+      scene.traverse((o) => { if (o.isSkinnedMesh) o.frustumCulled = false; }); // clips move limbs past the bind-pose bounds
+      if (def.weaponScene) gripV4Weapon(THREE, scene, def, def.weaponScene);
+    }
     holder.add(scene);
     holder.position.fromArray(def.at || [0, 0, 0]); if (def.rot) holder.rotation.fromArray(def.rot);
     const outline = !!def.outline; // ink outlines look noisy on dense scanned meshes; a rim light gives the pop instead
