@@ -3,7 +3,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),cp=require('node:ch
 (async()=>{
  const temp='.performance-baseline.html';
  if(fs.existsSync(temp))throw Error('Refusing to overwrite existing baseline file');
- fs.writeFileSync(temp,cp.execFileSync('git',['show','HEAD:index.html']));
+ fs.writeFileSync(temp,cp.execFileSync('git',['show','origin/main:index.html']));
  const browser=await chromium.launch({channel:'msedge',headless:true,args:['--enable-webgl','--ignore-gpu-blocklist']});const report=[];
  try{for(const file of [temp,'']){
   const context=await browser.newContext({viewport:{width:1280,height:850}});const page=await context.newPage();

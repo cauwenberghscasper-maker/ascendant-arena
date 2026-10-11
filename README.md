@@ -8,4 +8,4 @@ Mobile 3D brawler (Three.js, single page). Play: https://cauwenberghscasper-make
 
 Local preview: serve the repository with an HTTP server and open localhost. Localhost saves are isolated from production cloud saves and expose development tools. Production hostnames hide those tools.
 
-Checks: `node tools/check_release.cjs` and `node audit/checks.cjs`. Assessment: [audit/REPORT.md](audit/REPORT.md). Current implementation and release gates: [audit/PHASE1.md](audit/PHASE1.md).
+Checks: `node tools/check_release.cjs` and `node audit/checks.cjs`. Assessment: [audit/REPORT.md](audit/REPORT.md). Current implementation and release gates: [audit/PHASE1.md](audit/PHASE1.md). Map and pace of the 1-210 world: [audit/world-v9.md](audit/world-v9.md).

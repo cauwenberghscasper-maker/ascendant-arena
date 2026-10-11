@@ -3,9 +3,9 @@
     {
       "flow": "equip / replace / unequip / reviewed merge",
       "initialHp": 208,
-      "replacedHp": 302,
+      "replacedHp": 263,
       "emptyHp": 117,
-      "upgradedHp": 322
+      "upgradedHp": 280
     },
     {
       "viewport": {
@@ -14,11 +14,11 @@
       },
       "tab": "Stats",
       "scroll": {
-        "top": 232,
-        "height": 310,
-        "content": 1367,
-        "width": 294,
-        "scrollWidth": 294
+        "top": 131,
+        "height": 199,
+        "content": 1164,
+        "width": 276,
+        "scrollWidth": 276
       }
     },
     {
@@ -28,11 +28,11 @@
       },
       "tab": "Gear",
       "scroll": {
-        "top": 187,
-        "height": 310,
-        "content": 4466,
-        "width": 294,
-        "scrollWidth": 294
+        "top": 37,
+        "height": 80,
+        "content": 1080,
+        "width": 276,
+        "scrollWidth": 276
       }
     },
     {
@@ -42,10 +42,10 @@
       },
       "menu": {
         "top": 0,
-        "height": 423,
-        "content": 423,
-        "width": 294,
-        "scrollWidth": 294
+        "height": 464,
+        "content": 464,
+        "width": 292,
+        "scrollWidth": 292
       }
     },
     {
@@ -56,10 +56,10 @@
       "relicTab": "Equip",
       "scroll": {
         "top": 338,
-        "height": 542,
-        "content": 1825,
-        "width": 294,
-        "scrollWidth": 294
+        "height": 540,
+        "content": 1827,
+        "width": 292,
+        "scrollWidth": 292
       }
     },
     {
@@ -70,10 +70,10 @@
       "relicTab": "Upgrade",
       "scroll": {
         "top": 338,
-        "height": 542,
-        "content": 2839,
-        "width": 294,
-        "scrollWidth": 294
+        "height": 540,
+        "content": 2886,
+        "width": 292,
+        "scrollWidth": 292
       }
     },
     {
@@ -83,11 +83,11 @@
       },
       "tab": "Stats",
       "scroll": {
-        "top": 388,
-        "height": 467,
-        "content": 1334,
-        "width": 364,
-        "scrollWidth": 364
+        "top": 297,
+        "height": 392,
+        "content": 1127,
+        "width": 346,
+        "scrollWidth": 346
       }
     },
     {
@@ -97,11 +97,11 @@
       },
       "tab": "Gear",
       "scroll": {
-        "top": 290,
-        "height": 467,
-        "content": 4328,
-        "width": 364,
-        "scrollWidth": 364
+        "top": 198,
+        "height": 327,
+        "content": 952,
+        "width": 346,
+        "scrollWidth": 346
       }
     },
     {
@@ -111,10 +111,10 @@
       },
       "menu": {
         "top": 0,
-        "height": 423,
-        "content": 423,
-        "width": 364,
-        "scrollWidth": 364
+        "height": 445,
+        "content": 445,
+        "width": 362,
+        "scrollWidth": 362
       }
     },
     {
@@ -123,26 +123,26 @@
         "height": 844
       },
       "relicTab": "Equip",
+      "scroll": {
+        "top": 671,
+        "height": 816,
+        "content": 1635,
+        "width": 362,
+        "scrollWidth": 362
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "relicTab": "Upgrade",
       "scroll": {
         "top": 518,
-        "height": 818,
-        "content": 1635,
-        "width": 364,
-        "scrollWidth": 364
-      }
-    },
-    {
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "relicTab": "Upgrade",
-      "scroll": {
-        "top": 658,
-        "height": 818,
+        "height": 816,
         "content": 2577,
-        "width": 364,
-        "scrollWidth": 364
+        "width": 362,
+        "scrollWidth": 362
       }
     },
     {
@@ -152,11 +152,11 @@
       },
       "tab": "Stats",
       "scroll": {
-        "top": 267,
-        "height": 364,
-        "content": 1241,
-        "width": 488,
-        "scrollWidth": 488
+        "top": 160,
+        "height": 207,
+        "content": 1091,
+        "width": 470,
+        "scrollWidth": 470
       }
     },
     {
@@ -166,11 +166,11 @@
       },
       "tab": "Gear",
       "scroll": {
-        "top": 223,
-        "height": 364,
-        "content": 4078,
-        "width": 488,
-        "scrollWidth": 488
+        "top": 77,
+        "height": 141,
+        "content": 829,
+        "width": 470,
+        "scrollWidth": 470
       }
     },
     {
@@ -182,8 +182,8 @@
         "top": 0,
         "height": 254,
         "content": 254,
-        "width": 678,
-        "scrollWidth": 678
+        "width": 676,
+        "scrollWidth": 676
       }
     },
     {
@@ -194,10 +194,10 @@
       "relicTab": "Equip",
       "scroll": {
         "top": 223,
-        "height": 364,
-        "content": 772,
-        "width": 818,
-        "scrollWidth": 818
+        "height": 362,
+        "content": 901,
+        "width": 816,
+        "scrollWidth": 816
       }
     },
     {
@@ -208,10 +208,10 @@
       "relicTab": "Upgrade",
       "scroll": {
         "top": 223,
-        "height": 364,
+        "height": 362,
         "content": 1657,
-        "width": 818,
-        "scrollWidth": 818
+        "width": 816,
+        "scrollWidth": 816
       }
     }
   ],

@@ -29,7 +29,7 @@ const dir='audit/evidence/character-integration';fs.mkdirSync(dir,{recursive:tru
    for(const mode of ['idle','run','attack','runAttack','dash','hurt','death','respawn']){
     entity.moveAmt=/run/.test(mode)?1:0;entity.alive=mode!=='death';entity.dashT=mode==='dash'?.2:0;if(/attack/i.test(mode))entity.lastAttack+=100;if(mode==='hurt')entity.lastHurt=4;
     for(let i=0;i<30;i++){entity.z+=entity.moveAmt*.1;v.update(entity,1/60,i/60);v.root.updateMatrixWorld(true)}
-    const crown=v.root.getObjectByName('heroCrownSocket'),back=v.root.getObjectByName('heroBackSocket'),grip=v.root.getObjectByName('fantasyGrip');
+    const crown=v.root.getObjectByName('heroCrownSocket'),back=v.root.getObjectByName('heroBackSocket'),grip=v.root.getObjectByName('v4Grip') || v.root.getObjectByName('fantasyGrip');
     if(crown.children.length!==1||back.children.length!==2)throw Error('Unbound ascension '+id);
     if(grip.parent.name!=='handr')throw Error('Unbound grip');
     const expected=rarity?{chest:'chest',helmet:'head',boots:['footl','footr'],accessory:'chest'}:{};
@@ -45,5 +45,15 @@ const dir='audit/evidence/character-integration';fs.mkdirSync(dir,{recursive:tru
  }
  await page.evaluate(()=>{const p=__game.profile;p.level=200;p.gear=Object.fromEntries(__sim.CFG.gear.slots.map(slot=>[slot,__sim.makeItem(slot,'legendary',200)]));__sim.refreshPlayerStats(true);__dbg.heroTab('Gear')});
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(2500);await page.screenshot({path:dir+'/ascended-equipment.png'});
+ const currentImages=[];
+ for(const id of ids){
+  await page.evaluate(id=>{__game.profile.cls=id;__sim.refreshPlayerStats(false);__dbg.heroTab('Gear')},id);
+  await page.waitForTimeout(400);
+  const bytes=await page.screenshot({clip:{x:140,y:0,width:250,height:258}});
+  currentImages.push({id,src:'data:image/png;base64,'+bytes.toString('base64')});
+ }
+ const gallery=await browser.newPage({viewport:{width:1200,height:1000}});
+ await gallery.setContent('<body style="background:#14202c;color:white;font:16px sans-serif"><h1>Current v4 heroes · integrated equipment and ascension</h1><main style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">'+currentImages.map(x=>'<figure style="margin:0"><img style="width:100%" src="'+x.src+'"><figcaption>'+x.id+'</figcaption></figure>').join('')+'</main></body>');
+ await gallery.screenshot({path:dir+'/current-roster.png',fullPage:true});await gallery.close();
  assert.deepEqual(errors,[]);fs.writeFileSync(dir+'/results.json',JSON.stringify({report,errors},null,2));console.log('PASS all 16 characters: grips, crown/back attachments and eight animation states');await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});

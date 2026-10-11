@@ -12,7 +12,8 @@ export function prestigeBlock(p, context) {
   if (!context.inTown) return 'Return to Willowcross Town';
   return '';
 }
-const resetState = p => JSON.stringify([p.level, p.xp, p.heroTree, p.road, p.waypoints, p.worldTier, p.job, p.jobCycle]);
+const treesOf = p => Object.keys(p.brawlers || {}).sort().map(k => [k, p.brawlers[k] && p.brawlers[k].tree]);
+const resetState = p => JSON.stringify([p.level, p.xp, treesOf(p), p.road, p.waypoints, p.worldTier, p.job, p.jobCycle]);
 export function prestigePlan(p) {
   return { prestige: prestigeCount(p), level: p.level, signature: resetState(p) };
 }
@@ -21,7 +22,9 @@ export function applyPrestige(p, plan) {
       plan.prestige !== prestigeCount(p) || plan.level !== p.level || plan.signature !== resetState(p)) return false;
   p.prestige = prestigeCount(p) + 1;
   p.level = 1; p.xp = 0; p.road = 0; p.worldTier = 0; p.waypoints = [0];
-  p.heroTree = { active: 0, sets: [{}, {}, {}] };
+  // Every hero's tree is refunded: its level points restart at level 1, its mastery points stay to re-spend.
+  for (const k in p.brawlers || {}) if (p.brawlers[k]) p.brawlers[k].tree = { active: 0, sets: [{}, {}, {}] };
+  delete p.heroTree;
   p.job = null; p.jobCycle = {};
   return true;
 }

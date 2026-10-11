@@ -22,12 +22,12 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   }
   const zones=w.zones.map((_,i)=>({zone:i,patrols:g.enemies.filter(e=>e.zone===i&&e.patrol!=null).length,total:g.enemies.filter(e=>e.zone===i).length}));
   return {population:g.enemies.length,obstacles:g.hubObstacles.list.length,reachableCells:end,zones,unreachable,invalid};
- });assert.deepEqual(coverage.invalid,[]);assert.deepEqual(coverage.unreachable,[]);assert(coverage.zones.every(z=>z.patrols===48));
+ });assert.deepEqual(coverage.invalid,[]);assert.deepEqual(coverage.unreachable,[]);assert(coverage.zones[0].total===0,'Base Camp stays safe');assert(coverage.zones.slice(1).every(z=>z.patrols>=25));
  const combat=await page.evaluate(()=>{
   const g=__game,s=__sim,p=g.profile,pl=g.player,result=[];p.settings.autoHunt=false;p.settings.bots=false;p.settings.fastXp=false;g.modal=false;g.bossTimer=1e9;g.boss=null;g.shrines=[];g.hubFighters=[pl];
   for(const level of [1,5,10,25,50,100,200]){
    p.level=level;p.xp=0;p.gear=Object.fromEntries(s.CFG.gear.slots.map(slot=>{const it=s.makeItem(slot,'uncommon',level);it.aff={};return [slot,it]}));s.refreshPlayerStats(true);s.initHubWorld();g.pellets=[];g.events=[];
-   const e=g.enemies.find(e=>e.zone===0&&e.patrol===26);e.type='slime';e.r=s.CFG.enemies.slime.r;s.setEnemyLevel(e,Math.max(1,level-4));
+   const e=g.enemies.find(e=>e.zone===1&&e.patrol===14);e.type='slime';e.r=s.CFG.enemies.slime.r;s.setEnemyLevel(e,Math.max(1,level-4));
    const x=e.hx,z=e.hz;Object.assign(pl,{x:x+1.4,z,alive:true,hp:pl.maxHp,invulnT:0,lastHurt:g.time});Object.assign(e,{x,z,state:'chase',atkCd:0});g.enemies=[e];g.modal=false;g.menuSafe=0;pl.intent.mx=pl.intent.mz=0;pl.intent.fire=false;
    let frames=0;const start=performance.now();while(pl.alive&&frames<60*90){s.simStep(1/60);frames++}
    result.push({level,hp:pl.maxHp,enemyLevel:e.lvl,enemyDamage:e.atk,death:!pl.alive,seconds:frames/60,simulationMs:performance.now()-start});

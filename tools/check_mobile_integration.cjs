@@ -22,11 +22,13 @@ fs.mkdirSync(out,{recursive:true});
  await page.waitForTimeout(700);
  const state=()=>page.evaluate(()=>({gear:__game.profile.gear.chest,bag:__game.profile.bag.map(i=>i.id),hp:__game.player.maxHp,atk:__game.player.atk,gold:__game.profile.gold}));
  const initial=await state();
- assert.equal(await page.locator('[data-act="equip"][data-id="review-equipped"]').count(),0);
+ assert.equal(await page.locator('[data-act="gpick"][data-id="review-equipped"]').count(),0);
+ await page.locator('[data-act="gpick"][data-id="review-replacement"]').click();
  await page.locator('[data-act="equip"][data-id="review-replacement"]').click();
  const replaced=await state();assert.equal(replaced.gear.id,'review-replacement');assert(replaced.bag.includes('review-equipped'));assert(!replaced.bag.includes('review-replacement'));assert(replaced.hp>initial.hp);
  await page.locator('[data-act="unequip"][data-slot="chest"]').click();
  const removed=await state();assert.equal(removed.gear,null);assert(removed.bag.includes('review-replacement'));assert(removed.hp<replaced.hp);
+ await page.locator('[data-act="gpick"][data-id="review-replacement"]').click();
  await page.locator('[data-act="equip"][data-id="review-replacement"]').click();
  await page.locator('[data-act="upgradeHere"][data-slot="chest"]').click();
  await page.locator('[data-act="mergeConfirm"]').click();
@@ -47,10 +49,11 @@ fs.mkdirSync(out,{recursive:true});
   await page.setViewportSize(viewport);
   for(const tab of ['Stats','Gear']){
    await page.evaluate(tab=>__dbg.heroTab(tab),tab);await page.waitForTimeout(450);
-   const scroll=await swipe('#panel');assert(scroll.content>scroll.height,tab+' fixture should overflow');assert(scroll.top>20,tab+' touch swipe scrolls');assert(scroll.scrollWidth<=scroll.width+1,tab+' has no horizontal clipping');
+   const scroll=await swipe(await page.locator('#panel > .pBody').count() ? '#panel > .pBody' : '#panel');assert(scroll.content>scroll.height,tab+' fixture should overflow');assert(scroll.top>20,tab+' touch swipe scrolls '+JSON.stringify({viewport,scroll}));assert(scroll.scrollWidth<=scroll.width+1,tab+' has no horizontal clipping');
    const rect=await page.locator('#panel').boundingBox();assert(rect.x>=-1&&rect.y>=-1&&rect.x+rect.width<=viewport.width+1&&rect.y+rect.height<=viewport.height+1);
+   const clipped=await page.locator('#panel .pBtns > button').evaluateAll(els=>els.filter(e=>e.scrollWidth>e.clientWidth+2||e.getBoundingClientRect().bottom>innerHeight).map(e=>e.textContent));assert.deepEqual(clipped,[],'action buttons remain readable and on screen');
    results.push({viewport,tab,scroll});
-   await page.locator('#panel').evaluate(e=>e.scrollTop=0);await page.waitForTimeout(100);
+   await page.locator('#panel > .pBody').evaluate(e=>e.scrollTop=0);await page.waitForTimeout(100);
    await page.screenshot({path:`${out}/${tab.toLowerCase()}-${viewport.width}x${viewport.height}.png`});
    if(tab==='Gear'){
     const doll=await swipe('#doll');if(doll.content>doll.height+1)assert(doll.top>0,'equipped slots touch scroll');
@@ -66,7 +69,7 @@ fs.mkdirSync(out,{recursive:true});
   await page.evaluate(()=>{const p=__game.profile;p.unlocked.artifacts=Object.keys(__sim.CFG.artifacts);p.level=150;__dbg.refresh();});
   for(const tab of ['Equip','Upgrade']) {
    await page.evaluate(tab=>__dbg.openArtifacts(tab),tab);await page.waitForTimeout(150);
-   const scroll=await swipe('#panel');await page.screenshot({path:`${out}/relics-${tab.toLowerCase()}-${viewport.width}x${viewport.height}.png`});assert(scroll.top>20,'relics '+tab+' touch scrolling');assert(scroll.scrollWidth<=scroll.width+1,'relics '+tab+' no horizontal clipping '+JSON.stringify(scroll));
+   const scroll=await swipe(await page.locator('#panel > .pBody').count() ? '#panel > .pBody' : '#panel');await page.screenshot({path:`${out}/relics-${tab.toLowerCase()}-${viewport.width}x${viewport.height}.png`});assert(scroll.top>20,'relics '+tab+' touch scrolling');assert(scroll.scrollWidth<=scroll.width+1,'relics '+tab+' no horizontal clipping '+JSON.stringify(scroll));
    const overflow=await page.locator(tab==='Equip'?'.acard, .aslot2':'.aurow').evaluateAll(els=>els.filter(e=>e.scrollWidth>e.clientWidth+2).map(e=>e.textContent));assert.deepEqual(overflow,[],'all relic cards contain their text');
    await page.locator('#panel').evaluate(e=>e.scrollTop=e.scrollHeight);await page.waitForTimeout(80);
    const last=page.locator(tab==='Equip'?'.acard':'.aurow').last();const box=await last.boundingBox();assert(box.y+box.height<=viewport.height+1,'last relic is reachable');

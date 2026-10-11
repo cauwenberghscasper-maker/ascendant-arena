@@ -92,8 +92,8 @@ export function createWorldArt({THREE, GEO, part, mergeParts}) {
     add(parts,ring,0x9cd7d6,[T.x,2.39,T.z],[.85,.85,.85],[Math.PI/2,0,0]);
   }
 
-  function zoneLandmarks(group,W,zi){
-    const style=REGION_ART[zi], parts=[], zn=W.zones[zi], glow=[];
+  function zoneLandmarks(group,W,zi,styleArg){
+    const zn=W.zones[zi], th=zn.theme!=null?zn.theme:zi, style=styleArg||REGION_ART[th], parts=[], glow=[];
     // Existing lair is the focal landmark; its central combat disc remains unobstructed.
     const lair=W.lairs[zi];
     if(lair){
@@ -102,7 +102,7 @@ export function createWorldArt({THREE, GEO, part, mergeParts}) {
         add(parts,box,style.dark,[x,.16,z],[1.35,.32,1.12],[0,a,0]);
         add(parts,box,style.trim,[x,2.63,z],[1.23,.16,.96],[0,a,0]);
         add(parts,box,style.accent,[x+Math.sin(a)*.43,1.48,z+Math.cos(a)*.43],[.18,.8,.06],[0,a,0]);
-        if(zi>=2)add(glow,crystal,style.accent,[x,3.05,z],[.22,.7,.22],[0,a,0]);
+        if(th>=2)add(glow,crystal,style.accent,[x,3.05,z],[.22,.7,.22],[0,a,0]);
       }
       for(let i=0;i<32;i++){
         const a=i*Math.PI/16,r=7.7;add(parts,box,style.trim,[lair.x+Math.sin(a)*r,.055,lair.z+Math.cos(a)*r],[.18,.035,.55],[0,a,0]);
@@ -120,9 +120,9 @@ export function createWorldArt({THREE, GEO, part, mergeParts}) {
     // Distant silhouettes live beyond collision bounds: biome-specific horizon architecture.
     for(const side of [-1,1])for(let j=0;j<4;j++){
       const x=side*(W.maxX+9+j%2*5),z=zn.z0+23+j*(zn.z1-zn.z0-42)/3;
-      if(zi<=2||zi===3){
+      if(th<=3){
         add(parts,crown,style.dark,[x,3,z],[8,6+(j%3)*2,10],[.2,j,.1]);
-        add(parts,crown,zi===2?style.trim:style.stone,[x-2*side,5,z+1],[6,4,7],[.1,j,.2]);
+        add(parts,crown,th===2?style.trim:style.stone,[x-2*side,5,z+1],[6,4,7],[.1,j,.2]);
       }else{
         for(const s of [-1,1])add(parts,box,style.stone,[x+s*3.4,5.3,z],[1.8,10.6,2],[0,.08*s,.03*s]);
         add(parts,box,style.trim,[x,10.8,z],[9,.9,2.2],[0,0,.03]);
