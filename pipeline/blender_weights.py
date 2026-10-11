@@ -40,10 +40,16 @@ for name in JOINTS:
 bpy.ops.object.mode_set(mode='OBJECT')
 # watertight proxy for a stable heat solve
 proxy = mesh.copy(); proxy.data = mesh.data.copy(); proxy.name = 'proxy'; bpy.context.scene.collection.objects.link(proxy)
-rm = proxy.modifiers.new('remesh', 'REMESH'); rm.mode = 'VOXEL'; rm.voxel_size = 0.005
+rm = proxy.modifiers.new('remesh', 'REMESH'); rm.mode = 'VOXEL'; rm.voxel_size = 0.006
 bpy.context.view_layer.objects.active = proxy; bpy.ops.object.modifier_apply(modifier='remesh')
 if len(proxy.data.polygons) > 60000:
   dm = proxy.modifiers.new('dec', 'DECIMATE'); dm.ratio = 60000 / len(proxy.data.polygons); bpy.ops.object.modifier_apply(modifier='dec')
+# bone heat is unreliable on small models: solve at 20x scale
+K = 20.0
+for o in (proxy, arm):
+  o.scale = (K, K, K)
+bpy.ops.object.select_all(action='DESELECT'); proxy.select_set(True); arm.select_set(True); bpy.context.view_layer.objects.active = arm
+bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 bpy.ops.object.select_all(action='DESELECT'); proxy.select_set(True); arm.select_set(True); bpy.context.view_layer.objects.active = arm
 bpy.ops.object.parent_set(type='ARMATURE_AUTO')
 empty = [n for n in JOINTS if n not in proxy.vertex_groups]
@@ -55,7 +61,7 @@ for v in proxy.data.vertices:
   ws = sorted(((g.weight, JOINTS.index(gi[g.group])) for g in v.groups if gi[g.group] in JOINTS and g.weight > 1e-4), reverse=True)[:4]
   tot = sum(w for w, _ in ws)
   if tot <= 0: zero += 1
-  co = v.co
+  co = v.co / K
   out.append([round(co.x, 5), round(co.z, 5), round(-co.y, 5)] + [[j, round(w / tot, 4)] for w, j in ws] if tot > 0 else [round(co.x, 5), round(co.z, 5), round(-co.y, 5)])
 json.dump({'joints': JOINTS, 'zero': zero, 'missing_groups': empty, 'proxy_faces': len(proxy.data.polygons), 'verts': out}, open(out_path, 'w'), separators=(',', ':'))
 print('wrote', out_path, len(out), 'zero-weight proxy verts', zero)
