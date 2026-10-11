@@ -48,19 +48,14 @@ bpy.ops.object.select_all(action='DESELECT'); proxy.select_set(True); arm.select
 bpy.ops.object.parent_set(type='ARMATURE_AUTO')
 empty = [n for n in JOINTS if n not in proxy.vertex_groups]
 print('proxy faces', len(proxy.data.polygons), 'groups', len(proxy.vertex_groups), 'missing', empty)
-for n in JOINTS:
-  if n not in mesh.vertex_groups: mesh.vertex_groups.new(name=n)
-dt = mesh.modifiers.new('dt', 'DATA_TRANSFER'); dt.object = proxy; dt.use_vert_data = True
-dt.data_types_verts = {'VGROUP_WEIGHTS'}; dt.vert_mapping = 'POLYINTERP_NEAREST'
-dt.layers_vgroup_select_src = 'ALL'; dt.layers_vgroup_select_dst = 'NAME'
-bpy.context.view_layer.objects.active = mesh; bpy.ops.object.modifier_apply(modifier='dt')
-gi = {g.index: g.name for g in mesh.vertex_groups}
-out, bad = [], 0
-for v in mesh.data.vertices:
+# export the weighted proxy; the transfer to the real mesh happens offline (KD-tree + smoothing)
+gi = {g.index: g.name for g in proxy.vertex_groups}
+out, zero = [], 0
+for v in proxy.data.vertices:
   ws = sorted(((g.weight, JOINTS.index(gi[g.group])) for g in v.groups if gi[g.group] in JOINTS and g.weight > 1e-4), reverse=True)[:4]
   tot = sum(w for w, _ in ws)
-  if tot <= 0: bad += 1; ws = [(1.0, 0)]; tot = 1.0
+  if tot <= 0: zero += 1
   co = v.co
-  out.append([round(co.x, 5), round(co.z, 5), round(-co.y, 5)] + [[j, round(w / tot, 4)] for w, j in ws])
-json.dump({'joints': JOINTS, 'unweighted': bad, 'missing_groups': empty, 'proxy_faces': len(proxy.data.polygons), 'verts': out}, open(out_path, 'w'), separators=(',', ':'))
-print('wrote', out_path, len(out), 'unweighted', bad)
+  out.append([round(co.x, 5), round(co.z, 5), round(-co.y, 5)] + [[j, round(w / tot, 4)] for w, j in ws] if tot > 0 else [round(co.x, 5), round(co.z, 5), round(-co.y, 5)])
+json.dump({'joints': JOINTS, 'zero': zero, 'missing_groups': empty, 'proxy_faces': len(proxy.data.polygons), 'verts': out}, open(out_path, 'w'), separators=(',', ':'))
+print('wrote', out_path, len(out), 'zero-weight proxy verts', zero)
