@@ -1,21 +1,133 @@
 {
- "batch": "heroes-c",
+ "batch": "weapons-a",
  "files": [
   {
-   "name": "volt_t1.glb",
-   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/5cb3d14e952d702f2c91d69515b3667480426561a3ca3176b5ed320223ff3967/trellis_output_2026-10-11T162101.glb"
+   "name": "w_ayla.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/035659b30fd58ede9832d7066e33eeead4801c24893877c35869c6b1d255f2c4/trellis_output_2026-10-11T164049.glb"
   },
   {
-   "name": "volt_concept.webp",
-   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/3fc068877b4827e3fa16c0d6bcc2398f8b38f863c2065f5ffde685e47791c39e/image.webp"
+   "name": "w_ayla_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/ed5dbf2742c04532dbfa4fe60d4cbbc15d1e9b2e36092131efb0aa7ca83e579c/image.webp"
   },
   {
-   "name": "stella_t1.glb",
-   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/f58fb09fd4be327f0f207d6d2c3bd21ec3fba78feb56a4a2d700f7d5b69ea5db/trellis_output_2026-10-11T162206.glb"
+   "name": "w_brick.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/385ddbfcb8e00ac4ef6fd0369e16bcd1757d4eafcb3399e56db97de8b88b216b/trellis_output_2026-10-11T164127.glb"
   },
   {
-   "name": "stella_concept.webp",
-   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/5e59a254da9d722fd6839042dbd9302a0a66f4141d5480b864a3434a56785cb0/image.webp"
+   "name": "w_brick_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/56a751a7f104f6b5ab3d5dba6fed8b61d496eeb62310e0cedcb6128378c0f6ef/image.webp"
+  },
+  {
+   "name": "w_bruno.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/8f55d641d1248c0be5b92d79c90444979ff67d3cc53f3c4f20024179a0d37ab2/trellis_output_2026-10-11T164139.glb"
+  },
+  {
+   "name": "w_bruno_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/6c17253f14aab057ae21e0bfc5ac24d7ebe7058cd791d52287daadf77f11626b/image.webp"
+  },
+  {
+   "name": "w_gus.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/ce7606b0c9f7f5c54f4604a666061a01db720bf310a6508001caeeb747a8b079/trellis_output_2026-10-11T164153.glb"
+  },
+  {
+   "name": "w_gus_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/353892ad5d649caa7fad89871bed3a799ac6600aad3db68f502cac7f6a6516ad/image.webp"
+  },
+  {
+   "name": "w_lumi.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/cd6668c7d9050bebc508bf848ee0b283462c6de05908f180b9761b4922ddf1f1/trellis_output_2026-10-11T164206.glb"
+  },
+  {
+   "name": "w_lumi_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/10afc2d45fe837c1e439a60c05c7bc324a676385b217657af704d93d03098cb0/image.webp"
+  },
+  {
+   "name": "w_ember.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/157118f287b3d8fba61c961713765bb3e7288f2d6d948818e648c0b5d4117eef/trellis_output_2026-10-11T164217.glb"
+  },
+  {
+   "name": "w_ember_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/a1578181dbb8415cb347d89aec28c42fe329ded8d5fe1baa3d7e74a60f1cca60/image.webp"
+  },
+  {
+   "name": "w_stella.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/10b92ffe87469bcccfcda2b2ec1d644b9e57da72689a92022eb94b7d59ca9a56/trellis_output_2026-10-11T164228.glb"
+  },
+  {
+   "name": "w_stella_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/e99fd5680d03aa480855cbe96f34085ec576d15012ba1db4954887081941573a/image.webp"
+  },
+  {
+   "name": "w_volt.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/665e0dedbf56cb97c55ee77af924e8b8fdbca85596247746a4037c9374131eb9/trellis_output_2026-10-11T164245.glb"
+  },
+  {
+   "name": "w_volt_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/fb69515025336be1cbffdd9d1ac8a6d510f4b66902d5f031e3ae73e3f75d66d8/image.webp"
+  },
+  {
+   "name": "w_nova.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/e3dbccd38d6b6d6c13ae81cb2715737a995d9c03f7b81457fb06299d7fd61084/trellis_output_2026-10-11T164306.glb"
+  },
+  {
+   "name": "w_nova_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/7abc6ea3a204e143b6f96100588ec5b20bb397a5bb00424de289c60e7b81dea6/image.webp"
+  },
+  {
+   "name": "w_ren.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/725d85fa2a248424302bc35a7842820f3ebf6e005e409a62ea32f33127607c9d/trellis_output_2026-10-11T164319.glb"
+  },
+  {
+   "name": "w_ren_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/438b55a479e9b111ad34ad3701e8f941dd2afd62dca1c512867dc757ee5ee5e8/image.webp"
+  },
+  {
+   "name": "w_kiko.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/70b8f67bae69f4eaaea43fe4abbfd2f54518e6e3a28b1426b5f0169b9b410da3/trellis_output_2026-10-11T164334.glb"
+  },
+  {
+   "name": "w_kiko_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/1f8565db5863c6caf698814a7485d344be6df3e3c265bbc4b77cdd981ae158d4/image.webp"
+  },
+  {
+   "name": "w_rico.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/99e81dbf89a590eeb6be61f072b1f1f5516473ef6fadcb834304b78aefabfaa7/trellis_output_2026-10-11T164346.glb"
+  },
+  {
+   "name": "w_rico_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/7fc6e8525b26a1ae312fd019038ebadf941caf1cc28025af97852d442db3eeba/image.webp"
+  },
+  {
+   "name": "w_pip.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/6cd0ae8956f51d854e94967cdf20e7dedcc65187d3d9ea8dcb30822dea89b267/trellis_output_2026-10-11T164359.glb"
+  },
+  {
+   "name": "w_pip_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/f48b385d95df595141f8208c02d5c5c070dfd00204f669a89f89a67ebf374d6d/image.webp"
+  },
+  {
+   "name": "w_vex.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/d8e736a333bc0efd7930eac903da8715d8ff24d6f8e83149aecbfba19718968b/trellis_output_2026-10-11T164431.glb"
+  },
+  {
+   "name": "w_vex_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/a53f628487ddd550d0b27d27711ae92cd731bebcb99b51221e876dbc8b88aecf/image.webp"
+  },
+  {
+   "name": "w_boomer.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/62aeb311d1a8937a24003e245890d47be239827d42c8317e933c59aad635d984/trellis_output_2026-10-11T164505.glb"
+  },
+  {
+   "name": "w_boomer_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/136bee7a45d563c4102cb449b4e86e59eed4ab9633513fe5bda0e332ad6948b4/image.webp"
+  },
+  {
+   "name": "w_dax.glb",
+   "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/q5hm5/gradio_api/file=/tmp/gradio/962657fabb2af78d23138944101890305e1920f61a944df8adf624fbeb234cec/trellis_output_2026-10-11T164531.glb"
+  },
+  {
+   "name": "w_dax_concept.webp",
+   "url": "https://mcp-tools-flux-1-krea-dev.hf.space/--replicas/mgg97/gradio_api/file=/tmp/gradio/bc3ec84e91763b5b30d010946a73f535e5dd46f167ee1b5a3d9e0b564837c131/image.webp"
   }
  ]
 }
