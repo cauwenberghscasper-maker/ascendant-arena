@@ -1,13 +1,26 @@
 // ---- v9 monsters: two per area (see the area guide). Each reuses a body ("base") from the 14 sculpted
 // monsters with its own tint, size and fighting style until it gets bespoke art. ------------------------
 const MON_KIT = {
-  swarm: { hp: 44, atk: 9, speed: 6.0, r: 0.7, aggro: 12, leash: 26, attack: 'touch', cd: 0.75, gold: [3, 6], lunge: true },
-  charger: { hp: 74, atk: 12, speed: 4.4, r: 0.85, aggro: 10, leash: 24, attack: 'touch', cd: 1.1, gold: [3, 7], charge: true },
-  brute: { hp: 125, atk: 16, speed: 3.3, r: 1.0, aggro: 9, leash: 24, attack: 'touch', cd: 1.45, gold: [5, 9], heavy: true },
-  ambusher: { hp: 92, atk: 15, speed: 4.2, r: 0.9, aggro: 6, leash: 22, attack: 'touch', cd: 1.2, gold: [4, 8], lunge: true, heavy: true },
-  shooter: { hp: 56, atk: 9, speed: 4.0, r: 0.72, aggro: 13, leash: 26, attack: 'shoot', cd: 1.5, gold: [3, 7], shotSpeed: 12, keep: 8, shots: 1 },
-  spray: { hp: 62, atk: 8, speed: 4.2, r: 0.75, aggro: 13, leash: 28, attack: 'shoot', cd: 1.8, gold: [4, 8], shotSpeed: 11, keep: 9, shots: 3, spread: 0.5 },
-  turret: { hp: 90, atk: 9, speed: 1.8, r: 0.9, aggro: 15, leash: 20, attack: 'shoot', cd: 2.2, gold: [4, 9], shotSpeed: 10, keep: 11, shots: 5, spread: 0.9 },
+  swarm: { hp: 44, atk: 9, speed: 6.0, r: 0.7, aggro: 12, leash: 26, attack: 'touch', cd: 0.75, gold: [3, 6], lunge: true, moves: ['pounce', 'howl'] },
+  charger: { hp: 74, atk: 12, speed: 4.4, r: 0.85, aggro: 10, leash: 24, attack: 'touch', cd: 1.1, gold: [3, 7], charge: true, moves: ['trample'] },
+  brute: { hp: 125, atk: 16, speed: 3.3, r: 1.0, aggro: 9, leash: 24, attack: 'touch', cd: 1.45, gold: [5, 9], heavy: true, moves: ['cleave', 'slam'] },
+  ambusher: { hp: 92, atk: 15, speed: 4.2, r: 0.9, aggro: 6, leash: 22, attack: 'touch', cd: 1.2, gold: [4, 8], lunge: true, heavy: true, moves: ['cleave', 'pounce'] },
+  shooter: { hp: 56, atk: 9, speed: 4.0, r: 0.72, aggro: 13, leash: 26, attack: 'shoot', cd: 1.5, gold: [3, 7], shotSpeed: 12, keep: 8, shots: 1, moves: ['snipe'] },
+  spray: { hp: 62, atk: 8, speed: 4.2, r: 0.75, aggro: 13, leash: 28, attack: 'shoot', cd: 1.8, gold: [4, 8], shotSpeed: 11, keep: 9, shots: 3, spread: 0.5, moves: ['mortar'] },
+  turret: { hp: 90, atk: 9, speed: 1.8, r: 0.9, aggro: 15, leash: 20, attack: 'shoot', cd: 2.2, gold: [4, 9], shotSpeed: 10, keep: 11, shots: 5, spread: 0.9, moves: ['nova'] },
+};
+// Telegraphed monster moves (run by "monster moves" in 33-world-sim). wind = red warning before it lands, cd = seconds
+// between uses, min/max = hero distance that starts it, mult = mobDmg multiplier, r = hit radius.
+const MON_MOVES = {
+  cleave: { wind: 0.5, cd: [2.6, 3.6], max: 2.6, r: 2.2, ahead: 1.3, mult: 1.2 }, // hugging a brute is no longer safe
+  slam: { wind: 0.8, cd: [5.5, 6.5], max: 3.4, r: 3.2, mult: 1.6 },
+  pounce: { wind: 0.7, cd: [4.5, 6], min: 4, max: 9, r: 1.8, leap: 0.3, lead: 0.35, mult: 1.3 },
+  trample: { r: 1.3, every: 1.4, dur: 3, mult: 0.3 }, // rides the charge lane; burning chargers leave clouds behind
+  snipe: { wind: 0.7, cd: [4.5, 6], min: 4, max: 14, len: 14, speed: 26, mult: 2.2 },
+  mortar: { wind: 0.5, fly: 1.1, cd: [5, 7], min: 4, max: 13, r: 1.8, n: 3, gap: 2.6, lead: 0.5, mult: 1.1 },
+  nova: { wind: 0.6, cd: [5, 7], max: 12, n: 14, speed: 7, mult: 0.8 },
+  pool: { wind: 0.9, cd: [6, 8], max: 10, r: 2.2, dur: 3, mult: 0.35 },
+  howl: { r: 8, dur: 3, speed: 0.4 }, // a pack-mate falls nearby: the rest frenzy
 };
 // id: [name, kit, base body, tint, size, extra]
 const MON_ROWS = {
@@ -73,7 +86,9 @@ const MON_ROWS = {
 for (const k in CFG.enemies) if (CFG.enemies[k] && CFG.enemies[k].hp) CFG.enemies[k].legacy = true; // the old monsters stay for saves, Rift themes and records
 for (const id in MON_ROWS) {
   const [name, kit, base, tint, scale, extra] = MON_ROWS[id];
-  CFG.enemies[id] = Object.assign({}, MON_KIT[kit], { name, kit, base, tint, scale, r: +(MON_KIT[kit].r * Math.sqrt(scale)).toFixed(2) }, extra);
+  // heavy species also slam, burning ones spit pools; extra.moves replaces the list outright
+  const mv = MON_KIT[kit].moves.slice(); if (extra.heavy && !mv.includes('slam')) mv.push('slam'); if (extra.burn) mv.push('pool');
+  CFG.enemies[id] = Object.assign({}, MON_KIT[kit], { name, kit, base, tint, scale, r: +(MON_KIT[kit].r * Math.sqrt(scale)).toFixed(2), moves: mv }, extra);
 }
 const enemyBase = (type) => (CFG.enemies[type] && CFG.enemies[type].base) || type;
 for (const c in CFG.signatures) {

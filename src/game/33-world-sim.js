@@ -511,7 +511,7 @@ function stepEnemy(e, dt) {
   const slow = e.slowT > 0 ? 0.5 : 1;
   const plSafe = !pl.alive || G.menuSafe > 0 || distToTown(pl.x, pl.z) < CFG.world.town.r + 2;
   if (e.rift && G.menuSafe > 0) { e.moveAmt = Math.max(0, (e.moveAmt || 0) - dt * 3); return; }
-  if (e.champ && pl.alive && champTick(e, dt, pl, dp)) { trackVel(e, dt); collideObstacles(e); riftClamp(e, e.r); return; }
+  if (e.champ && e.rift && pl.alive && champTick(e, dt, pl, dp)) { trackVel(e, dt); collideObstacles(e); riftClamp(e, e.r); return; }
   const homeD = Math.hypot(e.x - e.hx, e.z - e.hz);
   let mx = 0, mz = 0, sp = 0;
   if (e.state === 'idle') {
@@ -524,7 +524,8 @@ function stepEnemy(e, dt) {
     else {
       markCombat();
       const dx = pl.x - e.x, dz = pl.z - e.z, dd = dp || 1;
-      if (d.attack === 'touch') {
+      if (d.moves && enemyMove(e, dt, pl, dp)) sp = 0; // a telegraphed move (or a hub elite's affix) owns this frame
+      else if (d.attack === 'touch') {
         mx = dx / dd; mz = dz / dd; sp = dd < e.r + pl.r + 0.15 ? 0 : d.speed; // hold at arm's length instead of grinding into the hero
         // All burst movement warns first, then follows the displayed lane. Moving
         // sideways or dashing during the windup must not cause the attack to track you.
@@ -584,11 +585,98 @@ function stepEnemy(e, dt) {
 }
 
 // --- monster moves
+// Each move warns in red the moment its windup starts (a pendingAoE ring, a lane or a cast ring) and then commits to
+// what it showed: leaving the marker during the windup always avoids it. Damage always goes through mobDmg.
+function moveState(e) { const M = { k: null, t: 0, seen: 0, gap: 1, cd: {}, x: 0, z: 0, sx: 0, sz: 0, a: 0, lx: 1e9, lz: 1e9, frenzyT: 0, pack: [], packT: 0 }; for (const k of CFG.enemies[e.type].moves) M.cd[k] = rand(1, 3); return M; }
+// hub elites roll Rift champion affixes (two from area 10 on); champTick runs them at reduced damage
+function eliteMods(e) {
+  const keys = Object.keys(CHAMP_MODS).sort(() => Math.random() - 0.5).slice(0, e.zone >= 10 ? 2 : 1);
+  e.champ = { mods: keys, cd: {}, cast: null, castT: 0, spin: 0, spinT: 0, chargeT: 0, hitDone: false, shieldT: 0 };
+  for (const k of keys) e.champ.cd[k] = rand(1.5, 3.5);
+  e.champName = keys.map((k) => CHAMP_MODS[k].name).join(' · ');
+}
+const moveAoE = (e, x, z, r, t, dmg) => G.pendingAoE.push({ x, z, r, t, max: t, dmg, team: 'mob', owner: e.id, kind: 'slam' });
+const outOfTown = (e, x, z) => e.rift || inInstance() || distToTown(x, z) > CFG.world.town.r + 2;
+function enemyMove(e, dt, pl, dp) {
+  const d = CFG.enemies[e.type], M = e.mv || (e.mv = moveState(e)), slow = e.slowT > 0 ? 0.5 : 1;
+  // died, lost the hero or walked home mid-move: drop it (markers already placed still land)
+  if (M.k && M.seen < G.time - 0.5) { M.k = null; e.windT = 0; }
+  M.seen = G.time; M.gap -= dt;
+  for (const k in M.cd) M.cd[k] -= dt;
+  if (e.elite && !e.champ) eliteMods(e);
+  if (e.champ && !e.rift && champTick(e, dt, pl, dp)) return true;
+  // howl: remember nearby pack-mates; if one has fallen since the last look, frenzy
+  if (d.moves.includes('howl') && (M.packT -= dt) <= 0) {
+    const H = MON_MOVES.howl; M.packT = 0.25;
+    for (const o of M.pack) if (!o.alive && Math.hypot(o.x - e.x, o.z - e.z) < H.r) { M.frenzyT = H.dur; ev({ t: 'moveTele', x: e.x, z: e.z, r: e.r * 2.4, life: 0.6, color: 0xff9b3d }); break; }
+    M.pack.length = 0;
+    for (const o of G.enemies) if (o !== e && o.alive && CFG.enemies[o.type].kit === d.kit && Math.abs(o.x - e.x) < H.r && Math.abs(o.z - e.z) < H.r) M.pack.push(o);
+  }
+  if (M.frenzyT > 0) { M.frenzyT -= dt; if (!M.k && !(e.windT > 0) && dp > 1) { const f = d.speed * MON_MOVES.howl.speed * slow * dt / dp; e.x += (pl.x - e.x) * f; e.z += (pl.z - e.z) * f; } }
+  // trample: a burning charger's committed charge leaves poison behind it
+  if (d.burn && d.charge && e.lungeT > 0 && d.moves.includes('trample')) {
+    const T = MON_MOVES.trample;
+    if (Math.hypot(e.x - M.lx, e.z - M.lz) > T.every) { M.lx = e.x; M.lz = e.z; G.clouds.push({ x: e.x, z: e.z, r: T.r, t: T.dur, max: T.dur, tick: 0, dmg: mobDmg(e, T.mult, pl), team: 'mob', owner: e.id }); }
+  } else M.lx = 1e9;
+  if (M.k) {
+    const k = M.k, S = MON_MOVES[k]; M.t -= dt; e.windT = Math.max(M.t, 0.05); e.moveAmt = 0;
+    // pounce: crouch, then leap so the body lands as the marker goes off
+    if (k === 'pounce' && M.t < S.leap) { const q = clamp(1 - M.t / S.leap, 0, 1); e.x = lerp(M.sx, M.x, q); e.z = lerp(M.sz, M.z, q); e.moveAmt = 1; }
+    if (M.t <= 0) { M.k = null; e.windT = 0; e.attackAnim = 1; M.gap = 0.8; fireMove(e, k, S, pl); }
+    return true;
+  }
+  if (e.windT > 0 || e.lungeT > 0 || M.gap > 0) return false;
+  for (const k of d.moves) {
+    const S = MON_MOVES[k]; if (!S.wind || M.cd[k] > 0 || dp > S.max || dp < (S.min || 0)) continue;
+    if (startMove(e, k, S, pl, slow)) { M.cd[k] = rand(S.cd[0], S.cd[1]); M.k = k; M.t = e.windT = S.wind; return true; }
+  }
+  return false;
+}
+function startMove(e, k, S, pl, slow) {
+  const M = e.mv, a = Math.atan2(pl.x - e.x, pl.z - e.z); e.facing = a; M.a = a;
+  if (k === 'cleave') { moveAoE(e, e.x + Math.sin(a) * S.ahead, e.z + Math.cos(a) * S.ahead, S.r, S.wind, mobDmg(e, S.mult, pl)); return true; }
+  if (k === 'slam') { moveAoE(e, e.x, e.z, S.r, S.wind, mobDmg(e, S.mult, pl)); return true; }
+  if (k === 'pounce') {
+    if (slow < 1) return false; // slowed monsters cannot leap
+    const x = pl.x + (pl.vx || 0) * S.lead, z = pl.z + (pl.vz || 0) * S.lead; if (!outOfTown(e, x, z)) return false;
+    M.sx = e.x; M.sz = e.z; M.x = x; M.z = z; moveAoE(e, x, z, S.r, S.wind, mobDmg(e, S.mult, pl)); return true;
+  }
+  if (k === 'snipe') { if (losBlocked(e.x, e.z, pl.x, pl.z)) return false; ev({ t: 'moveTele', x: e.x, z: e.z, a, len: S.len, w: 1, life: S.wind }); return true; }
+  if (k === 'mortar') {
+    // three shells across the hero's predicted spot; each lands exactly when its marker goes off
+    const cx = pl.x + (pl.vx || 0) * S.lead, cz = pl.z + (pl.vz || 0) * S.lead, px = Math.cos(a), pz = -Math.sin(a), d = CFG.enemies[e.type];
+    for (let i = 0; i < S.n; i++) {
+      const o = (i - (S.n - 1) / 2) * S.gap, x = cx + px * o, z = cz + pz * o, t = S.fly + i * 0.15, dd = Math.hypot(x - e.x, z - e.z);
+      moveAoE(e, x, z, S.r, t, mobDmg(e, S.mult, pl));
+      spawnProjectile({ x: e.x, z: e.z, vx: (x - e.x) / t, vz: (z - e.z) / t, life: t, r: 0.4, dmg: 0, team: 'mob', owner: e.id, kind: 'lob', lob: true, lobH: 1.6 + dd * 0.22, color: d.shotColor || 0xff7b2e, y: 1.2 });
+    }
+    ev({ t: 'shoot', kind: 'enemy', x: e.x, z: e.z }); return true;
+  }
+  if (k === 'nova') { ev({ t: 'moveTele', x: e.x, z: e.z, r: e.r * 2.2, life: S.wind }); return true; }
+  if (k === 'pool') { if (!outOfTown(e, pl.x, pl.z)) return false; M.x = pl.x; M.z = pl.z; ev({ t: 'moveTele', x: M.x, z: M.z, r: S.r, life: S.wind }); return true; }
+  return false;
+}
+function fireMove(e, k, S, pl) {
+  const M = e.mv, d = CFG.enemies[e.type];
+  if (k === 'snipe') { spawnProjectile({ x: e.x, z: e.z, vx: Math.sin(M.a) * S.speed, vz: Math.cos(M.a) * S.speed, life: S.len / S.speed, r: 0.45, dmg: mobDmg(e, S.mult, pl), pierce: 9, team: 'mob', owner: e.id, kind: 'orb', color: d.shotColor || 0xff3b3b, y: 1.4 }); ev({ t: 'shoot', kind: 'enemy', x: e.x, z: e.z }); }
+  // nova: one orb always flies at the hero; the three-orb gap sits right beside them
+  else if (k === 'nova') orbRing(e, S.n, 2, M.a + (Math.random() < 0.5 ? -2 : 2) * Math.PI * 2 / S.n, S.speed, mobDmg(e, S.mult, pl), d.shotColor || 0xff7b2e);
+  else if (k === 'pool') G.clouds.push({ x: M.x, z: M.z, r: S.r, t: S.dur, max: S.dur, tick: 0, dmg: mobDmg(e, S.mult, pl), team: 'mob', owner: e.id });
+}
+// a ring of N slow orbs with a gap of 2g-1 slots centred on angle gapA
+function orbRing(e, N, g, gapA, sp, dmg, color) {
+  for (let i = 0; i < N; i++) {
+    const a = gapA + (i / N) * Math.PI * 2; if (i < g || i > N - g) continue;
+    spawnProjectile({ x: e.x, z: e.z, vx: Math.sin(a) * sp, vz: Math.cos(a) * sp, life: 3, r: 0.48, dmg, team: 'mob', owner: e.id, kind: 'orb', color, y: 1.2 });
+  }
+  ev({ t: 'boom', x: e.x, z: e.z, r: 2, color });
+}
 // --- end monster moves
 
 // --- Rift champions: every big attack is shown first (red circles, lanes, glow) and can be dodged or dashed through
 function champTick(e, dt, pl, dp) {
-  const C = e.champ, n = G.rift ? G.rift.floor : 1, frac = champDmgFrac(n), hit = () => pl.maxHp * frac;
+  // Rift champions hit for a share of your HP; hub elites with affixes use normal monster damage at 0.6x
+  const C = e.champ, n = G.rift ? G.rift.floor : 1, frac = champDmgFrac(n), hit = e.rift ? () => pl.maxHp * frac : () => mobDmg(e, 0.6, pl);
   if (C.shieldT > 0) { C.shieldT -= dt; e.invulnT = C.shieldT > 0 ? 1 : 0; }
   if (C.mods.includes('frenzy')) { e.atkCd -= dt * 0.7; e.slowT = Math.min(e.slowT, 0); }
   // a charge in progress
@@ -628,15 +716,8 @@ function champFire(e, k, pl, hit) {
   if (k === 'charge') { C.chargeT = 0.7; C.hitDone = false; return; }
   if (k === 'spiral') { C.spinT = 2.4; C.spin = Math.atan2(pl.x - e.x, pl.z - e.z); return; }
   if (k === 'blink' && C.blink) { ev({ t: 'champBlink', x: e.x, z: e.z, out: true }); e.x = C.blink.x; e.z = C.blink.z; G.pendingAoE.push({ x: e.x, z: e.z, r: 2.4, t: 0.45, max: 0.45, dmg: hit() * 0.6, team: 'mob', owner: e.id, kind: 'slam' }); return; }
-  if (k === 'nova') {
-    // a ring of slow orbs with a gap: walk or dash through the gap
-    const N = 22, gap = Math.atan2(pl.x - e.x, pl.z - e.z) + rand(-1.4, 1.4);
-    for (let i = 0; i < N; i++) {
-      const a = gap + (i / N) * Math.PI * 2; if (i < 3 || i > N - 3) continue;
-      spawnProjectile({ x: e.x, z: e.z, vx: Math.sin(a) * 6.5, vz: Math.cos(a) * 6.5, life: 3, r: 0.48, dmg: hit() * 0.45, team: 'mob', owner: e.id, kind: 'orb', color: 0xffb347, y: 1.2 });
-    }
-    ev({ t: 'boom', x: e.x, z: e.z, r: 2, color: 0xffb347 });
-  }
+  // a ring of slow orbs with a gap: walk or dash through the gap
+  if (k === 'nova') orbRing(e, 22, 3, Math.atan2(pl.x - e.x, pl.z - e.z) + rand(-1.4, 1.4), 6.5, hit() * 0.45, 0xffb347);
 }
 // --- world boss -----------------------------------------------------------------
 function currentLair() { return CFG.world.lairs[G.bossLair]; }

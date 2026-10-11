@@ -11,7 +11,7 @@ const math = Object.create(Math); math.random = () => { seed = (Math.imul(seed, 
 const c = { Math: math, console, LOCAL_PREVIEW: false, TEST_MODE: false, nextId: 1,
   G: { mode: 'hub', time: 0, menuSafe: 0, profile: { level: 1, worldTier: 0, records: {} }, player: null, enemies: [], ents: new Map(), pendingAoE: [], clouds: [], boss: null, rift: null },
   ev() {}, toast() {}, markCombat() {}, trackVel() {}, champTick: () => false, slayerBonus: () => 0, petBonuses: () => ({ damage: 0, hp: 0 }), petMayFight: () => false,
-  onHitProcs() {}, killEntity: (t) => { t.alive = false; }, mpOnShot() {} };
+  onHitProcs() {}, killEntity: (t) => { t.alive = false; }, mpOnShot() {}, losBlocked: () => false };
 vm.createContext(c);
 vm.runInContext(fs.readFileSync(path.join(root, 'assets/data/test-mode.js'), 'utf8').replace(/export /g, ''), c);
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') +
@@ -22,7 +22,7 @@ vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp ='
   section('function applyLoadout(', 'function checkUnlocks(') +
   section('const PROJ_MAX =', 'function projColor(') + section('function stepProjectiles(dt) {', '// keystone and artifact') +
   section('function tickBurn(', 'function doSpecial(') + section('function regenTick(', 'function stepFighter(') +
-  section('function patrolCountFor(', 'function rewardEnemyKill(') + section('function separate(', '// --- Rift champions:') +
+  section('function patrolCountFor(', 'function rewardEnemyKill(') + section('const CHAMP_MODS = {', 'function riftWaveLevel(') + section('function separate(', '// --- Rift champions:') +
   '\nthis.config = CFG; this.kit = MON_KIT; this.mxpFor = mxpFor;', c);
 const CFG = c.config, E = CFG.enemies, W = CFG.world, LEVELS = [1, 10, 20, 50, 100, 150, 200], DT = 1 / 60;
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }

@@ -217,17 +217,18 @@ function updateProjectileMeshes() {
 // rings: explosions + telegraphs
 // telegraph colours: red is always a threat to the player, gold is the player's own
 const TELE_MOB = 0xff3b3b, TELE_PLAYER = 0xffc94a;
-const RING_MAX = 20, rings = [];
+const RING_MAX = 28, rings = [];
 for (let i = 0; i < RING_MAX; i++) {
   const ring = pxRingMesh(0.9, 1, { color: 0xffffff, transparent: true, depthWrite: false });
   const disc = pxRingMesh(0, 1, { color: 0xffffff, transparent: true, depthWrite: false });
   ring.visible = disc.visible = false; dynGroup.add(ring, disc);
-  rings.push({ ring, disc, life: 0, max: 0, r: 0, x: 0, z: 0 });
+  rings.push({ ring, disc, life: 0, max: 0, r: 0, x: 0, z: 0, warn: false });
 }
 const effects = [];
-function ringFx(x, z, r, color, life) {
+// warn: a full-size ring whose disc fills up until it lands (same look as a pendingAoE marker)
+function ringFx(x, z, r, color, life, warn) {
   const slot = rings.find((s) => s.life <= 0 && !s.tele) || rings[0];
-  slot.life = slot.max = life; slot.r = r; slot.x = x; slot.z = z;
+  slot.life = slot.max = life; slot.r = r; slot.x = x; slot.z = z; slot.warn = !!warn;
   slot.ring.material.color.setHex(color); slot.disc.material.color.setHex(color);
 }
 function updateRings(dt) {
@@ -235,18 +236,18 @@ function updateRings(dt) {
   let used = 0;
   for (const s of rings) s.tele = false;
   for (const a of G.pendingAoE) {
-    const s = rings[RING_MAX - 1 - used]; if (!s || used >= 6) break; used++;
+    const s = rings[RING_MAX - 1 - used]; if (!s || used >= 12) break; used++;
     s.tele = true;
-    const k = 1 - a.t / a.max;
+    const k = 1 - a.t / a.max, col = a.team === 'mob' ? TELE_MOB : TELE_PLAYER;
     s.ring.visible = s.disc.visible = true;
-    s.ring.position.set(a.x, 0.08, a.z); s.ring.scale.setScalar(a.r); s.ring.material.opacity = 0.9; s.ring.material.color.setHex(0xff3b3b);
-    s.disc.position.set(a.x, 0.07, a.z); s.disc.scale.setScalar(a.r * k); s.disc.material.opacity = 0.35; s.disc.material.color.setHex(0xff3b3b);
+    s.ring.position.set(a.x, 0.08, a.z); s.ring.scale.setScalar(a.r); s.ring.material.opacity = 0.9; s.ring.material.color.setHex(col);
+    s.disc.position.set(a.x, 0.07, a.z); s.disc.scale.setScalar(a.r * k); s.disc.material.opacity = 0.35; s.disc.material.color.setHex(col);
   }
   for (const c of G.clouds) {
-    const s = rings[RING_MAX - 1 - used]; if (!s || used >= 10) break; used++;
+    const s = rings[RING_MAX - 1 - used]; if (!s || used >= 18) break; used++;
     s.tele = true; const fade = Math.min(1, c.t / 0.5);
     s.ring.visible = s.disc.visible = true;
-    s.ring.position.set(c.x, 0.08, c.z); s.ring.scale.setScalar(c.r); s.ring.material.opacity = 0.7 * fade; s.ring.material.color.setHex(0x8dff6a);
+    s.ring.position.set(c.x, 0.08, c.z); s.ring.scale.setScalar(c.r); s.ring.material.opacity = 0.7 * fade; s.ring.material.color.setHex(c.team === 'mob' ? TELE_MOB : 0x8dff6a);
     s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * 6) * 0.05) * fade; s.disc.material.color.setHex(0x5fd84a);
     if (Math.random() < 0.5) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
   }
@@ -256,6 +257,7 @@ function updateRings(dt) {
     s.life -= dt;
     const k = 1 - s.life / s.max;
     s.ring.visible = s.disc.visible = true;
+    if (s.warn) { s.ring.position.set(s.x, 0.08, s.z); s.ring.scale.setScalar(s.r); s.ring.material.opacity = 0.9; s.disc.position.set(s.x, 0.07, s.z); s.disc.scale.setScalar(s.r * Math.max(0.01, k)); s.disc.material.opacity = 0.35; continue; }
     s.ring.position.set(s.x, 0.09, s.z); s.ring.scale.setScalar(s.r * (0.4 + 0.6 * Math.sqrt(k))); s.ring.material.opacity = (1 - k) * 0.95;
     s.disc.position.set(s.x, 0.08, s.z); s.disc.scale.setScalar(s.r * (0.3 + 0.7 * k)); s.disc.material.opacity = (1 - k) * 0.35;
   }
@@ -378,7 +380,7 @@ function updateAim(dt) {
 const LaneFX = [];
 function laneFx(x, z, a, len, w, color, life) {
   let L = LaneFX.find((l) => l.life <= 0);
-  if (!L) { if (LaneFX.length >= 8) L = LaneFX[0]; else { L = { mesh: new THREE.Mesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2).translate(0, 0, 0.5), aimMatOf(laneTex)), life: 0, max: 1 }; L.mesh.renderOrder = 3; dynGroup.add(L.mesh); LaneFX.push(L); } }
+  if (!L) { if (LaneFX.length >= 16) L = LaneFX[0]; else { L = { mesh: new THREE.Mesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2).translate(0, 0, 0.5), aimMatOf(laneTex)), life: 0, max: 1 }; L.mesh.renderOrder = 3; dynGroup.add(L.mesh); LaneFX.push(L); } }
   L.life = L.max = life; L.mesh.visible = true; L.mesh.position.set(x, 0.1, z); L.mesh.rotation.y = a; L.mesh.scale.set(w, 1, len); L.mesh.material.color.setHex(color);
 }
 function updateLaneFx(dt) { for (const L of LaneFX) { if (L.life <= 0) { L.mesh.visible = false; continue; } L.life -= dt; L.mesh.material.opacity = 0.35 + 0.5 * Math.abs(Math.sin(L.life * 18)) * (L.life / L.max); } }

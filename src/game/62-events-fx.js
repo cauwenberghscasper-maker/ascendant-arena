@@ -171,6 +171,7 @@ function processEvents() {
       case 'bossDown': Feed.remove('boss'); Feed.add(`${gi('m_feats')} World boss defeated!`, 'boss'); Sfx.play('win'); break;
       case 'bossGone': Feed.remove('boss'); Feed.add(`${gi('k_titan')} ${e.name} sank back into the ground`, 'boss'); break;
       case 'telegraph': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w || 1.4, 0xff4d4d, 0.6); break;
+      case 'moveTele': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w, TELE_MOB, e.life); else ringFx(e.x, e.z, e.r, e.color || TELE_MOB, e.life, !e.color); break; // monster moves: red lane or filling ring
       case 'bossRocks': if (near(e, 25)) Sfx.play('boom', { gap: 0.1 }); break;
       case 'respawn': showToast('Back in town. Watch your health!'); break;
       case 'spawn': break;
