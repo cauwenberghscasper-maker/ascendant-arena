@@ -1828,7 +1828,6 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const rand = (a, b) => a + Math.random() * (b - a);
 const randInt = (a, b) => Math.floor(rand(a, b + 1));
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const hypot = Math.hypot;
 function angDiff(a, b) { let d = b - a; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return d; }
 function mulberry32(seed) { return function () { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const fmt = (n) => Math.round(n).toLocaleString('en-US');
@@ -2001,12 +2000,6 @@ function forgeOffer(slot) {
   return { slot, style, price, item };
 }
 function emptyMods() { return { hp: 0, dmg: 0, reload: 0, superPow: 0, superGain: 0, speed: 0, skillCd: 0, aoe: 0 }; }
-function treeMods(cls, tree) {
-  const m = emptyMods();
-  const nodes = CFG.trees[cls]; if (!nodes || !tree) return m;
-  for (const n of nodes) { const r = tree[n.id] || 0; for (const k in n.eff) m[k] += n.eff[k] * r; }
-  return m;
-}
 
 const NPC_DEFS = [
   { id: 'ida', name: 'Farmer Ida', role: 'job', x: -7, z: -50, body: 0xe0a64a, accent: 0x6d4b2a, minLevel: 1,
@@ -2474,7 +2467,6 @@ const equipAttack = setBrawler;
 const BRAWLER_SWITCH_MASTERY = 80;
 function canSwitchBrawler(p, id) { const first = p.starterBrawler || 'bolt'; return id === p.cls || id === first || masteryLevel((p.mastery || {})['w:' + first] || 0) >= BRAWLER_SWITCH_MASTERY; }
 function artifactSlotsFor(p) { const earnedLevel = prestigeCount(p) ? Math.max(PRESTIGE_LEVEL,p.level) : p.level; let n = CFG.artifactSlots; for (const L in P.artifactSlotAt) if (earnedLevel >= +L) n = Math.max(n, P.artifactSlotAt[L]); return n; }
-function keySet(list) { const o = {}; if (Array.isArray(list)) for (const k of list) if (k) o[k] = true; return o; }
 function toggleArtifact(id) {
   const p = G.profile; if (!p.unlocked.artifacts.includes(id)) return false;
   const i = p.artifacts.indexOf(id);
@@ -2526,10 +2518,6 @@ function obstacleAt(x, z, pad) {
 }
 function clearProjectiles() { for (const p of projectiles) p.active = false; G.pendingAoE.length = 0; G.clouds.length = 0; }
 
-function damageTargets() {
-  if (G.mode === 'arena') return G.arena ? G.arena.fighters : [];
-  return null; // hub handled specially (enemies + boss + player)
-}
 function forEachTarget(fn) {
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
   fn(G.player);
@@ -4118,7 +4106,6 @@ function stepPendingAoE(dt) {
 
 // --- arena -------------------------------------------------------------------------
 function arenaDifficulty(trophies) { return clamp(0.15 + 0.85 * trophies / CFG.arena.maxDiffTrophies, 0.15, 1); }
-let arenaObstacleList = [];
 function startArena() {
   const A = CFG.arena, p = G.profile;
   clearProjectiles();
@@ -4733,12 +4720,6 @@ for (const [id, def] of Object.entries(ASSET_MANIFEST)) if (id.startsWith('hero.
 // Hand-painted, fully rigged adventurers (v4) replace them; each keeps its old entry as a fallback.
 applyHeroV4(ASSET_MANIFEST);
 // which kind of weapon a brawler holds (mirrors weaponGeometry)
-function heldWeaponFamily(cls) {
-  const A = CFG.attacks[cls], k = A ? A.kind : null;
-  if (['tracer', 'pellet', 'rail', 'missile', 'shell', 'lob', 'disc', 'chakram', 'flame'].includes(k)) return 'gun';
-  const c = k === 'wave' ? 'warrior' : k === 'arrow' ? 'ranger' : (k === 'orb' || k === 'spark') ? 'mage' : cls;
-  return c === 'mage' ? 'staff' : c === 'warrior' ? 'sword' : c === 'ranger' ? 'bow' : 'other';
-}
 // the generated weapon a hero holds: always the brawler's own signature weapon (equipped items are not shown on heroes)
 const SIGNATURE_WEAPON = { chain: 'gear.weapon.dragonsoul.focus' }; // Volt carries the Dragonsoul staff
 function heldWeaponAsset(cls) {
@@ -5230,10 +5211,6 @@ const ItemArt = {
 // <items-icons>
 const ITEM_ICONS = [];
 // </items-icons>
-// painted menu emblems (assets/ui/menu/<tile>.webp), same tool
-// <menu-icons>
-const MENU_EMBLEMS = []; // painted emblems retired: every menu tile uses the pixel icon set
-// </menu-icons>
 // Generated static menu paintings take precedence; procedural portraits cover future shapes.
 function thumbFor(it) {
   if (!it) return '';
@@ -5256,13 +5233,6 @@ function mergeKeep(geos) {
   const pos = new Float32Array(total * 3), nor = new Float32Array(total * 3), col = new Float32Array(total * 3); let o = 0;
   for (const g of geos) { pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3); col.set(g.attributes.color.array, o * 3); o += g.attributes.position.count; }
   const m = new THREE.BufferGeometry(); m.setAttribute('position', new THREE.BufferAttribute(pos, 3)); m.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); m.setAttribute('color', new THREE.BufferAttribute(col, 3)); m.computeBoundingSphere(); return m;
-}
-function mergeKeepPos(geos) {
-  const parts = geos.map((g) => (g.index ? g.toNonIndexed() : g));
-  let total = 0; for (const g of parts) total += g.attributes.position.count;
-  const pos = new Float32Array(total * 3); let o = 0;
-  for (const g of parts) { pos.set(g.attributes.position.array, o * 3); o += g.attributes.position.count; }
-  const m = new THREE.BufferGeometry(); m.setAttribute('position', new THREE.BufferAttribute(pos, 3)); m.computeBoundingSphere(); return m;
 }
 function bodyWithGear(o) {
   const cg = characterGeometry(o); if (!o.gear) return cg;
@@ -5692,7 +5662,6 @@ AssetSlots.register('enemy', (o) => {
     dispose() { AssetLibrary.disposeInstance(model); mat.dispose(); if (aura) aura.material.dispose(); },
   };
 });
-const ringGeoE = new THREE.RingGeometry(0.9, 1.05, 32).rotateX(-Math.PI / 2);
 
 // World boss: one golem body, tinted per zone, with a glowing core and a rune circle
 const golemCache = new Map();
@@ -6591,7 +6560,6 @@ function updateProjectileMeshes() {
 
 // rings: explosions + telegraphs
 const RING_MAX = 20, rings = [];
-const ringGeo = new THREE.RingGeometry(0.9, 1, 40).rotateX(-Math.PI / 2), discGeo = new THREE.CircleGeometry(1, 40).rotateX(-Math.PI / 2);
 for (let i = 0; i < RING_MAX; i++) {
   const ring = pxRingMesh(0.9, 1, { color: 0xffffff, transparent: true, depthWrite: false });
   const disc = pxRingMesh(0, 1, { color: 0xffffff, transparent: true, depthWrite: false });
@@ -6650,7 +6618,6 @@ const AimFX = {
     const laneGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2).translate(0, 0, 0.5);
     for (let i = 0; i < 5; i++) { const m = new THREE.Mesh(laneGeo, aimMatOf(laneTex)); m.visible = false; m.renderOrder = 3; dynGroup.add(m); this.lanes.push(m); }
     this.fan = new THREE.Mesh(new THREE.BufferGeometry(), this.fanMat); this.fan.visible = false; this.fan.renderOrder = 3; dynGroup.add(this.fan);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false, fog: false });
     this.ring = pxRingMesh(0.9, 1, { color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false, fog: false }); this.ring.renderOrder = 3;
     this.disc = pxRingMesh(0, 1, { color: 0xffffff, transparent: true, opacity: 0.18, depthWrite: false, fog: false });
     this.burstRing = pxRingMesh(0.92, 1, { color: 0xffffff, transparent: true, opacity: 0.6, depthWrite: false, fog: false });
@@ -7413,7 +7380,6 @@ function updateTags() {
     for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; if (near(b, 30)) put(b.x, 2.45 * growthScale(b), b.z, `${b.name} · ${b.level}`, null, 'bot'); }
     for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.nick} · ${e.level}`, e.hp, 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');
-    const pl2 = G.player;
     for (const e of G.enemies) if (e.alive && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
       const diff = e.lvl - G.profile.level, lvlCls = diff >= 5 ? ' red' : diff >= 2 ? ' orange' : diff <= -6 ? ' grey' : '';
@@ -7464,7 +7430,6 @@ const Coach = {
 // --- HUD ---
 const hudCache = {};
 function setText(id, v) { if (hudCache[id] !== v) { hudCache[id] = v; $(id).textContent = v; } }
-function setHTML(id, v) { if (hudCache[id] !== v) { hudCache[id] = v; $(id).innerHTML = v; } }
 function setStyle(id, prop, v) { const k = id + prop; if (hudCache[k] !== v) { hudCache[k] = v; $(id).style.setProperty(prop, v); } }
 function setHidden(id, h) { const k = id + 'hid'; if (hudCache[k] !== h) { hudCache[k] = h; $(id).hidden = h; } }
 function updateHUD(dt) {
@@ -8353,7 +8318,6 @@ const fmtK = (n) => {
   const e = Math.min(FMT_U.length - 1, Math.floor(Math.log10(a) / 3)), v = n / Math.pow(1000, e), av = Math.abs(v);
   return (av >= 100 ? v.toFixed(0) : av >= 10 ? v.toFixed(1) : v.toFixed(2)).replace(/\.0+$/, '') + FMT_U[e];
 };
-function keystoneFree() { return false; }
 // RuneScape-style XP drops: small numbers that float up by the minimap, merged per skill
 const XPDrops = {
   acc: new Map(), t: 0,
@@ -8942,7 +8906,6 @@ function openBrawlers(sel) {
   }).join('');
   const B = CFG.brawlers[sel], A = CFG.attacks[sel], C = CFG.classes[sel], have = owned.includes(sel);
   const first = p.starterBrawler || 'bolt', firstLevel = masteryOf(p, first), switchReady = canSwitchBrawler(p, sel);
-  const gateOld = firstLevel < BRAWLER_SWITCH_MASTERY ? `<p class="mergeNotice">Master ${CFG.brawlers[first].name} first: ${firstLevel}/${BRAWLER_SWITCH_MASTERY}. Reach mastery ${BRAWLER_SWITCH_MASTERY} of 99 to unlock changing brawlers. Level Road requirements still apply.</p>` : '';
   const xp = (p.mastery || {})['w:' + sel] || 0, L = masteryLevel(xp), a0 = mxpFor(L), a1 = mxpFor(Math.min(99, L + 1)), f = L >= 99 ? 1 : (xp - a0) / Math.max(1, a1 - a0);
   const t = tierOf(L), next = CFG.badges.find((b) => L < b.lvl);
   const badges = CFG.badges.map((b, i) => `<div class="bdg ${L >= b.lvl ? 'got' : ''}">${badgeSVG(L >= b.lvl ? i : -1, 'b_' + sel, { static: L < b.lvl })}<small>${b.name}<br>${b.lvl}</small></div>`).join('');
@@ -9033,7 +8996,6 @@ function openProgress(tab) {
 
 // --- Skill trees (canvas): pinch to zoom, drag to pan, tap a node ---------------------------------------------------
 const TreeView = { which: null, cv: null, s: 40, ox: 0, oy: 0, sel: null, ptrs: new Map(), pinch: null, moved: 0, raf: 0, paths: new Map() };
-function iconPath(key) { let p = TreeView.paths.get(key); if (!p && GI[key]) { p = new Path2D(GI[key]); TreeView.paths.set(key, p); } return p; }
 function nodeInfo(n) {
   if (n.key) { const k = CFG.keystones.flat().find((x) => x.id === n.key); return { name: k.name, icon: 'k_' + n.key, desc: k.desc }; }
   if (n.tag) { const t = BTAGS[n.tag]; return { name: t.name, icon: t.icon, desc: t.desc }; }
@@ -9099,8 +9061,6 @@ function setupTreeCanvas() {
   const loop = () => { if (UI.current !== 'skills' || !$('treeCv')) return; drawTree(); TreeView.raf = requestAnimationFrame(loop); };
   TreeView.raf = requestAnimationFrame(loop);
 }
-const BRANCH_COL = { might: '#ff7a45', fort: '#58e08a', swift: '#5dd6ff', sorc: '#c77dff', carn: '#ff4d6d', storm: '#7fa8ff', pow: '#ff7a45', rhy: '#ffc94a', uti: '#5dd6ff', core: '#ffc94a', r0: '#ffd34a', r1: '#c77dff', r2: '#9fe8ff', r3: '#ffd34a', r4: '#c77dff', r5: '#9fe8ff', r6: '#ffd34a', r7: '#c77dff', r8: '#9fe8ff' };
-const branchCol = (id) => BRANCH_COL[id.split('_')[0]] || '#ffc94a';
 // pixel tree: nodes are the game's pixel icon tiles (coloured by branch when learned, stone when not),
 // links are flat pixel bars, no glows; drawn with nearest-neighbour scaling so every tile stays crisp
 const BRANCH_FAM = { might: 'fire', fort: 'nature', swift: 'ice', sorc: 'arcane', carn: 'blood', storm: 'electric', pow: 'fire', rhy: 'gold', uti: 'ice', core: 'gold', r0: 'gold', r1: 'arcane', r2: 'ice', r3: 'gold', r4: 'arcane', r5: 'ice', r6: 'gold', r7: 'arcane', r8: 'ice' };
