@@ -1,0 +1,18 @@
+[
+  {
+    "version": "previous",
+    "medianMs": 18.299999999999272,
+    "p95Ms": 24.5,
+    "averageSimulationMs": 0.11749999945362409,
+    "visibleViews": 32,
+    "enemies": 481
+  },
+  {
+    "version": "updated",
+    "medianMs": 18.300000000000182,
+    "p95Ms": 24.399999999999636,
+    "averageSimulationMs": 0.1649999998509884,
+    "visibleViews": 44,
+    "enemies": 575
+  }
+]

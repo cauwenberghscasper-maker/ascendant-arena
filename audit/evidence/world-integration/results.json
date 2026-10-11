@@ -1,0 +1,121 @@
+{
+  "coverage": {
+    "population": 575,
+    "obstacles": 1920,
+    "reachableCells": 122286,
+    "zones": [
+      {
+        "zone": 0,
+        "patrols": 48,
+        "total": 82
+      },
+      {
+        "zone": 1,
+        "patrols": 48,
+        "total": 82
+      },
+      {
+        "zone": 2,
+        "patrols": 48,
+        "total": 82
+      },
+      {
+        "zone": 3,
+        "patrols": 48,
+        "total": 83
+      },
+      {
+        "zone": 4,
+        "patrols": 48,
+        "total": 78
+      },
+      {
+        "zone": 5,
+        "patrols": 48,
+        "total": 84
+      },
+      {
+        "zone": 6,
+        "patrols": 48,
+        "total": 84
+      }
+    ],
+    "unreachable": [],
+    "invalid": []
+  },
+  "combat": [
+    {
+      "level": 1,
+      "hp": 138,
+      "enemyLevel": 1,
+      "enemyDamage": 8,
+      "death": true,
+      "seconds": 17.016666666666666,
+      "simulationMs": 24
+    },
+    {
+      "level": 5,
+      "hp": 198,
+      "enemyLevel": 1,
+      "enemyDamage": 8,
+      "death": true,
+      "seconds": 24.016666666666666,
+      "simulationMs": 24.099999994039536
+    },
+    {
+      "level": 10,
+      "hp": 312,
+      "enemyLevel": 6,
+      "enemyDamage": 13.179574127525,
+      "death": true,
+      "seconds": 23.016666666666666,
+      "simulationMs": 13.099999994039536
+    },
+    {
+      "level": 25,
+      "hp": 1218,
+      "enemyLevel": 21,
+      "enemyDamage": 58.92987873540491,
+      "death": true,
+      "seconds": 20.016666666666666,
+      "simulationMs": 11.199999988079071
+    },
+    {
+      "level": 50,
+      "hp": 11776,
+      "enemyLevel": 46,
+      "enemyDamage": 715.1423510941162,
+      "death": true,
+      "seconds": 16.016666666666666,
+      "simulationMs": 14.199999988079071
+    },
+    {
+      "level": 100,
+      "hp": 1100828,
+      "enemyLevel": 96,
+      "enemyDamage": 105318.9204958193,
+      "death": true,
+      "seconds": 10.016666666666667,
+      "simulationMs": 7.0999999940395355
+    },
+    {
+      "level": 200,
+      "hp": 9619033137,
+      "enemyLevel": 196,
+      "enemyDamage": 954357194.8852389,
+      "death": true,
+      "seconds": 10.016666666666667,
+      "simulationMs": 13.700000017881393
+    },
+    {
+      "levelReward": true
+    }
+  ],
+  "perf": {
+    "medianMs": 36.30000000000109,
+    "p95Ms": 48.399999999999636,
+    "visibleViews": 48,
+    "enemies": 575
+  },
+  "errors": []
+}

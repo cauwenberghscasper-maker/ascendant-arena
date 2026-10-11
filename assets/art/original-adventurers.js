@@ -54,6 +54,11 @@ export function prepareOriginalAdventurer(scene,def,THREE){
   g.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(joints,4));g.setAttribute('skinWeight',new THREE.Float32BufferAttribute(weights,4));
   const skin=new THREE.SkinnedMesh(g,mesh.material);skin.name=mesh.name;skin.userData.armMasks=Object.keys(masks);mesh.removeFromParent();mesh.geometry.dispose();scene.add(skin);skin.bind(skeleton);skin.frustumCulled=false;skin.castShadow=true;
  }
+ // Named sockets are cloned with the skeleton and stay in measured model space.
+ for(const [name,parent,p] of [
+  ['heroBackSocket','chest',[0,r.shoulder.y-.045,r.torso.cz-r.torso.hd-.018]],
+  ['heroCrownSocket','head',[r.head.cx,r.head.top-.025,r.head.cz]],
+ ]){const socket=new THREE.Group();socket.name=name;socket.position.fromArray(p.map((v,i)=>v-positions[parent][i]));byName[parent].add(socket)}
  dress(scene,byName,positions,r,def,THREE);scene.scale.setScalar(def.size);scene.userData.originalRig=true;
 }
 function dress(scene,bones,at,r,def,T){
@@ -90,4 +95,44 @@ function dress(scene,bones,at,r,def,T){
   part(new T.BoxGeometry(.045,.045,.20),leather,[0,.035,.07]);part(new T.BoxGeometry(.24,.025,.03),gold,[0,.045,.10]);
   part(new T.ConeGeometry(.015,.12,4).rotateX(Math.PI/2),steel,[0,.05,.22]);
  }
+}
+
+// Per-instance equipment. Positions use the measured original mesh's rest space.
+// Each part is parented to its body bone; no frame-by-frame world-space offsets.
+export function equipOriginalAdventurer(model, def, gear, T) {
+ if (!def.original || !gear) return () => {};
+ const r=def.rig, owned=[],materials=[],nodes=[];
+ const colors={common:0x7e918d,uncommon:0x63a97a,rare:0x569bd0,epic:0x9865bf,legendary:0xd8b260,mythic:0xe370b5,ancient:0xdf8951,divine:0xdddcc3};
+ const trim=it=>it.rarity==='common'?0x8b775a:0xe2c47b;
+ const makeMat=color=>{const m=new T.MeshStandardMaterial({color,metalness:.45,roughness:.55});m.userData.baseEmissive=0;m.userData.baseEmissiveI=1;materials.push(m);return m};
+ function part(slot,bone,geometry,position,scale,color) {
+  const mesh=new T.Mesh(geometry,makeMat(color));mesh.name='equipped-'+slot;mesh.userData.equipmentSlot=slot;
+  mesh.position.fromArray(position);if(scale)mesh.scale.fromArray(scale);mesh.castShadow=true;
+  model.getObjectByName(bone).add(mesh);owned.push(geometry);nodes.push(mesh);return mesh;
+ }
+ if(gear.chest){
+  const it=gear.chest,w=r.torso.hw*.84,h=Math.max(.09,(r.shoulder.y-.28)*.65),y=.34+h*.35;
+  part('chest','chest',new T.SphereGeometry(1,12,8),[0,y-.32,r.chestFront-r.torso.cz+.016],[w,h,.035],colors[it.rarity]);
+  part('chest','chest',new T.OctahedronGeometry(.025+(it.up||0)*.0003),[0,y-.32,r.chestFront-r.torso.cz+.053],null,trim(it));
+ }
+ if(gear.helmet && gear.helmet.rarity!=='common'){
+  const it=gear.helmet,band=new T.TorusGeometry(r.head.r*.77,.016,6,20);band.rotateX(Math.PI/2);
+  part('helmet','head',band,[0,r.head.top-r.neckY-.06,0],null,colors[it.rarity]);
+  part('helmet','head',new T.OctahedronGeometry(.025),[0,r.head.top-r.neckY-.06,r.head.r*.77],null,trim(it));
+ }
+ if(gear.boots){
+  const it=gear.boots;
+  for(const s of ['l','r']){
+   const g=new T.TorusGeometry(.055,.012,6,12);g.rotateX(Math.PI/2);
+   part('boots','foot'+s,g,[0,.025,0],[1.2,1,1.25],colors[it.rarity]);
+  }
+ }
+ if(gear.accessory){const it=gear.accessory;
+  part('accessory','chest',new T.TorusGeometry(.028,.007,5,12),[r.torso.hw*.60,.045,r.chestFront-r.torso.cz+.045],null,trim(it));
+  part('accessory','chest',new T.OctahedronGeometry(.021),[r.torso.hw*.60,.014,r.chestFront-r.torso.cz+.045],null,colors[it.rarity]);
+ }
+ const grip=model.getObjectByName('fantasyGrip');
+ if(grip){grip.visible=!!gear.weapon;if(gear.weapon)grip.traverse(o=>{if(o.isMesh)o.material.color.lerp(new T.Color(colors[gear.weapon.rarity]),.3)})}
+ model.userData.mats.push(...materials);
+ return ()=>{nodes.forEach(o=>o.removeFromParent());owned.forEach(g=>g.dispose())};
 }
