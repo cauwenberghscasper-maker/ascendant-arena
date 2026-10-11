@@ -1,0 +1,19 @@
+{
+ "batch": "pilot-pip-1",
+ "files": [
+  {
+   "name": "pip_t1.glb",
+   "ok": true,
+   "bytes": 11091728,
+   "sha256": "580e51c5131beb3e325e85ef0b51564643969f7eaf1b7500bc55467c5ec629a8",
+   "error": null
+  },
+  {
+   "name": "pip_concept.webp",
+   "ok": true,
+   "bytes": 31548,
+   "sha256": "1e64900d344906308410ceb9d5d6dccacc35a06eac3db7d800a148ee12893de7",
+   "error": null
+  }
+ ]
+}
