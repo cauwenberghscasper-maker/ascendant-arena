@@ -600,6 +600,7 @@ function stepFighter(f, dt, ctx) {
 
 function boundFighter(f, ctx) {
   if (G.rift && f.isPlayer) { riftClamp(f, f.r); return; }
+  if (G.dungeon && f.isPlayer) { dungeonClamp(f, f.r); return; }
   if (ctx === 'arena') {
     const h = CFG.arena.half - f.r;
     f.x = clamp(f.x, AC.x - h, AC.x + h); f.z = clamp(f.z, AC.z - h, AC.z + h);

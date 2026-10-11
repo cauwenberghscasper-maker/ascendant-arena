@@ -465,6 +465,7 @@ function buildHub() {
 const _fogA = new THREE.Color(), _skyTop = new THREE.Color(), _skyHor = new THREE.Color();
 const ZoneMood = { fog: new THREE.Color(PALETTE.fog), top: new THREE.Color(PALETTE.skyTop), hor: new THREE.Color(PALETTE.skyHorizon), t: 0 };
 function updateZoneMood(dt) {
+  if (G.dungeon) { updateDungeonView(dt); return; } // the dungeon owns fog and sky while inside
   if (G.mode !== 'hub' || !G.player || G.rift) return;
   const W = CFG.world, z = G.player.z, zi = zoneAt(z), zn = W.zones[zi];
   // blend toward the next zone near its border

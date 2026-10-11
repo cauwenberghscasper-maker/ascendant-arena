@@ -5,6 +5,9 @@ function interact() {
   if (n.kind === 'waypoint') return openWaypoints();
   if (n.kind === 'rift') return openRiftPanel();
   if (n.kind === 'riftLeave') return endRift('leave');
+  if (n.kind === 'dungeon') return openDungeonPanel(n.poi);
+  if (n.kind === 'dungeonLeave') return endDungeon('leave');
+  if (n.kind === 'dungeonChest') return openDungeonChest();
   const d = n.def;
   if (d.role === 'smith') return openSmith();
   if (d.role === 'arena') return openArenaPanel();
@@ -380,6 +383,26 @@ function openRiftPanel() {
     <p class="fine">Checkpoints every 5 floors. If you fall or the time runs out, the run ends and you keep everything you earned.</p></div>
     <div class="row end"><button class="ghost" data-act="riftGo" data-f="1">Start at floor 1</button>${cp > 1 ? `<button class="primary big" data-act="riftGo" data-f="${cp}">Start at floor ${cp}</button>` : '<button class="primary big" data-act="riftGo" data-f="1">Enter the Rift</button>'}</div>`);
 }
+// Dungeons: a sealed instance per POI. Three guarded halls, a mini-boss and a chest on a 20 min cooldown.
+function openDungeonPanel(poi) {
+  UI.current = 'dungeon';
+  const p = G.profile, req = dungeonReq(poi), lvl = dungeonLevel(poi), rec = (p.dungeons || {})[poi.id], left = rec && rec.clears ? dungeonCdLeft(poi.id) : 0, nm = escapeHTML(poi.name);
+  if (p.level < req) { openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>${nm}</h3></div><p class="say">The seal holds against heroes below level ${req}. Come back stronger.</p>`); return; }
+  openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>${nm}</h3><span class="cnt">Lv ${lvl}</span></div>
+    <div class="riftCard"><p>Three guarded halls and a mini-boss. Each door opens once its hall is cleared. Monsters here are <b>level ${lvl}</b>, tougher and harder-hitting than outside; the boss calls for help at half health.</p>
+    <p>${left > 0 ? `Chest recharging · ${Math.ceil(left / 60)} min left. Until then the chest holds only XP and gold.` : `Chest ready: guaranteed <b>${poi.zone >= CFG.dungeon.chest.epicFrom ? 'Epic' : 'Rare'} or better</b> gear, gems, shards and a chance at a treasure chest.`}</p>
+    <p class="fine">Cleared ${rec ? rec.clears : 0} times. Falling or leaving resets the dungeon. You enter fully healed.</p></div>
+    <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="dungeonGo" data-id="${escapeHTML(poi.id)}">Enter ${nm} (Lv ${lvl})</button></div>`);
+}
+function openDungeonChest() {
+  const r = claimDungeonChest(); if (!r) return;
+  UI.current = 'dungeonChest'; Sfx.play('win');
+  const rows = r.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('');
+  openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared</div><h2>${r.full ? 'Dungeon chest' : 'Chest recharging'}</h2></div>
+    <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
+    ${rows ? `<div class="list">${rows}</div>` : `<p class="fine">Gear, gems and shards return in ${Math.round(r.cd / 60)} min.</p>`}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}
+    <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
+}
 function openRiftResult(r) {
   UI.current = 'riftResult';
   const why = r.why === 'down' ? 'You fell' : r.why === 'time' ? 'Time ran out' : 'You left the Rift';
@@ -538,6 +561,7 @@ function handlePanelClick(e) {
     case 'travel': UI.close(); travelTo(+b.dataset.i); break;
     case 'tier': if (setWorldTier(+b.dataset.t)) openWaypoints(); break;
     case 'riftGo': UI.close(); startRift(+b.dataset.f); break;
+    case 'dungeonGo': { UI.close(); const po = dungeonPois().find((x) => x.id === b.dataset.id); if (!startDungeon(po)) toast('Finish your challenge first', 'bad'); break; }
     case 'offline': claimOffline(G.offline); UI.close(); break;
     case 'tBoss': TestTools.boss(); UI.close(); toast('World boss is on its way'); break;
     case 'tUnlock': TestTools.unlockAll(); break;

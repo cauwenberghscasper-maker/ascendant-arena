@@ -41,6 +41,7 @@ function hqOn() { return !!(G.profile && G.profile.settings.hq) && !Q.lowTier; }
 const hubGroup = new THREE.Group(), arenaGroup = new THREE.Group(), dynGroup = new THREE.Group(), riftGroup = new THREE.Group();
 scene.add(hubGroup, arenaGroup, dynGroup, riftGroup);
 arenaGroup.visible = false; riftGroup.visible = false;
+const dungeonGroup = new THREE.Group(); scene.add(dungeonGroup); dungeonGroup.visible = false; // filled on dungeon entry (47)
 // soft procedural textures (swirl for portals, vertical fade for auras)
 let _swirl = null, _fade = null;
 function swirlTex() {

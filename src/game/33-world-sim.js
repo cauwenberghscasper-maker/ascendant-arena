@@ -90,7 +90,7 @@ function curTier() { const p = G.profile; return p ? Math.min(p.worldTier || 0, 
 function tierAdd() { return tierDef(curTier()).add; }
 function setWorldTier(t) {
   const p = G.profile; t = clamp(t | 0, 0, maxTier(p.level));
-  if (G.rift || activeShrine()) { toast('Finish your challenge first', 'bad'); return false; }
+  if (inInstance() || activeShrine()) { toast('Finish your challenge first', 'bad'); return false; }
   p.worldTier = t; p.records.bestTier = Math.max(p.records.bestTier || 0, t);
   for (const e of G.enemies) if (!e.rift) { const keep = e.alive; setEnemyLevel(e, enemyLevelFor(e)); if (!keep) e.hp = 0; else { e.state = 'idle'; } }
   checkAchievements(); G.dirty = true; ev({ t: 'tier', name: tierDef(t).name, tier: t }); return true;
@@ -198,7 +198,7 @@ function stepShrines(dt) {
     const d = Math.hypot(pl.x - sh.x, pl.z - sh.z);
     if (sh.state === 'cooldown') { sh.cd -= dt; if (sh.cd <= 0) sh.state = 'ready'; continue; }
     if (sh.state === 'ready') {
-      if (pl.alive && d < S.r && p.level >= CFG.world.zones[sh.zone].minLevel) {
+      if (pl.alive && d < S.r && p.level >= CFG.world.zones[sh.zone].minLevel && !inInstance()) {
         sh.state = 'active'; sh.t = S.time; sh.wave = [];
         const Z = CFG.world.zones[sh.zone];
         for (let i = 0; i < S.wave; i++) {
@@ -248,7 +248,7 @@ const riftCheckpoint = (p) => Math.floor((p.records.bestRift || 0) / 5) * 5 + 1;
 function riftClamp(f, r) { const R = CFG.rift.r - r, dx = f.x - RC.x, dz = f.z - RC.z, d = Math.hypot(dx, dz); if (d > R) { f.x = RC.x + dx / d * R; f.z = RC.z + dz / d * R; } }
 function startRift(floor) {
   const p = G.profile, R = CFG.rift;
-  if (G.rift || G.mode !== 'hub' || p.level < R.unlock || activeShrine() || !G.player.alive) return false;
+  if (inInstance() || G.mode !== 'hub' || p.level < R.unlock || activeShrine() || !G.player.alive) return false;
   floor = clamp(floor | 0, 1, riftCheckpoint(p));
   G.rift = { floor, start: floor, phase: 'intro', t: R.intro, tMax: R.intro, wave: [], gems: 0, gold: 0, items: 0, cleared: 0, kills: 0 };
   G.obstacles = G.riftObstacles || G.obstacles; clearProjectiles();
@@ -404,11 +404,12 @@ function stepHub(dt) {
   if (pl.alive) stepFighter(pl, dt, 'hub');
   else {
     G.respawnT -= dt;
-    if (G.respawnT <= 0) { pl.alive = true; pl.x = W.spawn.x; pl.z = W.spawn.z; pl.hp = pl.maxHp; pl.invulnT = 1.5; ev({ t: 'respawn' }); }
+    if (G.respawnT <= 0) { const sp = G.respawnAt || W.spawn; G.respawnAt = null; pl.alive = true; pl.x = sp.x; pl.z = sp.z; pl.hp = pl.maxHp; pl.invulnT = 1.5; ev({ t: 'respawn' }); }
   }
   // zone change
   if (G.rift) stepRift(dt);
-  const zi = G.rift ? G.zoneIdx : zoneAt(pl.z);
+  if (G.dungeon) stepDungeon(dt);
+  const zi = inInstance() ? G.zoneIdx : zoneAt(pl.z);
   if (zi !== G.zoneIdx) { G.zoneIdx = zi; ev({ t: 'zone', name: W.zones[zi].name, town: false }); if (zi > G.profile.stats.zone) { G.profile.stats.zone = zi; checkAchievements(); } }
   // bots
   for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; hubBotThink(b, dt); stepFighter(b, dt, 'hub'); }
@@ -440,9 +441,11 @@ function stepHub(dt) {
   // interaction target: NPCs and waypoint stones
   G.interact = null;
   if (G.rift) { if (pl.alive) G.interact = { kind: 'riftLeave' }; }
+  else if (G.dungeon) { if (pl.alive) G.interact = dungeonInteract(pl); }
   else if (pl.alive) {
     let best = 3.6;
     { const RG = CFG.rift.gate, d = Math.hypot(pl.x - RG.x, pl.z - RG.z); if (d < best) { best = d; G.interact = { kind: 'rift' }; } }
+    for (const po of dungeonPois()) { const d = Math.hypot(pl.x - po.x, pl.z - po.z); if (d < best) { best = d; G.interact = { kind: 'dungeon', poi: po, label: 'Enter ' + po.name }; } }
     for (const n of shownNpcs()) { const d = Math.hypot(pl.x - n.x, pl.z - n.z); if (d < best) { best = d; G.interact = n; } }
     CFG.world.waypoints.forEach((w, i) => { const d = Math.hypot(pl.x - w.x, pl.z - w.z); if (d < best) { best = d; G.interact = { kind: 'waypoint', i, def: w }; } });
   }
@@ -514,7 +517,7 @@ function separate(a, b) {
 }
 const bodyMass = (e) => { const M = CFG.enemies.mass; return e.kind === 'enemy' ? (M[(CFG.enemies[e.type] || {}).kit || 'legacy'] || 1) * (e.elite ? M.elite : 1) : M.player; };
 function stepEnemy(e, dt) {
-  if (!e.alive) { if (e.rift) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
+  if (!e.alive) { if (e.rift || e.dungeon) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
   const d = CFG.enemies[e.type], pl = G.player, Z = CFG.world.zones[e.zone];
   if (e.rift && e.state !== 'chase') e.state = 'chase';
   const dp = Math.hypot(pl.x - e.x, pl.z - e.z);
@@ -593,6 +596,7 @@ function stepEnemy(e, dt) {
   for (let i = 0; i < near.length; i++) { const o = near[i]; if (o !== e && o.alive && o.zone === e.zone) separate(e, o); }
   collideObstacles(e);
   if (e.rift) { riftClamp(e, e.r); return; }
+  if (e.dungeon) { dungeonClamp(e, e.r); return; }
   // stay in own zone and out of town
   e.z = clamp(e.z, Z.z0 + 1, Z.z1 - 1); e.x = clamp(e.x, CFG.world.minX, CFG.world.maxX);
   const T = CFG.world.town, td = distToTown(e.x, e.z), minT = T.r + 1.5;
@@ -690,8 +694,9 @@ function orbRing(e, N, g, gapA, sp, dmg, color) {
 
 // --- Rift champions: every big attack is shown first (red circles, lanes, glow) and can be dodged or dashed through
 function champTick(e, dt, pl, dp) {
-  // Rift champions hit for a share of your HP; hub elites with affixes use normal monster damage at 0.6x
-  const C = e.champ, n = G.rift ? G.rift.floor : 1, frac = champDmgFrac(n), hit = e.rift ? () => pl.maxHp * frac : () => mobDmg(e, 0.6, pl);
+  // Rift champions hit for a share of your HP; hub elites with affixes use normal monster damage at 0.6x,
+  // dungeon champions full mobDmg (their ×1.25 / ×1.5 already sits on e.atk)
+  const C = e.champ, n = G.rift ? G.rift.floor : 1, frac = champDmgFrac(n), hit = e.rift ? () => pl.maxHp * frac : () => mobDmg(e, e.dungeon ? 1 : 0.6, pl);
   if (C.shieldT > 0) { C.shieldT -= dt; e.invulnT = C.shieldT > 0 ? 1 : 0; }
   if (C.mods.includes('frenzy')) { e.atkCd -= dt * 0.7; e.slowT = Math.min(e.slowT, 0); }
   // a charge in progress
@@ -737,7 +742,7 @@ function champFire(e, k, pl, hit) {
 // --- world boss -----------------------------------------------------------------
 function currentLair() { return CFG.world.lairs[G.bossLair]; }
 function stepBossTimer(dt) {
-  if (G.boss || !G.started) return;
+  if (G.boss || !G.started || inInstance()) return; // paused inside the Rift and dungeons
   G.bossTimer -= dt;
   if (!G.bossWarned && G.bossTimer <= CFG.boss.warn) {
     G.bossWarned = true;
