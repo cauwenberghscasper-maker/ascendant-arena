@@ -1,0 +1,9 @@
+13:47:57 | INFO: Data are loaded, start creating Blender stuff
+13:47:57 | INFO: Blender create Mesh node geometry_0
+13:47:57 | INFO: glTF import finished in 0.04s
+Warning: Bone Heat Weighting: failed to find solution for one or more bones
+proxy faces 119980 groups 15 missing []
+wrote out/pip_t1/weights.json 30748 unweighted 30748
+Blender 4.2.3 LTS (hash 0e22e4fcea03 built 2024-10-14 23:31:34)
+
+Blender quit
