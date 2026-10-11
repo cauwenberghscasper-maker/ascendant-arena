@@ -1,0 +1,145 @@
+{
+ "batch": "heroes-b",
+ "files": [
+  {
+   "name": "ayla_t1.glb",
+   "ok": true,
+   "bytes": 13004984,
+   "sha256": "a9892625c2fa2033a4515a7beab0ad22c5bce256b472d0e1457d54c9bee4ba44",
+   "error": null
+  },
+  {
+   "name": "ayla_concept.webp",
+   "ok": true,
+   "bytes": 32038,
+   "sha256": "5ad5d581cbd3403fad84c5e30baea2096961f4feb07b336584baf5116960eed5",
+   "error": null
+  },
+  {
+   "name": "dax_t1.glb",
+   "ok": true,
+   "bytes": 12493148,
+   "sha256": "1b73f8e3219cc96006612c6edc478dafa6554fb1843c48612680cad66fb584e4",
+   "error": null
+  },
+  {
+   "name": "dax_concept.webp",
+   "ok": true,
+   "bytes": 32858,
+   "sha256": "3080882165ff84aeee412fcc2ff25e4eb737315d2c678ec9f615c8169316dbe3",
+   "error": null
+  },
+  {
+   "name": "boomer_t1.glb",
+   "ok": true,
+   "bytes": 11432876,
+   "sha256": "40c8db3de822334cb2de3070e4671813bc9b498b691098a0c46a6a39f49b8f05",
+   "error": null
+  },
+  {
+   "name": "boomer_concept.webp",
+   "ok": true,
+   "bytes": 32384,
+   "sha256": "0d5f1295e14f04c269dbd8a08feeac10c81bdd2341447258108e043840b171e4",
+   "error": null
+  },
+  {
+   "name": "kiko_t1.glb",
+   "ok": true,
+   "bytes": 9927096,
+   "sha256": "4f4d08e606a5e78fee80b454dbe85cac757586bbe2fd786bd3dced9a9fd2a3c5",
+   "error": null
+  },
+  {
+   "name": "kiko_concept.webp",
+   "ok": true,
+   "bytes": 25234,
+   "sha256": "f6f9b337388ebe7ba5cc73b5a5e20f4019560dc63d1e849df54d272065188773",
+   "error": null
+  },
+  {
+   "name": "lumi_t1.glb",
+   "ok": true,
+   "bytes": 12146228,
+   "sha256": "428e22b191110f8cdcf1194cd42267cfdc0ae70a0ededad7ce683b793a83e5d0",
+   "error": null
+  },
+  {
+   "name": "lumi_concept.webp",
+   "ok": true,
+   "bytes": 27720,
+   "sha256": "307ccac8f9393cefb705d2d4ae45226f6c363a2e634a0154dae863f9a35a0a3d",
+   "error": null
+  },
+  {
+   "name": "ember_t1.glb",
+   "ok": true,
+   "bytes": 11016904,
+   "sha256": "d01cee0498d1cc525287d12d44ddd04f6705a782604f9a0883eba43615cd94cf",
+   "error": null
+  },
+  {
+   "name": "ember_concept.webp",
+   "ok": true,
+   "bytes": 46108,
+   "sha256": "9637bb2eab3a4b00c4eb3b064c3f0de67464111918529333d1b795b18cec5de1",
+   "error": null
+  },
+  {
+   "name": "ren_t1.glb",
+   "ok": true,
+   "bytes": 10776580,
+   "sha256": "d416e5aee7ff936f6dad91cbf2fa58856c66798b7e7783f794ab60adaba4b6c2",
+   "error": null
+  },
+  {
+   "name": "ren_concept.webp",
+   "ok": true,
+   "bytes": 31392,
+   "sha256": "b014d2d113495972a42bd6a4af9f09c63804e14eac26a4497e12b174a5a9704e",
+   "error": null
+  },
+  {
+   "name": "volt_t1.glb",
+   "ok": true,
+   "bytes": 11744244,
+   "sha256": "7b49fe49c690a80811ecaa30bffb3f5e34a432700354d980f83893afe0c7e4b9",
+   "error": null
+  },
+  {
+   "name": "volt_concept.webp",
+   "ok": true,
+   "bytes": 43564,
+   "sha256": "0bf65a8d544e3767ac1bc5733b03ceae32c1dcc439fd6674f1ce1f58e80742a3",
+   "error": null
+  },
+  {
+   "name": "gus_t1.glb",
+   "ok": true,
+   "bytes": 11624904,
+   "sha256": "d86c11b5de230cca17ba86a8f1977db2b90a44ce1efb5e10d976b278cbcf4d53",
+   "error": null
+  },
+  {
+   "name": "gus_concept.webp",
+   "ok": true,
+   "bytes": 45568,
+   "sha256": "8ed482d1751350e4d751c973553dc7d0bd213a3da8ef445e926885134d84a9ec",
+   "error": null
+  },
+  {
+   "name": "stella_t1.glb",
+   "ok": true,
+   "bytes": 8891228,
+   "sha256": "679253a4913597a04a75d665e54d97f7497fcbf02d1c48d9ffdfaefa7da02cab",
+   "error": null
+  },
+  {
+   "name": "stella_concept.webp",
+   "ok": true,
+   "bytes": 41086,
+   "sha256": "423c773c83738d05d24e6327dcaf267fecb8547fb45016241c35f827f85b1287",
+   "error": null
+  }
+ ]
+}
