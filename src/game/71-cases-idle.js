@@ -1,0 +1,260 @@
+// ---------------------------------------------------------------------
+// 12. CASES + IDLE — earned cases with a spinning reel, the Vault, Expeditions and Auto Hunt.
+// Cases are only ever EARNED in play (drops, bosses, Rift, Level Road, Vault, Expeditions).
+// They are never sold for money or for any currency, and every case shows its odds.
+// ---------------------------------------------------------------------
+CFG.cases = {
+  hunter: { name: 'Hunter’s Chest', sub: 'Dropped by monsters, elites, dens and shrines', col: '#58b4ff', w: { common: 14, uncommon: 24, rare: 30, epic: 21, legendary: 9 }, hi: 5 },
+  treasure: { name: 'Treasure Chest', sub: 'From the Vault, expeditions and level-ups', col: '#ffc94a', w: { uncommon: 20, rare: 36, epic: 28, legendary: 14 }, hi: 6 },
+  boss: { name: 'Colossus Chest', sub: 'World boss loot', col: '#ff7a45', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  rift: { name: 'Rift Chest', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 46, legendary: 40 }, hi: 14 },
+  milestone: { name: 'Milestone Chest', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0 },
+  frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+};
+CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial'];
+const CASE_LUCK = { legendary: 30, mythic: 120 };
+// these drop sources hand out a case instead of the item itself (Epic and up, or always for big loot)
+const CASE_SRC = { monster: 'hunter', elite: 'hunter', level: 'hunter', shrine: 'hunter', idle: 'treasure', boss: 'boss', rift: 'rift', milestone: 'milestone' };
+function caseTable(c) {
+  const K = CFG.cases[c.k] || CFG.cases.hunter; let w;
+  if (c.k === 'milestone') {
+    const f = rarIdx(c.f || 'rare'), steps = [60, 25, 10, 4, 1]; w = {};
+    for (let i = 0; i < steps.length; i++) {
+      const r = RARITIES[f + i]; if (!r) break;
+      if ((r === 'mythic' && c.l < 80) || (r === 'ancient' && c.l < 150) || (r === 'divine' && c.l < 300)) break;
+      w[r] = steps[i];
+    }
+    return w;
+  }
+  w = Object.assign({}, K.w);
+  if (c.k === 'rift') { const n = c.n || 0; if (n >= 25) w.mythic = 6 + Math.min(20, (n - 25) * 0.4); if (n >= 50) w.ancient = 2 + Math.min(10, (n - 50) * 0.15); if (n >= 100) w.divine = 0.6 + Math.min(4, (n - 100) * 0.05); }
+  else { const H = highWeights(c.t || 0, c.z || 0); for (const h of HIGH_RAR) if (H[h] > 0) w[h] = H[h] * K.hi; }
+  if (c.f) for (const r in w) if (rarIdx(r) < rarIdx(c.f)) delete w[r];
+  return w;
+}
+function caseOdds(c) { const w = caseTable(c); let tot = 0; for (const k in w) tot += w[k]; return RARITIES.filter((r) => w[r]).map((r) => [r, w[r] / tot]); }
+function addCase(k, o) {
+  const p = G.profile; o = o || {};
+  const c = { id: 'c' + Date.now().toString(36) + (itemSeq++), k, l: o.l || p.level, t: o.t != null ? o.t : curTier(), z: o.z != null ? o.z : lootTier(highestZone(p.level)), n: o.n || 0, f: o.f || null };
+  p.cases.push(c); G.dirty = true;
+  saveNow(true); // Save newly earned chests before announcing them, including interrupted sessions.
+  ev({ t: 'caseGot', k, src: o.src }); return c;
+}
+function rollCase(c) {
+  const p = G.profile, w = caseTable(c); let r = rollRarity(w), lucky = false;
+  const L = p.caseLuck || (p.caseLuck = { legendary: 0, mythic: 0 });
+  if (w.mythic && rarIdx(r) < 5 && L.mythic + 1 >= CASE_LUCK.mythic) { r = 'mythic'; lucky = true; }
+  else if (w.legendary && rarIdx(r) < 4 && L.legendary + 1 >= CASE_LUCK.legendary) { r = 'legendary'; lucky = true; }
+  L.legendary = rarIdx(r) >= 4 ? 0 : L.legendary + 1;
+  if (w.mythic) L.mythic = rarIdx(r) >= 5 ? 0 : L.mythic + 1;
+  return { r, lucky };
+}
+// opening grants the item at once (so closing mid-spin never loses it); the reel only shows it
+function openCase(id) {
+  const p = G.profile, i = p.cases.findIndex((c) => c.id === id); if (i < 0) return null;
+  // Case rewards are always kept: when the bag is full they overflow it instead of blocking the case.
+  const c = p.cases.splice(i, 1)[0], { r, lucky } = rollCase(c);
+  const it = makeItem(pick(CFG.gear.slots), r, c.l);
+  p.stats.cases = (p.stats.cases || 0) + 1;
+  p.records.bestCase = Math.max(p.records.bestCase || 0, rarIdx(r));
+  grantItem(it, 'case');
+  G.dirty = true; checkAchievements();
+  saveNow(true); // Persist the case removal and exact reward together, before the reel.
+  return { item: it, lucky, c, kept: p.bag.some((b) => b.id === it.id) };
+}
+
+// --- Vault: fills while you play or are away; collect any time ---------------------------------
+const vaultLv = (p) => (p.vault && p.vault.lv) || 0;
+const vaultCapH = (p) => Math.min(24, 8 + vaultLv(p));
+const VAULT_MAX_LV = 16;
+function vaultRates(p) {
+  const t = Math.min(p.worldTier || 0, maxTier(p.level)), zi = highestZone(p.level), Z = CFG.world.zones[zi], L = Math.max(1, Math.min(p.level, Z.lvl[1] + tierDef(t).add));
+  const m = 1 + 0.12 * vaultLv(p), TM = tierMul(t);
+  return { gold: 6 * Math.pow(CFG.enemies.goldGrowth, L - 1) * m * TM.gold, xp: killXpAt(L) * 1.6 * m, gems: (0.1 + L / 600) * m * TM.gems, shards: 0.04 * m, casesPerH: 0.5 + vaultLv(p) * 0.03 };
+}
+function vaultState(now) {
+  const p = G.profile, cap = vaultCapH(p) * 60, mins = Math.min(cap, Math.max(0, (now - (p.vault.t || now)) / 60000)), R = vaultRates(p);
+  return { mins, cap, full: mins >= cap - 0.5, gold: Math.round(R.gold * mins), xp: Math.round(Math.min(R.xp * mins, xpToNext(p.level) * 2)), gems: Math.floor(R.gems * mins),
+    shards: Math.floor(R.shards * mins), cases: Math.floor((mins / 60) * R.casesPerH) };
+}
+function collectVault() {
+  const p = G.profile, v = vaultState(Date.now()); if (v.mins < 1) return null;
+  p.vault.t = Date.now();
+  addGold(v.gold, true); if (v.gems) addEssence(v.gems); if (v.shards) dropShards(v.shards, true);
+  for (let i = 0; i < v.cases; i++) addCase('treasure', { src: 'vault' });
+  if (v.xp) { const keep = p.settings.fastXp; p.settings.fastXp = false; addXp(v.xp, 'vault'); p.settings.fastXp = keep; }
+  p.stats.vaults = (p.stats.vaults || 0) + 1; G.dirty = true; ev({ t: 'vault', v }); return v;
+}
+const vaultUpCost = (p) => Math.round(400 * Math.pow(2.1, vaultLv(p)) * Math.pow(CFG.enemies.goldGrowth, Math.max(0, p.level - 1) * 0.5));
+function upgradeVault() {
+  const p = G.profile, c = vaultUpCost(p); if (vaultLv(p) >= VAULT_MAX_LV || p.gold < c) return false;
+  p.gold -= c; p.vault.lv = vaultLv(p) + 1; G.dirty = true; ev({ t: 'vaultUp', lv: p.vault.lv }); return true;
+}
+
+// --- Expeditions: the brawlers you are not playing go out and come back with loot --------------
+CFG.exped = { durs: [15, 60, 240, 480], slotsAt: [1, 20, 50, 100] };
+const expSlots = (p) => CFG.exped.slotsAt.filter((L) => p.level >= L).length;
+function expReward(p, e) {
+  const mins = e.d, B = masteryLevel(p.mastery['w:' + e.b] || 0), R = vaultRates(p), long = 1 + mins / 480;
+  return { gold: Math.round(R.gold * mins * 0.6 * long), mxp: Math.round(mins * 2 * (1 + B / 30)), gems: Math.floor(mins / 12 * long), shards: Math.floor(mins / 30), cases: Math.floor(mins / 120) + (mins >= 480 ? 1 : 0) };
+}
+const expDone = (e, now) => now - e.s >= e.d * 60000;
+function startExped(b, d) {
+  const p = G.profile; if (!CFG.exped.durs.includes(d) || !ownedBrawlers(p).includes(b) || b === p.cls || p.exp.some((e) => e.b === b) || p.exp.length >= expSlots(p)) return false;
+  p.exp.push({ b, s: Date.now(), d }); G.dirty = true; ev({ t: 'expStart', b, d }); return true;
+}
+function claimExped(i) {
+  const p = G.profile, e = p.exp[i]; if (!e || !expDone(e, Date.now())) return null;
+  const r = expReward(p, e); p.exp.splice(i, 1);
+  addGold(r.gold, true); addEssence(r.gems); if (r.shards) dropShards(r.shards, true); addMastery('w:' + e.b, r.mxp);
+  for (let k = 0; k < r.cases; k++) addCase('treasure', { src: 'exped' });
+  p.stats.expeds = (p.stats.expeds || 0) + 1; G.dirty = true; checkAchievements(); ev({ t: 'expDone', b: e.b, r }); return r;
+}
+const onExpedition = (p, b) => (p.exp || []).some((e) => e.b === b);
+
+// --- Auto Hunt: your hero fights on its own (walks to monsters at your level, shoots, dashes, supers) ---
+const AH = { tgt: null, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1 };
+function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && G.started); }
+function autoHuntIntent(f, it, manual, dt) {
+  if (manual) { AH.manualT = 1.5; return; }
+  if ((AH.manualT -= dt) > 0 || !f.alive) return;
+  const p = G.profile, w = weaponOf(f), range = w.range || 12;
+  AH.t -= dt; AH.dashT -= dt;
+  const okZone = (zi) => p.level >= CFG.world.zones[zi].minLevel;
+  if (AH.t <= 0 || !AH.tgt || !AH.tgt.alive) {
+    AH.t = 0.4; let best = null, bd = 30;
+    for (const e of G.enemies) { if (!e.alive || e.rift || e.lvl > p.level + 3 || !okZone(e.zone)) continue; const d = Math.hypot(e.x - f.x, e.z - f.z); if (d < bd) { bd = d; best = e; } }
+    AH.tgt = best;
+  }
+  let tx, tz;
+  const e = AH.tgt;
+  if (e) {
+    const dx = e.x - f.x, dz = e.z - f.z, d = Math.hypot(dx, dz) || 1, want = range * 0.7;
+    if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * 0.7 * AH.side; tz = dx / d * 0.7 * AH.side; }
+    if (d < range + 1) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
+    if (f.superCharge >= 1 && d < range) it.super = true;
+    if (f.hp < f.maxHp * 0.35 && d < 5 && AH.dashT <= 0) { it.dash = true; AH.dashT = 3; it.mx = -dx / d; it.mz = -dz / d; return; }
+    if (f.hp < f.maxHp * 0.2) { tx = -dx / d; tz = -dz / d; }
+  } else {
+    // nothing near: walk to the best open den for your level
+    let D = null, bd = 1e9;
+    CFG.world.dens.forEach((dn) => { if (!okZone(dn.zone)) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - p.level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2; if (score < bd) { bd = score; D = dn; } });
+    if (!D) return;
+    const dx = D.x - f.x, dz = D.z - f.z, d = Math.hypot(dx, dz) || 1; tx = dx / d; tz = dz / d;
+  }
+  // unstick: if we barely moved for a while, sidestep
+  AH.stuckT += dt; if (AH.stuckT > 1.6) { if (Math.hypot(f.x - AH.lx, f.z - AH.lz) < 0.8) AH.side = -AH.side; AH.stuckT = 0; AH.lx = f.x; AH.lz = f.z; }
+  it.mx = tx; it.mz = tz;
+}
+const powerOf = (f) => Math.round(Math.sqrt(Math.max(1, f.dmg) * Math.max(1, f.maxHp)));
+
+// --- UI -------------------------------------------------------------------------------------------
+function caseArt(k, cls) { const K = CFG.cases[k]; return `<span class="caseArt ${cls || ''}" style="--cc:${K.col}"><img src="${caseIcon(k) || PremiumPortraits.case(k)}" width="256" height="256" alt=""></span>`; }
+function openCases(sel) {
+  UI.current = 'cases';
+  const p = G.profile, groups = {}; let bar = ''; for (const c of p.cases) (groups[c.k] = groups[c.k] || []).push(c);
+  const kinds = CFG.caseOrder.filter((k) => groups[k]);
+  sel = sel && groups[sel] ? sel : kinds[0];
+  const tiles = CFG.caseOrder.map((k) => { const n = (groups[k] || []).length; return `<button class="ctile ${k === sel ? 'sel' : ''} ${n ? '' : 'none'}" data-act="caseSel" data-k="${k}" style="--cc:${CFG.cases[k].col}">${caseArt(k)}<b>${CFG.cases[k].name}</b><small>${n ? '×' + n : 'none yet'}</small></button>`; }).join('');
+  let body = '';
+  if (!sel) body = `<p class="say">Win treasure chests from monsters, bosses, the Rift, the Level Road, the Bank and expeditions. Hunt the Frost Colossus, Magma Titan and Celestial Colossus for their regional chests.</p>`;
+  else {
+    const c = groups[sel][0], odds = caseOdds(c), L = p.caseLuck || { legendary: 0, mythic: 0 };
+    body = `<div class="caseHero" style="--cc:${CFG.cases[sel].col}">${caseArt(sel, 'big')}<div><b>${CFG.cases[sel].name}</b><small>${CFG.cases[sel].sub} · item level ${c.l}${c.f ? ` · at least ${CFG.gear.rarity[c.f].name}` : ''}</small></div></div>
+      <div class="odds">${odds.map(([r, x]) => `<div class="od ${r}"><span>${CFG.gear.rarity[r].name}</span><b>${x >= 0.01 ? (x * 100).toFixed(1) : (x * 100).toFixed(2)}%</b></div>`).join('')}</div>
+      <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
+    bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost" data-act="caseFast" data-k="${sel}">Open ${Math.min(10, groups[sel].length)} fast</button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
+  }
+  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Open the Collection Log</button></div>`, bar));
+  $('panel').classList.add('wide');
+}
+// the CS:GO-style reel: a long strip of items slides past a golden marker and slows down on your item
+const Reel = { raf: 0, done: true, res: null };
+function reelCard(it) { return `<div class="rcard ${it.rarity}"><img src="${thumbFor(it)}" alt=""><i></i></div>`; }
+function spinCase(id) {
+  const res = openCase(id); if (!res) return;
+  const p = G.profile, w = caseTable(res.c), N = 52, WIN = 44, cards = [];
+  for (let i = 0; i < N; i++) {
+    let r = i === WIN ? res.item.rarity : rollRarity(w);
+    if (i === WIN + 1 && Math.random() < 0.45) { const hi = RARITIES.filter((x) => w[x] && rarIdx(x) > rarIdx(res.item.rarity)); if (hi.length) r = hi[0]; } // the classic near miss
+    cards.push(i === WIN ? res.item : makeItem(pick(CFG.gear.slots), r, res.c.l));
+  }
+  UI.current = 'reel'; Reel.res = res; Reel.done = false;
+  openModal(`<div class="reelHead" style="--cc:${CFG.cases[res.c.k].col}">${caseArt(res.c.k, 'shake')}<b>${CFG.cases[res.c.k].name}</b></div>
+    <div class="reel"><div class="strip" id="reelStrip">${cards.map(reelCard).join('')}</div><div class="marker"></div></div>
+    <div id="reelOut" class="reelOut"><button class="ghost sm" data-act="reelSkip">Skip</button></div>`, false);
+  $('panel').classList.add('wide');
+  const strip = $('reelStrip'), box = strip.parentNode, cw = strip.firstChild.getBoundingClientRect().width + 8, vw = box.getBoundingClientRect().width;
+  const end = WIN * cw + cw / 2 - vw / 2 + (Math.random() - 0.5) * (cw - 26), dur = 5600, t0 = performance.now();
+  let lastIdx = -1;
+  Sfx.play('super');
+  const step = (now) => {
+    if (UI.current !== 'reel') return;
+    const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4), x = end * (Reel.skip ? 1 : e);
+    strip.style.transform = `translateX(${-x}px)`;
+    const idx = Math.floor((x + vw / 2) / cw); if (idx !== lastIdx) { lastIdx = idx; Sfx.play('tick', { gap: 0.025 }); }
+    if (k >= 1 || Reel.skip) { Reel.skip = false; reelFinish(strip.children[WIN]); return; }
+    Reel.raf = requestAnimationFrame(step);
+  };
+  cancelAnimationFrame(Reel.raf); Reel.raf = requestAnimationFrame(step);
+}
+function reelFinish(card) {
+  const res = Reel.res; Reel.done = true; UI.closable = true;
+  if (card) card.classList.add('win');
+  const it = res.item, ri = rarIdx(it.rarity), p = G.profile, better = res.kept && isBetter(it, p.gear[it.slot]);
+  Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
+  if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
+  const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
+  $('reelOut').innerHTML = `${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Alch weaker gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
+    <div class="row end">${res.kept ? `<button class="ghost" data-act="salvage2" data-id="${it.id}">Alch ${ICON.coin}${fmtK(salvageValue(it))}</button>${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">${wearWord(it.slot)}</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
+    ${left.length ? `<button class="primary gold" data-act="caseOpen" data-id="${left[0].id}">Open next (${left.length})</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
+}
+function openCasesFast(k) {
+  const p = G.profile, ids = p.cases.filter((c) => c.k === k).slice(0, 10).map((c) => c.id), out = [];
+  for (const id of ids) { const r = openCase(id); if (!r) break; out.push(r); }
+  if (!out.length) return;
+  out.sort((a, b) => rarIdx(b.item.rarity) - rarIdx(a.item.rarity));
+  const best = out[0] ? rarIdx(out[0].item.rarity) : 0; Sfx.play(best >= 4 ? 'win' : 'unlock');
+  UI.current = 'caseFast';
+  openModal(`<div class="npcHead">${gi('m_caseOpen', 'hd')}<h3>${out.length} chests opened</h3></div><div class="fastGrid">${out.map((r) => `<div class="rcard ${r.item.rarity} ${r === out[0] ? 'win' : ''}"><img src="${thumbFor(r.item)}" alt=""><i></i><small>${CFG.gear.rarity[r.item.rarity].name}</small></div>`).join('')}</div>
+    <p class="fine">All ${out.length} rewards are saved in your bag.${p.bag.length > CFG.gear.bagMax ? ` Your bag is over its limit (${p.bag.length}/${CFG.gear.bagMax}); alch weaker gear so new drops are kept.` : ''} Check your Equipment for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button><button class="primary" data-act="close">Done</button></div>`);
+  $('panel').classList.add('wide');
+}
+function openIdle(tab) {
+  tab = tab || UI.idleTab || 'Vault'; UI.idleTab = tab; UI.current = 'idle';
+  const p = G.profile, now = Date.now();
+  const tabs = ['Vault', 'Expeditions', 'Auto Hunt'].map((t) => `<button class="tab ${t === tab ? 'on' : ''}" data-act="idleTab" data-tab="${t}">${tabName(t)}</button>`).join('');
+  let body = '', bar = '';
+  if (tab === 'Vault') {
+    const v = vaultState(now), R = vaultRates(p), lv = vaultLv(p), cost = vaultUpCost(p), pct = Math.round(v.mins / v.cap * 100);
+    const hm = (m) => `${Math.floor(m / 60)}h ${Math.floor(m % 60)}m`;
+    body = `<div class="vaultBox"><div class="vbar"><i style="width:${pct}%"></i><span>${pct}% · ${hm(v.mins)} of ${vaultCapH(p)}h${v.full ? ' · FULL' : ''}</span></div>
+      <div class="stats3"><div><b>${ICON.coin}${fmtK(v.gold)}</b><span>Gold</span></div><div><b>+${fmtK(v.xp)}</b><span>XP (max 2 levels)</span></div><div><b>${ICON.ess}${v.gems}</b><span>Gems</span></div></div>
+      <div class="stats3"><div><b>${v.shards}</b><span>Artifact shards</span></div><div><b>${v.cases}</b><span>Treasure Cases</span></div><div><b>${fmtK(R.gold * 60)}/h</b><span>Gold rate</span></div></div>
+</div>
+      <h4 class="sub">Bank level ${lv}/${VAULT_MAX_LV}</h4><p class="fine">Your bank coffers fill while you play and while you are away, up to ${vaultCapH(p)} hours. Each level adds +12% to everything and +1 hour of storage. Rates follow your level, your best open zone and your World Tier.</p>
+`;
+    bar = selBar('', `<button class="${lv < VAULT_MAX_LV && p.gold >= cost ? 'ghost' : 'disabled'}" data-act="vaultUp" ${lv < VAULT_MAX_LV && p.gold >= cost ? '' : 'aria-disabled="true"'}>${lv >= VAULT_MAX_LV ? 'Max level' : `Upgrade ${ICON.coin}${fmtK(cost)}`}</button><button class="${v.mins >= 1 ? 'primary big' : 'disabled'}" data-act="vaultCollect" ${v.mins >= 1 ? '' : 'aria-disabled="true"'}>Collect</button>`);
+  } else if (tab === 'Expeditions') {
+    const slots = expSlots(p), rows = p.exp.map((e, i) => {
+      const done = expDone(e, now), left = Math.max(0, e.s + e.d * 60000 - now), r = expReward(p, e), k = Math.min(1, (now - e.s) / (e.d * 60000));
+      return `<div class="item exp">${brawlerPortrait(e.b, true)}<div class="meta"><div class="slot">${CFG.brawlers[e.b].name} · ${e.d >= 60 ? e.d / 60 + 'h' : e.d + 'm'} expedition</div><div class="nm">${done ? 'Back with loot!' : `${Math.ceil(left / 60000)} min left`}</div>
+        <div class="st">${ICON.coin}${fmtK(r.gold)} · ${ICON.ess}${r.gems} · ${r.shards} shards · +${fmtK(r.mxp)} mastery${r.cases ? ` · ${r.cases} case${r.cases > 1 ? 's' : ''}` : ''}</div><div class="vbar sm"><i style="width:${Math.round(k * 100)}%"></i></div></div>
+        ${done ? `<button class="primary" data-act="expClaim" data-i="${i}">Claim</button>` : ''}</div>`;
+    }).join('');
+    const free = ownedBrawlers(p).filter((b) => b !== p.cls && !onExpedition(p, b));
+    const pick2 = slots > p.exp.length && free.length ? `<h4 class="sub">Send a brawler</h4><div class="expPick"><select id="expB">${free.map((b) => `<option value="${b}">${CFG.brawlers[b].name} · mastery ${masteryLevel(p.mastery['w:' + b] || 0)}</option>`).join('')}</select>
+      ${CFG.exped.durs.map((d) => `<button class="ghost sm" data-act="expGo" data-d="${d}">${d >= 60 ? d / 60 + ' h' : d + ' min'}</button>`).join('')}</div>` : '';
+    body = `<p class="fine">Brawlers you are not playing go out on their own and come back with gold, gems, shards, mastery XP and Treasure Cases, even while the game is closed. Slots: ${p.exp.length}/${slots} (more at levels ${CFG.exped.slotsAt.filter((L) => L > p.level).join(', ') || 'all open'}).</p>
+      <div class="list">${rows || '<p class="fine">No brawlers out right now.</p>'}</div>${pick2}${!free.length && slots > p.exp.length ? '<p class="fine">Unlock more brawlers on the Level Road to send them out.</p>' : ''}`;
+  } else {
+    body = `<label class="tgl"><input type="checkbox" data-set="autoHunt" ${p.settings.autoHunt ? 'checked' : ''}><span class="sw"></span><span><b>Auto Hunt</b><small>Your hero walks to monsters at your level, fights, dashes away when hurt and uses supers. Touch the move stick to take over; it resumes after a moment.</small></span></label>
+      <p class="fine">Auto Hunt works in the open world (not in the Rift or Showdown). Monsters more than 3 levels above you are skipped, so it stays safe. Turn it on, put the phone down, and check back.</p>`;
+  }
+  openModal(dock(`<div class="npcHead">${gi('m_idle', 'hd')}<h3>Bank &amp; Camp</h3><span class="cnt">${vaultState(now).full ? 'Bank full' : ''}</span></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar));
+}
+function idleAlert() { const p = G.profile, now = Date.now(); return vaultState(now).mins >= 60 || p.exp.some((e) => expDone(e, now)); }
+
+
