@@ -1,0 +1,75 @@
+{
+ "batch": "heroes-a",
+ "files": [
+  {
+   "name": "rico_t1.glb",
+   "ok": true,
+   "bytes": 10203180,
+   "sha256": "1edabea3c241de725c75865c36dc2561212d824c00d3a941b9290abc82fe6e0a",
+   "error": null
+  },
+  {
+   "name": "rico_concept.webp",
+   "ok": true,
+   "bytes": 28952,
+   "sha256": "a975fac07e4e8b7a07546b261fdc6a84027eec3cee36a5d9228dcc9c7f528b1b",
+   "error": null
+  },
+  {
+   "name": "bruno_t1.glb",
+   "ok": true,
+   "bytes": 11176880,
+   "sha256": "59a7a37fad50999bb2e17537f544cb1f5a3cb18b4c6e523f791bbf488aff7227",
+   "error": null
+  },
+  {
+   "name": "bruno_concept.webp",
+   "ok": true,
+   "bytes": 39516,
+   "sha256": "6e06e8fe32cba5fa7598d8957b241be2097dab3f0e684ce5d2c1426e2d46cb43",
+   "error": null
+  },
+  {
+   "name": "vex_t1.glb",
+   "ok": true,
+   "bytes": 10182596,
+   "sha256": "e276fcdb52d048e18609aa1d881dee4badda5df856d9d85907ef3df064a1d10c",
+   "error": null
+  },
+  {
+   "name": "vex_concept.webp",
+   "ok": true,
+   "bytes": 26246,
+   "sha256": "21928803cddc6917b5cfe946877ebc67c33cc81d739b5fed110363382f8a7c73",
+   "error": null
+  },
+  {
+   "name": "brick_t1.glb",
+   "ok": true,
+   "bytes": 11381168,
+   "sha256": "62e4e53a267fe53b2aba40db8e6abc100beb33827712298c398c94ec122572d7",
+   "error": null
+  },
+  {
+   "name": "brick_concept.webp",
+   "ok": true,
+   "bytes": 43720,
+   "sha256": "a11389e56c1856a07afba4003ae40d544ccc637ddf2186faa61695eb19c0d1a3",
+   "error": null
+  },
+  {
+   "name": "nova_t1.glb",
+   "ok": true,
+   "bytes": 9558788,
+   "sha256": "7f47c576f2452c26494981f4b20c15be3f6fbfc83bdb856cb621c0c84d3c9cd7",
+   "error": null
+  },
+  {
+   "name": "nova_concept.webp",
+   "ok": true,
+   "bytes": 27686,
+   "sha256": "1945428f4e01409b2e2c08bd8570edb2ea045fac3cd404032078e9afac16688c",
+   "error": null
+  }
+ ]
+}
