@@ -1,13 +1,13 @@
 """Turn generated item paintings into crisp game pixel icons and register them in index.html.
 
-Usage: python3 tools/pixelize_items.py index.html key=image.png [key=image.png ...] [--size 48]
+Usage: python3 tools/pixelize_items.py key=image.png [key=image.png ...] [--size 48]
        key = <slot>-<noun>-<rarity>, e.g. weapon-edge-legendary (see tools/item_prompts.py)
 
 Per image: the flat background is flood-filled away from the borders (so white highlights inside the
 item stay), stray specks are dropped, the item is cropped to a square, box-downsampled to SIZE art
 pixels with a hard alpha, colour-reduced to a small palette with a little extra contrast, and given
 a 1px dark ink outline. Output: assets/ui/items/<key>.png. The ITEM_ICONS list between the
-// <items-icons> markers in index.html is rewritten from the folder.
+// <items-icons> markers in src/game/42-characters.js is rewritten from the folder; then run node tools/build.cjs.
 """
 import os, re, sys
 import numpy as np
@@ -56,12 +56,13 @@ def pixelize(src, dst, N=48, colors=26):
 
 
 if __name__ == '__main__':
-    args = sys.argv[1:]; html = args.pop(0); N = 48
+    args = sys.argv[1:]; N = 48
     if '--size' in args: i = args.index('--size'); N = int(args[i + 1]); del args[i:i + 2]
-    game = os.path.dirname(os.path.abspath(html)); folder = os.path.join(game, 'assets', 'ui', 'items')
+    game = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); folder = os.path.join(game, 'assets', 'ui', 'items')
+    html = os.path.join(game, 'src', 'game', '42-characters.js')
     for kv in args:
         key, src = kv.split('=', 1); pixelize(src, os.path.join(folder, key + '.png'), N); print('ok', key)
     have = sorted(f[:-4] for f in os.listdir(folder) if f.endswith('.png')) if os.path.isdir(folder) else []
     s = open(html).read()
     s = re.sub(r"// <items-icons>\n.*?\n// </items-icons>", "// <items-icons>\nconst ITEM_ICONS = " + str(have).replace("'", '"') + ";\n// </items-icons>", s, flags=re.S)
-    open(html, 'w').write(s); print(len(have), 'item icons registered')
+    open(html, 'w').write(s); print(len(have), 'item icons registered; now run node tools/build.cjs')

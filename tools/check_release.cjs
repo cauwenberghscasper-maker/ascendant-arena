@@ -217,4 +217,7 @@ check('inline scripts and premium art modules parse',()=>{
   }
   const r=spawnSync(process.execPath,['--input-type=module','--check'],{input:collectionModule,encoding:'utf8'});assert.equal(r.status,0,r.stderr);
 });
+check('index.html is built from the current src/',()=>{
+  const r=require('node:child_process').spawnSync(process.execPath,[path.join(__dirname,'build.cjs'),'--check'],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);
+});
 console.log(`${passed} release checks passed.`);
