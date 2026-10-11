@@ -994,6 +994,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 }
 </style>
 <link rel="stylesheet" href="assets/art/adventurer-ui.css">
+<link rel="stylesheet" href="assets/art/runescape-ui.css">
 <style>
 /* v9 panels: fixed header, scrolling middle, action bar that is always visible (never scroll to confirm) */
 .panel.dock { overflow: hidden; }
@@ -1039,7 +1040,10 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .panel.dock .bdet { padding: 10px; gap: 8px; }
 .panel .pBtns > button.primary, .panel .pBtns > button.ghost, .panel .pBtns > button.disabled { padding: 0 10px; font-size: 16px; }
 .pSel .pMoreBtn + .pMoreBtn { margin-left: -4px; }
-@media (max-aspect-ratio: 1/1) and (max-height: 760px) { #modal.room .panel { max-height: 77%; } }
+@media (max-aspect-ratio: 1/1) and (max-height: 760px) { #modal.room > .panel { max-height: 78%; } }
+.panel > .npcHead, .panel > .menuHead { padding-right: 56px !important; } .panel > .heroHead { padding-right: 0 !important; } .panel > .heroHead .hm { margin-right: 54px !important; }
+@media (max-aspect-ratio: 1/1) { .panel.dock .tiles .tile { height: 62px; min-height: 0; aspect-ratio: auto; justify-content: center; } .panel.dock .tiles .tile img { max-width: 32px; max-height: 32px; } }
+@media (max-width: 400px) { .panel.dock .heroHead small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .panel.dock .heroHead .prestigeBadge { display: none; } }
 @media (max-width: 400px) { .panel .pBtns > button.primary, .panel .pBtns > button.ghost, .panel .pBtns > button.disabled { font-size: 14px; padding: 0 8px; } .igrid { grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); } }
 @media (max-aspect-ratio: 1/1) { #modal.room .panel { max-height: 70%; } #modal.room { background: linear-gradient(180deg, rgba(8,9,22,0) 22%, rgba(8,9,22,.6) 34%); } }
 .panel.dock .tiles .tile { padding: 4px 2px 3px; } .panel.dock .tiles .tile img { max-width: 44px; }
@@ -1091,15 +1095,15 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
     <div id="hudTR">
       <button class="hbtn ic" id="bMap" aria-label="Map"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"><path d="M3 6.5l5.5-2.5 7 2.5 5.5-2.5v13.5l-5.5 2.5-7-2.5L3 20z"/><path d="M8.5 4v13.5M15.5 6.5V20"/></svg></button>
       <button class="hbtn ic" id="bHero" aria-label="Hero"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"><path d="M12 2.8l7 2.6v5.2c0 4.6-3 8.3-7 10.6-4-2.3-7-6-7-10.6V5.4z"/><path d="M9 11.5l2.2 2.2L15.5 9"/></svg><span id="heroDot" hidden></span></button>
-      <button class="hbtn ic" id="bMenu" aria-label="Menu"><svg viewBox="0 0 24 24" fill="#fff"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2.2"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2.2"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2.2"/><rect x="13" y="13" width="7.5" height="7.5" rx="2.2"/></svg><span id="menuDot" hidden></span></button>
-      <button class="hbtn ic" id="bSet" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
+      <button class="hbtn ic" id="bMenu" aria-label="Adventurer’s Journal"><svg viewBox="0 0 24 24" fill="#fff"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2.2"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2.2"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2.2"/><rect x="13" y="13" width="7.5" height="7.5" rx="2.2"/></svg><span id="menuDot" hidden></span></button>
+      <button class="hbtn ic" id="bSet" aria-label="Options"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
       <div id="fps" hidden></div>
     </div>
     <nav id="hubShortcuts" aria-label="Hero upgrades" hidden>
-      <button data-quick="gear"><span class="quickIcon" data-icon="m_hero" aria-hidden="true"></span><span>Gear</span><i id="navGearDot" class="rdot" hidden></i></button>
-      <button data-quick="skills"><span class="quickIcon" data-icon="m_skills" aria-hidden="true"></span><span>Skills</span><i id="navSkillsDot" class="rdot" hidden></i></button>
-      <button data-quick="artifacts"><span class="quickIcon" data-icon="m_artifacts" aria-hidden="true"></span><span>Artifacts</span><i id="navArtifactsDot" class="rdot" hidden></i></button>
-      <button data-quick="cases"><img src="assets/ui/premium-v2/case-treasure.webp" alt=""><span>Cases</span><b id="navCasesCount" hidden></b></button>
+      <button data-quick="gear"><span class="quickIcon" data-icon="m_hero" aria-hidden="true"></span><span>Equipment</span><i id="navGearDot" class="rdot" hidden></i></button>
+      <button data-quick="skills"><span class="quickIcon" data-icon="m_skills" aria-hidden="true"></span><span>Talents</span><i id="navSkillsDot" class="rdot" hidden></i></button>
+      <button data-quick="artifacts"><span class="quickIcon" data-icon="m_artifacts" aria-hidden="true"></span><span>Relics</span><i id="navArtifactsDot" class="rdot" hidden></i></button>
+      <button data-quick="cases"><img src="assets/ui/premium-v2/case-treasure.webp" alt=""><span>Chests</span><b id="navCasesCount" hidden></b></button>
     </nav>
     <div id="hudTop">
       <div id="objective" hidden><span id="objArrow">▲</span><span id="objText"></span></div>
@@ -1525,7 +1529,7 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
   // one boss lair per area (not in Base Camp), waypoint at every area gate, one den per area on alternating sides
   W.lairs = Z.map((zn, i) => zn.safe ? null : { x: 0, z: Math.round(zn.z0 + zn.len * 0.5), name: zn.lairName, zone: i });
   W.lairList = W.lairs.filter(Boolean);
-  W.waypoints = [{ name: 'Base Camp', x: 9, z: -46, zone: 0 }].concat(Z.slice(1).map((zn, i) => ({ name: zn.name + ' Gate', x: 9, z: zn.z0 + 9, zone: i + 1 })));
+  W.waypoints = [{ name: 'Base Camp Lodestone', x: 9, z: -46, zone: 0 }].concat(Z.slice(1).map((zn, i) => ({ name: zn.name + ' Lodestone', x: 9, z: zn.z0 + 9, zone: i + 1 })));
   W.dens = [];
   Z.forEach((zn, i) => { if (!zn.safe) W.dens.push({ name: zn.denName, zone: i, x: (i % 2 ? -1 : 1) * 66, z: Math.round(zn.z0 + zn.len * 0.62), r: 13, n: zn.len >= 110 ? 13 : 11 }); });
   // two challenge shrines per biome (second and fourth area)
@@ -2033,8 +2037,8 @@ const ACHIEVEMENTS = [
   { id: 'rift10', name: 'Rift Walker', desc: 'Clear Rift floor 10', xp: 0.6, check: (p) => (p.records.bestRift || 0) >= 10 },
   { id: 'rift25', name: 'Rift Breaker', desc: 'Clear Rift floor 25', xp: 0.8, check: (p) => (p.records.bestRift || 0) >= 25 },
   { id: 'rift50', name: 'Rift Lord', desc: 'Clear Rift floor 50', xp: 1, check: (p) => (p.records.bestRift || 0) >= 50 },
-  { id: 'case10', name: 'Unboxer', desc: 'Open 10 cases', xp: 0.5, check: (p) => (p.stats.cases || 0) >= 10 },
-  { id: 'case100', name: 'Case Hardened', desc: 'Open 100 cases', xp: 1, check: (p) => (p.stats.cases || 0) >= 100 },
+  { id: 'case10', name: 'Looter', desc: 'Open 10 treasure chests', xp: 0.5, check: (p) => (p.stats.cases || 0) >= 10 },
+  { id: 'case100', name: 'Treasure Hunter', desc: 'Open 100 treasure chests', xp: 1, check: (p) => (p.stats.cases || 0) >= 100 },
   { id: 'exped10', name: 'Expedition Leader', desc: 'Bring back 10 expeditions', xp: 0.8, check: (p) => (p.stats.expeds || 0) >= 10 },
   { id: 'kills10k', name: 'Ten Thousand', desc: 'Defeat 10,000 monsters', xp: 1, check: (p) => p.stats.kills >= 10000 },
 ];
@@ -7520,6 +7524,10 @@ function statLine(it) {
   return out.join(' · ');
 }
 function perkLine(it) { const t = perkText(it); return t ? `<div class="perk">${t}</div>` : ''; }
+// RuneScape-style display names for tabs whose keys stay the same in code
+const TAB_NAME = { Gear: 'Equipment', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
+const tabName = (t) => TAB_NAME[t] || t;
+const wearWord = (slot) => (slot === 'weapon' ? 'Wield' : 'Wear');
 const SLOT_LABEL = { weapon: 'Weapon', helmet: 'Helmet', chest: 'Armor', boots: 'Boots', accessory: 'Accessory' };
 const escapeHTML = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function openMerge(slot, bulk, back) {
@@ -7530,15 +7538,15 @@ function openMerge(slot, bulk, back) {
   const pieces = p.bag.filter((m) => m.slot === slot).sort((x, y) => (used.has(y.id) - used.has(x.id)) || rarIdx(x.rarity) - rarIdx(y.rarity));
   const mark = (m) => used.has(m.id) ? { cls: 'use', text: '✓', label: 'will be consumed' } : m.locked ? { cls: 'kept', label: 'protected, kept' } : !cand.has(m.id) ? { cls: 'kept', text: '▲', label: 'better or equal, kept' } : { cls: 'kept', label: 'not needed, kept' };
   const after = Object.assign({}, it, { up: it.up + plan.n });
-  const head = `<div class="npcHead"><h3>Merge ${SLOT_LABEL[slot]}</h3></div>`;
+  const head = `<div class="npcHead"><h3>Reforge ${SLOT_LABEL[slot]}</h3></div>`;
   const body = `<div class="mergePreview"><img src="${thumbFor(it)}" alt=""><div><b>+${it.up} → +${after.up}</b><p class="fine">${statLine(it)}<br>→ ${statLine(after)}</p></div></div>
-    <div class="subRow"><h4 class="sub">Your ${SLOT_LABEL[slot].toLowerCase()} pieces · ${pieces.length}</h4></div>
-    <div class="ilegend"><span><i class="m1">✓</i>consumed (${plan.materials.length})</span><span><i class="up">▲</i>better or equal, kept</span><span>${gi('m_lock')} protected, kept</span><span>faded: kept</span></div>
+    <div class="subRow"><h4 class="sub">${SLOT_LABEL[slot]}s in your bag · ${pieces.length}</h4></div>
+    <div class="ilegend"><span><i class="m1">✓</i>melted down (${plan.materials.length})</span><span><i class="up">▲</i>better or equal, kept</span><span>${gi('m_lock')} protected, kept</span><span>faded: kept</span></div>
     ${itemGrid(pieces, { mark, empty: `No other ${SLOT_LABEL[slot].toLowerCase()} pieces in your bag.` })}
-    <p class="mergeNotice">Only weaker pieces of the same slot are used, weakest first. Protected and equipped gear is never used. Rarity and perks of your equipped item stay the same.</p>`;
-  const note = plan.n ? `Uses <b>${plan.materials.length}</b> piece${plan.materials.length === 1 ? '' : 's'} (marked ✓) · ${costHTML(plan.gold, plan.ess)}`
+    <p class="mergeNotice">The smith melts down only weaker pieces of the same slot, weakest first. Protected and worn gear is never touched. Your piece keeps its rarity and perks.</p>`;
+  const note = plan.n ? `Melts <b>${plan.materials.length}</b> piece${plan.materials.length === 1 ? '' : 's'} (marked ✓) · ${costHTML(plan.gold, plan.ess)}`
     : `Next level needs ${need} weaker piece${need > 1 ? 's' : ''} (${available.length} available) · ${costHTML(upgradeCost(it), upgradeEssence(it))}`;
-  const btn = `<button class="ghost" data-act="mergeBack">Back</button><button class="${plan.n ? 'primary' : 'disabled'}" data-act="mergeConfirm" ${plan.n ? '' : 'disabled'}>${plan.n ? `Merge · +${plan.n} level${plan.n > 1 ? 's' : ''}` : it.up >= CFG.gear.maxUp ? 'Maximum level' : 'Need materials or currency'}</button>`;
+  const btn = `<button class="ghost" data-act="mergeBack">Back</button><button class="${plan.n ? 'primary' : 'disabled'}" data-act="mergeConfirm" ${plan.n ? '' : 'disabled'}>${plan.n ? `Reforge · +${plan.n} level${plan.n > 1 ? 's' : ''}` : it.up >= CFG.gear.maxUp ? 'Maximum level' : 'Need materials or currency'}</button>`;
   openModal(dock(head, body, selBar('', btn, '', note)), true, true);
 }
 function mergeReturn(back) { UI.mergePlan = null; if (back === 'smith') openSmith('Upgrade'); else heroTab('Gear'); }
@@ -7582,10 +7590,10 @@ function openSmith(tab) {
   const p = G.profile;
   let body;
   if (tab === 'Upgrade') {
-    body = `<p class="say">“Merge weaker gear of the same slot to level up your equipped item. Each level adds 12% to its stats. Past +5 I need gems too; every 10 levels earns a star.”</p><div class="list">` + CFG.gear.slots.map((s) => {
+    body = `<p class="say">“Bring me weaker gear of the same slot and I’ll melt it into the piece you wear. Each level adds 12% to its stats. Past +5 I need gems too; every 10 levels earns a star.”</p><div class="list">` + CFG.gear.slots.map((s) => {
       const it = p.gear[s], cost = upgradeCost(it), ess = upgradeEssence(it), max = it.up >= CFG.gear.maxUp, can = maxUpgradePlan(it, 1).n > 0;
       const mp = maxUpgradePlan(it);
-      return itemRow(it, `<div class="col"><button class="${can ? 'primary' : 'ghost'}" data-act="${mp.n > 1 ? 'upgradeMax2' : 'upgrade'}" data-slot="${s}" ${max ? 'disabled' : ''}>${max ? 'Max' : mp.n > 1 ? `Merge… +${mp.n}` : `Merge… ${costHTML(cost, ess)}`}</button>${mergeCostHTML(it)}</div>`, null, { upgrade: can });
+      return itemRow(it, `<div class="col"><button class="${can ? 'primary' : 'ghost'}" data-act="${mp.n > 1 ? 'upgradeMax2' : 'upgrade'}" data-slot="${s}" ${max ? 'disabled' : ''}>${max ? 'Max' : mp.n > 1 ? `Reforge… +${mp.n}` : `Reforge… ${costHTML(cost, ess)}`}</button>${mergeCostHTML(it)}</div>`, null, { upgrade: can });
     }).join('') + '</div>';
   } else if (tab === 'Gems') {
     const pr = gemPrice(p), row = (n) => { let c = 0; for (let i = 0; i < n; i++) c += Math.round(30 * Math.pow(CFG.enemies.goldGrowth, p.level - 1) * Math.pow(1.03, (p.gemBuys || 0) + i)); return `<button class="${p.gold >= c ? 'primary' : 'disabled'}" data-act="gems" data-n="${n}" ${p.gold >= c ? '' : 'aria-disabled="true"'}>${ICON.ess}${n} for ${ICON.coin}${fmtK(c)}</button>`; };
@@ -7599,9 +7607,9 @@ function openSmith(tab) {
     }).join('') + '</div><p class="fine">Prices are fixed. Epic pieces only drop from monsters, world bosses and their perks are stronger.</p>';
   }
   const upAlert = Object.values(slotAlerts()).some((a) => a.canUpgrade);
-  const tabs = ['Upgrade', 'Gems', 'Forge'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${t}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
-  openModal(dock(`<div class="npcHead"><span class="dotc" style="background:#8a5a3c"></span><h3>Smith Garo</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
-    <div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, tab === 'Upgrade' ? selBar('', '', '', 'Each Merge… opens a review that shows every piece it will use before you confirm.') : ''), true, true);
+  const tabs = ['Upgrade', 'Gems', 'Forge'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${tabName(t)}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
+  openModal(dock(`<div class="npcHead"><span class="dotc" style="background:#8a5a3c"></span><h3>Garo’s Smithy</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
+    <div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, tab === 'Upgrade' ? selBar('', '', '', 'Each Reforge… shows every piece the smith will melt down before you confirm.') : ''), true, true);
 }
 function openArenaPanel() {
   UI.current = 'arena';
@@ -7643,7 +7651,7 @@ function openLoot(loot) {
   let body;
   if (!loot.eligible) body = `<p class="say">You didn’t deal enough damage to share the loot (at least ${pct(CFG.boss.loot.minContrib)} of the total). Join the next fight!</p>`;
   else body = `<div class="stats3"><div><b>${pct(loot.contrib)}</b><span>Your damage share</span></div><div><b>${pct(loot.rareChance)}</b><span>Rare drop chance</span></div><div><b>${ICON.coin}+${fmt(loot.gold)}</b><span>Gold</span></div></div>
-    <div class="list">${loot.item ? `<div class="item">${caseArt(loot.caseKind || 'boss')}<div class="meta"><div class="slot">Case</div><div class="nm">${CFG.cases[loot.caseKind || 'boss'].name}</div><div class="st">Rare or better inside. Open it in Menu › Cases</div></div><button class="primary" data-act="cases">Open</button></div>` : '<p class="fine">No case this time.</p>'}
+    <div class="list">${loot.item ? `<div class="item">${caseArt(loot.caseKind || 'boss')}<div class="meta"><div class="slot">Treasure chest</div><div class="nm">${CFG.cases[loot.caseKind || 'boss'].name}</div><div class="st">Rare or better inside. Open it in your Journal › Treasure Chests</div></div><button class="primary" data-act="cases">Open</button></div>` : '<p class="fine">No chest this time.</p>'}
     ${loot.tomeXp ? `<div class="item"><div class="meta"><div class="slot">Tome</div><div class="nm">Golem Tome</div><div class="st">+${fmt(loot.tomeXp * progressionXpMultiplier(G.profile))} XP</div></div></div>` : ''}
     ${loot.essence ? `<div class="item"><div class="meta"><div class="slot">Gems</div><div class="nm">+${loot.essence} gems · +${loot.shards || 0} artifact shards</div><div class="st">For gear upgrades and artifact stars</div></div></div>` : ''}</div>
     <p class="fine">Drop odds come only from your share of the damage. Nothing in this game is bought with money.</p>`;
@@ -7657,7 +7665,7 @@ function heroTab(tab) {
   const p = G.profile, pl = G.player, c = CFG.classes[p.cls] || CFG.classes.bolt;
   const gearAlert = Object.values(slotAlerts()).some((a) => a.better || a.canUpgrade);
   const dots = { Gear: gearAlert };
-  const tabs = ['Stats', 'Gear'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="tab" data-tab="${t}">${t}${dots[t] ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
+  const tabs = ['Stats', 'Gear'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="tab" data-tab="${t}">${tabName(t)}${dots[t] ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
   let body = '', bar = '';
   const pct = (x) => `${Math.round(x * 100)}%`;
   if (tab === 'Stats') {
@@ -7702,21 +7710,21 @@ function heroTab(tab) {
     const L = p.luck, Pi = CFG.loot.pity;
     const reroll = rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '';
     body = `<div class="tiles">${tiles}</div>
-      <div class="subRow"><h4 class="sub">All ${SLOT_LABEL[sel].toLowerCase()} pieces · ${pieces.length}</h4><small>bag ${p.bag.length}/${CFG.gear.bagMax}</small>${worse ? `<button class="ghost sm" data-act="salvageAll" aria-label="Salvage ${worse} weaker pieces">Salvage ${worse}</button>` : ''}</div>
-      ${pieces.length ? `<div class="ilegend"><span><i class="up">▲</i>better</span><span><i class="m1">+1</i>next merge</span><span><i class="mm">max</i>merge max</span><span>${gi('m_lock')} kept</span></div>` : ''}
+      <div class="subRow"><h4 class="sub">${SLOT_LABEL[sel]}s in your bag · ${pieces.length}</h4><small>bag ${p.bag.length}/${CFG.gear.bagMax}</small>${worse ? `<button class="ghost sm" data-act="salvageAll" aria-label="High-alch ${worse} weaker pieces">Alch ${worse}</button>` : ''}</div>
+      ${pieces.length ? `<div class="ilegend"><span><i class="up">▲</i>better</span><span><i class="m1">+1</i>next reforge</span><span><i class="mm">max</i>reforge max</span><span>${gi('m_lock')} kept</span></div>` : ''}
       ${itemGrid(pieces, { act: 'gpick', sel: UI.gearPick, mark, empty: `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
-      <h4 class="sub">${SLOT_LABEL[sel]} · equipped</h4><div class="list">${itemRow(cur, reroll, null, { upgrade: can })}</div>
+      <h4 class="sub">${SLOT_LABEL[sel]} · worn</h4><div class="list">${itemRow(cur, reroll, null, { upgrade: can })}</div>
       <h4 class="sub">Luck</h4><div class="luck">${['rare', 'epic', 'legendary'].concat(HIGH_RAR.filter((h) => highWeights(curTier(), 6)[h] > 0)).map((r) => `<div class="lk ${r}"><span>${CFG.gear.rarity[r].name} guaranteed in</span><b>${Math.max(1, Pi[r] - L[r])} drops</b><i style="--v:${Math.round(L[r] / Pi[r] * 100)}%"></i></div>`).join('')}</div>`;
     if (pick) {
       const better = isBetter(pick, cur), se = salvageEssence(pick);
-      bar = selBar(itemSummary(pick, `${better ? '<span style="color:#58e08a">Better than equipped</span> · ' : ''}Salvage: ${ICON.coin}${fmtK(salvageValue(pick))}${se ? ` ${ICON.ess}${se}` : ''}`) + `<button class="pMoreBtn" data-act="gpick" data-id="" aria-label="Deselect">✕</button>`,
+      bar = selBar(itemSummary(pick, `${better ? '<span style="color:#58e08a">Better than equipped</span> · ' : ''}Alch: ${ICON.coin}${fmtK(salvageValue(pick))}${se ? ` ${ICON.ess}${se}` : ''}`) + `<button class="pMoreBtn" data-act="gpick" data-id="" aria-label="Deselect">✕</button>`,
         `<button class="ghost" data-act="protectGear" data-id="${escapeHTML(pick.id)}">${pick.locked ? 'Unprotect' : 'Protect'}</button>`
-        + `<button class="ghost" data-act="salvage" data-id="${escapeHTML(pick.id)}" ${pick.locked ? 'disabled' : ''}>Salvage</button><button class="primary" data-act="equip" data-id="${escapeHTML(pick.id)}">Equip</button>`,
-        `<div class="list">${itemRow(pick, '', 'In your bag', { better })}${itemRow(cur, '', 'Equipped now')}</div>`);
+        + `<button class="ghost" data-act="salvage" data-id="${escapeHTML(pick.id)}" ${pick.locked ? 'disabled' : ''}>Alch</button><button class="primary" data-act="equip" data-id="${escapeHTML(pick.id)}">${wearWord(pick.slot)}</button>`,
+        `<div class="list">${itemRow(pick, '', 'In your bag', { better })}${itemRow(cur, '', 'Worn now')}</div>`);
     } else {
-      const note = max ? 'This piece is at its maximum level.' : one.n ? '' : `${mergeCostHTML(cur)} · tap a piece for its options`;
-      bar = selBar('', `<button class="${can && !max ? 'primary' : 'ghost'}" data-act="upgradeHere" data-slot="${sel}" ${max ? 'disabled' : ''}>${max ? 'Max level' : `Merge +1 ${costHTML(upgradeCost(cur), upgradeEssence(cur))}`}</button>`
-        + `<button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Merge max${mp.n > 1 ? ` +${mp.n}` : ''}</button>`, '', note);
+      const note = max ? 'This piece is at its maximum level.' : one.n ? '' : `${mergeCostHTML(cur)} · tap a piece to wear, protect or alch it`;
+      bar = selBar('', `<button class="${can && !max ? 'primary' : 'ghost'}" data-act="upgradeHere" data-slot="${sel}" ${max ? 'disabled' : ''}>${max ? 'Max level' : `Reforge +1 ${costHTML(upgradeCost(cur), upgradeEssence(cur))}`}</button>`
+        + `<button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Reforge max${mp.n > 1 ? ` +${mp.n}` : ''}</button>`, '', note);
     }
   } else if (tab === 'Attacks') {
     const cur = resolvedAttack(p), av = availableAttacks(p), fresh = new Set(p.newUnlocks);
@@ -7791,7 +7799,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div><button class="ghost sm hm" data-act="openMenu">${gi('m_menu')} Menu</button></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div><button class="ghost sm hm" data-act="openMenu">${gi('m_menu')} Journal</button></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
 }
 function openWaypoints() {
   UI.current = 'waypoints';
@@ -7801,10 +7809,10 @@ function openWaypoints() {
   const rows = CFG.world.waypoints.map((w, i) => {
     const zn = CFG.world.zones[w.zone], have = p.waypoints.includes(i), lvl = p.level >= zn.minLevel;
     const head = zn.biome !== lastBiome ? `<h4 class="sub">${zn.biomeName}</h4>` : ''; lastBiome = zn.biome;
-    const btn = i === here ? '<span class="tagged">You are here</span>' : have && lvl ? `<button class="primary" data-act="travel" data-i="${i}">Travel</button>` : `<span class="tagged">${!lvl ? 'Level ' + zn.minLevel : 'Not found yet'}</span>`;
+    const btn = i === here ? '<span class="tagged">You are here</span>' : have && lvl ? `<button class="primary" data-act="travel" data-i="${i}">Teleport</button>` : `<span class="tagged">${!lvl ? 'Level ' + zn.minLevel : 'Not attuned yet'}</span>`;
     return `${head}<div class="item wp"><div class="meta"><div class="slot">${zn.safe ? 'Safe camp · no monsters' : `${zn.name} · monsters Lv ${zn.lvl[0] + ta}–${zn.lvl[1] + ta}`}</div><div class="nm">${w.name}</div></div>${btn}</div>`;
   }).join('');
-  openModal(`<div class="npcHead"><span class="dotc" style="background:#9fe8ff"></span><h3>Waypoint</h3></div>${tierPicker()}<p class="say">Touch a waypoint once to unlock it. Then travel between them for free.</p><div class="list">${rows}</div>`);
+  openModal(`<div class="npcHead"><span class="dotc" style="background:#9fe8ff"></span><h3>Lodestone Network</h3></div>${tierPicker()}<p class="say">Touch a lodestone once to attune to it. Then teleport between them for free.</p><div class="list">${rows}</div>`);
 }
 // World Tier picker: shown at every waypoint
 function tierPicker() {
@@ -7866,7 +7874,7 @@ function openSettings() {
   const tg = (k, label, hint) => `<label class="tgl"><input type="checkbox" id="set-${k}" data-set="${k}" ${s[k] ? 'checked' : ''}><span class="sw"></span><span><b>${label}</b><small>${hint}</small></span></label>`;
   const cloud = Cloud.state === 'on' ? (Cloud.kind === 'supa' ? 'Saved to the cloud and this device. To move to a new phone, copy your Backup code and load it there.' : 'Saved to your Claude account and this device. Your level and items come back on any device where you open this game.')
     : Cloud.state === 'connecting' ? 'Connecting to your cloud save…' : Cloud.state === 'readonly' ? 'Cloud save is read-only here. Progress is kept on this device only.' : 'Cloud save is not available in this view. Progress is kept on this device when storage allows.';
-  openModal(`<h3>Settings</h3>
+  openModal(`<h3>Options</h3>
     <div class="savebox playtest"><b>${TEST_MODE ? '×100 gameplay test mode' : 'Gameplay testing'}</b><small>${TEST_MODE ? 'Hero, mastery and pet XP are ×100. This test hero saves separately on this device. Cloud save and multiplayer are off. Gold and combat speed stay normal. Return to normal play to recover your normal hero.' : 'Test the gameplay flow with ×100 hero, mastery and pet XP. Your normal hero stays saved separately. A first test run copies your current hero; later runs resume your test hero.'}</small><div class="row"><button class="${TEST_MODE ? 'ghost' : 'primary'}" data-act="testMode">${TEST_MODE ? 'Return to normal play' : 'Enter ×100 test mode'}</button></div></div>
     <div class="savebox ${Cloud.state}"><b>${Cloud.state === 'on' ? 'Cloud save on' : 'Local save'}</b><small>${cloud}</small><div class="row"><button class="ghost sm" data-act="saveNow">Save now</button><button class="ghost sm" data-act="saveCode">Backup code</button></div></div>
     <div class="mpbox"><b>Multiplayer</b><small>${MP.state === 'on' ? `Connected. ${mpCount() ? mpCount() + ' other player' + (mpCount() > 1 ? 's' : '') + ' in the world.' : 'No one else is here right now.'} Other players see your nickname, brawler and level.` : MP.state === 'connecting' ? 'Connecting to the world…' : 'Not available in this view. Online world play needs a supported connected session. Showdown uses computer opponents.'}</small>
@@ -7966,7 +7974,7 @@ function handlePanelClick(e) {
     case 'upgradeHere': openMerge(b.dataset.slot, false, 'hero'); break;
     case 'upgradeMax': openMerge(b.dataset.slot, true, 'hero'); break;
     case 'upgradeMax2': openMerge(b.dataset.slot, true, 'smith'); break;
-    case 'mergeConfirm': { const plan = UI.mergePlan; if (!plan) break; if (upgradeItemMax(plan.slot, plan)) { Sfx.play('win'); toast(`Merged ${plan.materials.length} gear · +${plan.n} level${plan.n > 1 ? 's' : ''}`, 'good'); mergeReturn(plan.back); } else { toast('Inventory or cost changed. Review the refreshed merge.', 'bad'); openMerge(plan.slot, plan.bulk, plan.back); } break; }
+    case 'mergeConfirm': { const plan = UI.mergePlan; if (!plan) break; if (upgradeItemMax(plan.slot, plan)) { Sfx.play('win'); toast(`Reforged with ${plan.materials.length} piece${plan.materials.length > 1 ? 's' : ''} · +${plan.n} level${plan.n > 1 ? 's' : ''}`, 'good'); mergeReturn(plan.back); } else { toast('Inventory or cost changed. Review the refreshed merge.', 'bad'); openMerge(plan.slot, plan.bulk, plan.back); } break; }
     case 'mergeBack': mergeReturn(UI.mergePlan && UI.mergePlan.back); break;
     case 'protectGear': { const it = G.profile.bag.find(m => m.id === b.dataset.id); if (it) { it.locked = !it.locked; G.dirty = true; heroTab('Gear'); } break; }
     case 'salvage': salvageItem(b.dataset.id); UI.gearPick = null; heroTab('Gear'); break;
@@ -8084,8 +8092,8 @@ function processEvents() {
         showBanner(`${PET_DEFS[e.id].name} · level ${e.level}`,'Pet attack and world bonuses improved','good');Sfx.play('unlock');
         break;
       case 'unlock': {
-        if (e.what === 'brawler') showBanner('New brawler!', `${e.name} · ${e.role} · Menu › Brawlers`, 'gold');
-        else showBanner('New artifact!', `${e.name} · Menu › Artifacts`, 'gold');
+        if (e.what === 'brawler') showBanner('A hero joins you!', `${e.name} · ${e.role} · Journal › Heroes`, 'gold');
+        else showBanner('Relic discovered!', `${e.name} · Journal › Relics`, 'gold');
         Sfx.play('unlock'); UI.alertT = 0; break;
       }
       case 'attackEquipped': Sfx.play('job'); break;
@@ -8121,7 +8129,7 @@ function processEvents() {
       case 'treeReset': showToast('Tree reset. Points refunded.', 'good'); break;
       case 'autoSalvage': break;
       case 'salvaged': Feed.add(`${gi('m_coin')} Salvaged ${e.n} · +${fmtK(e.gold)} gold${e.ess ? ` · +${e.ess} gems` : ''}`); break;
-      case 'waypoint': Feed.add(`${gi('m_portal')} Waypoint found: <b>${e.name}</b>`, 'wp'); Sfx.play('unlock'); break;
+      case 'waypoint': Feed.add(`${gi('m_portal')} Lodestone attuned: <b>${e.name}</b>`, 'wp'); Sfx.play('unlock'); break;
       case 'tier': showBanner(`World Tier: ${e.name}`, e.tier ? `Monsters +${tierDef(e.tier).add} levels · richer drops` : 'Base difficulty', e.tier >= 2 ? 'red' : 'gold'); Sfx.play('horn'); break;
       case 'riftStart': enterRiftView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; burst(e.x, 1, e.z, 40, 0xff5d8f, 7, 0.9, 0.3, 2, 1.6); SpriteFX.play('pillar', 'arcane', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`The Rift · Floor ${e.floor}`, 'Clear every monster before time runs out', 'red'); break;
       case 'champShield': ringFx(e.x, e.z, e.r, 0x5dd6ff, 2.2); break;
@@ -8141,14 +8149,14 @@ function processEvents() {
         break;
       case 'levelPower': {
         const n = e.level - e.from, pts = (() => { let s = 0; for (let L = e.from + 1; L <= e.level; L++) s += 2 + (L % 10 === 0 ? 5 : 0); return s; })();
-        showBanner(`Level ${e.level}!`, `Power ${fmtK(e.p0)} → ${fmtK(e.p1)} · +${pts} hero points${n > 1 ? ` · ${n} levels` : ''}${e.level % 10 === 0 ? ' · Treasure Case' : ''}`, 'gold');
+        showBanner(`Level ${e.level}!`, `Power ${fmtK(e.p0)} → ${fmtK(e.p1)} · +${pts} talent points${n > 1 ? ` · ${n} levels` : ''}${e.level % 10 === 0 ? ' · Treasure Chest' : ''}`, 'gold');
         break;
       }
-      case 'caseGot': { const K = CFG.cases[e.k]; Feed.add(`${gi('m_case')} <b style="color:${K.col}">${K.name}</b> found · open it in Menu › Cases`, 'case'); Sfx.play('unlock'); UI.caseFlash = 1.2; break; }
-      case 'vault': showToast(`Vault collected: +${fmtK(e.v.gold)} gold, +${e.v.gems} gems${e.v.cases ? `, ${e.v.cases} case${e.v.cases > 1 ? 's' : ''}` : ''}`, 'good'); Sfx.play('coin'); break;
+      case 'caseGot': { const K = CFG.cases[e.k]; Feed.add(`${gi('m_case')} <b style="color:${K.col}">${K.name}</b> found · open it in your Journal › Treasure Chests`, 'case'); Sfx.play('unlock'); UI.caseFlash = 1.2; break; }
+      case 'vault': showToast(`Bank collected: +${fmtK(e.v.gold)} coins, +${e.v.gems} gems${e.v.cases ? `, ${e.v.cases} chest${e.v.cases > 1 ? 's' : ''}` : ''}`, 'good'); Sfx.play('coin'); break;
       case 'vaultUp': showToast(`Vault level ${e.lv}`, 'good'); Sfx.play('unlock'); break;
       case 'expStart': showToast(`${CFG.brawlers[e.b].name} left on a ${e.d >= 60 ? e.d / 60 + 'h' : e.d + 'm'} expedition`); break;
-      case 'expDone': showToast(`${CFG.brawlers[e.b].name} is back: +${fmtK(e.r.gold)} gold, +${e.r.gems} gems${e.r.cases ? `, ${e.r.cases} case${e.r.cases > 1 ? 's' : ''}` : ''}`, 'good'); Sfx.play('win'); break;
+      case 'expDone': showToast(`${CFG.brawlers[e.b].name} is back: +${fmtK(e.r.gold)} coins, +${e.r.gems} gems${e.r.cases ? `, ${e.r.cases} chest${e.r.cases > 1 ? 's' : ''}` : ''}`, 'good'); Sfx.play('win'); break;
       case 'achievement': Feed.add(`${gi('m_feats')} Feat: <b>${e.name}</b>`, 'feat'); Sfx.play('job'); break;
       case 'jobAccepted': showToast(`Job accepted: ${e.title}`); break;
       case 'jobDone': Sfx.play('job'); break;
@@ -8428,7 +8436,7 @@ function updateGearPrompt() {
   box.dataset.id = it.id;
   box.innerHTML = `<span class="thw ${it.rarity}"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""></span><div class="gp"><div class="gt">Better ${SLOT_LABEL[it.slot].toLowerCase()} found${G.gearPrompts.length > 1 ? ` · +${G.gearPrompts.length - 1} more` : ''}</div>
     <div class="gn">${it.name} ${rarityChip(it.rarity)}</div><div class="gc">${statLine(it)}${it.aff && Object.keys(it.aff).length ? ' · ' + affixText(it) : ''}</div><div class="gc was">Now: ${cur.name} (${CFG.gear.rarity[cur.rarity].name}) · ${statLine(cur)}</div>${rarIdx(it.rarity) > rarIdx(cur.rarity) && itemPower(it) < itemPower(cur) ? '<div class="gc note">Higher rarity. Some stats are lower until you level it up at the Smith</div>' : ''}</div>
-    <div class="gb"><button class="primary" data-gp="equip">Equip</button><button class="ghost" data-gp="later">Later</button></div>`;
+    <div class="gb"><button class="primary" data-gp="equip">${wearWord(it.slot)}</button><button class="ghost" data-gp="later">Later</button></div>`;
   box.hidden = false;
 }
 function onGearPrompt(e) {
@@ -8670,25 +8678,25 @@ function openMenu(section) {
   const hp = 0, bp = Math.max(0, treeFree(p, p.cls));
   const tile = (act, icon, title, sub, dot) => `<button class="mtile" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${sub}</small></span>${dot ? '<i class="rdot"></i>' : ''}</button>`;
   const upgrades = [
-    tile('mGear', 'm_hero', 'Gear', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, A.hero),
-    tile('mSkills', 'm_skills', 'Skills', hp + bp > 0 ? `${fmt(hp + bp)} points to spend` : 'All points spent', A.skills),
-    tile('mArtifacts', 'm_artifacts', 'Artifacts', `${p.artifacts.length}/${artifactSlotsFor(p)} equipped`, A.artifacts),
-    tile('mCases', 'm_case', 'Cases', p.cases.length ? `${p.cases.length} to open` : 'Earned from loot', p.cases.length > 0),
-    tile('mBrawlers', 'm_brawlers', 'Brawlers', `${own}/${CFG.brawlerOrder.length} unlocked`, A.brawlers),
-    tile('mSmith', 'm_smith', 'Smith', 'Merge & forge', UI.anyAlert),
+    tile('mGear', 'm_hero', 'Equipment', `Gear score ${fmt(Math.round(gearTotals(p.gear).score))}`, A.hero),
+    tile('mSkills', 'm_skills', 'Talents', hp + bp > 0 ? `${fmt(hp + bp)} talent points` : 'All points spent', A.skills),
+    tile('mArtifacts', 'm_artifacts', 'Relics', `${p.artifacts.length}/${artifactSlotsFor(p)} socketed`, A.artifacts),
+    tile('mCases', 'm_case', 'Treasure Chests', p.cases.length ? `${p.cases.length} to open` : 'Won from monsters', p.cases.length > 0),
+    tile('mBrawlers', 'm_brawlers', 'Heroes', `${own}/${CFG.brawlerOrder.length} recruited`, A.brawlers),
+    tile('mSmith', 'm_smith', 'Smithy', 'Reforge & forge', UI.anyAlert),
   ];
   const adventure = [
-    tile('mProgress', 'm_progress', 'Progress', 'Rewards & records', A.progress),
-    tile('mCollection', 'm_hero', 'Collection', `${Object.keys(p.collection || {}).length}/${COLLECTION_ITEMS.length} found`, false),
+    tile('mProgress', 'm_progress', 'Adventure Log', 'Level Road & hiscores', A.progress),
+    tile('mCollection', 'm_hero', 'Collection Log', `${Object.keys(p.collection || {}).length}/${COLLECTION_ITEMS.length} logged`, false),
     tile('mPrestige', 'm_asc', 'Pets & prestige', `Prestige ${prestigeCount(p)}`, !prestigeBlocked()),
-    tile('mIdle', 'm_idle', 'Idle', 'Vault & hunts', idleAlert()),
-    tile('mPlayers', 'm_players', 'Players', mpSummary()),
-    tile('mArena', 'm_arena', 'Showdown', '9 computer rivals', false),
+    tile('mIdle', 'm_idle', 'Bank & Camp', 'Coffers & expeditions', idleAlert()),
+    tile('mPlayers', 'm_players', 'Fellow Adventurers', mpSummary()),
+    tile('mArena', 'm_arena', 'Showdown', 'Duel 9 rival champions', false),
   ];
-  openModal(`<div class="menuHead"><div><h3>Menu</h3><small>${CFG.brawlers[p.cls].name} · Level ${fmt(p.level)}</small></div></div>
+  openModal(`<div class="menuHead"><div><h3>Adventurer’s Journal</h3><small>${CFG.brawlers[p.cls].name} · Combat level ${fmt(p.level)}</small></div></div>
     <div class="menuSections" role="group" aria-label="Menu sections">
-      <button data-act="menuSection" data-section="upgrades" aria-pressed="${UI.menuSection === 'upgrades'}">Upgrades${Object.values(A).some(Boolean) || p.cases.length ? '<i class="rdot"></i>' : ''}</button>
-      <button data-act="menuSection" data-section="adventure" aria-pressed="${UI.menuSection === 'adventure'}">Adventure</button>
+      <button data-act="menuSection" data-section="upgrades" aria-pressed="${UI.menuSection === 'upgrades'}">Hero${Object.values(A).some(Boolean) || p.cases.length ? '<i class="rdot"></i>' : ''}</button>
+      <button data-act="menuSection" data-section="adventure" aria-pressed="${UI.menuSection === 'adventure'}">World</button>
     </div><div class="mtiles">${(UI.menuSection === 'adventure' ? adventure : upgrades).join('')}</div>`);
   $('panel').classList.remove('scroll'); $('panel').classList.add('menuPanel');
 }
@@ -8740,10 +8748,10 @@ function confirmPrestige() {
 
 // --- Earned equipment collection ----------------------------------------------------------------------
 const COLLECTION_HUNTS = {
-  common: 'Monster loot and Hunter Cases', uncommon: 'Monster loot and Hunter Cases',
-  rare: 'Rare monster loot, boss cases and the Level Road',
-  epic: 'Boss cases, Rift Lords and the Level Road',
-  legendary: 'Boss cases, Rift Lords and the Level Road',
+  common: 'Monster loot and Hunter’s Chests', uncommon: 'Monster loot and Hunter’s Chests',
+  rare: 'Rare monster loot, boss chests and the Level Road',
+  epic: 'Boss chests, Rift Lords and the Level Road',
+  legendary: 'Boss chests, Rift Lords and the Level Road',
   mythic: 'World Tiers, deep zones or Rift floor 25+',
   ancient: 'World Tier 2+ or Rift floor 50+',
   divine: 'World Tier 3+ or Rift floor 100+',
@@ -8757,7 +8765,7 @@ function openCollection(slot) {
   const cards = items.map(d => `<button class="collectionCard ${d.rarity} ${found[d.id] ? 'found' : ''}" data-act="collectionItem" data-id="${d.id}" aria-label="${d.name}, ${d.rarity}, ${found[d.id] ? 'found' : 'not found'}">
     <img src="${collectionIcon({ ...d, collectionId: d.id })}" width="256" height="256" loading="lazy" decoding="async" alt="">
     <b>${d.name}</b>${rarityChip(d.rarity)}<small>${found[d.id] ? 'Found · ' + found[d.id].count + ' earned' : 'Item level ' + d.minLevel + '+'}</small></button>`).join('');
-  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Item collection</h3><span class="cnt">${count}/${all.length}</span></div>
+  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Collection Log</h3><span class="cnt">${count}/${all.length}</span></div>
     <p class="fine">Tap an item to plan your hunt. Found records stay after merging or salvaging gear.</p>
     <div class="collectionFilters">${filters}</div><div class="collectionGrid">${cards}</div>
     <div class="row end"><button class="ghost" data-act="mMenu">Menu</button><button class="ghost" data-act="cases">Cases</button></div>`);
@@ -8768,7 +8776,7 @@ function openCollectionItem(id) {
   UI.current = 'collectionItem';
   const p = G.profile, record = p.collection?.[id], misses = p.collectionLuck?.[d.slot + '|' + d.rarity] || 0;
   openModal(`<div class="npcHead"><h3>${d.name}</h3></div>
-    <div class="collectionFocus ${d.rarity}"><img src="${collectionIcon({ ...d, collectionId: d.id })}" width="256" height="256" alt="${d.name}">${rarityChip(d.rarity)}<b>${record ? 'Found · ' + record.count + ' earned' : 'Not found yet'}</b></div>
+    <div class="collectionFocus ${d.rarity}"><img src="${collectionIcon({ ...d, collectionId: d.id })}" width="256" height="256" alt="${d.name}">${rarityChip(d.rarity)}<b>${record ? 'Found · ' + record.count + ' earned' : 'Not attuned yet'}</b></div>
     <p class="fine">${d.theme || 'Explorer'} collection · ${SLOT_LABEL[d.slot]} · item level ${d.minLevel}+</p>
     <h4>Where to hunt</h4><p class="say">${COLLECTION_HUNTS[d.rarity]}</p>
     <p class="mergeNotice collectionOdds">Each eligible ${d.rarity} ${SLOT_LABEL[d.slot].toLowerCase()} drop has a ${COLLECTION_CHANCE * 100}% named-item chance. Drop ${COLLECTION_GUARANTEE} guarantees one.<br><b>${misses}/${COLLECTION_GUARANTEE - 1} misses toward the guarantee</b></p>
@@ -8805,8 +8813,8 @@ function openBrawlers(sel) {
     <div class="bdgs">${badges}</div>`;
   const btns = have ? `<button class="ghost" data-act="bTree" data-id="${sel}">${gi('m_skills')} Skill tree${free > 0 ? '<i class="rdot in"></i>' : ''}</button>${sel === p.cls ? '<button class="disabled" aria-disabled="true">Playing</button>' : switchReady ? `<button class="primary" data-act="bPlay" data-id="${sel}">Play as ${B.name}</button>` : `<button class="disabled" disabled>Mastery ${BRAWLER_SWITCH_MASTERY} required</button>`}` : '<button class="disabled" disabled>Locked</button>';
   const note = firstLevel < BRAWLER_SWITCH_MASTERY ? `Master ${CFG.brawlers[first].name} to ${BRAWLER_SWITCH_MASTERY} to switch heroes (${firstLevel}/${BRAWLER_SWITCH_MASTERY}).` : '';
-  openModal(dock(`<div class="npcHead">${gi('m_brawlers', 'hd')}<h3>Brawlers</h3><span class="cnt">${owned.length}/${CFG.brawlerOrder.length}</span>
-    <label class="own"><input type="checkbox" data-act="ownedOnly" ${onlyOwned ? 'checked' : ''}> Owned only</label></div>`,
+  openModal(dock(`<div class="npcHead">${gi('m_brawlers', 'hd')}<h3>Heroes</h3><span class="cnt">${owned.length}/${CFG.brawlerOrder.length}</span>
+    <label class="own"><input type="checkbox" data-act="ownedOnly" ${onlyOwned ? 'checked' : ''}> Recruited only</label></div>`,
     `<div class="bgrid">${cards}</div>`, selBar(summary, btns, more, note)));
   $('panel').classList.add('wide');
   setTimeout(() => { p.newUnlocks = p.newUnlocks.filter((u) => !u.startsWith('a:')); G.dirty = true; }, 0);
@@ -8827,15 +8835,15 @@ function openArtifacts(tab) {
     return `<button class="acard ${have ? 'own' : 'locked'} ${on ? 'on' : ''}" ${have ? `data-act="toggleArt" data-id="${id}"` : 'aria-disabled="true"'}>${fresh.has('r:' + id) ? '<i class="rdot"></i>' : ''}
       <span class="aic fam-${ART_FAM[id] || 'tech'}">${gi('a_' + id)}${have ? '' : gi('m_lock', 'lk')}</span><b>${a.name}</b>${have ? `<span class="stars">${starRow(st)}</span>` : ''}<small>${have ? artDesc(id, st) : unlockText(a.unlock)}</small>${on ? '<span class="eqd">On</span>' : ''}</button>`;
   }).join('');
-  const tabs = ['Equip', 'Upgrade'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="artTab" data-tab="${t}">${t}</button>`).join('');
+  const tabs = ['Equip', 'Upgrade'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="artTab" data-tab="${t}">${t === 'Upgrade' ? 'Empower' : tabName(t)}</button>`).join('');
   const body = tab === 'Equip'
-    ? `<p class="fine">Artifacts change how ${CFG.brawlers[p.cls].name}’s ${CFG.attacks[p.cls].name} behaves. Each brawler keeps its own loadout.</p><div class="aslots2">${slots}</div><div class="agrid">${cards}</div>`
+    ? `<p class="fine">Socketed relics change how ${CFG.brawlers[p.cls].name}’s ${CFG.attacks[p.cls].name} behaves. Each hero keeps their own relics.</p><div class="aslots2">${slots}</div><div class="agrid">${cards}</div>`
     : `<p class="fine">Each star makes an artifact stronger. Shards drop from elites, dens, shrines and world bosses (only for artifacts you own).</p><div class="aup">${p.unlocked.artifacts.filter((id) => !onlyOwned || true).map((id) => {
         const a = CFG.artifacts[id], st = p.artStars[id] || 1, max = st >= ART_MAX, sh = p.shards[id] || 0, need = artShardCost(st), gm = artGemCost(st), can = !max && sh >= need && p.essence >= gm;
         return `<div class="aurow"><span class="aic own fam-${ART_FAM[id] || 'tech'}">${gi('a_' + id)}</span><div class="aum"><b>${a.name} <span class="stars">${starRow(st)}</span></b><small>${artDesc(id, st)}</small>${max ? '' : `<small class="nx">★${st + 1}: ${artDesc(id, st + 1)}</small>`}
           ${max ? '' : `<span class="sbar"><i style="--v:${Math.min(100, sh / need * 100).toFixed(0)}%"></i><em>${sh}/${need} shards</em></span>`}</div>
           <button class="${can ? 'primary' : 'disabled'}" data-act="artUp" data-id="${id}" ${can ? '' : 'aria-disabled="true"'}>${max ? 'Max' : `★ ${ICON.ess}${gm}`}</button></div>`; }).join('') || '<p class="fine">Unlock artifacts first.</p>'}</div>`;
-  openModal(`<div class="npcHead">${gi('m_artifacts', 'hd')}<h3>Artifacts</h3><span class="cnt">${p.unlocked.artifacts.length}/${Object.keys(CFG.artifacts).length}</span>
+  openModal(`<div class="npcHead">${gi('m_artifacts', 'hd')}<h3>Relics</h3><span class="cnt">${p.unlocked.artifacts.length}/${Object.keys(CFG.artifacts).length}</span>
     <label class="own"><input type="checkbox" data-act="ownedOnly" ${onlyOwned ? 'checked' : ''}> Owned only</label></div>
     <div class="tabs">${tabs}</div><div class="tabBody">${body}</div>`);
   $('panel').classList.add('wide');
@@ -8846,7 +8854,7 @@ function openArtifacts(tab) {
 function openProgress(tab) {
   tab = tab || 'Road'; UI.current = 'progress';
   const p = G.profile;
-  const tabs = ['Road', 'Records', 'Feats'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="progTab" data-tab="${t}">${t}</button>`).join('');
+  const tabs = ['Road', 'Records', 'Feats'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="progTab" data-tab="${t}">${tabName(t)}</button>`).join('');
   let body = '';
   if (tab === 'Road') {
     const rows = [];
@@ -8861,10 +8869,10 @@ function openProgress(tab) {
       if (L === CFG.rift.unlock) r.push(`<span class="rw zone">${gi('m_rift')} The Rift opens</span>`);
       for (const id of CFG.brawlerOrder) { const a = CFG.attacks[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw atk">${gi('b_' + id)} ${CFG.brawlers[id].name}</span>`); }
       for (const id in CFG.artifacts) { const a = CFG.artifacts[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw art">${gi('a_' + id)} ${a.name}</span>`); }
-      r.push(`<span class="rw key">+${2 + (L % 10 === 0 ? 5 : 0)} hero points</span>`);
+      r.push(`<span class="rw key">+${2 + (L % 10 === 0 ? 5 : 0)} talent points</span>`);
       rows.push(`<div class="road ${L <= p.level ? 'done' : L === p.level + 1 ? 'next' : ''} ${ms ? 'ms' : ''}" ${L === p.level + 1 ? 'id="roadNext"' : ''}><span class="rl">${L}</span><div class="rr">${r.join('')}</div></div>`);
     }
-    body = `<p class="fine">Every level drops an item and gives hero points. Every 5th level is a milestone chest.</p><div class="roadlist">${rows.join('')}</div>`;
+    body = `<p class="fine">Every level drops an item and gives talent points to every hero. Every 5th level is a milestone chest.</p><div class="roadlist">${rows.join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   } else if (tab === 'Records') {
     const s = p.stats, rec = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
@@ -8877,7 +8885,7 @@ function openProgress(tab) {
   } else {
     body = `<div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}">${gi(p.ach[a.id] ? 'm_feats' : 'm_lock')}<b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
   }
-  openModal(`<div class="npcHead">${gi('m_progress', 'hd')}<h3>Progress</h3><span class="cnt">Level ${p.level}</span></div><div class="tabs">${tabs}</div><div class="tabBody">${body}</div>`);
+  openModal(`<div class="npcHead">${gi('m_progress', 'hd')}<h3>Adventure Log</h3><span class="cnt">Level ${p.level}</span></div><div class="tabs">${tabs}</div><div class="tabBody">${body}</div>`);
 }
 
 // --- Skill trees (canvas): pinch to zoom, drag to pan, tap a node ---------------------------------------------------
@@ -9225,7 +9233,7 @@ function openPlayers() {
     return `<div class="item"><div class="meta"><div class="slot">${escHtml(zn)}${e.md === 'hub' ? ` · ${d} m` : ''}</div><div class="nm">${escHtml(e.nick)} <em>Lv ${e.level}</em></div><div class="st">${B.name} · ${CFG.attacks[e.cls].name}</div></div>${e.md === 'hub' ? `<button class="primary" data-act="mpGo" data-k="${escHtml(e.key)}">Go to</button>` : ''}</div>`;
   }).join('');
   const st = (x) => ({ on: 'connected', connecting: 'connecting…', off: 'not available here', none: 'starting…', readonly: 'read only' })[x] || x;
-  openModal(`<div class="npcHead">${gi('m_players', 'hd')}<h3>Players</h3><span class="cnt">${mpSummary()}</span></div>
+  openModal(`<div class="npcHead">${gi('m_players', 'hd')}<h3>Fellow Adventurers</h3><span class="cnt">${mpSummary()}</span></div>
     ${rows ? `<div class="list">${rows}</div>` : `<p class="say">No one else is in the world right now. Open this game on a second device or invite a friend, and they show up here and on your minimap.</p>`}
     <div class="mpdiag"><b>Connection</b><small>Live room: ${st(MP.roomState)}${MP.roomState === 'on' ? ` · ${MP.roomPeers} here` : ''} · Shared world: ${st(MP.dbState)}${MP.dbState !== 'off' ? ` · ${MP.dbPeers} seen` : ''} · sent ${MP.sent + MP.dbSent}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>
     <small>Same account on two devices works. Friends join when you invite them by email from the Share menu; people who open a public link can watch others but may not appear themselves.</small></div>`);
@@ -9237,14 +9245,14 @@ function openPlayers() {
 // They are never sold for money or for any currency, and every case shows its odds.
 // ---------------------------------------------------------------------
 CFG.cases = {
-  hunter: { name: 'Hunter Case', sub: 'Dropped by monsters, elites, dens and shrines', col: '#58b4ff', w: { common: 14, uncommon: 24, rare: 30, epic: 21, legendary: 9 }, hi: 5 },
-  treasure: { name: 'Treasure Case', sub: 'From the Vault, expeditions and level-ups', col: '#ffc94a', w: { uncommon: 20, rare: 36, epic: 28, legendary: 14 }, hi: 6 },
-  boss: { name: 'Colossus Case', sub: 'World boss loot', col: '#ff7a45', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  rift: { name: 'Rift Case', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 46, legendary: 40 }, hi: 14 },
-  milestone: { name: 'Milestone Case', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0 },
-  frost: { name: 'Frostbound Case', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  ember: { name: 'Cinderforge Case', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  celestial: { name: 'Seraphic Case', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  hunter: { name: 'Hunter’s Chest', sub: 'Dropped by monsters, elites, dens and shrines', col: '#58b4ff', w: { common: 14, uncommon: 24, rare: 30, epic: 21, legendary: 9 }, hi: 5 },
+  treasure: { name: 'Treasure Chest', sub: 'From the Vault, expeditions and level-ups', col: '#ffc94a', w: { uncommon: 20, rare: 36, epic: 28, legendary: 14 }, hi: 6 },
+  boss: { name: 'Colossus Chest', sub: 'World boss loot', col: '#ff7a45', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  rift: { name: 'Rift Chest', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 46, legendary: 40 }, hi: 14 },
+  milestone: { name: 'Milestone Chest', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0 },
+  frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
 };
 CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial'];
 const CASE_MAX = 60, CASE_LUCK = { legendary: 30, mythic: 120 };
@@ -9270,7 +9278,7 @@ function caseTable(c) {
 function caseOdds(c) { const w = caseTable(c); let tot = 0; for (const k in w) tot += w[k]; return RARITIES.filter((r) => w[r]).map((r) => [r, w[r] / tot]); }
 function addCase(k, o) {
   const p = G.profile; o = o || {};
-  if (p.cases.length >= CASE_MAX) { const g = 10 + Math.floor((o.l || p.level) / 10); addEssence(g); toast(`Case storage full: +${g} gems instead`); return null; }
+  if (p.cases.length >= CASE_MAX) { const g = 10 + Math.floor((o.l || p.level) / 10); addEssence(g); toast(`Your chest hoard is full: +${g} gems instead`); return null; }
   const c = { id: 'c' + Date.now().toString(36) + (itemSeq++), k, l: o.l || p.level, t: o.t != null ? o.t : curTier(), z: o.z != null ? o.z : lootTier(highestZone(p.level)), n: o.n || 0, f: o.f || null };
   p.cases.push(c); G.dirty = true; ev({ t: 'caseGot', k, src: o.src }); return c;
 }
@@ -9391,15 +9399,15 @@ function openCases(sel) {
   sel = sel && groups[sel] ? sel : kinds[0];
   const tiles = CFG.caseOrder.map((k) => { const n = (groups[k] || []).length; return `<button class="ctile ${k === sel ? 'sel' : ''} ${n ? '' : 'none'}" data-act="caseSel" data-k="${k}" style="--cc:${CFG.cases[k].col}">${caseArt(k)}<b>${CFG.cases[k].name}</b><small>${n ? '×' + n : 'none yet'}</small></button>`; }).join('');
   let body = '';
-  if (!sel) body = `<p class="say">Earn cases from monsters, bosses, the Rift, the Level Road, the Vault and expeditions. Hunt the Frost Colossus, Magma Titan and Celestial Colossus for their regional cases.</p>`;
+  if (!sel) body = `<p class="say">Win treasure chests from monsters, bosses, the Rift, the Level Road, the Bank and expeditions. Hunt the Frost Colossus, Magma Titan and Celestial Colossus for their regional chests.</p>`;
   else {
     const c = groups[sel][0], odds = caseOdds(c), L = p.caseLuck || { legendary: 0, mythic: 0 };
     body = `<div class="caseHero" style="--cc:${CFG.cases[sel].col}">${caseArt(sel, 'big')}<div><b>${CFG.cases[sel].name}</b><small>${CFG.cases[sel].sub} · item level ${c.l}${c.f ? ` · at least ${CFG.gear.rarity[c.f].name}` : ''}</small></div></div>
       <div class="odds">${odds.map(([r, x]) => `<div class="od ${r}"><span>${CFG.gear.rarity[r].name}</span><b>${x >= 0.01 ? (x * 100).toFixed(1) : (x * 100).toFixed(2)}%</b></div>`).join('')}</div>
-      <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} cases${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Cases are earned in play only and can never be bought.</p>`;
+      <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
     bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost" data-act="caseFast" data-k="${sel}">Open ${Math.min(10, groups[sel].length)} fast</button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
-  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Cases</h3><span class="cnt">${p.cases.length}/${CASE_MAX}</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Explore the item collection</button></div>`, bar));
+  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length}/${CASE_MAX}</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Open the Collection Log</button></div>`, bar));
   $('panel').classList.add('wide');
 }
 // the CS:GO-style reel: a long strip of items slides past a golden marker and slows down on your item
@@ -9439,8 +9447,8 @@ function reelFinish(card) {
   Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
   if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
   const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
-  $('reelOut').innerHTML = `${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Salvage weaker gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
-    <div class="row end">${res.kept ? `<button class="ghost" data-act="salvage2" data-id="${it.id}">Salvage ${ICON.coin}${fmtK(salvageValue(it))}</button>${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">Equip</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
+  $('reelOut').innerHTML = `${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Alch weaker gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
+    <div class="row end">${res.kept ? `<button class="ghost" data-act="salvage2" data-id="${it.id}">Alch ${ICON.coin}${fmtK(salvageValue(it))}</button>${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">${wearWord(it.slot)}</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
     ${left.length ? `<button class="primary gold" data-act="caseOpen" data-id="${left[0].id}">Open next (${left.length})</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
 function openCasesFast(k) {
@@ -9450,14 +9458,14 @@ function openCasesFast(k) {
   out.sort((a, b) => rarIdx(b.item.rarity) - rarIdx(a.item.rarity));
   const best = out[0] ? rarIdx(out[0].item.rarity) : 0; Sfx.play(best >= 4 ? 'win' : 'unlock');
   UI.current = 'caseFast';
-  openModal(`<div class="npcHead">${gi('m_caseOpen', 'hd')}<h3>${out.length} cases opened</h3></div><div class="fastGrid">${out.map((r) => `<div class="rcard ${r.item.rarity} ${r === out[0] ? 'win' : ''}"><img src="${thumbFor(r.item)}" alt=""><i></i><small>${CFG.gear.rarity[r.item.rarity].name}</small></div>`).join('')}</div>
-    <p class="fine">All ${out.length} rewards are saved in your bag.${p.bag.length > CFG.gear.bagMax ? ` Your bag is over its limit (${p.bag.length}/${CFG.gear.bagMax}); salvage weaker gear so new drops are kept.` : ''} Check Hero › Gear for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button><button class="primary" data-act="close">Done</button></div>`);
+  openModal(`<div class="npcHead">${gi('m_caseOpen', 'hd')}<h3>${out.length} chests opened</h3></div><div class="fastGrid">${out.map((r) => `<div class="rcard ${r.item.rarity} ${r === out[0] ? 'win' : ''}"><img src="${thumbFor(r.item)}" alt=""><i></i><small>${CFG.gear.rarity[r.item.rarity].name}</small></div>`).join('')}</div>
+    <p class="fine">All ${out.length} rewards are saved in your bag.${p.bag.length > CFG.gear.bagMax ? ` Your bag is over its limit (${p.bag.length}/${CFG.gear.bagMax}); alch weaker gear so new drops are kept.` : ''} Check your Equipment for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button><button class="primary" data-act="close">Done</button></div>`);
   $('panel').classList.add('wide');
 }
 function openIdle(tab) {
   tab = tab || UI.idleTab || 'Vault'; UI.idleTab = tab; UI.current = 'idle';
   const p = G.profile, now = Date.now();
-  const tabs = ['Vault', 'Expeditions', 'Auto Hunt'].map((t) => `<button class="tab ${t === tab ? 'on' : ''}" data-act="idleTab" data-tab="${t}">${t}</button>`).join('');
+  const tabs = ['Vault', 'Expeditions', 'Auto Hunt'].map((t) => `<button class="tab ${t === tab ? 'on' : ''}" data-act="idleTab" data-tab="${t}">${tabName(t)}</button>`).join('');
   let body = '', bar = '';
   if (tab === 'Vault') {
     const v = vaultState(now), R = vaultRates(p), lv = vaultLv(p), cost = vaultUpCost(p), pct = Math.round(v.mins / v.cap * 100);
@@ -9466,7 +9474,7 @@ function openIdle(tab) {
       <div class="stats3"><div><b>${ICON.coin}${fmtK(v.gold)}</b><span>Gold</span></div><div><b>+${fmtK(v.xp)}</b><span>XP (max 2 levels)</span></div><div><b>${ICON.ess}${v.gems}</b><span>Gems</span></div></div>
       <div class="stats3"><div><b>${v.shards}</b><span>Artifact shards</span></div><div><b>${v.cases}</b><span>Treasure Cases</span></div><div><b>${fmtK(R.gold * 60)}/h</b><span>Gold rate</span></div></div>
 </div>
-      <h4 class="sub">Vault level ${lv}/${VAULT_MAX_LV}</h4><p class="fine">The Vault fills while you play and while you are away, up to ${vaultCapH(p)} hours. Each level adds +12% to everything and +1 hour of storage. Rates follow your level, your best open zone and your World Tier.</p>
+      <h4 class="sub">Bank level ${lv}/${VAULT_MAX_LV}</h4><p class="fine">Your bank coffers fill while you play and while you are away, up to ${vaultCapH(p)} hours. Each level adds +12% to everything and +1 hour of storage. Rates follow your level, your best open zone and your World Tier.</p>
 `;
     bar = selBar('', `<button class="${lv < VAULT_MAX_LV && p.gold >= cost ? 'ghost' : 'disabled'}" data-act="vaultUp" ${lv < VAULT_MAX_LV && p.gold >= cost ? '' : 'aria-disabled="true"'}>${lv >= VAULT_MAX_LV ? 'Max level' : `Upgrade ${ICON.coin}${fmtK(cost)}`}</button><button class="${v.mins >= 1 ? 'primary big' : 'disabled'}" data-act="vaultCollect" ${v.mins >= 1 ? '' : 'aria-disabled="true"'}>Collect</button>`);
   } else if (tab === 'Expeditions') {
@@ -9485,7 +9493,7 @@ function openIdle(tab) {
     body = `<label class="tgl"><input type="checkbox" data-set="autoHunt" ${p.settings.autoHunt ? 'checked' : ''}><span class="sw"></span><span><b>Auto Hunt</b><small>Your hero walks to monsters at your level, fights, dashes away when hurt and uses supers. Touch the move stick to take over; it resumes after a moment.</small></span></label>
       <p class="fine">Auto Hunt works in the open world (not in the Rift or Showdown). Monsters more than 3 levels above you are skipped, so it stays safe. Turn it on, put the phone down, and check back.</p>`;
   }
-  openModal(dock(`<div class="npcHead">${gi('m_idle', 'hd')}<h3>Idle</h3><span class="cnt">${vaultState(now).full ? 'Vault full' : ''}</span></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar));
+  openModal(dock(`<div class="npcHead">${gi('m_idle', 'hd')}<h3>Bank &amp; Camp</h3><span class="cnt">${vaultState(now).full ? 'Bank full' : ''}</span></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar));
 }
 function idleAlert() { const p = G.profile, now = Date.now(); return vaultState(now).mins >= 60 || p.exp.some((e) => expDone(e, now)); }
 

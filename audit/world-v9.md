@@ -34,3 +34,16 @@ A full bag no longer blocks opening a case. The case reward is always kept (the 
 - `node tools/check_release.cjs` (25 checks, including the new v8 → v9 save migration and full-bag case opening)
 - `node audit/checks.cjs`, `node tools/check_test_mode.cjs`, `node tools/check_companions.cjs`
 - Headless browser tour of all areas (portrait 430×932), monster line-up, full-bag case opening through the UI. Draw calls in town: 125 (v8: 122).
+
+## One skill tree per hero (11 Oct 2026)
+The shared Hero tree is gone. Each hero (brawler) has one tree with 9 branches around one core: its own Power, Rhythm and Utility (ending in its special shots), each flanked by two general branches (Might, Carnage, Swiftness, Tempest, Fortitude, Sorcery). Points per hero = level points (2 per level + 5 every 10) + that hero's mastery points (2 per mastery level). Older saves copy their spent Hero-tree nodes into every hero's tree (same node ids, so nothing is lost). Prestige refunds every hero's tree.
+
+## Menus (11 Oct 2026)
+- Reusable panel parts: `dock()` keeps the header and an action bar on screen while the middle scrolls (no screen needs a scroll to reach its confirm button); `selBar()` shows a short summary with a Details expander; `itemGrid()` shows every piece of one gear slot as tiles with badges.
+- Equipment: every piece of the selected slot at once (▲ better, +1 next reforge, max reforge max, lock = protected). Tap a piece to wear/wield, protect or alch it.
+- Reforge review shows all pieces of the slot with the ones that will be melted down marked ✓; the confirm button is pinned.
+- Heroes: compact grid, details on demand, Skill tree / Play pinned. Treasure Chests, Smithy, Bank & Camp, Prestige: actions pinned.
+- Checked at 375×667, 430×720 and 932×430: every confirm button visible without scrolling.
+
+## Adventure-RPG wording and look (11 Oct 2026)
+RuneScape-inspired names: Adventurer's Journal (menu), Equipment, Talents, Relics, Treasure Chests (cases), Heroes, Smithy, Adventure Log, Collection Log, Bank & Camp, Fellow Adventurers, Lodestone Network (waypoints, Teleport), Hiscores, Achievements, Options; Reforge (merge), Alch (salvage), Wear/Wield (equip), coins. Tab keys and save data are unchanged; only display text changed. New skin `assets/art/runescape-ui.css`: carved brown stone panels with a gold inner frame, Cinzel serif titles in RuneScape yellow, red-brown selected tabs, brass primary buttons.
