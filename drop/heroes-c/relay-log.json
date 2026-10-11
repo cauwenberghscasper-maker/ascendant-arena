@@ -1,0 +1,33 @@
+{
+ "batch": "heroes-c",
+ "files": [
+  {
+   "name": "volt_t1.glb",
+   "ok": true,
+   "bytes": 13362208,
+   "sha256": "7406cca02d6cb218c3a96f82de4066465a55f05f251912b7be96dfd690158edf",
+   "error": null
+  },
+  {
+   "name": "volt_concept.webp",
+   "ok": true,
+   "bytes": 37396,
+   "sha256": "5b760a941ca3033a3a9171982fca060c9eca588b70de79beb45b27e96dcad9b5",
+   "error": null
+  },
+  {
+   "name": "stella_t1.glb",
+   "ok": true,
+   "bytes": 9665912,
+   "sha256": "eabb637d7e04a656994eb077b625913b78d25aab8195fe31a0b1eec1e768ff9a",
+   "error": null
+  },
+  {
+   "name": "stella_concept.webp",
+   "ok": true,
+   "bytes": 27760,
+   "sha256": "51df0c1925e58373f7c25872a680392c0f80fff773c8362d52b388c49a317f0d",
+   "error": null
+  }
+ ]
+}
