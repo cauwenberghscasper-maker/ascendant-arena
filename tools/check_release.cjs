@@ -104,6 +104,22 @@ check('v8 saves move onto the 29-area map: open gates, remapped jobs, no lost pr
   assert.equal(Z.length,30);assert(Z.every((z,i)=>!i||z.z0===Z[i-1].z1));assert.equal(Z.at(-1).lvl[1],210);
   for(const z of Z.slice(1)){assert(ctx.config.enemies[z.enemy]&&ctx.config.enemies[z.alt],z.name);}
 });
+check('one skill tree per hero: 9 branches, no overlapping nodes, v8 hero tree merges into every hero',()=>{
+  const C=ctx.config;assert.equal(C.heroTree,undefined);
+  for(const id in C.brawlerTrees){const N=C.brawlerTrees[id],ids=Object.keys(N);
+    for(const b of ['pow','might','carn','rhy','swift','storm','uti','fort','sorc'])assert(N[b+'_c0'],id+' '+b);
+    for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){const a=N[ids[i]],c=N[ids[j]];assert(Math.hypot(a.x-c.x,a.y-c.y)>1.2,id+' '+ids[i]+'~'+ids[j]);}
+    for(const n of Object.values(N))for(const l of n.links)assert(N[l]&&N[l].links.includes(n.id));}
+  const old={...ctx.newProfile(),level:40,mastery:{'w:bolt':1e9},cls:'bolt',brawlers:{bolt:{tree:{active:0,sets:[{core:2,pow_c0:3},{},{}]},artifacts:[]},smg:{tree:{active:1,sets:[{},{rhy_c0:1},{}]},artifacts:[]}},
+    heroTree:{active:0,sets:[{core:5,might_c0:5,r0:2},{fort_c0:1},{}]}};delete old.treeVersion;
+  const p=ctx.sanitizeProfile(JSON.parse(JSON.stringify(old)));
+  assert.equal(p.heroTree,undefined);assert.equal(p.treeVersion,9);
+  assert.deepEqual({...p.brawlers.bolt.tree.sets[0]},{core:7,pow_c0:3,might_c0:5,r0:2});assert.deepEqual({...p.brawlers.smg.tree.sets[1]},{rhy_c0:1,fort_c0:1});
+  const again=ctx.sanitizeProfile(JSON.parse(JSON.stringify(p)));assert.deepEqual({...again.brawlers.bolt.tree.sets[0]},{core:7,pow_c0:3,might_c0:5,r0:2});
+  vm.runInContext(section('const levelPointsTotal =','function nodeOpen(')+'\nthis.treeOf=treeOf;this.treeFree=treeFree;',ctx);
+  ctx.G.profile=p;const T=ctx.treeOf(p,'bolt');assert.equal(T.total,T.level+T.mastery);assert.equal(T.level,2*40+5*4);assert(ctx.treeFree(p,'bolt')>=0);
+  assert.equal(ctx.treeOf(p,'smg').level,T.level);
+});
 check('same slot, strictly weaker, unique and unprotected material selection',()=>{
   const p=fresh();p.bag=[make('weak'),make('weak'),make('other','helmet'),Object.assign(make('locked'),{locked:true}),make('strong','weapon','legendary'),make('equal','weapon','rare',10),{...p.gear.weapon},make('second','weapon','uncommon',2)];
   assert.deepEqual(Array.from(ctx.mergeCandidates(p.gear.weapon),m=>m.id),['weak','second']);

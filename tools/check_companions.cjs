@@ -5,7 +5,7 @@ function section(a,b){const i=html.indexOf(a),j=html.indexOf(b,i+a.length);asser
 let passed=0;function check(name,test){test();passed++;console.log('PASS '+name);}
 const c={console,Math,Number,JSON};vm.createContext(c);
 vm.runInContext(moduleText('assets/data/companions.js')+'\n'+moduleText('assets/data/prestige.js')+'\nthis.defs=PET_DEFS;',c);
-function profile(prestige=4){const p={prestige,level:200,xp:20,heroTree:{active:0,sets:[{a:4},{},{}]},road:200,worldTier:3,waypoints:[0,1,2],job:{id:3},jobCycle:{a:1},gear:{weapon:{id:'kept'}},bag:[{id:'locked',locked:true}],mastery:{bolt:100},gold:99};c.migratePets(p);return p;}
+function profile(prestige=4){const p={prestige,level:200,xp:20,brawlers:{bolt:{tree:{active:0,sets:[{a:4},{},{}]},artifacts:[]}},road:200,worldTier:3,waypoints:[0,1,2],job:{id:3},jobCycle:{a:1},gear:{weapon:{id:'kept'}},bag:[{id:'locked',locked:true}],mastery:{bolt:100},gold:99};c.migratePets(p);return p;}
 check('legacy and malformed saves migrate safely without unlocking unearned pets',()=>{
   const old={prestige:0,pets:{crystal:{level:99,xp:10}},activePet:'crystal'};c.migratePets(old);assert.equal(old.activePet,null);assert.equal(Object.keys(old.pets).length,0);
   const p={prestige:4,pets:{crystal:{level:Infinity,xp:NaN,kills:-1},bull:{level:5,xp:999999},slime:{level:99,xp:999},unknown:{level:99}},activePet:'unknown'};
@@ -22,7 +22,7 @@ check('level 99 caps XP and prestige preserves training, gear and currency atomi
   const p=profile();p.pets.crystal={level:98,xp:c.petXpToNext(98)-1,kills:10};c.grantPetXp(p,10000);assert.equal(p.pets.crystal.level,99);assert.equal(p.pets.crystal.xp,0);
   const pets=JSON.stringify(p.pets),gear=JSON.stringify(p.gear),bag=JSON.stringify(p.bag),plan=c.prestigePlan(p);
   p.xp++;assert.equal(c.applyPrestige(p,plan),false);assert.equal(p.level,200);p.xp--;
-  assert.equal(c.applyPrestige(p,plan),true);c.migratePets(p);assert.equal(p.level,1);assert.equal(p.prestige,5);assert.equal(JSON.stringify(p.pets),pets);assert.equal(JSON.stringify(p.gear),gear);assert.equal(JSON.stringify(p.bag),bag);assert.equal(p.gold,99);assert.equal(c.applyPrestige(p,plan),false);
+  assert.equal(c.applyPrestige(p,plan),true);c.migratePets(p);assert.equal(p.level,1);assert.equal(p.heroTree,undefined);assert.equal(JSON.stringify(p.brawlers.bolt.tree),JSON.stringify({active:0,sets:[{},{},{}]}));assert.equal(p.prestige,5);assert.equal(JSON.stringify(p.pets),pets);assert.equal(JSON.stringify(p.gear),gear);assert.equal(JSON.stringify(p.bag),bag);assert.equal(p.gold,99);assert.equal(c.applyPrestige(p,plan),false);
 });
 check('prestige requires level 200, town and a safe world session',()=>{
   const p=profile(),context={mode:'hub',alive:true,inTown:true};assert.equal(c.prestigeBlock(p,context),'');

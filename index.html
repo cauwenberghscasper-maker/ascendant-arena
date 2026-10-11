@@ -1627,7 +1627,7 @@ const NODE_KINDS = {
   gold: { name: 'Fortune', eff: { goldFind: 0.05 }, icon: 'n_gold', fmt: (v) => `+${pct(v.goldFind)} gold` },
   gems: { name: 'Prospector', eff: { gemFind: 0.05 }, icon: 'n_gems', fmt: (v) => `+${pct(v.gemFind)} gems` },
   xp: { name: 'Wisdom', eff: { xpFind: 0.03 }, icon: 'n_xp', fmt: (v) => `+${pct(v.xpFind)} XP` },
-  core: { name: 'Ascension Core', eff: { dmg: 0.005, hp: 0.005 }, icon: 'n_core', fmt: (v) => `+${pct(v.dmg)} damage and HP`, inf: true },
+  core: { name: 'Ascension Core', eff: { dmg: 0.0075, hp: 0.005 }, icon: 'n_core', fmt: (v) => `+${pct(v.dmg)} damage, +${pct(v.hp)} HP`, inf: true },
   mcore: { name: 'Mastery Core', eff: { dmg: 0.01 }, icon: 'n_core', fmt: (v) => `+${pct(v.dmg)} damage with this brawler`, inf: true },
 };
 const pct = (v) => (Math.round(v * 1000) / 10) + '%';
@@ -1654,7 +1654,7 @@ const BTAGS = {
 };
 // radial tree layout: branches fan out from a center core; each branch ends in big ◆ nodes
 function buildTree(spec) {
-  const nodes = {}, add = (n) => { nodes[n.id] = Object.assign({ links: [], max: 5, cost: 1 }, n); return nodes[n.id]; };
+  const nodes = {}, add = (n) => { nodes[n.id] = Object.assign({ links: [], max: 5, cost: 1 }, n); return nodes[n.id]; }, r0 = spec.r0 || 2.7, ringR = spec.ringR || 1.7;
   const link = (a, b) => { nodes[a].links.push(b); nodes[b].links.push(a); };
   add({ id: 'core', kind: spec.core, x: 0, y: 0, max: Infinity, start: true });
   const nb = spec.branches.length;
@@ -1663,11 +1663,11 @@ function buildTree(spec) {
     const P2 = (r, da) => ({ x: Math.cos(a + (da || 0)) * r, y: Math.sin(a + (da || 0)) * r });
     let prev = 'core';
     br.chain.forEach((kind, i) => {
-      const rc = 2.7 + i * 2.2, id = `${br.id}_c${i}`; add(Object.assign({ id, kind, max: br.max || 5 }, P2(rc, 0))); link(prev, id); prev = id;
+      const rc = r0 + i * 2.2, id = `${br.id}_c${i}`; add(Object.assign({ id, kind, max: br.max || 5 }, P2(rc, 0))); link(prev, id); prev = id;
       // side nodes sit one step out and a fixed 1.25 units to the side (always the same side, so neighbours never meet)
       if (br.sides && br.sides[i]) { const sid = `${br.id}_s${i}`, rs = rc + 0.9; add(Object.assign({ id: sid, kind: br.sides[i], max: br.max || 5 }, P2(rs, Math.atan2(1.25, rs)))); link(id, sid); }
     });
-    const rEnd = 2.7 + br.chain.length * 2.2 + 0.4, k = br.keys.length;
+    const rEnd = r0 + br.chain.length * 2.2 + 0.4, k = br.keys.length;
     br.keys.forEach((key, j) => {
       const id = `${br.id}_k${j}`, da = k > 1 ? (j / (k - 1) - 0.5) * (nb > 3 ? 0.42 : 0.5) : 0;
       add(Object.assign({ id, key: key.key, tag: key.tag, max: 1, cost: 3, big: true }, P2(rEnd + (j === (k - 1) / 2 ? 1.3 : 0), da))); link(prev, id);
@@ -1675,28 +1675,38 @@ function buildTree(spec) {
   });
   if (spec.ring) spec.ring.forEach((kind, i) => {
     const a = ((i + 0.5) / nb) * Math.PI * 2 - Math.PI / 2, id = 'r' + i;
-    add({ id, kind, x: Math.cos(a) * 1.7, y: Math.sin(a) * 1.7, max: 10 });
+    add({ id, kind, x: Math.cos(a) * ringR, y: Math.sin(a) * ringR, max: 10 });
     link(id, `${spec.branches[i].id}_c0`); link(id, `${spec.branches[(i + 1) % nb].id}_c0`);
   });
   return nodes;
 }
 const K = (key) => ({ key });
-CFG.heroTree = buildTree({ core: 'core', ring: ['gold', 'gems', 'xp', 'gold', 'gems', 'xp'], branches: [
-  { id: 'might', name: 'Might', chain: ['dmg', 'dmg', 'critDmg', 'dmg'], sides: ['crit', null, 'crit'], keys: [K('execute'), K('kraken'), K('infinity')] },
-  { id: 'fort', name: 'Fortitude', chain: ['hp', 'armor', 'hp', 'regen'], sides: ['hp', null, 'armor'], keys: [K('titan'), K('grasp'), K('undying')] },
-  { id: 'swift', name: 'Swiftness', chain: ['speed', 'reload', 'speed', 'reload'], sides: ['reload', null, 'cdr'], keys: [K('tempo'), K('phase'), K('aftershock')] },
-  { id: 'sorc', name: 'Sorcery', chain: ['superGain', 'superPow', 'aoe', 'superGain'], sides: ['cdr', null, 'superPow'], keys: [K('comet'), K('sunfire'), K('ascend')] },
-  { id: 'carn', name: 'Carnage', chain: ['lifesteal', 'critDmg', 'lifesteal', 'dmg'], sides: ['crit', null, 'lifesteal'], keys: [K('bloodthirst'), K('conqueror'), K('glass')] },
-  { id: 'storm', name: 'Tempest', chain: ['cdr', 'reload', 'crit', 'cdr'], sides: ['superGain', null, 'speed'], keys: [K('electrocute'), K('storm'), K('secondWind')] },
-] });
+// One skill tree per hero (brawler). Nine branches around one core: the hero's own three
+// (Power, Rhythm, Utility, ending in its special shots) each flanked by two general branches.
+// Node ids match the old Hero and Brawler trees, so v8 saves merge without losing a point.
+CFG.treeBranches = [
+  { id: 'pow', name: 'Power' }, { id: 'might', name: 'Might' }, { id: 'carn', name: 'Carnage' },
+  { id: 'rhy', name: 'Rhythm' }, { id: 'swift', name: 'Swiftness' }, { id: 'storm', name: 'Tempest' },
+  { id: 'uti', name: 'Utility' }, { id: 'fort', name: 'Fortitude' }, { id: 'sorc', name: 'Sorcery' },
+].map((b, i) => Object.assign(b, { angle: (i / 9) * Math.PI * 2 - Math.PI / 2 }));
+const GENERAL_BRANCHES = {
+  might: { chain: ['dmg', 'dmg', 'critDmg', 'dmg'], sides: ['crit', null, 'crit'], keys: [K('execute'), K('kraken'), K('infinity')] },
+  fort: { chain: ['hp', 'armor', 'hp', 'regen'], sides: ['hp', null, 'armor'], keys: [K('titan'), K('grasp'), K('undying')] },
+  swift: { chain: ['speed', 'reload', 'speed', 'reload'], sides: ['reload', null, 'cdr'], keys: [K('tempo'), K('phase'), K('aftershock')] },
+  sorc: { chain: ['superGain', 'superPow', 'aoe', 'superGain'], sides: ['cdr', null, 'superPow'], keys: [K('comet'), K('sunfire'), K('ascend')] },
+  carn: { chain: ['lifesteal', 'critDmg', 'lifesteal', 'dmg'], sides: ['crit', null, 'lifesteal'], keys: [K('bloodthirst'), K('conqueror'), K('glass')] },
+  storm: { chain: ['cdr', 'reload', 'crit', 'cdr'], sides: ['superGain', null, 'speed'], keys: [K('electrocute'), K('storm'), K('secondWind')] },
+};
 CFG.brawlerTrees = {};
 for (const id in CFG.brawlers) {
   const sp = CFG.brawlers[id].specials.map((tag) => ({ tag }));
-  CFG.brawlerTrees[id] = buildTree({ core: 'mcore', branches: [
-    { id: 'pow', name: 'Power', angle: -Math.PI / 2, max: 6, chain: ['dmg', 'crit', 'dmg', 'critDmg'], sides: ['dmg', null, 'crit'], keys: [sp[0], sp[1]] },
-    { id: 'rhy', name: 'Rhythm', angle: Math.PI / 6, max: 6, chain: ['reload', 'superGain', 'reload', 'reload'], sides: ['superGain', null, 'reload'], keys: [sp[2], sp[3]] },
-    { id: 'uti', name: 'Utility', angle: Math.PI * 5 / 6, max: 6, chain: ['hp', 'range', 'speed', 'superPow'], sides: ['hp', null, 'range'], keys: [sp[4], sp[5]] },
-  ] });
+  const own = {
+    pow: { max: 6, chain: ['dmg', 'crit', 'dmg', 'critDmg'], sides: ['dmg', null, 'crit'], keys: [sp[0], sp[1]] },
+    rhy: { max: 6, chain: ['reload', 'superGain', 'reload', 'reload'], sides: ['superGain', null, 'reload'], keys: [sp[2], sp[3]] },
+    uti: { max: 6, chain: ['hp', 'range', 'speed', 'superPow'], sides: ['hp', null, 'range'], keys: [sp[4], sp[5]] },
+  };
+  CFG.brawlerTrees[id] = buildTree({ core: 'core', r0: 3.3, ringR: 2.0, ring: ['gold', 'gems', 'xp', 'gold', 'gems', 'xp', 'gold', 'gems', 'xp'],
+    branches: CFG.treeBranches.map((b) => Object.assign({ id: b.id, name: b.name, angle: b.angle }, own[b.id] || GENERAL_BRANCHES[b.id])) });
 }
 CFG.trees2 = { resetBase: 200, presets: 3 };
 const NO_ARTS = {};
@@ -1983,7 +1993,7 @@ function defaultProfile() {
   for (const s of CFG.gear.slots) gear[s] = makeItem(s, 'common', 1, 'Worn ' + ITEM_NAMES[s][0]);
   const prof = {
     v: 2, level: 1, xp: 0, prestige: 0, gold: 0, trophies: 0, bestTrophies: 0, cls: 'bolt', starterBrawler: 'bolt', mergeVersion: 1, artVersion: 1, gear, bag: [],
-    heroTree: newTreeState(), brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
+    treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
     essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 9, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0,
@@ -2021,11 +2031,18 @@ function sanitizeProfile(p) {
   if (!CFG.brawlers[out.cls]) out.cls = 'bolt';
   out.starterBrawler = CFG.brawlers[p.starterBrawler] ? p.starterBrawler : out.cls;
   if (!p.mergeVersion) { out.settings.autoSalvage = 0; out.mergeVersion = 1; }
-  if (!out.heroTree || !Array.isArray(out.heroTree.sets)) out.heroTree = newTreeState();
   if (!out.brawlers || typeof out.brawlers !== 'object') out.brawlers = {};
   if (!out.brawlers[out.cls]) out.brawlers[out.cls] = newBrawlerState();
   for (const k in out.brawlers) { if (!CFG.brawlers[k] || !out.brawlers[k] || typeof out.brawlers[k] !== 'object') { delete out.brawlers[k]; continue; } const b = out.brawlers[k]; if (!b.tree || !Array.isArray(b.tree.sets)) b.tree = newTreeState(); if (!Array.isArray(b.artifacts)) b.artifacts = []; }
   if (!out.brawlers[out.cls]) out.brawlers[out.cls] = newBrawlerState();
+  if ((p.treeVersion | 0) < 9) {
+    // v9: the shared Hero tree is gone. Its spent nodes are copied into every hero's own tree (same node ids),
+    // so each hero keeps the build it had; points now come from level + that hero's mastery.
+    const H = out.heroTree && Array.isArray(out.heroTree.sets) ? out.heroTree : null;
+    if (H) for (const k in out.brawlers) { const st = out.brawlers[k].tree; for (let i = 0; i < st.sets.length; i++) { const hs = H.sets[i] || {}, bs = st.sets[i] || (st.sets[i] = {}); for (const id in hs) if (hs[id] > 0) bs[id] = (bs[id] || 0) + hs[id]; } }
+    out.treeVersion = 9;
+  }
+  delete out.heroTree;
   for (const s of CFG.gear.slots) if (!out.gear[s]) out.gear[s] = d.gear[s];
   if (!Array.isArray(out.bag)) out.bag = [];
   migrateCollection(out);
@@ -2075,12 +2092,13 @@ const Store = {
   clear() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ } },
 };
 // --- skill trees -----------------------------------------------------------------------
-const heroPointsTotal = (p) => 2 * p.level + 5 * Math.floor(p.level / 10);
+const levelPointsTotal = (p) => 2 * p.level + 5 * Math.floor(p.level / 10);
 const brawlerPointsTotal = (p, id) => 2 * masteryLevel((p.mastery || {})['w:' + id] || 0);
-function treeOf(p, which) { return which === 'hero' ? { nodes: CFG.heroTree, st: p.heroTree, total: heroPointsTotal(p) } : { nodes: CFG.brawlerTrees[which], st: (p.brawlers[which] || newBrawlerState()).tree, total: brawlerPointsTotal(p, which) }; }
+// every hero has exactly one tree: points from your level plus points from that hero's mastery
+function treeOf(p, which) { if (!CFG.brawlerTrees[which]) which = p.cls; return { id: which, nodes: CFG.brawlerTrees[which], st: (p.brawlers[which] || newBrawlerState()).tree, total: levelPointsTotal(p) + brawlerPointsTotal(p, which), level: levelPointsTotal(p), mastery: brawlerPointsTotal(p, which) }; }
 function treeSpent(nodes, set) { let n = 0; for (const id in set) { const nd = nodes[id]; if (nd) n += set[id] * nd.cost; } return n; }
 function treeFree(p, which) { const T = treeOf(p, which); return T.total - treeSpent(T.nodes, T.st.sets[T.st.active]); }
-const skillPointsFree = (p) => Math.max(0, treeFree(p, 'hero')) + Math.max(0, treeFree(p, p.cls));
+const skillPointsFree = (p) => Math.max(0, treeFree(p, p.cls));
 function nodeOpen(nodes, set, id) { const n = nodes[id]; if (!n) return false; if (n.start) return true; return n.links.some((l) => (set[l] || 0) > 0 || (nodes[l] && nodes[l].start)); }
 function nodeMax(n) { return n.kind && NODE_KINDS[n.kind] && NODE_KINDS[n.kind].inf ? Infinity : n.max; }
 function canSpend(p, which, id) {
@@ -2088,7 +2106,8 @@ function canSpend(p, which, id) {
   return (set[id] || 0) < nodeMax(n) && nodeOpen(T.nodes, set, id) && treeFree(p, which) >= n.cost;
 }
 function spendNode(p, which, id, times) {
-  if (which !== 'hero' && !p.brawlers[which]) p.brawlers[which] = newBrawlerState();
+  if (!CFG.brawlerTrees[which]) return 0;
+  if (!p.brawlers[which]) p.brawlers[which] = newBrawlerState();
   const T = treeOf(p, which), set = T.st.sets[T.st.active]; let n = 0;
   for (let i = 0; i < (times || 1); i++) { if (!canSpend(p, which, id)) break; set[id] = (set[id] || 0) + 1; n++; }
   if (n) { refreshPlayerStats(false); checkAchievements(); G.dirty = true; ev({ t: 'node', which, id }); }
@@ -2101,7 +2120,7 @@ function resetTree(p, which) {
   p.gold -= c; T.st.sets[T.st.active] = {}; refreshPlayerStats(false); G.dirty = true; ev({ t: 'treeReset', which }); return true;
 }
 function setPreset(p, which, i) { const T = treeOf(p, which); if (i < 0 || i >= T.st.sets.length) return; T.st.active = i; refreshPlayerStats(false); G.dirty = true; }
-// all stat bonuses from both trees and the brawler's badges
+// all stat bonuses from the hero's tree and badges
 function emptyMods2() { return { hp: 0, dmg: 0, reload: 0, superPow: 0, superGain: 0, speed: 0, skillCd: 0, aoe: 0, crit: 0, critDmg: 0, lifesteal: 0, armor: 0, cdr: 0, regen: 0, range: 0,
   goldFind: 0, gemFind: 0, xpFind: 0, burst: 0, count: 0, pierce: 0, split: 0, bounce: 0, homing: 0, blast: 0, burn: 0, chain: 0, ammo: 0, slow: 0 }; }
 function addTreeMods(m, nodes, set, keys) {
@@ -2115,7 +2134,6 @@ function addTreeMods(m, nodes, set, keys) {
 function badgeCount(p, id) { const L = masteryLevel((p.mastery || {})['w:' + id] || 0); return CFG.badges.filter((b) => L >= b.lvl).length; }
 function buildMods(src, bid) {
   const m = emptyMods2(), keys = {};
-  if (src && src.heroTree) { const T = src.heroTree; addTreeMods(m, CFG.heroTree, T.sets[T.active] || {}, keys); }
   if (src && src.brawlers && src.brawlers[bid]) { const T = src.brawlers[bid].tree; addTreeMods(m, CFG.brawlerTrees[bid] || {}, T.sets[T.active] || {}, keys); }
   if (src && src.mastery && CFG.brawlers[bid]) { const n = badgeCount(src, bid); for (let i = 0; i < n; i++) { m.dmg += CFG.badges[i].dmg; m.hp += CFG.badges[i].hp; } }
   return { m, keys };
@@ -7543,7 +7561,7 @@ function openLoot(loot) {
 }
 function heroTab(tab) {
   if (tab === 'Attacks' || tab === 'Mastery') return openBrawlers();
-  if (tab === 'Skills' || tab === 'Build') return openSkills('hero');
+  if (tab === 'Skills' || tab === 'Build') return openSkills(G.profile.cls);
   if (tab === 'Road' || tab === 'Feats') return openProgress(tab === 'Feats' ? 'Feats' : 'Road');
   UI.current = 'hero'; UI.heroTab = tab;
   const p = G.profile, pl = G.player, c = CFG.classes[p.cls] || CFG.classes.bolt;
@@ -7823,7 +7841,7 @@ function handlePanelClick(e) {
     case 'mHero': heroTab('Stats'); break;
     case 'mGear': heroTab('Gear'); break;
     case 'mBrawlers': openBrawlers(); break;
-    case 'mSkills': openSkills(treeFree(G.profile, 'hero') > 0 ? 'hero' : G.profile.cls); break;
+    case 'mSkills': openSkills(G.profile.cls); break;
     case 'mArtifacts': openArtifacts('Equip'); break;
     case 'mProgress': openProgress('Road'); break;
     case 'bSel': openBrawlers(b.dataset.id); break;
@@ -8525,7 +8543,7 @@ function menuAlerts() {
   const p = G.profile, al = Object.values(slotAlerts()).some((a) => a.better || a.canUpgrade);
   const freeB = ownedBrawlers(p).some((id) => treeFree(p, id) > 0);
   return {
-    hero: al, brawlers: p.newUnlocks.some((u) => u.startsWith('a:')), skills: treeFree(p, 'hero') > 0 || freeB,
+    hero: al, brawlers: p.newUnlocks.some((u) => u.startsWith('a:')), skills: freeB,
     artifacts: p.newUnlocks.some((u) => u.startsWith('r:')), progress: false,
   };
 }
@@ -8536,7 +8554,7 @@ function openQuickUpgrade(action) {
   if (!hubShortcutsAvailable()) return;
   Sfx.play('click');
   if (action === 'gear') heroTab('Gear');
-  else if (action === 'skills') openSkills(treeFree(G.profile, 'hero') > 0 ? 'hero' : G.profile.cls);
+  else if (action === 'skills') openSkills(G.profile.cls);
   else if (action === 'artifacts') openArtifacts('Equip');
   else if (action === 'cases') openCases();
 }
@@ -8544,7 +8562,7 @@ function openMenu(section) {
   UI.current = 'menu';
   if (section === 'upgrades' || section === 'adventure') UI.menuSection = section;
   const p = G.profile, A = menuAlerts(), own = ownedBrawlers(p).length;
-  const hp = treeFree(p, 'hero'), bp = treeFree(p, p.cls);
+  const hp = 0, bp = Math.max(0, treeFree(p, p.cls));
   const tile = (act, icon, title, sub, dot) => `<button class="mtile" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${sub}</small></span>${dot ? '<i class="rdot"></i>' : ''}</button>`;
   const upgrades = [
     tile('mGear', 'm_hero', 'Gear', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, A.hero),
@@ -8761,7 +8779,7 @@ function openProgress(tab) {
 }
 
 // --- Skill trees (canvas): pinch to zoom, drag to pan, tap a node ---------------------------------------------------
-const TreeView = { which: 'hero', cv: null, s: 40, ox: 0, oy: 0, sel: null, ptrs: new Map(), pinch: null, moved: 0, raf: 0, paths: new Map() };
+const TreeView = { which: null, cv: null, s: 40, ox: 0, oy: 0, sel: null, ptrs: new Map(), pinch: null, moved: 0, raf: 0, paths: new Map() };
 function iconPath(key) { let p = TreeView.paths.get(key); if (!p && GI[key]) { p = new Path2D(GI[key]); TreeView.paths.set(key, p); } return p; }
 function nodeInfo(n) {
   if (n.key) { const k = CFG.keystones.flat().find((x) => x.id === n.key); return { name: k.name, icon: 'k_' + n.key, desc: k.desc }; }
@@ -8770,19 +8788,17 @@ function nodeInfo(n) {
 }
 function openSkills(which) {
   const p = G.profile;
-  which = which || TreeView.which || 'hero';
-  if (which !== 'hero' && !ownedBrawlers(p).includes(which)) which = p.cls;
-  if (which !== 'hero' && which !== TreeView.which) TreeView.sel = null;
+  which = which || TreeView.which || p.cls;
+  if (!ownedBrawlers(p).includes(which)) which = p.cls;
   if (which !== TreeView.which) TreeView.sel = null;
   TreeView.which = which; UI.current = 'skills';
-  const T = treeOf(p, which), free = treeFree(p, which), title = which === 'hero' ? 'Hero tree' : `${CFG.brawlers[which].name}’s tree`;
-  const src = which === 'hero' ? `${T.total} points from player level ${p.level} · shared by every brawler` : `${T.total} points from mastery ${masteryOf(p, which)} · only for ${CFG.brawlers[which].name}`;
+  const T = treeOf(p, which), free = treeFree(p, which), title = `${CFG.brawlers[which].name}’s tree`;
+  const src = `${T.total} points · ${T.level} from level ${p.level} + ${T.mastery} from mastery ${masteryOf(p, which)} · only for ${CFG.brawlers[which].name}`;
   const presets = T.st.sets.map((_, i) => `<button class="pre ${T.st.active === i ? 'on' : ''}" data-act="tPreset" data-i="${i}">${i + 1}</button>`).join('');
   const bopts = ownedBrawlers(p).map((id) => `<option value="${id}" ${id === which ? 'selected' : ''}>${CFG.brawlers[id].name}${treeFree(p, id) > 0 ? ' •' : ''}</option>`).join('');
   openModal(`<div class="treeTop">
-      <div class="tsw"><button class="tab ${which === 'hero' ? 'on' : ''}" data-act="tWhich" data-w="hero">${gi('m_hero')} Hero${treeFree(p, 'hero') > 0 ? '<i class="rdot tabdot"></i>' : ''}</button>
-        <button class="tab ${which !== 'hero' ? 'on' : ''}" data-act="tWhich" data-w="${which === 'hero' ? p.cls : which}">${gi('m_brawlers')} Brawler${ownedBrawlers(p).some((id) => treeFree(p, id) > 0) ? '<i class="rdot tabdot"></i>' : ''}</button>
-        ${which !== 'hero' ? `<select data-sel2="tBrawler">${bopts}</select>` : ''}</div>
+      <div class="tsw"><span class="tab on">${gi('m_brawlers')} Hero${ownedBrawlers(p).some((id) => id !== which && treeFree(p, id) > 0) ? '<i class="rdot tabdot"></i>' : ''}</span>
+        <select data-sel2="tBrawler" aria-label="Choose a hero">${bopts}</select></div>
       <div class="tinfo"><b>${title}</b><span class="tpts ${free > 0 ? 'hot' : ''}">${free} point${free === 1 ? '' : 's'} to spend</span><small>${src}</small></div>
       <div class="tact"><span class="pres">Build ${presets}</span><button class="ghost sm" data-act="tReset">Reset ${ICON.coin}${fmtK(treeResetCost(p))}</button></div>
     </div>
@@ -8793,10 +8809,10 @@ function openSkills(which) {
 }
 const TZ_MIN = 6, TZ_MAX = 150;
 // the whole tree fits the canvas (with room for the labels around it)
-function treeFit(w, h) { return Math.min(w, h * 1.1) / 2 / (TreeView.which === 'hero' ? 15.8 : 14); }
+function treeFit(w, h) { return Math.min(w, h * 1.1) / 2 / 18.2; }
 function treeZoom(how) {
   const cx = TreeView.w / 2, cy = TreeView.h / 2, wx = (cx - TreeView.ox) / TreeView.s, wy = (cy - TreeView.oy) / TreeView.s;
-  if (how === 'fit') { TreeView.s = treeFit(TreeView.w, TreeView.h); TreeView.ox = TreeView.w / 2; TreeView.oy = TreeView.h / 2 + (TreeView.which === 'hero' ? 0 : 16); return; }
+  if (how === 'fit') { TreeView.s = treeFit(TreeView.w, TreeView.h); TreeView.ox = TreeView.w / 2; TreeView.oy = TreeView.h / 2; return; }
   TreeView.s = clamp(TreeView.s * (how === 'in' ? 1.3 : 1 / 1.3), TZ_MIN, TZ_MAX); TreeView.ox = cx - wx * TreeView.s; TreeView.oy = cy - wy * TreeView.s;
 }
 function setupTreeCanvas() {
@@ -8804,7 +8820,7 @@ function setupTreeCanvas() {
   const r = cv.parentNode.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
   const fit = treeFit(r.width, r.height);
-  if (!TreeView.keep) { TreeView.s = Math.max(fit, Math.min(fit * 1.6, 26)); TreeView.ox = r.width / 2; TreeView.oy = r.height / 2 + (TreeView.which === 'hero' ? 0 : 20); }
+  if (!TreeView.keep) { TreeView.s = Math.max(fit, Math.min(fit * 1.6, 26)); TreeView.ox = r.width / 2; TreeView.oy = r.height / 2; }
   TreeView.keep = false; TreeView.w = r.width; TreeView.h = r.height; TreeView.dpr = dpr;
   const toWorld = (x, y) => [(x - TreeView.ox) / TreeView.s, (y - TreeView.oy) / TreeView.s];
   cv.onpointerdown = (e) => { cv.setPointerCapture(e.pointerId); TreeView.ptrs.set(e.pointerId, { x: e.offsetX, y: e.offsetY }); TreeView.moved = 0; if (TreeView.ptrs.size === 2) { const [a, b] = [...TreeView.ptrs.values()]; TreeView.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), s: TreeView.s }; } };
@@ -8830,11 +8846,11 @@ function setupTreeCanvas() {
   const loop = () => { if (UI.current !== 'skills' || !$('treeCv')) return; drawTree(); TreeView.raf = requestAnimationFrame(loop); };
   TreeView.raf = requestAnimationFrame(loop);
 }
-const BRANCH_COL = { might: '#ff7a45', fort: '#58e08a', swift: '#5dd6ff', sorc: '#c77dff', carn: '#ff4d6d', storm: '#7fa8ff', pow: '#ff7a45', rhy: '#ffc94a', uti: '#5dd6ff', core: '#ffc94a', r0: '#ffd34a', r1: '#c77dff', r2: '#9fe8ff', r3: '#ffd34a', r4: '#c77dff', r5: '#9fe8ff' };
+const BRANCH_COL = { might: '#ff7a45', fort: '#58e08a', swift: '#5dd6ff', sorc: '#c77dff', carn: '#ff4d6d', storm: '#7fa8ff', pow: '#ff7a45', rhy: '#ffc94a', uti: '#5dd6ff', core: '#ffc94a', r0: '#ffd34a', r1: '#c77dff', r2: '#9fe8ff', r3: '#ffd34a', r4: '#c77dff', r5: '#9fe8ff', r6: '#ffd34a', r7: '#c77dff', r8: '#9fe8ff' };
 const branchCol = (id) => BRANCH_COL[id.split('_')[0]] || '#ffc94a';
 // pixel tree: nodes are the game's pixel icon tiles (coloured by branch when learned, stone when not),
 // links are flat pixel bars, no glows; drawn with nearest-neighbour scaling so every tile stays crisp
-const BRANCH_FAM = { might: 'fire', fort: 'nature', swift: 'ice', sorc: 'arcane', carn: 'blood', storm: 'electric', pow: 'fire', rhy: 'gold', uti: 'ice', core: 'gold', r0: 'gold', r1: 'arcane', r2: 'ice', r3: 'gold', r4: 'arcane', r5: 'ice' };
+const BRANCH_FAM = { might: 'fire', fort: 'nature', swift: 'ice', sorc: 'arcane', carn: 'blood', storm: 'electric', pow: 'fire', rhy: 'gold', uti: 'ice', core: 'gold', r0: 'gold', r1: 'arcane', r2: 'ice', r3: 'gold', r4: 'arcane', r5: 'ice', r6: 'gold', r7: 'arcane', r8: 'ice' };
 const branchFam = (id) => BRANCH_FAM[id.split('_')[0]] || 'gold';
 const treeImgs = new Map();
 function treeImg(url) { let im = treeImgs.get(url); if (!im) { im = new Image(); im.src = url; treeImgs.set(url, im); } return im; }
@@ -8886,9 +8902,8 @@ function drawTree() {
   }
   // branch names
   if (S > 7) {
-    const names = which === 'hero' ? ['Might', 'Fortitude', 'Swiftness', 'Sorcery', 'Carnage', 'Tempest'] : ['Power', 'Rhythm', 'Utility'];
-    const angs = which === 'hero' ? names.map((_, i) => (i / 6) * Math.PI * 2 - Math.PI / 2) : [-Math.PI / 2, Math.PI / 6, Math.PI * 5 / 6];
-    names.forEach((nm, i) => { const r = which === 'hero' ? 15 : 13.4; label(nm.toUpperCase(), X(Math.cos(angs[i]) * r), Y(Math.sin(angs[i]) * r) + 5, clamp(Math.round(S * 0.5), 12, 20), '#6e6878'); });
+    const own = { pow: 1, rhy: 1, uti: 1 };
+    CFG.treeBranches.forEach((b) => { const r = 15.6; label(b.name.toUpperCase(), X(Math.cos(b.angle) * r), Y(Math.sin(b.angle) * r) + 5, clamp(Math.round(S * 0.5), 12, 20), own[b.id] ? '#a8925a' : '#6e6878'); });
   }
 }
 function renderNodeCard() {
@@ -8935,8 +8950,8 @@ function openV8Intro() {
   const p = G.profile, B = CFG.brawlers[p.cls];
   openModal(`<div class="center"><div class="eyebrow">Update · Endless Ascension</div><h2>Meet the brawlers</h2></div>
     <div class="v8">${brawlerPortrait(p.cls, true, 84)}<div><p>Your hero is now <b>${B.name}</b>, the ${CFG.classes[p.cls].role.toLowerCase()} with ${CFG.attacks[p.cls].name}. Every attack is now its own brawler with a mastery and badges.</p>
-    <p>All skill points were refunded: <b>${treeFree(p, 'hero')} points</b> wait in the new Hero tree, and ${B.name} has <b>${treeFree(p, p.cls)}</b> in their own tree.</p></div></div>
-    <div class="row end"><button class="ghost" data-act="close">Later</button><button class="primary" data-act="mSkills">Open skill trees</button></div>`);
+    <p>All skill points were refunded: ${B.name} has <b>${treeFree(p, p.cls)} points</b> waiting in their skill tree. Every hero has their own tree.</p></div></div>
+    <div class="row end"><button class="ghost" data-act="close">Later</button><button class="primary" data-act="mSkills">Open skill tree</button></div>`);
 }
 
 // ---------------------------------------------------------------------
