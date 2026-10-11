@@ -1,0 +1,229 @@
+{
+ "batch": "weapons-a",
+ "files": [
+  {
+   "name": "w_ayla.glb",
+   "ok": true,
+   "bytes": 5214704,
+   "sha256": "ce04fa66c4e0c6efdb91e24b9d7549c801169ccbe3fc6b71ba47ae0fde8ec733",
+   "error": null
+  },
+  {
+   "name": "w_ayla_concept.webp",
+   "ok": true,
+   "bytes": 11104,
+   "sha256": "729bf22437cc8e5a9f732abfec13e4cff9484d003933f52e7fde4d9cf62d7f9b",
+   "error": null
+  },
+  {
+   "name": "w_brick.glb",
+   "ok": true,
+   "bytes": 4186992,
+   "sha256": "41d3d1ff87ab2fb10a3ca1d643555b310c936dc5263e2681ab7cd3d7d18dd795",
+   "error": null
+  },
+  {
+   "name": "w_brick_concept.webp",
+   "ok": true,
+   "bytes": 14462,
+   "sha256": "f3b5078a91783ccead2c81c24a14a81c5a77d6f6844fd290c07f01ee0146ba16",
+   "error": null
+  },
+  {
+   "name": "w_bruno.glb",
+   "ok": true,
+   "bytes": 4782816,
+   "sha256": "c67dc5ecfd221f63d195971da669f696122982fb459e1f8236f8622bf1200918",
+   "error": null
+  },
+  {
+   "name": "w_bruno_concept.webp",
+   "ok": true,
+   "bytes": 22880,
+   "sha256": "1af38e13e39b4accb81940762b62fc450716cb638d3e4e15730cb4ee8dc8545e",
+   "error": null
+  },
+  {
+   "name": "w_gus.glb",
+   "ok": true,
+   "bytes": 4389940,
+   "sha256": "69874f50469ea8b1f1cfd4af2eb536ffdca8676d267009abd3e32573755a9d66",
+   "error": null
+  },
+  {
+   "name": "w_gus_concept.webp",
+   "ok": true,
+   "bytes": 23720,
+   "sha256": "2075259e771861a6d97c72140e2ab14b311dc8555ce81d9a54188a964dd5a3b9",
+   "error": null
+  },
+  {
+   "name": "w_lumi.glb",
+   "ok": true,
+   "bytes": 4223216,
+   "sha256": "c241d1651a696db80656d8b8ce35aa9eae96045642e39a97fcdc60255e1807bc",
+   "error": null
+  },
+  {
+   "name": "w_lumi_concept.webp",
+   "ok": true,
+   "bytes": 15434,
+   "sha256": "dedcf531886a0099353510e46b0ec851b0f30d3eb5c67b82cb098673f03b16da",
+   "error": null
+  },
+  {
+   "name": "w_ember.glb",
+   "ok": true,
+   "bytes": 4128520,
+   "sha256": "fa53e49ccf2d198fb32beee741e450f840beca5a927f2ad2ad7dfc7988c97d8b",
+   "error": null
+  },
+  {
+   "name": "w_ember_concept.webp",
+   "ok": true,
+   "bytes": 16316,
+   "sha256": "d84d9e9ae3c17185b587f272694483eb48f1605fc2094017deca096a919a248e",
+   "error": null
+  },
+  {
+   "name": "w_stella.glb",
+   "ok": true,
+   "bytes": 4334808,
+   "sha256": "eeb97a97542888fcc7e2243e834703e154837526ae977240c31749e11381cb3b",
+   "error": null
+  },
+  {
+   "name": "w_stella_concept.webp",
+   "ok": true,
+   "bytes": 12106,
+   "sha256": "32756eeee9bc1224fb27a80d5bdc1b6322eb27b07d51e4a4587789911ac69f77",
+   "error": null
+  },
+  {
+   "name": "w_volt.glb",
+   "ok": true,
+   "bytes": 4407940,
+   "sha256": "2b94cac9b56d03eaa1ec72387624a17bf427d213acb4bdee92cbee81d6a2224c",
+   "error": null
+  },
+  {
+   "name": "w_volt_concept.webp",
+   "ok": true,
+   "bytes": 16144,
+   "sha256": "e94ce897ed3a8bdef0d695f41c3defc697ed8778d1f8222a28989858d2d18836",
+   "error": null
+  },
+  {
+   "name": "w_nova.glb",
+   "ok": true,
+   "bytes": 5345560,
+   "sha256": "1caddeb121689799613c3529dca288303bd7b0a8a9d42cd96b3303cb89e9ec31",
+   "error": null
+  },
+  {
+   "name": "w_nova_concept.webp",
+   "ok": true,
+   "bytes": 14800,
+   "sha256": "0d06514d01ea45aec63d0b94003243d9b6d8bf2b3c7ff715f68129db015980e4",
+   "error": null
+  },
+  {
+   "name": "w_ren.glb",
+   "ok": true,
+   "bytes": 4744240,
+   "sha256": "50aab3dbfabce11989d231d464d33896bf60b667c777ba3504cfc75e284a9cac",
+   "error": null
+  },
+  {
+   "name": "w_ren_concept.webp",
+   "ok": true,
+   "bytes": 14290,
+   "sha256": "cfdc15b0e799c306abbd84226bb9531bb45c63511c3e92180da123927e0d79af",
+   "error": null
+  },
+  {
+   "name": "w_kiko.glb",
+   "ok": true,
+   "bytes": 4752768,
+   "sha256": "59c7aa4a610025b7490046575377e9aaa095f2e7d8dedffa2cb1731b32a9807f",
+   "error": null
+  },
+  {
+   "name": "w_kiko_concept.webp",
+   "ok": true,
+   "bytes": 42188,
+   "sha256": "5bc9bafa2892255cfa36af400c8245c9bef284563c39878601ce4b7d122edf79",
+   "error": null
+  },
+  {
+   "name": "w_rico.glb",
+   "ok": true,
+   "bytes": 4140348,
+   "sha256": "f29fd77631ab86ae606ef2f05705d37f93ed37037c72a4a915914d23faf46f82",
+   "error": null
+  },
+  {
+   "name": "w_rico_concept.webp",
+   "ok": true,
+   "bytes": 21232,
+   "sha256": "e8000c07ed35264683b3c4dcb72200aeae2c4232ce41f994ae250c7bd7a5c92a",
+   "error": null
+  },
+  {
+   "name": "w_pip.glb",
+   "ok": true,
+   "bytes": 4698244,
+   "sha256": "87ed83c36163f9a6317fb66b15257663b26deca843828f9cc28ca5a7348935ad",
+   "error": null
+  },
+  {
+   "name": "w_pip_concept.webp",
+   "ok": true,
+   "bytes": 26972,
+   "sha256": "be2e3e4f2f00e138df6046f90973ce5ff905b1bd87a01b78e77b69273c61ed27",
+   "error": null
+  },
+  {
+   "name": "w_vex.glb",
+   "ok": true,
+   "bytes": 4615388,
+   "sha256": "a639f76299f434804b3b20207317e5ec470ee0ed59a019fdee82c803d6600e25",
+   "error": null
+  },
+  {
+   "name": "w_vex_concept.webp",
+   "ok": true,
+   "bytes": 24786,
+   "sha256": "f6b9b8a684de629b30088d2eae9f91dd10cde15250dd28a3e51526825cf02428",
+   "error": null
+  },
+  {
+   "name": "w_boomer.glb",
+   "ok": true,
+   "bytes": 4416224,
+   "sha256": "1bd8fa93f368239744bf1b3fd8bb0052940b74d7657f58507d868f5c18827deb",
+   "error": null
+  },
+  {
+   "name": "w_boomer_concept.webp",
+   "ok": true,
+   "bytes": 22886,
+   "sha256": "026524caf8c48a7f5d35886b1cc997233e329b7e14461fcbd7a0049768369d0f",
+   "error": null
+  },
+  {
+   "name": "w_dax.glb",
+   "ok": true,
+   "bytes": 4462968,
+   "sha256": "18a67a2fe70707fb24398c8832e6a222dd1e61bfdd37a2ba6368bd4bd84977db",
+   "error": null
+  },
+  {
+   "name": "w_dax_concept.webp",
+   "ok": true,
+   "bytes": 18736,
+   "sha256": "a4cb38d6596d34f32b67d9589f1bf547ae57f8e71a72c758fb98b9ac6f1f719a",
+   "error": null
+  }
+ ]
+}
