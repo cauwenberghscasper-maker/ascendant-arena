@@ -107,6 +107,7 @@ function mote(x, y, z, vx, vy, vz, life, size, grav, col) {
 }
 const GearAura = { sig: '', best: -1, n: 0, acc: 0, twT: 0 };
 function updateGearAura(dt) {
+  if (!HERO_OVERLAYS) return;
   const pl = G.player, p = G.profile; if (!pl || !p || !pl.alive || !G.started) return;
   const gear = p.gear || {}, sig = gearSignature(gear);
   if (sig !== GearAura.sig) {

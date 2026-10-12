@@ -475,7 +475,7 @@ AssetSlots.register('character', (o) => {
   const hId = AssetLibrary.has('hero.' + o.cls) ? 'hero.' + o.cls : null;
   const wId = ASSET_MANIFEST[hId]?.animated ? null : AssetLibrary.idForItem(heldIt);
   let hero = null, heroLegs = null, heroMotion = null, clipMotion = null, gearDispose = null, aura = null, hDone = !hId, wDone = !wId;
-  const asc = o.asc ? addAscended(root, pivot, o.asc) : null;
+  const asc = HERO_OVERLAYS && o.asc ? addAscended(root, pivot, o.asc) : null;
   const swapModels = () => {
     if (!hDone) {
       const st = AssetLibrary.status(hId);
@@ -503,7 +503,7 @@ AssetSlots.register('character', (o) => {
           wPivot.position.set(0, 0, 0); wPivot.rotation.set(0, 0, 0);
         }
         const ar = gearAuraRarity(o.gear);
-        if (ar && !o.peer) {
+        if (HERO_OVERLAYS && ar && !o.peer) {
           aura = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.3).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: auraTexture(), color: RAR_HEX[ar], transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
           aura.position.y = 0.04; aura.userData.k = rarIdx(ar); root.add(aura);
         }

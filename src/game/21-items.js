@@ -8,6 +8,8 @@ const killXpAt = (L) => xpToNext(L) / (P.killsPerLevel + P.killsPerLevelGrowth *
 // milestone chests every 5 levels, forever (legendary every 10 after 65)
 const milestoneAt = (L) => P.milestones[L] || (L > 65 && L % 5 === 0 ? (L >= 300 && L % 100 === 0 ? 'divine' : L >= 150 && L % 50 === 0 ? 'ancient' : L >= 100 && L % 10 === 0 ? 'mythic' : L % 10 === 0 ? 'legendary' : 'epic') : null);
 const ascTier = (L) => P.ascendAt.filter((x) => L >= x).length;
+// visual overlays on the hero (ascended crown/wings/aura/trail, gear glow ring and particles); off = clean character
+const HERO_OVERLAYS = false;
 // RuneScape skill curve (level 99 at 13M), divided by mastery.xpScale
 const MXP = (() => { const t = [0, 0]; let pts = 0; for (let l = 1; l < 100; l++) { pts += Math.floor(l + 300 * Math.pow(2, l / 7)); t.push(Math.floor(pts / 4)); } return t; })();
 const mxpFor = (L) => MXP[clamp(L, 1, 99)] / CFG.mastery.xpScale;
