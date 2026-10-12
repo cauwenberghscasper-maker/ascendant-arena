@@ -213,7 +213,8 @@ AssetSlots.register('enemy', (o) => {
       const s = (0.9 + Math.min(0.25, (e.lvl - 1) * 0.004)) * (e.elite ? 1.35 : 1) * vs;
       if (crown) { crown.rotation.y = t * 1.2; aura.scale.setScalar(1.3 + Math.sin(t * 4) * 0.08); aura.material.opacity = 0.35 + Math.sin(t * 4) * 0.15; }
       if (!e.alive) { deadT += dt; const k = Math.max(0, 1 - deadT * 3); root.scale.setScalar(s * k); root.visible = k > 0; }
-      else { deadT = 0; root.scale.setScalar(s); root.visible = true; }
+      else { deadT = 0; root.scale.setScalar(s); root.visible = !e.hidden; } // hidden: burrowed (a burrow move's marker shows where it is)
+      if (e.hidden && Math.random() < 0.3) burst(e.x + (Math.random() - 0.5), 0.2, e.z + (Math.random() - 0.5), 1, 0x9a8a6a, 1.2, 0.4, 0.25, 6, 2);
     },
     dispose() { AssetLibrary.disposeInstance(model); mat.dispose(); if (aura) aura.material.dispose(); },
   };

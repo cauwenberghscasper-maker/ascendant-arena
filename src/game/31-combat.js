@@ -507,7 +507,8 @@ function doSpecial(f, dx, dz, aimDist) {
 function stepClouds(dt) {
   for (let i = G.clouds.length - 1; i >= 0; i--) {
     const c = G.clouds[i]; c.t -= dt; c.tick -= dt;
-    if (c.tick <= 0) { c.tick = CFG.elements.poison.tick; aoeDamage(c.x, c.z, c.r, c.dmg, c.team, c.owner, { charge: 0.1, slow: 0.6 }); }
+    if (c.pull) cloudPull(c, dt); // monster vortex (33-world-sim)
+    if (c.tick <= 0) { c.tick = CFG.elements.poison.tick; if (c.dmg > 0) aoeDamage(c.x, c.z, c.r, c.dmg, c.team, c.owner, { charge: 0.1, slow: 0.6 }); }
     if (c.t <= 0) G.clouds.splice(i, 1);
   }
 }

@@ -1647,78 +1647,97 @@ const MON_KIT = {
   turret: { hp: 90, atk: 9, speed: 1.8, r: 0.9, aggro: 15, leash: 20, attack: 'shoot', cd: 2.2, gold: [4, 9], shotSpeed: 10, keep: 11, shots: 5, spread: 0.9, moves: ['nova'] },
 };
 // Telegraphed monster moves (run by "monster moves" in 33-world-sim). wind = red warning before it lands, cd = seconds
-// between uses, min/max = hero distance that starts it, mult = mobDmg multiplier, r = hit radius.
+// between uses, min/max = hero distance that starts it, mult = mobDmg multiplier, r = hit radius, marks = pendingAoE
+// markers it places (a move only starts if every one of them can be drawn).
+// Kits keep their default lists; species swap in variants through extra.moves so each biome fights differently:
+//   biome      spray            swarm          charger          brute            turret        shooter / ambusher
+//   Woodlands  mortar           pounce·howl    spikes           cleave·spikes    -             snipe / cleave·pounce
+//   Mountain   trap (ice/web)   +mirror        burrow·spikes    cleave·slam      nova          boomerang / burrow
+//   Volcanic   breath (cone)    pounce·pool    trample          spikes·pool      -             - / cleave·pounce
+//   Arcane     zap (chain)      +trap          spikes·slam      vortex·quake     spiral        - / +mirror
+//   Ocean      vortex·zap       burrow         vortex·spikes    spikes·pool      nova·zap      trap / burrow
+//   Celestial  breath·zap       pounce·howl    spikes·slam      quake·vortex     spiral        zap·boomerang
 const MON_MOVES = {
-  cleave: { wind: 0.5, cd: [2.6, 3.6], max: 2.6, r: 2.2, ahead: 1.3, mult: 1.2 }, // hugging a brute is no longer safe
-  slam: { wind: 0.8, cd: [5.5, 6.5], max: 3.4, r: 3.2, mult: 1.6 },
-  pounce: { wind: 0.7, cd: [4.5, 6], min: 4, max: 9, r: 1.8, leap: 0.3, lead: 0.35, mult: 1.3 },
+  cleave: { wind: 0.5, cd: [2.6, 3.6], max: 2.6, r: 2.2, ahead: 1.3, mult: 1.2, marks: 1 }, // hugging a brute is no longer safe
+  slam: { wind: 0.8, cd: [5.5, 6.5], max: 3.4, r: 3.2, mult: 1.6, marks: 1 },
+  pounce: { wind: 0.7, cd: [4.5, 6], min: 4, max: 9, r: 1.8, leap: 0.3, lead: 0.35, mult: 1.3, marks: 1 },
   trample: { r: 1.3, every: 1.4, dur: 3, mult: 0.3 }, // rides the charge lane; burning chargers leave clouds behind
   snipe: { wind: 0.7, cd: [4.5, 6], min: 4, max: 14, len: 14, speed: 26, mult: 2.2 },
-  mortar: { wind: 0.5, fly: 1.1, cd: [5, 7], min: 4, max: 13, r: 1.8, n: 3, gap: 2.6, lead: 0.5, mult: 1.1 },
+  mortar: { wind: 0.5, fly: 1.1, cd: [5, 7], min: 4, max: 13, r: 1.8, n: 3, gap: 2.6, lead: 0.5, mult: 1.1, marks: 3 },
   nova: { wind: 0.6, cd: [5, 7], max: 12, n: 14, speed: 7, mult: 0.8 },
   pool: { wind: 0.9, cd: [6, 8], max: 10, r: 2.2, dur: 3, mult: 0.35 },
   howl: { r: 8, dur: 3, speed: 0.4 }, // a pack-mate falls nearby: the rest frenzy
+  breath: { wind: 0.7, cd: [5, 7], max: 5, r: 6, half: 0.52, mult: 1.3, marks: 1 }, // 60° cone from the mouth: step out sideways
+  spikes: { wind: 0.6, cd: [5, 7], min: 2, max: 9, n: 6, gap: 1.6, r: 1, step: 0.12, mult: 1.2, marks: 6 }, // erupt outward along the aim, one hit per line
+  quake: { wind: 0.9, cd: [6, 8], min: 2, max: 4.5, gap: 1.2, w: 3, mult: 1.4, marks: 1 }, // donut: hug the monster or get clear
+  vortex: { wind: 0.8, cd: [7, 9], min: 3, max: 10, r: 2, pullR: 5.5, pull: 2.2, dur: 1.5, mult: 1.6, marks: 1 }, // drags you in, then slams the eye
+  spiral: { wind: 0.7, cd: [8, 10], max: 6, arms: 3, every: 0.13, step: 0.38, speed: 7, life: 0.95, dur: 2.2, mult: 0.3 }, // short-range sprinkler: back off
+  boomerang: { wind: 0.6, cd: [4.5, 6], min: 3, max: 12, len: 12, speed: 14, mult: 0.9 }, // out along the lane, then home to the thrower
+  burrow: { wind: 1.1, lock: 0.45, cd: [6, 8], min: 3, max: 10, r: 2, mult: 1.4, marks: 1 }, // sinks, the marker stalks you, locks, erupts
+  zap: { wind: 0.6, cd: [5, 7], min: 3, max: 12, n: 3, hop: 0.25, r: 1.6, mult: 1, marks: 3 }, // three hops toward you, one hit per chain
+  trap: { wind: 0.8, cd: [6, 8], min: 3, max: 11, r: 2.2, slow: 1.5, dur: 4, mult: 0.5, tick: 0.15, marks: 1 }, // slowing patch that lingers
+  mirror: { wind: 0.8, cd: [14, 18], max: 12, n: 2, hp: 0.3, life: 12, elite: true }, // elites only: two frail copies
 };
 // id: [name, kit, base body, tint, size, extra]
 const MON_ROWS = {
   thistlehare: ['Thistle-Hare', 'spray', 'boar', 0xe8cf98, 0.72, { hp: 40, atk: 7, aggro: 8, keep: 7, cd: 2.0, shots: 2, shotSpeed: 12, shotColor: 0xe8e0a0, spread: 0.36 }],
   hornet: ['Sun-Drunk Hornet', 'swarm', 'imp', 0xffd23a, 0.78, { hp: 38, atk: 7, aggro: 7, speed: 6.2 }],
-  truffleboar: ['Truffle-Grubbing Boar', 'charger', 'boar', 0xa07858, 1.05, { hp: 86 }],
+  truffleboar: ['Truffle-Grubbing Boar', 'charger', 'boar', 0xa07858, 1.05, { hp: 86, moves: ['spikes'] }],
   myconid: ['Myconid Spore-Tosser', 'shooter', 'slime', 0xd77cff, 1.2, { aggro: 9, burn: 0.25, shotColor: 0xd77cff, shots: 2, spread: 0.4 }],
-  bramble: ['Bramble-Lasher', 'brute', 'spider', 0x6a7a3a, 1.25, { speed: 1.6, aggro: 6, cd: 1.1 }],
+  bramble: ['Bramble-Lasher', 'brute', 'spider', 0x6a7a3a, 1.25, { speed: 1.6, aggro: 6, cd: 1.1, moves: ['cleave', 'spikes'] }],
   barkviper: ['Bark-Scale Viper', 'ambusher', 'crawler', 0x8a6a48, 0.95, { speed: 5.2 }],
   thornbeetle: ['Thorn-Carapace Beetle', 'charger', 'beetle', 0x7f9a5a, 1.1, { hp: 110, heavy: true }],
   gloompanther: ['Gloom-Panther', 'swarm', 'wolf', 0x3a3456, 1.05, { hp: 58, atk: 12, speed: 6.6, aggro: 10 }],
   craggoat: ['Crag-Goat', 'charger', 'boar', 0xc8c0b0, 0.95, { heavy: true }],
-  dustharpy: ['Dust-Harpy', 'shooter', 'fireimp', 0xd8b080, 1.0, { atk: 12, shotSpeed: 10, cd: 1.7, shotColor: 0xa08a70 }],
-  bouldermimic: ['Boulder-Mimic', 'ambusher', 'crawler', 0x9a9a92, 1.25, { hp: 150, speed: 3.2, aggro: 5 }],
-  galeweaver: ['Gale-Weaver', 'spray', 'spider', 0xdfe6ee, 1.0, { shotColor: 0xe6f2ff, shots: 2, spread: 0.6 }],
-  miragestalker: ['Mirage-Stalker', 'swarm', 'wolf', 0xe8c890, 1.0, { hp: 52, atk: 11 }],
-  pitfallwurm: ['Pitfall-Wurm', 'charger', 'crawler', 0xc89a7a, 1.15, { hp: 96 }],
+  dustharpy: ['Dust-Harpy', 'shooter', 'fireimp', 0xd8b080, 1.0, { atk: 12, shotSpeed: 10, cd: 1.7, shotColor: 0xa08a70, moves: ['boomerang', 'snipe'] }],
+  bouldermimic: ['Boulder-Mimic', 'ambusher', 'crawler', 0x9a9a92, 1.25, { hp: 150, speed: 3.2, aggro: 5, moves: ['cleave', 'burrow'] }],
+  galeweaver: ['Gale-Weaver', 'spray', 'spider', 0xdfe6ee, 1.0, { shotColor: 0xe6f2ff, shots: 2, spread: 0.6, moves: ['trap', 'mortar'] }],
+  miragestalker: ['Mirage-Stalker', 'swarm', 'wolf', 0xe8c890, 1.0, { hp: 52, atk: 11, moves: ['pounce', 'howl', 'mirror'] }],
+  pitfallwurm: ['Pitfall-Wurm', 'charger', 'crawler', 0xc89a7a, 1.15, { hp: 96, moves: ['burrow', 'spikes'] }],
   frostgargoyle: ['Frost-Gargoyle', 'ambusher', 'imp', 0x5a6a80, 1.2, {}],
-  chillbanshee: ['Chill-Banshee', 'spray', 'wraith', 0xbfe6ff, 1.0, { shotColor: 0x9fe8ff }],
+  chillbanshee: ['Chill-Banshee', 'spray', 'wraith', 0xbfe6ff, 1.0, { shotColor: 0x9fe8ff, moves: ['trap', 'mortar'] }],
   glacialtroll: ['Glacial-Troll', 'brute', 'yeti', 0xd8f0ff, 1.08, { hp: 140 }],
   iceshard: ['Ice-Shard Elemental', 'turret', 'sentinel', 0x9fe8ff, 0.95, { shotColor: 0xbff4ff }],
   screecrawler: ['Scree-Crawler', 'swarm', 'crawler', 0x9a8a7a, 1.0, { hp: 54 }],
-  echobat: ['Echo-Bat', 'spray', 'fireimp', 0x6a5a88, 0.85, { shotColor: 0xc8a8ff, shotSpeed: 14 }],
+  echobat: ['Echo-Bat', 'spray', 'fireimp', 0x6a5a88, 0.85, { shotColor: 0xc8a8ff, shotSpeed: 14, moves: ['breath', 'mortar'] }],
   sulfurslime: ['Sulfur-Slime', 'brute', 'slime', 0xe0d84a, 1.25, { speed: 3.0, burn: 0.35 }],
-  fumetoad: ['Fume-Toad', 'spray', 'slime', 0x8a9a3a, 1.5, { burn: 0.3, shotColor: 0xb8d040, shotSpeed: 9 }],
+  fumetoad: ['Fume-Toad', 'spray', 'slime', 0x8a9a3a, 1.5, { burn: 0.3, shotColor: 0xb8d040, shotSpeed: 9, moves: ['breath', 'pool'] }],
   magmahound: ['Magma-Hound', 'swarm', 'wolf', 0xff7a3a, 1.05, { burn: 0.3 }],
-  cinderelemental: ['Cinder-Elemental', 'brute', 'fireimp', 0xe8e0d8, 1.2, { burn: 0.35 }],
+  cinderelemental: ['Cinder-Elemental', 'brute', 'fireimp', 0xe8e0d8, 1.2, { burn: 0.35, moves: ['cleave', 'spikes', 'pool'] }],
   ashstalker: ['Ash-Stalker', 'ambusher', 'wolf', 0x8a8480, 1.1, {}],
-  emberwraith: ['Ember-Wraith', 'spray', 'wraith', 0xff8a3a, 1.0, { burn: 0.25, shotColor: 0xff8a3a }],
+  emberwraith: ['Ember-Wraith', 'spray', 'wraith', 0xff8a3a, 1.0, { burn: 0.25, shotColor: 0xff8a3a, moves: ['breath', 'pool'] }],
   scoriascorpion: ['Scoria-Scorpion', 'charger', 'beetle', 0xff9a6a, 1.35, { hp: 120, burn: 0.3, heavy: true }],
-  flamewyrm: ['Flame-Wyrm', 'spray', 'fireimp', 0xff5a2a, 1.3, { burn: 0.3, shotColor: 0xff6a1f }],
+  flamewyrm: ['Flame-Wyrm', 'spray', 'fireimp', 0xff5a2a, 1.3, { burn: 0.3, shotColor: 0xff6a1f, moves: ['breath', 'mortar', 'pool'] }],
   manaleech: ['Mana-Leech', 'swarm', 'crawler', 0x4a8aff, 0.85, { hp: 48 }],
-  azuregolem: ['Azure-Golem', 'brute', 'warden', 0x6a9aff, 1.05, { charge: true, hp: 150 }],
-  riftspider: ['Rift-Spider', 'swarm', 'spider', 0xa06aff, 1.1, { speed: 7.0 }],
-  geodrone: ['Geometry-Drone', 'turret', 'sentinel', 0xb08aff, 1.0, { shotColor: 0xc77dff }],
-  voidray: ['Void-Ray', 'spray', 'wraith', 0x2a5a7a, 1.15, { shotColor: 0x4fd8ff }],
-  asteroidhermit: ['Asteroid-Hermit', 'brute', 'crawler', 0x7a7088, 1.4, { hp: 175, speed: 2.6 }],
-  prismmimic: ['Prism-Mimic', 'ambusher', 'slime', 0xd0f4ff, 1.0, { speed: 5.6 }],
-  glassminotaur: ['Glass-Minotaur', 'charger', 'yeti', 0xbfe8ff, 1.1, { hp: 140, heavy: true }],
-  starsentry: ['Starlight-Sentry', 'brute', 'warden', 0xfff0c0, 1.0, { charge: true }],
-  astronomer: ['Fallen-Astronomer', 'spray', 'wraith', 0x6a5fc9, 1.05, { shots: 2, spread: 0.36, shotColor: 0xc77dff }],
-  nebulajelly: ['Nebula-Jellyfish', 'turret', 'sentinel', 0xff9bf2, 0.95, { speed: 2.4, shotColor: 0xff9bf2 }],
-  kelpie: ['Ruins-Kelpie', 'charger', 'boar', 0x2fbfa0, 1.1, {}],
-  rapidsiren: ['Rapids-Siren', 'spray', 'drowned', 0x7fd0ff, 1.0, { shotColor: 0x7fd0ff }],
-  thrasher: ['Current-Thrasher', 'charger', 'crawler', 0x5a7a9a, 1.15, { speed: 5.0 }],
-  sporeurchin: ['Spore-Urchin', 'brute', 'slime', 0x4fffb0, 1.1, { burn: 0.3, speed: 2.4 }],
-  angler: ['Grotto-Angler', 'ambusher', 'beetle', 0x2a4a8a, 1.2, {}],
-  trenchcrawler: ['Trench-Crawler', 'swarm', 'crawler', 0x2a3a4a, 1.0, { hp: 60, burn: 0.15 }],
-  pressuresquid: ['Pressure-Squid', 'shooter', 'drowned', 0x7a3a9a, 1.05, { shotSpeed: 17, atk: 13, shotColor: 0x3a1a5a }],
-  leviathan: ['Eldritch-Leviathan', 'charger', 'crawler', 0x1a3a40, 1.6, { hp: 160, heavy: true }],
-  abyssphantom: ['Abyssal-Phantom', 'spray', 'wraith', 0x2fffd0, 1.0, { shotColor: 0x2fffd0 }],
-  boilcrab: ['Boil-Crab', 'brute', 'crawler', 0xff6a4a, 1.3, { burn: 0.3 }],
-  steamelemental: ['Steam-Elemental', 'spray', 'wraith', 0xf0f0f4, 1.1, { burn: 0.3, shotColor: 0xffffff }],
+  azuregolem: ['Azure-Golem', 'brute', 'warden', 0x6a9aff, 1.05, { charge: true, hp: 150, moves: ['cleave', 'vortex'] }],
+  riftspider: ['Rift-Spider', 'swarm', 'spider', 0xa06aff, 1.1, { speed: 7.0, moves: ['pounce', 'howl', 'trap'] }],
+  geodrone: ['Geometry-Drone', 'turret', 'sentinel', 0xb08aff, 1.0, { shotColor: 0xc77dff, moves: ['spiral', 'nova'] }],
+  voidray: ['Void-Ray', 'spray', 'wraith', 0x2a5a7a, 1.15, { shotColor: 0x4fd8ff, moves: ['zap', 'mortar'] }],
+  asteroidhermit: ['Asteroid-Hermit', 'brute', 'crawler', 0x7a7088, 1.4, { hp: 175, speed: 2.6, moves: ['slam', 'vortex'] }],
+  prismmimic: ['Prism-Mimic', 'ambusher', 'slime', 0xd0f4ff, 1.0, { speed: 5.6, moves: ['cleave', 'pounce', 'mirror'] }],
+  glassminotaur: ['Glass-Minotaur', 'charger', 'yeti', 0xbfe8ff, 1.1, { hp: 140, heavy: true, moves: ['spikes', 'slam'] }],
+  starsentry: ['Starlight-Sentry', 'brute', 'warden', 0xfff0c0, 1.0, { charge: true, moves: ['cleave', 'quake'] }],
+  astronomer: ['Fallen-Astronomer', 'spray', 'wraith', 0x6a5fc9, 1.05, { shots: 2, spread: 0.36, shotColor: 0xc77dff, moves: ['zap', 'mortar'] }],
+  nebulajelly: ['Nebula-Jellyfish', 'turret', 'sentinel', 0xff9bf2, 0.95, { speed: 2.4, shotColor: 0xff9bf2, moves: ['nova', 'zap'] }],
+  kelpie: ['Ruins-Kelpie', 'charger', 'boar', 0x2fbfa0, 1.1, { moves: ['vortex', 'spikes'] }],
+  rapidsiren: ['Rapids-Siren', 'spray', 'drowned', 0x7fd0ff, 1.0, { shotColor: 0x7fd0ff, moves: ['vortex', 'mortar'] }],
+  thrasher: ['Current-Thrasher', 'charger', 'crawler', 0x5a7a9a, 1.15, { speed: 5.0, moves: ['spikes', 'burrow'] }],
+  sporeurchin: ['Spore-Urchin', 'brute', 'slime', 0x4fffb0, 1.1, { burn: 0.3, speed: 2.4, moves: ['spikes', 'slam', 'pool'] }],
+  angler: ['Grotto-Angler', 'ambusher', 'beetle', 0x2a4a8a, 1.2, { moves: ['cleave', 'burrow'] }],
+  trenchcrawler: ['Trench-Crawler', 'swarm', 'crawler', 0x2a3a4a, 1.0, { hp: 60, burn: 0.15, moves: ['burrow', 'howl', 'pool'] }],
+  pressuresquid: ['Pressure-Squid', 'shooter', 'drowned', 0x7a3a9a, 1.05, { shotSpeed: 17, atk: 13, shotColor: 0x3a1a5a, moves: ['snipe', 'trap'] }],
+  leviathan: ['Eldritch-Leviathan', 'charger', 'crawler', 0x1a3a40, 1.6, { hp: 160, heavy: true, moves: ['vortex', 'slam'] }],
+  abyssphantom: ['Abyssal-Phantom', 'spray', 'wraith', 0x2fffd0, 1.0, { shotColor: 0x2fffd0, moves: ['zap', 'mortar'] }],
+  boilcrab: ['Boil-Crab', 'brute', 'crawler', 0xff6a4a, 1.3, { burn: 0.3, moves: ['cleave', 'quake', 'pool'] }],
+  steamelemental: ['Steam-Elemental', 'spray', 'wraith', 0xf0f0f4, 1.1, { burn: 0.3, shotColor: 0xffffff, moves: ['breath', 'pool'] }],
   shaftvulture: ['Shaft-Vulture', 'swarm', 'imp', 0x4a3a30, 1.1, { speed: 7.0 }],
-  obsidiangargoyle: ['Obsidian-Gargoyle', 'charger', 'fireimp', 0x2a2236, 1.2, { heavy: true, hp: 120 }],
-  lightningwyvern: ['Lightning-Wyvern', 'shooter', 'imp', 0xfff04a, 1.25, { shotSpeed: 18, shots: 2, spread: 0.3, shotColor: 0xfff04a }],
-  cyclone: ['Cyclone-Elemental', 'turret', 'sentinel', 0xd8e0ea, 1.1, { speed: 3.2, shots: 6, spread: 1.4, shotColor: 0xe6f2ff }],
-  aetherray: ['Aether-Ray', 'spray', 'seraph', 0xc8b8ff, 1.0, { shotColor: 0xc8b8ff }],
-  halosentinel: ['Halo-Sentinel', 'turret', 'sentinel', 0xffd86a, 1.05, { shotColor: 0xffd86a }],
-  archon: ['Spire-Archon', 'shooter', 'seraph', 0xffffff, 1.2, { shots: 3, spread: 0.3, atk: 11, shotColor: 0xfff07a }],
-  cosmicweaver: ['Cosmic-Weaver', 'brute', 'warden', 0x9a7aff, 1.1, { charge: true, hp: 160 }],
+  obsidiangargoyle: ['Obsidian-Gargoyle', 'charger', 'fireimp', 0x2a2236, 1.2, { heavy: true, hp: 120, moves: ['spikes', 'slam'] }],
+  lightningwyvern: ['Lightning-Wyvern', 'shooter', 'imp', 0xfff04a, 1.25, { shotSpeed: 18, shots: 2, spread: 0.3, shotColor: 0xfff04a, moves: ['snipe', 'zap'] }],
+  cyclone: ['Cyclone-Elemental', 'turret', 'sentinel', 0xd8e0ea, 1.1, { speed: 3.2, shots: 6, spread: 1.4, shotColor: 0xe6f2ff, moves: ['spiral', 'vortex'] }],
+  aetherray: ['Aether-Ray', 'spray', 'seraph', 0xc8b8ff, 1.0, { shotColor: 0xc8b8ff, moves: ['zap', 'breath'] }],
+  halosentinel: ['Halo-Sentinel', 'turret', 'sentinel', 0xffd86a, 1.05, { shotColor: 0xffd86a, moves: ['spiral', 'nova'] }],
+  archon: ['Spire-Archon', 'shooter', 'seraph', 0xffffff, 1.2, { shots: 3, spread: 0.3, atk: 11, shotColor: 0xfff07a, moves: ['snipe', 'boomerang'] }],
+  cosmicweaver: ['Cosmic-Weaver', 'brute', 'warden', 0x9a7aff, 1.1, { charge: true, hp: 160, moves: ['quake', 'vortex'] }],
 };
 for (const k in CFG.enemies) if (CFG.enemies[k] && CFG.enemies[k].hp) CFG.enemies[k].legacy = true; // the old monsters stay for saves, Rift themes and records
 for (const id in MON_ROWS) {
@@ -3068,7 +3087,8 @@ function doSpecial(f, dx, dz, aimDist) {
 function stepClouds(dt) {
   for (let i = G.clouds.length - 1; i >= 0; i--) {
     const c = G.clouds[i]; c.t -= dt; c.tick -= dt;
-    if (c.tick <= 0) { c.tick = CFG.elements.poison.tick; aoeDamage(c.x, c.z, c.r, c.dmg, c.team, c.owner, { charge: 0.1, slow: 0.6 }); }
+    if (c.pull) cloudPull(c, dt); // monster vortex (33-world-sim)
+    if (c.tick <= 0) { c.tick = CFG.elements.poison.tick; if (c.dmg > 0) aoeDamage(c.x, c.z, c.r, c.dmg, c.team, c.owner, { charge: 0.1, slow: 0.6 }); }
     if (c.t <= 0) G.clouds.splice(i, 1);
   }
 }
@@ -3980,6 +4000,7 @@ function separate(a, b) {
 }
 const bodyMass = (e) => { const M = CFG.enemies.mass; return e.kind === 'enemy' ? (M[(CFG.enemies[e.type] || {}).kit || 'legacy'] || 1) * (e.elite ? M.elite : 1) : M.player; };
 function stepEnemy(e, dt) {
+  if ((e.mirror || e.hidden) && moveUpkeep(e, dt)) return;
   if (!e.alive) { if (e.rift || e.dungeon) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
   const d = CFG.enemies[e.type], pl = G.player, Z = CFG.world.zones[e.zone];
   if (e.rift && e.state !== 'chase') e.state = 'chase';
@@ -4054,7 +4075,7 @@ function stepEnemy(e, dt) {
   e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
   trackVel(e, dt);
   // keep bodies apart: enemy vs player and vs other enemies
-  if (pl.alive) separate(e, pl);
+  if (pl.alive && !e.hidden) separate(e, pl); // a burrowed monster has no body to bump
   const near = e.zb && G.enemiesByZone ? G.enemiesByZone[e.zone] : G.enemies;
   for (let i = 0; i < near.length; i++) { const o = near[i]; if (o !== e && o.alive && o.zone === e.zone) separate(e, o); }
   collideObstacles(e);
@@ -4067,9 +4088,9 @@ function stepEnemy(e, dt) {
 }
 
 // --- monster moves
-// Each move warns in red the moment its windup starts (a pendingAoE ring, a lane or a cast ring) and then commits to
-// what it showed: leaving the marker during the windup always avoids it. Damage always goes through mobDmg.
-function moveState(e) { const M = { k: null, t: 0, seen: 0, gap: 1, cd: {}, x: 0, z: 0, sx: 0, sz: 0, a: 0, lx: 1e9, lz: 1e9, frenzyT: 0, pack: [], packT: 0 }; for (const k of CFG.enemies[e.type].moves) M.cd[k] = rand(1, 3); return M; }
+// Each move warns in red the moment its windup starts (a pendingAoE ring, cone or donut, a lane or a cast ring) and then
+// commits to what it showed: leaving the marker during the windup always avoids it. Damage always goes through mobDmg.
+function moveState(e) { const M = { k: null, t: 0, seen: 0, gap: 1, cd: {}, x: 0, z: 0, sx: 0, sz: 0, a: 0, lx: 1e9, lz: 1e9, frenzyT: 0, pack: [], packT: 0, spinT: 0, spinAcc: 0, spin: 0, dmg: 0, aoe: null }; for (const k of CFG.enemies[e.type].moves) M.cd[k] = rand(1, 3); return M; }
 // hub elites roll Rift champion affixes (two from area 10 on); champTick runs them at reduced damage
 function eliteMods(e) {
   const keys = Object.keys(CHAMP_MODS).sort(() => Math.random() - 0.5).slice(0, e.zone >= 10 ? 2 : 1);
@@ -4077,12 +4098,43 @@ function eliteMods(e) {
   for (const k of keys) e.champ.cd[k] = rand(1.5, 3.5);
   e.champName = keys.map((k) => CHAMP_MODS[k].name).join(' · ');
 }
-const moveAoE = (e, x, z, r, t, dmg) => G.pendingAoE.push({ x, z, r, t, max: t, dmg, team: 'mob', owner: e.id, kind: 'slam' });
+// pendingAoE extras: inner (donut, safe centre), cone {a, half} (apex at x,z), grp (shared: one hit per target per volley),
+// slow/burn (applied on the hit). The renderer draws AOE_SHOWN ring markers and CONE_SHOWN cones; a move needing more waits.
+const AOE_SHOWN = 18, CONE_SHOWN = 6;
+const moveAoE = (e, x, z, r, t, dmg, o) => { const a = Object.assign({ x, z, r, t, max: t, dmg, team: 'mob', owner: e.id, kind: 'slam' }, o); G.pendingAoE.push(a); return a; };
+function markersFree(n, cone) { let c = 0, k = 0; for (const a of G.pendingAoE) if (a.cone) k++; else c++; return cone ? k + n <= CONE_SHOWN : c + n <= AOE_SHOWN; }
+// does marker a cover a body of radius r at x,z? (the donut hole tests the body centre so hugging its owner is safe)
+function aoeCovers(a, x, z, r) {
+  const dx = x - a.x, dz = z - a.z, d = Math.hypot(dx, dz);
+  if (d > a.r + r || (a.inner && d < a.inner)) return false;
+  return !a.cone || d < 1e-3 || Math.abs(angDiff(a.cone.a, Math.atan2(dx, dz))) <= a.cone.half + Math.asin(Math.min(1, r / d));
+}
+function aoeHits(a, t) { if (!aoeCovers(a, t.x, t.z, t.r)) return false; if (a.grp) { if (a.grp.includes(t.id)) return false; a.grp.push(t.id); } return true; }
+// vortex clouds drag the hero toward the eye at a capped speed and stop there; a dash breaks free, obstacles still block
+function cloudPull(c, dt) {
+  const p = G.player; if (!p || !p.alive || p.team === c.team || p.invulnT > 0) return;
+  const dx = c.x - p.x, dz = c.z - p.z, d = Math.hypot(dx, dz); if (d > c.r + p.r || d < 1e-4) return;
+  const s = Math.min(c.pull * dt, d); p.x += dx / d * s; p.z += dz / d * s; collideObstacles(p); boundFighter(p, G.mode === 'arena' ? 'arena' : 'hub');
+}
 const outOfTown = (e, x, z) => e.rift || inInstance() || distToTown(x, z) > CFG.world.town.r + 2;
+// a dropped or finished move: resurface a burrowed monster, stop a spiral
+function moveEnd(e) { const M = e.mv; M.k = null; M.spinT = 0; e.windT = 0; if (e.hidden) { e.hidden = false; e.invulnT = 0; } }
+// mirror copies fade with their elite or after a while; a burrowed monster whose move stopped running resurfaces
+function moveUpkeep(e, dt) {
+  if (e.mirror) {
+    const o = G.ents.get(e.mirror.of);
+    if (!e.alive || (e.mirror.t -= dt) <= 0 || !o || !o.alive) {
+      if (e.alive) ev({ t: 'puff', x: e.x, z: e.z, color: 0xc8b8ff });
+      e.alive = false; G.enemies = G.enemies.filter((x) => x !== e); G.ents.delete(e.id); return true;
+    }
+  }
+  if (e.hidden && e.mv && G.time - e.mv.seen > 0.2) moveEnd(e);
+  return false;
+}
 function enemyMove(e, dt, pl, dp) {
   const d = CFG.enemies[e.type], M = e.mv || (e.mv = moveState(e)), slow = e.slowT > 0 ? 0.5 : 1;
   // died, lost the hero or walked home mid-move: drop it (markers already placed still land)
-  if (M.k && M.seen < G.time - 0.5) { M.k = null; e.windT = 0; }
+  if ((M.k || M.spinT > 0) && M.seen < G.time - 0.5) moveEnd(e);
   M.seen = G.time; M.gap -= dt;
   for (const k in M.cd) M.cd[k] -= dt;
   if (e.elite && !e.champ) eliteMods(e);
@@ -4100,10 +4152,21 @@ function enemyMove(e, dt, pl, dp) {
     const T = MON_MOVES.trample;
     if (Math.hypot(e.x - M.lx, e.z - M.lz) > T.every) { M.lx = e.x; M.lz = e.z; G.clouds.push({ x: e.x, z: e.z, r: T.r, t: T.dur, max: T.dur, tick: 0, dmg: mobDmg(e, T.mult, pl), team: 'mob', owner: e.id }); }
   } else M.lx = 1e9;
+  // spiral: after its cast the monster roots and spins out three arms of short-lived orbs
+  if (M.spinT > 0) {
+    const S = MON_MOVES.spiral; M.spinT -= dt; e.moveAmt = 0;
+    if ((M.spinAcc -= dt) <= 0) {
+      M.spinAcc = S.every; M.spin += S.step;
+      for (let i = 0; i < S.arms; i++) { const a = M.spin + i * Math.PI * 2 / S.arms; spawnProjectile({ x: e.x, z: e.z, vx: Math.sin(a) * S.speed, vz: Math.cos(a) * S.speed, life: S.life, r: 0.42, dmg: M.dmg, team: 'mob', owner: e.id, kind: 'orb', color: d.shotColor || 0xff5d8f, y: 1.2 }); }
+    }
+    return true;
+  }
   if (M.k) {
     const k = M.k, S = MON_MOVES[k]; M.t -= dt; e.windT = Math.max(M.t, 0.05); e.moveAmt = 0;
     // pounce: crouch, then leap so the body lands as the marker goes off
     if (k === 'pounce' && M.t < S.leap) { const q = clamp(1 - M.t / S.leap, 0, 1); e.x = lerp(M.sx, M.x, q); e.z = lerp(M.sz, M.z, q); e.moveAmt = 1; }
+    // burrow: the marker stalks the hero underground until it locks for the final beat
+    if (k === 'burrow' && M.t > S.lock && M.aoe && outOfTown(e, pl.x, pl.z)) { M.aoe.x = pl.x; M.aoe.z = pl.z; }
     if (M.t <= 0) { M.k = null; e.windT = 0; e.attackAnim = 1; M.gap = 0.8; fireMove(e, k, S, pl); }
     return true;
   }
@@ -4115,27 +4178,63 @@ function enemyMove(e, dt, pl, dp) {
   return false;
 }
 function startMove(e, k, S, pl, slow) {
-  const M = e.mv, a = Math.atan2(pl.x - e.x, pl.z - e.z); e.facing = a; M.a = a;
-  if (k === 'cleave') { moveAoE(e, e.x + Math.sin(a) * S.ahead, e.z + Math.cos(a) * S.ahead, S.r, S.wind, mobDmg(e, S.mult, pl)); return true; }
-  if (k === 'slam') { moveAoE(e, e.x, e.z, S.r, S.wind, mobDmg(e, S.mult, pl)); return true; }
+  const M = e.mv, a = Math.atan2(pl.x - e.x, pl.z - e.z), d = CFG.enemies[e.type], dmg = mobDmg(e, S.mult, pl);
+  if (S.marks && !markersFree(S.marks, k === 'breath')) return false; // every hit must be drawn
+  e.facing = a; M.a = a;
+  if (k === 'cleave') { moveAoE(e, e.x + Math.sin(a) * S.ahead, e.z + Math.cos(a) * S.ahead, S.r, S.wind, dmg); return true; }
+  if (k === 'slam') { moveAoE(e, e.x, e.z, S.r, S.wind, dmg); return true; }
   if (k === 'pounce') {
     if (slow < 1) return false; // slowed monsters cannot leap
     const x = pl.x + (pl.vx || 0) * S.lead, z = pl.z + (pl.vz || 0) * S.lead; if (!outOfTown(e, x, z)) return false;
-    M.sx = e.x; M.sz = e.z; M.x = x; M.z = z; moveAoE(e, x, z, S.r, S.wind, mobDmg(e, S.mult, pl)); return true;
+    M.sx = e.x; M.sz = e.z; M.x = x; M.z = z; moveAoE(e, x, z, S.r, S.wind, dmg); return true;
   }
-  if (k === 'snipe') { if (losBlocked(e.x, e.z, pl.x, pl.z)) return false; ev({ t: 'moveTele', x: e.x, z: e.z, a, len: S.len, w: 1, life: S.wind }); return true; }
+  if (k === 'snipe' || k === 'boomerang') { if (losBlocked(e.x, e.z, pl.x, pl.z)) return false; ev({ t: 'moveTele', x: e.x, z: e.z, a, len: S.len, w: 1, life: S.wind }); return true; }
   if (k === 'mortar') {
     // three shells across the hero's predicted spot; each lands exactly when its marker goes off
-    const cx = pl.x + (pl.vx || 0) * S.lead, cz = pl.z + (pl.vz || 0) * S.lead, px = Math.cos(a), pz = -Math.sin(a), d = CFG.enemies[e.type];
+    const cx = pl.x + (pl.vx || 0) * S.lead, cz = pl.z + (pl.vz || 0) * S.lead, px = Math.cos(a), pz = -Math.sin(a);
     for (let i = 0; i < S.n; i++) {
       const o = (i - (S.n - 1) / 2) * S.gap, x = cx + px * o, z = cz + pz * o, t = S.fly + i * 0.15, dd = Math.hypot(x - e.x, z - e.z);
-      moveAoE(e, x, z, S.r, t, mobDmg(e, S.mult, pl));
+      moveAoE(e, x, z, S.r, t, dmg);
       spawnProjectile({ x: e.x, z: e.z, vx: (x - e.x) / t, vz: (z - e.z) / t, life: t, r: 0.4, dmg: 0, team: 'mob', owner: e.id, kind: 'lob', lob: true, lobH: 1.6 + dd * 0.22, color: d.shotColor || 0xff7b2e, y: 1.2 });
     }
     ev({ t: 'shoot', kind: 'enemy', x: e.x, z: e.z }); return true;
   }
   if (k === 'nova') { ev({ t: 'moveTele', x: e.x, z: e.z, r: e.r * 2.2, life: S.wind }); return true; }
   if (k === 'pool') { if (!outOfTown(e, pl.x, pl.z)) return false; M.x = pl.x; M.z = pl.z; ev({ t: 'moveTele', x: M.x, z: M.z, r: S.r, life: S.wind }); return true; }
+  if (k === 'breath') { moveAoE(e, e.x, e.z, S.r, S.wind, dmg, { cone: { a, half: S.half }, kind: 'breath', burn: d.burn ? mobDmg(e, d.burn, pl) : 0 }); return true; }
+  if (k === 'spikes') {
+    // a line of spikes bursting outward from the monster, 0.12 s apart: sidestep the line
+    const grp = [];
+    for (let i = 0; i < S.n; i++) { const dd = e.r + 1 + i * S.gap; moveAoE(e, e.x + Math.sin(a) * dd, e.z + Math.cos(a) * dd, S.r, S.wind + i * S.step, dmg, { grp, kind: 'spike' }); }
+    return true;
+  }
+  if (k === 'quake') { const inner = e.r + S.gap; moveAoE(e, e.x, e.z, inner + S.w, S.wind, dmg, { inner }); return true; }
+  if (k === 'vortex') {
+    // the eye slam is marked from the start; the pull only begins once the windup ends
+    if (!outOfTown(e, pl.x, pl.z)) return false; M.x = pl.x; M.z = pl.z;
+    moveAoE(e, M.x, M.z, S.r, S.wind + S.dur, dmg, { kind: 'vortex' }); ev({ t: 'moveTele', x: M.x, z: M.z, r: S.pullR, life: S.wind }); return true;
+  }
+  if (k === 'spiral') { ev({ t: 'moveTele', x: e.x, z: e.z, r: S.speed * S.life + 0.4, life: S.wind }); return true; } // the ring is its reach
+  if (k === 'burrow') {
+    if (!outOfTown(e, pl.x, pl.z)) return false;
+    M.aoe = moveAoE(e, pl.x, pl.z, S.r, S.wind, dmg); e.hidden = true; e.invulnT = 1; ev({ t: 'boom', x: e.x, z: e.z, r: e.r * 1.5, color: 0x9a8a6a }); return true;
+  }
+  if (k === 'zap') {
+    const grp = [];
+    for (let i = 0; i < S.n; i++) { const f = (i + 1) / S.n; moveAoE(e, lerp(e.x, pl.x, f), lerp(e.z, pl.z, f), S.r, S.wind + i * S.hop, dmg, { grp, kind: 'zap' }); }
+    return true;
+  }
+  if (k === 'trap') {
+    if (!outOfTown(e, pl.x, pl.z)) return false; M.x = pl.x; M.z = pl.z;
+    moveAoE(e, M.x, M.z, S.r, S.wind, dmg, { slow: S.slow, kind: 'trap' });
+    spawnProjectile({ x: e.x, z: e.z, vx: (M.x - e.x) / S.wind, vz: (M.z - e.z) / S.wind, life: S.wind, r: 0.4, dmg: 0, team: 'mob', owner: e.id, kind: 'lob', lob: true, lobH: 1.4 + Math.hypot(M.x - e.x, M.z - e.z) * 0.2, color: d.shotColor || 0x9fe8ff, y: 1.2 });
+    return true;
+  }
+  if (k === 'mirror') {
+    if (!e.elite || e.mirror || inInstance()) return false;
+    for (let i = 0; i < S.n; i++) { const b = a + (i ? 1.6 : -1.6); ev({ t: 'moveTele', x: e.x + Math.sin(b) * 2.5, z: e.z + Math.cos(b) * 2.5, r: d.r * 1.6, life: S.wind, color: 0xc8b8ff }); }
+    return true;
+  }
   return false;
 }
 function fireMove(e, k, S, pl) {
@@ -4144,6 +4243,24 @@ function fireMove(e, k, S, pl) {
   // nova: one orb always flies at the hero; the three-orb gap sits right beside them
   else if (k === 'nova') orbRing(e, S.n, 2, M.a + (Math.random() < 0.5 ? -2 : 2) * Math.PI * 2 / S.n, S.speed, mobDmg(e, S.mult, pl), d.shotColor || 0xff7b2e);
   else if (k === 'pool') G.clouds.push({ x: M.x, z: M.z, r: S.r, t: S.dur, max: S.dur, tick: 0, dmg: mobDmg(e, S.mult, pl), team: 'mob', owner: e.id });
+  // out to the end of the lane and back (it can catch you twice)
+  else if (k === 'boomerang') { spawnProjectile({ x: e.x, z: e.z, vx: Math.sin(M.a) * S.speed, vz: Math.cos(M.a) * S.speed, life: 2 * S.len / S.speed, r: 0.5, dmg: mobDmg(e, S.mult, pl), pierce: 9, boomerang: true, team: 'mob', owner: e.id, kind: 'chakram', color: d.shotColor || 0xffb347, y: 1.2 }); ev({ t: 'shoot', kind: 'enemy', x: e.x, z: e.z }); }
+  else if (k === 'vortex') G.clouds.push({ x: M.x, z: M.z, r: S.pullR, t: S.dur, max: S.dur, tick: 0, dmg: 0, pull: S.pull, color: 0xb36bff, team: 'mob', owner: e.id });
+  else if (k === 'spiral') { M.spinT = S.dur; M.spinAcc = 0; M.spin = M.a; M.dmg = mobDmg(e, S.mult, pl); }
+  else if (k === 'burrow') { if (M.aoe) { e.x = M.aoe.x; e.z = M.aoe.z; } M.aoe = null; moveEnd(e); }
+  else if (k === 'trap') G.clouds.push({ x: M.x, z: M.z, r: S.r, t: S.dur, max: S.dur, tick: 0, dmg: mobDmg(e, S.tick, pl), color: d.shotColor || 0x9fe8ff, team: 'mob', owner: e.id });
+  else if (k === 'mirror') {
+    // frail, loot-free copies of the elite's plain self (normal damage, a third of normal HP)
+    const El = CFG.enemies.elite;
+    for (let i = 0; i < S.n; i++) {
+      const b = M.a + (i ? 1.6 : -1.6), x = e.x + Math.sin(b) * 2.5, z = e.z + Math.cos(b) * 2.5; if (pointBlocked(x, z, d.r)) continue;
+      const o = Object.assign({}, e, { id: nextId++, elite: false, champ: null, champName: null, mv: null, r: d.r, x, z, wx: x, wz: z, temp: true, mirror: { of: e.id, t: S.life },
+        state: 'chase', windT: 0, lungeT: 0, atkCd: 1, flashT: 0, attackAnim: 0, hidden: false, invulnT: 0, burnT: 0, slowT: 0, lastHurt: -99 });
+      o.maxHp = o.hp = Math.max(1, Math.round(e.maxHp / El.hp * S.hp)); o.atk = e.atk / El.atk;
+      Object.defineProperty(o, 'tagged', { get: () => false, set() {} }); // never rewarded: no XP or loot farm
+      G.enemies.push(o); G.ents.set(o.id, o); ev({ t: 'boom', x, z, r: 1.4, color: 0xc8b8ff });
+    }
+  }
 }
 // a ring of N slow orbs with a gap of 2g-1 slots centred on angle gapA
 function orbRing(e, N, g, gapA, sp, dmg, color) {
@@ -4246,8 +4363,19 @@ function stepBoss(b, dt) {
     else b.moveAmt = Math.max(0, b.moveAmt - dt * 3);
     if (b.atkT <= 0) {
       b.atkT = B.attackEvery * rand(0.85, 1.15); b.attackAnim = 1;
-      if (Math.random() < 0.55) {
+      const roll = Math.random(), A = b.facing;
+      if (roll < 0.4) {
         G.pendingAoE.push({ x: target.x, z: target.z, r: B.slamR, t: B.slamDelay, max: B.slamDelay, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'slam' });
+        ev({ t: 'telegraph' });
+      } else if (roll < 0.6 && markersFree(15)) {
+        // three spike lines fan out toward the target, rippling outward; one hit at most
+        const grp = [];
+        for (let l = -1; l <= 1; l++) for (let i = 0; i < 5; i++) { const a = A + l * 0.5, d = b.r + 1.2 + i * 2.2, t = B.slamDelay + i * 0.12; G.pendingAoE.push({ x: b.x + Math.sin(a) * d, z: b.z + Math.cos(a) * d, r: 1.3, t, max: t, dmg: b.atk * 1.1, team: 'mob', owner: b.id, kind: 'spike', grp }); }
+        ev({ t: 'telegraph' });
+      } else if (roll < 0.78 && markersFree(1) && (target !== pl || distToTown(pl.x, pl.z) > CFG.world.town.r + 4)) {
+        // vortex: drags the hero toward the eye for 1.6 s, the eye erupts 0.6 s after the pull lets go
+        G.clouds.push({ x: target.x, z: target.z, r: 6, t: 1.6, max: 1.6, tick: 0, dmg: 0, pull: 2.4, color: 0xb36bff, team: 'mob', owner: b.id });
+        G.pendingAoE.push({ x: target.x, z: target.z, r: 2.4, t: 2.2, max: 2.2, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'vortex' });
         ev({ t: 'telegraph' });
       } else {
         const off = Math.random() * Math.PI;
@@ -4300,8 +4428,15 @@ function stepPendingAoE(dt) {
   for (let i = G.pendingAoE.length - 1; i >= 0; i--) {
     const a = G.pendingAoE[i]; a.t -= dt;
     if (a.t <= 0) {
-      aoeDamage(a.x, a.z, a.r, a.dmg, a.team, a.owner, { knock: 6, charge: 0 });
-      ev({ t: 'boom', x: a.x, z: a.z, r: a.r, color: a.kind === 'meteor' ? 0xff7b2e : a.kind === 'comet' ? 0x9fb8ff : 0xc9a16b, big: a.kind !== 'comet' });
+      // plain circles keep aoeDamage; cones, donuts and one-hit volleys filter targets through aoeHits first
+      if (!a.inner && !a.cone && !a.grp) aoeDamage(a.x, a.z, a.r, a.dmg, a.team, a.owner, { knock: 6, charge: 0, slow: a.slow || 0, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
+      else forEachTarget((t) => {
+        if (!t.alive || t.team === a.team || (t.kind === 'fighter' && t.invulnT > 0) || !aoeHits(a, t)) return;
+        dealDamage(t, a.dmg, a.owner, { charge: 0, canCrit: false, slow: a.slow || 0, knockX: t.x - a.x, knockZ: t.z - a.z, knock: 6, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
+      });
+      if (a.kind === 'zap') ev({ t: 'bolt', x: a.x, z: a.z });
+      const C = a.cone, bx = C ? a.x + Math.sin(C.a) * a.r * 0.55 : a.x, bz = C ? a.z + Math.cos(C.a) * a.r * 0.55 : a.z;
+      ev({ t: 'boom', x: bx, z: bz, r: C ? a.r * 0.45 : a.r, color: a.kind === 'meteor' || a.kind === 'breath' ? 0xff7b2e : a.kind === 'comet' || a.kind === 'zap' || a.kind === 'trap' ? 0x9fb8ff : a.kind === 'vortex' ? 0xb36bff : 0xc9a16b, big: a.kind !== 'comet' && a.kind !== 'spike' && a.kind !== 'zap' });
       G.pendingAoE.splice(i, 1);
     }
   }
@@ -6041,7 +6176,8 @@ AssetSlots.register('enemy', (o) => {
       const s = (0.9 + Math.min(0.25, (e.lvl - 1) * 0.004)) * (e.elite ? 1.35 : 1) * vs;
       if (crown) { crown.rotation.y = t * 1.2; aura.scale.setScalar(1.3 + Math.sin(t * 4) * 0.08); aura.material.opacity = 0.35 + Math.sin(t * 4) * 0.15; }
       if (!e.alive) { deadT += dt; const k = Math.max(0, 1 - deadT * 3); root.scale.setScalar(s * k); root.visible = k > 0; }
-      else { deadT = 0; root.scale.setScalar(s); root.visible = true; }
+      else { deadT = 0; root.scale.setScalar(s); root.visible = !e.hidden; } // hidden: burrowed (a burrow move's marker shows where it is)
+      if (e.hidden && Math.random() < 0.3) burst(e.x + (Math.random() - 0.5), 0.2, e.z + (Math.random() - 0.5), 1, 0x9a8a6a, 1.2, 0.4, 0.25, 6, 2);
     },
     dispose() { AssetLibrary.disposeInstance(model); mat.dispose(); if (aura) aura.material.dispose(); },
   };
@@ -6958,7 +7094,8 @@ function updateProjectileMeshes() {
 // rings: explosions + telegraphs
 // telegraph colours: red is always a threat to the player, gold is the player's own
 const TELE_MOB = 0xff3b3b, TELE_PLAYER = 0xffc94a;
-const RING_MAX = 28, rings = [];
+// pendingAoE markers take up to AOE_SHOWN slots from the top (sim moves refuse to place more), clouds the next 8
+const RING_MAX = AOE_SHOWN + 18, rings = [];
 for (let i = 0; i < RING_MAX; i++) {
   const ring = pxRingMesh(0.9, 1, { color: 0xffffff, transparent: true, depthWrite: false });
   const disc = pxRingMesh(0, 1, { color: 0xffffff, transparent: true, depthWrite: false });
@@ -6973,24 +7110,31 @@ function ringFx(x, z, r, color, life, warn) {
   slot.ring.material.color.setHex(color); slot.disc.material.color.setHex(color);
 }
 function updateRings(dt) {
-  // telegraphs from pending AoE
-  let used = 0;
-  for (const s of rings) s.tele = false;
+  // telegraphs from pending AoE (cones have their own meshes)
+  let used = 0, cones = 0;
+  for (const s of rings) { s.tele = false; s.disc.material.userData.px.uIn.value = 0; }
   for (const a of G.pendingAoE) {
-    const s = rings[RING_MAX - 1 - used]; if (!s || used >= 12) break; used++;
-    s.tele = true;
     const k = 1 - a.t / a.max, col = a.team === 'mob' ? TELE_MOB : TELE_PLAYER;
+    if (a.cone) { if (cones < CONE_SHOWN) mobCone(cones++, a, k, col); continue; }
+    const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN) continue; used++;
+    s.tele = true;
     s.ring.visible = s.disc.visible = true;
     s.ring.position.set(a.x, 0.08, a.z); s.ring.scale.setScalar(a.r); s.ring.material.opacity = 0.9; s.ring.material.color.setHex(col);
-    s.disc.position.set(a.x, 0.07, a.z); s.disc.scale.setScalar(a.r * k); s.disc.material.opacity = 0.35; s.disc.material.color.setHex(col);
+    s.disc.position.set(a.x, 0.07, a.z); s.disc.material.color.setHex(col);
+    // donut: the whole band shows from the start (the hole is the safe spot) and brightens as it lands
+    if (a.inner) { s.disc.scale.setScalar(a.r); s.disc.material.userData.px.uIn.value = a.inner / a.r; s.disc.material.opacity = 0.18 + 0.3 * k; }
+    else { s.disc.scale.setScalar(a.r * k); s.disc.material.opacity = 0.35; }
   }
+  for (let i = cones; i < MobCones.length; i++) MobCones[i].edge.visible = MobCones[i].fill.visible = false;
   for (const c of G.clouds) {
-    const s = rings[RING_MAX - 1 - used]; if (!s || used >= 18) break; used++;
-    s.tele = true; const fade = Math.min(1, c.t / 0.5);
+    const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
+    s.tele = true; const fade = Math.min(1, c.t / 0.5), tint = c.color || 0x5fd84a;
     s.ring.visible = s.disc.visible = true;
     s.ring.position.set(c.x, 0.08, c.z); s.ring.scale.setScalar(c.r); s.ring.material.opacity = 0.7 * fade; s.ring.material.color.setHex(c.team === 'mob' ? TELE_MOB : 0x8dff6a);
-    s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * 6) * 0.05) * fade; s.disc.material.color.setHex(0x5fd84a);
-    if (Math.random() < 0.5) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
+    s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * (c.pull ? 14 : 6)) * 0.05) * fade; s.disc.material.color.setHex(tint);
+    // a vortex sheds sparks from its rim; other clouds bubble anywhere
+    if (c.pull) { if (Math.random() < 0.7) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
+    else if (Math.random() < 0.5) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
   }
   for (let i = 0; i < RING_MAX - used; i++) {
     const s = rings[i];
@@ -7125,6 +7269,18 @@ function laneFx(x, z, a, len, w, color, life) {
   L.life = L.max = life; L.mesh.visible = true; L.mesh.position.set(x, 0.1, z); L.mesh.rotation.y = a; L.mesh.scale.set(w, 1, len); L.mesh.material.color.setHex(color);
 }
 function updateLaneFx(dt) { for (const L of LaneFX) { if (L.life <= 0) { L.mesh.visible = false; continue; } L.life -= dt; L.mesh.material.opacity = 0.35 + 0.5 * Math.abs(Math.sin(L.life * 18)) * (L.life / L.max); } }
+// red mob cones (breath): an outlined sector plus a fill that grows out from the mouth; geometry cached per half-angle
+const MobCones = [], coneGeos = {};
+const coneGeo = (half) => coneGeos[half] || (coneGeos[half] = new THREE.CircleGeometry(1, 24, -Math.PI / 2 - half, half * 2).rotateX(-Math.PI / 2));
+for (let i = 0; i < CONE_SHOWN; i++) {
+  const edge = new THREE.Mesh(coneGeo(0.52), aimMatOf(fanTex)), fill = new THREE.Mesh(coneGeo(0.52), aimMatOf(null));
+  edge.visible = fill.visible = false; edge.renderOrder = fill.renderOrder = 3; dynGroup.add(edge, fill); MobCones.push({ edge, fill });
+}
+function conePut(m, y, a, g, col) { m.geometry = g; m.visible = true; m.position.set(a.x, y, a.z); m.rotation.y = a.cone.a; m.material.color.setHex(col); }
+function mobCone(i, a, k, col) {
+  const C = MobCones[i], g = coneGeo(a.cone.half);
+  conePut(C.edge, 0.09, a, g, col); conePut(C.fill, 0.095, a, g, col); C.edge.scale.set(a.r, 1, a.r); C.edge.material.opacity = 0.85; C.fill.scale.set(a.r * Math.max(0.02, k), 1, a.r * Math.max(0.02, k)); C.fill.material.opacity = 0.3;
+}
 function drawSuperAim(f, kind, a, mag) {
   const gold = 0xffc94a;
   if (kind === 'super') {

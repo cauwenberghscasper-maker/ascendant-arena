@@ -217,7 +217,8 @@ function updateProjectileMeshes() {
 // rings: explosions + telegraphs
 // telegraph colours: red is always a threat to the player, gold is the player's own
 const TELE_MOB = 0xff3b3b, TELE_PLAYER = 0xffc94a;
-const RING_MAX = 28, rings = [];
+// pendingAoE markers take up to AOE_SHOWN slots from the top (sim moves refuse to place more), clouds the next 8
+const RING_MAX = AOE_SHOWN + 18, rings = [];
 for (let i = 0; i < RING_MAX; i++) {
   const ring = pxRingMesh(0.9, 1, { color: 0xffffff, transparent: true, depthWrite: false });
   const disc = pxRingMesh(0, 1, { color: 0xffffff, transparent: true, depthWrite: false });
@@ -232,24 +233,31 @@ function ringFx(x, z, r, color, life, warn) {
   slot.ring.material.color.setHex(color); slot.disc.material.color.setHex(color);
 }
 function updateRings(dt) {
-  // telegraphs from pending AoE
-  let used = 0;
-  for (const s of rings) s.tele = false;
+  // telegraphs from pending AoE (cones have their own meshes)
+  let used = 0, cones = 0;
+  for (const s of rings) { s.tele = false; s.disc.material.userData.px.uIn.value = 0; }
   for (const a of G.pendingAoE) {
-    const s = rings[RING_MAX - 1 - used]; if (!s || used >= 12) break; used++;
-    s.tele = true;
     const k = 1 - a.t / a.max, col = a.team === 'mob' ? TELE_MOB : TELE_PLAYER;
+    if (a.cone) { if (cones < CONE_SHOWN) mobCone(cones++, a, k, col); continue; }
+    const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN) continue; used++;
+    s.tele = true;
     s.ring.visible = s.disc.visible = true;
     s.ring.position.set(a.x, 0.08, a.z); s.ring.scale.setScalar(a.r); s.ring.material.opacity = 0.9; s.ring.material.color.setHex(col);
-    s.disc.position.set(a.x, 0.07, a.z); s.disc.scale.setScalar(a.r * k); s.disc.material.opacity = 0.35; s.disc.material.color.setHex(col);
+    s.disc.position.set(a.x, 0.07, a.z); s.disc.material.color.setHex(col);
+    // donut: the whole band shows from the start (the hole is the safe spot) and brightens as it lands
+    if (a.inner) { s.disc.scale.setScalar(a.r); s.disc.material.userData.px.uIn.value = a.inner / a.r; s.disc.material.opacity = 0.18 + 0.3 * k; }
+    else { s.disc.scale.setScalar(a.r * k); s.disc.material.opacity = 0.35; }
   }
+  for (let i = cones; i < MobCones.length; i++) MobCones[i].edge.visible = MobCones[i].fill.visible = false;
   for (const c of G.clouds) {
-    const s = rings[RING_MAX - 1 - used]; if (!s || used >= 18) break; used++;
-    s.tele = true; const fade = Math.min(1, c.t / 0.5);
+    const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
+    s.tele = true; const fade = Math.min(1, c.t / 0.5), tint = c.color || 0x5fd84a;
     s.ring.visible = s.disc.visible = true;
     s.ring.position.set(c.x, 0.08, c.z); s.ring.scale.setScalar(c.r); s.ring.material.opacity = 0.7 * fade; s.ring.material.color.setHex(c.team === 'mob' ? TELE_MOB : 0x8dff6a);
-    s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * 6) * 0.05) * fade; s.disc.material.color.setHex(0x5fd84a);
-    if (Math.random() < 0.5) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
+    s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * (c.pull ? 14 : 6)) * 0.05) * fade; s.disc.material.color.setHex(tint);
+    // a vortex sheds sparks from its rim; other clouds bubble anywhere
+    if (c.pull) { if (Math.random() < 0.7) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
+    else if (Math.random() < 0.5) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
   }
   for (let i = 0; i < RING_MAX - used; i++) {
     const s = rings[i];
@@ -384,6 +392,18 @@ function laneFx(x, z, a, len, w, color, life) {
   L.life = L.max = life; L.mesh.visible = true; L.mesh.position.set(x, 0.1, z); L.mesh.rotation.y = a; L.mesh.scale.set(w, 1, len); L.mesh.material.color.setHex(color);
 }
 function updateLaneFx(dt) { for (const L of LaneFX) { if (L.life <= 0) { L.mesh.visible = false; continue; } L.life -= dt; L.mesh.material.opacity = 0.35 + 0.5 * Math.abs(Math.sin(L.life * 18)) * (L.life / L.max); } }
+// red mob cones (breath): an outlined sector plus a fill that grows out from the mouth; geometry cached per half-angle
+const MobCones = [], coneGeos = {};
+const coneGeo = (half) => coneGeos[half] || (coneGeos[half] = new THREE.CircleGeometry(1, 24, -Math.PI / 2 - half, half * 2).rotateX(-Math.PI / 2));
+for (let i = 0; i < CONE_SHOWN; i++) {
+  const edge = new THREE.Mesh(coneGeo(0.52), aimMatOf(fanTex)), fill = new THREE.Mesh(coneGeo(0.52), aimMatOf(null));
+  edge.visible = fill.visible = false; edge.renderOrder = fill.renderOrder = 3; dynGroup.add(edge, fill); MobCones.push({ edge, fill });
+}
+function conePut(m, y, a, g, col) { m.geometry = g; m.visible = true; m.position.set(a.x, y, a.z); m.rotation.y = a.cone.a; m.material.color.setHex(col); }
+function mobCone(i, a, k, col) {
+  const C = MobCones[i], g = coneGeo(a.cone.half);
+  conePut(C.edge, 0.09, a, g, col); conePut(C.fill, 0.095, a, g, col); C.edge.scale.set(a.r, 1, a.r); C.edge.material.opacity = 0.85; C.fill.scale.set(a.r * Math.max(0.02, k), 1, a.r * Math.max(0.02, k)); C.fill.material.opacity = 0.3;
+}
 function drawSuperAim(f, kind, a, mag) {
   const gold = 0xffc94a;
   if (kind === 'super') {
