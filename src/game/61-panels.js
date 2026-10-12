@@ -17,7 +17,7 @@ function interact() {
 }
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
-  const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + UI.gearSlot : UI.current === 'collection' ? '|' + UI.collectionSlot : '');
+  const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + (UI.gearAll && UI.heroTab === 'Gear' ? 'all' : UI.gearSlot) : UI.current === 'collection' ? '|' + UI.collectionSlot : '');
   const prevBody = $('panel').querySelector(':scope > .pBody'), same = UI.panelKind === panelKind;
   const scroll = same ? (prevBody ? prevBody.scrollTop : $('panel').scrollTop) : 0; UI.panelKind = panelKind;
   if (!same) UI.moreOpen = false;
@@ -60,6 +60,38 @@ function itemGrid(items, o) {
 function itemSummary(it, extra) {
   return `<img src="${thumbFor(it)}" alt="" style="--rc:${rarCol(it.rarity)}"><div class="sx"><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b><small>${CFG.gear.rarity[it.rarity].name} · ${SLOT_LABEL[it.slot]} · item level ${it.ilvl}</small><small>${extra || statLine(it)}</small></div>`;
 }
+// Menu size (Options): menus and the HUD are drawn at this zoom. Compact (the default) fits about a third more on a phone.
+const UI_SIZES = [{ name: 'Compact', z: 0.84 }, { name: 'Normal', z: 1 }, { name: 'Large', z: 1.15 }];
+function applyUiSize() {
+  const z = (UI_SIZES[(G.profile && G.profile.settings.uiSize) | 0] || UI_SIZES[0]).z;
+  document.documentElement.style.setProperty('--uiz', z);
+}
+// --- build preview: the hero's numbers now, and with one bag piece swapped in -------------------------------------
+// applyStats runs on a copy of the player, so nothing in the game changes while you compare.
+function previewStats(it) {
+  const p = G.profile, f = Object.assign({}, G.player);
+  applyStats(f, 'hub', it ? Object.assign({}, p, { gear: Object.assign({}, p.gear, { [it.slot]: it }) }) : p);
+  return f;
+}
+const pctS = (x) => `${Math.round(x * 100)}%`;
+const BUILD_STATS = [
+  ['Damage', (f) => f.dmg, (x) => fmtK(x)],
+  ['Max HP', (f) => f.maxHp, (x) => fmtK(x)],
+  ['Crit', (f) => CFG.combat.critChance + f.critBonus, pctS],
+  ['Crit dmg', (f) => CFG.combat.critMult + f.critDmg, (x) => '×' + x.toFixed(2)],
+  ['Atk spd', (f) => f.atkSpeed || 0, (x) => (x >= 0.005 ? '+' : '') + pctS(x)],
+  ['Lifesteal', (f) => f.lifesteal || 0, pctS],
+  ['Armor', (f) => Math.min(0.6, f.armor || 0), pctS],
+  ['Cooldown', (f) => f.cdr || 0, (x) => (x >= 0.005 ? '-' : '') + pctS(x)],
+];
+// eight key stats in a 4×2 ledger; with a picked piece each one shows what it would gain or lose
+function statStrip(pick) {
+  const now = previewStats(null), then = pick ? previewStats(pick) : null;
+  return `<div class="bstats" aria-label="${pick ? 'Your stats if you equip this piece' : 'Your stats'}">${BUILD_STATS.map(([k, get, f]) => {
+    const a = get(now), b = then ? get(then) : a, d = b - a, big = Math.abs(d) > Math.max(1e-6, Math.abs(a) * 0.0005);
+    const dt = !then || !big ? '' : `<em class="${d > 0 ? 'gain' : 'loss'}">${d > 0 ? '▲' : '▼'}${k === 'Damage' || k === 'Max HP' ? fmtK(Math.abs(d)) : f(Math.abs(d)).replace(/^[+-]/, '')}</em>`;
+    return `<div><span>${k}</span><b>${f(then ? b : a)}</b>${dt}</div>`; }).join('')}</div>`;
+}
 // --- hero sheet (portrait dressing room): a bottom sheet at 45% that the grip drags up to full height and back ---
 // The sheet's rect is cached here (open, resize, drag) so the camera and paper doll never read layout per frame.
 UI.sheet = { top: 0, left: 0, right: 0, bottom: 0 };
@@ -94,7 +126,7 @@ function setupSheetGrip() {
     const d = drag; drag = null; modal.classList.remove('dragging');
     if (!d.moved) return; // a tap: the click below toggles (keyboards and screen readers click too)
     // snap to whichever stop the finger ended nearer, and swallow the click that follows the drag
-    const h = $('panel').getBoundingClientRect().height, half = window.innerHeight * 0.45, full = window.innerHeight;
+    const h = $('panel').getBoundingClientRect().height, half = window.innerHeight * 0.6, full = window.innerHeight;
     dragged = true; setSheetFull(e.type !== 'pointercancel' && h > (half + full) / 2 - 60);
   };
   grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
@@ -262,25 +294,25 @@ function heroTab(tab) {
   const pct = (x) => `${Math.round(x * 100)}%`;
   if (tab === 'Stats') {
     const g = gearTotals(p.gear);
+    // one line per stat: name, value and four benchmark pips (Base to Ascendant); two columns
     const st = (k, v, sub, earned) => {
-      const colors = ['#aba4b8','#77ad91','#80cbd8','#c296df','#f2cf85'];
-      const rank = earned && earned.rank;
-      return `<div class="${earned ? 'statCard' : ''}" ${earned ? `style="--statColor:${colors[rank]}"` : ''}><span>${k}</span><b>${v}${sub ? ` <small>${sub}</small>` : ''}</b>${earned ? `<i class="statCorner" aria-hidden="true"></i><label class="statSteps" aria-hidden="true">${[1,2,3,4].map(n=>`<i class="${rank>=n?'earned':''}"></i>`).join('')}</label><small class="statRank">${earned.name} benchmark</small>` : ''}</div>`;
+      const colors = ['#9d9686', '#7f9e6e', '#6f9fb0', '#a184b8', '#d4a85a'], rank = earned ? earned.rank : -1;
+      return `<div class="lrow"${earned ? ` style="--statColor:${colors[rank]}" title="${earned.name} benchmark"` : ''}><span>${k}</span><b>${v}${sub ? ` <small>${sub}</small>` : ''}</b>${earned ? `<i class="pips" aria-label="${earned.name} benchmark">${[1, 2, 3, 4].map((n) => `<i class="${rank >= n ? 'on' : ''}"></i>`).join('')}</i>` : ''}</div>`;
     };
     const mark = statMilestone;
-    body = `<h4 class="sub first">Combat</h4><div class="statgrid">
+    body = `<h4 class="sub first">Combat</h4><div class="ledger">
       ${st('Damage', fmtK(pl.dmg),null,mark(pl.dmg,[75,250,1000,5000]))}${st('Max HP', fmtK(pl.maxHp),null,mark(pl.maxHp,[500,2000,10000,50000]))}
       ${st('Crit chance', pct(CFG.combat.critChance + pl.critBonus),null,mark(pl.critBonus,[.05,.15,.3,.5]))}${st('Crit damage', '×' + (CFG.combat.critMult + pl.critDmg).toFixed(2),null,mark(pl.critDmg,[.1,.3,.6,1]))}
       ${st('Attack speed', '+' + pct(pl.atkSpeed || 0),null,mark(pl.atkSpeed,[.1,.25,.5,1]))}${st('Lifesteal', pct(pl.lifesteal || 0),null,mark(pl.lifesteal,[.03,.08,.15,.3]))}
       ${st('Damage reduction', pct(Math.min(0.6, pl.armor || 0)),null,mark(Math.min(.6,pl.armor||0),[.05,.15,.3,.5]))}${st('Cooldowns', '-' + pct(pl.cdr || 0),null,mark(pl.cdr,[.05,.15,.3,.5]))}
       ${st('Move speed', pl.speed.toFixed(2))}${st('Weapon mastery', '+' + pct(pl.masteryDmg || 0), 'damage')}</div>
-      <h4 class="sub">Progress</h4><div class="statgrid">
+      <h4 class="sub">Progress</h4><div class="ledger">
       ${st('Level', `${p.level}`)}${st('Prestige', `${prestigeCount(p)}`)}${st('Gear score', fmt(Math.round(g.score)))}
       ${st('Total mastery', fmt(totalMastery(p)))}${st('Gems', fmtK(p.essence))}
       ${st('Monsters', fmtK(p.stats.kills), `${fmt(p.stats.elites || 0)} elite`)}${st('Best streak', fmt(p.stats.bestStreak || 0))}
       ${st('Trophies', fmt(p.trophies), `best ${fmt(p.bestTrophies)}`)}${st('Arena power', '×' + playerArenaPower(p).toFixed(2))}</div>
 
-      <p class="fine">Corner ribbons show earned stat benchmarks, from Base to Ascendant. They are not stat caps.</p><button class="ghost" data-act="mPrestige">Prestige ${prestigeCount(p)} · ${prestigeCount(p) ? `${petProgress(p).name} Lv ${petProgress(p).level}` : `Dragon unlocks at level ${PRESTIGE_LEVEL}`}</button>
+      <p class="fine">The pips show earned benchmarks, from Base to Ascendant. They are not stat caps.</p><button class="ghost" data-act="mPrestige">Prestige ${prestigeCount(p)} · ${prestigeCount(p) ? `${petProgress(p).name} Lv ${petProgress(p).level}` : `Dragon unlocks at level ${PRESTIGE_LEVEL}`}</button>
       <h4 class="sub">Gear bonuses</h4><p class="fine">${(() => { const a = g.aff; const l = Object.keys(a).filter((k) => a[k] > 0).map((k) => `+${Math.round(a[k] * 100)}% ${CFG.affixes[k].name}`); return l.length ? l.join(' · ') : 'Uncommon and better items roll bonuses like attack speed, crit damage, lifesteal and damage reduction.'; })()}</p>
       <h4 class="sub">Attack perks and specials</h4>${(() => { const l = CFG.gear.slots.map((s) => perkText(p.gear[s])).filter(Boolean); return l.length ? `<div class="list">${l.map((t) => `<div class="perk solo">${t}</div>`).join('')}</div>` : '<p class="fine">Rare, Epic and Legendary pieces each add a new attack option, and accessories add a Fire, Ice, Storm or Toxic special.</p>'; })()}`;
   } else if (tab === 'Gear') {
@@ -296,21 +328,24 @@ function heroTab(tab) {
     const can = !!cur && a.canUpgrade && p.essence >= upgradeEssence(cur);
     const one = cur ? maxUpgradePlan(cur, 1) : {n:0,materials:[]}, mp = cur ? maxUpgradePlan(cur) : {n:0,materials:[]}, next = new Set(one.materials), all = new Set(mp.materials);
     const equippedIds = new Set(Object.values(p.gear).filter(Boolean).map(it => it.id));
-    const pieces = p.bag.filter((b) => b.slot === sel && !equippedIds.has(b.id)).sort((x, y) => (isBetter(y, x) ? 1 : isBetter(x, y) ? -1 : 0));
+    // "All gear" lists the whole bag by slot, so a build can be planned without hopping between slots
+    const all0 = !!UI.gearAll, bagOf = (b) => !equippedIds.has(b.id) && (all0 || b.slot === sel);
+    const pieces = p.bag.filter(bagOf).sort((x, y) => (all0 && x.slot !== y.slot ? order.indexOf(x.slot) - order.indexOf(y.slot) : isBetter(y, x) ? 1 : isBetter(x, y) ? -1 : 0));
     const pick = pieces.find((b) => b.id === UI.gearPick) || null; if (!pick) UI.gearPick = null;
-    const mark = (it) => isBetter(it, cur) ? { cls: 'up', text: '▲', label: 'better than equipped' } : next.has(it.id) ? { cls: 'mat1', text: '+1', label: 'used by the next merge' } : all.has(it.id) ? { cls: 'mat', text: 'max', label: 'used by Merge max' } : null;
+    const mark = (it) => isBetter(it, p.gear[it.slot]) ? { cls: 'up', text: '▲', label: 'better than equipped' } : next.has(it.id) ? { cls: 'mat1', text: '+1', label: 'used by the next merge' } : all.has(it.id) ? { cls: 'mat', text: 'max', label: 'used by Merge max' } : null;
     const worse = p.bag.filter((b) => !b.locked && !isBetter(b, p.gear[b.slot]) && rarIdx(b.rarity) < 4).length;
     const L = p.luck, Pi = CFG.loot.pity;
     const reroll = cur && rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '';
-    body = `<div class="tiles">${tiles}</div>
-      <div class="subRow"><h4 class="sub">${SLOT_LABEL[sel]}s in your bag · ${pieces.length}</h4><small>bag ${p.bag.length}/${CFG.gear.bagMax}</small>${worse ? `<button class="ghost sm" data-act="salvageAll" aria-label="High-alch ${worse} weaker pieces">Alch ${worse}</button>` : ''}</div>
-      ${itemGrid(pieces, { act: 'gpick', sel: UI.gearPick, mark, empty: `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
+    const filt = `<div class="bagFilter" role="group" aria-label="Show"><button class="${all0 ? '' : 'on'}" data-act="gearAll" data-v="0" aria-pressed="${!all0}">${SLOT_LABEL[sel]}s</button><button class="${all0 ? 'on' : ''}" data-act="gearAll" data-v="1" aria-pressed="${all0}">All gear</button></div>`;
+    body = `${statStrip(pick)}<div class="tiles">${tiles}</div>
+      <div class="subRow"><h4 class="sub">Bag · ${pieces.length}</h4>${filt}<small>${p.bag.length}/${CFG.gear.bagMax}</small>${worse ? `<button class="ghost sm" data-act="salvageAll" aria-label="High-alch ${worse} weaker pieces">Alch ${worse}</button>` : ''}</div>
+      ${itemGrid(pieces, { act: 'gpick', sel: UI.gearPick, mark, empty: all0 ? 'Your bag is empty. Monsters, elites, dens, shrines and world bosses drop gear.' : `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
       ${pieces.length ? `<div class="ilegend"><span><i class="up">▲</i>better</span><span><i class="m1">+1</i>next reforge</span><span><i class="mm">max</i>reforge max</span><span>${gi('m_lock')} kept</span></div>` : ''}
       <h4 class="sub">${SLOT_LABEL[sel]} · worn</h4><div class="list">${cur ? itemRow(cur, reroll, null, { upgrade: can }) : '<p class="fine">Nothing equipped. Choose a piece from your bag above.</p>'}</div>
       <h4 class="sub">Luck</h4><div class="luck">${['rare', 'epic', 'legendary'].concat(HIGH_RAR.filter((h) => highWeights(curTier(), 6)[h] > 0)).map((r) => `<div class="lk ${r}"><span>${CFG.gear.rarity[r].name} guaranteed in</span><b>${Math.max(1, Pi[r] - L[r])} drops</b><i style="--v:${Math.round(L[r] / Pi[r] * 100)}%"></i></div>`).join('')}</div>`;
     if (pick) {
       const better = isBetter(pick, cur), se = salvageEssence(pick);
-      bar = selBar(itemSummary(pick, `${better ? '<span style="color:#58e08a">Better than equipped</span> · ' : ''}Alch: ${ICON.coin}${fmtK(salvageValue(pick))}${se ? ` ${ICON.ess}${se}` : ''}`) + `<button class="pMoreBtn" data-act="gpick" data-id="" aria-label="Deselect">✕</button>`,
+      bar = selBar(itemSummary(pick, `${better ? '<span class="gain">Better than equipped</span> · ' : ''}Alch: ${ICON.coin}${fmtK(salvageValue(pick))}${se ? ` ${ICON.ess}${se}` : ''}`) + `<button class="pMoreBtn" data-act="gpick" data-id="" aria-label="Deselect">✕</button>`,
         `<button class="ghost" data-act="protectGear" data-id="${escapeHTML(pick.id)}">${pick.locked ? 'Unprotect' : 'Protect'}</button>`
         + `<button class="ghost" data-act="salvage" data-id="${escapeHTML(pick.id)}" ${pick.locked ? 'disabled' : ''}>Alch</button><button class="primary" data-act="equip" data-id="${escapeHTML(pick.id)}">${wearWord(pick.slot)}</button>`,
         `<div class="list">${itemRow(pick, '', 'In your bag', { better })}${cur ? itemRow(cur, '', 'Worn now') : '<p class="fine">Empty slot</p>'}</div>`);
@@ -514,6 +549,8 @@ function openSettings() {
       <button class="ghost sm" data-act="tLevel">+1 level</button><button class="ghost sm" data-act="t5">+5 levels</button>${TEST_MODE ? '<button class="ghost sm" data-act="t100">+100 levels</button>' : ''}<button class="ghost sm" data-act="tGold">+gold</button><button class="ghost sm" data-act="tEss">+50 gems</button><button class="ghost sm" data-act="tShards">+40 shards</button>
       <button class="ghost sm" data-act="tBoss">World boss now</button><button class="ghost sm" data-act="tUnlock">Unlock attacks</button>
       <button class="ghost sm" data-act="tLegend">Legendary item</button><button class="ghost sm" data-act="tFocus">Dragonsoul Focus (new 3D)</button></div>` : ''}
+    <label class="tgl sel"><span><b>Menu size</b><small>Compact fits more items and stats on screen. Large makes text and buttons bigger</small></span>
+      <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
@@ -597,7 +634,11 @@ function handlePanelClick(e) {
     case 'credits': creditsPanel(); break;
     case 'openSettings': openSettings(); break;
     case 'equip': equipItem(b.dataset.id); UI.gearPick = null; Showcase.spin = 0; heroTab('Gear'); break;
-    case 'gpick': UI.gearPick = b.dataset.id && UI.gearPick !== b.dataset.id ? b.dataset.id : null; heroTab('Gear'); break;
+    case 'gpick': { UI.gearPick = b.dataset.id && UI.gearPick !== b.dataset.id ? b.dataset.id : null;
+      // in "All gear" a pick also selects its slot, so the compare and the buttons are about that slot
+      const it = UI.gearPick && G.profile.bag.find((x) => x.id === UI.gearPick); if (it && it.slot !== UI.gearSlot) { UI.gearSlot = it.slot; UI.gearPickSlot = it.slot; }
+      heroTab('Gear'); break; }
+    case 'gearAll': UI.gearAll = b.dataset.v === '1'; UI.gearPick = null; heroTab('Gear'); break;
     case 'pMore': UI.moreOpen = !UI.moreOpen; syncMore(); break;
     case 'unequip': if (unequipItem(b.dataset.slot)) { Showcase.spin = 0; heroTab('Gear'); } break;
     case 'slot': UI.gearSlot = b.dataset.slot; heroTab('Gear'); break;
@@ -640,7 +681,7 @@ function handlePanelClick(e) {
 }
 function handleSettingChange(e) {
   if (e.target.dataset.sel2 === 'tBrawler') { openSkills(e.target.value); return; }
-  if (e.target.dataset.sel) { G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; return; }
+  if (e.target.dataset.sel) { G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; if (e.target.dataset.sel === 'uiSize') { applyUiSize(); measureSheet(); } return; }
   const k = e.target.dataset.set; if (!k) return;
   if (k === 'fastXp' && !LOCAL_PREVIEW) return;
   G.profile.settings[k] = e.target.checked; G.dirty = true;

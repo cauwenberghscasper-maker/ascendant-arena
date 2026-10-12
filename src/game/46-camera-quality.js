@@ -120,9 +120,10 @@ Cam.frame = { dist: 8, yc: 1.2, span: 2.4, offX: 0, offY: 0 };
 function showcaseFrame() {
   const F = Cam.frame, S = UI.sheet; if (UI.sheetFull || !S.bottom) return F;
   const w = window.innerWidth, h = window.innerHeight, gs = growthScale(G.player);
-  const chipR = Cam.portrait ? 8 + Math.min(138, Math.max(124, w * .34)) : 8 + Math.min(158, w * .19);
+  // the paper-doll sockets take a column on each side in portrait and one on the left in landscape
+  const chipR = 10 + DOLL_SLOT + 8;
   const top = 8, bot = Cam.portrait ? S.top - 28 : h - 30;
-  const left = chipR + 6, right = Cam.portrait ? w : S.left - 8;
+  const left = chipR, right = Cam.portrait ? w - chipR : S.left - 8;
   // world span from the podium floor to the hat tip (measured 1.65 x growth); ascended heroes add a crown
   const lo = Showcase.podium - 0.05, hi = Showcase.podium + 1.72 * gs * (ascTier(G.profile.level) >= 3 ? 1.3 : 1);
   const px = Math.max(120, (bot - top) * 0.96);

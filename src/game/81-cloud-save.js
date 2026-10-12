@@ -45,6 +45,7 @@ function applyProfile(prof, note) {
   G.profile = prof;
   refreshPlayerStats(true);
   Sfx.setMute(!!prof.settings.mute);
+  applyUiSize();
   setMap(prof.settings.map !== false);
   G.zoneIdx = zoneAt(G.player.z);
   if (!G.started) $('playBtn').textContent = prof.level > 1 || prof.stats.jobs > 0 ? `Continue · Level ${prof.level}` : 'PLAY';
