@@ -47,6 +47,7 @@ function processEvents() {
   const evs = G.events;
   for (let i = 0; i < evs.length; i++) {
     const e = evs[i];
+    if (e.t.length > 4 && e.t.startsWith('hero')) { HeroFX.event(e); continue; }
     switch (e.t) {
       case 'toast': showToast(e.text, e.kind); break;
       case 'hit':
@@ -63,8 +64,8 @@ function processEvents() {
         break;
       case 'melee': SpriteFX.play('slash', 'white', e.x, 1.1, e.z, 2.8, { rot: Math.random() * 6.28 }); burst(e.x, 1, e.z, 6, 0xffffff, 6, 0.25, 0.2, 10); if (e.isPlayer || near(e, 15)) Sfx.play('melee'); break;
       case 'dash': SpriteFX.play('dust', 'dust', e.x, 0, e.z, 1.6); burst(e.x, 0.4, e.z, 10, 0xe8f4ff, 4, 0.35, 0.25, 2, 0.2); if (e.isPlayer || near(e, 15)) Sfx.play('dash', { gap: 0.05 }); break;
-      case 'boom': if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); boomFx(e); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
-      case 'puff': burst(e.x, 1, e.z, 3, e.color, 3, 0.25, 0.15, 6); break;
+      case 'boom': if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); if (e.hid) HeroFX.impact(e); else boomFx(e); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
+      case 'puff': if (e.hid) HeroFX.impact(e); else burst(e.x, 1, e.z, 3, e.color, 3, 0.25, 0.15, 6); break;
       case 'bounce': SpriteFX.play('impact', 'white', e.x, 1, e.z, 1.1); burst(e.x, 1, e.z, 4, 0xffffff, 3, 0.2, 0.14, 4); if (near(e, 16)) Sfx.play('bounce', { gap: 0.05 }); break;
       case 'split': SpriteFX.play('impact', fxPal(e.color), e.x, 1, e.z, 1.5); burst(e.x, 1, e.z, 8, e.color, 5, 0.3, 0.18, 6); if (near(e, 18)) Sfx.play('split', { gap: 0.05 }); break;
       case 'petAttack':
@@ -91,7 +92,7 @@ function processEvents() {
         if (near(e, 22)) Sfx.play('die', { gap: 0.05 });
         if (e.kind === 'boss') Cam.shake = 1;
         break;
-      case 'super': if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } burst(e.x, 1, e.z, 14, 0xffb02e, 7, 0.5, 0.25, 6); if (e.isPlayer || near(e, 20)) { SpriteFX.play('nova', 'gold', e.x, 1.2, e.z, 5.5); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 6, { speed: 1.1 }); } break;
+      case 'super': if (e.hero) { if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } break; } if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } burst(e.x, 1, e.z, 14, 0xffb02e, 7, 0.5, 0.25, 6); if (e.isPlayer || near(e, 20)) { SpriteFX.play('nova', 'gold', e.x, 1.2, e.z, 5.5); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 6, { speed: 1.1 }); } break;
       case 'skill': { const pal = e.kind === 'ironskin' ? 'gold' : e.kind === 'swift' ? 'venom' : 'frost'; burst(e.x, 1, e.z, 12, e.kind === 'ironskin' ? 0xffd34a : e.kind === 'swift' ? 0x9cff9c : 0x9ae8ff, 5, 0.5, 0.22, 4); SpriteFX.play('pillar', pal, e.x, 0, e.z, 4.2); if (e.isPlayer) Sfx.play('super'); break; }
       case 'gold': if (e.amt > 0) Sfx.play('coin', { gap: 0.08 }); break;
       case 'xp': if (e.reason && e.reason !== 'kill') dmgNumberPlayer(`+${fmtK(e.amt)} XP`, 'xp'); XPDrops.add('xp', e.amt); break;

@@ -6,7 +6,7 @@ function defaultProfile() {
   const gear = {};
   for (const s of CFG.gear.slots) gear[s] = makeItem(s, 'common', 1, 'Worn ' + ITEM_NAMES[s][0]);
   const prof = {
-    v: 2, level: 1, xp: 0, prestige: 0, gold: 0, trophies: 0, bestTrophies: 0, cls: 'bolt', starterBrawler: 'bolt', mergeVersion: 1, artVersion: 1, gear, bag: [],
+    v: 2, level: 1, xp: 0, prestige: 0, gold: 0, trophies: 0, bestTrophies: 0, cls: STARTER_HERO, starterBrawler: STARTER_HERO, mergeVersion: 1, artVersion: 1, gear, bag: [],
     treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
@@ -42,8 +42,11 @@ function sanitizeProfile(p) {
   if (!(p.settings && p.settings.testSeen)) { out.settings.fastXp = false; out.settings.testSeen = true; } // new players start in normal mode; Test mode stays a switch in Settings
   if (!LOCAL_PREVIEW) out.settings.fastXp = false;
   out.level = clamp(out.level | 0, 1, CFG.progression.cap);
-  if (!CFG.brawlers[out.cls]) out.cls = 'bolt';
-  out.starterBrawler = CFG.brawlers[p.starterBrawler] ? p.starterBrawler : out.cls;
+  // retired adventurers (bolt, smg, ... starfall) hand over to the starter hero, keeping the first hero's mastery so switching stays open
+  const oldFirst = p.starterBrawler || 'bolt';
+  if (!CFG.brawlerOrder.includes(out.cls)) out.cls = STARTER_HERO;
+  out.starterBrawler = CFG.brawlerOrder.includes(p.starterBrawler) ? p.starterBrawler : out.cls;
+  if (out.starterBrawler !== oldFirst && out.mastery && out.mastery['w:' + oldFirst]) out.mastery = Object.assign({}, out.mastery, { ['w:' + out.starterBrawler]: Math.max(out.mastery['w:' + out.starterBrawler] || 0, out.mastery['w:' + oldFirst]) });
   if (!p.mergeVersion) { out.settings.autoSalvage = 0; out.mergeVersion = 1; }
   if (!out.brawlers || typeof out.brawlers !== 'object') out.brawlers = {};
   if (!out.brawlers[out.cls]) out.brawlers[out.cls] = newBrawlerState();

@@ -32,7 +32,7 @@ function frame(now) {
   const t = now / 1000;
   syncViews(dt, t);
   mpUpdate(dt);
-  updateGearAura(dt); updateProjectileMeshes(); updateParticles(dt); updateRings(dt); updateAim(dt);
+  updateGearAura(dt); updateProjectileMeshes(); HeroFX.update(dt, HeroSupers.marked); updateParticles(dt); updateRings(dt); updateAim(dt);
   if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
   updateCamera(dt);
   updateCompanion(dt,t);

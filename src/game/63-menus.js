@@ -38,6 +38,14 @@ const PX_KEY_FAM = {
   m_gem: 'arcane', m_coin: 'gold', m_shard: 'arcane', m_rift: 'mythic', m_portal: 'arcane', m_asc: 'gold', m_arena: 'blood', m_lock: 'steel',
   m_hero: 'gold', m_brawlers: 'fire', m_skills: 'arcane', m_artifacts: 'mythic', m_progress: 'nature', m_records: 'gold', m_feats: 'gold', m_case: 'gold', m_caseOpen: 'gold', m_vault: 'steel', m_exped: 'nature', m_auto: 'electric', m_idle: 'gold', m_menu: 'steel', m_players: 'ice', m_smith: 'fire', m_floor: 'arcane', m_tier: 'blood',
 };
+// Codex heroes reuse the closest game-icons glyph, tinted in their own colour family
+const HERO_ICON = { wrenna: ['m_progress', 'ice'], hob: ['n_aoe', 'tech'], corrin: ['n_regen', 'nature'], mott: ['k_undying', 'fire'], nyssa: ['m_coin', 'steel'],
+  pyrrhos: ['n_armor', 'gold'], moss: ['n_core', 'blood'], ione: ['n_super', 'tech'], fenwick: ['k_bloodthirst', 'steel'], thimble: ['k_phase', 'venom'], unwritten: ['n_xp', 'parch'],
+  lysandra: ['k_aftershock', 'parch'], kallix: ['a_ember', 'fire'], oko: ['a_lens', 'gold'], ysolt: ['k_grasp', 'blood'], halven: ['u_crown', 'arcane'],
+  sena: ['k_execute', 'blood'], jory: ['a_reaper', 'ice'], sleeper: ['k_kraken', 'tech'], camedown: ['m_floor', 'gold'],
+  vell: ['m_idle', 'arcane'], ophira: ['k_glass', 'venom'], kerberon: ['m_brawlers', 'fire'], tychon: ['k_infinity', 'mythic'], aurvan: ['a_frost', 'ice'], ourax: ['a_giant', 'nature'], hespera: ['k_sunfire', 'fire'] };
+for (const id in HERO_ICON) { const [k, fam] = HERO_ICON[id]; if (GI[k]) { GI['b_' + id] = GI[k]; GI_SRC['b_' + id] = GI_SRC[k]; PX_KEY_FAM['b_' + id] = fam; } }
+
 const PX_ART_FAM = { tech: 'tech', mythic: 'mythic', ice: 'ice', gold: 'gold', steel: 'steel', fire: 'fire', blood: 'blood', venom: 'venom', electric: 'electric' };
 function pxFamOf(key) {
   if (PX_KEY_FAM[key]) return PX_KEY_FAM[key];
@@ -294,14 +302,22 @@ function openBrawlers(sel) {
   const p = G.profile, owned = ownedBrawlers(p), fresh = new Set(p.newUnlocks);
   sel = sel || UI.brawlerSel || p.cls; UI.brawlerSel = sel;
   const onlyOwned = !!UI.ownedOnly;
-  const cards = CFG.brawlerOrder.filter((id) => !onlyOwned || owned.includes(id)).map((id) => {
+  const card = (id) => {
     const B = CFG.brawlers[id], have = owned.includes(id), L = masteryOf(p, id);
-    return `<button class="bcard ${have ? 'own' : 'locked'} ${id === sel ? 'sel' : ''} ${id === p.cls ? 'cur' : ''}" data-act="bSel" data-id="${id}">
+    return `<button class="bcard ${have ? 'own' : 'locked'} ${id === sel ? 'sel' : ''} ${id === p.cls ? 'cur' : ''} tier-${B.tier || 'adventurer'}" data-act="bSel" data-id="${id}">
       ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have, 96)}
-      <b>${B.name}</b><small>${have ? `Mastery ${L}` : 'Locked'}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
+      <b>${B.name}</b><small>${have ? `Mastery ${L}` : `Lv ${CFG.attacks[id].unlock && CFG.attacks[id].unlock.level ? CFG.attacks[id].unlock.level : '—'}`}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
+  };
+  // one section per tier, from the champions up to the divines
+  const HERO_TIERS = [['adventurer', 'Adventurers'], ['champion', 'Champions'], ['legendary', 'Legendaries'], ['ascendant', 'Ascendants'], ['divine', 'Divines']];
+  const shown = CFG.brawlerOrder.filter((id) => !onlyOwned || owned.includes(id));
+  const cards = HERO_TIERS.map(([tier, label]) => {
+    const all = CFG.brawlerOrder.filter((id) => (CFG.brawlers[id].tier || 'adventurer') === tier), ids = shown.filter((id) => all.includes(id));
+    if (!ids.length) return '';
+    return `<div class="btier tier-${tier}"><b>${label}</b><span>${all.filter((id) => owned.includes(id)).length}/${all.length}</span></div>` + ids.map(card).join('');
   }).join('');
   const B = CFG.brawlers[sel], A = CFG.attacks[sel], C = CFG.classes[sel], have = owned.includes(sel);
-  const first = p.starterBrawler || 'bolt', firstLevel = masteryOf(p, first), switchReady = canSwitchBrawler(p, sel);
+  const first = p.starterBrawler || STARTER_HERO, firstLevel = masteryOf(p, first), switchReady = canSwitchBrawler(p, sel);
   const xp = (p.mastery || {})['w:' + sel] || 0, L = masteryLevel(xp), a0 = mxpFor(L), a1 = mxpFor(Math.min(99, L + 1)), f = L >= 99 ? 1 : (xp - a0) / Math.max(1, a1 - a0);
   const t = tierOf(L), next = CFG.badges.find((b) => L < b.lvl);
   const badges = CFG.badges.map((b, i) => `<div class="bdg ${L >= b.lvl ? 'got' : ''}">${badgeSVG(L >= b.lvl ? i : -1, 'b_' + sel, { static: L < b.lvl })}<small>${b.name}<br>${b.lvl}</small></div>`).join('');
@@ -309,7 +325,8 @@ function openBrawlers(sel) {
   const free = have ? treeFree(p, sel) : 0, tp = have ? treeOf(p, sel).total : 0;
   const summary = `${brawlerPortrait(sel, have, 68)}<div class="sx"><b>${B.name}${sel === p.cls ? ' · playing' : ''}</b><small>${C.role} · ${A.name}</small><small>${have ? `Mastery ${L}${t >= 0 ? ' · ' + CFG.badges[t].title : ''} · ${free > 0 ? `<span style="color:#ffc94a">${free} tree points free</span>` : `${tp} tree points`}` : `${gi('m_lock')} ${unlockText(A.unlock)}`}</small></div>`;
   const more = `<p class="bdesc">${A.desc}.</p>
-    <div class="kit"><div><span>Super</span><b>${sup.name}</b><small>Tap to auto-aim, drag to aim</small></div><div><span>Skill</span><b>${sk ? sk.name : '—'}</b><small>${sk ? sk.desc : ''}</small></div></div>
+    ${B.title ? `<p class="fine htitle">${B.full || B.name} · ${B.title}</p>` : ''}
+    <div class="kit"><div><span>Super</span><b>${sup.name}</b><small>${sup.desc || 'Tap to auto-aim, drag to aim'}</small></div><div><span>Skill</span><b>${sk ? sk.name : '—'}</b><small>${sk ? sk.desc : ''}</small></div></div>
     ${have ? `<div class="mast"><div class="mrowh"><b>Mastery ${L}</b><span>${L >= 99 ? 'Maxed' : next ? `${next.name} badge at ${next.lvl}` : ''}</span></div><span class="mbar"><i style="--v:${(f * 100).toFixed(1)}%"></i></span>
       <small>${fmtK(xp)} xp · badges give +3% damage and +2% HP each</small></div>` : ''}
     <div class="bdgs">${badges}</div>`;

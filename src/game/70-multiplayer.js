@@ -51,7 +51,7 @@ function mpApply(key, s, via, guest) {
   const t = mpNum(s.t, Date.now());
   let e = MP.peers.get(key);
   if (e && t < e.t - 50) return e; // older than what we already have
-  const cls = CFG.brawlers[s.c] ? s.c : 'bolt', x = clamp(mpNum(s.x, 0), -2000, 2000), z = clamp(mpNum(s.z, 0), -2000, 2000);
+  const cls = CFG.brawlerOrder.includes(s.c) ? s.c : STARTER_HERO, x = clamp(mpNum(s.x, 0), -2000, 2000), z = clamp(mpNum(s.z, 0), -2000, 2000);
   if (!e) {
     e = { id: 'peer:' + key, key, kind: 'fighter', isPeer: true, team: 'peer', cls, x, z, tx: x, tz: z, facing: 0, tf: 0, moveAmt: 0, alive: true, level: 1, r: 0.55,
       hp: 1, maxHp: 1, nick: 'Hero', md: 'hub', seq: mpNum(s.s, 0), guest: !!guest, attackAnim: 0, t: 0 };

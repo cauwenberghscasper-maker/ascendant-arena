@@ -6,6 +6,7 @@ function simStep(dt) {
   else if (G.mode === 'arena' && G.arena) stepArena(dt);
   stepPendingAoE(dt);
   stepClouds(dt);
+  HeroSupers.step(dt);
   stepPetCombat(dt);
   stepProjectiles(dt);
 }
@@ -67,7 +68,7 @@ const TestTools = {
   boss() { if (G.boss || G.mode !== 'hub') return; G.bossWarned = false; G.bossTimer = Math.min(G.bossTimer, CFG.boss.warn + 1); },
   unlockAll() {
     const p = G.profile;
-    for (const id in CFG.attacks) if (!CFG.attacks[id].signature && !p.unlocked.attacks.includes(id)) { p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); }
+    for (const id of CFG.brawlerOrder) if (!p.unlocked.attacks.includes(id)) { p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); }
     for (const id in CFG.artifacts) if (!p.unlocked.artifacts.includes(id)) { p.unlocked.artifacts.push(id); p.newUnlocks.push('r:' + id); }
     G.dirty = true; toast('All attacks and artifacts unlocked', 'good');
   },

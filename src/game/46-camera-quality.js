@@ -45,6 +45,8 @@ function syncViews(dt, t) {
     const d = Math.hypot(e.x - cx, e.z - cz);
     if (d > far && !(e.kind === 'boss')) { const v = views.get(e); if (v) v.root.visible = false; if (!(e.kind === 'enemy' && d > far * 2.4)) seen.add(e); return; }
     const v = viewFor(e); v.update(e, dt, t); seen.add(e);
+    if (e.heroAirY) v.root.position.y += e.heroAirY; // carried into the air by a hero super
+    if (e.lostT > 0) { v.root.visible = false; v.lostHid = true; } else if (v.lostHid) { v.root.visible = true; v.lostHid = false; }
     if (e.kind === 'fighter' && e.alive) v.root.scale.setScalar(growthScale(e));
     if (Showcase.on && e === G.player) {
       Showcase.yaw += angDiff(Showcase.yaw, Showcase.baseYaw + Showcase.spin) * (1 - Math.exp(-dt * 10));

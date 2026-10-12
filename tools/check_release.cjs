@@ -11,6 +11,7 @@ const collectionModule=fs.readFileSync(path.join(root,'assets/data/loot-collecti
 vm.runInContext(collectionModule+'\nthis.collectionDefs=COLLECTION_ITEMS;',ctx);
 vm.runInContext(fs.readFileSync(path.join(root,'assets/data/prestige.js'),'utf8').replace(/export /g,''),ctx);
 vm.runInContext(fs.readFileSync(path.join(root,'assets/data/companions.js'),'utf8').replace(/export /g,''),ctx);
+vm.runInContext(fs.readFileSync(path.join(root,'assets/data/heroes-v6.js'),'utf8').replace(/export /g,''),ctx);
 vm.runInContext(section('const CFG = {','// 2. UTIL')+section('const clamp =','// 3. DATA')+
   section('const P = CFG.progression;','const salvageValue =')+
   section('function itemPower(it) {','function bestBagItem(')+
@@ -124,15 +125,15 @@ check('one skill tree per hero: 9 branches, no overlapping nodes, v8 hero tree m
     for(const b of ['pow','might','carn','rhy','swift','storm','uti','fort','sorc'])assert(N[b+'_c0'],id+' '+b);
     for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){const a=N[ids[i]],c=N[ids[j]];assert(Math.hypot(a.x-c.x,a.y-c.y)>1.2,id+' '+ids[i]+'~'+ids[j]);}
     for(const n of Object.values(N))for(const l of n.links)assert(N[l]&&N[l].links.includes(n.id));}
-  const old={...ctx.newProfile(),level:40,mastery:{'w:bolt':1e9},cls:'bolt',brawlers:{bolt:{tree:{active:0,sets:[{core:2,pow_c0:3},{},{}]},artifacts:[]},smg:{tree:{active:1,sets:[{},{rhy_c0:1},{}]},artifacts:[]}},
+  const old={...ctx.newProfile(),level:40,mastery:{'w:wrenna':1e9},cls:'wrenna',brawlers:{wrenna:{tree:{active:0,sets:[{core:2,pow_c0:3},{},{}]},artifacts:[]},hob:{tree:{active:1,sets:[{},{rhy_c0:1},{}]},artifacts:[]}},
     heroTree:{active:0,sets:[{core:5,might_c0:5,r0:2},{fort_c0:1},{}]}};delete old.treeVersion;
   const p=ctx.sanitizeProfile(JSON.parse(JSON.stringify(old)));
   assert.equal(p.heroTree,undefined);assert.equal(p.treeVersion,9);
-  assert.deepEqual({...p.brawlers.bolt.tree.sets[0]},{core:7,pow_c0:3,might_c0:5,r0:2});assert.deepEqual({...p.brawlers.smg.tree.sets[1]},{rhy_c0:1,fort_c0:1});
-  const again=ctx.sanitizeProfile(JSON.parse(JSON.stringify(p)));assert.deepEqual({...again.brawlers.bolt.tree.sets[0]},{core:7,pow_c0:3,might_c0:5,r0:2});
+  assert.deepEqual({...p.brawlers.wrenna.tree.sets[0]},{core:7,pow_c0:3,might_c0:5,r0:2});assert.deepEqual({...p.brawlers.hob.tree.sets[1]},{rhy_c0:1,fort_c0:1});
+  const again=ctx.sanitizeProfile(JSON.parse(JSON.stringify(p)));assert.deepEqual({...again.brawlers.wrenna.tree.sets[0]},{core:7,pow_c0:3,might_c0:5,r0:2});
   vm.runInContext(section('const levelPointsTotal =','function nodeOpen(')+'\nthis.treeOf=treeOf;this.treeFree=treeFree;',ctx);
-  ctx.G.profile=p;const T=ctx.treeOf(p,'bolt');assert.equal(T.total,T.level+T.mastery);assert.equal(T.level,2*40+5*4);assert(ctx.treeFree(p,'bolt')>=0);
-  assert.equal(ctx.treeOf(p,'smg').level,T.level);
+  ctx.G.profile=p;const T=ctx.treeOf(p,'wrenna');assert.equal(T.total,T.level+T.mastery);assert.equal(T.level,2*40+5*4);assert(ctx.treeFree(p,'wrenna')>=0);
+  assert.equal(ctx.treeOf(p,'hob').level,T.level);
 });
 check('same slot, strictly weaker, unique and unprotected material selection',()=>{
   const p=fresh();p.bag=[make('weak'),make('weak'),make('other','helmet'),Object.assign(make('locked'),{locked:true}),make('strong','weapon','legendary'),make('equal','weapon','rare',10),{...p.gear.weapon},make('second','weapon','uncommon',2)];
@@ -169,16 +170,21 @@ check('a full inventory prevents forging from discarding equipped gear',()=>{
   assert.equal(ctx.buyForge('weapon'),false);assert.equal(JSON.stringify(p),before);
 });
 check('mastery 79 locks switching; mastery 80 permits owned brawlers only',()=>{
-  const p=fresh();p.unlocked.attacks=['wave'];ctx.ownedBrawlers=p=>['bolt',...p.unlocked.attacks];p.mastery['w:bolt']=ctx.mxp(80)-1;
-  assert.equal(ctx.masteryLevel(p.mastery['w:bolt']),79);assert.equal(ctx.setBrawler('wave'),false);assert.equal(p.cls,'bolt');
-  p.mastery['w:bolt']=ctx.mxp(80);assert.equal(ctx.setBrawler('wave'),true);assert.equal(p.cls,'wave');assert.equal(ctx.setBrawler('rail'),false);
-  ctx.G.mode='arena';assert.equal(ctx.setBrawler('bolt'),false);ctx.G.mode='hub';ctx.onExpedition=()=>true;assert.equal(ctx.setBrawler('bolt'),false);ctx.onExpedition=()=>false;
+  const p=fresh();p.unlocked.attacks=['hob'];ctx.ownedBrawlers=p=>['wrenna',...p.unlocked.attacks];p.mastery['w:wrenna']=ctx.mxp(80)-1;
+  assert.equal(ctx.masteryLevel(p.mastery['w:wrenna']),79);assert.equal(ctx.setBrawler('hob'),false);assert.equal(p.cls,'wrenna');
+  p.mastery['w:wrenna']=ctx.mxp(80);assert.equal(ctx.setBrawler('hob'),true);assert.equal(p.cls,'hob');assert.equal(ctx.setBrawler('corrin'),false);
+  ctx.G.mode='arena';assert.equal(ctx.setBrawler('wrenna'),false);ctx.G.mode='hub';ctx.onExpedition=()=>true;assert.equal(ctx.setBrawler('wrenna'),false);ctx.onExpedition=()=>false;
+});
+check('retired adventurers hand over to the starter hero with their mastery',()=>{
+  const old=fresh();old.cls='smg';old.starterBrawler='bolt';old.mastery={'w:bolt':ctx.mxp(85)};old.brawlers={smg:ctx.newBrawlerState()};
+  const p=ctx.sanitizeProfile(old);assert.equal(p.cls,'wrenna');assert.equal(p.starterBrawler,'wrenna');assert.equal(p.mastery['w:wrenna'],ctx.mxp(85));
+  assert(!ctx.config.brawlerOrder.includes('bolt'));assert.equal(ctx.config.brawlerOrder.length,27);
 });
 check('old saves retain current hero and inventory; auto salvage migration happens once',()=>{
-  const old=fresh();old.cls='wave';delete old.starterBrawler;delete old.mergeVersion;old.brawlers.wave=ctx.newBrawlerState();old.settings.autoSalvage=2;old.bag=[Object.assign(make('locked'),{locked:true})];
-  const p=ctx.sanitizeProfile(old);assert.equal(p.starterBrawler,'wave');assert.equal(p.cls,'wave');assert.equal(p.settings.autoSalvage,0);assert.equal(p.bag[0].locked,true);
+  const old=fresh();old.cls='hob';delete old.starterBrawler;delete old.mergeVersion;old.brawlers.hob=ctx.newBrawlerState();old.settings.autoSalvage=2;old.bag=[Object.assign(make('locked'),{locked:true})];
+  const p=ctx.sanitizeProfile(old);assert.equal(p.starterBrawler,'hob');assert.equal(p.cls,'hob');assert.equal(p.settings.autoSalvage,0);assert.equal(p.bag[0].locked,true);
   p.settings.autoSalvage=2;assert.equal(ctx.sanitizeProfile(p).settings.autoSalvage,2);
-  assert.doesNotThrow(()=>ctx.sanitizeProfile({v:2,gear:null,brawlers:{wave:null}}));
+  assert.doesNotThrow(()=>ctx.sanitizeProfile({v:2,gear:null,brawlers:{hob:null}}));
 });
 check('60 Hz scheduler preserves cadence on 60/90/120/144/165 Hz displays',()=>{
   const prefix=section('  if (now < nextFrameAt','  let dt =');

@@ -13,7 +13,7 @@ function spawnProjectile(o) {
       p.team = o.team; p.owner = o.owner; p.pet = !!o.pet; p.kind = o.kind; p.aoe = o.aoe || 0; p.aoeMult = o.aoeMult || 0;
       p.slow = o.slow || 0; p.charge = o.charge || 0; p.color = o.color; p.y = o.y || 1.0; p.burn = o.burn || 0; p.burnT = o.burnT || 0;
       p.homing = o.homing || 0; p.pierce = o.pierce || 0; p.hits.length = 0; p.bounce = o.bounce || 0; p.split = o.split || null;
-      p.ghost = !!o.ghost; p.lob = !!o.lob && !o.ghost; p.lobH = o.lobH || 0; p.boomerang = !!o.boomerang; p.returning = false; p.vamp = o.vamp || 0; p.speed = Math.hypot(o.vx, o.vz); p.chain = o.chain || 0;
+      p.hx = o.hx || null; p.hv = o.hv || 0; p.hf = null; p.shape = o.shape || null; p.stun = o.stun || 0; p.knock = o.knock || 1.5; p.ghost = !!o.ghost; p.lob = !!o.lob && !o.ghost; p.lobH = o.lobH || 0; p.boomerang = !!o.boomerang; p.returning = false; p.vamp = o.vamp || 0; p.speed = Math.hypot(o.vx, o.vz); p.chain = o.chain || 0;
       return p;
     }
   }
@@ -25,7 +25,12 @@ function obstacleAt(x, z, pad) {
   G.obstacles.query(x, z, (o) => { if (!hit && Math.hypot(x - o.x, z - o.z) < o.r + pad) hit = o; });
   return hit;
 }
-function clearProjectiles() { for (const p of projectiles) p.active = false; G.pendingAoE.length = 0; G.clouds.length = 0; }
+function clearProjectiles() { for (const p of projectiles) p.active = false; G.pendingAoE.length = 0; G.clouds.length = 0; HeroSupers.clear(); if (HeroFXRef) HeroFXRef.clear(); }
+// Codex heroes' supers and statuses run on the sim clock; their art (HeroFX) is created with the renderer below
+const heroApi = { G, forEachTarget, dealDamage, spawnProjectile, ev, nearestFoe: (f, d) => nearestFoe(f, d),
+  collide: (e) => { collideObstacles(e); if (e.kind === 'fighter') boundFighter(e, G.mode === 'arena' ? 'arena' : 'hub'); }, fx: null };
+const HeroSupers = createHeroSupers(heroApi);
+let HeroFXRef = null;
 
 function forEachTarget(fn) {
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
@@ -103,7 +108,8 @@ function stepProjectiles(dt) {
       if (dx * dx + dz * dz < rr * rr) hitT = t;
     });
     if (hitT) {
-      dealDamage(hitT, p.dmg, p.owner, { pet:p.pet, proc:p.pet, vamp: p.vamp, charge: p.charge, canCrit: !p.pet, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: 1.5, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
+      const amt = dealDamage(hitT, p.dmg, p.owner, { pet:p.pet, proc:p.pet, vamp: p.vamp, charge: p.charge, canCrit: !p.pet, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: p.knock || 1.5, stun: p.stun, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
+      if (p.hx) { HeroSupers.onBulletHit(p, hitT, amt || 0); if (!p.aoe) ev({ t: 'heroImpact', hid: p.hx, x: hitT.x, z: hitT.z, r: 0.9, hv: p.hv }); }
       if (p.chain > 0) chainFrom(hitT, p.chain, p.dmg * 0.6, p.owner, p.team);
       if (p.pierce > 0) {
         p.pierce--; p.hits.push(hitT.id);
@@ -143,12 +149,13 @@ function spawnSplit(p, direct) {
 function expireProjectile(p, explode, direct) {
   if (!p.active) return;
   p.active = false;
+  if (p.hx) HeroSupers.onBulletEnd(p, explode, direct);
   if (explode && p.split) spawnSplit(p, direct);
   if (explode && p.aoe > 0) {
     aoeDamage(p.x, p.z, p.aoe, p.dmg * (direct ? p.aoeMult : p.aoeMult * 1.25), p.team, p.owner, { exclude: direct, charge: p.charge * 0.5, knock: 3, burn: p.burn, burnT: p.burnT, slow: p.slow });
-    ev({ t: 'boom', x: p.x, z: p.z, r: p.aoe, color: p.color, lob: p.lob });
+    ev({ t: 'boom', x: p.x, z: p.z, r: p.aoe, color: p.color, lob: p.lob, hid: p.hx, hv: p.hv });
   } else if (explode) {
-    ev({ t: 'puff', x: p.x, z: p.z, color: p.color });
+    ev({ t: 'puff', x: p.x, z: p.z, color: p.color, hid: direct ? null : p.hx, hv: p.hv });
   }
 }
 function aoeDamage(x, z, r, dmg, team, owner, o) {
@@ -183,7 +190,8 @@ function dealDamage(t, amount, srcId, o) {
   if (t.armorT > 0) amt *= 1 - CFG.skills.ironskin.reduce;
   if (t.armor) amt *= 1 - Math.min(0.6, t.armor);
   if (t.ks && t.ks.afterT > 0) amt *= CFG.combat.afterReduce ?? 0.75;
-  amt = Math.max(1, Math.round(amt));
+  amt = HeroSupers.modDamage(src && src.kind === 'fighter' && !o.pet ? src : null, t, amt, o); // hero statuses: shields, guard, vulnerability, buffs
+  amt = Math.max(t.guardT > 0 || t.shieldHp > 0 ? 0 : 1, Math.round(amt));
   // Undying Rage: survive one lethal hit per minute
   if (t.kind === 'fighter' && t.keys && t.keys.undying && t.ks.undyCd <= 0 && t.hp - amt <= 0) {
     amt = Math.max(0, Math.round(t.hp - 1)); t.ks.undyCd = 60; t.invulnT = 1.5; ev({ t: 'undying', x: t.x, z: t.z, isPlayer: t.isPlayer });
@@ -376,10 +384,12 @@ function spawnBullet(f, w, a, lobDist, scale) {
   let aoe = (w.aoe || 0) * (1 + f.mods.aoe), aoeMult = w.aoeMult || 0;
   if (A.blast) { const bv = artVal('blast', A.blast); if (aoe) aoe += bv.r / 3; else { aoe = bv.r; aoeMult = bv.mult; } }
   const burn = (A.ember ? base * artVal('ember', A.ember) : 0) + (w.burnMult ? base * w.burnMult : 0);
-  return spawnProjectile({ x: f.x + sx * 0.7, z: f.z + sz * 0.7, vx: sx * speed, vz: sz * speed, life, r, dmg: base, team: f.team, owner: f.id, kind: w.kind,
+  const shot = spawnProjectile({ x: f.x + sx * 0.7, z: f.z + sz * 0.7, vx: sx * speed, vz: sz * speed, life, r, dmg: base, team: f.team, owner: f.id, kind: w.kind,
     aoe, aoeMult, charge: per, color: projColor(f), homing: (w.homing || 0) + (A.seekerChip ? artVal('seekerChip', A.seekerChip) : 0), pierce: (w.pierce || 0) + (A.pierce ? artVal('pierce', A.pierce) : 0),
     bounce: (w.bounce || 0) + (A.rubber ? artVal('rubber', A.rubber) : 0), split, lob: !!w.lob, lobH, boomerang: !!w.boomerang, chain: w.chain || 0,
     burn, burnT: burn ? 2.5 : 0, slow: (A.frost ? artVal('frost', A.frost) : 0) + (w.slow || 0), vamp: A.vamp ? artVal('vamp', A.vamp) : 0 });
+  if (w.hero && shot) HeroSupers.decorateBullet(shot, w, f);
+  return shot;
 }
 // where a lobbed shot lands: the aim stick's length when aimed by hand (Brawl Stars), else the target
 function lobDistFor(f, w, base, aimDist) {
@@ -403,6 +413,7 @@ function emitVolley(f, w, dx, dz, first, aimDist) {
 function fireWeapon(f, dx, dz, aimDist) {
   const w = weaponOf(f);
   emitVolley(f, w, dx, dz, true, aimDist);
+  f.motionClip = null; if (w.lunge) HeroSupers.lunge(f, w, dx, dz);
   if (w.burst > 1) { f.burstLeft = w.burst - 1; f.burstT = w.burstGap; f.burstDX = dx; f.burstDZ = dz; }
   f.facing = Math.atan2(dx, dz); f.attackAnim = 1; f.lastAttack = G.time; f.motionAction = "attack";
   ev({ t: 'shoot', kind: w.kind, isPlayer: f.isPlayer, x: f.x, z: f.z });
@@ -420,7 +431,7 @@ function doMelee(f) {
     if (d > 1.0 && Math.acos(clamp(dot, -1, 1)) > M.arc) return;
     dealDamage(t, f.dmg * mult * (tanky ? 1.1 : 1), f.id, { charge: 0.8, canCrit: true, knockX: dx, knockZ: dz, knock: M.knock, pk: 'melee' });
   });
-  f.attackAnim = 1; f.lastAttack = G.time; f.motionAction = 'melee';
+  f.attackAnim = 1; f.lastAttack = G.time; f.motionAction = 'melee'; f.motionClip = null;
   ev({ t: 'melee', x: f.x + fx * 1.3, z: f.z + fz * 1.3, isPlayer: f.isPlayer });
 }
 function doSuper(f, dx, dz, aimDist) {
@@ -428,6 +439,11 @@ function doSuper(f, dx, dz, aimDist) {
   // mastery makes supers bigger and wider; ascended heroes hit even harder
   const ML = f.superML || 1, big = (ML - 1) / 98;
   const pow = (1 + f.mods.superPow) * (1 + big) * (f.isPlayer && G.mode === 'hub' && ascTier(G.profile.level) >= 2 ? 1.5 : 1);
+  if (S && S.hero) { // Codex heroes: a scripted super of their own (assets/data/hero-supers-v6.js)
+    HeroSupers.cast(f, dx, dz, aimDist, { pow });
+    f.superCharge = 0; f.attackAnim = 1; f.lastAttack = G.time; f.motionAction = 'spell';
+    ev({ t: 'super', kind: s, hero: S.hero, isPlayer: f.isPlayer, x: f.x, z: f.z }); return;
+  }
   const base = Math.atan2(dx, dz);
   const color = f.isPlayer ? 0xffb02e : 0xff6a3d;
   if (s === 'nova') {
@@ -528,6 +544,7 @@ function stepFighter(f, dt, ctx) {
   f.invulnT -= dt; f.flashT -= dt; f.slowT -= dt; f.armorT -= dt; f.swiftT -= dt; f.retalCd -= dt; f.specialCd -= dt;
   tickBurn(f, dt); if (!f.alive) return;
   stepKeystones(f, dt); if (!f.alive) return;
+  if (HeroSupers.tickStatus(f, dt)) { f.moveAmt = Math.max(0, (f.moveAmt || 0) - dt * 6); trackVel(f, dt); clearOneShots(f.intent); return; } // stunned, banished or mid-super
   const tempo = f.ks.tempo * 0.05;
   f.attackAnim = Math.max(0, f.attackAnim - dt * 4);
   if (f.burstLeft > 0) {
