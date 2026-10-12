@@ -1209,6 +1209,7 @@ import { prepareOriginalAdventurer, equipOriginalAdventurer } from './assets/art
 import { createKayKitMotion } from './assets/data/kaykit-motion.js';
 import { applyHeroV4, heroV4Clips, gripV4Weapon, prepareV4Equipment, equipV4Hero } from './assets/data/hero-models-v4.js';
 import { addHeroEyes } from './assets/data/hero-eyes.js';
+import { relaxArms } from './assets/data/hero-arms.js';
 import { equipmentIcon, caseIcon } from './assets/art/premium-icons.js';
 import { COLLECTION_ITEMS, COLLECTION_CHANCE, COLLECTION_GUARANTEE, collectionIcon, rollCollectionItem, recordCollectionItem, migrateCollection, regionBossCase } from './assets/data/loot-collection.js';
 import { PRESTIGE_LEVEL, prestigeCount, migratePrestige, prestigeBlock, prestigePlan, applyPrestige, statMilestone } from './assets/data/prestige.js';
@@ -4781,7 +4782,7 @@ const AssetLibrary = {
       .then(([gltf, weapon, clips]) => {
         if (def.v4) def.weaponScene = weapon ? weapon.scene : null;
         e.model = this.prepare(gltf.scene, def, id);
-        e.model.animations = def.v4 ? heroV4Clips(THREE, clips, gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
+        e.model.animations = def.v4 ? relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
       })
       .catch((err) => {
         // a v4 hero that fails falls back to the previous adventurer model
