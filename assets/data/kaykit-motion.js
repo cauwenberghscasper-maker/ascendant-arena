@@ -54,9 +54,9 @@ export function createKayKitMotion(THREE, model, clips, def) {
       // Every shot has an event timestamp; remote peers use the attack impulse.
       const timestamp = Number.isFinite(e.lastAttack) ? e.lastAttack : -Infinity;
       if ((timestamp >= 0 && timestamp !== lastAttack) || (e.attackAnim > previousAttack + .25 && timestamp < 0)) {
-        const clip = e.motionAction === 'spell' ? 'Spellcast_Raise' : e.motionAction === 'melee' ? '1H_Melee_Attack_Slice_Horizontal' : def.attack;
+        const clip = (e.motionClip && source.has(e.motionClip)) ? e.motionClip : e.motionAction === 'spell' ? 'Spellcast_Raise' : e.motionAction === 'melee' ? '1H_Melee_Attack_Slice_Horizontal' : def.attack; // heroes may name the clip of their super
         const interval=timestamp-lastAttack;
-        trigger(clip, /Melee|Raise/.test(clip) ? .48 : Math.min(.32,Math.max(.12,interval>0?interval:.32)));
+        trigger(clip, /Melee|Raise|Cheer|Throw|Chop/.test(clip) ? (/Cheer/.test(clip) ? .9 : .5) : Math.min(.32,Math.max(.12,interval>0?interval:.32)));
       }
       lastAttack = timestamp; previousAttack = e.attackAnim || 0;
       if (e.lastHurt >= 0 && e.lastHurt !== lastHurt && !overlay) trigger('Hit_A', .24);
