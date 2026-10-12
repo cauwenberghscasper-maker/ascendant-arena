@@ -64,7 +64,7 @@ const TestTools = {
   levels100() { for (let i = 0; i < 100; i++) this.levelUp(); },
   gold() { const n = Math.round(1000 * Math.pow(CFG.enemies.goldGrowth, G.profile.level - 1)); G.profile.gold += n; G.dirty = true; ev({ t: 'gold', amt: n }); },
   essence() { addEssence(50); },
-  boss() { if (G.boss || G.mode !== 'hub') return; G.bossWarned = false; G.bossTimer = Math.min(G.bossTimer, CFG.boss.warn + 1); },
+  boss() { if (G.boss || G.mode !== 'hub') return; G.bossWarned = false; G.bossTimer = Math.min(G.bossTimer, 12); }, // warns at once, rises 12 s later
   unlockAll() {
     const p = G.profile;
     for (const id in CFG.attacks) if (!CFG.attacks[id].signature && !p.unlocked.attacks.includes(id)) { p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); }

@@ -127,11 +127,14 @@ const CFG = {
     speedMult: 1.0, // world monster move speed (v10 plan 1.15 to match the faster hero; held at 1 until check_hardcore pack timings are retuned)
   },
   boss: {
-    name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 25, duration: 120,
-    hp: 3600, hpGrowth: 1.105, atk: 22, r: 2.4, speed: 2.2, leash: 8, attackEvery: 3.2,
-    slamR: 5.5, slamDelay: 1.1, rocks: 12, rockSpeed: 11, joinRange: 34, botFireEvery: 1.2,
-    loot: { minContrib: 0.02, goldBase: 60, goldPerLevel: 12, rareBase: 0.25, rareScale: 1.6, rareMax: 0.95,
-      epicScale: 1.2, epicMax: 0.6, tomeBase: 0.45, tomeScale: 1.0, tomeXpFrac: 0.6, essence: [10, 18], shards: [8, 14] },
+    // the roster is WORLD_BOSSES (12-monsters); a warning goes out `warn` seconds before one rises
+    name: 'World Boss', firstSpawn: 80, interval: 150, warn: 50, duration: 120,
+    // HP = hpHits × the reference hero's hit (refDmg) at the boss level: that hero deals ~1.5 refDmg/s, so alone at
+    // the same level it needs well over the 300 s a boss can stay; ~15 levels above the boss it takes about a minute.
+    // Bot helpers hit for botHit × refDmg per weapon multiplier. Hits are shares of the reference hero's HP (refHp).
+    hpHits: 700, soloHp: 0.85, botHit: 0.55, leash: 14, attackEvery: 2.6, rageAt: 0.5, rageEvery: 0.72, enrageDmg: 1.3, joinRange: 34, botFireEvery: 1.2,
+    loot: { minContrib: 0.02, goldBase: 90, goldPerLevel: 18, rareBase: 0.5, rareScale: 1.6, rareMax: 0.97,
+      epicScale: 1.4, epicMax: 0.7, tomeBase: 0.55, tomeScale: 1.0, tomeXpFrac: 0.8, essence: [16, 26], shards: [12, 20] },
   },
   arena: {
     half: 30, fighters: 10, spawnR: 26, countdown: 3,

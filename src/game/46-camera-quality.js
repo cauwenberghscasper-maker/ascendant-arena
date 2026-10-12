@@ -18,7 +18,7 @@ function viewFor(e) {
     v = AssetSlots.create('character', { cls: e.cls, body: c.body, accent: e.isPlayer ? (badgeTint(G.profile, e.cls) || c.accent) : c.accent, hair: BR.hair, look: BR.look, ring, gear, xray: e.isPlayer, cape, asc, peer: !!e.isPeer });
     v.cls = e.cls; v.sig = e.isPlayer ? playerViewSig(e.cls) : '';
   } else if (e.kind === 'enemy') v = AssetSlots.create('enemy', { type: e.type, elite: e.elite });
-  else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone });
+  else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone, def: e.def });
   else if (e.kind === 'npc') v = AssetSlots.create('npc', { body: e.def.body, accent: e.def.accent });
   dynGroup.add(v.root); views.set(e, v);
   return v;

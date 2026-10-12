@@ -532,6 +532,9 @@ button.inl { margin-left: 8px; vertical-align: middle; }
 #bossBar .bn span:last-child { font: 600 11px/1.6 var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
 #bossBar .bb { height: 9px; border-radius: 5px; background: rgba(0,0,0,.45); overflow: hidden; }
 #bossBar .bb i { display: block; height: 100%; background: linear-gradient(90deg, #ff4d5a, #ffb02e); transition: width .2s; }
+#bossCall { display: flex; align-items: center; gap: 8px; max-width: 100%; background: rgba(20,22,43,.9); border: 2px solid rgba(255,93,108,.6); border-radius: 12px; padding: 5px 5px 5px 10px; font: 600 12px/1.25 var(--body); color: #ffd7a8; }
+#bossCall span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#bossCall button { flex: none; font: 700 12px/1 var(--body); color: #fff; background: #d9283a; border: 0; border-radius: 8px; padding: 7px 10px; box-shadow: 0 2px 0 rgba(0,0,0,.35); }
 #bossPtr { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 4px; background: rgba(217,40,58,.85); color: #fff; padding: 4px 8px 4px 6px; border-radius: 999px; font: 11px/1 var(--display); box-shadow: 0 3px 0 rgba(0,0,0,.35); animation: ptr 1s ease-in-out infinite; white-space: nowrap; }
 #bossPtr.warn { background: #e2771c; }
 #bossPtr i { width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 11px solid #fff; display: block; }

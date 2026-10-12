@@ -114,3 +114,33 @@ for (const c in CFG.signatures) {
   const sg = CFG.signatures[c];
   CFG.attacks[sg.id] = Object.assign({ signature: c, name: sg.name, role: sg.role, desc: 'Signature attack of the ' + CFG.classes[c].name }, CFG.classes[c].weapon);
 }
+// ---- World bosses: two per biome, one rises at random every few minutes (see "world boss" in 33-world-sim).
+// body = 'golem' (the sculpted golem) or a monster base drawn huge; tint/core = colours; scale = view size; r = hit radius.
+// moves = boss patterns (BOSS_PATTERNS); rage = patterns added below half HP, when it also attacks faster.
+// They are built to be near-unkillable alone at your own level: bring the other heroes, or come back far stronger.
+const WORLD_BOSSES = {
+  golem: { name: 'Ancient Golem', title: 'Heart of the Old Stones', biome: 0, body: 'golem', r: 2.4, speed: 2.2,
+    moves: ['slam', 'spikeFan', 'rockRing', 'quake'], rage: ['vortex', 'leap'] },
+  broodmother: { name: 'Vexa the Brood Mother', title: 'Queen of the Hollow Oak', biome: 0, body: 'spider', tint: 0x4a6a2a, core: 0xb6ff4f, scale: 3.2, r: 2.6, speed: 3.0, shot: 0xb6ff4f,
+    moves: ['webVolley', 'leap', 'spikeFan', 'brood'], rage: ['spiral', 'pools'] },
+  frostcolossus: { name: 'Frost Colossus', title: 'The Avalanche That Walks', biome: 1, body: 'yeti', tint: 0xcfe8ff, core: 0x7fe3ff, scale: 2.6, r: 2.6, speed: 2.0, shot: 0xbff4ff, slow: true,
+    moves: ['coreQuake', 'meteor', 'breathSweep', 'spikeCross'], rage: ['webVolley', 'leap'] },
+  stormroc: { name: 'Stormcrag Roc', title: 'Rider of the Thunderheads', biome: 1, body: 'imp', tint: 0xbfd0e0, core: 0xfff04a, scale: 3.0, r: 2.3, speed: 3.2, shot: 0xfff04a,
+    moves: ['beams', 'vortex', 'zapStorm', 'rockRing'], rage: ['spiral', 'meteor'] },
+  magmatitan: { name: 'Magma Titan', title: 'Forge-Heart of the Underworld', biome: 2, body: 'warden', tint: 0x6a3020, core: 0xff5a1f, scale: 2.5, r: 2.6, speed: 1.9, shot: 0xff6a1f, burn: true,
+    moves: ['meteor', 'breathSweep', 'quake', 'pools'], rage: ['coreQuake', 'leap'] },
+  cinderwyrm: { name: 'Cinder Wyrm', title: 'Ash on Black Wings', biome: 2, body: 'fireimp', tint: 0xff5a2a, core: 0xffb347, scale: 2.9, r: 2.4, speed: 2.8, shot: 0xff6a1f, burn: true,
+    moves: ['breathSweep', 'meteor', 'spiral', 'pools'], rage: ['beams', 'novaRings'] },
+  voidcolossus: { name: 'Void Colossus', title: 'Geometry of the End', biome: 3, body: 'sentinel', tint: 0x6a5aff, core: 0xc77dff, scale: 2.8, r: 2.5, speed: 2.0, shot: 0xc77dff,
+    moves: ['novaRings', 'spiral', 'blink', 'vortex'], rage: ['beams', 'brood'] },
+  riftweaver: { name: 'The Riftweaver', title: 'Thread-Cutter of the Ruins', biome: 3, body: 'wraith', tint: 0x8a5aff, core: 0x4fd8ff, scale: 2.8, r: 2.3, speed: 3.0, shot: 0x4fd8ff,
+    moves: ['blink', 'zapStorm', 'beams', 'webVolley'], rage: ['spiral', 'meteor'] },
+  leviathan: { name: 'Abyssal Leviathan', title: 'It Sleeps Beneath the Wrecks', biome: 4, body: 'crawler', tint: 0x1d5560, core: 0x2fffd0, scale: 2.8, r: 2.8, speed: 2.4, shot: 0x2fffd0,
+    moves: ['burrowStalk', 'tidalWave', 'vortex', 'zapStorm'], rage: ['novaRings', 'brood'] },
+  drownedking: { name: 'The Drowned King', title: 'Crown of Barnacles', biome: 4, body: 'drowned', tint: 0x2a8a9a, core: 0x7fd0ff, scale: 2.8, r: 2.4, speed: 2.6, shot: 0x7fd0ff,
+    moves: ['tidalWave', 'webVolley', 'beams', 'vortex'], rage: ['spiral', 'blink'] },
+  celestialcolossus: { name: 'Celestial Colossus', title: 'Keeper of the Dawn Gate', biome: 5, body: 'golem', r: 2.4, speed: 2.2,
+    moves: ['beams', 'meteor', 'coreQuake', 'novaRings'], rage: ['blink', 'spikeCross'] },
+  dawnseraph: { name: 'Seraph of Dawn', title: 'Six Wings, No Mercy', biome: 5, body: 'seraph', tint: 0xfff0c0, core: 0xfff07a, scale: 2.9, r: 2.3, speed: 3.0, shot: 0xfff07a,
+    moves: ['beams', 'spiral', 'zapStorm', 'blink'], rage: ['meteor', 'novaRings'] },
+};

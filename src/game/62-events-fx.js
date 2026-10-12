@@ -171,8 +171,10 @@ function processEvents() {
       case 'pickup': burst(e.x, 0.6, e.z, 10, 0xff5fa2, 4, 0.5, 0.2, 8); SpriteFX.play('crit', 'arcane', e.x, 0.9, e.z, 1.8); Sfx.play('pickup'); break;
       case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.z)]; const prevB = Feed.lastBiome; Feed.lastBiome = zn.biome;
         Feed.add(zn.safe ? `${gi('m_progress')} Back at <b>${e.name}</b> · safe` : prevB != null && prevB !== zn.biome ? `${gi('m_progress')} <b>${zn.biomeName}</b> › ${e.name} · Lv ${zn.lvl[0]}–${zn.lvl[1]}` : `${gi('m_progress')} Entered <b>${e.name}</b> · Lv ${zn.lvl[0]}–${zn.lvl[1]}`, 'zone'); break; }
-      case 'bossWarn': Sfx.play('horn'); break;
-      case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); SpriteFX.play('dust', 'dust', e.x, 0, e.z, 6); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 10); break;
+      case 'bossWarn': Sfx.play('horn'); showBanner(`${escapeHTML(e.name)} stirs`, `Rises at ${escapeHTML(e.lair)} in ${e.secs}s${e.wp >= 0 ? ' · tap Travel to go' : ''}`, 'red'); break;
+      case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, e.color || 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); SpriteFX.play('dust', 'dust', e.x, 0, e.z, 6); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 10);
+        if (near(e, 60)) showBanner(escapeHTML(e.name), escapeHTML(e.title || 'World boss'), 'red'); break;
+      case 'bossRage': showToast(`${e.name} is enraged!`, 'bad'); ringFx(e.x, e.z, 7, e.color || 0xff5a1f, 0.8); burst(e.x, 2, e.z, 40, e.color || 0xff5a1f, 9, 0.9, 0.4, 6, 1.4); if (near(e, 30)) Cam.shake = Math.max(Cam.shake, 1); Sfx.play('horn'); break;
       case 'bossDown': Feed.remove('boss'); Feed.add(`${gi('m_feats')} World boss defeated!`, 'boss'); Sfx.play('win'); break;
       case 'bossGone': Feed.remove('boss'); Feed.add(`${gi('k_titan')} ${e.name} sank back into the ground`, 'boss'); break;
       case 'telegraph': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w || 1.4, 0xff4d4d, 0.6); break;

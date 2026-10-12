@@ -170,6 +170,8 @@ function dealDamage(t, amount, srcId, o) {
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
   if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot) return 0; // hub bots are bystanders
   const src = G.ents.get(srcId);
+  // bot helpers have no gear: against a world boss they hit as a fixed share of the reference hero (CFG.boss.botHit)
+  if (t.kind === 'boss' && src && src.isBot && src.dmgAlt > 0) amount = refDmg(t.lvl) * CFG.boss.botHit * (amount / src.dmgAlt);
   let amt = amount * (1 + (Math.random() * 2 - 1) * CFG.combat.variance);
   let crit = false;
   const sf = src && src.kind === 'fighter' && !o.pet ? src : null, K = sf ? sf.keys : null;

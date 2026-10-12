@@ -182,7 +182,14 @@ function updateHUD(dt) {
   // world boss: a live line in the small feed instead of a big banner
   if (G.mode === 'hub' && G.started) {
     if (G.boss) { const d = Math.round(Math.hypot(G.boss.x - G.player.x, G.boss.z - G.player.z)); Feed.add(`${gi('k_titan')} <b>${G.boss.name}</b> · ${G.boss.life > 0 ? Math.ceil(G.boss.life) + 's' : 'enraged'} · ${d}m`, 'boss', 'boss', 1.2); }
-    else if (G.bossWarned) Feed.add(`${gi('k_titan')} <b>${CFG.world.zones[G.bossLair].boss}</b> rises in ${Math.ceil(G.bossTimer)}s · ${currentLair().name}`, 'boss', 'boss', 1.2);
+    else if (G.bossWarned) Feed.add(`${gi('k_titan')} <b>${bossDef(G.bossNext).name}</b> rises in ${Math.ceil(G.bossTimer)}s · ${currentLair().name}`, 'boss', 'boss', 1.2);
+  }
+  // boss call: before it rises (and while it is up and you are far away), one tap to the waypoint nearest its lair
+  if ((hudCache.bossCallT = (hudCache.bossCallT || 0) - dt) <= 0) {
+    hudCache.bossCallT = 0.25;
+    const up = G.mode === 'hub' && G.started && !G.modal && !inInstance() && (G.bossWarned || G.boss), wp = up ? bossWaypoint() : -1;
+    UI.bossWp = wp; setHidden('bossCall', wp < 0);
+    if (wp >= 0) setText('bossCallT', G.boss ? `${G.boss.name} is up · ${currentLair().name}` : `${bossDef(G.bossNext).name} in ${Math.ceil(G.bossTimer)}s · ${currentLair().name}`);
   }
   // buttons
   const w = weaponOf(f);

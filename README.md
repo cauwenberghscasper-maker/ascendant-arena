@@ -18,6 +18,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Balance: stats, timings, economy, quality tiers | `src/game/10-config.js` (`CFG`) |
 | World map, areas, biomes, zone levels | `src/game/11-world-data.js`; how the world looks: `44-world-view.js` |
 | Monsters (stats, drops, which body they use) | `src/game/12-monsters.js`; behavior: `33-world-sim.js`; looks: `43-enemies-view.js` |
+| World bosses (roster, patterns, warning, travel offer) | roster `WORLD_BOSSES` in `src/game/12-monsters.js`, tuning `CFG.boss` in `10-config.js`; patterns `BOSS_PATTERNS` in `33-world-sim.js`; looks: `43-enemies-view.js` |
 | Brawlers (heroes), attacks, skill-tree data | `src/game/13-brawlers.js`; their 3D models: `41-assets.js` (`ASSET_MANIFEST`) and `assets/data/hero-models-v4.js` |
 | Items, rarities, merge, salvage, forge | `src/game/21-items.js`; inventory and loot rolls: `32-progression.js` |
 | Cases, Vault, Expeditions, Auto Hunt | `src/game/71-cases-idle.js`; named collection drops: `assets/data/loot-collection.js` |
@@ -40,7 +41,7 @@ After editing: `node tools/build.cjs`, then run the checks.
 
 ## Checks
 
-`npm run check` runs `tools/check_release.cjs` (which also fails when `index.html` was not rebuilt), `check_test_mode`, `check_companions`, `check_gameplay` and `audit/checks.cjs`. Browser checks (`tools/check_game_browser.cjs` and the other `check_*_integration.cjs`) need a server on port 8766 and Playwright. Assessment: [audit/REPORT.md](audit/REPORT.md). Current implementation and release gates: [audit/PHASE1.md](audit/PHASE1.md). Map and pace of the 1-210 world: [audit/world-v9.md](audit/world-v9.md).
+`npm run check` runs `tools/check_release.cjs` (which also fails when `index.html` was not rebuilt), `check_test_mode`, `check_companions`, `check_gameplay`, `audit/checks.cjs`, `check_hardcore`, `check_moves`, `check_bosses`, `check_world_layout` and `check_dungeon`. Browser checks (`tools/check_game_browser.cjs` and the other `check_*_integration.cjs`) need a server on port 8766 and Playwright. Assessment: [audit/REPORT.md](audit/REPORT.md). Current implementation and release gates: [audit/PHASE1.md](audit/PHASE1.md). Map and pace of the 1-210 world: [audit/world-v9.md](audit/world-v9.md).
 
 ## Store apps (iOS and Android)
 

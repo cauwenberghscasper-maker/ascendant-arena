@@ -161,7 +161,8 @@ function tintMonsterMaterial(m, tint, k) {
 }
 AssetSlots.register('enemy', (o) => {
   const root = new THREE.Group();
-  const ED = CFG.enemies[o.type] || {}, bt = enemyBase(o.type), tint = ED.tint != null ? new THREE.Color(ED.tint) : null, esz = ED.scale || 1;
+  // o.base / o.look: a body and tint/scale drawn without a monster row (world bosses use this)
+  const ED = o.look || CFG.enemies[o.type] || {}, bt = o.base || enemyBase(o.type), tint = ED.tint != null ? new THREE.Color(ED.tint) : null, esz = ED.scale || 1;
   const shadow = new THREE.Mesh(geoShadow, matShadow); shadow.scale.setScalar((bt === 'wolf' || bt === 'beetle' ? 0.9 : 0.75) * esz); shadow.position.y = 0.03; root.add(shadow);
   const pivot = new THREE.Group(); root.add(pivot);
   const mat = flashMaterial();
@@ -245,7 +246,35 @@ function golemGeos(zi) {
   ]);
   const out = { body, arm, glow }; golemCache.set(bkey, out); return out;
 }
+// Other world bosses: a sculpted monster body drawn huge in the boss's colours, on the same rune circle as the golem
+function speciesBossView(o, D) {
+  const root = new THREE.Group(), core = D.core || 0xff8a2a;
+  const runeMat = new THREE.MeshBasicMaterial({ color: core, transparent: true, opacity: 0.5, depthWrite: false });
+  const rune = new THREE.Mesh(new THREE.RingGeometry(D.r + 1.8, D.r + 2.1, 6, 1).rotateX(-Math.PI / 2), runeMat); rune.position.y = 0.06; root.add(rune);
+  const rune2 = new THREE.Mesh(new THREE.RingGeometry(D.r + 1.0, D.r + 1.15, 48).rotateX(-Math.PI / 2), runeMat); rune2.position.y = 0.06; root.add(rune2);
+  const body = new THREE.Group(); body.scale.setScalar(D.scale || 2.8); root.add(body);
+  const inner = AssetSlots.create('enemy', { base: D.body, look: { tint: D.tint, scale: 1, tintK: 0.8 } }); body.add(inner.root);
+  // the monster view reads a few fields; it draws at the origin of `body` and the boss root does the moving
+  const px = { x: 0, z: 0, facing: 0, alive: true, lvl: 1, elite: false, hidden: false, moveAmt: 0, windT: 0, attackAnim: 0, flashT: 0, invulnT: 0, slowT: 0, burnT: 0 };
+  let spawnT = 0, dust = 0;
+  return {
+    root,
+    update(b, dt, t) {
+      root.visible = b.alive !== false && !b.hidden;
+      spawnT = b.spawnT != null && Number.isFinite(G.time) ? clamp((G.time - b.spawnT) * 0.8, 0, 1) : Math.min(1, spawnT + dt * 0.8);
+      root.position.set(b.x, -3.5 * (1 - spawnT) - (b.retreat != null ? 4.5 * (1 - Math.max(0, b.retreat) / 2.5) : 0) + (b.leap && b.leap.t < 0.35 ? Math.sin(clamp(1 - b.leap.t / 0.35, 0, 1) * Math.PI) * 3 : 0), b.z);
+      root.rotation.y += angDiff(root.rotation.y, b.facing) * (1 - Math.exp(-dt * 4));
+      px.moveAmt = b.moveAmt; px.windT = b.windT || 0; px.attackAnim = b.attackAnim; px.flashT = b.flashT; px.slowT = b.slowT; px.burnT = b.burnT || 0;
+      inner.update(px, dt, t);
+      const pulse = 0.75 + Math.sin(t * (b.rage ? 9 : 4)) * 0.25;
+      rune.rotation.y = t * (b.rage ? 1.2 : 0.4); rune2.rotation.y = -t * 0.25; runeMat.opacity = 0.3 + pulse * 0.25;
+      if (b.hidden && (dust -= dt) <= 0) { dust = 0.05; burst(b.x + (Math.random() - 0.5) * 2, 0.2, b.z + (Math.random() - 0.5) * 2, 2, 0x9a8a6a, 2, 0.5, 0.3, 6, 2); }
+    },
+    dispose() { inner.dispose(); runeMat.dispose(); rune.geometry.dispose(); rune2.geometry.dispose(); },
+  };
+}
 AssetSlots.register('boss', (o) => {
+  const D = o.def && WORLD_BOSSES[o.def]; if (D && D.body !== 'golem') return speciesBossView(o, D);
   const zi = o.zone || 0, Z = CFG.world.zones[zi] || CFG.world.zones[0], G3 = golemGeos(zi);
   const root = new THREE.Group();
   const shadow = new THREE.Mesh(geoShadow, matShadow); shadow.scale.setScalar(3.1); shadow.position.y = 0.04; root.add(shadow);
@@ -267,11 +296,11 @@ AssetSlots.register('boss', (o) => {
     root,
     update(b, dt, t) {
       // Showcase hides existing world views. Restore live bosses when combat resumes.
-      root.visible = b.alive !== false;
+      root.visible = b.alive !== false && !b.hidden;
       // A boss may spawn while showcase suppresses its view. Use simulation age
       // so returning to combat cannot restart the rise underneath an attacking boss.
       spawnT = b.spawnT != null && Number.isFinite(G.time) ? clamp((G.time - b.spawnT) * 0.8, 0, 1) : Math.min(1, spawnT + dt * 0.8);
-      root.position.set(b.x, -3.5 * (1 - spawnT) - (b.retreat != null ? 4.5 * (1 - Math.max(0, b.retreat) / 2.5) : 0), b.z);
+      root.position.set(b.x, -3.5 * (1 - spawnT) - (b.retreat != null ? 4.5 * (1 - Math.max(0, b.retreat) / 2.5) : 0) + (b.leap && b.leap.t < 0.35 ? Math.sin(clamp(1 - b.leap.t / 0.35, 0, 1) * Math.PI) * 3 : 0), b.z);
       root.rotation.y += angDiff(root.rotation.y, b.facing) * (1 - Math.exp(-dt * 4));
       phase += dt * (1 + b.moveAmt * 4);
       const atk = b.attackAnim;

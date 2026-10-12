@@ -128,6 +128,7 @@ function setupInput() {
   };
   aimBtn('bSuper', 'super'); aimBtn('bSpecial', 'special');
   $('bAct').addEventListener('click', (e) => { e.preventDefault(); if (!G.modal) interact(); });
+  $('bossGo').addEventListener('click', (e) => { e.preventDefault(); if (!G.modal && UI.bossWp >= 0 && travelTo(UI.bossWp)) { UI.bossWp = -1; setHidden('bossCall', true); } });
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return; const k = e.key.toLowerCase(); Input.keys.add(k);

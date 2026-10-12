@@ -105,5 +105,17 @@ check('heavy monsters shove the hero, light ones barely; poise limits knockback'
   for (let i = 0; i < 10; i++) { c.dealDamage(e, 1, f.id, { knockX: 1, knockZ: 0, knock: 6 }); c.dealDamage(s, 1, f.id, { knockX: 1, knockZ: 0, knock: 6 }); }
   assert(Math.abs(e.x - 0.144) < 1e-6, 'brute: one knock at 20%'); assert(Math.abs(s.x - 0.432) < 1e-6, 'swarm: one knock at 60%');
 });
-console.log(JSON.stringify({ passed, table }, null, 1).replace(/\n  +/g, ' '));
+// world bosses (CFG.boss.hpHits × refDmg): alone at the boss's level the reference hero's sustained fire needs far longer
+// than the 300 s a boss stays; about 15 levels above it, roughly a minute to two
+const bossTable = [];
+check('world bosses: near-unkillable alone at the same level, killable ~15 levels above', () => {
+  const sustained = (f) => { const w = c.weaponOf(f); let t = 0, ammo = f.ammoMax, rl = 0, cd = 0, dealt = 0; const shot = f.dmgAlt * w.mult * w.count * (w.burst || 1);
+    while (t < 60) { t += DT; cd -= DT; if (ammo < f.ammoMax) { rl += DT; if (rl >= w.reload) { ammo++; rl = 0; } } if (ammo >= 1 && cd <= 0) { ammo--; cd = w.cd; dealt += shot; } } return dealt / 60; };
+  for (const L of [10, 30, 60, 100, 150, 190]) {
+    const hp = c.refDmg(L) * CFG.boss.hpHits, same = hp / sustained(hero(L)), over = hp / sustained(hero(L + 15));
+    assert(same > 360, `L${L} alone at the same level: ${same.toFixed(0)} s`); assert(over < 150 && over > 30, `L${L} from 15 levels above: ${over.toFixed(0)} s`);
+    bossTable.push({ level: L, soloSameLevelS: Math.round(same), solo15AboveS: Math.round(over) });
+  }
+});
+console.log(JSON.stringify({ passed, table, bossTable }, null, 1).replace(/\n  +/g, ' '));
 console.log(`${passed} hardcore checks passed.`);

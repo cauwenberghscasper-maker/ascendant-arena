@@ -539,6 +539,9 @@ button.inl { margin-left: 8px; vertical-align: middle; }
 #bossBar .bn span:last-child { font: 600 11px/1.6 var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
 #bossBar .bb { height: 9px; border-radius: 5px; background: rgba(0,0,0,.45); overflow: hidden; }
 #bossBar .bb i { display: block; height: 100%; background: linear-gradient(90deg, #ff4d5a, #ffb02e); transition: width .2s; }
+#bossCall { display: flex; align-items: center; gap: 8px; max-width: 100%; background: rgba(20,22,43,.9); border: 2px solid rgba(255,93,108,.6); border-radius: 12px; padding: 5px 5px 5px 10px; font: 600 12px/1.25 var(--body); color: #ffd7a8; }
+#bossCall span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#bossCall button { flex: none; font: 700 12px/1 var(--body); color: #fff; background: #d9283a; border: 0; border-radius: 8px; padding: 7px 10px; box-shadow: 0 2px 0 rgba(0,0,0,.35); }
 #bossPtr { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 4px; background: rgba(217,40,58,.85); color: #fff; padding: 4px 8px 4px 6px; border-radius: 999px; font: 11px/1 var(--display); box-shadow: 0 3px 0 rgba(0,0,0,.35); animation: ptr 1s ease-in-out infinite; white-space: nowrap; }
 #bossPtr.warn { background: #e2771c; }
 #bossPtr i { width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 11px solid #fff; display: block; }
@@ -1413,6 +1416,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
     <div id="hudTop">
       <div id="objective" hidden><span id="objArrow">▲</span><span id="objText"></span></div>
       <div id="bossBar" hidden><div class="bn"><span id="bossName"></span><span id="bossTime"></span></div><div class="bb"><i id="bossHp"></i></div></div>
+      <div id="bossCall" hidden><span id="bossCallT"></span><button id="bossGo">Travel</button></div>
       <div id="toasts"></div>
     </div>
     <div id="streak" hidden><b id="streakN">×3</b><span id="streakB">+4% XP</span><i></i></div>
@@ -1610,11 +1614,14 @@ const CFG = {
     speedMult: 1.0, // world monster move speed (v10 plan 1.15 to match the faster hero; held at 1 until check_hardcore pack timings are retuned)
   },
   boss: {
-    name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 25, duration: 120,
-    hp: 3600, hpGrowth: 1.105, atk: 22, r: 2.4, speed: 2.2, leash: 8, attackEvery: 3.2,
-    slamR: 5.5, slamDelay: 1.1, rocks: 12, rockSpeed: 11, joinRange: 34, botFireEvery: 1.2,
-    loot: { minContrib: 0.02, goldBase: 60, goldPerLevel: 12, rareBase: 0.25, rareScale: 1.6, rareMax: 0.95,
-      epicScale: 1.2, epicMax: 0.6, tomeBase: 0.45, tomeScale: 1.0, tomeXpFrac: 0.6, essence: [10, 18], shards: [8, 14] },
+    // the roster is WORLD_BOSSES (12-monsters); a warning goes out `warn` seconds before one rises
+    name: 'World Boss', firstSpawn: 80, interval: 150, warn: 50, duration: 120,
+    // HP = hpHits × the reference hero's hit (refDmg) at the boss level: that hero deals ~1.5 refDmg/s, so alone at
+    // the same level it needs well over the 300 s a boss can stay; ~15 levels above the boss it takes about a minute.
+    // Bot helpers hit for botHit × refDmg per weapon multiplier. Hits are shares of the reference hero's HP (refHp).
+    hpHits: 700, soloHp: 0.85, botHit: 0.55, leash: 14, attackEvery: 2.6, rageAt: 0.5, rageEvery: 0.72, enrageDmg: 1.3, joinRange: 34, botFireEvery: 1.2,
+    loot: { minContrib: 0.02, goldBase: 90, goldPerLevel: 18, rareBase: 0.5, rareScale: 1.6, rareMax: 0.97,
+      epicScale: 1.4, epicMax: 0.7, tomeBase: 0.55, tomeScale: 1.0, tomeXpFrac: 0.8, essence: [16, 26], shards: [12, 20] },
   },
   arena: {
     half: 30, fighters: 10, spawnR: 26, countdown: 3,
@@ -2007,6 +2014,36 @@ for (const c in CFG.signatures) {
   const sg = CFG.signatures[c];
   CFG.attacks[sg.id] = Object.assign({ signature: c, name: sg.name, role: sg.role, desc: 'Signature attack of the ' + CFG.classes[c].name }, CFG.classes[c].weapon);
 }
+// ---- World bosses: two per biome, one rises at random every few minutes (see "world boss" in 33-world-sim).
+// body = 'golem' (the sculpted golem) or a monster base drawn huge; tint/core = colours; scale = view size; r = hit radius.
+// moves = boss patterns (BOSS_PATTERNS); rage = patterns added below half HP, when it also attacks faster.
+// They are built to be near-unkillable alone at your own level: bring the other heroes, or come back far stronger.
+const WORLD_BOSSES = {
+  golem: { name: 'Ancient Golem', title: 'Heart of the Old Stones', biome: 0, body: 'golem', r: 2.4, speed: 2.2,
+    moves: ['slam', 'spikeFan', 'rockRing', 'quake'], rage: ['vortex', 'leap'] },
+  broodmother: { name: 'Vexa the Brood Mother', title: 'Queen of the Hollow Oak', biome: 0, body: 'spider', tint: 0x4a6a2a, core: 0xb6ff4f, scale: 3.2, r: 2.6, speed: 3.0, shot: 0xb6ff4f,
+    moves: ['webVolley', 'leap', 'spikeFan', 'brood'], rage: ['spiral', 'pools'] },
+  frostcolossus: { name: 'Frost Colossus', title: 'The Avalanche That Walks', biome: 1, body: 'yeti', tint: 0xcfe8ff, core: 0x7fe3ff, scale: 2.6, r: 2.6, speed: 2.0, shot: 0xbff4ff, slow: true,
+    moves: ['coreQuake', 'meteor', 'breathSweep', 'spikeCross'], rage: ['webVolley', 'leap'] },
+  stormroc: { name: 'Stormcrag Roc', title: 'Rider of the Thunderheads', biome: 1, body: 'imp', tint: 0xbfd0e0, core: 0xfff04a, scale: 3.0, r: 2.3, speed: 3.2, shot: 0xfff04a,
+    moves: ['beams', 'vortex', 'zapStorm', 'rockRing'], rage: ['spiral', 'meteor'] },
+  magmatitan: { name: 'Magma Titan', title: 'Forge-Heart of the Underworld', biome: 2, body: 'warden', tint: 0x6a3020, core: 0xff5a1f, scale: 2.5, r: 2.6, speed: 1.9, shot: 0xff6a1f, burn: true,
+    moves: ['meteor', 'breathSweep', 'quake', 'pools'], rage: ['coreQuake', 'leap'] },
+  cinderwyrm: { name: 'Cinder Wyrm', title: 'Ash on Black Wings', biome: 2, body: 'fireimp', tint: 0xff5a2a, core: 0xffb347, scale: 2.9, r: 2.4, speed: 2.8, shot: 0xff6a1f, burn: true,
+    moves: ['breathSweep', 'meteor', 'spiral', 'pools'], rage: ['beams', 'novaRings'] },
+  voidcolossus: { name: 'Void Colossus', title: 'Geometry of the End', biome: 3, body: 'sentinel', tint: 0x6a5aff, core: 0xc77dff, scale: 2.8, r: 2.5, speed: 2.0, shot: 0xc77dff,
+    moves: ['novaRings', 'spiral', 'blink', 'vortex'], rage: ['beams', 'brood'] },
+  riftweaver: { name: 'The Riftweaver', title: 'Thread-Cutter of the Ruins', biome: 3, body: 'wraith', tint: 0x8a5aff, core: 0x4fd8ff, scale: 2.8, r: 2.3, speed: 3.0, shot: 0x4fd8ff,
+    moves: ['blink', 'zapStorm', 'beams', 'webVolley'], rage: ['spiral', 'meteor'] },
+  leviathan: { name: 'Abyssal Leviathan', title: 'It Sleeps Beneath the Wrecks', biome: 4, body: 'crawler', tint: 0x1d5560, core: 0x2fffd0, scale: 2.8, r: 2.8, speed: 2.4, shot: 0x2fffd0,
+    moves: ['burrowStalk', 'tidalWave', 'vortex', 'zapStorm'], rage: ['novaRings', 'brood'] },
+  drownedking: { name: 'The Drowned King', title: 'Crown of Barnacles', biome: 4, body: 'drowned', tint: 0x2a8a9a, core: 0x7fd0ff, scale: 2.8, r: 2.4, speed: 2.6, shot: 0x7fd0ff,
+    moves: ['tidalWave', 'webVolley', 'beams', 'vortex'], rage: ['spiral', 'blink'] },
+  celestialcolossus: { name: 'Celestial Colossus', title: 'Keeper of the Dawn Gate', biome: 5, body: 'golem', r: 2.4, speed: 2.2,
+    moves: ['beams', 'meteor', 'coreQuake', 'novaRings'], rage: ['blink', 'spikeCross'] },
+  dawnseraph: { name: 'Seraph of Dawn', title: 'Six Wings, No Mercy', biome: 5, body: 'seraph', tint: 0xfff0c0, core: 0xfff07a, scale: 2.9, r: 2.3, speed: 3.0, shot: 0xfff07a,
+    moves: ['beams', 'spiral', 'zapStorm', 'blink'], rage: ['meteor', 'novaRings'] },
+};
 // ---- v8: brawlers replace classes. Each brawler fires exactly one attack type (id = attack id). ----
 CFG.roles = {
   balanced: { name: 'Balanced', hpMult: 1.0, atkMult: 1.0, speedMult: 1.0, arenaHp: 2800, arenaDmg: 450, super: 'nova', skill: 'swift' },
@@ -3006,6 +3043,8 @@ function dealDamage(t, amount, srcId, o) {
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
   if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot) return 0; // hub bots are bystanders
   const src = G.ents.get(srcId);
+  // bot helpers have no gear: against a world boss they hit as a fixed share of the reference hero (CFG.boss.botHit)
+  if (t.kind === 'boss' && src && src.isBot && src.dmgAlt > 0) amount = refDmg(t.lvl) * CFG.boss.botHit * (amount / src.dmgAlt);
   let amt = amount * (1 + (Math.random() * 2 - 1) * CFG.combat.variance);
   let crit = false;
   const sf = src && src.kind === 'fighter' && !o.pet ? src : null, K = sf ? sf.keys : null;
@@ -4576,73 +4615,252 @@ function champFire(e, k, pl, hit) {
   if (k === 'nova') orbRing(e, 22, 3, Math.atan2(pl.x - e.x, pl.z - e.z) + rand(-1.4, 1.4), 6.5, hit() * 0.45, 0xffb347);
 }
 // --- world boss -----------------------------------------------------------------
+// A random boss from WORLD_BOSSES rises at a random open area's lair. CFG.boss.warn seconds ahead the HUD names it,
+// the place and the nearest attuned waypoint (one tap to travel there).
 function currentLair() { return CFG.world.lairs[G.bossLair]; }
+const bossDef = (id) => WORLD_BOSSES[id] || WORLD_BOSSES.golem;
 function stepBossTimer(dt) {
   if (G.boss || !G.started || inInstance()) return; // paused inside the Rift and dungeons
   G.bossTimer -= dt;
   if (!G.bossWarned && G.bossTimer <= CFG.boss.warn) {
-    G.bossWarned = true;
-    // the boss rises in the zone you are in (or your highest open zone)
-    G.bossLair = Math.max(1, Math.min(zoneAt(G.player.z), highestZone(G.profile.level)));
-    ev({ t: 'bossWarn', lair: currentLair().name, secs: Math.ceil(G.bossTimer) });
+    G.bossWarned = true; pickNextBoss();
+    ev({ t: 'bossWarn', lair: currentLair().name, name: bossDef(G.bossNext).name, secs: Math.ceil(G.bossTimer), wp: bossWaypoint() });
   }
   if (G.bossTimer <= 0) spawnBoss();
 }
-function spawnBoss() {
-  const B = CFG.boss, L = currentLair(), zi = G.bossLair, Z = CFG.world.zones[zi];
-  const ta = tierAdd(), lvl = clamp(G.profile.level + 1, Z.lvl[0] + 2 + ta, Z.lvl[1] + 3 + ta);
-  const b = { id: nextId++, kind: 'boss', team: 'mob', x: L.x, z: L.z, hx: L.x, hz: L.z, r: B.r, lvl, zone: zi, name: Z.boss,
-    maxHp: Math.round(B.hp * egrow(B.hpGrowth, lvl)), hp: 0, atk: B.atk * egrow(CFG.enemies.atkGrowth, lvl),
-    alive: true, atkT: 2.5, life: B.duration, dmgBy: {}, total: 0, facing: 0, moveAmt: 0, flashT: 0, slowT: 0, invulnT: 0, armorT: 0, attackAnim: 0, lastHurt: -99 };
-  if (!G.profile.settings.bots) { b.maxHp = Math.round(b.maxHp * 0.6); } // no bot helpers: a solo-sized boss
-  b.hp = b.maxHp; b.spawnT = G.time;
-  G.boss = b; G.ents.set(b.id, b);
-  ev({ t: 'bossSpawn', name: Z.boss, lair: L.name, x: b.x, z: b.z });
+// half the time the area you stand in, otherwise one of your four highest open areas; then a boss of that biome
+function pickNextBoss() {
+  const hi = Math.max(1, highestZone(G.profile.level)), here = zoneAt(G.player.z);
+  G.bossLair = here >= 1 && here <= hi && Math.random() < 0.5 ? here : randInt(Math.max(1, hi - 3), hi);
+  const biome = CFG.world.zones[G.bossLair].biome, pool = Object.keys(WORLD_BOSSES).filter((k) => WORLD_BOSSES[k].biome === biome);
+  const fresh = pool.filter((k) => k !== G.bossLast);
+  G.bossNext = pick(fresh.length ? fresh : pool.length ? pool : ['golem']);
 }
-function stepBoss(b, dt) {
-  const B = CFG.boss, pl = G.player;
-  trackVel(b, dt);
-  b.flashT -= dt; b.slowT -= dt; b.life -= dt; b.atkT -= dt; tickBurn(b, dt); if (!G.boss) return; b.attackAnim = Math.max(0, b.attackAnim - dt * 1.5);
-  if (b.life <= 0 && G.time - b.lastHurt < 8 && b.life > -180) { /* still being fought: stay */ }
-  else if (b.life <= 0) {
-    if (!b.retreat) { b.retreat = 2.5; b.invulnT = 99; ev({ t: 'bossGone', name: b.name }); }
-    b.retreat -= dt; b.moveAmt = 0; if (b.retreat <= 0) endBoss(false); return;
-  }
-  // choose a target: player if close, otherwise the nearest bot
-  let target = null, td = 18;
+// the attuned waypoint nearest the lair, if it gets you meaningfully closer than walking (index or -1)
+function bossWaypoint() {
+  const L = currentLair(), pl = G.player; if (!L || !G.profile) return -1;
+  let best = -1, bd = Infinity;
+  for (const i of G.profile.waypoints) { const w = CFG.world.waypoints[i]; if (!w) continue; const d = Math.hypot(w.x - L.x, w.z - L.z); if (d < bd) { bd = d; best = i; } }
+  return best >= 0 && Math.hypot(pl.x - L.x, pl.z - L.z) > bd + 30 ? best : -1;
+}
+function spawnBoss() {
+  const B = CFG.boss, L = currentLair(), zi = G.bossLair, Z = CFG.world.zones[zi], id = G.bossNext in WORLD_BOSSES ? G.bossNext : 'golem', D = bossDef(id);
+  const ta = tierAdd(), lvl = clamp(G.profile.level + 1, Z.lvl[0] + 2 + ta, Z.lvl[1] + 3 + ta);
+  const b = { id: nextId++, kind: 'boss', team: 'mob', def: id, x: L.x, z: L.z, hx: L.x, hz: L.z, r: D.r, lvl, zone: zi, name: D.name,
+    maxHp: Math.round(refDmg(lvl) * B.hpHits), hp: 0, atk: refHp(lvl),
+    alive: true, atkT: 2.5, life: B.duration, dmgBy: {}, total: 0, facing: 0, moveAmt: 0, flashT: 0, slowT: 0, invulnT: 0, armorT: 0, attackAnim: 0, windT: 0, lastHurt: -99,
+    seq: [], busyT: 0, last: null, rage: false, hidden: false, leap: null, burrow: null, spin: null };
+  if (!G.profile.settings.bots) b.maxHp = Math.round(b.maxHp * B.soloHp); // no bot helpers: a little less HP, still a long fight
+  b.hp = b.maxHp; b.spawnT = G.time; G.bossLast = id;
+  G.boss = b; G.ents.set(b.id, b);
+  ev({ t: 'bossSpawn', name: D.name, title: D.title, lair: L.name, x: b.x, z: b.z, color: D.core || Z.coreColor });
+}
+// --- boss patterns. Like monster moves, every hit is drawn before it can land (pendingAoE rings, cones, donuts and
+// spike lines, lanes, cast rings) and lands exactly where it was drawn. Long patterns place their markers in beats
+// (b.seq) and skip a beat rather than ever hitting from an undrawn marker. Damage is a share of the reference hero's
+// HP at the boss level (b.atk = refHp), so a big hit takes half of an equal-level hero.
+const bossDmg = (b, frac) => b.atk * frac * (b.life <= 0 ? CFG.boss.enrageDmg : 1);
+const bossAoE = (b, x, z, r, t, frac, o) => moveAoE(b, x, z, r, t, bossDmg(b, frac), o);
+const bossLater = (b, t, fn) => b.seq.push({ t, fn });
+const bossAim = (b, tg) => Math.atan2(tg.x - b.x, tg.z - b.z);
+const bossColor = (b) => bossDef(b.def).shot || 0xff7b2e;
+// a spot is fair game if it is out of town (bosses never reach into the safe zone)
+const bossSpot = (x, z) => distToTown(x, z) > CFG.world.town.r + 3;
+function bossShot(b, a, sp, life, frac, o) {
+  return spawnProjectile(Object.assign({ x: b.x, z: b.z, vx: Math.sin(a) * sp, vz: Math.cos(a) * sp, life, r: 0.55, dmg: bossDmg(b, frac), team: 'mob', owner: b.id, kind: 'orb', color: bossColor(b), y: 1.6 }, o));
+}
+// lobbed shell that lands as its marker goes off
+function bossLob(b, x, z, t, color) {
+  const dd = Math.hypot(x - b.x, z - b.z);
+  spawnProjectile({ x: b.x, z: b.z, vx: (x - b.x) / t, vz: (z - b.z) / t, life: t, r: 0.5, dmg: 0, team: 'mob', owner: b.id, kind: 'lob', lob: true, lobH: 3 + dd * 0.3, color: color || bossColor(b), y: 3 });
+}
+// [min, max] = target distance that allows the pattern; busy = seconds it roots the boss; fn returns false if it cannot start
+const BOSS_PATTERNS = {
+  // a huge ring on the target
+  slam: { max: 16, busy: 1.2, fn(b, tg) { if (!markersFree(1)) return false; bossAoE(b, tg.x, tg.z, 5.5, 1.1, 0.5); return true; } },
+  // three spike lines fan out toward the target, rippling outward; one hit at most
+  spikeFan: { min: 2, max: 14, busy: 1.4, fn(b, tg) {
+    if (!markersFree(15)) return false; const A = bossAim(b, tg), grp = [];
+    for (let l = -1; l <= 1; l++) for (let i = 0; i < 5; i++) { const a = A + l * 0.5, d = b.r + 1.2 + i * 2.2; bossAoE(b, b.x + Math.sin(a) * d, b.z + Math.cos(a) * d, 1.3, 1.0 + i * 0.12, 0.35, { kind: 'spike', grp }); }
+    return true; } },
+  // four spike lines in a cross aimed at the target: stand between the arms
+  spikeCross: { max: 14, busy: 1.4, fn(b, tg) {
+    if (!markersFree(16)) return false; const A = bossAim(b, tg), grp = [];
+    for (let l = 0; l < 4; l++) for (let i = 0; i < 4; i++) { const a = A + l * Math.PI / 2, d = b.r + 1.2 + i * 2.4; bossAoE(b, b.x + Math.sin(a) * d, b.z + Math.cos(a) * d, 1.4, 1.0 + i * 0.12, 0.35, { kind: 'spike', grp }); }
+    return true; } },
+  // a ring of rocks (two in a rage); the cast ring shows first
+  rockRing: { busy: 1.4, fn(b) {
+    ev({ t: 'moveTele', x: b.x, z: b.z, r: b.r * 1.8, life: 0.6 });
+    const ring = (off) => { for (let i = 0; i < 14; i++) { const a = off + (i / 14) * Math.PI * 2; bossShot(b, a, 11, 2.4, 0.18, { kind: 'rock', color: 0xa38b6d }); } ev({ t: 'bossRocks', x: b.x, z: b.z }); };
+    const off = Math.random() * Math.PI; bossLater(b, 0.6, () => ring(off)); if (b.rage) bossLater(b, 1.1, () => ring(off + Math.PI / 14));
+    return true; } },
+  // donut: the safe spot is hugging the boss
+  quake: { max: 9, busy: 1.3, fn(b) { if (!markersFree(1)) return false; const inner = b.r + 1.6; bossAoE(b, b.x, b.z, inner + 5, 1.1, 0.45, { inner }); return true; } },
+  // donut, then the core: hug the boss for the first, get out for the second
+  coreQuake: { max: 10, busy: 2.0, fn(b) {
+    if (!markersFree(2)) return false; const inner = b.r + 1.6;
+    bossAoE(b, b.x, b.z, inner + 5, 1.0, 0.45, { inner }); bossAoE(b, b.x, b.z, inner + 0.4, 1.75, 0.45); return true; } },
+  // drags the target in, then the eye erupts
+  vortex: { min: 3, max: 16, busy: 1.0, fn(b, tg) {
+    if (!markersFree(1) || !bossSpot(tg.x, tg.z)) return false; const x = tg.x, z = tg.z;
+    bossAoE(b, x, z, 2.6, 2.4, 0.45, { kind: 'vortex' }); ev({ t: 'moveTele', x, z, r: 7, life: 0.8 });
+    bossLater(b, 0.8, () => G.clouds.push({ x, z, r: 7, t: 1.6, max: 1.6, tick: 0, dmg: 0, pull: 2.6, color: 0xb36bff, team: 'mob', owner: b.id }));
+    return true; } },
+  // crouch, leap and crash down on the marked spot
+  leap: { min: 6, max: 20, busy: 1.3, fn(b, tg) {
+    const x = tg.x + (tg.vx || 0) * 0.3, z = tg.z + (tg.vz || 0) * 0.3;
+    if (!markersFree(1) || !bossSpot(x, z) || pointBlocked(x, z, b.r * 0.6) || Math.hypot(x - b.hx, z - b.hz) > CFG.boss.leash * 2) return false;
+    bossAoE(b, x, z, 4.5, 1.1, 0.5); b.leap = { sx: b.x, sz: b.z, x, z, t: 1.1 }; return true; } },
+  // three sticky webs/ice patches lobbed around the target: slow and a little damage while you stand in them
+  webVolley: { min: 3, max: 16, busy: 1.0, fn(b, tg) {
+    if (!markersFree(3)) return false; const A = bossAim(b, tg), px = Math.cos(A), pz = -Math.sin(A), D = bossDef(b.def);
+    for (let i = -1; i <= 1; i++) {
+      const x = tg.x + px * i * 3.4, z = tg.z + pz * i * 3.4, t = 0.9 + Math.abs(i) * 0.15; if (!bossSpot(x, z)) continue;
+      bossAoE(b, x, z, 2.4, t, 0.12, { slow: 1.6, kind: 'trap' }); bossLob(b, x, z, t);
+      bossLater(b, t, () => G.clouds.push({ x, z, r: 2.4, t: 5, max: 5, tick: 0, dmg: bossDmg(b, 0.03), color: D.shot || 0x9fe8ff, team: 'mob', owner: b.id }));
+    }
+    return true; } },
+  // poison/lava pools on and around the target
+  pools: { max: 16, busy: 1.0, fn(b, tg) {
+    const spots = [[tg.x, tg.z], [tg.x + rand(-4, 4), tg.z + rand(-4, 4)], [tg.x + rand(-4, 4), tg.z + rand(-4, 4)]].filter(([x, z]) => bossSpot(x, z)); if (!spots.length) return false;
+    for (const [x, z] of spots) { ev({ t: 'moveTele', x, z, r: 2.6, life: 0.9 }); bossLater(b, 0.9, () => G.clouds.push({ x, z, r: 2.6, t: 5, max: 5, tick: 0, dmg: bossDmg(b, 0.04), team: 'mob', owner: b.id })); }
+    return true; } },
+  // summons a few frail, loot-free monsters of the area (at most six at once)
+  brood: { busy: 1.0, fn(b) {
+    const alive = G.enemies.filter((e) => e.alive && e.mirror && e.mirror.of === b.id).length; if (alive >= 6) return false;
+    const Z = CFG.world.zones[b.zone], spots = [];
+    for (let i = 0; i < 3; i++) { const a = rand(0, 6.28), x = b.x + Math.sin(a) * (b.r + 3), z = b.z + Math.cos(a) * (b.r + 3); if (!pointBlocked(x, z, 1)) { spots.push([x, z]); ev({ t: 'moveTele', x, z, r: 1.6, life: 0.8, color: 0xc8b8ff }); } }
+    bossLater(b, 0.8, () => { for (const [x, z] of spots) bossAdd(b, Math.random() < 0.5 ? Z.enemy : (Z.alt || Z.enemy), x, z); });
+    return spots.length > 0; } },
+  // roots and spins out four arms of orbs (cast ring = their reach): back off or weave between the arms
+  spiral: { max: 9, busy: 3.6, fn(b, tg) {
+    const sp = 8, life = 1.5; ev({ t: 'moveTele', x: b.x, z: b.z, r: sp * life + 0.5, life: 0.8 });
+    bossLater(b, 0.8, () => { b.spin = { t: 2.6, acc: 0, a: bossAim(b, tg), dir: Math.random() < 0.5 ? 1 : -1 }; }); return true; } },
+  // meteor rain: shells keep falling on and around the target for a few seconds
+  meteor: { max: 22, busy: 1.4, fn(b, tg) {
+    let any = false;
+    for (let k = 0; k < 7; k++) bossLater(b, k * 0.32, () => {
+      const T = bossTarget(b) || tg, pts = [[T.x + (T.vx || 0) * 0.6 + rand(-1.5, 1.5), T.z + (T.vz || 0) * 0.6 + rand(-1.5, 1.5)], [b.x + rand(-12, 12), b.z + rand(-12, 12)]];
+      for (const [x, z] of pts) if (bossSpot(x, z) && markersFree(1)) { bossAoE(b, x, z, 2.4, 1.1, 0.3, { kind: 'meteor' }); bossLob(b, x, z, 1.1, 0xff7b2e); }
+    });
+    any = true; return any; } },
+  // three cones sweep across in turn; one hit at most
+  breathSweep: { max: 9, busy: 2.2, fn(b, tg) {
+    if (!markersFree(3, true)) return false; const A = bossAim(b, tg), dir = Math.random() < 0.5 ? 1 : -1, grp = [], D = bossDef(b.def);
+    for (let i = 0; i < 3; i++) bossAoE(b, b.x, b.z, 10, 0.9 + i * 0.45, 0.4, { cone: { a: A + dir * (i - 1) * 0.75, half: 0.42 }, kind: 'breath', grp, slow: D.slow ? 1.5 : 0, burn: D.burn ? bossDmg(b, 0.05) : 0 });
+    return true; } },
+  // five lanes fanned at the target, then piercing beams down each
+  beams: { min: 3, max: 22, busy: 1.4, fn(b, tg) {
+    const A = bossAim(b, tg), n = b.rage ? 7 : 5;
+    for (let i = 0; i < n; i++) ev({ t: 'moveTele', x: b.x, z: b.z, a: A + (i - (n - 1) / 2) * 0.32, len: 24, w: 1.3, life: 0.9 });
+    bossLater(b, 0.9, () => { for (let i = 0; i < n; i++) bossShot(b, A + (i - (n - 1) / 2) * 0.32, 34, 24 / 34, 0.4, { pierce: 9, r: 0.6 }); ev({ t: 'shoot', kind: 'enemy', x: b.x, z: b.z }); });
+    return true; } },
+  // three lightning chains hop out toward and beside the target; one hit per chain
+  zapStorm: { min: 3, max: 16, busy: 1.4, fn(b, tg) {
+    if (!markersFree(9)) return false; const A = bossAim(b, tg), d = Math.hypot(tg.x - b.x, tg.z - b.z);
+    for (let c = -1; c <= 1; c++) { const a = A + c * 0.55, grp = []; for (let i = 0; i < 3; i++) { const f = (i + 1) / 3; bossAoE(b, b.x + Math.sin(a) * d * f, b.z + Math.cos(a) * d * f, 1.7, 0.75 + i * 0.22, 0.3, { kind: 'zap', grp }); } }
+    return true; } },
+  // two orb rings with a gap each, the second offset
+  novaRings: { max: 14, busy: 1.6, fn(b, tg) {
+    const A = bossAim(b, tg); ev({ t: 'moveTele', x: b.x, z: b.z, r: b.r * 2, life: 0.6 });
+    bossLater(b, 0.6, () => orbRing(b, 20, 2, A + (Math.random() < 0.5 ? -1 : 1) * 0.6, 7, bossDmg(b, 0.2), bossColor(b)));
+    bossLater(b, 1.2, () => orbRing(b, 20, 2, A + Math.PI / 20 + (Math.random() < 0.5 ? -1 : 1) * 1.2, 7, bossDmg(b, 0.2), bossColor(b)));
+    return true; } },
+  // vanishes and crashes down behind the target
+  blink: { min: 5, max: 22, busy: 1.4, fn(b, tg) {
+    const a = bossAim(b, tg), x = tg.x + Math.sin(a) * 3, z = tg.z + Math.cos(a) * 3;
+    if (!markersFree(1) || !bossSpot(x, z) || pointBlocked(x, z, b.r * 0.6) || Math.hypot(x - b.hx, z - b.hz) > CFG.boss.leash * 2) return false;
+    bossAoE(b, x, z, 4, 1.2, 0.45);
+    bossLater(b, 0.6, () => { ev({ t: 'champBlink', x: b.x, z: b.z, out: true }); b.x = x; b.z = z; ev({ t: 'champBlink', x, z }); });
+    return true; } },
+  // dives underground; its marker stalks the target, locks, and it erupts there, three times
+  burrowStalk: { min: 3, max: 18, busy: 0.5, fn(b, tg) {
+    if (!markersFree(1) || !bossSpot(tg.x, tg.z)) return false;
+    b.burrow = { n: 3, t: 1.4, aoe: bossAoE(b, tg.x, tg.z, 3.2, 1.4, 0.45) }; b.hidden = true; b.invulnT = 99;
+    ev({ t: 'boom', x: b.x, z: b.z, r: b.r * 1.5, color: 0x9a8a6a }); return true; } },
+  // rows of water crash outward across the aim, one row after another; one hit at most
+  tidalWave: { max: 18, busy: 2.2, fn(b, tg) {
+    const A = bossAim(b, tg), px = Math.cos(A), pz = -Math.sin(A), grp = [];
+    for (let row = 0; row < 5; row++) bossLater(b, row * 0.32, () => {
+      if (!markersFree(5)) return; const d = b.r + 2 + row * 3.2;
+      for (let i = -2; i <= 2; i++) { const x = b.x + Math.sin(A) * d + px * i * 3.2, z = b.z + Math.cos(A) * d + pz * i * 3.2; bossAoE(b, x, z, 1.9, 0.9, 0.4, { kind: 'spike', grp }); }
+    });
+    return true; } },
+};
+// a frail, loot-free add (it fades with its boss, like an elite's mirror copies)
+function bossAdd(b, type, x, z) {
+  if (!CFG.enemies[type] || pointBlocked(x, z, 1)) return;
+  let e; try { e = makeEnemy(type, b.zone, { patrol: 0 }); } catch (err) { return; } setEnemyLevel(e, b.lvl);
+  Object.assign(e, { x, z, hx: b.hx, hz: b.hz, wx: x, wz: z, state: 'chase', temp: true, mirror: { of: b.id, t: 30 }, atkCd: 1 });
+  e.maxHp = e.hp = Math.max(1, Math.round(e.maxHp * 0.5));
+  Object.defineProperty(e, 'tagged', { get: () => false, set() {} }); // never rewarded: no XP or loot farm
+  G.enemies.push(e); ev({ t: 'boom', x, z, r: 1.4, color: 0xc8b8ff });
+}
+// the player if close (and not hiding in a menu), otherwise the nearest helper
+function bossTarget(b) {
+  const pl = G.player; let target = null, td = 24;
   if (pl.alive && !(G.menuSafe > 0)) { const d = Math.hypot(pl.x - b.x, pl.z - b.z); if (d < td) { td = d; target = pl; } }
   if (!target) for (let i = 1; i < G.hubFighters.length; i++) { const f = G.hubFighters[i]; const d = Math.hypot(f.x - b.x, f.z - b.z); if (d < td) { td = d; target = f; } }
-  if (target) {
-    const dx = target.x - b.x, dz = target.z - b.z, d = Math.hypot(dx, dz) || 1;
-    b.facing = Math.atan2(dx, dz);
-    if (d > 5 && Math.hypot(b.x - b.hx, b.z - b.hz) < B.leash) { b.x += dx / d * B.speed * dt * (b.slowT > 0 ? 0.5 : 1); b.z += dz / d * B.speed * dt; b.moveAmt = 1; }
-    else b.moveAmt = Math.max(0, b.moveAmt - dt * 3);
-    if (b.atkT <= 0) {
-      b.atkT = B.attackEvery * rand(0.85, 1.15); b.attackAnim = 1;
-      const roll = Math.random(), A = b.facing;
-      if (roll < 0.4) {
-        G.pendingAoE.push({ x: target.x, z: target.z, r: B.slamR, t: B.slamDelay, max: B.slamDelay, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'slam' });
-        ev({ t: 'telegraph' });
-      } else if (roll < 0.6 && markersFree(15)) {
-        // three spike lines fan out toward the target, rippling outward; one hit at most
-        const grp = [];
-        for (let l = -1; l <= 1; l++) for (let i = 0; i < 5; i++) { const a = A + l * 0.5, d = b.r + 1.2 + i * 2.2, t = B.slamDelay + i * 0.12; G.pendingAoE.push({ x: b.x + Math.sin(a) * d, z: b.z + Math.cos(a) * d, r: 1.3, t, max: t, dmg: b.atk * 1.1, team: 'mob', owner: b.id, kind: 'spike', grp }); }
-        ev({ t: 'telegraph' });
-      } else if (roll < 0.78 && markersFree(1) && (target !== pl || distToTown(pl.x, pl.z) > CFG.world.town.r + 4)) {
-        // vortex: drags the hero toward the eye for 1.6 s, the eye erupts 0.6 s after the pull lets go
-        G.clouds.push({ x: target.x, z: target.z, r: 6, t: 1.6, max: 1.6, tick: 0, dmg: 0, pull: 2.4, color: 0xb36bff, team: 'mob', owner: b.id });
-        G.pendingAoE.push({ x: target.x, z: target.z, r: 2.4, t: 2.2, max: 2.2, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'vortex' });
-        ev({ t: 'telegraph' });
-      } else {
-        const off = Math.random() * Math.PI;
-        for (let i = 0; i < B.rocks; i++) {
-          const a = off + (i / B.rocks) * Math.PI * 2;
-          spawnProjectile({ x: b.x, z: b.z, vx: Math.sin(a) * B.rockSpeed, vz: Math.cos(a) * B.rockSpeed, life: 2.2, r: 0.6, dmg: b.atk * 0.6, team: 'mob', owner: b.id, kind: 'rock', color: 0xa38b6d, y: 1.6 });
-        }
-        ev({ t: 'bossRocks', x: b.x, z: b.z });
-      }
+  return target;
+}
+function stepBoss(b, dt) {
+  const B = CFG.boss, D = bossDef(b.def);
+  trackVel(b, dt);
+  b.flashT -= dt; b.slowT -= dt; b.life -= dt; b.atkT -= dt; b.busyT -= dt; b.windT = Math.max(0, b.windT - dt); tickBurn(b, dt); if (!G.boss) return; b.attackAnim = Math.max(0, b.attackAnim - dt * 1.5);
+  if (b.life <= 0 && G.time - b.lastHurt < 8 && b.life > -180) { /* still being fought: stay (enraged) */ }
+  else if (b.life <= 0) {
+    if (!b.retreat) { b.retreat = 2.5; b.invulnT = 99; b.seq.length = 0; b.hidden = false; b.burrow = null; b.spin = null; ev({ t: 'bossGone', name: b.name }); }
+    b.retreat -= dt; b.moveAmt = 0; if (b.retreat <= 0) endBoss(false); return;
+  }
+  // below half HP: rage (faster, more patterns)
+  if (!b.rage && b.hp < b.maxHp * B.rageAt) { b.rage = true; ev({ t: 'bossRage', name: b.name, x: b.x, z: b.z, color: D.core || 0xff5a1f }); }
+  // queued beats of the running pattern
+  for (let i = b.seq.length - 1; i >= 0; i--) { const s = b.seq[i]; if ((s.t -= dt) <= 0) { b.seq.splice(i, 1); s.fn(); } }
+  const target = bossTarget(b);
+  // a leap in flight: rise over the last 0.35 s and land on the marker
+  if (b.leap) {
+    const L = b.leap; L.t -= dt; b.moveAmt = 0;
+    if (L.t < 0.35) { const q = clamp(1 - L.t / 0.35, 0, 1); b.x = lerp(L.sx, L.x, q); b.z = lerp(L.sz, L.z, q); }
+    if (L.t <= 0) { b.x = L.x; b.z = L.z; b.leap = null; ev({ t: 'boom', x: b.x, z: b.z, r: 4.5, color: 0xc9a16b, big: true }); }
+    return;
+  }
+  // underground: the marker follows the target until it locks for the last 0.45 s, then the boss erupts there
+  if (b.burrow) {
+    const R = b.burrow; R.t -= dt; b.moveAmt = 0;
+    if (R.t > 0.45 && target && bossSpot(target.x, target.z) && R.aoe) { R.aoe.x = target.x; R.aoe.z = target.z; }
+    if (R.t <= 0) {
+      if (R.aoe) { b.x = R.aoe.x; b.z = R.aoe.z; }
+      if (--R.n > 0 && target && bossSpot(target.x, target.z) && markersFree(1)) { R.t = 1.2; R.aoe = bossAoE(b, target.x, target.z, 3.2, 1.2, 0.45); }
+      else { b.burrow = null; b.hidden = false; b.invulnT = 0; b.atkT = Math.min(b.atkT, 1); }
     }
-  } else b.moveAmt = Math.max(0, b.moveAmt - dt * 3);
+    return;
+  }
+  // spinning: rooted, four arms of orbs
+  if (b.spin) {
+    const S = b.spin; S.t -= dt; b.moveAmt = 0;
+    if ((S.acc -= dt) <= 0) { S.acc = 0.11; S.a += 0.3 * S.dir; for (let i = 0; i < 4; i++) bossShot(b, S.a + i * Math.PI / 2, 8, 1.5, 0.12, { r: 0.45, y: 1.4 }); }
+    if (S.t <= 0) b.spin = null;
+    return;
+  }
+  if (!target) { b.moveAmt = Math.max(0, b.moveAmt - dt * 3); return; }
+  const dx = target.x - b.x, dz = target.z - b.z, d = Math.hypot(dx, dz) || 1;
+  b.facing = Math.atan2(dx, dz);
+  if (b.busyT > 0) { b.moveAmt = Math.max(0, b.moveAmt - dt * 3); return; }
+  const home = Math.hypot(b.x - b.hx, b.z - b.hz);
+  if (home > B.leash * 1.6) { const sp = D.speed * dt; b.x += (b.hx - b.x) / home * sp; b.z += (b.hz - b.z) / home * sp; b.moveAmt = 1; } // a leap or blink carried it far: walk back
+  else if (d > 6 && home < B.leash) { const sp = D.speed * dt * (b.slowT > 0 ? 0.5 : 1) * (b.rage ? 1.15 : 1); b.x += dx / d * sp; b.z += dz / d * sp; b.moveAmt = 1; }
+  else b.moveAmt = Math.max(0, b.moveAmt - dt * 3);
+  if (b.atkT > 0) return;
+  // a random pattern that fits the range (never the same one twice in a row)
+  const list = b.rage ? D.moves.concat(D.rage || []) : D.moves, ok = list.filter((k) => { const P = BOSS_PATTERNS[k]; return P && k !== b.last && d >= (P.min || 0) && d <= (P.max || 99); });
+  while (ok.length) {
+    const k = ok.splice(randInt(0, ok.length - 1), 1)[0], P = BOSS_PATTERNS[k];
+    if (!P.fn(b, target)) continue;
+    b.last = k; b.busyT = P.busy; b.windT = Math.min(P.busy, 1); b.attackAnim = 1;
+    b.atkT = P.busy + B.attackEvery * (b.rage ? B.rageEvery : 1) * rand(0.8, 1.15);
+    ev({ t: 'telegraph' }); return;
+  }
+  b.atkT = 0.4; // nothing fits from here: close in and try again
 }
 function endBoss(killed) {
   const b = G.boss; if (!b) return;
@@ -4981,7 +5199,7 @@ const TestTools = {
   levels100() { for (let i = 0; i < 100; i++) this.levelUp(); },
   gold() { const n = Math.round(1000 * Math.pow(CFG.enemies.goldGrowth, G.profile.level - 1)); G.profile.gold += n; G.dirty = true; ev({ t: 'gold', amt: n }); },
   essence() { addEssence(50); },
-  boss() { if (G.boss || G.mode !== 'hub') return; G.bossWarned = false; G.bossTimer = Math.min(G.bossTimer, CFG.boss.warn + 1); },
+  boss() { if (G.boss || G.mode !== 'hub') return; G.bossWarned = false; G.bossTimer = Math.min(G.bossTimer, 12); }, // warns at once, rises 12 s later
   unlockAll() {
     const p = G.profile;
     for (const id in CFG.attacks) if (!CFG.attacks[id].signature && !p.unlocked.attacks.includes(id)) { p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); }
@@ -6380,7 +6598,8 @@ function tintMonsterMaterial(m, tint, k) {
 }
 AssetSlots.register('enemy', (o) => {
   const root = new THREE.Group();
-  const ED = CFG.enemies[o.type] || {}, bt = enemyBase(o.type), tint = ED.tint != null ? new THREE.Color(ED.tint) : null, esz = ED.scale || 1;
+  // o.base / o.look: a body and tint/scale drawn without a monster row (world bosses use this)
+  const ED = o.look || CFG.enemies[o.type] || {}, bt = o.base || enemyBase(o.type), tint = ED.tint != null ? new THREE.Color(ED.tint) : null, esz = ED.scale || 1;
   const shadow = new THREE.Mesh(geoShadow, matShadow); shadow.scale.setScalar((bt === 'wolf' || bt === 'beetle' ? 0.9 : 0.75) * esz); shadow.position.y = 0.03; root.add(shadow);
   const pivot = new THREE.Group(); root.add(pivot);
   const mat = flashMaterial();
@@ -6464,7 +6683,35 @@ function golemGeos(zi) {
   ]);
   const out = { body, arm, glow }; golemCache.set(bkey, out); return out;
 }
+// Other world bosses: a sculpted monster body drawn huge in the boss's colours, on the same rune circle as the golem
+function speciesBossView(o, D) {
+  const root = new THREE.Group(), core = D.core || 0xff8a2a;
+  const runeMat = new THREE.MeshBasicMaterial({ color: core, transparent: true, opacity: 0.5, depthWrite: false });
+  const rune = new THREE.Mesh(new THREE.RingGeometry(D.r + 1.8, D.r + 2.1, 6, 1).rotateX(-Math.PI / 2), runeMat); rune.position.y = 0.06; root.add(rune);
+  const rune2 = new THREE.Mesh(new THREE.RingGeometry(D.r + 1.0, D.r + 1.15, 48).rotateX(-Math.PI / 2), runeMat); rune2.position.y = 0.06; root.add(rune2);
+  const body = new THREE.Group(); body.scale.setScalar(D.scale || 2.8); root.add(body);
+  const inner = AssetSlots.create('enemy', { base: D.body, look: { tint: D.tint, scale: 1, tintK: 0.8 } }); body.add(inner.root);
+  // the monster view reads a few fields; it draws at the origin of `body` and the boss root does the moving
+  const px = { x: 0, z: 0, facing: 0, alive: true, lvl: 1, elite: false, hidden: false, moveAmt: 0, windT: 0, attackAnim: 0, flashT: 0, invulnT: 0, slowT: 0, burnT: 0 };
+  let spawnT = 0, dust = 0;
+  return {
+    root,
+    update(b, dt, t) {
+      root.visible = b.alive !== false && !b.hidden;
+      spawnT = b.spawnT != null && Number.isFinite(G.time) ? clamp((G.time - b.spawnT) * 0.8, 0, 1) : Math.min(1, spawnT + dt * 0.8);
+      root.position.set(b.x, -3.5 * (1 - spawnT) - (b.retreat != null ? 4.5 * (1 - Math.max(0, b.retreat) / 2.5) : 0) + (b.leap && b.leap.t < 0.35 ? Math.sin(clamp(1 - b.leap.t / 0.35, 0, 1) * Math.PI) * 3 : 0), b.z);
+      root.rotation.y += angDiff(root.rotation.y, b.facing) * (1 - Math.exp(-dt * 4));
+      px.moveAmt = b.moveAmt; px.windT = b.windT || 0; px.attackAnim = b.attackAnim; px.flashT = b.flashT; px.slowT = b.slowT; px.burnT = b.burnT || 0;
+      inner.update(px, dt, t);
+      const pulse = 0.75 + Math.sin(t * (b.rage ? 9 : 4)) * 0.25;
+      rune.rotation.y = t * (b.rage ? 1.2 : 0.4); rune2.rotation.y = -t * 0.25; runeMat.opacity = 0.3 + pulse * 0.25;
+      if (b.hidden && (dust -= dt) <= 0) { dust = 0.05; burst(b.x + (Math.random() - 0.5) * 2, 0.2, b.z + (Math.random() - 0.5) * 2, 2, 0x9a8a6a, 2, 0.5, 0.3, 6, 2); }
+    },
+    dispose() { inner.dispose(); runeMat.dispose(); rune.geometry.dispose(); rune2.geometry.dispose(); },
+  };
+}
 AssetSlots.register('boss', (o) => {
+  const D = o.def && WORLD_BOSSES[o.def]; if (D && D.body !== 'golem') return speciesBossView(o, D);
   const zi = o.zone || 0, Z = CFG.world.zones[zi] || CFG.world.zones[0], G3 = golemGeos(zi);
   const root = new THREE.Group();
   const shadow = new THREE.Mesh(geoShadow, matShadow); shadow.scale.setScalar(3.1); shadow.position.y = 0.04; root.add(shadow);
@@ -6486,11 +6733,11 @@ AssetSlots.register('boss', (o) => {
     root,
     update(b, dt, t) {
       // Showcase hides existing world views. Restore live bosses when combat resumes.
-      root.visible = b.alive !== false;
+      root.visible = b.alive !== false && !b.hidden;
       // A boss may spawn while showcase suppresses its view. Use simulation age
       // so returning to combat cannot restart the rise underneath an attacking boss.
       spawnT = b.spawnT != null && Number.isFinite(G.time) ? clamp((G.time - b.spawnT) * 0.8, 0, 1) : Math.min(1, spawnT + dt * 0.8);
-      root.position.set(b.x, -3.5 * (1 - spawnT) - (b.retreat != null ? 4.5 * (1 - Math.max(0, b.retreat) / 2.5) : 0), b.z);
+      root.position.set(b.x, -3.5 * (1 - spawnT) - (b.retreat != null ? 4.5 * (1 - Math.max(0, b.retreat) / 2.5) : 0) + (b.leap && b.leap.t < 0.35 ? Math.sin(clamp(1 - b.leap.t / 0.35, 0, 1) * Math.PI) * 3 : 0), b.z);
       root.rotation.y += angDiff(root.rotation.y, b.facing) * (1 - Math.exp(-dt * 4));
       phase += dt * (1 + b.moveAmt * 4);
       const atk = b.attackAnim;
@@ -7575,7 +7822,7 @@ function viewFor(e) {
     v = AssetSlots.create('character', { cls: e.cls, body: c.body, accent: e.isPlayer ? (badgeTint(G.profile, e.cls) || c.accent) : c.accent, hair: BR.hair, look: BR.look, ring, gear, xray: e.isPlayer, cape, asc, peer: !!e.isPeer });
     v.cls = e.cls; v.sig = e.isPlayer ? playerViewSig(e.cls) : '';
   } else if (e.kind === 'enemy') v = AssetSlots.create('enemy', { type: e.type, elite: e.elite });
-  else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone });
+  else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone, def: e.def });
   else if (e.kind === 'npc') v = AssetSlots.create('npc', { body: e.def.body, accent: e.def.accent });
   dynGroup.add(v.root); views.set(e, v);
   return v;
@@ -8150,6 +8397,7 @@ function setupInput() {
   };
   aimBtn('bSuper', 'super'); aimBtn('bSpecial', 'special');
   $('bAct').addEventListener('click', (e) => { e.preventDefault(); if (!G.modal) interact(); });
+  $('bossGo').addEventListener('click', (e) => { e.preventDefault(); if (!G.modal && UI.bossWp >= 0 && travelTo(UI.bossWp)) { UI.bossWp = -1; setHidden('bossCall', true); } });
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return; const k = e.key.toLowerCase(); Input.keys.add(k);
@@ -8386,7 +8634,14 @@ function updateHUD(dt) {
   // world boss: a live line in the small feed instead of a big banner
   if (G.mode === 'hub' && G.started) {
     if (G.boss) { const d = Math.round(Math.hypot(G.boss.x - G.player.x, G.boss.z - G.player.z)); Feed.add(`${gi('k_titan')} <b>${G.boss.name}</b> · ${G.boss.life > 0 ? Math.ceil(G.boss.life) + 's' : 'enraged'} · ${d}m`, 'boss', 'boss', 1.2); }
-    else if (G.bossWarned) Feed.add(`${gi('k_titan')} <b>${CFG.world.zones[G.bossLair].boss}</b> rises in ${Math.ceil(G.bossTimer)}s · ${currentLair().name}`, 'boss', 'boss', 1.2);
+    else if (G.bossWarned) Feed.add(`${gi('k_titan')} <b>${bossDef(G.bossNext).name}</b> rises in ${Math.ceil(G.bossTimer)}s · ${currentLair().name}`, 'boss', 'boss', 1.2);
+  }
+  // boss call: before it rises (and while it is up and you are far away), one tap to the waypoint nearest its lair
+  if ((hudCache.bossCallT = (hudCache.bossCallT || 0) - dt) <= 0) {
+    hudCache.bossCallT = 0.25;
+    const up = G.mode === 'hub' && G.started && !G.modal && !inInstance() && (G.bossWarned || G.boss), wp = up ? bossWaypoint() : -1;
+    UI.bossWp = wp; setHidden('bossCall', wp < 0);
+    if (wp >= 0) setText('bossCallT', G.boss ? `${G.boss.name} is up · ${currentLair().name}` : `${bossDef(G.bossNext).name} in ${Math.ceil(G.bossTimer)}s · ${currentLair().name}`);
   }
   // buttons
   const w = weaponOf(f);
@@ -9273,8 +9528,10 @@ function processEvents() {
       case 'pickup': burst(e.x, 0.6, e.z, 10, 0xff5fa2, 4, 0.5, 0.2, 8); SpriteFX.play('crit', 'arcane', e.x, 0.9, e.z, 1.8); Sfx.play('pickup'); break;
       case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.z)]; const prevB = Feed.lastBiome; Feed.lastBiome = zn.biome;
         Feed.add(zn.safe ? `${gi('m_progress')} Back at <b>${e.name}</b> · safe` : prevB != null && prevB !== zn.biome ? `${gi('m_progress')} <b>${zn.biomeName}</b> › ${e.name} · Lv ${zn.lvl[0]}–${zn.lvl[1]}` : `${gi('m_progress')} Entered <b>${e.name}</b> · Lv ${zn.lvl[0]}–${zn.lvl[1]}`, 'zone'); break; }
-      case 'bossWarn': Sfx.play('horn'); break;
-      case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); SpriteFX.play('dust', 'dust', e.x, 0, e.z, 6); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 10); break;
+      case 'bossWarn': Sfx.play('horn'); showBanner(`${escapeHTML(e.name)} stirs`, `Rises at ${escapeHTML(e.lair)} in ${e.secs}s${e.wp >= 0 ? ' · tap Travel to go' : ''}`, 'red'); break;
+      case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, e.color || 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); SpriteFX.play('dust', 'dust', e.x, 0, e.z, 6); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 10);
+        if (near(e, 60)) showBanner(escapeHTML(e.name), escapeHTML(e.title || 'World boss'), 'red'); break;
+      case 'bossRage': showToast(`${e.name} is enraged!`, 'bad'); ringFx(e.x, e.z, 7, e.color || 0xff5a1f, 0.8); burst(e.x, 2, e.z, 40, e.color || 0xff5a1f, 9, 0.9, 0.4, 6, 1.4); if (near(e, 30)) Cam.shake = Math.max(Cam.shake, 1); Sfx.play('horn'); break;
       case 'bossDown': Feed.remove('boss'); Feed.add(`${gi('m_feats')} World boss defeated!`, 'boss'); Sfx.play('win'); break;
       case 'bossGone': Feed.remove('boss'); Feed.add(`${gi('k_titan')} ${e.name} sank back into the ground`, 'boss'); break;
       case 'telegraph': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w || 1.4, 0xff4d4d, 0.6); break;
