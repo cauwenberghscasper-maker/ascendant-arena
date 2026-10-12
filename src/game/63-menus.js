@@ -308,7 +308,7 @@ function openBrawlers(sel) {
       ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have, 96)}
       <b>${B.name}</b><small>${have ? `Mastery ${L}` : `Lv ${CFG.attacks[id].unlock && CFG.attacks[id].unlock.level ? CFG.attacks[id].unlock.level : '—'}`}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
   };
-  // 43 heroes: one section per tier (the original adventurers, then the Codex champions up to the divines)
+  // one section per tier, from the champions up to the divines
   const HERO_TIERS = [['adventurer', 'Adventurers'], ['champion', 'Champions'], ['legendary', 'Legendaries'], ['ascendant', 'Ascendants'], ['divine', 'Divines']];
   const shown = CFG.brawlerOrder.filter((id) => !onlyOwned || owned.includes(id));
   const cards = HERO_TIERS.map(([tier, label]) => {
@@ -317,7 +317,7 @@ function openBrawlers(sel) {
     return `<div class="btier tier-${tier}"><b>${label}</b><span>${all.filter((id) => owned.includes(id)).length}/${all.length}</span></div>` + ids.map(card).join('');
   }).join('');
   const B = CFG.brawlers[sel], A = CFG.attacks[sel], C = CFG.classes[sel], have = owned.includes(sel);
-  const first = p.starterBrawler || 'bolt', firstLevel = masteryOf(p, first), switchReady = canSwitchBrawler(p, sel);
+  const first = p.starterBrawler || STARTER_HERO, firstLevel = masteryOf(p, first), switchReady = canSwitchBrawler(p, sel);
   const xp = (p.mastery || {})['w:' + sel] || 0, L = masteryLevel(xp), a0 = mxpFor(L), a1 = mxpFor(Math.min(99, L + 1)), f = L >= 99 ? 1 : (xp - a0) / Math.max(1, a1 - a0);
   const t = tierOf(L), next = CFG.badges.find((b) => L < b.lvl);
   const badges = CFG.badges.map((b, i) => `<div class="bdg ${L >= b.lvl ? 'got' : ''}">${badgeSVG(L >= b.lvl ? i : -1, 'b_' + sel, { static: L < b.lvl })}<small>${b.name}<br>${b.lvl}</small></div>`).join('');

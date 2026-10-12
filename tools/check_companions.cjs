@@ -4,6 +4,7 @@ const moduleText=file=>fs.readFileSync(path.join(root,file),'utf8').replace(/exp
 function section(a,b){const i=html.indexOf(a),j=html.indexOf(b,i+a.length);assert(i>=0&&j>i,a);return html.slice(i,j);}
 let passed=0;function check(name,test){test();passed++;console.log('PASS '+name);}
 const c={console,Math,Number,JSON};vm.createContext(c);
+c.HeroSupers={ tickStatus: () => false, modDamage: (s, t, a) => a, step() {}, clear() {}, onBulletHit() {}, onBulletEnd() {}, decorateBullet() {}, lunge() {}, cast() {}, marked: [] };
 vm.runInContext(moduleText('assets/data/companions.js')+'\n'+moduleText('assets/data/prestige.js')+'\nthis.defs=PET_DEFS;',c);
 function profile(prestige=4){const p={prestige,level:200,xp:20,brawlers:{bolt:{tree:{active:0,sets:[{a:4},{},{}]},artifacts:[]}},road:200,worldTier:3,waypoints:[0,1,2],job:{id:3},jobCycle:{a:1},gear:{weapon:{id:'kept'}},bag:[{id:'locked',locked:true}],mastery:{bolt:100},gold:99};c.migratePets(p);return p;}
 check('legacy and malformed saves migrate safely without unlocking unearned pets',()=>{

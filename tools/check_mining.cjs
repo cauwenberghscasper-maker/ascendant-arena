@@ -8,7 +8,7 @@ const events = [], got = { cases: [], gems: 0 };
 const c = { Math: math, console, LOCAL_PREVIEW: false, TEST_MODE: false, nextId: 1, G: {}, ev: (e) => events.push(e),
   addCase: (k, o) => got.cases.push({ k, o }), addEssence: (n) => { got.gems += n; }, migratePets: (p) => { p.pets.sprout = { level: 1 }; } };
 vm.createContext(c);
-for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions']) vm.runInContext(fs.readFileSync(path.join(root, 'assets/data', f + '.js'), 'utf8').replace(/export /g, ''), c);
+for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions', 'heroes-v6']) vm.runInContext(fs.readFileSync(path.join(root, 'assets/data', f + '.js'), 'utf8').replace(/export /g, ''), c);
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') + section('// --- Mining:', '// --- end mining') +
   '\nthis.CFG = CFG; this.mineState = mineState; this.pickCost = pickCost; this.geodeChance = geodeChance; this.museumBonus = museumBonus; this.isRareVein = isRareVein;', c);
 const W = c.CFG.world, M = c.CFG.mining;

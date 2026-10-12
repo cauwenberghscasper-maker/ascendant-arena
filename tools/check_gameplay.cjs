@@ -9,8 +9,9 @@ const c = { Math: math, console, LOCAL_PREVIEW: true, TEST_MODE: false, nextId: 
   G: { profile: { level: 1, worldTier: 0 }, player: { alive: true, x: 0, z: -49, r: .55, speed: 6.4, intent: {} }, enemies: [], ents: new Map(), time: 0, menuSafe: 0 },
   ev: e => events.push(e), tickBurn() {}, markCombat() {}, trackVel() {}, champTick: () => false, spawnProjectile() {},
   dealDamage: (p, amt) => { if (p.invulnT > 0) return 0; hits.push(amt); p.hp -= amt * (1 - Math.min(.6, p.armor || 0)); if (p.hp <= 0) p.alive = false; return amt; } };
+c.HeroSupers = { tickStatus: () => false, modDamage: (s, t, a) => a, step() {}, clear() {}, onBulletHit() {}, onBulletEnd() {}, decorateBullet() {}, lunge() {}, cast() {}, marked: [] }; // Codex hero supers are drawn and scripted in the browser
 vm.createContext(c);
-for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions']) vm.runInContext(fs.readFileSync(path.join(root, 'assets/data', f + '.js'), 'utf8').replace(/export /g, ''), c);
+for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions', 'heroes-v6']) vm.runInContext(fs.readFileSync(path.join(root, 'assets/data', f + '.js'), 'utf8').replace(/export /g, ''), c);
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') +
   section('class Grid {', '// --- entities') + section('function patrolCountFor(', 'function rewardEnemyKill(') +
   section('function separate(', '// --- Rift champions:') + '\nthis.config = CFG; this.Grid = Grid;', c);

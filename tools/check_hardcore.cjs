@@ -14,6 +14,8 @@ const c = { Math: math, console, LOCAL_PREVIEW: false, TEST_MODE: false, nextId:
   onHitProcs() {}, killEntity: (t) => { t.alive = false; }, mpOnShot() {}, losBlocked: () => false };
 vm.createContext(c);
 vm.runInContext(fs.readFileSync(path.join(root, 'assets/data/test-mode.js'), 'utf8').replace(/export /g, ''), c);
+vm.runInContext(fs.readFileSync(path.join(root, 'assets/data/heroes-v6.js'), 'utf8').replace(/export /g, ''), c);
+vm.runInContext(fs.readFileSync(path.join(root, 'assets/data/hero-supers-v6.js'), 'utf8').replace(/^import .*$/m, '').replace(/export /g, ''), c);
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') +
   section('const P = CFG.progression;', 'const salvageValue =') + section('function itemElement(it) {', 'function perkText(it) {') +
   section('function gearPerks(gear) {', 'const FORGE_AFF') + section('function emptyMods() {', 'const NPC_DEFS') +

@@ -7,7 +7,7 @@ let passed = 0;
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }
 const c = { Math, console, LOCAL_PREVIEW: false, TEST_MODE: false, nextId: 1, G: { profile: { level: 1, worldTier: 0 }, player: { alive: false, x: 0, z: -49 }, enemies: [], ents: new Map(), time: 0, obstacles: null }, ev() {} };
 vm.createContext(c);
-for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions']) vm.runInContext(fs.readFileSync(path.join(root, 'assets/data', f + '.js'), 'utf8').replace(/export /g, ''), c);
+for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions', 'heroes-v6']) vm.runInContext(fs.readFileSync(path.join(root, 'assets/data', f + '.js'), 'utf8').replace(/export /g, ''), c);
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') + section('class Grid {', '// --- entities') +
   section('function patrolCountFor(', 'function rewardEnemyKill(') + '\nthis.config = CFG;', c);
 const W = c.config.world, Z = W.zones;

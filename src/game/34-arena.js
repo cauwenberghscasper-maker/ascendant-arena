@@ -23,8 +23,9 @@ function startArena() {
       applyStats(f, 'arena', p);
     } else {
       const arche = pick(['aggressive', 'cautious', 'sniper']);
-      let cls = arche === 'sniper' ? pick(['rail', 'arrow', 'seeker', 'mortar', 'orb']) : arche === 'aggressive' ? pick(['scatter', 'smg', 'flamer', 'wave', 'chakram', 'gatling']) : pick(CFG.brawlerOrder);
-      if (p.trophies < 30 && Math.random() < 0.4) cls = 'bolt';
+      const byRole = (roles) => CFG.brawlerOrder.filter((id) => roles.includes(CFG.brawlers[id].role));
+      let cls = pick(arche === 'sniper' ? byRole(['marksman', 'artillery', 'mage']) : arche === 'aggressive' ? byRole(['tank', 'skirmisher', 'balanced']) : CFG.brawlerOrder);
+      if (p.trophies < 30 && Math.random() < 0.4) cls = STARTER_HERO;
       f = makeFighter({ name: names[i - 1], team: 't' + i, isBot: true, cls, x, z, facing,
         ai: { arche, react: rand(0, 0.5), target: null, strafe: Math.random() < 0.5 ? 1 : -1, strafeT: rand(1, 2.5), fireT: rand(0.3, 1), dodgeT: 0, wx: AC.x, wz: AC.z, lx: x, lz: z, stuckT: 0 } });
       f.power = CFG.arena.botPowerBase + CFG.arena.botPowerScale * d * rand(0.85, 1.1);

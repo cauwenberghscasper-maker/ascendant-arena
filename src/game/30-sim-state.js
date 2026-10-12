@@ -122,9 +122,9 @@ function playerArenaPower(p) {
   return Math.min(A.powerCap, 1 + A.powerPerLevel * (p.level - 1) + A.powerPerGear * g.score);
 }
 // owned brawlers (ids = attack ids); Pip (bolt) is the starter
-function ownedBrawlers(p) { return CFG.brawlerOrder.filter((id) => id === 'bolt' || p.unlocked.attacks.includes(id)); }
+function ownedBrawlers(p) { return CFG.brawlerOrder.filter((id) => id === STARTER_HERO || p.unlocked.attacks.includes(id)); }
 const availableAttacks = ownedBrawlers;
-function resolvedAttack(p) { return CFG.brawlers[p.cls] ? p.cls : 'bolt'; }
+function resolvedAttack(p) { return CFG.brawlerOrder.includes(p.cls) ? p.cls : STARTER_HERO; }
 // artifacts carry their star level (1–10) as the value: effects grow with stars
 function artsOf(list, stars) { const o = {}; for (const a of list || []) if (CFG.artifacts[a]) o[a] = (stars && stars[a]) || 1; return o; }
 const AK = (s) => (s || 1) - 1; // extra stars beyond the first
@@ -202,7 +202,7 @@ function weaponOf(f) { return f.weapon || CFG.attacks[f.attackId] || CFG.attacks
 function checkUnlocks() {
   const p = G.profile; if (!p) return;
   for (const id of CFG.brawlerOrder) {
-    const a = CFG.attacks[id]; if (id === 'bolt' || p.unlocked.attacks.includes(id) || !canSwitchBrawler(p, id)) continue;
+    const a = CFG.attacks[id]; if (id === STARTER_HERO || p.unlocked.attacks.includes(id) || !canSwitchBrawler(p, id)) continue;
     if (unlockMet(a.unlock, p)) { p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: a.name }); G.dirty = true; }
   }
   for (const id in CFG.artifacts) {
@@ -213,7 +213,7 @@ function checkUnlocks() {
 // switch the active brawler (in town or anywhere outside a fight); artifacts and trees are per brawler
 function setBrawler(id) {
   const p = G.profile; if (!ownedBrawlers(p).includes(id) || G.mode !== 'hub') return false;
-  if (!canSwitchBrawler(p, id)) { toast(`Reach mastery ${BRAWLER_SWITCH_MASTERY} with ${CFG.brawlers[p.starterBrawler || 'bolt'].name} to change brawlers`, 'bad'); return false; }
+  if (!canSwitchBrawler(p, id)) { toast(`Reach mastery ${BRAWLER_SWITCH_MASTERY} with ${CFG.brawlers[p.starterBrawler || STARTER_HERO].name} to change brawlers`, 'bad'); return false; }
   if (onExpedition(p, id)) { toast(`${CFG.brawlers[id].name} is on an expedition`, 'bad'); return false; }
   if (!p.brawlers[id]) p.brawlers[id] = newBrawlerState();
   p.cls = id; p.artifacts = p.brawlers[id].artifacts;
@@ -221,7 +221,7 @@ function setBrawler(id) {
 }
 const equipAttack = setBrawler;
 const BRAWLER_SWITCH_MASTERY = 80;
-function canSwitchBrawler(p, id) { const first = p.starterBrawler || 'bolt'; if (TEST_MODE) return true; /* ×100 test mode: try any recruited hero */ return id === p.cls || id === first || masteryLevel((p.mastery || {})['w:' + first] || 0) >= BRAWLER_SWITCH_MASTERY; }
+function canSwitchBrawler(p, id) { const first = p.starterBrawler || STARTER_HERO; if (TEST_MODE) return true; /* ×100 test mode: try any recruited hero */ return id === p.cls || id === first || masteryLevel((p.mastery || {})['w:' + first] || 0) >= BRAWLER_SWITCH_MASTERY; }
 function artifactSlotsFor(p) { const earnedLevel = prestigeCount(p) ? Math.max(PRESTIGE_LEVEL,p.level) : p.level; let n = CFG.artifactSlots; for (const L in P.artifactSlotAt) if (earnedLevel >= +L) n = Math.max(n, P.artifactSlotAt[L]); return n; }
 function toggleArtifact(id) {
   const p = G.profile; if (!p.unlocked.artifacts.includes(id)) return false;

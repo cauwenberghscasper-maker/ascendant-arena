@@ -30,8 +30,12 @@ CFG.brawlerOrder = ['bolt', 'smg', 'scatter', 'rail', 'wave', 'seeker', 'arrow',
 // unlocks: mostly the Level Road, some through bosses, shrines and feats (never money)
 Object.assign(CFG.attacks.wave, { unlock: { level: 5 } }); Object.assign(CFG.attacks.arrow, { unlock: { level: 8 }, mult: 1.2 }); Object.assign(CFG.attacks.orb, { unlock: { level: 15 }, mult: 1.0 });
 CFG.attacks.cluster.unlock = { level: 10 }; CFG.attacks.mortar.unlock = { level: 12 }; CFG.attacks.chain.unlock = { streak: 30 }; CFG.attacks.gatling.unlock = { level: 40 };
-// the 27 painted Codex heroes join the roster as brawlers of their own (assets/data/heroes-v6.js)
+// the 27 painted Codex heroes are the roster (assets/data/heroes-v6.js); the original 16 adventurers above are retired:
+// their data stays only for old saves and internal fallbacks, they can no longer be recruited, played or met in the arena
+CFG.brawlerOrder = [];
 installHeroesV6(CFG);
+const STARTER_HERO = 'wrenna'; // every new adventure starts with Wrenna
+CFG.attacks[STARTER_HERO].unlock = { level: 1 };
 for (const id in CFG.brawlers) {
   const B = CFG.brawlers[id], R = CFG.roles[B.role];
   CFG.classes[id] = { name: B.name, role: R.name, hpMult: R.hpMult, atkMult: R.atkMult, speedMult: R.speedMult, arenaHp: R.arenaHp, arenaDmg: R.arenaDmg,

@@ -12,7 +12,7 @@ function session(test,storage=new Map()){
     MP:{roomState:'connecting',dbState:'connecting'},window:{},refreshPlayerStats(){},powerOf:()=>1,ev:e=>events.push(e),
     milestoneAt:()=>null,rollRarity:()=> 'common',grantItem(){},addEssence(){},dropShards(){},addCase(){},checkAchievements(){},masteryBonus:()=>0};
   vm.createContext(c);
-  for(const file of ['test-mode','loot-collection','prestige','companions'])vm.runInContext(moduleText('assets/data/'+file+'.js'),c);
+  for(const file of ['test-mode','loot-collection','prestige','companions','heroes-v6'])vm.runInContext(moduleText('assets/data/'+file+'.js'),c);
   vm.runInContext(section('const CFG = {','// 2. UTIL')+section('const clamp =','// 3. DATA')+
     section('const P = CFG.progression;','const salvageValue =')+
     section('const SAVE_KEY =','// --- skill trees')+

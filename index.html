@@ -1447,7 +1447,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
   <div id="modal" hidden><div class="panel scroll" id="panel" role="dialog" aria-modal="true"></div><button id="sheetGrip" type="button" aria-label="Expand the list" aria-expanded="false"><i></i></button></div>
   <div id="title">
     <div class="art" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div><div class="sparks" aria-hidden="true"></div>
-    <div class="top"><div class="logo">Ascendant<span>Arena</span></div><div class="badge">43 heroes · endless ascension</div></div>
+    <div class="top"><div class="logo">Ascendant<span>Arena</span></div><div class="badge">27 heroes · endless ascension</div></div>
     <div class="bottom">
       <div class="tagline">Start weak. Hunt monsters, beat world bosses, collect legendary gear, then prove it in the arena.</div>
       <div id="loading">Loading the world…</div>
@@ -2058,8 +2058,12 @@ CFG.brawlerOrder = ['bolt', 'smg', 'scatter', 'rail', 'wave', 'seeker', 'arrow',
 // unlocks: mostly the Level Road, some through bosses, shrines and feats (never money)
 Object.assign(CFG.attacks.wave, { unlock: { level: 5 } }); Object.assign(CFG.attacks.arrow, { unlock: { level: 8 }, mult: 1.2 }); Object.assign(CFG.attacks.orb, { unlock: { level: 15 }, mult: 1.0 });
 CFG.attacks.cluster.unlock = { level: 10 }; CFG.attacks.mortar.unlock = { level: 12 }; CFG.attacks.chain.unlock = { streak: 30 }; CFG.attacks.gatling.unlock = { level: 40 };
-// the 27 painted Codex heroes join the roster as brawlers of their own (assets/data/heroes-v6.js)
+// the 27 painted Codex heroes are the roster (assets/data/heroes-v6.js); the original 16 adventurers above are retired:
+// their data stays only for old saves and internal fallbacks, they can no longer be recruited, played or met in the arena
+CFG.brawlerOrder = [];
 installHeroesV6(CFG);
+const STARTER_HERO = 'wrenna'; // every new adventure starts with Wrenna
+CFG.attacks[STARTER_HERO].unlock = { level: 1 };
 for (const id in CFG.brawlers) {
   const B = CFG.brawlers[id], R = CFG.roles[B.role];
   CFG.classes[id] = { name: B.name, role: R.name, hpMult: R.hpMult, atkMult: R.atkMult, speedMult: R.speedMult, arenaHp: R.arenaHp, arenaDmg: R.arenaDmg,
@@ -2456,7 +2460,7 @@ function defaultProfile() {
   const gear = {};
   for (const s of CFG.gear.slots) gear[s] = makeItem(s, 'common', 1, 'Worn ' + ITEM_NAMES[s][0]);
   const prof = {
-    v: 2, level: 1, xp: 0, prestige: 0, gold: 0, trophies: 0, bestTrophies: 0, cls: 'bolt', starterBrawler: 'bolt', mergeVersion: 1, artVersion: 1, gear, bag: [],
+    v: 2, level: 1, xp: 0, prestige: 0, gold: 0, trophies: 0, bestTrophies: 0, cls: STARTER_HERO, starterBrawler: STARTER_HERO, mergeVersion: 1, artVersion: 1, gear, bag: [],
     treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
@@ -2492,8 +2496,11 @@ function sanitizeProfile(p) {
   if (!(p.settings && p.settings.testSeen)) { out.settings.fastXp = false; out.settings.testSeen = true; } // new players start in normal mode; Test mode stays a switch in Settings
   if (!LOCAL_PREVIEW) out.settings.fastXp = false;
   out.level = clamp(out.level | 0, 1, CFG.progression.cap);
-  if (!CFG.brawlers[out.cls]) out.cls = 'bolt';
-  out.starterBrawler = CFG.brawlers[p.starterBrawler] ? p.starterBrawler : out.cls;
+  // retired adventurers (bolt, smg, ... starfall) hand over to the starter hero, keeping the first hero's mastery so switching stays open
+  const oldFirst = p.starterBrawler || 'bolt';
+  if (!CFG.brawlerOrder.includes(out.cls)) out.cls = STARTER_HERO;
+  out.starterBrawler = CFG.brawlerOrder.includes(p.starterBrawler) ? p.starterBrawler : out.cls;
+  if (out.starterBrawler !== oldFirst && out.mastery && out.mastery['w:' + oldFirst]) out.mastery = Object.assign({}, out.mastery, { ['w:' + out.starterBrawler]: Math.max(out.mastery['w:' + out.starterBrawler] || 0, out.mastery['w:' + oldFirst]) });
   if (!p.mergeVersion) { out.settings.autoSalvage = 0; out.mergeVersion = 1; }
   if (!out.brawlers || typeof out.brawlers !== 'object') out.brawlers = {};
   if (!out.brawlers[out.cls]) out.brawlers[out.cls] = newBrawlerState();
@@ -2741,9 +2748,9 @@ function playerArenaPower(p) {
   return Math.min(A.powerCap, 1 + A.powerPerLevel * (p.level - 1) + A.powerPerGear * g.score);
 }
 // owned brawlers (ids = attack ids); Pip (bolt) is the starter
-function ownedBrawlers(p) { return CFG.brawlerOrder.filter((id) => id === 'bolt' || p.unlocked.attacks.includes(id)); }
+function ownedBrawlers(p) { return CFG.brawlerOrder.filter((id) => id === STARTER_HERO || p.unlocked.attacks.includes(id)); }
 const availableAttacks = ownedBrawlers;
-function resolvedAttack(p) { return CFG.brawlers[p.cls] ? p.cls : 'bolt'; }
+function resolvedAttack(p) { return CFG.brawlerOrder.includes(p.cls) ? p.cls : STARTER_HERO; }
 // artifacts carry their star level (1–10) as the value: effects grow with stars
 function artsOf(list, stars) { const o = {}; for (const a of list || []) if (CFG.artifacts[a]) o[a] = (stars && stars[a]) || 1; return o; }
 const AK = (s) => (s || 1) - 1; // extra stars beyond the first
@@ -2821,7 +2828,7 @@ function weaponOf(f) { return f.weapon || CFG.attacks[f.attackId] || CFG.attacks
 function checkUnlocks() {
   const p = G.profile; if (!p) return;
   for (const id of CFG.brawlerOrder) {
-    const a = CFG.attacks[id]; if (id === 'bolt' || p.unlocked.attacks.includes(id) || !canSwitchBrawler(p, id)) continue;
+    const a = CFG.attacks[id]; if (id === STARTER_HERO || p.unlocked.attacks.includes(id) || !canSwitchBrawler(p, id)) continue;
     if (unlockMet(a.unlock, p)) { p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: a.name }); G.dirty = true; }
   }
   for (const id in CFG.artifacts) {
@@ -2832,7 +2839,7 @@ function checkUnlocks() {
 // switch the active brawler (in town or anywhere outside a fight); artifacts and trees are per brawler
 function setBrawler(id) {
   const p = G.profile; if (!ownedBrawlers(p).includes(id) || G.mode !== 'hub') return false;
-  if (!canSwitchBrawler(p, id)) { toast(`Reach mastery ${BRAWLER_SWITCH_MASTERY} with ${CFG.brawlers[p.starterBrawler || 'bolt'].name} to change brawlers`, 'bad'); return false; }
+  if (!canSwitchBrawler(p, id)) { toast(`Reach mastery ${BRAWLER_SWITCH_MASTERY} with ${CFG.brawlers[p.starterBrawler || STARTER_HERO].name} to change brawlers`, 'bad'); return false; }
   if (onExpedition(p, id)) { toast(`${CFG.brawlers[id].name} is on an expedition`, 'bad'); return false; }
   if (!p.brawlers[id]) p.brawlers[id] = newBrawlerState();
   p.cls = id; p.artifacts = p.brawlers[id].artifacts;
@@ -2840,7 +2847,7 @@ function setBrawler(id) {
 }
 const equipAttack = setBrawler;
 const BRAWLER_SWITCH_MASTERY = 80;
-function canSwitchBrawler(p, id) { const first = p.starterBrawler || 'bolt'; if (TEST_MODE) return true; /* ×100 test mode: try any recruited hero */ return id === p.cls || id === first || masteryLevel((p.mastery || {})['w:' + first] || 0) >= BRAWLER_SWITCH_MASTERY; }
+function canSwitchBrawler(p, id) { const first = p.starterBrawler || STARTER_HERO; if (TEST_MODE) return true; /* ×100 test mode: try any recruited hero */ return id === p.cls || id === first || masteryLevel((p.mastery || {})['w:' + first] || 0) >= BRAWLER_SWITCH_MASTERY; }
 function artifactSlotsFor(p) { const earnedLevel = prestigeCount(p) ? Math.max(PRESTIGE_LEVEL,p.level) : p.level; let n = CFG.artifactSlots; for (const L in P.artifactSlotAt) if (earnedLevel >= +L) n = Math.max(n, P.artifactSlotAt[L]); return n; }
 function toggleArtifact(id) {
   const p = G.profile; if (!p.unlocked.artifacts.includes(id)) return false;
@@ -4783,8 +4790,9 @@ function startArena() {
       applyStats(f, 'arena', p);
     } else {
       const arche = pick(['aggressive', 'cautious', 'sniper']);
-      let cls = arche === 'sniper' ? pick(['rail', 'arrow', 'seeker', 'mortar', 'orb']) : arche === 'aggressive' ? pick(['scatter', 'smg', 'flamer', 'wave', 'chakram', 'gatling']) : pick(CFG.brawlerOrder);
-      if (p.trophies < 30 && Math.random() < 0.4) cls = 'bolt';
+      const byRole = (roles) => CFG.brawlerOrder.filter((id) => roles.includes(CFG.brawlers[id].role));
+      let cls = pick(arche === 'sniper' ? byRole(['marksman', 'artillery', 'mage']) : arche === 'aggressive' ? byRole(['tank', 'skirmisher', 'balanced']) : CFG.brawlerOrder);
+      if (p.trophies < 30 && Math.random() < 0.4) cls = STARTER_HERO;
       f = makeFighter({ name: names[i - 1], team: 't' + i, isBot: true, cls, x, z, facing,
         ai: { arche, react: rand(0, 0.5), target: null, strafe: Math.random() < 0.5 ? 1 : -1, strafeT: rand(1, 2.5), fireT: rand(0.3, 1), dodgeT: 0, wx: AC.x, wz: AC.z, lx: x, lz: z, stuckT: 0 } });
       f.power = CFG.arena.botPowerBase + CFG.arena.botPowerScale * d * rand(0.85, 1.1);
@@ -5045,7 +5053,7 @@ const TestTools = {
   boss() { if (G.boss || G.mode !== 'hub') return; G.bossWarned = false; G.bossTimer = Math.min(G.bossTimer, CFG.boss.warn + 1); },
   unlockAll() {
     const p = G.profile;
-    for (const id in CFG.attacks) if (!CFG.attacks[id].signature && !p.unlocked.attacks.includes(id)) { p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); }
+    for (const id of CFG.brawlerOrder) if (!p.unlocked.attacks.includes(id)) { p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); }
     for (const id in CFG.artifacts) if (!p.unlocked.artifacts.includes(id)) { p.unlocked.artifacts.push(id); p.newUnlocks.push('r:' + id); }
     G.dirty = true; toast('All attacks and artifacts unlocked', 'good');
   },
@@ -9101,7 +9109,7 @@ function heroTab(tab) {
       return `<div class="mrow ${L >= 99 ? 'max' : ''}"><span class="ml">${L}</span><div class="mm"><b>${masteryName(key)}</b><small>${desc}</small><span class="mbar"><i style="--v:${(f * 100).toFixed(1)}%"></i></span><em>${L >= 99 ? fmtK(xp) + ' xp · Skillcape' : `${fmtK(xp)} / ${fmtK(b)} xp`}</em></div></div>`;
     };
     const av = availableAttacks(p);
-    const wpn = Object.keys(CFG.attacks).filter((id) => av.includes(id) || p.mastery['w:' + id]).sort((x, y) => (p.mastery['w:' + y] || 0) - (p.mastery['w:' + x] || 0)).map((id) => row('w:' + id, `+${((masteryLevel(p.mastery['w:' + id] || 0) - 1) * 0.4).toFixed(1)}% damage with ${CFG.attacks[id].name}`)).join('');
+    const wpn = CFG.brawlerOrder.filter((id) => av.includes(id) || p.mastery['w:' + id]).sort((x, y) => (p.mastery['w:' + y] || 0) - (p.mastery['w:' + x] || 0)).map((id) => row('w:' + id, `+${((masteryLevel(p.mastery['w:' + id] || 0) - 1) * 0.4).toFixed(1)}% damage with ${CFG.attacks[id].name}`)).join('');
     const slay = Object.keys(CFG.enemies).filter((k) => CFG.enemies[k].hp && (!CFG.enemies[k].legacy || (p.mastery['s:' + k] || 0) > 0)).map((k) => { const L = masteryLevel(p.mastery['s:' + k] || 0); return row('s:' + k, `+${((L - 1) * 0.3).toFixed(1)}% damage and +${((L - 1) * 0.5).toFixed(0)}% drop chance vs ${CFG.enemies[k].name}s`); }).join('');
     const skills = Object.keys(CFG.mastery.skills).map((k) => row(k, CFG.mastery.skills[k].desc)).join('');
     body = `<div class="mtotal"><b>${fmt(totalMastery(p))}</b><span>Total mastery level</span></div><p class="fine">Masteries level from 1 to 99 on the classic curve: level 92 is halfway to 99. Reach 99 in anything to earn a skillcape.</p>
@@ -9117,7 +9125,7 @@ function heroTab(tab) {
       const ki = P.keystoneLevels.indexOf(L); if (ki >= 0) r.push('<span class="rw key">Keystone choice</span>');
       if (P.artifactSlotAt[L]) r.push('<span class="rw art">3rd artifact slot</span>');
       if (L === P.classAt) r.push('<span class="rw key">Choose your class</span>');
-      for (const id in CFG.attacks) { const a = CFG.attacks[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw atk">${a.name}</span>`); }
+      for (const id of CFG.brawlerOrder) { const a = CFG.attacks[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw atk">${CFG.brawlers[id].name}</span>`); }
       for (const id in CFG.artifacts) { const a = CFG.artifacts[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw art">${a.name}</span>`); }
       rows.push(`<div class="road ${L <= p.level ? 'done' : L === p.level + 1 ? 'next' : ''} ${ms ? 'ms' : ''}" ${L === p.level + 1 ? 'id="roadNext"' : ''}><span class="rl">${L}</span><div class="rr">${r.join('')}</div></div>`);
     }
@@ -10242,7 +10250,7 @@ function openBrawlers(sel) {
       ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have, 96)}
       <b>${B.name}</b><small>${have ? `Mastery ${L}` : `Lv ${CFG.attacks[id].unlock && CFG.attacks[id].unlock.level ? CFG.attacks[id].unlock.level : '—'}`}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
   };
-  // 43 heroes: one section per tier (the original adventurers, then the Codex champions up to the divines)
+  // one section per tier, from the champions up to the divines
   const HERO_TIERS = [['adventurer', 'Adventurers'], ['champion', 'Champions'], ['legendary', 'Legendaries'], ['ascendant', 'Ascendants'], ['divine', 'Divines']];
   const shown = CFG.brawlerOrder.filter((id) => !onlyOwned || owned.includes(id));
   const cards = HERO_TIERS.map(([tier, label]) => {
@@ -10251,7 +10259,7 @@ function openBrawlers(sel) {
     return `<div class="btier tier-${tier}"><b>${label}</b><span>${all.filter((id) => owned.includes(id)).length}/${all.length}</span></div>` + ids.map(card).join('');
   }).join('');
   const B = CFG.brawlers[sel], A = CFG.attacks[sel], C = CFG.classes[sel], have = owned.includes(sel);
-  const first = p.starterBrawler || 'bolt', firstLevel = masteryOf(p, first), switchReady = canSwitchBrawler(p, sel);
+  const first = p.starterBrawler || STARTER_HERO, firstLevel = masteryOf(p, first), switchReady = canSwitchBrawler(p, sel);
   const xp = (p.mastery || {})['w:' + sel] || 0, L = masteryLevel(xp), a0 = mxpFor(L), a1 = mxpFor(Math.min(99, L + 1)), f = L >= 99 ? 1 : (xp - a0) / Math.max(1, a1 - a0);
   const t = tierOf(L), next = CFG.badges.find((b) => L < b.lvl);
   const badges = CFG.badges.map((b, i) => `<div class="bdg ${L >= b.lvl ? 'got' : ''}">${badgeSVG(L >= b.lvl ? i : -1, 'b_' + sel, { static: L < b.lvl })}<small>${b.name}<br>${b.lvl}</small></div>`).join('');
@@ -10567,7 +10575,7 @@ function mpApply(key, s, via, guest) {
   const t = mpNum(s.t, Date.now());
   let e = MP.peers.get(key);
   if (e && t < e.t - 50) return e; // older than what we already have
-  const cls = CFG.brawlers[s.c] ? s.c : 'bolt', x = clamp(mpNum(s.x, 0), -2000, 2000), z = clamp(mpNum(s.z, 0), -2000, 2000);
+  const cls = CFG.brawlerOrder.includes(s.c) ? s.c : STARTER_HERO, x = clamp(mpNum(s.x, 0), -2000, 2000), z = clamp(mpNum(s.z, 0), -2000, 2000);
   if (!e) {
     e = { id: 'peer:' + key, key, kind: 'fighter', isPeer: true, team: 'peer', cls, x, z, tx: x, tz: z, facing: 0, tf: 0, moveAmt: 0, alive: true, level: 1, r: 0.55,
       hp: 1, maxHp: 1, nick: 'Hero', md: 'hub', seq: mpNum(s.s, 0), guest: !!guest, attackAnim: 0, t: 0 };

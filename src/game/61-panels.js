@@ -370,7 +370,7 @@ function heroTab(tab) {
       return `<div class="mrow ${L >= 99 ? 'max' : ''}"><span class="ml">${L}</span><div class="mm"><b>${masteryName(key)}</b><small>${desc}</small><span class="mbar"><i style="--v:${(f * 100).toFixed(1)}%"></i></span><em>${L >= 99 ? fmtK(xp) + ' xp · Skillcape' : `${fmtK(xp)} / ${fmtK(b)} xp`}</em></div></div>`;
     };
     const av = availableAttacks(p);
-    const wpn = Object.keys(CFG.attacks).filter((id) => av.includes(id) || p.mastery['w:' + id]).sort((x, y) => (p.mastery['w:' + y] || 0) - (p.mastery['w:' + x] || 0)).map((id) => row('w:' + id, `+${((masteryLevel(p.mastery['w:' + id] || 0) - 1) * 0.4).toFixed(1)}% damage with ${CFG.attacks[id].name}`)).join('');
+    const wpn = CFG.brawlerOrder.filter((id) => av.includes(id) || p.mastery['w:' + id]).sort((x, y) => (p.mastery['w:' + y] || 0) - (p.mastery['w:' + x] || 0)).map((id) => row('w:' + id, `+${((masteryLevel(p.mastery['w:' + id] || 0) - 1) * 0.4).toFixed(1)}% damage with ${CFG.attacks[id].name}`)).join('');
     const slay = Object.keys(CFG.enemies).filter((k) => CFG.enemies[k].hp && (!CFG.enemies[k].legacy || (p.mastery['s:' + k] || 0) > 0)).map((k) => { const L = masteryLevel(p.mastery['s:' + k] || 0); return row('s:' + k, `+${((L - 1) * 0.3).toFixed(1)}% damage and +${((L - 1) * 0.5).toFixed(0)}% drop chance vs ${CFG.enemies[k].name}s`); }).join('');
     const skills = Object.keys(CFG.mastery.skills).map((k) => row(k, CFG.mastery.skills[k].desc)).join('');
     body = `<div class="mtotal"><b>${fmt(totalMastery(p))}</b><span>Total mastery level</span></div><p class="fine">Masteries level from 1 to 99 on the classic curve: level 92 is halfway to 99. Reach 99 in anything to earn a skillcape.</p>
@@ -386,7 +386,7 @@ function heroTab(tab) {
       const ki = P.keystoneLevels.indexOf(L); if (ki >= 0) r.push('<span class="rw key">Keystone choice</span>');
       if (P.artifactSlotAt[L]) r.push('<span class="rw art">3rd artifact slot</span>');
       if (L === P.classAt) r.push('<span class="rw key">Choose your class</span>');
-      for (const id in CFG.attacks) { const a = CFG.attacks[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw atk">${a.name}</span>`); }
+      for (const id of CFG.brawlerOrder) { const a = CFG.attacks[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw atk">${CFG.brawlers[id].name}</span>`); }
       for (const id in CFG.artifacts) { const a = CFG.artifacts[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw art">${a.name}</span>`); }
       rows.push(`<div class="road ${L <= p.level ? 'done' : L === p.level + 1 ? 'next' : ''} ${ms ? 'ms' : ''}" ${L === p.level + 1 ? 'id="roadNext"' : ''}><span class="rl">${L}</span><div class="rr">${r.join('')}</div></div>`);
     }
