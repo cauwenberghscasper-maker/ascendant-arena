@@ -197,6 +197,7 @@ function openLoot(loot) {
   if (!loot.eligible) body = `<p class="say">You didn’t deal enough damage to share the loot (at least ${pct(CFG.boss.loot.minContrib)} of the total). Join the next fight!</p>`;
   else body = `<div class="stats3"><div><b>${pct(loot.contrib)}</b><span>Your damage share</span></div><div><b>${pct(loot.rareChance)}</b><span>Rare drop chance</span></div><div><b>${ICON.coin}+${fmt(loot.gold)}</b><span>Gold</span></div></div>
     <div class="list">${loot.item ? `<div class="item">${caseArt(loot.caseKind || 'boss')}<div class="meta"><div class="slot">Treasure chest</div><div class="nm">${CFG.cases[loot.caseKind || 'boss'].name}</div><div class="st">Rare or better inside. Open it in your Journal › Treasure Chests</div></div><button class="primary" data-act="cases">Open</button></div>` : '<p class="fine">No chest this time.</p>'}
+    ${loot.weekly ? '<p class="say">Weekly Colossus bonus: a <b>Legendary-or-better Colossus Chest</b> is in your Journal.</p>' : ''}
     ${loot.tomeXp ? `<div class="item"><div class="meta"><div class="slot">Tome</div><div class="nm">Golem Tome</div><div class="st">+${fmt(loot.tomeXp * progressionXpMultiplier(G.profile))} XP</div></div></div>` : ''}
     ${loot.essence ? `<div class="item"><div class="meta"><div class="slot">Gems</div><div class="nm">+${loot.essence} gems · +${loot.shards || 0} artifact shards</div><div class="st">For gear upgrades and artifact stars</div></div></div>` : ''}</div>
     <p class="fine">Drop odds come only from your share of the damage. Nothing in this game is bought with money.</p>`;
@@ -491,6 +492,8 @@ function handlePanelClick(e) {
     case 'menuSection': openMenu(b.dataset.section); $('panel').querySelector(`[data-section="${UI.menuSection}"]`).focus({preventScroll:true}); break;
     case 'mCases': case 'cases': openCases(); break;
     case 'mCollection': openCollection(); break;
+    case 'mDaily': openDaily(); break;
+    case 'dailyClaim': { const r = claimLogin(Date.now()); if (r) { Sfx.play(r.i === 6 ? 'win' : 'unlock'); toast(`Day ${r.i + 1}: ${r.name}${r.key ? ` (Tier ${r.key.t})` : r.gems ? ` (+${r.gems})` : ''}`, 'good'); } openDaily(); break; }
     case 'mPrestige': openPrestige(); break;
     case 'petEquip': equipCompanion(b.dataset.pet); break;
     case 'prestigeReview': openPrestigeReview(); break;

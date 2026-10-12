@@ -168,6 +168,7 @@ function openMenu(section) {
     tile('mSmith', 'm_smith', 'Smithy', 'Reforge & forge', UI.anyAlert),
   ];
   const adventure = [
+    tile('mDaily', 'm_progress', 'Daily & Coming Up', loginReady(Date.now()) ? 'Reward ready!' : `Day ${loginState().n % 7 + 1} tomorrow`, loginReady(Date.now())),
     tile('mProgress', 'm_progress', 'Adventure Log', 'Level Road & hiscores', A.progress),
     tile('mCollection', 'm_hero', 'Collection Log', `${Object.keys(p.collection || {}).length}/${COLLECTION_ITEMS.length} logged`, false),
     tile('mPrestige', 'm_asc', 'Pets & prestige', `Prestige ${prestigeCount(p)}`, !prestigeBlocked()),
@@ -179,8 +180,22 @@ function openMenu(section) {
     <div class="menuSections" role="group" aria-label="Menu sections">
       <button data-act="menuSection" data-section="upgrades" aria-pressed="${UI.menuSection === 'upgrades'}">Hero${Object.values(A).some(Boolean) || p.cases.length ? '<i class="rdot"></i>' : ''}</button>
       <button data-act="menuSection" data-section="adventure" aria-pressed="${UI.menuSection === 'adventure'}">World</button>
-    </div><div class="mtiles">${(UI.menuSection === 'adventure' ? adventure : upgrades).join('')}</div>`);
+    </div><div class="mtiles">${(UI.menuSection === 'adventure' ? adventure : upgrades).join('')}</div>${comingUpHtml(3)}`);
   $('panel').classList.add('menuPanel');
+}
+function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><b>${x.t ? '⏳' : '✦'}</b><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }
+// the login calendar: seven days that never reset, the weekly Colossus bonus and the full coming-up list
+function openDaily() {
+  UI.current = 'daily';
+  const now = Date.now(), L = loginState(), i = L.n % 7, ready = loginReady(now), wk = G.profile.weekly, wdone = wk && wk.wk === weekNum(now) && wk.done;
+  const tiles = CFG.daily.days.map((d, k) => `<div class="rcard ${k === 6 ? 'legendary' : k === 3 ? 'epic' : 'rare'} ${k < i ? 'win' : ''}" style="opacity:${k < i ? 0.55 : 1}"><small><b>Day ${k + 1}</b>${k < i ? '✓ claimed' : escapeHTML(d)}${k === i && ready ? ' · today' : ''}</small></div>`).join('');
+  openModal(`<div class="npcHead">${gi('m_progress', 'hd')}<h3>Daily rewards</h3><span class="cnt">Week ${Math.floor(L.n / 7) + 1}</span></div>
+    <p class="fine">One reward per day. Missing a day never resets your calendar: you just pick up where you left off. Rewards grow every full week.</p>
+    <div class="fastGrid">${tiles}</div>
+    <p class="say">Weekly Colossus: ${wdone ? 'claimed this week ✓' : 'the first world boss you slay this week drops a <b>Legendary-or-better Colossus Chest</b>.'}</p>
+    ${comingUpHtml(12)}
+    <div class="row end"><button class="ghost" data-act="mMenu">Menu</button><button class="${ready ? 'primary big' : 'disabled'}" data-act="dailyClaim" ${ready ? '' : 'aria-disabled="true"'}>${ready ? `Claim day ${i + 1}: ${escapeHTML(CFG.daily.days[i])}` : 'Come back tomorrow'}</button></div>`);
+  $('panel').classList.add('wide');
 }
 
 // --- Prestige: reviewed reset, permanent companion and bounded world bonuses ---------------------------

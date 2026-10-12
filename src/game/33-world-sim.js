@@ -837,6 +837,7 @@ function endBoss(killed) {
     const ft = Math.round(G.time - (b.spawnT || G.time)); if (ft > 0 && (!p.records.fastBoss || ft < p.records.fastBoss)) p.records.fastBoss = ft;
     addMastery('w:' + G.player.attackId, 300 * contrib + 40);
     if (Math.random() < loot.tomeChance && p.level < P.cap) { loot.tomeXp = Math.round(xpToNext(p.level) * L.tomeXpFrac); addXp(loot.tomeXp, 'tome'); }
+    loot.weekly = weeklyBossBonus(Date.now());
     checkAchievements();
   }
   G.lootQueue.push(loot);
