@@ -224,6 +224,9 @@ function buildHub() {
   { const bg = new THREE.CylinderGeometry(0.7, 1.6, 46, 10, 1, true), bmat = new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
     const caves = W.pois.filter((q) => q.kind === 'dungeon'), bim = new THREE.InstancedMesh(bg, bmat, caves.length), m4 = new THREE.Matrix4();
     caves.forEach((q, i) => bim.setMatrixAt(i, m4.makeTranslation(q.x, 23, q.z))); bim.frustumCulled = false; hubGroup.add(bim); }
+  // ore vein crystals: one instance per vein, hidden while it regrows (updateHubProps)
+  { const oim = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.6, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }), W.nodes.length);
+    oim.instanceMatrix.setUsage(THREE.DynamicDrawUsage); oim.frustumCulled = false; oim.setColorAt(0, _col.set(0xffffff)); hubGroup.add(oim); hubParts.oreIM = oim; G.nodesDirty = true; }
   // waypoint stones: obelisks with a floating crystal
   W.waypoints.forEach((w) => {
     tParts.push(part(GEO.cyl8, 0x6f6a8a, [w.x, 0.25, w.z], null, [1.3, 0.5, 1.3]));

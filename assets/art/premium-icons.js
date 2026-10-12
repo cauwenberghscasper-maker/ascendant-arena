@@ -14,6 +14,8 @@ export function equipmentIcon(slot, noun) {
   return shapes[slot]?.includes(shape) ? `${base}${slot}-${shape}.webp` : '';
 }
 export function caseIcon(key) {
+  // shortcut: the Geode reuses the crystal Frostbound painting until it gets its own
+  if (key === 'geode') key = 'frost';
   if (regionalCases.has(key)) return `assets/ui/collection-v1/case-${key}.webp`;
   return cases.has(key) ? `${base}case-${key}.webp` : '';
 }

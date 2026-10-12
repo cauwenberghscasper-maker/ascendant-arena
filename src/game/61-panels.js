@@ -7,6 +7,7 @@ function interact() {
   if (n.kind === 'riftLeave') return endRift('leave');
   if (n.kind === 'dungeon') return openDungeonPanel(n.poi);
   if (n.kind === 'trial') return openTrialPanel(n.zone);
+  if (n.kind === 'mine') return mineNode(n.st);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
   if (n.kind === 'dungeonChest') return openDungeonChest();
   const d = n.def;
@@ -67,7 +68,7 @@ function statLine(it) {
 }
 function perkLine(it) { const t = perkText(it); return t ? `<div class="perk">${t}</div>` : ''; }
 // RuneScape-style display names for tabs whose keys stay the same in code
-const TAB_NAME = { Gear: 'Equipment', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
+const TAB_NAME = { Mining: 'Mining & Museum', Gear: 'Equipment', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
 const tabName = (t) => TAB_NAME[t] || t;
 const wearWord = (slot) => (slot === 'weapon' ? 'Wield' : 'Wear');
 const SLOT_LABEL = { weapon: 'Weapon', helmet: 'Helmet', chest: 'Armor', boots: 'Boots', accessory: 'Accessory' };
@@ -504,6 +505,7 @@ function handlePanelClick(e) {
     case 'equip2': if (equipItem(b.dataset.id)) { Sfx.play('equipped'); b.remove(); } break;
     case 'salvage2': salvageItem(b.dataset.id); Sfx.play('coin'); b.parentNode.querySelectorAll('[data-act=equip2],[data-act=salvage2]').forEach((x) => x.remove()); break;
     case 'idleTab': openIdle(b.dataset.tab); break;
+    case 'pickUp': if (upgradePick()) { Sfx.play('unlock'); openIdle('Mining'); } break;
     case 'vaultCollect': if (collectVault()) openIdle('Vault'); break;
     case 'vaultUp': if (upgradeVault()) openIdle('Vault'); break;
     case 'expGo': { const sel = $('expB'); if (sel && startExped(sel.value, +b.dataset.d)) openIdle('Expeditions'); break; }

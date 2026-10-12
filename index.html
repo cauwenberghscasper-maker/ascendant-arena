@@ -1610,7 +1610,7 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
     W.dens.push({ name: zn.denName, zone: i, x: s * M * 0.5, z: Math.round(zn.z0 + zn.len * 0.3), r: 13, n });
     W.dens.push({ name: zn.denName + ' Deep', zone: i, x: -s * M * 0.5, z: Math.round(zn.z0 + zn.len * 0.72), r: 13, n }); });
   // points of interest: { id: 'a07:dungeon:0', zone, x, z, r, kind: landmark|secret|dungeon|rune|node, name, art, lvl, hidden }
-  // ids are stable save keys (profile.secrets / pois / dungeons): never renumber. Resource nodes will use a${zi}:node:${n} (G.nodes).
+  // ids are stable save keys (profile.secrets / pois / dungeons / runes): never renumber. Ore veins are a${zi}:node:${n} (G.nodes).
   W.pois = [];
   Z.forEach((zn, i) => {
     const s = i % 2 ? -1 : 1, L = zn.len, z0 = zn.z0, id = (k, n) => `a${String(i).padStart(2, '0')}:${k}:${n}`;
@@ -1624,6 +1624,8 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
     if (L >= 135) add('secret', 1, s * (M - 9), z0 + L * 0.38, 9, 'Forgotten Hoard', 'cache', { gap: jit(i, 8) < 0 ? -1 : 1 });
     // four runestones per combat area (hidden from the map); lighting all four opens the landmark's Legendary Trial
     if (!zn.safe) [[0.62, 0.12], [-0.62, 0.88], [0.35, 0.55], [-0.2, 0.75]].forEach(([fx, fz], n) => add('rune', n, s * M * fx, z0 + L * fz, 3, 'Runestone', 'obelisk', { hidden: true }));
+    // four ore veins per combat area (Mining, G.nodes); n 3 is the rare crystal vein
+    if (!zn.safe) [[0.45, 0.62], [-0.45, 0.25], [0.9, 0.45], [-0.92, 0.65]].forEach(([fx, fz], n) => add('node', n, s * M * fx, z0 + L * fz, 2.5, 'Ore Vein', 'ore'));
     // three cave entrances per combat area (n = variant in CFG.dungeon.variants); mouths face the road, rock mounds sit outward
     if (!zn.safe) {
       add('dungeon', 0, s * M * 0.8, z0 + L * 0.72, 9, zn.denName + ' Caves', 'cave', { face: -s });
@@ -1631,7 +1633,7 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
       add('dungeon', 2, s * M * 0.8, z0 + L * 0.2, 9, zn.lairName + ' Sanctum', 'cave', { face: -s });
     }
   });
-  W.secrets = W.pois.filter((q) => q.kind === 'secret'); W.runes = W.pois.filter((q) => q.kind === 'rune');
+  W.secrets = W.pois.filter((q) => q.kind === 'secret'); W.runes = W.pois.filter((q) => q.kind === 'rune'); W.nodes = W.pois.filter((q) => q.kind === 'node');
   W.mmScale = Math.min(1, 1600 / (W.maxZ - W.minZ)); // minimap base canvas px per metre
   // two challenge shrines per biome (second and fourth area)
   CFG.shrines.list = [];
@@ -2167,7 +2169,7 @@ function defaultProfile() {
     treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
-    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {},
+    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {},
     job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, pixel: false, bots: false, npcs: false, autoHunt: false },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
@@ -2245,11 +2247,12 @@ function sanitizeProfile(p) {
     // v10: same 30 areas in the same order (waypoint/zone indices stay valid), just wider; adds secrets, POIs and dungeons
     out.worldVersion = 10;
   }
-  for (const k of ['secrets', 'pois', 'dungeons', 'runes', 'trials']) if (!out[k] || typeof out[k] !== 'object' || Array.isArray(out[k])) out[k] = {};
+  for (const k of ['secrets', 'pois', 'dungeons', 'runes', 'trials', 'petFinds']) if (!out[k] || typeof out[k] !== 'object' || Array.isArray(out[k])) out[k] = {};
   // Dungeon Keys (CFG.dungeon loads later; the cap of 12 matches CFG.dungeon.keys.max)
   out.keys = (Array.isArray(out.keys) ? out.keys : []).filter((k) => k && k.t >= 1 && Array.isArray(k.a)).slice(0, 12)
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));
   if (CFG.world && CFG.world.waypoints) out.waypoints = out.waypoints.filter((i) => Number.isInteger(i) && i >= 0 && i < CFG.world.waypoints.length);
+  { const m = out.mine && typeof out.mine === 'object' ? out.mine : {}; out.mine = { ore: Math.max(0, +m.ore || 0), pick: Math.max(0, Math.min(20, m.pick | 0)), mined: Math.max(0, m.mined | 0), museum: m.museum && typeof m.museum === 'object' && !Array.isArray(m.museum) ? m.museum : {} }; }
   out.essence = Math.max(0, out.essence | 0);
   if (!out.artStars || typeof out.artStars !== 'object') out.artStars = {};
   if (!out.shards || typeof out.shards !== 'object') out.shards = {};
@@ -2329,7 +2332,7 @@ const RC = { x: 0, z: -1400 }; // rift sanctum centre
 CFG.rift = { gate: { x: -9, z: -44 }, unlock: 15, r: 22, time: 70, intro: 2.4, clear: 2.8, lvlBase: 4, lvlPer: 2.5, bossEvery: 5 };
 const G = {
   mode: 'hub', started: false, time: 0, paused: false, modal: false,
-  profile: null, player: null, hubFighters: [], enemies: [], npcs: [], berries: [], dungeon: null, nodes: [], chain: { type: null, zone: -1, n: 0 }, slowT: 0,
+  profile: null, player: null, hubFighters: [], enemies: [], npcs: [], berries: [], dungeon: null, nodes: [], nodesDirty: true, chain: { type: null, zone: -1, n: 0 }, slowT: 0,
   boss: null, bossTimer: CFG.boss.firstSpawn, bossWarned: false, bossLair: 1,
   arena: null, pendingAoE: [], clouds: [], events: [], ents: new Map(), pellets: [], pelletsDirty: true, shrines: [],
   lastCombat: -99, zoneIdx: 0, interact: null, respawnT: 0, gateToastT: 0, dirty: false,
@@ -3197,7 +3200,7 @@ function boundFighter(f, ctx) {
 }
 
 // --- progression ---------------------------------------------------------
-function progressionXpMultiplier(p) { return (TEST_MODE ? 100 : (p.settings.fastXp ? P.fastXpMult : 1)) * (1 + 0.005 * Object.keys(p.secrets || {}).length); } // +0.5% per secret found
+function progressionXpMultiplier(p) { return (TEST_MODE ? 100 : (p.settings.fastXp ? P.fastXpMult : 1)) * (1 + 0.005 * Object.keys(p.secrets || {}).length + museumBonus(p)); } // +0.5% per secret found, +1% per Museum mineral
 function addXp(amount, reason) {
   const p = G.profile;
   if (p.level >= P.cap) return;
@@ -3897,6 +3900,7 @@ function stepHub(dt) {
   if (pl.alive) for (const sc of W.secrets) if (!G.profile.secrets[sc.id] && Math.abs(pl.z - sc.z) < 4 && Math.hypot(pl.x - sc.x, pl.z - sc.z) < 4) findSecret(sc);
   if (pl.alive) for (const q of W.runes) if (!G.profile.runes[q.id] && Math.abs(pl.z - q.z) < 4 && Math.hypot(pl.x - q.x, pl.z - q.z) < 4) lightRune(q);
   if (!pl.alive) G.chain.n = 0;
+  stepNodes(dt);
   // XP orbs and challenge shrines
   stepPellets(dt);
   stepShrines(dt);
@@ -3923,6 +3927,7 @@ function stepHub(dt) {
     for (const po of dungeonPois()) { const d = Math.hypot(pl.x - po.x, pl.z - po.z); if (d < best) { best = d; G.interact = { kind: 'dungeon', poi: po, label: 'Enter ' + po.name }; } }
     for (const n of shownNpcs()) { const d = Math.hypot(pl.x - n.x, pl.z - n.z); if (d < best) { best = d; G.interact = n; } }
     CFG.world.waypoints.forEach((w, i) => { const d = Math.hypot(pl.x - w.x, pl.z - w.z); if (d < best) { best = d; G.interact = { kind: 'waypoint', i, def: w }; } });
+    if (!G.interact) { const st = nodeNear(pl); if (st && G.profile.level >= CFG.world.zones[st.q.zone].minLevel) G.interact = { kind: 'mine', st, label: 'Mine ' + veinName(st.q, st) }; }
     if (!G.interact) { const tp = trialPoi(zoneAt(pl.z)); if (tp && trialOpen(tp.zone) && Math.hypot(pl.x - tp.x, pl.z - tp.z) < tp.r + 2) G.interact = { kind: 'trial', zone: tp.zone, label: 'Legendary Trial' }; }
   }
   // boss proximity counts as combat
@@ -4862,6 +4867,58 @@ function endDungeon(why) {
   ev({ t: 'dungeonEnd', why, name: D.poi.name, cleared: D.bossDead, x: pl.x, z: pl.z });
 }
 // --- end dungeons
+// --- Mining: four ore veins per combat area (POIs kind 'node'; n 3 is the rare glowing vein). Tap a ready vein to
+// mine it: Ore (spent on pickaxe levels), a Geode roll per ore (a case opened on the reel that also fills the Museum)
+// and a 1 in 10,000 pet. Veins regrow on a timer; 1% regrow as rich veins that pay triple. Expeditions mine too.
+CFG.mining = {
+  ore: [3, 5], rareMul: 2, richMul: 3, rich: 0.01, respawn: 60, rareRespawn: 300, interactR: 4,
+  geode: 0.02, geodeMax: 0.05, pickGeode: 0.0015, pickYield: 0.2, pickMax: 20, pickCost: [40, 1.8], pet: 10000, petId: 'sprout', petGems: 500,
+  biomeOre: ['Copper', 'Iron', 'Obsidian', 'Mithril', 'Abyssal', 'Starsteel'],
+  // Museum: every geode holds one mineral; each kind you own adds +1% XP for good
+  minerals: [['quartz', 'Quartz', 30], ['amethyst', 'Amethyst', 22], ['citrine', 'Citrine', 16], ['jade', 'Jade', 10], ['ruby', 'Ruby', 7], ['sapphire', 'Sapphire', 5],
+    ['emerald', 'Emerald', 4], ['opal', 'Fire Opal', 2.5], ['moonstone', 'Moonstone', 1.5], ['obsidian', 'Obsidian Heart', 1], ['stardiamond', 'Star Diamond', 0.5], ['prism', 'Prismatic Core', 0.1]],
+};
+const mineState = () => G.profile.mine || (G.profile.mine = { ore: 0, pick: 0, mined: 0, museum: {} });
+const isRareVein = (q) => q.id.endsWith(':3');
+const oreName = (q) => CFG.mining.biomeOre[CFG.world.zones[q.zone].biome] || 'Ore';
+const veinName = (q, st) => `${st && st.rich ? 'Rich ' : ''}${oreName(q)} ${isRareVein(q) ? 'Crystal Vein' : 'Vein'}`;
+// runtime vein state, one per node POI: t = seconds until it regrows (0 = ready)
+function nodeStates() { const W = CFG.world; if (G.nodes.length !== W.nodes.length) G.nodes = W.nodes.map((q) => ({ q, t: 0, rich: Math.random() < CFG.mining.rich })); return G.nodes; }
+function stepNodes(dt) { for (const st of nodeStates()) if (st.t > 0 && (st.t -= dt) <= 0) { st.t = 0; st.rich = Math.random() < CFG.mining.rich; G.nodesDirty = true; } }
+function nodeNear(pl) { let best = null, bd = CFG.mining.interactR; for (const st of nodeStates()) { if (st.t > 0) continue; const d = Math.hypot(pl.x - st.q.x, pl.z - st.q.z); if (d < bd) { bd = d; best = st; } } return best; }
+const pickCost = (lv) => Math.round(CFG.mining.pickCost[0] * Math.pow(CFG.mining.pickCost[1], lv));
+const geodeChance = (m, rare) => Math.min(CFG.mining.geodeMax, CFG.mining.geode + CFG.mining.pickGeode * m.pick) * (rare ? 2 : 1);
+function mineNode(st) {
+  if (!st || st.t > 0 || G.profile.level < CFG.world.zones[st.q.zone].minLevel) return null;
+  const M = CFG.mining, p = G.profile, m = mineState(), q = st.q, rare = isRareVein(q);
+  const res = { name: veinName(q, st), rich: st.rich, ore: Math.round(randInt(M.ore[0], M.ore[1]) * (rare ? M.rareMul : 1) * (st.rich ? M.richMul : 1) * (1 + M.pickYield * m.pick)), geodes: 0, pet: false };
+  m.ore += res.ore; m.mined++;
+  const gc = geodeChance(m, rare); for (let i = 0; i < res.ore; i++) if (Math.random() < gc) res.geodes++;
+  for (let i = 0; i < res.geodes; i++) addCase('geode', { l: Math.max(q.lvl, p.level), src: 'mine' });
+  if (Math.random() < 1 / M.pet) res.pet = findMiningPet();
+  st.t = rare ? M.rareRespawn : M.respawn; st.rich = false; G.nodesDirty = true; G.dirty = true;
+  ev(Object.assign({ t: 'mined', x: q.x, z: q.z }, res)); return res;
+}
+// the pet unlocks Stone Sprout before its prestige; if you have it already the find pays gems
+function findMiningPet() {
+  const p = G.profile, id = CFG.mining.petId, had = !!(p.pets || {})[id];
+  p.petFinds = p.petFinds || {}; p.petFinds[id] = (p.petFinds[id] || 0) + 1;
+  if (had) addEssence(CFG.mining.petGems); else migratePets(p);
+  ev({ t: 'minePet', id, had }); return true;
+}
+function upgradePick() {
+  const m = mineState(), c = pickCost(m.pick); if (m.pick >= CFG.mining.pickMax || m.ore < c) return false;
+  m.ore -= c; m.pick++; G.dirty = true; return true;
+}
+function rollMineral() { const L = CFG.mining.minerals; let tot = 0; for (const x of L) tot += x[2]; let r = Math.random() * tot; for (const x of L) { if ((r -= x[2]) < 0) return x; } return L[0]; }
+// called by openCase for a geode, after its item is granted
+function crackGeode() {
+  const m = mineState(), [id, name] = rollMineral(), first = !m.museum[id];
+  m.museum[id] = (m.museum[id] || 0) + 1; addEssence(randInt(1, 3)); G.dirty = true;
+  ev({ t: 'mineral', id, name, first, n: Object.keys(m.museum).length }); return { id, name, first };
+}
+const museumBonus = (p) => 0.01 * Object.keys((p.mine && p.mine.museum) || {}).length;
+// --- end mining
 // ---------------------------------------------------------------------
 // 6. RENDER — Three.js scene, procedural assets behind AssetSlots
 // ---------------------------------------------------------------------
@@ -6445,6 +6502,9 @@ function buildHub() {
   { const bg = new THREE.CylinderGeometry(0.7, 1.6, 46, 10, 1, true), bmat = new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
     const caves = W.pois.filter((q) => q.kind === 'dungeon'), bim = new THREE.InstancedMesh(bg, bmat, caves.length), m4 = new THREE.Matrix4();
     caves.forEach((q, i) => bim.setMatrixAt(i, m4.makeTranslation(q.x, 23, q.z))); bim.frustumCulled = false; hubGroup.add(bim); }
+  // ore vein crystals: one instance per vein, hidden while it regrows (updateHubProps)
+  { const oim = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.6, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }), W.nodes.length);
+    oim.instanceMatrix.setUsage(THREE.DynamicDrawUsage); oim.frustumCulled = false; oim.setColorAt(0, _col.set(0xffffff)); hubGroup.add(oim); hubParts.oreIM = oim; G.nodesDirty = true; }
   // waypoint stones: obelisks with a floating crystal
   W.waypoints.forEach((w) => {
     tParts.push(part(GEO.cyl8, 0x6f6a8a, [w.x, 0.25, w.z], null, [1.3, 0.5, 1.3]));
@@ -8130,6 +8190,7 @@ function interact() {
   if (n.kind === 'riftLeave') return endRift('leave');
   if (n.kind === 'dungeon') return openDungeonPanel(n.poi);
   if (n.kind === 'trial') return openTrialPanel(n.zone);
+  if (n.kind === 'mine') return mineNode(n.st);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
   if (n.kind === 'dungeonChest') return openDungeonChest();
   const d = n.def;
@@ -8190,7 +8251,7 @@ function statLine(it) {
 }
 function perkLine(it) { const t = perkText(it); return t ? `<div class="perk">${t}</div>` : ''; }
 // RuneScape-style display names for tabs whose keys stay the same in code
-const TAB_NAME = { Gear: 'Equipment', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
+const TAB_NAME = { Mining: 'Mining & Museum', Gear: 'Equipment', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
 const tabName = (t) => TAB_NAME[t] || t;
 const wearWord = (slot) => (slot === 'weapon' ? 'Wield' : 'Wear');
 const SLOT_LABEL = { weapon: 'Weapon', helmet: 'Helmet', chest: 'Armor', boots: 'Boots', accessory: 'Accessory' };
@@ -8627,6 +8688,7 @@ function handlePanelClick(e) {
     case 'equip2': if (equipItem(b.dataset.id)) { Sfx.play('equipped'); b.remove(); } break;
     case 'salvage2': salvageItem(b.dataset.id); Sfx.play('coin'); b.parentNode.querySelectorAll('[data-act=equip2],[data-act=salvage2]').forEach((x) => x.remove()); break;
     case 'idleTab': openIdle(b.dataset.tab); break;
+    case 'pickUp': if (upgradePick()) { Sfx.play('unlock'); openIdle('Mining'); } break;
     case 'vaultCollect': if (collectVault()) openIdle('Vault'); break;
     case 'vaultUp': if (upgradeVault()) openIdle('Vault'); break;
     case 'expGo': { const sel = $('expB'); if (sel && startExped(sel.value, +b.dataset.d)) openIdle('Expeditions'); break; }
@@ -8851,6 +8913,12 @@ function processEvents() {
         else showToast(`A runestone awakens (${e.n}/${e.of}) · more sleep in this area`, 'good'); break;
       case 'radiant': G.slowT = 1.4; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 22); SpriteFX.play('nova', 'gold', e.x, 1, e.z, 14, { delay: 0.2 }); burst(e.x, 1, e.z, 60, 0xfff07a, 9, 1.2, 0.3, 4, 2); Sfx.play('radiant');
         showBanner('✦ RADIANT ✦', `${escapeHTML(e.name)} · trial ${e.n} · 1 in ${fmt(e.odds)}`, 'gold'); Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> found <b>${escapeHTML(e.name)}</b> after ${e.n} trials!`, 'boss'); break;
+      case 'mined': burst(e.x, 1.6, e.z, 14, e.rich ? 0xffd34a : 0xb8c4d0, 4, 0.6, 0.2, 3, 1); Sfx.play('hit');
+        showToast(`${e.name}: +${e.ore} ore${e.geodes ? ` · ${e.geodes} Geode${e.geodes > 1 ? 's' : ''}!` : ''}`, e.geodes || e.rich ? 'good' : ''); break;
+      case 'mineral': if (e.first) showToast(`New for the Museum: ${e.name} (${e.n} kinds · +${e.n}% XP)`, 'good'); break;
+      case 'minePet': G.slowT = 1.4; Sfx.play('radiant'); SpriteFX.play('pillar', 'venom', G.player.x, 0, G.player.z, 18);
+        showBanner(e.had ? 'Pet found again!' : 'A pet in the rock!', e.had ? `+${CFG.mining.petGems} gems` : `${PET_DEFS[e.id].name} joins you · 1 in ${fmt(CFG.mining.pet)}`, 'gold');
+        Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
       case 'dungeonBoss': Feed.remove('dungeon'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
       case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); if (e.why === 'down') showToast(`${e.name} resets · you fell`, 'bad'); break;
@@ -8970,6 +9038,14 @@ function updateHubProps(t) {
     pim.count = n; pim.instanceMatrix.needsUpdate = true; if (pim.instanceColor) pim.instanceColor.needsUpdate = true;
   }
   pim.position.y = Math.sin(t * 2.4) * 0.08;
+  // ore veins: crystals vanish while a vein regrows; rich veins are big and gold, crystal veins purple
+  if (G.nodesDirty && hubParts.oreIM) {
+    G.nodesDirty = false; const oim = hubParts.oreIM, ORE = [0xd88a4a, 0xb8c4d0, 0x9a5aff, 0x6af0ff, 0x2fffd0, 0xfff07a];
+    nodeStates().forEach((st, i) => { const q = st.q, sc = st.t > 0 ? 0 : st.rich ? 1.6 : 1; _e.set(0.3, i, 0.2); _q.setFromEuler(_e);
+      _m4.compose(_v3.set(q.x, 1.7, q.z), _q, _s3.set(sc, sc * 1.6, sc)); oim.setMatrixAt(i, _m4);
+      oim.setColorAt(i, _col.set(st.rich ? 0xffd34a : isRareVein(q) ? 0xc77dff : ORE[CFG.world.zones[q.zone].biome] || 0xd88a4a)); });
+    oim.instanceMatrix.needsUpdate = true; if (oim.instanceColor) oim.instanceColor.needsUpdate = true;
+  }
   // shrines
   const cim = hubParts.shrineIM, rim = hubParts.shrineRingIM;
   G.shrines.forEach((sh, i) => {
@@ -9090,6 +9166,7 @@ function drawMinimap() {
     g.fillText(q.kind === 'dungeon' ? '⛫' : q.kind === 'secret' ? '✦' : q.major ? '★' : '•', mmX(q.x), mmY(q.z));
   }
   for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('☠', mmX(D.x), mmY(D.z)); }
+  for (const st of nodeStates()) if (!st.t && Math.abs(st.q.z - pl.z) < winH) { g.fillStyle = st.rich ? '#ffd34a' : isRareVein(st.q) ? '#c77dff' : '#7fe3c4'; g.fillRect(mmX(st.q.x) - 1.6 * u, mmY(st.q.z) - 1.6 * u, 3.2 * u, 3.2 * u); }
   // off-window dens and caves of this area: a pinned icon on the window edge so the flanks are never forgotten
   { const zi = zoneAt(pl.z), m = 6 * u, ex = (x) => clamp(x, ox + m, ox + winW - m), ey = (y) => clamp(y, oy + m, oy + winH - m);
     const pin = (x, z, ch, col) => { const X = mmX(x), Y = mmY(z); if (X > ox && X < ox + winW && Y > oy && Y < oy + winH) return;
@@ -9994,8 +10071,9 @@ CFG.cases = {
   frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
   ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
   celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  geode: { name: 'Geode', sub: 'Cracked from ore veins (Mining) · also holds a Museum mineral', col: '#7fe3c4', w: { uncommon: 30, rare: 40, epic: 22, legendary: 8 }, hi: 4 },
 };
-CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial'];
+CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial', 'geode'];
 const CASE_LUCK = { legendary: 30, mythic: 120 };
 // these drop sources hand out a case instead of the item itself (Epic and up, or always for big loot)
 const CASE_SRC = { monster: 'hunter', elite: 'hunter', level: 'hunter', shrine: 'hunter', idle: 'treasure', boss: 'boss', rift: 'rift', milestone: 'milestone' };
@@ -10042,9 +10120,10 @@ function openCase(id) {
   p.stats.cases = (p.stats.cases || 0) + 1;
   p.records.bestCase = Math.max(p.records.bestCase || 0, rarIdx(r));
   grantItem(it, 'case');
+  const mineral = c.k === 'geode' ? crackGeode() : null;
   G.dirty = true; checkAchievements();
   saveNow(true); // Persist the case removal and exact reward together, before the reel.
-  return { item: it, lucky, c, kept: p.bag.some((b) => b.id === it.id) };
+  return { item: it, lucky, c, mineral, kept: p.bag.some((b) => b.id === it.id) };
 }
 
 // --- Vault: fills while you play or are away; collect any time ---------------------------------
@@ -10080,7 +10159,8 @@ CFG.exped = { durs: [15, 60, 240, 480], slotsAt: [1, 20, 50, 100] };
 const expSlots = (p) => CFG.exped.slotsAt.filter((L) => p.level >= L).length;
 function expReward(p, e) {
   const mins = e.d, B = masteryLevel(p.mastery['w:' + e.b] || 0), R = vaultRates(p), long = 1 + mins / 480;
-  return { gold: Math.round(R.gold * mins * 0.6 * long), mxp: Math.round(mins * 2 * (1 + B / 30)), gems: Math.floor(mins / 12 * long), shards: Math.floor(mins / 30), cases: Math.floor(mins / 120) + (mins >= 480 ? 1 : 0) };
+  return { gold: Math.round(R.gold * mins * 0.6 * long), mxp: Math.round(mins * 2 * (1 + B / 30)), gems: Math.floor(mins / 12 * long), shards: Math.floor(mins / 30), cases: Math.floor(mins / 120) + (mins >= 480 ? 1 : 0),
+    ore: Math.round(mins * 0.5 * (1 + CFG.mining.pickYield * ((p.mine && p.mine.pick) || 0))), geodes: Math.floor(mins / 90) };
 }
 const expDone = (e, now) => now - e.s >= e.d * 60000;
 function startExped(b, d) {
@@ -10092,6 +10172,7 @@ function claimExped(i) {
   const r = expReward(p, e); p.exp.splice(i, 1);
   addGold(r.gold, true); addEssence(r.gems); if (r.shards) dropShards(r.shards, true); addMastery('w:' + e.b, r.mxp);
   for (let k = 0; k < r.cases; k++) addCase('treasure', { src: 'exped' });
+  mineState().ore += r.ore; for (let k = 0; k < r.geodes; k++) addCase('geode', { src: 'exped' });
   p.stats.expeds = (p.stats.expeds || 0) + 1; G.dirty = true; checkAchievements(); ev({ t: 'expDone', b: e.b, r }); return r;
 }
 const onExpedition = (p, b) => (p.exp || []).some((e) => e.b === b);
@@ -10215,7 +10296,7 @@ function openCasesFast(k) {
 function openIdle(tab) {
   tab = tab || UI.idleTab || 'Vault'; UI.idleTab = tab; UI.current = 'idle';
   const p = G.profile, now = Date.now();
-  const tabs = ['Vault', 'Expeditions', 'Auto Hunt'].map((t) => `<button class="tab ${t === tab ? 'on' : ''}" data-act="idleTab" data-tab="${t}">${tabName(t)}</button>`).join('');
+  const tabs = ['Vault', 'Expeditions', 'Mining', 'Auto Hunt'].map((t) => `<button class="tab ${t === tab ? 'on' : ''}" data-act="idleTab" data-tab="${t}">${tabName(t)}</button>`).join('');
   let body = '', bar = '';
   if (tab === 'Vault') {
     const v = vaultState(now), R = vaultRates(p), lv = vaultLv(p), cost = vaultUpCost(p), pct = Math.round(v.mins / v.cap * 100);
@@ -10231,14 +10312,21 @@ function openIdle(tab) {
     const slots = expSlots(p), rows = p.exp.map((e, i) => {
       const done = expDone(e, now), left = Math.max(0, e.s + e.d * 60000 - now), r = expReward(p, e), k = Math.min(1, (now - e.s) / (e.d * 60000));
       return `<div class="item exp">${brawlerPortrait(e.b, true)}<div class="meta"><div class="slot">${CFG.brawlers[e.b].name} · ${e.d >= 60 ? e.d / 60 + 'h' : e.d + 'm'} expedition</div><div class="nm">${done ? 'Back with loot!' : `${Math.ceil(left / 60000)} min left`}</div>
-        <div class="st">${ICON.coin}${fmtK(r.gold)} · ${ICON.ess}${r.gems} · ${r.shards} shards · +${fmtK(r.mxp)} mastery${r.cases ? ` · ${r.cases} case${r.cases > 1 ? 's' : ''}` : ''}</div><div class="vbar sm"><i style="width:${Math.round(k * 100)}%"></i></div></div>
+        <div class="st">${ICON.coin}${fmtK(r.gold)} · ${ICON.ess}${r.gems} · ${r.shards} shards · +${fmtK(r.mxp)} mastery${r.cases ? ` · ${r.cases} case${r.cases > 1 ? 's' : ''}` : ''} · ${r.ore} ore${r.geodes ? ` · ${r.geodes} geode${r.geodes > 1 ? 's' : ''}` : ''}</div><div class="vbar sm"><i style="width:${Math.round(k * 100)}%"></i></div></div>
         ${done ? `<button class="primary" data-act="expClaim" data-i="${i}">Claim</button>` : ''}</div>`;
     }).join('');
     const free = ownedBrawlers(p).filter((b) => b !== p.cls && !onExpedition(p, b));
     const pick2 = slots > p.exp.length && free.length ? `<h4 class="sub">Send a brawler</h4><div class="expPick"><select id="expB">${free.map((b) => `<option value="${b}">${CFG.brawlers[b].name} · mastery ${masteryLevel(p.mastery['w:' + b] || 0)}</option>`).join('')}</select>
       ${CFG.exped.durs.map((d) => `<button class="ghost sm" data-act="expGo" data-d="${d}">${d >= 60 ? d / 60 + ' h' : d + ' min'}</button>`).join('')}</div>` : '';
-    body = `<p class="fine">Brawlers you are not playing go out on their own and come back with gold, gems, shards, mastery XP and Treasure Cases, even while the game is closed. Slots: ${p.exp.length}/${slots} (more at levels ${CFG.exped.slotsAt.filter((L) => L > p.level).join(', ') || 'all open'}).</p>
+    body = `<p class="fine">Brawlers you are not playing go out on their own and come back with gold, gems, shards, mastery XP, ore, geodes and Treasure Cases, even while the game is closed. Slots: ${p.exp.length}/${slots} (more at levels ${CFG.exped.slotsAt.filter((L) => L > p.level).join(', ') || 'all open'}).</p>
       <div class="list">${rows || '<p class="fine">No brawlers out right now.</p>'}</div>${pick2}${!free.length && slots > p.exp.length ? '<p class="fine">Unlock more brawlers on the Level Road to send them out.</p>' : ''}`;
+  } else if (tab === 'Mining') {
+    const m = mineState(), M = CFG.mining, c = pickCost(m.pick), can = m.pick < M.pickMax && m.ore >= c, own = M.minerals.filter(([id]) => m.museum[id]).length;
+    body = `<div class="stats3"><div><b>${fmt(m.ore)}</b><span>Ore</span></div><div><b>${m.pick}/${M.pickMax}</b><span>Pickaxe</span></div><div><b>${fmt(m.mined)}</b><span>Veins mined</span></div></div>
+      <p class="fine">Every area has four ore veins off the road (one glows: the rare crystal vein). Tap a vein to mine it; it regrows in ${M.respawn / 60} min (${M.rareRespawn / 60} min for crystal), and 1 in ${Math.round(1 / M.rich)} regrows rich for triple ore. Each ore has a ${(geodeChance(m, false) * 100).toFixed(2)}% chance to hold a Geode. A vein hides a pet: 1 in ${fmt(M.pet)}.</p>
+      <p class="fine">Pickaxe level ${m.pick}: +${Math.round(m.pick * M.pickYield * 100)}% ore and +${(m.pick * M.pickGeode * 100).toFixed(2)}% geode chance.</p>
+      <h4 class="sub">Museum ${own}/${M.minerals.length} · +${own}% XP for good</h4><div class="list">${M.minerals.map(([id, name, w]) => `<div class="row"><b>${m.museum[id] ? name : '???'}</b><small>${m.museum[id] ? `×${m.museum[id]}` : 'not found'} · ${(w / M.minerals.reduce((s, x) => s + x[2], 0) * 100).toFixed(w < 1 ? 2 : 1)}% per geode</small></div>`).join('')}</div>`;
+    bar = selBar('', `<button class="${can ? 'primary' : 'disabled'}" data-act="pickUp" ${can ? '' : 'aria-disabled="true"'}>${m.pick >= M.pickMax ? 'Max pickaxe' : `Upgrade pickaxe · ${fmt(c)} ore`}</button>`);
   } else {
     body = `<label class="tgl"><input type="checkbox" data-set="autoHunt" ${p.settings.autoHunt ? 'checked' : ''}><span class="sw"></span><span><b>Auto Hunt</b><small>Your hero walks to monsters at your level, fights, dashes away when hurt and uses supers. Touch the move stick to take over; it resumes after a moment.</small></span></label>
       <p class="fine">Auto Hunt works in the open world (not in the Rift or Showdown). Monsters more than 3 levels above you are skipped, so it stays safe. Turn it on, put the phone down, and check back.</p>`;
@@ -10440,7 +10528,7 @@ function boot(hotData) {
     try { window.claude.hot.snapshot(() => ({ profile: G.profile })); } catch (e) { /* optional */ }
   }
   window.addEventListener('pagehide', () => saveNow(true));
-  if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi };
+  if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle };
   window.__gameBooted = true;
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
   if (LOCAL_PREVIEW) window.__dbg = { renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };

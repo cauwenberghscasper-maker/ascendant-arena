@@ -425,6 +425,7 @@ function stepHub(dt) {
   if (pl.alive) for (const sc of W.secrets) if (!G.profile.secrets[sc.id] && Math.abs(pl.z - sc.z) < 4 && Math.hypot(pl.x - sc.x, pl.z - sc.z) < 4) findSecret(sc);
   if (pl.alive) for (const q of W.runes) if (!G.profile.runes[q.id] && Math.abs(pl.z - q.z) < 4 && Math.hypot(pl.x - q.x, pl.z - q.z) < 4) lightRune(q);
   if (!pl.alive) G.chain.n = 0;
+  stepNodes(dt);
   // XP orbs and challenge shrines
   stepPellets(dt);
   stepShrines(dt);
@@ -451,6 +452,7 @@ function stepHub(dt) {
     for (const po of dungeonPois()) { const d = Math.hypot(pl.x - po.x, pl.z - po.z); if (d < best) { best = d; G.interact = { kind: 'dungeon', poi: po, label: 'Enter ' + po.name }; } }
     for (const n of shownNpcs()) { const d = Math.hypot(pl.x - n.x, pl.z - n.z); if (d < best) { best = d; G.interact = n; } }
     CFG.world.waypoints.forEach((w, i) => { const d = Math.hypot(pl.x - w.x, pl.z - w.z); if (d < best) { best = d; G.interact = { kind: 'waypoint', i, def: w }; } });
+    if (!G.interact) { const st = nodeNear(pl); if (st && G.profile.level >= CFG.world.zones[st.q.zone].minLevel) G.interact = { kind: 'mine', st, label: 'Mine ' + veinName(st.q, st) }; }
     if (!G.interact) { const tp = trialPoi(zoneAt(pl.z)); if (tp && trialOpen(tp.zone) && Math.hypot(pl.x - tp.x, pl.z - tp.z) < tp.r + 2) G.interact = { kind: 'trial', zone: tp.zone, label: 'Legendary Trial' }; }
   }
   // boss proximity counts as combat
