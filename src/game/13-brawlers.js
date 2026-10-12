@@ -30,11 +30,14 @@ CFG.brawlerOrder = ['bolt', 'smg', 'scatter', 'rail', 'wave', 'seeker', 'arrow',
 // unlocks: mostly the Level Road, some through bosses, shrines and feats (never money)
 Object.assign(CFG.attacks.wave, { unlock: { level: 5 } }); Object.assign(CFG.attacks.arrow, { unlock: { level: 8 }, mult: 1.2 }); Object.assign(CFG.attacks.orb, { unlock: { level: 15 }, mult: 1.0 });
 CFG.attacks.cluster.unlock = { level: 10 }; CFG.attacks.mortar.unlock = { level: 12 }; CFG.attacks.chain.unlock = { streak: 30 }; CFG.attacks.gatling.unlock = { level: 40 };
+// the 27 painted Codex heroes join the roster as brawlers of their own (assets/data/heroes-v6.js)
+installHeroesV6(CFG);
 for (const id in CFG.brawlers) {
   const B = CFG.brawlers[id], R = CFG.roles[B.role];
   CFG.classes[id] = { name: B.name, role: R.name, hpMult: R.hpMult, atkMult: R.atkMult, speedMult: R.speedMult, arenaHp: R.arenaHp, arenaDmg: R.arenaDmg,
     body: B.body, accent: B.accent, weapon: CFG.attacks[id], super: R.super, skill: R.skill, brawler: true };
 }
+finishHeroesV6(CFG);
 // mastery badges per brawler (RuneScape-style mastery levels)
 CFG.badges = [
   { lvl: 10, name: 'Bronze', title: 'Adept', color: 0xcd7f32, dmg: 0.03, hp: 0.02 },

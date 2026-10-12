@@ -166,10 +166,17 @@ function updateParticles(dt) {
   partIM.count = n; partIM.instanceMatrix.needsUpdate = true; if (partIM.instanceColor) partIM.instanceColor.needsUpdate = true;
 }
 // each bullet type gets its own silhouette and trail
+// --- Codex heroes: super engine (sim) + their art (ammunition, impacts, super props, status marks) ---------------
+const HeroFX = createHeroFX({ scene: dynGroup, camera, fxPal: (c) => fxPal(c), growth: (e) => growthScale(e), ent: (id) => G.ents.get(id),
+  play: (k, pal, x, y, z, size, opts) => SpriteFX.play(k, pal, x, y, z, size, opts),
+  particles: { burst, mote, play: (k, pal, x, y, z, size, opts) => SpriteFX.play(k, pal, x, y, z, size, opts), ring: (x, z, r, c, l) => ringFx(x, z, r, c, l), shake: (v) => { if (!G.profile || !G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, v); } },
+  banner: (big, small) => showBanner(big, small, 'gold'), toast: (t) => showToast(t), healNumber: (e) => { if (e.amt >= 1) dmgNumber(e.x, 2.2, e.z, '+' + fmtK(e.amt), 'heal'); } });
+heroApi.fx = HeroFX; HeroFXRef = HeroFX;
 const LONG_KINDS = { arrow: [1, 1, 1], ice: [1, 1, 1], tracer: [0.55, 0.55, 0.7], rail: [1.1, 1.1, 3.4], missile: [1.7, 1.7, 0.62], spark: [0.8, 0.8, 0.9] };
 let trailTick = 0;
 function updateProjectileMeshes() {
   let no = 0, na = 0, nd = 0, ng = 0;
+  HeroFX.ammoBegin();
   trailTick = (trailTick + 1) % 2;
   const glowOn = hqOn();
   for (let i = 0; i < PROJ_MAX; i++) {
@@ -180,6 +187,7 @@ function updateProjectileMeshes() {
       _m4.compose(_v3.set(p.x, p.y, p.z), camera.quaternion, _s3.set(gs, gs, gs));
       glowIM.setMatrixAt(ng, _m4); glowIM.setColorAt(ng, _col.set(p.color).multiplyScalar(p.team === 'mob' ? 0.8 : 0.65)); ng++;
     }
+    if (p.hx && HeroFX.ammo(p, i, yaw)) continue; // Codex heroes fire their own ammunition (hero-fx-v6.js)
     if (p.kind === 'flame') {
       if (no >= PROJ_MAX) continue;
       const k = 1 - Math.max(0, p.life) / p.total, s2 = p.r * (0.5 + k * 1.3);
@@ -209,7 +217,7 @@ function updateProjectileMeshes() {
       if ((p.kind === 'lob' || p.kind === 'shell') && trailTick === 0) burst(p.x, p.y, p.z, 1, p.color, 0.3, 0.35, 0.2, 0, 0.1);
     }
   }
-  orbIM.count = no; arrowIM.count = na; discIM.count = nd; glowIM.count = ng;
+  orbIM.count = no; arrowIM.count = na; discIM.count = nd; glowIM.count = ng; HeroFX.ammoEnd();
   glowIM.instanceMatrix.needsUpdate = true; if (glowIM.instanceColor) glowIM.instanceColor.needsUpdate = true;
   orbIM.instanceMatrix.needsUpdate = true; arrowIM.instanceMatrix.needsUpdate = true; discIM.instanceMatrix.needsUpdate = true;
   if (orbIM.instanceColor) orbIM.instanceColor.needsUpdate = true; if (arrowIM.instanceColor) arrowIM.instanceColor.needsUpdate = true; if (discIM.instanceColor) discIM.instanceColor.needsUpdate = true;
@@ -409,6 +417,14 @@ function drawSuperAim(f, kind, a, mag) {
   const gold = 0xffc94a;
   if (kind === 'super') {
     const s = CFG.classes[f.cls].super, S = CFG.supers[s];
+    if (S && S.hero) { // Codex heroes: aim shape from their super (self circle, lane, landing circle or target)
+      const A = S.aim || { type: 'self', r: 6 };
+      if (A.type === 'self') AimFX.circle(f.x, f.z, A.r, gold, true);
+      else if (A.type === 'lane') AimFX.lane(0, f.x, f.z, a, A.len, A.width, gold, 0.85);
+      else if (A.type === 'circle') { const d = A.dist * clamp(mag, 0.25, 1); const tx = f.x + Math.sin(a) * d, tz = f.z + Math.cos(a) * d; AimFX.circle(tx, tz, A.r, gold, true); AimFX.arc(f.x, f.z, tx, tz, 3.5, gold); }
+      else { AimFX.circle(f.x, f.z, A.range, gold, false); AimFX.lane(0, f.x, f.z, a, A.range, 0.6, gold, 0.6); }
+      return;
+    }
     if (s === 'nova') AimFX.circle(f.x, f.z, 12, gold, true);
     else if (s === 'slam') AimFX.circle(f.x, f.z, S.r, gold, true);
     else if (s === 'volley') { AimFX.setFan(S.spread + 0.05, gold, 0.85); AimFX.fan.position.set(f.x, 0.09, f.z); AimFX.fan.rotation.y = a; AimFX.fan.scale.set(20, 1, 20); }

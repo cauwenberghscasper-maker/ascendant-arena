@@ -6,6 +6,7 @@ function simStep(dt) {
   else if (G.mode === 'arena' && G.arena) stepArena(dt);
   stepPendingAoE(dt);
   stepClouds(dt);
+  HeroSupers.step(dt);
   stepPetCombat(dt);
   stepProjectiles(dt);
 }

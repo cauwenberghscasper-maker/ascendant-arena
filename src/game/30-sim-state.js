@@ -221,7 +221,7 @@ function setBrawler(id) {
 }
 const equipAttack = setBrawler;
 const BRAWLER_SWITCH_MASTERY = 80;
-function canSwitchBrawler(p, id) { const first = p.starterBrawler || 'bolt'; return id === p.cls || id === first || masteryLevel((p.mastery || {})['w:' + first] || 0) >= BRAWLER_SWITCH_MASTERY; }
+function canSwitchBrawler(p, id) { const first = p.starterBrawler || 'bolt'; if (TEST_MODE) return true; /* ×100 test mode: try any recruited hero */ return id === p.cls || id === first || masteryLevel((p.mastery || {})['w:' + first] || 0) >= BRAWLER_SWITCH_MASTERY; }
 function artifactSlotsFor(p) { const earnedLevel = prestigeCount(p) ? Math.max(PRESTIGE_LEVEL,p.level) : p.level; let n = CFG.artifactSlots; for (const L in P.artifactSlotAt) if (earnedLevel >= +L) n = Math.max(n, P.artifactSlotAt[L]); return n; }
 function toggleArtifact(id) {
   const p = G.profile; if (!p.unlocked.artifacts.includes(id)) return false;

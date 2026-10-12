@@ -70,6 +70,7 @@ for (const [id, def] of Object.entries(ASSET_MANIFEST)) if (id.startsWith('hero.
 }
 // Hand-painted, fully rigged adventurers (v4) replace them; each keeps its old entry as a fallback.
 applyHeroV4(ASSET_MANIFEST);
+applyHeroV6Models(ASSET_MANIFEST);
 // which kind of weapon a brawler holds (mirrors weaponGeometry)
 // the generated weapon a hero holds: always the brawler's own signature weapon (equipped items are not shown on heroes)
 const SIGNATURE_WEAPON = { chain: 'gear.weapon.dragonsoul.focus' }; // Volt carries the Dragonsoul staff
@@ -113,7 +114,7 @@ const AssetLibrary = {
       .then(([gltf, weapon, clips]) => {
         if (def.v4) def.weaponScene = weapon ? weapon.scene : null;
         e.model = this.prepare(gltf.scene, def, id);
-        e.model.animations = def.v4 ? heroV4Clips(THREE, clips, gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
+        e.model.animations = def.v4 ? relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
       })
       .catch((err) => {
         // a v4 hero that fails falls back to the previous adventurer model
@@ -206,6 +207,14 @@ const AssetLibrary = {
       else { m.emissive.setHex(m.userData.baseEmissive); m.emissiveIntensity = m.userData.baseEmissiveI; }
     }
   },
+};
+if (LOCAL_PREVIEW) window.__heroLab = { // local playtesting of the Codex heroes: __heroLab.play('wrenna'); __heroLab.dummies(6); __heroLab.superNow()
+  G, CFG, HeroSupers, HERO_V6, get HeroFX() { return HeroFX; },
+  play(id) { const p = G.profile; if (!p.unlocked.attacks.includes(id)) p.unlocked.attacks.push(id); if (!p.brawlers[id]) p.brawlers[id] = newBrawlerState(); p.cls = id; p.artifacts = p.brawlers[id].artifacts; refreshPlayerStats(true); return CFG.brawlers[id].name; },
+  dummies(n = 6, r = 6, hp = 1e6) { const pl = G.player, base = G.enemies.find((e) => e.alive) || G.enemies[0]; const out = [];
+    for (let i = 0; i < n; i++) { const e = makeEnemy(base.type, base.zone); const a = i / n * Math.PI * 2; e.x = e.hx = pl.x + Math.sin(a) * r; e.z = e.hz = pl.z + Math.cos(a) * r; e.maxHp = e.hp = hp; e.state = 'idle'; e.lab = true; G.enemies.push(e); out.push(e); } return out.length; },
+  superNow(dx, dz, dist) { const f = G.player; f.superCharge = 1; const t = nearestFoe(f, 30); const a = dx != null ? Math.atan2(dx, dz) : t ? Math.atan2(t.x - f.x, t.z - f.z) : 0; doSuper(f, Math.sin(a), Math.cos(a), dist || 0); },
+  shoot(dist) { const f = G.player, t = nearestFoe(f, 30); const a = t ? Math.atan2(t.x - f.x, t.z - f.z) : f.facing; f.ammo = f.ammoMax; fireWeapon(f, Math.sin(a), Math.cos(a), dist || 0); },
 };
 if (LOCAL_PREVIEW) { window.__assets = AssetLibrary; window.__THREE = THREE; window.__manifest = ASSET_MANIFEST; window.__sfx = () => SpriteFX; window.__lab = { px: () => PixelIcons, gi: () => GI, slots: AssetSlots, heldWeaponAsset, itemIcon: (it) => thumbFor(it) }; }
 // best gear rarity worn on at least two slots, shown as an aura under generated heroes

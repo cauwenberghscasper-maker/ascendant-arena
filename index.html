@@ -340,6 +340,7 @@ textarea.code { width: 100%; box-sizing: border-box; font: 12px/1.35 ui-monospac
 .tag.den .tn { font: 14px/1 var(--display); color: #fff; background: rgba(160, 30, 45, .82); padding: 4px 8px; border-radius: 8px; text-shadow: none; }
 .tag.wp .tn { font: 700 11px/1 var(--body); color: #0e2a36; background: #9fe8ff; padding: 3px 7px; border-radius: 7px; text-shadow: none; }
 .dmg.kxp { color: #c9b8ff; font-size: 13px; }
+.dmg.heal { color: #8dff8d; font-size: 14px; }
 .toast.mastery { border-color: #8fe3a0; } .toast.ess { border-color: #c77dff; } .toast.legendary { border-color: #ffb347; } .toast.uncommon { border-color: #7fd17f; }
 /* v7: panels */
 .esschip { display: inline-flex; align-items: center; gap: 4px; font: 700 13px/1 var(--body); background: var(--ink3); padding: 6px 9px; border-radius: 10px; }
@@ -431,6 +432,12 @@ button.inl { margin-left: 8px; vertical-align: middle; }
 /* brawlers */
 .bwrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
 .bgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.btier { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; margin: 8px 2px 0; padding: 0 2px 3px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.btier b { font: 15px/1 var(--display); letter-spacing: .02em; } .btier span { font: 700 11px/1 var(--body); opacity: .7; }
+.btier:first-child { margin-top: 0; }
+.btier.tier-champion b { color: #9fe3e0; } .btier.tier-legendary b { color: #ffc94a; } .btier.tier-ascendant b { color: #c77dff; } .btier.tier-divine b { color: #ff9a6a; text-shadow: 0 0 8px rgba(255,154,106,.45); }
+.bcard.tier-legendary { box-shadow: inset 0 0 0 1px rgba(255,201,74,.35); } .bcard.tier-ascendant { box-shadow: inset 0 0 0 1px rgba(199,125,255,.4); } .bcard.tier-divine { box-shadow: inset 0 0 0 1px rgba(255,154,106,.5), 0 0 10px rgba(255,154,106,.18); }
+.htitle { margin: 2px 0 6px; color: #d9c9a8; font-style: italic; }
 .bcard { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; border: 2px solid transparent; border-radius: 14px; background: var(--ink2); padding: 8px 4px 7px; color: var(--text); }
 .bcard b { font: 14px/1 var(--display); } .bcard small { font: 600 10.5px/1 var(--body); color: var(--muted); }
 .bcard.sel { border-color: #9fe8ff; } .bcard.cur .eqd { position: absolute; top: -7px; left: 50%; transform: translateX(-50%); font: 700 9px/1 var(--body); background: var(--good); color: #0c2a17; padding: 3px 6px; border-radius: 6px; }
@@ -1440,7 +1447,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
   <div id="modal" hidden><div class="panel scroll" id="panel" role="dialog" aria-modal="true"></div><button id="sheetGrip" type="button" aria-label="Expand the list" aria-expanded="false"><i></i></button></div>
   <div id="title">
     <div class="art" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div><div class="sparks" aria-hidden="true"></div>
-    <div class="top"><div class="logo">Ascendant<span>Arena</span></div><div class="badge">16 brawlers · endless ascension</div></div>
+    <div class="top"><div class="logo">Ascendant<span>Arena</span></div><div class="badge">43 heroes · endless ascension</div></div>
     <div class="bottom">
       <div class="tagline">Start weak. Hunt monsters, beat world bosses, collect legendary gear, then prove it in the arena.</div>
       <div id="loading">Loading the world…</div>
@@ -1469,6 +1476,10 @@ import { prepareOriginalAdventurer, equipOriginalAdventurer } from './assets/art
 import { createKayKitMotion } from './assets/data/kaykit-motion.js';
 import { applyHeroV4, heroV4Clips, gripV4Weapon, prepareV4Equipment, equipV4Hero } from './assets/data/hero-models-v4.js';
 import { addHeroEyes } from './assets/data/hero-eyes.js';
+import { relaxArms } from './assets/data/hero-arms.js';
+import { installHeroesV6, finishHeroesV6, applyHeroV6Models, HERO_V6, HEROES_V6 } from './assets/data/heroes-v6.js';
+import { createHeroSupers } from './assets/data/hero-supers-v6.js';
+import { createHeroFX } from './assets/data/hero-fx-v6.js';
 import { equipmentIcon, caseIcon } from './assets/art/premium-icons.js';
 import { COLLECTION_ITEMS, COLLECTION_CHANCE, COLLECTION_GUARANTEE, collectionIcon, rollCollectionItem, recordCollectionItem, migrateCollection, regionBossCase } from './assets/data/loot-collection.js';
 import { PRESTIGE_LEVEL, prestigeCount, migratePrestige, prestigeBlock, prestigePlan, applyPrestige, statMilestone } from './assets/data/prestige.js';
@@ -2047,11 +2058,14 @@ CFG.brawlerOrder = ['bolt', 'smg', 'scatter', 'rail', 'wave', 'seeker', 'arrow',
 // unlocks: mostly the Level Road, some through bosses, shrines and feats (never money)
 Object.assign(CFG.attacks.wave, { unlock: { level: 5 } }); Object.assign(CFG.attacks.arrow, { unlock: { level: 8 }, mult: 1.2 }); Object.assign(CFG.attacks.orb, { unlock: { level: 15 }, mult: 1.0 });
 CFG.attacks.cluster.unlock = { level: 10 }; CFG.attacks.mortar.unlock = { level: 12 }; CFG.attacks.chain.unlock = { streak: 30 }; CFG.attacks.gatling.unlock = { level: 40 };
+// the 27 painted Codex heroes join the roster as brawlers of their own (assets/data/heroes-v6.js)
+installHeroesV6(CFG);
 for (const id in CFG.brawlers) {
   const B = CFG.brawlers[id], R = CFG.roles[B.role];
   CFG.classes[id] = { name: B.name, role: R.name, hpMult: R.hpMult, atkMult: R.atkMult, speedMult: R.speedMult, arenaHp: R.arenaHp, arenaDmg: R.arenaDmg,
     body: B.body, accent: B.accent, weapon: CFG.attacks[id], super: R.super, skill: R.skill, brawler: true };
 }
+finishHeroesV6(CFG);
 // mastery badges per brawler (RuneScape-style mastery levels)
 CFG.badges = [
   { lvl: 10, name: 'Bronze', title: 'Adept', color: 0xcd7f32, dmg: 0.03, hp: 0.02 },
@@ -2826,7 +2840,7 @@ function setBrawler(id) {
 }
 const equipAttack = setBrawler;
 const BRAWLER_SWITCH_MASTERY = 80;
-function canSwitchBrawler(p, id) { const first = p.starterBrawler || 'bolt'; return id === p.cls || id === first || masteryLevel((p.mastery || {})['w:' + first] || 0) >= BRAWLER_SWITCH_MASTERY; }
+function canSwitchBrawler(p, id) { const first = p.starterBrawler || 'bolt'; if (TEST_MODE) return true; /* ×100 test mode: try any recruited hero */ return id === p.cls || id === first || masteryLevel((p.mastery || {})['w:' + first] || 0) >= BRAWLER_SWITCH_MASTERY; }
 function artifactSlotsFor(p) { const earnedLevel = prestigeCount(p) ? Math.max(PRESTIGE_LEVEL,p.level) : p.level; let n = CFG.artifactSlots; for (const L in P.artifactSlotAt) if (earnedLevel >= +L) n = Math.max(n, P.artifactSlotAt[L]); return n; }
 function toggleArtifact(id) {
   const p = G.profile; if (!p.unlocked.artifacts.includes(id)) return false;
@@ -2865,7 +2879,7 @@ function spawnProjectile(o) {
       p.team = o.team; p.owner = o.owner; p.pet = !!o.pet; p.kind = o.kind; p.aoe = o.aoe || 0; p.aoeMult = o.aoeMult || 0;
       p.slow = o.slow || 0; p.charge = o.charge || 0; p.color = o.color; p.y = o.y || 1.0; p.burn = o.burn || 0; p.burnT = o.burnT || 0;
       p.homing = o.homing || 0; p.pierce = o.pierce || 0; p.hits.length = 0; p.bounce = o.bounce || 0; p.split = o.split || null;
-      p.ghost = !!o.ghost; p.lob = !!o.lob && !o.ghost; p.lobH = o.lobH || 0; p.boomerang = !!o.boomerang; p.returning = false; p.vamp = o.vamp || 0; p.speed = Math.hypot(o.vx, o.vz); p.chain = o.chain || 0;
+      p.hx = o.hx || null; p.hv = o.hv || 0; p.hf = null; p.shape = o.shape || null; p.stun = o.stun || 0; p.knock = o.knock || 1.5; p.ghost = !!o.ghost; p.lob = !!o.lob && !o.ghost; p.lobH = o.lobH || 0; p.boomerang = !!o.boomerang; p.returning = false; p.vamp = o.vamp || 0; p.speed = Math.hypot(o.vx, o.vz); p.chain = o.chain || 0;
       return p;
     }
   }
@@ -2877,7 +2891,12 @@ function obstacleAt(x, z, pad) {
   G.obstacles.query(x, z, (o) => { if (!hit && Math.hypot(x - o.x, z - o.z) < o.r + pad) hit = o; });
   return hit;
 }
-function clearProjectiles() { for (const p of projectiles) p.active = false; G.pendingAoE.length = 0; G.clouds.length = 0; }
+function clearProjectiles() { for (const p of projectiles) p.active = false; G.pendingAoE.length = 0; G.clouds.length = 0; HeroSupers.clear(); if (HeroFXRef) HeroFXRef.clear(); }
+// Codex heroes' supers and statuses run on the sim clock; their art (HeroFX) is created with the renderer below
+const heroApi = { G, forEachTarget, dealDamage, spawnProjectile, ev, nearestFoe: (f, d) => nearestFoe(f, d),
+  collide: (e) => { collideObstacles(e); if (e.kind === 'fighter') boundFighter(e, G.mode === 'arena' ? 'arena' : 'hub'); }, fx: null };
+const HeroSupers = createHeroSupers(heroApi);
+let HeroFXRef = null;
 
 function forEachTarget(fn) {
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
@@ -2955,7 +2974,8 @@ function stepProjectiles(dt) {
       if (dx * dx + dz * dz < rr * rr) hitT = t;
     });
     if (hitT) {
-      dealDamage(hitT, p.dmg, p.owner, { pet:p.pet, proc:p.pet, vamp: p.vamp, charge: p.charge, canCrit: !p.pet, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: 1.5, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
+      const amt = dealDamage(hitT, p.dmg, p.owner, { pet:p.pet, proc:p.pet, vamp: p.vamp, charge: p.charge, canCrit: !p.pet, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: p.knock || 1.5, stun: p.stun, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
+      if (p.hx) { HeroSupers.onBulletHit(p, hitT, amt || 0); if (!p.aoe) ev({ t: 'heroImpact', hid: p.hx, x: hitT.x, z: hitT.z, r: 0.9, hv: p.hv }); }
       if (p.chain > 0) chainFrom(hitT, p.chain, p.dmg * 0.6, p.owner, p.team);
       if (p.pierce > 0) {
         p.pierce--; p.hits.push(hitT.id);
@@ -2995,12 +3015,13 @@ function spawnSplit(p, direct) {
 function expireProjectile(p, explode, direct) {
   if (!p.active) return;
   p.active = false;
+  if (p.hx) HeroSupers.onBulletEnd(p, explode, direct);
   if (explode && p.split) spawnSplit(p, direct);
   if (explode && p.aoe > 0) {
     aoeDamage(p.x, p.z, p.aoe, p.dmg * (direct ? p.aoeMult : p.aoeMult * 1.25), p.team, p.owner, { exclude: direct, charge: p.charge * 0.5, knock: 3, burn: p.burn, burnT: p.burnT, slow: p.slow });
-    ev({ t: 'boom', x: p.x, z: p.z, r: p.aoe, color: p.color, lob: p.lob });
+    ev({ t: 'boom', x: p.x, z: p.z, r: p.aoe, color: p.color, lob: p.lob, hid: p.hx, hv: p.hv });
   } else if (explode) {
-    ev({ t: 'puff', x: p.x, z: p.z, color: p.color });
+    ev({ t: 'puff', x: p.x, z: p.z, color: p.color, hid: direct ? null : p.hx, hv: p.hv });
   }
 }
 function aoeDamage(x, z, r, dmg, team, owner, o) {
@@ -3035,7 +3056,8 @@ function dealDamage(t, amount, srcId, o) {
   if (t.armorT > 0) amt *= 1 - CFG.skills.ironskin.reduce;
   if (t.armor) amt *= 1 - Math.min(0.6, t.armor);
   if (t.ks && t.ks.afterT > 0) amt *= CFG.combat.afterReduce ?? 0.75;
-  amt = Math.max(1, Math.round(amt));
+  amt = HeroSupers.modDamage(src && src.kind === 'fighter' && !o.pet ? src : null, t, amt, o); // hero statuses: shields, guard, vulnerability, buffs
+  amt = Math.max(t.guardT > 0 || t.shieldHp > 0 ? 0 : 1, Math.round(amt));
   // Undying Rage: survive one lethal hit per minute
   if (t.kind === 'fighter' && t.keys && t.keys.undying && t.ks.undyCd <= 0 && t.hp - amt <= 0) {
     amt = Math.max(0, Math.round(t.hp - 1)); t.ks.undyCd = 60; t.invulnT = 1.5; ev({ t: 'undying', x: t.x, z: t.z, isPlayer: t.isPlayer });
@@ -3228,10 +3250,12 @@ function spawnBullet(f, w, a, lobDist, scale) {
   let aoe = (w.aoe || 0) * (1 + f.mods.aoe), aoeMult = w.aoeMult || 0;
   if (A.blast) { const bv = artVal('blast', A.blast); if (aoe) aoe += bv.r / 3; else { aoe = bv.r; aoeMult = bv.mult; } }
   const burn = (A.ember ? base * artVal('ember', A.ember) : 0) + (w.burnMult ? base * w.burnMult : 0);
-  return spawnProjectile({ x: f.x + sx * 0.7, z: f.z + sz * 0.7, vx: sx * speed, vz: sz * speed, life, r, dmg: base, team: f.team, owner: f.id, kind: w.kind,
+  const shot = spawnProjectile({ x: f.x + sx * 0.7, z: f.z + sz * 0.7, vx: sx * speed, vz: sz * speed, life, r, dmg: base, team: f.team, owner: f.id, kind: w.kind,
     aoe, aoeMult, charge: per, color: projColor(f), homing: (w.homing || 0) + (A.seekerChip ? artVal('seekerChip', A.seekerChip) : 0), pierce: (w.pierce || 0) + (A.pierce ? artVal('pierce', A.pierce) : 0),
     bounce: (w.bounce || 0) + (A.rubber ? artVal('rubber', A.rubber) : 0), split, lob: !!w.lob, lobH, boomerang: !!w.boomerang, chain: w.chain || 0,
     burn, burnT: burn ? 2.5 : 0, slow: (A.frost ? artVal('frost', A.frost) : 0) + (w.slow || 0), vamp: A.vamp ? artVal('vamp', A.vamp) : 0 });
+  if (w.hero && shot) HeroSupers.decorateBullet(shot, w, f);
+  return shot;
 }
 // where a lobbed shot lands: the aim stick's length when aimed by hand (Brawl Stars), else the target
 function lobDistFor(f, w, base, aimDist) {
@@ -3255,6 +3279,7 @@ function emitVolley(f, w, dx, dz, first, aimDist) {
 function fireWeapon(f, dx, dz, aimDist) {
   const w = weaponOf(f);
   emitVolley(f, w, dx, dz, true, aimDist);
+  f.motionClip = null; if (w.lunge) HeroSupers.lunge(f, w, dx, dz);
   if (w.burst > 1) { f.burstLeft = w.burst - 1; f.burstT = w.burstGap; f.burstDX = dx; f.burstDZ = dz; }
   f.facing = Math.atan2(dx, dz); f.attackAnim = 1; f.lastAttack = G.time; f.motionAction = "attack";
   ev({ t: 'shoot', kind: w.kind, isPlayer: f.isPlayer, x: f.x, z: f.z });
@@ -3272,7 +3297,7 @@ function doMelee(f) {
     if (d > 1.0 && Math.acos(clamp(dot, -1, 1)) > M.arc) return;
     dealDamage(t, f.dmg * mult * (tanky ? 1.1 : 1), f.id, { charge: 0.8, canCrit: true, knockX: dx, knockZ: dz, knock: M.knock, pk: 'melee' });
   });
-  f.attackAnim = 1; f.lastAttack = G.time; f.motionAction = 'melee';
+  f.attackAnim = 1; f.lastAttack = G.time; f.motionAction = 'melee'; f.motionClip = null;
   ev({ t: 'melee', x: f.x + fx * 1.3, z: f.z + fz * 1.3, isPlayer: f.isPlayer });
 }
 function doSuper(f, dx, dz, aimDist) {
@@ -3280,6 +3305,11 @@ function doSuper(f, dx, dz, aimDist) {
   // mastery makes supers bigger and wider; ascended heroes hit even harder
   const ML = f.superML || 1, big = (ML - 1) / 98;
   const pow = (1 + f.mods.superPow) * (1 + big) * (f.isPlayer && G.mode === 'hub' && ascTier(G.profile.level) >= 2 ? 1.5 : 1);
+  if (S && S.hero) { // Codex heroes: a scripted super of their own (assets/data/hero-supers-v6.js)
+    HeroSupers.cast(f, dx, dz, aimDist, { pow });
+    f.superCharge = 0; f.attackAnim = 1; f.lastAttack = G.time; f.motionAction = 'spell';
+    ev({ t: 'super', kind: s, hero: S.hero, isPlayer: f.isPlayer, x: f.x, z: f.z }); return;
+  }
   const base = Math.atan2(dx, dz);
   const color = f.isPlayer ? 0xffb02e : 0xff6a3d;
   if (s === 'nova') {
@@ -3380,6 +3410,7 @@ function stepFighter(f, dt, ctx) {
   f.invulnT -= dt; f.flashT -= dt; f.slowT -= dt; f.armorT -= dt; f.swiftT -= dt; f.retalCd -= dt; f.specialCd -= dt;
   tickBurn(f, dt); if (!f.alive) return;
   stepKeystones(f, dt); if (!f.alive) return;
+  if (HeroSupers.tickStatus(f, dt)) { f.moveAmt = Math.max(0, (f.moveAmt || 0) - dt * 6); trackVel(f, dt); clearOneShots(f.intent); return; } // stunned, banished or mid-super
   const tempo = f.ks.tempo * 0.05;
   f.attackAnim = Math.max(0, f.attackAnim - dt * 4);
   if (f.burstLeft > 0) {
@@ -4284,6 +4315,7 @@ const bodyMass = (e) => { const M = CFG.enemies.mass; return e.kind === 'enemy' 
 function stepEnemy(e, dt) {
   if ((e.mirror || e.hidden) && moveUpkeep(e, dt)) return;
   if (!e.alive) { if (e.rift || e.dungeon) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
+  if (HeroSupers.tickStatus(e, dt)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); e.moveAmt = 0; return; } // stunned / banished by a hero super
   const d = CFG.enemies[e.type], pl = G.player, Z = CFG.world.zones[e.zone];
   if (e.rift && e.state !== 'chase') e.state = 'chase';
   const dp = Math.hypot(pl.x - e.x, pl.z - e.z);
@@ -4628,6 +4660,7 @@ function spawnBoss() {
 function stepBoss(b, dt) {
   const B = CFG.boss, pl = G.player;
   trackVel(b, dt);
+  if (HeroSupers.tickStatus(b, dt)) { b.flashT -= dt; b.moveAmt = 0; return; }
   b.flashT -= dt; b.slowT -= dt; b.life -= dt; b.atkT -= dt; tickBurn(b, dt); if (!G.boss) return; b.attackAnim = Math.max(0, b.attackAnim - dt * 1.5);
   if (b.life <= 0 && G.time - b.lastHurt < 8 && b.life > -180) { /* still being fought: stay */ }
   else if (b.life <= 0) {
@@ -4950,6 +4983,7 @@ function simStep(dt) {
   else if (G.mode === 'arena' && G.arena) stepArena(dt);
   stepPendingAoE(dt);
   stepClouds(dt);
+  HeroSupers.step(dt);
   stepPetCombat(dt);
   stepProjectiles(dt);
 }
@@ -5682,6 +5716,7 @@ for (const [id, def] of Object.entries(ASSET_MANIFEST)) if (id.startsWith('hero.
 }
 // Hand-painted, fully rigged adventurers (v4) replace them; each keeps its old entry as a fallback.
 applyHeroV4(ASSET_MANIFEST);
+applyHeroV6Models(ASSET_MANIFEST);
 // which kind of weapon a brawler holds (mirrors weaponGeometry)
 // the generated weapon a hero holds: always the brawler's own signature weapon (equipped items are not shown on heroes)
 const SIGNATURE_WEAPON = { chain: 'gear.weapon.dragonsoul.focus' }; // Volt carries the Dragonsoul staff
@@ -5725,7 +5760,7 @@ const AssetLibrary = {
       .then(([gltf, weapon, clips]) => {
         if (def.v4) def.weaponScene = weapon ? weapon.scene : null;
         e.model = this.prepare(gltf.scene, def, id);
-        e.model.animations = def.v4 ? heroV4Clips(THREE, clips, gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
+        e.model.animations = def.v4 ? relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
       })
       .catch((err) => {
         // a v4 hero that fails falls back to the previous adventurer model
@@ -5818,6 +5853,14 @@ const AssetLibrary = {
       else { m.emissive.setHex(m.userData.baseEmissive); m.emissiveIntensity = m.userData.baseEmissiveI; }
     }
   },
+};
+if (LOCAL_PREVIEW) window.__heroLab = { // local playtesting of the Codex heroes: __heroLab.play('wrenna'); __heroLab.dummies(6); __heroLab.superNow()
+  G, CFG, HeroSupers, HERO_V6, get HeroFX() { return HeroFX; },
+  play(id) { const p = G.profile; if (!p.unlocked.attacks.includes(id)) p.unlocked.attacks.push(id); if (!p.brawlers[id]) p.brawlers[id] = newBrawlerState(); p.cls = id; p.artifacts = p.brawlers[id].artifacts; refreshPlayerStats(true); return CFG.brawlers[id].name; },
+  dummies(n = 6, r = 6, hp = 1e6) { const pl = G.player, base = G.enemies.find((e) => e.alive) || G.enemies[0]; const out = [];
+    for (let i = 0; i < n; i++) { const e = makeEnemy(base.type, base.zone); const a = i / n * Math.PI * 2; e.x = e.hx = pl.x + Math.sin(a) * r; e.z = e.hz = pl.z + Math.cos(a) * r; e.maxHp = e.hp = hp; e.state = 'idle'; e.lab = true; G.enemies.push(e); out.push(e); } return out.length; },
+  superNow(dx, dz, dist) { const f = G.player; f.superCharge = 1; const t = nearestFoe(f, 30); const a = dx != null ? Math.atan2(dx, dz) : t ? Math.atan2(t.x - f.x, t.z - f.z) : 0; doSuper(f, Math.sin(a), Math.cos(a), dist || 0); },
+  shoot(dist) { const f = G.player, t = nearestFoe(f, 30); const a = t ? Math.atan2(t.x - f.x, t.z - f.z) : f.facing; f.ammo = f.ammoMax; fireWeapon(f, Math.sin(a), Math.cos(a), dist || 0); },
 };
 if (LOCAL_PREVIEW) { window.__assets = AssetLibrary; window.__THREE = THREE; window.__manifest = ASSET_MANIFEST; window.__sfx = () => SpriteFX; window.__lab = { px: () => PixelIcons, gi: () => GI, slots: AssetSlots, heldWeaponAsset, itemIcon: (it) => thumbFor(it) }; }
 // best gear rarity worn on at least two slots, shown as an aura under generated heroes
@@ -7494,10 +7537,17 @@ function updateParticles(dt) {
   partIM.count = n; partIM.instanceMatrix.needsUpdate = true; if (partIM.instanceColor) partIM.instanceColor.needsUpdate = true;
 }
 // each bullet type gets its own silhouette and trail
+// --- Codex heroes: super engine (sim) + their art (ammunition, impacts, super props, status marks) ---------------
+const HeroFX = createHeroFX({ scene: dynGroup, camera, fxPal: (c) => fxPal(c), growth: (e) => growthScale(e), ent: (id) => G.ents.get(id),
+  play: (k, pal, x, y, z, size, opts) => SpriteFX.play(k, pal, x, y, z, size, opts),
+  particles: { burst, mote, play: (k, pal, x, y, z, size, opts) => SpriteFX.play(k, pal, x, y, z, size, opts), ring: (x, z, r, c, l) => ringFx(x, z, r, c, l), shake: (v) => { if (!G.profile || !G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, v); } },
+  banner: (big, small) => showBanner(big, small, 'gold'), toast: (t) => showToast(t), healNumber: (e) => { if (e.amt >= 1) dmgNumber(e.x, 2.2, e.z, '+' + fmtK(e.amt), 'heal'); } });
+heroApi.fx = HeroFX; HeroFXRef = HeroFX;
 const LONG_KINDS = { arrow: [1, 1, 1], ice: [1, 1, 1], tracer: [0.55, 0.55, 0.7], rail: [1.1, 1.1, 3.4], missile: [1.7, 1.7, 0.62], spark: [0.8, 0.8, 0.9] };
 let trailTick = 0;
 function updateProjectileMeshes() {
   let no = 0, na = 0, nd = 0, ng = 0;
+  HeroFX.ammoBegin();
   trailTick = (trailTick + 1) % 2;
   const glowOn = hqOn();
   for (let i = 0; i < PROJ_MAX; i++) {
@@ -7508,6 +7558,7 @@ function updateProjectileMeshes() {
       _m4.compose(_v3.set(p.x, p.y, p.z), camera.quaternion, _s3.set(gs, gs, gs));
       glowIM.setMatrixAt(ng, _m4); glowIM.setColorAt(ng, _col.set(p.color).multiplyScalar(p.team === 'mob' ? 0.8 : 0.65)); ng++;
     }
+    if (p.hx && HeroFX.ammo(p, i, yaw)) continue; // Codex heroes fire their own ammunition (hero-fx-v6.js)
     if (p.kind === 'flame') {
       if (no >= PROJ_MAX) continue;
       const k = 1 - Math.max(0, p.life) / p.total, s2 = p.r * (0.5 + k * 1.3);
@@ -7537,7 +7588,7 @@ function updateProjectileMeshes() {
       if ((p.kind === 'lob' || p.kind === 'shell') && trailTick === 0) burst(p.x, p.y, p.z, 1, p.color, 0.3, 0.35, 0.2, 0, 0.1);
     }
   }
-  orbIM.count = no; arrowIM.count = na; discIM.count = nd; glowIM.count = ng;
+  orbIM.count = no; arrowIM.count = na; discIM.count = nd; glowIM.count = ng; HeroFX.ammoEnd();
   glowIM.instanceMatrix.needsUpdate = true; if (glowIM.instanceColor) glowIM.instanceColor.needsUpdate = true;
   orbIM.instanceMatrix.needsUpdate = true; arrowIM.instanceMatrix.needsUpdate = true; discIM.instanceMatrix.needsUpdate = true;
   if (orbIM.instanceColor) orbIM.instanceColor.needsUpdate = true; if (arrowIM.instanceColor) arrowIM.instanceColor.needsUpdate = true; if (discIM.instanceColor) discIM.instanceColor.needsUpdate = true;
@@ -7737,6 +7788,14 @@ function drawSuperAim(f, kind, a, mag) {
   const gold = 0xffc94a;
   if (kind === 'super') {
     const s = CFG.classes[f.cls].super, S = CFG.supers[s];
+    if (S && S.hero) { // Codex heroes: aim shape from their super (self circle, lane, landing circle or target)
+      const A = S.aim || { type: 'self', r: 6 };
+      if (A.type === 'self') AimFX.circle(f.x, f.z, A.r, gold, true);
+      else if (A.type === 'lane') AimFX.lane(0, f.x, f.z, a, A.len, A.width, gold, 0.85);
+      else if (A.type === 'circle') { const d = A.dist * clamp(mag, 0.25, 1); const tx = f.x + Math.sin(a) * d, tz = f.z + Math.cos(a) * d; AimFX.circle(tx, tz, A.r, gold, true); AimFX.arc(f.x, f.z, tx, tz, 3.5, gold); }
+      else { AimFX.circle(f.x, f.z, A.range, gold, false); AimFX.lane(0, f.x, f.z, a, A.range, 0.6, gold, 0.6); }
+      return;
+    }
     if (s === 'nova') AimFX.circle(f.x, f.z, 12, gold, true);
     else if (s === 'slam') AimFX.circle(f.x, f.z, S.r, gold, true);
     else if (s === 'volley') { AimFX.setFan(S.spread + 0.05, gold, 0.85); AimFX.fan.position.set(f.x, 0.09, f.z); AimFX.fan.rotation.y = a; AimFX.fan.scale.set(20, 1, 20); }
@@ -7798,6 +7857,8 @@ function syncViews(dt, t) {
     const d = Math.hypot(e.x - cx, e.z - cz);
     if (d > far && !(e.kind === 'boss')) { const v = views.get(e); if (v) v.root.visible = false; if (!(e.kind === 'enemy' && d > far * 2.4)) seen.add(e); return; }
     const v = viewFor(e); v.update(e, dt, t); seen.add(e);
+    if (e.heroAirY) v.root.position.y += e.heroAirY; // carried into the air by a hero super
+    if (e.lostT > 0) { v.root.visible = false; v.lostHid = true; } else if (v.lostHid) { v.root.visible = true; v.lostHid = false; }
     if (e.kind === 'fighter' && e.alive) v.root.scale.setScalar(growthScale(e));
     if (Showcase.on && e === G.player) {
       Showcase.yaw += angDiff(Showcase.yaw, Showcase.baseYaw + Showcase.spin) * (1 - Math.exp(-dt * 10));
@@ -9370,6 +9431,7 @@ function processEvents() {
   const evs = G.events;
   for (let i = 0; i < evs.length; i++) {
     const e = evs[i];
+    if (e.t.length > 4 && e.t.startsWith('hero')) { HeroFX.event(e); continue; }
     switch (e.t) {
       case 'toast': showToast(e.text, e.kind); break;
       case 'hit':
@@ -9386,8 +9448,8 @@ function processEvents() {
         break;
       case 'melee': SpriteFX.play('slash', 'white', e.x, 1.1, e.z, 2.8, { rot: Math.random() * 6.28 }); burst(e.x, 1, e.z, 6, 0xffffff, 6, 0.25, 0.2, 10); if (e.isPlayer || near(e, 15)) Sfx.play('melee'); break;
       case 'dash': SpriteFX.play('dust', 'dust', e.x, 0, e.z, 1.6); burst(e.x, 0.4, e.z, 10, 0xe8f4ff, 4, 0.35, 0.25, 2, 0.2); if (e.isPlayer || near(e, 15)) Sfx.play('dash', { gap: 0.05 }); break;
-      case 'boom': if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); boomFx(e); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
-      case 'puff': burst(e.x, 1, e.z, 3, e.color, 3, 0.25, 0.15, 6); break;
+      case 'boom': if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); if (e.hid) HeroFX.impact(e); else boomFx(e); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
+      case 'puff': if (e.hid) HeroFX.impact(e); else burst(e.x, 1, e.z, 3, e.color, 3, 0.25, 0.15, 6); break;
       case 'bounce': SpriteFX.play('impact', 'white', e.x, 1, e.z, 1.1); burst(e.x, 1, e.z, 4, 0xffffff, 3, 0.2, 0.14, 4); if (near(e, 16)) Sfx.play('bounce', { gap: 0.05 }); break;
       case 'split': SpriteFX.play('impact', fxPal(e.color), e.x, 1, e.z, 1.5); burst(e.x, 1, e.z, 8, e.color, 5, 0.3, 0.18, 6); if (near(e, 18)) Sfx.play('split', { gap: 0.05 }); break;
       case 'petAttack':
@@ -9414,7 +9476,7 @@ function processEvents() {
         if (near(e, 22)) Sfx.play('die', { gap: 0.05 });
         if (e.kind === 'boss') Cam.shake = 1;
         break;
-      case 'super': if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } burst(e.x, 1, e.z, 14, 0xffb02e, 7, 0.5, 0.25, 6); if (e.isPlayer || near(e, 20)) { SpriteFX.play('nova', 'gold', e.x, 1.2, e.z, 5.5); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 6, { speed: 1.1 }); } break;
+      case 'super': if (e.hero) { if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } break; } if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } burst(e.x, 1, e.z, 14, 0xffb02e, 7, 0.5, 0.25, 6); if (e.isPlayer || near(e, 20)) { SpriteFX.play('nova', 'gold', e.x, 1.2, e.z, 5.5); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 6, { speed: 1.1 }); } break;
       case 'skill': { const pal = e.kind === 'ironskin' ? 'gold' : e.kind === 'swift' ? 'venom' : 'frost'; burst(e.x, 1, e.z, 12, e.kind === 'ironskin' ? 0xffd34a : e.kind === 'swift' ? 0x9cff9c : 0x9ae8ff, 5, 0.5, 0.22, 4); SpriteFX.play('pillar', pal, e.x, 0, e.z, 4.2); if (e.isPlayer) Sfx.play('super'); break; }
       case 'gold': if (e.amt > 0) Sfx.play('coin', { gap: 0.08 }); break;
       case 'xp': if (e.reason && e.reason !== 'kill') dmgNumberPlayer(`+${fmtK(e.amt)} XP`, 'xp'); XPDrops.add('xp', e.amt); break;
@@ -9910,6 +9972,14 @@ const PX_KEY_FAM = {
   m_gem: 'arcane', m_coin: 'gold', m_shard: 'arcane', m_rift: 'mythic', m_portal: 'arcane', m_asc: 'gold', m_arena: 'blood', m_lock: 'steel',
   m_hero: 'gold', m_brawlers: 'fire', m_skills: 'arcane', m_artifacts: 'mythic', m_progress: 'nature', m_records: 'gold', m_feats: 'gold', m_case: 'gold', m_caseOpen: 'gold', m_vault: 'steel', m_exped: 'nature', m_auto: 'electric', m_idle: 'gold', m_menu: 'steel', m_players: 'ice', m_smith: 'fire', m_floor: 'arcane', m_tier: 'blood',
 };
+// Codex heroes reuse the closest game-icons glyph, tinted in their own colour family
+const HERO_ICON = { wrenna: ['m_progress', 'ice'], hob: ['n_aoe', 'tech'], corrin: ['n_regen', 'nature'], mott: ['k_undying', 'fire'], nyssa: ['m_coin', 'steel'],
+  pyrrhos: ['n_armor', 'gold'], moss: ['n_core', 'blood'], ione: ['n_super', 'tech'], fenwick: ['k_bloodthirst', 'steel'], thimble: ['k_phase', 'venom'], unwritten: ['n_xp', 'parch'],
+  lysandra: ['k_aftershock', 'parch'], kallix: ['a_ember', 'fire'], oko: ['a_lens', 'gold'], ysolt: ['k_grasp', 'blood'], halven: ['u_crown', 'arcane'],
+  sena: ['k_execute', 'blood'], jory: ['a_reaper', 'ice'], sleeper: ['k_kraken', 'tech'], camedown: ['m_floor', 'gold'],
+  vell: ['m_idle', 'arcane'], ophira: ['k_glass', 'venom'], kerberon: ['m_brawlers', 'fire'], tychon: ['k_infinity', 'mythic'], aurvan: ['a_frost', 'ice'], ourax: ['a_giant', 'nature'], hespera: ['k_sunfire', 'fire'] };
+for (const id in HERO_ICON) { const [k, fam] = HERO_ICON[id]; if (GI[k]) { GI['b_' + id] = GI[k]; GI_SRC['b_' + id] = GI_SRC[k]; PX_KEY_FAM['b_' + id] = fam; } }
+
 const PX_ART_FAM = { tech: 'tech', mythic: 'mythic', ice: 'ice', gold: 'gold', steel: 'steel', fire: 'fire', blood: 'blood', venom: 'venom', electric: 'electric' };
 function pxFamOf(key) {
   if (PX_KEY_FAM[key]) return PX_KEY_FAM[key];
@@ -10166,11 +10236,19 @@ function openBrawlers(sel) {
   const p = G.profile, owned = ownedBrawlers(p), fresh = new Set(p.newUnlocks);
   sel = sel || UI.brawlerSel || p.cls; UI.brawlerSel = sel;
   const onlyOwned = !!UI.ownedOnly;
-  const cards = CFG.brawlerOrder.filter((id) => !onlyOwned || owned.includes(id)).map((id) => {
+  const card = (id) => {
     const B = CFG.brawlers[id], have = owned.includes(id), L = masteryOf(p, id);
-    return `<button class="bcard ${have ? 'own' : 'locked'} ${id === sel ? 'sel' : ''} ${id === p.cls ? 'cur' : ''}" data-act="bSel" data-id="${id}">
+    return `<button class="bcard ${have ? 'own' : 'locked'} ${id === sel ? 'sel' : ''} ${id === p.cls ? 'cur' : ''} tier-${B.tier || 'adventurer'}" data-act="bSel" data-id="${id}">
       ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have, 96)}
-      <b>${B.name}</b><small>${have ? `Mastery ${L}` : 'Locked'}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
+      <b>${B.name}</b><small>${have ? `Mastery ${L}` : `Lv ${CFG.attacks[id].unlock && CFG.attacks[id].unlock.level ? CFG.attacks[id].unlock.level : '—'}`}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
+  };
+  // 43 heroes: one section per tier (the original adventurers, then the Codex champions up to the divines)
+  const HERO_TIERS = [['adventurer', 'Adventurers'], ['champion', 'Champions'], ['legendary', 'Legendaries'], ['ascendant', 'Ascendants'], ['divine', 'Divines']];
+  const shown = CFG.brawlerOrder.filter((id) => !onlyOwned || owned.includes(id));
+  const cards = HERO_TIERS.map(([tier, label]) => {
+    const all = CFG.brawlerOrder.filter((id) => (CFG.brawlers[id].tier || 'adventurer') === tier), ids = shown.filter((id) => all.includes(id));
+    if (!ids.length) return '';
+    return `<div class="btier tier-${tier}"><b>${label}</b><span>${all.filter((id) => owned.includes(id)).length}/${all.length}</span></div>` + ids.map(card).join('');
   }).join('');
   const B = CFG.brawlers[sel], A = CFG.attacks[sel], C = CFG.classes[sel], have = owned.includes(sel);
   const first = p.starterBrawler || 'bolt', firstLevel = masteryOf(p, first), switchReady = canSwitchBrawler(p, sel);
@@ -10181,7 +10259,8 @@ function openBrawlers(sel) {
   const free = have ? treeFree(p, sel) : 0, tp = have ? treeOf(p, sel).total : 0;
   const summary = `${brawlerPortrait(sel, have, 68)}<div class="sx"><b>${B.name}${sel === p.cls ? ' · playing' : ''}</b><small>${C.role} · ${A.name}</small><small>${have ? `Mastery ${L}${t >= 0 ? ' · ' + CFG.badges[t].title : ''} · ${free > 0 ? `<span style="color:#ffc94a">${free} tree points free</span>` : `${tp} tree points`}` : `${gi('m_lock')} ${unlockText(A.unlock)}`}</small></div>`;
   const more = `<p class="bdesc">${A.desc}.</p>
-    <div class="kit"><div><span>Super</span><b>${sup.name}</b><small>Tap to auto-aim, drag to aim</small></div><div><span>Skill</span><b>${sk ? sk.name : '—'}</b><small>${sk ? sk.desc : ''}</small></div></div>
+    ${B.title ? `<p class="fine htitle">${B.full || B.name} · ${B.title}</p>` : ''}
+    <div class="kit"><div><span>Super</span><b>${sup.name}</b><small>${sup.desc || 'Tap to auto-aim, drag to aim'}</small></div><div><span>Skill</span><b>${sk ? sk.name : '—'}</b><small>${sk ? sk.desc : ''}</small></div></div>
     ${have ? `<div class="mast"><div class="mrowh"><b>Mastery ${L}</b><span>${L >= 99 ? 'Maxed' : next ? `${next.name} badge at ${next.lvl}` : ''}</span></div><span class="mbar"><i style="--v:${(f * 100).toFixed(1)}%"></i></span>
       <small>${fmtK(xp)} xp · badges give +3% damage and +2% HP each</small></div>` : ''}
     <div class="bdgs">${badges}</div>`;
@@ -10923,7 +11002,7 @@ function frame(now) {
   const t = now / 1000;
   syncViews(dt, t);
   mpUpdate(dt);
-  updateGearAura(dt); updateProjectileMeshes(); updateParticles(dt); updateRings(dt); updateAim(dt);
+  updateGearAura(dt); updateProjectileMeshes(); HeroFX.update(dt, HeroSupers.marked); updateParticles(dt); updateRings(dt); updateAim(dt);
   if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
   updateCamera(dt);
   updateCompanion(dt,t);
