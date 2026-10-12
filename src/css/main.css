@@ -565,8 +565,7 @@ button.inl { margin-left: 8px; vertical-align: middle; }
   #hudTop { left: calc(16px + var(--sal)); transform: none; width: calc(100vw - 140px); align-items: flex-start; }
   .classes { grid-template-columns: 1fr; }
   .atkgrid { grid-template-columns: 1fr 1fr; } .atk .ad { font-size: 10.5px; }
-  #modal.room { place-items: end center; background: linear-gradient(180deg, rgba(8,9,22,0) 40%, rgba(8,9,22,.6) 58%); }
-  #modal.room .panel { width: 100%; max-height: 57%; }
+  #modal.room { place-items: end center; }
   #spinHint { left: 50%; transform: translateX(-50%); bottom: auto; top: calc(14px + var(--sat)); width: 80vw; }
   #banner { top: 30%; }
 }
@@ -1030,7 +1029,6 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .tile .emptySlot { font:25px var(--body); color:var(--muted); }
 @media (max-aspect-ratio:1/1) {
   #spinHint { left:auto; right:8px; width:calc(100vw - 152px); transform:none; font-size:10px; }
-  #modal.room .panel { max-height:calc(57dvh - 12px - var(--sab)); }
   #doll .dchip { min-height:54px; padding:4px; gap:5px; }
   #doll .dchip img { width:32px; height:32px; }
 }

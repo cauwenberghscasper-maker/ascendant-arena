@@ -168,7 +168,11 @@ function updateHUD(dt) {
   const sp = skillPointsFree(p);
   UI.alertT = (UI.alertT || 0) - dt;
   if (UI.alertT <= 0) { UI.alertT = 0.3; UI.anyAlert = Object.values(slotAlerts()).some((a) => a.better || a.canUpgrade); updateGearPrompt(); $('feed').classList.toggle('up', !$('gearPrompt').hidden); }
-  setHidden('hubShortcuts', !hubShortcutsAvailable());
+  { const dock = hubShortcutsAvailable(), bannerOn = bannerT > 0;
+    // the shortcut dock pushes toasts below it, and steps aside while the zone banner shows
+    if (hudCache.dock !== dock) { hudCache.dock = dock; $('hud').classList.toggle('dock', dock); }
+    if (hudCache.bannerOn !== bannerOn) { hudCache.bannerOn = bannerOn; $('hud').classList.toggle('bannerOn', bannerOn); }
+    setHidden('hubShortcuts', !dock); }
   setHidden('navGearDot', !UI.anyAlert); setHidden('navSkillsDot', sp <= 0);
   setHidden('navArtifactsDot', !p.newUnlocks.some(u => u.startsWith('r:')));
   setHidden('navCasesCount', !p.cases.length); setText('navCasesCount', String(p.cases.length));

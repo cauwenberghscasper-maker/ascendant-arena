@@ -42,12 +42,10 @@
 .panel.dock .bdet { padding: 10px; gap: 8px; }
 .panel .pBtns > button.primary, .panel .pBtns > button.ghost, .panel .pBtns > button.disabled { padding: 0 10px; font-size: 16px; }
 .pSel .pMoreBtn + .pMoreBtn { margin-left: -4px; }
-@media (max-aspect-ratio: 1/1) and (max-height: 760px) { #modal.room > .panel { max-height: 78%; } }
 .panel > .npcHead, .panel > .menuHead { padding-right: 56px !important; } .panel > .heroHead { padding-right: 0 !important; } .panel > .heroHead .hm { margin-right: 54px !important; }
 @media (max-aspect-ratio: 1/1) { .panel.dock .tiles .tile { height: 62px; min-height: 0; aspect-ratio: auto; justify-content: center; } .panel.dock .tiles .tile img { max-width: 32px; max-height: 32px; } }
 @media (max-width: 400px) { .panel.dock .heroHead small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .panel.dock .heroHead .prestigeBadge { display: none; } }
 @media (max-width: 400px) { .panel .pBtns > button.primary, .panel .pBtns > button.ghost, .panel .pBtns > button.disabled { font-size: 14px; padding: 0 8px; } .igrid { grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); } }
-@media (max-aspect-ratio: 1/1) { #modal.room .panel { max-height: 70%; } #modal.room { background: linear-gradient(180deg, rgba(8,9,22,0) 22%, rgba(8,9,22,.6) 34%); } }
 .panel.dock .tiles .tile { padding: 4px 2px 3px; } .panel.dock .tiles .tile img { max-width: 44px; }
 @media (max-aspect-ratio: 1/1) {
   .panel.dock { gap: 8px; }
