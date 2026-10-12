@@ -484,8 +484,9 @@ AssetSlots.register('character', (o) => {
         body.visible = bodyOl.visible = false; for (const l of legs) l.visible = false;
         const L = hero.getObjectByName('legLPivot'), R = hero.getObjectByName('legRPivot'); if (L && R) heroLegs = [L, R];
         const def = ASSET_MANIFEST[hId];
-        if (def.original) gearDispose = equipOriginalAdventurer(hero, def, o.gear, THREE);
-        else if (def.v4) gearDispose = equipV4Hero(hero, o.gear, THREE);
+        const worn = HERO_OVERLAYS ? o.gear : o.gear && { weapon: o.gear.weapon }; // overlays off: no gear pieces (orb, rings, gem) on the body
+        if (def.original) gearDispose = equipOriginalAdventurer(hero, def, worn, THREE);
+        else if (def.v4) gearDispose = equipV4Hero(hero, worn, THREE);
         if (asc) asc.bindHero(hero, def);
         if (def.animated) {
           clipMotion = createKayKitMotion(THREE, hero, hero.animations, def);
