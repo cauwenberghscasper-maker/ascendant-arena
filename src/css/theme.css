@@ -252,3 +252,9 @@
 @media (min-aspect-ratio: 1/1) and (max-height: 590px) {
   #hud.dock #banner { top: calc(176px + var(--sat)); }
 }
+
+/* loot feed: one readable sentence per line (as a flex row, every text piece became its own column) */
+.fl { display: block !important; max-width: 100%; }
+.fl .gi { display: inline-block; vertical-align: -2px; margin-right: 6px; }
+/* short landscape: one-line action-bar note and buttons, so the bag row above them isn't squeezed out */
+@media (orientation: landscape) and (max-height: 500px) { .panel.dock .pBar .pNote { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .panel.dock .pBar .pNote .mergeCost { display: inline; } .panel.dock .pBtns > button { white-space: nowrap; } }
