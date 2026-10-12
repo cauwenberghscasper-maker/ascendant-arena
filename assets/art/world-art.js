@@ -83,6 +83,8 @@ const POI_ART = {
   graves(k){const S=k.s;for(let i=0;i<6;i++){const x=-2.4+(i%3)*2.4,z=i<3?-1.2:1.4;k.b('box',S.stone,x,.6,z,.8,1.2+(i%2)*.3,.25,(i%3-1)*.1);k.b('box',0x3a3328,x,.05,z+.9,.7,.1,1.4);k.h(x,z,.4);}k.b('cyl',S.dark,3.6,1.2,0,.12,2.4,.12);},
   obelisk(k){const S=k.s;k.b('box',S.dark,0,.25,0,2,.5,2);k.b('cone4',S.stone,0,3,0,.8,5.5,.8,0,.78,0);k.g('box',S.accent,0,2.4,.42,.2,1.6,.05);k.h(0,0,1);},
   shack(k){const S=k.s;k.b('box',0x6a5a4c,0,1.2,0,4,2.4,3.2);k.b('cone4',S.dark,0,3.2,0,3.2,1.6,2.6,0,.78,0);k.b('box',0x3a2a20,0,.8,1.62,.9,1.6,.05);k.g('box',0xffd99a,1.3,1.4,1.62,.6,.5,.05);k.h(-1,0,1.8);k.h(1,0,1.8);},
+  // ore vein: a dark rock mound (the glowing crystals on top are instanced in the hub view so they can be mined away)
+  ore(k){const S=k.s;k.b('crown',S.dark,0,.7,0,1.8,1.3,1.6);k.b('crown',S.stone,1.3,.45,.7,1,.8,1,0,.7,0);k.b('crown',S.stone,-1.1,.35,-.6,.8,.6,.8,0,1.4,0);k.h(0,0,1.6);},
   // cave mouth down to a dungeon: rock mound behind, dark arch and steps toward the road, two torches
   cave(k){const S=k.s;k.b('crown',S.dark,0,2.2,-6,5.5,4.6,5);k.b('crown',S.stone,-4,1.6,-4,3,3,3,0,.5,0);k.b('crown',S.stone,4,1.6,-4,3,3,3,0,1,0);
     k.b('box',0x050407,0,1.5,-1.2,3.4,3,.6);k.b('box',S.trim,0,3.2,-1,4.2,.6,1.2);for(let i=0;i<3;i++)k.b('box',S.stone,0,.08-i*.02,.2-i*.5,3,.16,.5);

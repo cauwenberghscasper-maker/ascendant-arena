@@ -119,10 +119,21 @@ function processEvents() {
       case 'champBlink': ringFx(e.x, e.z, 2.4, e.out ? 0xa36bff : 0xff3b3b, e.out ? 0.5 : 0.8); if (e.out) { burst(e.x, 1, e.z, 16, 0xa36bff, 5, 0.6, 0.25, 2, 1.2); SpriteFX.play('poof', 'arcane', e.x, 0, e.z, 3); } break;
       case 'riftWave': if (e.guard) { showBanner(`Floor ${e.floor} · Rift Lord!`, `Read the red warnings · dash through attacks`, 'red'); Sfx.play('horn'); } else if (e.champs) { Feed.add(`${gi('m_floor')} Floor <b>${e.floor}</b> · ${e.champs} champion${e.champs > 1 ? 's' : ''} · Lv ${e.lvl}`, 'rift'); } else Feed.add(`${gi('m_floor')} Floor <b>${e.floor}</b> · ${e.theme} · Lv ${e.lvl}`, 'rift'); break;
       case 'riftClear': Feed.add(`${gi('m_rift')} <b class="grade g${e.grade}">${e.grade}</b> Floor ${e.floor}${e.grade === 'S' ? ' · flawless ×2' : e.grade === 'A' ? ' · ×1.5' : ''} · +${e.gems} gems · +${fmtK(e.gold)} gold${e.item ? ' · guardian item!' : ''}`, 'rift'); Sfx.play('job'); burst(G.player.x, 1, G.player.z, 24, 0xff7ab8, 6, 0.8, 0.25, 3, 1.3); SpriteFX.play('nova', e.grade === 'S' ? 'gold' : 'arcane', G.player.x, 1.2, G.player.z, 5); break;
-      case 'dungeonStart': enterDungeonView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(e.name, `Monsters Lv ${e.lvl} · clear each hall to open its door`, 'red'); break;
+      case 'dungeonStart': enterDungeonView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(e.name, `${e.key ? `Tier ${e.key} key · ` : ''}Monsters Lv ${e.lvl} · clear each hall to open its door`, 'red'); break;
       case 'dungeonRoom': Feed.add(`${gi('m_portal')} Hall ${e.i}/${e.n} cleared · ${e.boss ? 'the boss awaits' : 'the next door opens'}`, 'rift'); Sfx.play('unlock'); break;
+      case 'rune': SpriteFX.play('pillar', 'arcane', e.x, 0, e.z, 8); Sfx.play('unlock');
+        if (e.n >= e.of) { const tp = trialPoi(e.zone); showBanner('Legendary Trial unlocked', `${tp.landmark} hums with power · go there to begin`, 'gold'); }
+        else showToast(`A runestone awakens (${e.n}/${e.of}) · more sleep in this area`, 'good'); break;
+      case 'radiant': G.slowT = 1.4; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 22); SpriteFX.play('nova', 'gold', e.x, 1, e.z, 14, { delay: 0.2 }); burst(e.x, 1, e.z, 60, 0xfff07a, 9, 1.2, 0.3, 4, 2); Sfx.play('radiant');
+        showBanner('✦ RADIANT ✦', `${escapeHTML(e.name)} · trial ${e.n} · 1 in ${fmt(e.odds)}`, 'gold'); Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> found <b>${escapeHTML(e.name)}</b> after ${e.n} trials!`, 'boss'); break;
+      case 'mined': burst(e.x, 1.6, e.z, 14, e.rich ? 0xffd34a : 0xb8c4d0, 4, 0.6, 0.2, 3, 1); Sfx.play('hit');
+        showToast(`${e.name}: +${e.ore} ore${e.geodes ? ` · ${e.geodes} Geode${e.geodes > 1 ? 's' : ''}!` : ''}`, e.geodes || e.rich ? 'good' : ''); break;
+      case 'mineral': if (e.first) showToast(`New for the Museum: ${e.name} (${e.n} kinds · +${e.n}% XP)`, 'good'); break;
+      case 'minePet': G.slowT = 1.4; Sfx.play('radiant'); SpriteFX.play('pillar', 'venom', G.player.x, 0, G.player.z, 18);
+        showBanner(e.had ? 'Pet found again!' : 'A pet in the rock!', e.had ? `+${CFG.mining.petGems} gems` : `${PET_DEFS[e.id].name} joins you · 1 in ${fmt(CFG.mining.pet)}`, 'gold');
+        Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
-      case 'dungeonBoss': Feed.remove('dungeon'); showBanner(`${e.name} cleared!`, 'Open the chest · the portal leads out', 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
+      case 'dungeonBoss': Feed.remove('dungeon'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
       case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); if (e.why === 'down') showToast(`${e.name} resets · you fell`, 'bad'); break;
       case 'riftEnd': enterRiftView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); break;
       case 'teleport': burst(e.x, 1, e.z, 30, 0x9fe8ff, 6, 0.8, 0.3, 2, 1.5); SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 5.5); Sfx.play('super'); Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; showToast(e.name); break;
@@ -240,6 +251,14 @@ function updateHubProps(t) {
     pim.count = n; pim.instanceMatrix.needsUpdate = true; if (pim.instanceColor) pim.instanceColor.needsUpdate = true;
   }
   pim.position.y = Math.sin(t * 2.4) * 0.08;
+  // ore veins: crystals vanish while a vein regrows; rich veins are big and gold, crystal veins purple
+  if (G.nodesDirty && hubParts.oreIM) {
+    G.nodesDirty = false; const oim = hubParts.oreIM, ORE = [0xd88a4a, 0xb8c4d0, 0x9a5aff, 0x6af0ff, 0x2fffd0, 0xfff07a];
+    nodeStates().forEach((st, i) => { const q = st.q, sc = st.t > 0 ? 0 : st.rich ? 1.6 : 1; _e.set(0.3, i, 0.2); _q.setFromEuler(_e);
+      _m4.compose(_v3.set(q.x, 1.7, q.z), _q, _s3.set(sc, sc * 1.6, sc)); oim.setMatrixAt(i, _m4);
+      oim.setColorAt(i, _col.set(st.rich ? 0xffd34a : isRareVein(q) ? 0xc77dff : ORE[CFG.world.zones[q.zone].biome] || 0xd88a4a)); });
+    oim.instanceMatrix.needsUpdate = true; if (oim.instanceColor) oim.instanceColor.needsUpdate = true;
+  }
   // shrines
   const cim = hubParts.shrineIM, rim = hubParts.shrineRingIM;
   G.shrines.forEach((sh, i) => {
@@ -360,6 +379,13 @@ function drawMinimap() {
     g.fillText(q.kind === 'dungeon' ? '⛫' : q.kind === 'secret' ? '✦' : q.major ? '★' : '•', mmX(q.x), mmY(q.z));
   }
   for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('☠', mmX(D.x), mmY(D.z)); }
+  for (const st of nodeStates()) if (!st.t && Math.abs(st.q.z - pl.z) < winH) { g.fillStyle = st.rich ? '#ffd34a' : isRareVein(st.q) ? '#c77dff' : '#7fe3c4'; g.fillRect(mmX(st.q.x) - 1.6 * u, mmY(st.q.z) - 1.6 * u, 3.2 * u, 3.2 * u); }
+  // off-window dens and caves of this area: a pinned icon on the window edge so the flanks are never forgotten
+  { const zi = zoneAt(pl.z), m = 6 * u, ex = (x) => clamp(x, ox + m, ox + winW - m), ey = (y) => clamp(y, oy + m, oy + winH - m);
+    const pin = (x, z, ch, col) => { const X = mmX(x), Y = mmY(z); if (X > ox && X < ox + winW && Y > oy && Y < oy + winH) return;
+      g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.font = `bold ${8 * u}px Rubik, sans-serif`; g.fillText(ch, ex(X), ey(Y)); };
+    for (const D of W.dens) if (D.zone === zi) pin(D.x, D.z, '☠', '#ff5d6c');
+    for (const q of W.pois) if (q.kind === 'dungeon' && q.zone === zi) pin(q.x, q.z, '⛫', '#ffb347'); }
   for (const e of mpVisible()) { g.fillStyle = '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }
   W.waypoints.forEach((w, i) => { const x = mmX(w.x), y = mmY(w.z), k = 4 * u, have = p.waypoints.includes(i); g.fillStyle = have ? '#9fe8ff' : '#6f6a8a'; g.beginPath(); g.moveTo(x, y - k); g.lineTo(x + k * 0.7, y); g.lineTo(x, y + k); g.lineTo(x - k * 0.7, y); g.closePath(); g.fill(); });
   for (const sh of G.shrines) {

@@ -11,7 +11,7 @@ const integer = (n, fallback, max) => Number.isSafeInteger(n) && n>=0 ? Math.min
 export function petXpToNext(level) { return level>=PET_MAX_LEVEL ? 0 : 40+8*level+2*level*level; }
 export function migratePets(p) {
   const old=p.pets && typeof p.pets==='object' && !Array.isArray(p.pets) ? p.pets : {}, pets={};
-  for(const [id,d] of Object.entries(PET_DEFS)) if(prestige(p)>=d.unlock) {
+  for(const [id,d] of Object.entries(PET_DEFS)) if(prestige(p)>=d.unlock || (p.petFinds && p.petFinds[id])) { // petFinds: found early (Mining)
     const s=old[id] || {}, level=Math.max(1,integer(s.level,1,PET_MAX_LEVEL));
     pets[id]={level,xp:level===PET_MAX_LEVEL?0:integer(s.xp,0,petXpToNext(level)-1),kills:integer(s.kills,0,Number.MAX_SAFE_INTEGER)};
   }

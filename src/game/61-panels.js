@@ -6,6 +6,8 @@ function interact() {
   if (n.kind === 'rift') return openRiftPanel();
   if (n.kind === 'riftLeave') return endRift('leave');
   if (n.kind === 'dungeon') return openDungeonPanel(n.poi);
+  if (n.kind === 'trial') return openTrialPanel(n.zone);
+  if (n.kind === 'mine') return mineNode(n.st);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
   if (n.kind === 'dungeonChest') return openDungeonChest();
   const d = n.def;
@@ -112,7 +114,7 @@ function statLine(it) {
 }
 function perkLine(it) { const t = perkText(it); return t ? `<div class="perk">${t}</div>` : ''; }
 // RuneScape-style display names for tabs whose keys stay the same in code
-const TAB_NAME = { Gear: 'Equipment', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
+const TAB_NAME = { Mining: 'Mining & Museum', Gear: 'Equipment', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
 const tabName = (t) => TAB_NAME[t] || t;
 const wearWord = (slot) => (slot === 'weapon' ? 'Wield' : 'Wear');
 const SLOT_LABEL = { weapon: 'Weapon', helmet: 'Helmet', chest: 'Armor', boots: 'Boots', accessory: 'Accessory' };
@@ -241,6 +243,7 @@ function openLoot(loot) {
   if (!loot.eligible) body = `<p class="say">You didn’t deal enough damage to share the loot (at least ${pct(CFG.boss.loot.minContrib)} of the total). Join the next fight!</p>`;
   else body = `<div class="stats3"><div><b>${pct(loot.contrib)}</b><span>Your damage share</span></div><div><b>${pct(loot.rareChance)}</b><span>Rare drop chance</span></div><div><b>${ICON.coin}+${fmt(loot.gold)}</b><span>Gold</span></div></div>
     <div class="list">${loot.item ? `<div class="item">${caseArt(loot.caseKind || 'boss')}<div class="meta"><div class="slot">Treasure chest</div><div class="nm">${CFG.cases[loot.caseKind || 'boss'].name}</div><div class="st">Rare or better inside. Open it in your Journal › Treasure Chests</div></div><button class="primary" data-act="cases">Open</button></div>` : '<p class="fine">No chest this time.</p>'}
+    ${loot.weekly ? '<p class="say">Weekly Colossus bonus: a <b>Legendary-or-better Colossus Chest</b> is in your Journal.</p>' : ''}
     ${loot.tomeXp ? `<div class="item"><div class="meta"><div class="slot">Tome</div><div class="nm">Golem Tome</div><div class="st">+${fmt(loot.tomeXp * progressionXpMultiplier(G.profile))} XP</div></div></div>` : ''}
     ${loot.essence ? `<div class="item"><div class="meta"><div class="slot">Gems</div><div class="nm">+${loot.essence} gems · +${loot.shards || 0} artifact shards</div><div class="st">For gear upgrades and artifact stars</div></div></div>` : ''}</div>
     <p class="fine">Drop odds come only from your share of the damage. Nothing in this game is bought with money.</p>`;
@@ -429,24 +432,37 @@ function openRiftPanel() {
     <p class="fine">Checkpoints every 5 floors. If you fall or the time runs out, the run ends and you keep everything you earned.</p></div>
     <div class="row end"><button class="ghost" data-act="riftGo" data-f="1">Start at floor 1</button>${cp > 1 ? `<button class="primary big" data-act="riftGo" data-f="${cp}">Start at floor ${cp}</button>` : '<button class="primary big" data-act="riftGo" data-f="1">Enter the Rift</button>'}</div>`);
 }
-// Dungeons: a sealed instance per POI. Three guarded halls, a mini-boss and a chest on a 20 min cooldown.
+// Dungeons: a sealed instance per POI. Pick a plain run or one of your Dungeon Keys (it is used up on entry).
 function openDungeonPanel(poi) {
   UI.current = 'dungeon';
-  const p = G.profile, req = dungeonReq(poi), lvl = dungeonLevel(poi), rec = (p.dungeons || {})[poi.id], left = rec && rec.clears ? dungeonCdLeft(poi.id) : 0, nm = escapeHTML(poi.name);
+  const p = G.profile, req = dungeonReq(poi), V = dungeonVariant(poi.id), lvl = dungeonLevel(poi), rec = (p.dungeons || {})[poi.id], nm = escapeHTML(poi.name), id = escapeHTML(poi.id), keys = p.keys || [];
   if (p.level < req) { openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>${nm}</h3></div><p class="say">The seal holds against heroes below level ${req}. Come back stronger.</p>`); return; }
+  const keyBtns = keys.map((k, i) => `<button class="ghost" data-act="dungeonGo" data-id="${id}" data-key="${i}" title="${k.a.map((a) => CFG.dungeon.keys.affixes[a].d).join(' · ')}">${escapeHTML(keyName(k))} (Lv ${dungeonLevel(poi, k)})</button>`).join('');
   openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>${nm}</h3><span class="cnt">Lv ${lvl}</span></div>
-    <div class="riftCard"><p>Three guarded halls and a mini-boss. Each door opens once its hall is cleared. Monsters here are <b>level ${lvl}</b>, tougher and harder-hitting than outside; the boss calls for help at half health.</p>
-    <p>${left > 0 ? `Chest recharging · ${Math.ceil(left / 60)} min left. Until then the chest holds only XP and gold.` : `Chest ready: guaranteed <b>${poi.zone >= CFG.dungeon.chest.epicFrom ? 'Epic' : 'Rare'} or better</b> gear, gems, shards and a chance at a treasure chest.`}</p>
-    <p class="fine">Cleared ${rec ? rec.clears : 0} times. Falling or leaving resets the dungeon. You enter fully healed.</p></div>
-    <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="dungeonGo" data-id="${escapeHTML(poi.id)}">Enter ${nm} (Lv ${lvl})</button></div>`);
+    <div class="riftCard"><p>${V.blurb}. Each door opens once its hall is cleared. Monsters here are <b>level ${lvl}</b>, tougher and harder-hitting than outside; the boss calls for help at half health.</p>
+    <p>${rec && rec.clears ? 'A plain run pays XP, gold and a <b>Tier 1 Dungeon Key</b>.' : `First clear: guaranteed <b>${poi.zone >= CFG.dungeon.chest.epicFrom ? 'Epic' : 'Rare'} or better</b> gear, gems, shards and a Dungeon Key.`} <b>Keyed runs</b> always fill the chest, and every tier adds a monster level and better loot. Beat the par time (${Math.floor(V.par / 60)}:${String(V.par % 60).padStart(2, '0')}) and the key comes back up to 3 tiers higher.</p>
+    <p class="fine">Cleared ${rec ? rec.clears : 0} times · best key tier here ${rec && rec.best || 0} · your best ever ${p.records.bestKey || 0}. Falling or leaving returns your key one tier lower. You enter fully healed.</p></div>
+    ${keyBtns ? `<div class="row">${keyBtns}</div>` : ''}
+    <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="dungeonGo" data-id="${id}">Enter ${nm} (Lv ${lvl})</button></div>`);
+}
+// Legendary Trial: one arena, a four-affix champion; sigils toward the area's relic and a tiny Radiant chance
+function openTrialPanel(zi) {
+  UI.current = 'trial';
+  const poi = trialPoi(zi), S = trialState(zi), T = CFG.dungeon.trial, lvl = dungeonLevel(poi), nm = escapeHTML(poi.name), odds = radiantOdds(), ch = G.chain;
+  openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>${nm}</h3><span class="cnt">Lv ${lvl}</span></div>
+    <div class="riftCard"><p>The runestones answered: ${escapeHTML(poi.landmark)} holds a sealed arena and a <b>four-affix champion</b> (level ${lvl}). You can take the trial as often as you like.</p>
+    <p>Every clear pays a <b>Trial Sigil</b> (${S.sig}/${T.sigilCost}: forge this area's Mythic relic) and rolls for a <b>Radiant</b> item: <b>1 in ${fmt(odds)}</b> right now.</p>
+    <p class="fine">Kill chain: ${ch.n ? `${ch.n} × ${escapeHTML(CFG.enemies[ch.type] ? CFG.enemies[ch.type].name : ch.type)}` : 'none'} · keep killing one kind of monster without falling to raise the Radiant chance (up to ×${T.chainMax} at ${(T.chainMax - 1) * T.chainStep}). Trials taken ${S.n} · Radiants found ${S.rad}.</p></div>
+    <div class="row end"><button class="ghost" data-act="close">Not now</button>${S.sig >= T.sigilCost ? `<button class="ghost" data-act="trialForge" data-z="${zi}">Forge relic (${T.sigilCost} sigils)</button>` : ''}<button class="primary big" data-act="trialGo" data-z="${zi}">Begin the Trial (Lv ${lvl})</button></div>`);
 }
 function openDungeonChest() {
   const r = claimDungeonChest(); if (!r) return;
   UI.current = 'dungeonChest'; Sfx.play('win');
   const rows = r.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('');
-  openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared</div><h2>${r.full ? 'Dungeon chest' : 'Chest recharging'}</h2></div>
+  openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
-    ${rows ? `<div class="list">${rows}</div>` : `<p class="fine">Gear, gems and shards return in ${Math.round(r.cd / 60)} min.</p>`}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}
+    ${r.radiant ? `<h2 class="center">✦ RADIANT ✦</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
+    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
 function openRiftResult(r) {
@@ -522,6 +538,8 @@ function handlePanelClick(e) {
     case 'menuSection': openMenu(b.dataset.section); $('panel').querySelector(`[data-section="${UI.menuSection}"]`).focus({preventScroll:true}); break;
     case 'mCases': case 'cases': openCases(); break;
     case 'mCollection': openCollection(); break;
+    case 'mDaily': openDaily(); break;
+    case 'dailyClaim': { const r = claimLogin(Date.now()); if (r) { Sfx.play(r.i === 6 ? 'win' : 'unlock'); toast(`Day ${r.i + 1}: ${r.name}${r.key ? ` (Tier ${r.key.t})` : r.gems ? ` (+${r.gems})` : ''}`, 'good'); } openDaily(); break; }
     case 'mPrestige': openPrestige(); break;
     case 'petEquip': equipCompanion(b.dataset.pet); break;
     case 'prestigeReview': openPrestigeReview(); break;
@@ -536,6 +554,7 @@ function handlePanelClick(e) {
     case 'equip2': if (equipItem(b.dataset.id)) { Sfx.play('equipped'); b.remove(); } break;
     case 'salvage2': salvageItem(b.dataset.id); Sfx.play('coin'); b.parentNode.querySelectorAll('[data-act=equip2],[data-act=salvage2]').forEach((x) => x.remove()); break;
     case 'idleTab': openIdle(b.dataset.tab); break;
+    case 'pickUp': if (upgradePick()) { Sfx.play('unlock'); openIdle('Mining'); } break;
     case 'vaultCollect': if (collectVault()) openIdle('Vault'); break;
     case 'vaultUp': if (upgradeVault()) openIdle('Vault'); break;
     case 'expGo': { const sel = $('expB'); if (sel && startExped(sel.value, +b.dataset.d)) openIdle('Expeditions'); break; }
@@ -607,7 +626,9 @@ function handlePanelClick(e) {
     case 'travel': UI.close(); travelTo(+b.dataset.i); break;
     case 'tier': if (setWorldTier(+b.dataset.t)) openWaypoints(); break;
     case 'riftGo': UI.close(); startRift(+b.dataset.f); break;
-    case 'dungeonGo': { UI.close(); const po = dungeonPois().find((x) => x.id === b.dataset.id); if (!startDungeon(po)) toast('Finish your challenge first', 'bad'); break; }
+    case 'trialGo': { UI.close(); if (!startDungeon(trialPoi(+b.dataset.z))) toast('Finish your challenge first', 'bad'); break; }
+    case 'trialForge': { const it = forgeTrialRelic(+b.dataset.z); if (it) { toast(`Forged ${it.name}!`, 'good'); Sfx.play('win'); } openTrialPanel(+b.dataset.z); break; }
+    case 'dungeonGo': { UI.close(); const po = dungeonPois().find((x) => x.id === b.dataset.id); if (!startDungeon(po, b.dataset.key != null ? +b.dataset.key : null)) toast('Finish your challenge first', 'bad'); break; }
     case 'offline': claimOffline(G.offline); UI.close(); break;
     case 'tBoss': TestTools.boss(); UI.close(); toast('World boss is on its way'); break;
     case 'tUnlock': TestTools.unlockAll(); break;

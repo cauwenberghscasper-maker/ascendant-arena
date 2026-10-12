@@ -12,8 +12,9 @@ CFG.cases = {
   frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
   ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
   celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
+  geode: { name: 'Geode', sub: 'Cracked from ore veins (Mining) · also holds a Museum mineral', col: '#7fe3c4', w: { uncommon: 30, rare: 40, epic: 22, legendary: 8 }, hi: 4 },
 };
-CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial'];
+CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial', 'geode'];
 const CASE_LUCK = { legendary: 30, mythic: 120 };
 // these drop sources hand out a case instead of the item itself (Epic and up, or always for big loot)
 const CASE_SRC = { monster: 'hunter', elite: 'hunter', level: 'hunter', shrine: 'hunter', idle: 'treasure', boss: 'boss', rift: 'rift', milestone: 'milestone' };
@@ -60,9 +61,10 @@ function openCase(id) {
   p.stats.cases = (p.stats.cases || 0) + 1;
   p.records.bestCase = Math.max(p.records.bestCase || 0, rarIdx(r));
   grantItem(it, 'case');
+  const mineral = c.k === 'geode' ? crackGeode() : null;
   G.dirty = true; checkAchievements();
   saveNow(true); // Persist the case removal and exact reward together, before the reel.
-  return { item: it, lucky, c, kept: p.bag.some((b) => b.id === it.id) };
+  return { item: it, lucky, c, mineral, kept: p.bag.some((b) => b.id === it.id) };
 }
 
 // --- Vault: fills while you play or are away; collect any time ---------------------------------
@@ -98,7 +100,8 @@ CFG.exped = { durs: [15, 60, 240, 480], slotsAt: [1, 20, 50, 100] };
 const expSlots = (p) => CFG.exped.slotsAt.filter((L) => p.level >= L).length;
 function expReward(p, e) {
   const mins = e.d, B = masteryLevel(p.mastery['w:' + e.b] || 0), R = vaultRates(p), long = 1 + mins / 480;
-  return { gold: Math.round(R.gold * mins * 0.6 * long), mxp: Math.round(mins * 2 * (1 + B / 30)), gems: Math.floor(mins / 12 * long), shards: Math.floor(mins / 30), cases: Math.floor(mins / 120) + (mins >= 480 ? 1 : 0) };
+  return { gold: Math.round(R.gold * mins * 0.6 * long), mxp: Math.round(mins * 2 * (1 + B / 30)), gems: Math.floor(mins / 12 * long), shards: Math.floor(mins / 30), cases: Math.floor(mins / 120) + (mins >= 480 ? 1 : 0),
+    ore: Math.round(mins * 0.5 * (1 + CFG.mining.pickYield * ((p.mine && p.mine.pick) || 0))), geodes: Math.floor(mins / 90) };
 }
 const expDone = (e, now) => now - e.s >= e.d * 60000;
 function startExped(b, d) {
@@ -110,12 +113,19 @@ function claimExped(i) {
   const r = expReward(p, e); p.exp.splice(i, 1);
   addGold(r.gold, true); addEssence(r.gems); if (r.shards) dropShards(r.shards, true); addMastery('w:' + e.b, r.mxp);
   for (let k = 0; k < r.cases; k++) addCase('treasure', { src: 'exped' });
+  mineState().ore += r.ore; for (let k = 0; k < r.geodes; k++) addCase('geode', { src: 'exped' });
   p.stats.expeds = (p.stats.expeds || 0) + 1; G.dirty = true; checkAchievements(); ev({ t: 'expDone', b: e.b, r }); return r;
 }
 const onExpedition = (p, b) => (p.exp || []).some((e) => e.b === b);
 
 // --- Auto Hunt: your hero fights on its own (walks to monsters at your level, shoots, dashes, supers) ---
-const AH = { tgt: null, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1 };
+const AH = { tgt: null, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1, lastDen: null };
+// the best open den for your level; the den you just emptied scores as if it were 300 m further away
+function autoHuntDen(f, level) {
+  let D = null, bd = 1e9;
+  CFG.world.dens.forEach((dn) => { if (level < CFG.world.zones[dn.zone].minLevel) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2 + (dn === AH.lastDen ? 60 : 0); if (score < bd) { bd = score; D = dn; } });
+  return D;
+}
 function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && G.started); }
 function autoHuntIntent(f, it, manual, dt) {
   if (manual) { AH.manualT = 1.5; return; }
@@ -140,8 +150,9 @@ function autoHuntIntent(f, it, manual, dt) {
   } else {
     // nothing near: walk to the best open den for your level
     let D = null, bd = 1e9;
-    CFG.world.dens.forEach((dn) => { if (!okZone(dn.zone)) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - p.level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2; if (score < bd) { bd = score; D = dn; } });
+    D = autoHuntDen(f, p.level);
     if (!D) return;
+    if (Math.hypot(D.x - f.x, D.z - f.z) < D.r) AH.lastDen = D; // emptied this den: head for the other one next
     const dx = D.x - f.x, dz = D.z - f.z, d = Math.hypot(dx, dz) || 1; tx = dx / d; tz = dz / d;
   }
   // unstick: if we barely moved for a while, sidestep
@@ -226,7 +237,7 @@ function openCasesFast(k) {
 function openIdle(tab) {
   tab = tab || UI.idleTab || 'Vault'; UI.idleTab = tab; UI.current = 'idle';
   const p = G.profile, now = Date.now();
-  const tabs = ['Vault', 'Expeditions', 'Auto Hunt'].map((t) => `<button class="tab ${t === tab ? 'on' : ''}" data-act="idleTab" data-tab="${t}">${tabName(t)}</button>`).join('');
+  const tabs = ['Vault', 'Expeditions', 'Mining', 'Auto Hunt'].map((t) => `<button class="tab ${t === tab ? 'on' : ''}" data-act="idleTab" data-tab="${t}">${tabName(t)}</button>`).join('');
   let body = '', bar = '';
   if (tab === 'Vault') {
     const v = vaultState(now), R = vaultRates(p), lv = vaultLv(p), cost = vaultUpCost(p), pct = Math.round(v.mins / v.cap * 100);
@@ -242,14 +253,21 @@ function openIdle(tab) {
     const slots = expSlots(p), rows = p.exp.map((e, i) => {
       const done = expDone(e, now), left = Math.max(0, e.s + e.d * 60000 - now), r = expReward(p, e), k = Math.min(1, (now - e.s) / (e.d * 60000));
       return `<div class="item exp">${brawlerPortrait(e.b, true)}<div class="meta"><div class="slot">${CFG.brawlers[e.b].name} · ${e.d >= 60 ? e.d / 60 + 'h' : e.d + 'm'} expedition</div><div class="nm">${done ? 'Back with loot!' : `${Math.ceil(left / 60000)} min left`}</div>
-        <div class="st">${ICON.coin}${fmtK(r.gold)} · ${ICON.ess}${r.gems} · ${r.shards} shards · +${fmtK(r.mxp)} mastery${r.cases ? ` · ${r.cases} case${r.cases > 1 ? 's' : ''}` : ''}</div><div class="vbar sm"><i style="width:${Math.round(k * 100)}%"></i></div></div>
+        <div class="st">${ICON.coin}${fmtK(r.gold)} · ${ICON.ess}${r.gems} · ${r.shards} shards · +${fmtK(r.mxp)} mastery${r.cases ? ` · ${r.cases} case${r.cases > 1 ? 's' : ''}` : ''} · ${r.ore} ore${r.geodes ? ` · ${r.geodes} geode${r.geodes > 1 ? 's' : ''}` : ''}</div><div class="vbar sm"><i style="width:${Math.round(k * 100)}%"></i></div></div>
         ${done ? `<button class="primary" data-act="expClaim" data-i="${i}">Claim</button>` : ''}</div>`;
     }).join('');
     const free = ownedBrawlers(p).filter((b) => b !== p.cls && !onExpedition(p, b));
     const pick2 = slots > p.exp.length && free.length ? `<h4 class="sub">Send a brawler</h4><div class="expPick"><select id="expB">${free.map((b) => `<option value="${b}">${CFG.brawlers[b].name} · mastery ${masteryLevel(p.mastery['w:' + b] || 0)}</option>`).join('')}</select>
       ${CFG.exped.durs.map((d) => `<button class="ghost sm" data-act="expGo" data-d="${d}">${d >= 60 ? d / 60 + ' h' : d + ' min'}</button>`).join('')}</div>` : '';
-    body = `<p class="fine">Brawlers you are not playing go out on their own and come back with gold, gems, shards, mastery XP and Treasure Cases, even while the game is closed. Slots: ${p.exp.length}/${slots} (more at levels ${CFG.exped.slotsAt.filter((L) => L > p.level).join(', ') || 'all open'}).</p>
+    body = `<p class="fine">Brawlers you are not playing go out on their own and come back with gold, gems, shards, mastery XP, ore, geodes and Treasure Cases, even while the game is closed. Slots: ${p.exp.length}/${slots} (more at levels ${CFG.exped.slotsAt.filter((L) => L > p.level).join(', ') || 'all open'}).</p>
       <div class="list">${rows || '<p class="fine">No brawlers out right now.</p>'}</div>${pick2}${!free.length && slots > p.exp.length ? '<p class="fine">Unlock more brawlers on the Level Road to send them out.</p>' : ''}`;
+  } else if (tab === 'Mining') {
+    const m = mineState(), M = CFG.mining, c = pickCost(m.pick), can = m.pick < M.pickMax && m.ore >= c, own = M.minerals.filter(([id]) => m.museum[id]).length;
+    body = `<div class="stats3"><div><b>${fmt(m.ore)}</b><span>Ore</span></div><div><b>${m.pick}/${M.pickMax}</b><span>Pickaxe</span></div><div><b>${fmt(m.mined)}</b><span>Veins mined</span></div></div>
+      <p class="fine">Every area has four ore veins off the road (one glows: the rare crystal vein). Tap a vein to mine it; it regrows in ${M.respawn / 60} min (${M.rareRespawn / 60} min for crystal), and 1 in ${Math.round(1 / M.rich)} regrows rich for triple ore. Each ore has a ${(geodeChance(m, false) * 100).toFixed(2)}% chance to hold a Geode. A vein hides a pet: 1 in ${fmt(M.pet)}.</p>
+      <p class="fine">Pickaxe level ${m.pick}: +${Math.round(m.pick * M.pickYield * 100)}% ore and +${(m.pick * M.pickGeode * 100).toFixed(2)}% geode chance.</p>
+      <h4 class="sub">Museum ${own}/${M.minerals.length} · +${own}% XP for good</h4><div class="list">${M.minerals.map(([id, name, w]) => `<div class="row"><b>${m.museum[id] ? name : '???'}</b><small>${m.museum[id] ? `×${m.museum[id]}` : 'not found'} · ${(w / M.minerals.reduce((s, x) => s + x[2], 0) * 100).toFixed(w < 1 ? 2 : 1)}% per geode</small></div>`).join('')}</div>`;
+    bar = selBar('', `<button class="${can ? 'primary' : 'disabled'}" data-act="pickUp" ${can ? '' : 'aria-disabled="true"'}>${m.pick >= M.pickMax ? 'Max pickaxe' : `Upgrade pickaxe · ${fmt(c)} ore`}</button>`);
   } else {
     body = `<label class="tgl"><input type="checkbox" data-set="autoHunt" ${p.settings.autoHunt ? 'checked' : ''}><span class="sw"></span><span><b>Auto Hunt</b><small>Your hero walks to monsters at your level, fights, dashes away when hurt and uses supers. Touch the move stick to take over; it resumes after a moment.</small></span></label>
       <p class="fine">Auto Hunt works in the open world (not in the Rift or Showdown). Monsters more than 3 levels above you are skipped, so it stays safe. Turn it on, put the phone down, and check back.</p>`;

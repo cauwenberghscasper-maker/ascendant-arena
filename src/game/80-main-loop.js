@@ -15,7 +15,7 @@ function frame(now) {
   buildPlayerIntent();
   // the open world keeps running behind menus (you are safe while one is open); Showdown pauses
   if (!G.modal || (G.mode === 'hub' && G.started)) {
-    simAcc += dt;
+    simAcc += G.slowT > 0 ? dt * 0.3 : dt; G.slowT -= dt; // a Radiant drop slows the world for a moment
     let n = 0;
     while (simAcc >= CFG.sim.step && n < CFG.sim.maxSteps) { simStep(CFG.sim.step); simAcc -= CFG.sim.step; n++; }
     if (n === CFG.sim.maxSteps) simAcc = 0;
@@ -26,6 +26,7 @@ function frame(now) {
     if (G.mode === 'arena' && G.arena && G.arena.result && G.arena.phase === 'over' && G.arena.overT <= 0) openResults();
     else if (G.mode === 'hub' && G.pendingClassChoice && !G.profile.cls) openClassChoice();
     else if (G.mode === 'hub' && G.lootQueue.length) openLoot(G.lootQueue.shift());
+    else if (G.mode === 'hub' && G.started && !UI.dailyShown && G.profile.tut >= 3 && loginReady(Date.now())) { UI.dailyShown = true; openDaily(); }
     else if (G.mode === 'hub' && G.riftResult) { const rr = G.riftResult; G.riftResult = null; openRiftResult(rr); }
   }
   const t = now / 1000;

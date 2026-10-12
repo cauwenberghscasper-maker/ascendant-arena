@@ -23,11 +23,11 @@ const W = c.config.world, Z = W.zones;
   });
   const ids = W.pois.map((q) => q.id);
   check('POI ids are unique and stable (save keys)', () => {
-    assert.equal(new Set(ids).size, ids.length); assert.equal(ids.length, 159);
-    for (const id of ['a00:landmark:0', 'a01:secret:0', 'a03:dungeon:0', 'a09:secret:1', 'a29:secret:1', 'a29:dungeon:0']) assert(ids.includes(id), id);
-    for (const id of ['a00:dungeon:0', 'a02:dungeon:0', 'a01:secret:1']) assert(!ids.includes(id), id);
+    assert.equal(new Set(ids).size, ids.length); assert.equal(ids.length, 451); assert.equal(W.nodes.length, (Z.length - 1) * 4); assert.equal(W.runes.length, (Z.length - 1) * 4); assert(W.runes.every((q) => q.hidden && q.art === 'obelisk'));
+    for (const id of ['a00:landmark:0', 'a01:secret:0', 'a03:dungeon:0', 'a09:secret:1', 'a29:secret:1', 'a29:dungeon:0', 'a01:dungeon:0', 'a01:dungeon:2', 'a29:dungeon:2']) assert(ids.includes(id), id);
+    for (const id of ['a00:dungeon:0', 'a01:secret:1', 'a05:dungeon:3']) assert(!ids.includes(id), id);
     for (const q of W.pois) assert(new RegExp(`^a${String(q.zone).padStart(2, '0')}:${q.kind}:\\d$`).test(q.id), q.id);
-    const dg = W.pois.filter((q) => q.kind === 'dungeon'); assert.equal(dg.length, Z.length - 3);
+    const dg = W.pois.filter((q) => q.kind === 'dungeon'); assert.equal(dg.length, (Z.length - 1) * 3, 'three caves per combat area');
     for (const q of dg) { assert.equal(q.lvl, Z[q.zone].lvl[1]); assert(Math.abs(Math.abs(q.x) - W.maxX * 0.8) < 2); }
     assert.equal(W.secrets.length, 42); assert(W.secrets.every((q) => q.hidden && Math.abs(q.x) > W.maxX * 0.85));
   });
@@ -75,7 +75,7 @@ const W = c.config.world, Z = W.zones;
     }
     for (let zi = 0; zi < Z.length; zi++) {
       const ok = reach(zi);
-      for (const q of W.pois.filter((p) => p.zone === zi)) assert(ok(q.x, q.z, q.kind === 'landmark' ? q.r : 1), q.id + ' reachable');
+      for (const q of W.pois.filter((p) => p.zone === zi)) assert(ok(q.x, q.z, q.kind === 'landmark' || q.kind === 'rune' || q.kind === 'node' ? q.r : 1), q.id + ' reachable');
       for (const D of W.dens.filter((d) => d.zone === zi)) assert(ok(D.x, D.z, 2), D.name + ' reachable');
       for (const s of W.secrets.filter((p) => p.zone === zi)) assert(!reach(zi, [{ x: s.x, z: s.z + s.gap * 7, r: 1.4 }])(s.x, s.z, 1), s.id + ' is sealed except for its gap');
     }
@@ -85,6 +85,13 @@ const W = c.config.world, Z = W.zones;
     assert(w <= 2048 && h <= 2048, w + 'x' + h);
     const pop = Z.reduce((n, zn, i) => n + c.patrolCountFor(i) + (zn.safe ? 0 : W.elitesPerZone), 0) + W.dens.reduce((n, d) => n + d.n + 1, 0);
     assert(pop <= 1700, pop); console.log(JSON.stringify({ minimap: w + 'x' + h, population: pop, pois: ids.length, maxZ: W.maxZ, width: W.maxX - W.minX }));
+  });
+  check('Auto Hunt alternates between the two dens of an area instead of camping the nearest', () => {
+    vm.runInContext('const AH = { lastDen: null };\n' + section('// the best open den', 'function autoHuntOn(') + '\nthis.AH = AH; this.autoHuntDen = autoHuntDen;', c);
+    const [a, b] = W.dens.filter((D) => D.zone === 5), lvl = Z[5].lvl[1], f = { x: a.x, z: a.z };
+    assert.equal(c.autoHuntDen(f, lvl), a, 'standing in a den picks it');
+    c.AH.lastDen = a; assert.equal(c.autoHuntDen(f, lvl), b, 'after emptying it, the other den');
+    c.AH.lastDen = b; assert.equal(c.autoHuntDen({ x: b.x, z: b.z }, lvl), a);
   });
   console.log(passed + ' world_layout checks passed.');
 })().catch((e) => { console.error(e); process.exit(1); });
