@@ -20,12 +20,12 @@ await p.route('http://pc.local/**', (r) => {
   const u = new URL(r.request().url());
   if (u.pathname === '/') return r.fulfill({ status: 200, contentType: 'text/html', body: PAGE });
   const f = path.join(root, decodeURIComponent(u.pathname));
-  r.fulfill({ status: existsSync(f) ? 200 : 404, body: existsSync(f) ? readFileSync(f) : '' });
+  r.fulfill({ status: existsSync(f) ? 200 : 404, contentType: f.endsWith('.js') ? 'application/javascript' : undefined, body: existsSync(f) ? readFileSync(f) : '' });
 });
 const PAGE = `<!doctype html><meta charset="utf-8"><body style="margin:0;background:transparent">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
 <script type="module">
-import * as THREE from 'three'; import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'; import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import * as THREE from 'three'; import {relaxArms} from '/assets/data/hero-arms.js'; import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'; import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true}); r.setSize(256,256); r.outputColorSpace=THREE.SRGBColorSpace; r.setClearColor(0,0); document.body.appendChild(r.domElement);
 const pm=new THREE.PMREMGenerator(r), env=pm.fromScene(new RoomEnvironment(),0.04).texture;
 const clipsRaw=await (await fetch('/assets/animation/adventurer-clips.json')).json();
@@ -37,7 +37,7 @@ window.shot=async(id)=>{
   m.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.material.envMapIntensity=1.1;o.material.roughness=Math.max(.6,o.material.roughness);}});
   const root=m.getObjectByName('heroRoot'), rest=root.position.clone(), hipH=rest.y||.5;
   const c=clipsRaw.clips.find(c=>c.name==='Idle'); const clip=new THREE.AnimationClip(c.name,c.duration,c.tracks.map(t=>t.type==='vector'?new THREE.VectorKeyframeTrack(t.name,t.times,t.values.map((v,i)=>(i%3===0?rest.x:i%3===1?rest.y:rest.z)+v*hipH)):new THREE.QuaternionKeyframeTrack(t.name,t.times,t.values)));
-  const mix=new THREE.AnimationMixer(m); mix.clipAction(clip).play(); mix.setTime(0.3); m.updateMatrixWorld(true);
+  const [relaxed]=relaxArms(THREE,[clip],m); const mix=new THREE.AnimationMixer(m); mix.clipAction(relaxed).play(); mix.setTime(0.3); m.updateMatrixWorld(true);
   const head=m.getObjectByName('head').getWorldPosition(new THREE.Vector3()), chest=m.getObjectByName('chest').getWorldPosition(new THREE.Vector3());
   const box=new THREE.Box3().setFromObject(m), top=box.max.y;
   const look=new THREE.Vector3(head.x, (top*0.5+chest.y*0.5)-0.01, head.z);
