@@ -613,7 +613,7 @@ function eliteMods(e) {
   const keys = Object.keys(CHAMP_MODS).sort(() => Math.random() - 0.5).slice(0, e.zone >= 10 ? 2 : 1);
   e.champ = { mods: keys, cd: {}, cast: null, castT: 0, spin: 0, spinT: 0, chargeT: 0, hitDone: false, shieldT: 0 };
   for (const k of keys) e.champ.cd[k] = rand(1.5, 3.5);
-  e.champName = keys.map((k) => CHAMP_MODS[k].name).join(' · ');
+  e.champName = keys.map((k) => CHAMP_MODS[k].name).join(' · '); e.affixed = true;
 }
 // pendingAoE extras: inner (donut, safe centre), cone {a, half} (apex at x,z), grp (shared: one hit per target per volley),
 // slow/burn (applied on the hit). The renderer draws AOE_SHOWN ring markers and CONE_SHOWN cones; a move needing more waits.
