@@ -101,7 +101,7 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
   Z.forEach((zn, i) => { if (zn.safe) return; const s = i % 2 ? -1 : 1, n = zn.len >= 135 ? 12 : 10;
     W.dens.push({ name: zn.denName, zone: i, x: s * M * 0.5, z: Math.round(zn.z0 + zn.len * 0.3), r: 13, n });
     W.dens.push({ name: zn.denName + ' Deep', zone: i, x: -s * M * 0.5, z: Math.round(zn.z0 + zn.len * 0.72), r: 13, n }); });
-  // points of interest: { id: 'a07:dungeon:0', zone, x, z, r, kind: landmark|secret|dungeon|node, name, art, lvl, hidden }
+  // points of interest: { id: 'a07:dungeon:0', zone, x, z, r, kind: landmark|secret|dungeon|rune|node, name, art, lvl, hidden }
   // ids are stable save keys (profile.secrets / pois / dungeons): never renumber. Resource nodes will use a${zi}:node:${n} (G.nodes).
   W.pois = [];
   Z.forEach((zn, i) => {
@@ -114,6 +114,8 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
     // secrets: a walled pocket against the border forest, entered through one narrow gap (gap = +1 north / −1 south)
     add('secret', 0, -s * (M - 9), z0 + L * 0.5, 9, 'Hidden Cache', 'cache', { gap: jit(i, 7) < 0 ? -1 : 1 });
     if (L >= 135) add('secret', 1, s * (M - 9), z0 + L * 0.38, 9, 'Forgotten Hoard', 'cache', { gap: jit(i, 8) < 0 ? -1 : 1 });
+    // four runestones per combat area (hidden from the map); lighting all four opens the landmark's Legendary Trial
+    if (!zn.safe) [[0.62, 0.12], [-0.62, 0.88], [0.35, 0.55], [-0.2, 0.75]].forEach(([fx, fz], n) => add('rune', n, s * M * fx, z0 + L * fz, 3, 'Runestone', 'obelisk', { hidden: true }));
     // three cave entrances per combat area (n = variant in CFG.dungeon.variants); mouths face the road, rock mounds sit outward
     if (!zn.safe) {
       add('dungeon', 0, s * M * 0.8, z0 + L * 0.72, 9, zn.denName + ' Caves', 'cave', { face: -s });
@@ -121,7 +123,7 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
       add('dungeon', 2, s * M * 0.8, z0 + L * 0.2, 9, zn.lairName + ' Sanctum', 'cave', { face: -s });
     }
   });
-  W.secrets = W.pois.filter((q) => q.kind === 'secret');
+  W.secrets = W.pois.filter((q) => q.kind === 'secret'); W.runes = W.pois.filter((q) => q.kind === 'rune');
   W.mmScale = Math.min(1, 1600 / (W.maxZ - W.minZ)); // minimap base canvas px per metre
   // two challenge shrines per biome (second and fourth area)
   CFG.shrines.list = [];

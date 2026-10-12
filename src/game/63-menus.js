@@ -238,6 +238,12 @@ const COLLECTION_HUNTS = {
   ancient: 'World Tier 2+ or Rift floor 50+',
   divine: 'World Tier 3+ or Rift floor 100+',
 };
+// Legendary Trials in the Collection Log: runestones, trials taken, sigils, Radiants and today's odds
+function trialLog() {
+  const T = CFG.dungeon.trial, rows = CFG.world.zones.map((zn, zi) => ({ zn, zi, lit: zn.safe ? 0 : runesLit(zi), S: (G.profile.trials || {})[zi] })).filter((r) => r.lit || r.S);
+  return `<h3>Legendary Trials</h3><p class="fine">Radiant chance per trial: 1 in ${fmt(radiantOdds())} with your current kill chain (base 1 in ${T.radiant}). Every area hides ${T.runes} runestones.</p>` +
+    (rows.length ? `<div class="list">${rows.map((r) => `<div class="row"><b>${escapeHTML(r.zn.name)}</b><small>${r.lit < T.runes ? `${r.lit}/${T.runes} runestones` : `${r.S ? r.S.n : 0} trials · ${r.S ? r.S.sig : 0}/${T.sigilCost} sigils · ${r.S ? r.S.rad : 0} Radiant`}</small></div>`).join('')}</div>` : '<p class="fine">No runestones lit yet. Look for lone obelisks off the road.</p>');
+}
 function openCollection(slot) {
   UI.current = 'collection'; UI.collectionSlot = slot === 'all' || CFG.gear.slots.includes(slot) ? slot : 'all';
   const p = G.profile, found = p.collection || {}, all = COLLECTION_ITEMS;
@@ -249,7 +255,7 @@ function openCollection(slot) {
     <b>${d.name}</b>${rarityChip(d.rarity)}<small>${found[d.id] ? 'Found · ' + found[d.id].count + ' earned' : 'Item level ' + d.minLevel + '+'}</small></button>`).join('');
   openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Collection Log</h3><span class="cnt">${count}/${all.length}</span></div>
     <p class="fine">Tap an item to plan your hunt. Found records stay after merging or salvaging gear.</p>
-    <div class="collectionFilters">${filters}</div><div class="collectionGrid">${cards}</div>
+    <div class="collectionFilters">${filters}</div><div class="collectionGrid">${cards}</div>${trialLog()}
     <div class="row end"><button class="ghost" data-act="mMenu">Menu</button><button class="ghost" data-act="cases">Cases</button></div>`);
   $('panel').classList.add('wide');
 }

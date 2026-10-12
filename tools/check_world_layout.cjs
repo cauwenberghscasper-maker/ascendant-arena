@@ -23,7 +23,7 @@ const W = c.config.world, Z = W.zones;
   });
   const ids = W.pois.map((q) => q.id);
   check('POI ids are unique and stable (save keys)', () => {
-    assert.equal(new Set(ids).size, ids.length); assert.equal(ids.length, 219);
+    assert.equal(new Set(ids).size, ids.length); assert.equal(ids.length, 335); assert.equal(W.runes.length, (Z.length - 1) * 4); assert(W.runes.every((q) => q.hidden && q.art === 'obelisk'));
     for (const id of ['a00:landmark:0', 'a01:secret:0', 'a03:dungeon:0', 'a09:secret:1', 'a29:secret:1', 'a29:dungeon:0', 'a01:dungeon:0', 'a01:dungeon:2', 'a29:dungeon:2']) assert(ids.includes(id), id);
     for (const id of ['a00:dungeon:0', 'a01:secret:1', 'a05:dungeon:3']) assert(!ids.includes(id), id);
     for (const q of W.pois) assert(new RegExp(`^a${String(q.zone).padStart(2, '0')}:${q.kind}:\\d$`).test(q.id), q.id);
@@ -75,7 +75,7 @@ const W = c.config.world, Z = W.zones;
     }
     for (let zi = 0; zi < Z.length; zi++) {
       const ok = reach(zi);
-      for (const q of W.pois.filter((p) => p.zone === zi)) assert(ok(q.x, q.z, q.kind === 'landmark' ? q.r : 1), q.id + ' reachable');
+      for (const q of W.pois.filter((p) => p.zone === zi)) assert(ok(q.x, q.z, q.kind === 'landmark' || q.kind === 'rune' ? q.r : 1), q.id + ' reachable');
       for (const D of W.dens.filter((d) => d.zone === zi)) assert(ok(D.x, D.z, 2), D.name + ' reachable');
       for (const s of W.secrets.filter((p) => p.zone === zi)) assert(!reach(zi, [{ x: s.x, z: s.z + s.gap * 7, r: 1.4 }])(s.x, s.z, 1), s.id + ' is sealed except for its gap');
     }

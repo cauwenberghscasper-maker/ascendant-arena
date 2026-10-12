@@ -44,6 +44,7 @@ const Sfx = {
       case 'level': [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0, 0.18, 'triangle', 0.14, i * 0.09)); break;
       case 'job': [659, 784, 988].forEach((f, i) => this.tone(f, 0, 0.14, 'square', 0.07, i * 0.08)); break;
       case 'horn': this.tone(110, 98, 1.1, 'sawtooth', 0.12); this.tone(165, 147, 1.1, 'sawtooth', 0.08); break;
+      case 'radiant': [784, 988, 1175, 1568, 1976, 2349].forEach((f, i) => { this.tone(f, 0, 0.5, 'sine', 0.16, i * 0.07); this.tone(f * 1.5, 0, 0.35, 'triangle', 0.05, i * 0.07 + 0.03); }); this.noise(1.2, 0.08, 6000, 2, 12000); break;
       case 'win': [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, 0, 0.22, 'triangle', 0.14, i * 0.1)); break;
       case 'lose': [392, 330, 262, 196].forEach((f, i) => this.tone(f, 0, 0.25, 'triangle', 0.12, i * 0.12)); break;
       case 'click': this.tone(700, 500, 0.05, 'square', 0.05); break;

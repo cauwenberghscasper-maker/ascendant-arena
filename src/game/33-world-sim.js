@@ -140,6 +140,7 @@ function respawnEnemy(e) {
 function rewardEnemyKill(e) {
   const p = G.profile, d = CFG.enemies[e.type], E = CFG.enemies.elite;
   if(G.player.alive && Math.hypot(e.x-G.player.x,e.z-G.player.z)<=24) awardPetCombatXp((10+Math.min(100,e.lvl)*2)*(e.elite?3:1));
+  { const ch = G.chain; if (ch.type === e.type && ch.zone === e.zone) ch.n++; else Object.assign(ch, { type: e.type, zone: e.zone, n: 1 }); } // Radiant kill chain
   p.stats.kills++; if (e.type === 'slime') p.stats.slimes++; if (e.elite) p.stats.elites = (p.stats.elites || 0) + 1;
   const kb = p.stats.killsBy || (p.stats.killsBy = {}); kb[e.type] = (kb[e.type] || 0) + 1;
   // kill streak: keep killing within a few seconds for bonus XP
@@ -422,6 +423,8 @@ function stepHub(dt) {
     if (!G.profile.waypoints.includes(i) && Math.hypot(pl.x - w.x, pl.z - w.z) < 7) { G.profile.waypoints.push(i); G.dirty = true; ev({ t: 'waypoint', name: w.name }); }
   });
   if (pl.alive) for (const sc of W.secrets) if (!G.profile.secrets[sc.id] && Math.abs(pl.z - sc.z) < 4 && Math.hypot(pl.x - sc.x, pl.z - sc.z) < 4) findSecret(sc);
+  if (pl.alive) for (const q of W.runes) if (!G.profile.runes[q.id] && Math.abs(pl.z - q.z) < 4 && Math.hypot(pl.x - q.x, pl.z - q.z) < 4) lightRune(q);
+  if (!pl.alive) G.chain.n = 0;
   // XP orbs and challenge shrines
   stepPellets(dt);
   stepShrines(dt);
@@ -448,11 +451,16 @@ function stepHub(dt) {
     for (const po of dungeonPois()) { const d = Math.hypot(pl.x - po.x, pl.z - po.z); if (d < best) { best = d; G.interact = { kind: 'dungeon', poi: po, label: 'Enter ' + po.name }; } }
     for (const n of shownNpcs()) { const d = Math.hypot(pl.x - n.x, pl.z - n.z); if (d < best) { best = d; G.interact = n; } }
     CFG.world.waypoints.forEach((w, i) => { const d = Math.hypot(pl.x - w.x, pl.z - w.z); if (d < best) { best = d; G.interact = { kind: 'waypoint', i, def: w }; } });
+    if (!G.interact) { const tp = trialPoi(zoneAt(pl.z)); if (tp && trialOpen(tp.zone) && Math.hypot(pl.x - tp.x, pl.z - tp.z) < tp.r + 2) G.interact = { kind: 'trial', zone: tp.zone, label: 'Legendary Trial' }; }
   }
   // boss proximity counts as combat
   if (G.boss && Math.hypot(pl.x - G.boss.x, pl.z - G.boss.z) < 22) markCombat();
 }
 
+function lightRune(q) {
+  G.profile.runes[q.id] = Date.now(); G.dirty = true;
+  ev({ t: 'rune', n: runesLit(q.zone), of: CFG.dungeon.trial.runes, zone: q.zone, x: q.x, z: q.z });
+}
 // secrets: first visit pays an epic+ item, gems, shards and a permanent +0.5% XP (progressionXpMultiplier)
 function findSecret(sc) {
   const p = G.profile, gems = 15 + sc.zone;

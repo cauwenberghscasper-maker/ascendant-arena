@@ -6,6 +6,7 @@ function interact() {
   if (n.kind === 'rift') return openRiftPanel();
   if (n.kind === 'riftLeave') return endRift('leave');
   if (n.kind === 'dungeon') return openDungeonPanel(n.poi);
+  if (n.kind === 'trial') return openTrialPanel(n.zone);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
   if (n.kind === 'dungeonChest') return openDungeonChest();
   const d = n.def;
@@ -396,13 +397,24 @@ function openDungeonPanel(poi) {
     ${keyBtns ? `<div class="row">${keyBtns}</div>` : ''}
     <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="dungeonGo" data-id="${id}">Enter ${nm} (Lv ${lvl})</button></div>`);
 }
+// Legendary Trial: one arena, a four-affix champion; sigils toward the area's relic and a tiny Radiant chance
+function openTrialPanel(zi) {
+  UI.current = 'trial';
+  const poi = trialPoi(zi), S = trialState(zi), T = CFG.dungeon.trial, lvl = dungeonLevel(poi), nm = escapeHTML(poi.name), odds = radiantOdds(), ch = G.chain;
+  openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>${nm}</h3><span class="cnt">Lv ${lvl}</span></div>
+    <div class="riftCard"><p>The runestones answered: ${escapeHTML(poi.landmark)} holds a sealed arena and a <b>four-affix champion</b> (level ${lvl}). You can take the trial as often as you like.</p>
+    <p>Every clear pays a <b>Trial Sigil</b> (${S.sig}/${T.sigilCost}: forge this area's Mythic relic) and rolls for a <b>Radiant</b> item: <b>1 in ${fmt(odds)}</b> right now.</p>
+    <p class="fine">Kill chain: ${ch.n ? `${ch.n} × ${escapeHTML(CFG.enemies[ch.type] ? CFG.enemies[ch.type].name : ch.type)}` : 'none'} · keep killing one kind of monster without falling to raise the Radiant chance (up to ×${T.chainMax} at ${(T.chainMax - 1) * T.chainStep}). Trials taken ${S.n} · Radiants found ${S.rad}.</p></div>
+    <div class="row end"><button class="ghost" data-act="close">Not now</button>${S.sig >= T.sigilCost ? `<button class="ghost" data-act="trialForge" data-z="${zi}">Forge relic (${T.sigilCost} sigils)</button>` : ''}<button class="primary big" data-act="trialGo" data-z="${zi}">Begin the Trial (Lv ${lvl})</button></div>`);
+}
 function openDungeonChest() {
   const r = claimDungeonChest(); if (!r) return;
   UI.current = 'dungeonChest'; Sfx.play('win');
   const rows = r.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('');
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
-    ${rows ? `<div class="list">${rows}</div>` : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}
+    ${r.radiant ? `<h2 class="center">✦ RADIANT ✦</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
+    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
 function openRiftResult(r) {
@@ -563,6 +575,8 @@ function handlePanelClick(e) {
     case 'travel': UI.close(); travelTo(+b.dataset.i); break;
     case 'tier': if (setWorldTier(+b.dataset.t)) openWaypoints(); break;
     case 'riftGo': UI.close(); startRift(+b.dataset.f); break;
+    case 'trialGo': { UI.close(); if (!startDungeon(trialPoi(+b.dataset.z))) toast('Finish your challenge first', 'bad'); break; }
+    case 'trialForge': { const it = forgeTrialRelic(+b.dataset.z); if (it) { toast(`Forged ${it.name}!`, 'good'); Sfx.play('win'); } openTrialPanel(+b.dataset.z); break; }
     case 'dungeonGo': { UI.close(); const po = dungeonPois().find((x) => x.id === b.dataset.id); if (!startDungeon(po, b.dataset.key != null ? +b.dataset.key : null)) toast('Finish your challenge first', 'bad'); break; }
     case 'offline': claimOffline(G.offline); UI.close(); break;
     case 'tBoss': TestTools.boss(); UI.close(); toast('World boss is on its way'); break;

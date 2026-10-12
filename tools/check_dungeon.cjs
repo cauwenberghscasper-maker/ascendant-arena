@@ -9,20 +9,20 @@ const c = { Math: math, console, LOCAL_PREVIEW: true, TEST_MODE: false, nextId: 
   ev: (e) => events.push(e), tickBurn() {}, markCombat() {}, trackVel() {}, spawnProjectile() {}, clearProjectiles() {}, toast() {}, checkAchievements() {}, addMastery() {},
   dealDamage: (p, amt) => { p.hp -= amt; if (p.hp <= 0) p.alive = false; return amt; },
   xpToNext: () => 1000, addXp: (n) => { grants.xp += n; }, addGold: (n) => { grants.gold += n; }, rollLoot: () => 'common', rarIdx: (r) => ['common', 'uncommon', 'rare', 'epic', 'legendary'].indexOf(r),
-  makeItem: (slot, rarity, ilvl) => ({ slot, rarity, ilvl }), grantItem: (it) => grants.items.push(it), addEssence: (n) => { grants.gems += n; }, dropShards: (n) => { grants.shards += n; }, addCase: () => { grants.cases++; } };
+  makeItem: (slot, rarity, ilvl) => ({ slot, rarity, ilvl, name: 'Fine ' + slot }), grantItem: (it) => grants.items.push(it), addEssence: (n) => { grants.gems += n; }, dropShards: (n) => { grants.shards += n; }, addCase: () => { grants.cases++; } };
 vm.createContext(c);
 for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions']) vm.runInContext(fs.readFileSync(path.join(root, 'assets/data', f + '.js'), 'utf8').replace(/export /g, ''), c);
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') + 'const P = CFG.progression;' + section('const AC =', 'const G = {') +
   section('class Grid {', '// --- entities') + section('function patrolCountFor(', 'function rewardEnemyKill(') + section('const PELLET_COLORS', '// --- hub step') +
   section('function separate(', '// --- world boss') + section('// --- world boss', 'function spawnBoss(') + section('function boundFighter(', '// --- progression') +
-  section('// --- Dungeons:', '// --- end dungeons') + '\nthis.CFG = CFG; this.Grid = Grid; this.DC = DC; this.RC = RC;', c);
+  section('// --- Dungeons:', '// --- end dungeons') + '\nthis.CFG = CFG; this.Grid = Grid; this.DC = DC; this.RC = RC; this.runesLit = runesLit; this.trialOpen = trialOpen; this.radiantOdds = radiantOdds;', c);
 const W = c.CFG.world, D0 = c.CFG.dungeon;
 // the real POI list from 11-world-data (Agent C): one cave per area from index 3
 assert(W.pois.some((p) => p.kind !== 'dungeon'));
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }
 function reset(level = 60) {
   const hub = new c.Grid(6); hub.add({ x: 500, z: 500, r: 1 });
-  Object.assign(c.G, { mode: 'hub', started: true, profile: { level, worldTier: 0, dungeons: {}, records: {} }, enemies: [], ents: new Map(), time: 0, menuSafe: 0, rift: null, dungeon: null, boss: null,
+  Object.assign(c.G, { mode: 'hub', started: true, profile: { level, worldTier: 0, dungeons: {}, records: {}, runes: {}, trials: {} }, chain: { type: null, zone: -1, n: 0 }, enemies: [], ents: new Map(), time: 0, menuSafe: 0, rift: null, dungeon: null, boss: null,
     shrines: [], hubObstacles: hub, obstacles: hub, riftObstacles: new c.Grid(6), bossTimer: 100, bossWarned: false, respawnAt: null, pendingAoE: [] });
   c.G.player = { alive: true, x: 0, z: 0, r: 0.55, hp: 10, maxHp: 100, ammo: 0, ammoMax: 3, speed: 6.4, intent: {}, isPlayer: true, facing: 0, invulnT: 0 };
   events.length = 0; for (const k in grants) grants[k] = k === 'items' ? [] : 0;
@@ -189,5 +189,33 @@ check('leaving, falling or being carried away ends the instance and restores the
   assert.equal(c.G.dungeon, null); assert.deepEqual({ ...c.G.respawnAt }, { ...D.enterPos }); assert.equal(c.G.obstacles, c.G.hubObstacles); assert(!c.G.enemies.length);
   D = enter(p, 120); pl = c.G.player; pl.x = 50; pl.z = 900; c.stepDungeon(1 / 60);
   assert.equal(c.G.dungeon, null); assert.deepEqual({ x: pl.x, z: pl.z }, { x: 50, z: 900 }, 'travel keeps where you went'); assert.equal(c.G.zoneIdx, c.zoneAt(900));
+});
+check('Legendary Trial: sealed until all four runestones of the area are lit; one arena, a 4-affix champion at +6 levels, no keys', () => {
+  reset(90); const zi = 7, tp = c.trialPoi(zi), runes = W.runes.filter((q) => q.zone === zi);
+  assert.equal(runes.length, 4); assert.equal(c.trialPoi(zi), tp, 'one stable object per area'); assert.equal(c.trialPoi(0), null, 'no trial in Base Camp');
+  assert.equal(tp.name, W.pois.find((q) => q.zone === zi && q.major).name + ' Trial');
+  Object.assign(c.G.player, { x: tp.x, z: tp.z });
+  runes.slice(0, 3).forEach((q) => { c.G.profile.runes[q.id] = 1; }); assert.equal(c.runesLit(zi), 3); assert(!c.startDungeon(tp), 'three runes are not enough');
+  c.G.profile.runes[runes[3].id] = 1; assert(c.trialOpen(zi)); c.G.profile.keys = [{ t: 5, a: [] }]; assert(!c.startDungeon(tp, 0), 'keys do not fit a trial');
+  assert(c.startDungeon(tp)); const D = c.G.dungeon;
+  assert.equal(D.rooms.length, 1); assert(D.rooms[0].boss); assert.equal(D.doors.length, 0); assert.equal(D.boss.champ.mods.length, 4);
+  assert.equal(D.lvl, Math.max(tp.lvl, 90) + 4 + 6); assert.equal(D.mobs.length, 1);
+  assert(reach(D)(D.boss), 'the champion is reachable from the arrival point');
+  clear(D); assert.equal(D.newKey, null); assert.equal(c.G.profile.keys.length, 1);
+  const r = c.claimDungeonChest(); assert(!r.full && !r.items.length); assert.equal(r.sigils, 1); assert.equal(c.trialState(zi).n, 1);
+  c.endDungeon('leave'); assert.equal(c.G.profile.keys.length, 1, 'a cleared trial hands back nothing extra');
+});
+check('Radiant: 1 in 500 base, kill chain raises it to at most x4; the drop is an Ancient, counted, announced; sigils forge the Mythic relic', () => {
+  reset(90); const T = D0.trial;
+  assert.equal(c.radiantOdds(), 500); c.G.chain.n = 25; assert.equal(c.radiantOdds(), 250); c.G.chain.n = 75; assert.equal(c.radiantOdds(), 125); c.G.chain.n = 5000; assert.equal(c.radiantOdds(), 125);
+  const zi = 9, tp = c.trialPoi(zi); W.runes.filter((q) => q.zone === zi).forEach((q) => { c.G.profile.runes[q.id] = 1; });
+  // over many trials the base rate lands near 1/500
+  c.G.chain.n = 0; let rad = 0; const N = 6000;
+  for (let i = 0; i < N; i++) { Object.assign(c.G.player, { x: tp.x, z: tp.z }); assert(c.startDungeon(tp)); clear(c.G.dungeon); if (c.claimDungeonChest().radiant) rad++; c.endDungeon('leave'); }
+  assert(rad >= 4 && rad <= 25, 'radiants ' + rad); const S = c.trialState(zi); assert.equal(S.n, N); assert.equal(S.rad, rad);
+  T.radiant = 1; events.length = 0; Object.assign(c.G.player, { x: tp.x, z: tp.z }); c.startDungeon(tp); clear(c.G.dungeon); const r = c.claimDungeonChest(); T.radiant = 500; c.endDungeon('leave');
+  assert(r.radiant && r.radiant.radiant && r.radiant.rarity === 'ancient' && /^Radiant /.test(r.radiant.name)); assert(events.some((x) => x.t === 'radiant' && x.n === N + 1));
+  S.sig = T.sigilCost - 1; assert.equal(c.forgeTrialRelic(zi), null);
+  S.sig = T.sigilCost + 3; const it = c.forgeTrialRelic(zi); assert.equal(it.rarity, 'mythic'); assert.equal(S.sig, 3); assert(it.name.startsWith(tp.landmark));
 });
 console.log(`${passed} dungeon checks passed.`);

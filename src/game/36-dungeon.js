@@ -10,7 +10,12 @@ CFG.dungeon = {
     { name: 'Caves', counts: [6, 7, 8], elite: 0.25, mods: 2, hp: 12, par: 150, blurb: 'Three guarded halls and a mini-boss' },
     { name: 'Warrens', counts: [9, 9, 10, 10], elite: 0.1, mods: 2, hp: 10, par: 210, blurb: 'Four crowded halls of swarming monsters and a mini-boss' },
     { name: 'Sanctum', counts: [4, 5], elite: 0.6, mods: 3, hp: 16, par: 120, blurb: 'Two halls of elites and a three-affix guardian' },
+    { name: 'Trial', counts: [], elite: 0, mods: 4, hp: 20, lvl: 6, par: 90, trial: true, blurb: 'One sealed arena and a four-affix champion' },
   ],
+  // Legendary Trials: light an area's runestones to open a repeatable trial at its landmark. Every clear pays a sigil
+  // (sigilCost buys that area's Mythic relic) and rolls 1 in `radiant` for a Radiant item; a kill chain of one
+  // monster type multiplies that chance by 1 + chain/chainStep, up to chainMax.
+  trial: { runes: 4, sigilCost: 50, radiant: 500, chainStep: 25, chainMax: 4 },
   interactR: 3.6, bossBlock: 30,
   chest: { items: 2, ilvlAdd: 4, epicFrom: 15, gems: [6, 10], shards: [3, 5], caseChance: 0.1, xpFrac: 0.35, gold: [40, 8] },
   // Dungeon Keys: +1 monster level per tier. Clear under par: the key comes back 1-3 tiers higher; fall or leave: one tier lower.
@@ -18,7 +23,25 @@ CFG.dungeon = {
     bulwark: { name: 'Bulwark', d: 'Monsters +40% HP', bad: true }, brutal: { name: 'Brutal', d: 'Monsters +30% damage', bad: true }, swift: { name: 'Swift', d: 'Monsters +20% speed', bad: true },
     gilded: { name: 'Gilded', d: '+50% gold' }, bountiful: { name: 'Bountiful', d: '+1 gear item' }, lucky: { name: 'Lucky', d: '+25% treasure chest chance' } } },
 };
-const dungeonVariant = (id) => CFG.dungeon.variants[+String(id).slice(-1)] || CFG.dungeon.variants[0];
+const dungeonVariant = (id) => CFG.dungeon.variants[String(id).endsWith(':trial') ? 3 : +String(id).slice(-1)] || CFG.dungeon.variants[0];
+const runesLit = (zi) => CFG.world.runes.filter((q) => q.zone === zi && (G.profile.runes || {})[q.id]).length;
+const trialOpen = (zi) => runesLit(zi) >= CFG.dungeon.trial.runes;
+function trialState(zi) { const p = G.profile, T = p.trials || (p.trials = {}); return T[zi] || (T[zi] = { n: 0, sig: 0, rad: 0 }); }
+// the trial is a dungeon instance entered at the area's hero landmark (one stable object per area)
+const TRIAL_POIS = {};
+function trialPoi(zi) {
+  if (TRIAL_POIS[zi]) return TRIAL_POIS[zi];
+  const lm = CFG.world.pois.find((q) => q.zone === zi && q.major); if (!lm || CFG.world.zones[zi].safe) return null;
+  return (TRIAL_POIS[zi] = { id: `a${String(zi).padStart(2, '0')}:trial`, kind: 'dungeon', trial: true, zone: zi, lvl: lm.lvl, x: lm.x, z: lm.z, r: lm.r, name: lm.name + ' Trial', landmark: lm.name });
+}
+function chainMult() { const T = CFG.dungeon.trial; return Math.min(T.chainMax, 1 + ((G.chain && G.chain.n) | 0) / T.chainStep); }
+const radiantOdds = () => Math.max(1, Math.round(CFG.dungeon.trial.radiant / chainMult())); // "1 in N"
+function forgeTrialRelic(zi) {
+  const S = trialState(zi), cost = CFG.dungeon.trial.sigilCost, poi = trialPoi(zi); if (!poi || S.sig < cost) return null;
+  S.sig -= cost; G.dirty = true;
+  const it = makeItem(pick(CFG.gear.slots), 'mythic', Math.max(poi.lvl, G.profile.level) + CFG.dungeon.chest.ilvlAdd + 6); it.name = `${poi.landmark} ${it.name.split(' ').pop()}`;
+  grantItem(it, 'shrine', { zone: zi }); return it;
+}
 function rollKeyAffixes(t) { const all = Object.keys(CFG.dungeon.keys.affixes), out = []; for (let n = Math.min(3, 1 + Math.floor(t / 8)); out.length < n;) { const a = pick(all); if (!out.includes(a)) out.push(a); } return out; }
 function makeKey(t) { t = Math.max(1, t | 0); return { t, a: rollKeyAffixes(t) }; }
 // keys stay sorted best-first; past the cap the lowest tier falls off
@@ -26,7 +49,7 @@ function addKey(k) { const p = G.profile, ks = p.keys || (p.keys = []); ks.push(
 const keyName = (k) => `Tier ${k.t} Key` + (k.a.length ? ' · ' + k.a.map((a) => CFG.dungeon.keys.affixes[a].name).join(', ') : '');
 const keyHas = (D, a) => !!(D.key && D.key.a.includes(a));
 function dungeonPois() { return (CFG.world.pois || []).filter((p) => p.kind === 'dungeon'); }
-function dungeonLevel(poi, key) { return Math.max(poi.lvl, G.profile.level) + CFG.dungeon.lvlAdd + tierAdd() + (key ? key.t : 0); }
+function dungeonLevel(poi, key) { return Math.max(poi.lvl, G.profile.level) + CFG.dungeon.lvlAdd + tierAdd() + (key ? key.t : 0) + (dungeonVariant(poi.id).lvl || 0); }
 function dungeonReq(poi) { return (CFG.world.zones[poi.zone] || {}).minLevel || 1; }
 function strSeed(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }
 // Deterministic per POI id: rooms walk north/east/west (never south, so the path cannot fold back onto itself).
@@ -35,7 +58,7 @@ function dungeonLayout(id) {
   const rect = (x, z, hx, hz) => ({ x0: x - hx, x1: x + hx, z0: z - hz, z1: z + hz });
   for (let i = 0; i <= last; i++) {
     const h = i === last ? C.bossR : C.room / 2;
-    if (!i) { rooms.push(Object.assign(rect(DC.x, DC.z, h, h), { x: DC.x, z: DC.z, h, i, boss: false })); continue; }
+    if (!i) { rooms.push(Object.assign(rect(DC.x, DC.z, h, h), { x: DC.x, z: DC.z, h, i, boss: !last })); continue; }
     const a = rooms[i - 1], dirs = [[0, 1], [1, 0], [-1, 0]].sort(() => rng() - 0.5);
     let nr = null, dir = [0, 1];
     for (const d of dirs) {
@@ -115,7 +138,7 @@ function dungeonMob(D, type, lvl, room, o) {
 // keyIdx: index into profile.keys (consumed on entry) or null for a plain run
 function startDungeon(poi, keyIdx) {
   const p = G.profile, pl = G.player, key = keyIdx != null ? (p.keys || [])[keyIdx] : null;
-  if (!poi || poi.kind !== 'dungeon' || inInstance() || G.mode !== 'hub' || !pl.alive || activeShrine() || p.level < dungeonReq(poi) || (keyIdx != null && !key)) return false;
+  if (!poi || poi.kind !== 'dungeon' || inInstance() || G.mode !== 'hub' || !pl.alive || activeShrine() || p.level < dungeonReq(poi) || (keyIdx != null && !key) || (poi.trial && (key || !trialOpen(poi.zone)))) return false;
   if (G.boss && Math.hypot(G.boss.x - pl.x, G.boss.z - pl.z) < CFG.dungeon.bossBlock) return false;
   if (key) { p.keys.splice(keyIdx, 1); G.dirty = true; }
   const C = CFG.dungeon, V = dungeonVariant(poi.id), L = dungeonLayout(poi.id), lvl = dungeonLevel(poi, key), Z = CFG.world.zones[poi.zone];
@@ -156,10 +179,10 @@ function stepDungeon(dt) {
   }
   if (!b.alive && !D.bossDead) {
     D.bossDead = D.rooms.at(-1).cleared = true; D.clearT = G.time - D.t0;
-    // every clear pays a key: a plain run a Tier 1 key, a keyed run its key back 0-3 tiers higher by clear time
+    // every dungeon clear pays a key: a plain run a Tier 1 key, a keyed run its key back 0-3 tiers higher by clear time
     const par = D.variant.par, up = !D.key ? 0 : D.clearT <= par * 0.5 ? 3 : D.clearT <= par * 0.75 ? 2 : D.clearT <= par ? 1 : 0;
-    D.newKey = addKey(makeKey(D.key ? D.key.t + up : 1));
-    ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: D.poi.name, secs: Math.round(D.clearT), par, key: D.newKey.t, up });
+    if (!D.variant.trial) D.newKey = addKey(makeKey(D.key ? D.key.t + up : 1));
+    ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: D.poi.name, secs: Math.round(D.clearT), par, key: D.newKey ? D.newKey.t : 0, up });
   }
 }
 function dungeonInteract(pl) {
@@ -174,7 +197,7 @@ function claimDungeonChest() {
   const D = G.dungeon; if (!D || !D.bossDead || D.chestOpen) return null;
   D.chestOpen = true;
   const p = G.profile, C = CFG.dungeon, K = C.chest, recs = p.dungeons || (p.dungeons = {});
-  const rec = recs[D.id] || (recs[D.id] = { t: 0, clears: 0 }), full = !!D.key || !rec.clears, t = D.key ? D.key.t : 0;
+  const rec = recs[D.id] || (recs[D.id] = { t: 0, clears: 0 }), full = !D.variant.trial && (!!D.key || !rec.clears), t = D.key ? D.key.t : 0;
   const L = Math.max(D.poi.lvl, p.level), res = { name: D.poi.name, full, xp: 0, gold: 0, items: [], gems: 0, shards: 0, case: false, key: D.newKey, tier: t };
   if (p.level < P.cap) { res.xp = Math.round(xpToNext(p.level) * K.xpFrac); addXp(res.xp, 'dungeon'); }
   res.gold = Math.round((K.gold[0] + K.gold[1] * L) * Math.pow(CFG.enemies.goldGrowth, L - 1) * tierMul(curTier()).gold * (keyHas(D, 'gilded') ? 1.5 : 1)); addGold(res.gold);
@@ -188,6 +211,15 @@ function claimDungeonChest() {
     res.shards = randInt(K.shards[0], K.shards[1]); dropShards(res.shards);
     if (Math.random() < Math.min(0.6, K.caseChance + 0.02 * t) + (keyHas(D, 'lucky') ? 0.25 : 0)) { res.case = true; addCase('treasure', { l: L + K.ilvlAdd + t, src: 'dungeon' }); }
     rec.t = Date.now();
+  }
+  if (D.variant.trial) {
+    // trial: a sigil every clear, then the Radiant roll (no pity: the sigils are the sure path)
+    const S = trialState(D.zone); S.n++; S.sig++; res.sigils = S.sig; res.odds = radiantOdds();
+    if (Math.random() < 1 / res.odds) {
+      const it = makeItem(pick(CFG.gear.slots), 'ancient', L + K.ilvlAdd + 6); it.name = 'Radiant ' + it.name; it.radiant = true;
+      grantItem(it, 'shrine', { zone: D.zone }); S.rad++; res.radiant = it;
+      ev({ t: 'radiant', name: it.name, n: S.n, odds: res.odds, x: D.chest.x, z: D.chest.z });
+    }
   }
   rec.clears++; rec.best = Math.max(rec.best || 0, t); G.dirty = true;
   ev(Object.assign({ t: 'dungeonChest' }, res, { items: res.items.length }));
