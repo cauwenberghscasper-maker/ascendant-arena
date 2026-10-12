@@ -30,7 +30,7 @@ function clearProjectiles() { for (const p of projectiles) p.active = false; G.p
 function forEachTarget(fn) {
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
   fn(G.player);
-  for (let i = 0; i < G.enemies.length; i++) fn(G.enemies[i]);
+  for (let i = 0; i < G.enemies.length; i++) if (!G.enemies[i].hidden) fn(G.enemies[i]); // burrowed monsters can't be hit or aimed at
   if (G.boss) fn(G.boss);
 }
 
