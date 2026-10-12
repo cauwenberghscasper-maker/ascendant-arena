@@ -220,6 +220,9 @@ function buildHub() {
     tParts.push(part(GEO.cyl8, 0x4a3426, [D.x, 0.2, D.z], null, [1.2, 0.4, 1.2]));
     hubParts.denLabels.push({ x: D.x, z: D.z, y: 3.6, den: di });
   });
+  // dungeon beacons: a tall soft pillar of light over every cave, seen from the road
+  { const bg = new THREE.CylinderGeometry(0.7, 1.6, 46, 10, 1, true), bmat = new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    for (const q of W.pois) if (q.kind === 'dungeon') { const b = new THREE.Mesh(bg, bmat); b.position.set(q.x, 23, q.z); hubGroup.add(b); } }
   // waypoint stones: obelisks with a floating crystal
   W.waypoints.forEach((w) => {
     tParts.push(part(GEO.cyl8, 0x6f6a8a, [w.x, 0.25, w.z], null, [1.3, 0.5, 1.3]));

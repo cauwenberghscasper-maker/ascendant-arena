@@ -360,6 +360,12 @@ function drawMinimap() {
     g.fillText(q.kind === 'dungeon' ? '⛫' : q.kind === 'secret' ? '✦' : q.major ? '★' : '•', mmX(q.x), mmY(q.z));
   }
   for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('☠', mmX(D.x), mmY(D.z)); }
+  // off-window dens and caves of this area: a pinned icon on the window edge so the flanks are never forgotten
+  { const zi = zoneAt(pl.z), m = 6 * u, ex = (x) => clamp(x, ox + m, ox + winW - m), ey = (y) => clamp(y, oy + m, oy + winH - m);
+    const pin = (x, z, ch, col) => { const X = mmX(x), Y = mmY(z); if (X > ox && X < ox + winW && Y > oy && Y < oy + winH) return;
+      g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.font = `bold ${8 * u}px Rubik, sans-serif`; g.fillText(ch, ex(X), ey(Y)); };
+    for (const D of W.dens) if (D.zone === zi) pin(D.x, D.z, '☠', '#ff5d6c');
+    for (const q of W.pois) if (q.kind === 'dungeon' && q.zone === zi) pin(q.x, q.z, '⛫', '#ffb347'); }
   for (const e of mpVisible()) { g.fillStyle = '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }
   W.waypoints.forEach((w, i) => { const x = mmX(w.x), y = mmY(w.z), k = 4 * u, have = p.waypoints.includes(i); g.fillStyle = have ? '#9fe8ff' : '#6f6a8a'; g.beginPath(); g.moveTo(x, y - k); g.lineTo(x + k * 0.7, y); g.lineTo(x, y + k); g.lineTo(x - k * 0.7, y); g.closePath(); g.fill(); });
   for (const sh of G.shrines) {

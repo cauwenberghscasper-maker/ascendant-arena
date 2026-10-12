@@ -115,7 +115,13 @@ function claimExped(i) {
 const onExpedition = (p, b) => (p.exp || []).some((e) => e.b === b);
 
 // --- Auto Hunt: your hero fights on its own (walks to monsters at your level, shoots, dashes, supers) ---
-const AH = { tgt: null, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1 };
+const AH = { tgt: null, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1, lastDen: null };
+// the best open den for your level; the den you just emptied scores as if it were 300 m further away
+function autoHuntDen(f, level) {
+  let D = null, bd = 1e9;
+  CFG.world.dens.forEach((dn) => { if (level < CFG.world.zones[dn.zone].minLevel) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2 + (dn === AH.lastDen ? 60 : 0); if (score < bd) { bd = score; D = dn; } });
+  return D;
+}
 function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && G.started); }
 function autoHuntIntent(f, it, manual, dt) {
   if (manual) { AH.manualT = 1.5; return; }
@@ -140,8 +146,9 @@ function autoHuntIntent(f, it, manual, dt) {
   } else {
     // nothing near: walk to the best open den for your level
     let D = null, bd = 1e9;
-    CFG.world.dens.forEach((dn) => { if (!okZone(dn.zone)) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - p.level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2; if (score < bd) { bd = score; D = dn; } });
+    D = autoHuntDen(f, p.level);
     if (!D) return;
+    if (Math.hypot(D.x - f.x, D.z - f.z) < D.r) AH.lastDen = D; // emptied this den: head for the other one next
     const dx = D.x - f.x, dz = D.z - f.z, d = Math.hypot(dx, dz) || 1; tx = dx / d; tz = dz / d;
   }
   // unstick: if we barely moved for a while, sidestep

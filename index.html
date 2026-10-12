@@ -6362,6 +6362,9 @@ function buildHub() {
     tParts.push(part(GEO.cyl8, 0x4a3426, [D.x, 0.2, D.z], null, [1.2, 0.4, 1.2]));
     hubParts.denLabels.push({ x: D.x, z: D.z, y: 3.6, den: di });
   });
+  // dungeon beacons: a tall soft pillar of light over every cave, seen from the road
+  { const bg = new THREE.CylinderGeometry(0.7, 1.6, 46, 10, 1, true), bmat = new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    for (const q of W.pois) if (q.kind === 'dungeon') { const b = new THREE.Mesh(bg, bmat); b.position.set(q.x, 23, q.z); hubGroup.add(b); } }
   // waypoint stones: obelisks with a floating crystal
   W.waypoints.forEach((w) => {
     tParts.push(part(GEO.cyl8, 0x6f6a8a, [w.x, 0.25, w.z], null, [1.3, 0.5, 1.3]));
@@ -7859,6 +7862,7 @@ function updateTags() {
       put(e.x, h, e.z, e.affixed ? `Elite ${CFG.enemies[e.type].name} ${e.lvl} · ${e.champName}` : e.champ ? `${e.guardian ? 'Rift Lord' : 'Champion'} ${e.lvl} · ${e.champName}` : `${e.guardian ? 'Rift Guardian ' : e.elite ? 'Elite ' : ''}${CFG.enemies[e.type].name} ${e.lvl}`, e.hp / e.maxHp, 'mob' + (e.elite ? ' elite' : '') + lvlCls);
     }
     for (const dl of hubParts.denLabels) { const D = CFG.world.dens[dl.den]; if (Math.hypot(dl.x - cx, dl.z - cz) < 55) put(dl.x, dl.y, dl.z, `${D.name} · Lv ${areaLevel(D.zone, D.z) + CFG.world.denLevelBonus + tierAdd()}`, null, 'den'); }
+    for (const q of dungeonPois()) if (Math.hypot(q.x - cx, q.z - cz) < 90) put(q.x, 7.2, q.z, G.profile.level >= dungeonReq(q) ? `${q.name} · Dungeon` : `${q.name} · Level ${dungeonReq(q)}`, null, 'den');
     { const RG = CFG.rift.gate; if (Math.hypot(RG.x - cx, RG.z - cz) < 30) put(RG.x, 4.4, RG.z, G.profile.level >= CFG.rift.unlock ? `The Rift · best floor ${G.profile.records.bestRift || 0}` : `The Rift · Level ${CFG.rift.unlock}`, null, 'wp'); }
     CFG.world.waypoints.forEach((w, i) => { if (Math.hypot(w.x - cx, w.z - cz) < 30) put(w.x, 4.4, w.z, G.profile.waypoints.includes(i) ? 'Waypoint' : 'Waypoint · touch to unlock', null, 'wp'); });
     for (const gl of hubParts.gateLabels) { const zn = CFG.world.zones[gl.zone]; if (G.profile.level < zn.minLevel && Math.hypot(gl.x - cx, gl.z - cz) < 60) put(gl.x, gl.y, gl.z, `${zn.name} · Level ${zn.minLevel}`, null, 'gate'); }
@@ -8983,6 +8987,12 @@ function drawMinimap() {
     g.fillText(q.kind === 'dungeon' ? '⛫' : q.kind === 'secret' ? '✦' : q.major ? '★' : '•', mmX(q.x), mmY(q.z));
   }
   for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('☠', mmX(D.x), mmY(D.z)); }
+  // off-window dens and caves of this area: a pinned icon on the window edge so the flanks are never forgotten
+  { const zi = zoneAt(pl.z), m = 6 * u, ex = (x) => clamp(x, ox + m, ox + winW - m), ey = (y) => clamp(y, oy + m, oy + winH - m);
+    const pin = (x, z, ch, col) => { const X = mmX(x), Y = mmY(z); if (X > ox && X < ox + winW && Y > oy && Y < oy + winH) return;
+      g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.font = `bold ${8 * u}px Rubik, sans-serif`; g.fillText(ch, ex(X), ey(Y)); };
+    for (const D of W.dens) if (D.zone === zi) pin(D.x, D.z, '☠', '#ff5d6c');
+    for (const q of W.pois) if (q.kind === 'dungeon' && q.zone === zi) pin(q.x, q.z, '⛫', '#ffb347'); }
   for (const e of mpVisible()) { g.fillStyle = '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }
   W.waypoints.forEach((w, i) => { const x = mmX(w.x), y = mmY(w.z), k = 4 * u, have = p.waypoints.includes(i); g.fillStyle = have ? '#9fe8ff' : '#6f6a8a'; g.beginPath(); g.moveTo(x, y - k); g.lineTo(x + k * 0.7, y); g.lineTo(x, y + k); g.lineTo(x - k * 0.7, y); g.closePath(); g.fill(); });
   for (const sh of G.shrines) {
@@ -9978,7 +9988,13 @@ function claimExped(i) {
 const onExpedition = (p, b) => (p.exp || []).some((e) => e.b === b);
 
 // --- Auto Hunt: your hero fights on its own (walks to monsters at your level, shoots, dashes, supers) ---
-const AH = { tgt: null, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1 };
+const AH = { tgt: null, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1, lastDen: null };
+// the best open den for your level; the den you just emptied scores as if it were 300 m further away
+function autoHuntDen(f, level) {
+  let D = null, bd = 1e9;
+  CFG.world.dens.forEach((dn) => { if (level < CFG.world.zones[dn.zone].minLevel) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2 + (dn === AH.lastDen ? 60 : 0); if (score < bd) { bd = score; D = dn; } });
+  return D;
+}
 function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && G.started); }
 function autoHuntIntent(f, it, manual, dt) {
   if (manual) { AH.manualT = 1.5; return; }
@@ -10003,8 +10019,9 @@ function autoHuntIntent(f, it, manual, dt) {
   } else {
     // nothing near: walk to the best open den for your level
     let D = null, bd = 1e9;
-    CFG.world.dens.forEach((dn) => { if (!okZone(dn.zone)) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - p.level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2; if (score < bd) { bd = score; D = dn; } });
+    D = autoHuntDen(f, p.level);
     if (!D) return;
+    if (Math.hypot(D.x - f.x, D.z - f.z) < D.r) AH.lastDen = D; // emptied this den: head for the other one next
     const dx = D.x - f.x, dz = D.z - f.z, d = Math.hypot(dx, dz) || 1; tx = dx / d; tz = dz / d;
   }
   // unstick: if we barely moved for a while, sidestep

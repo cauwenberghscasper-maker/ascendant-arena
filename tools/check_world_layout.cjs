@@ -86,5 +86,12 @@ const W = c.config.world, Z = W.zones;
     const pop = Z.reduce((n, zn, i) => n + c.patrolCountFor(i) + (zn.safe ? 0 : W.elitesPerZone), 0) + W.dens.reduce((n, d) => n + d.n + 1, 0);
     assert(pop <= 1700, pop); console.log(JSON.stringify({ minimap: w + 'x' + h, population: pop, pois: ids.length, maxZ: W.maxZ, width: W.maxX - W.minX }));
   });
+  check('Auto Hunt alternates between the two dens of an area instead of camping the nearest', () => {
+    vm.runInContext('const AH = { lastDen: null };\n' + section('// the best open den', 'function autoHuntOn(') + '\nthis.AH = AH; this.autoHuntDen = autoHuntDen;', c);
+    const [a, b] = W.dens.filter((D) => D.zone === 5), lvl = Z[5].lvl[1], f = { x: a.x, z: a.z };
+    assert.equal(c.autoHuntDen(f, lvl), a, 'standing in a den picks it');
+    c.AH.lastDen = a; assert.equal(c.autoHuntDen(f, lvl), b, 'after emptying it, the other den');
+    c.AH.lastDen = b; assert.equal(c.autoHuntDen({ x: b.x, z: b.z }, lvl), a);
+  });
   console.log(passed + ' world_layout checks passed.');
 })().catch((e) => { console.error(e); process.exit(1); });
