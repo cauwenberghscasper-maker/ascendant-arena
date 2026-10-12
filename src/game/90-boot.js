@@ -24,6 +24,7 @@ function boot(hotData) {
   setupPools(); setupInput();
   $('panel').addEventListener('click', handlePanelClick);
   $('panel').addEventListener('change', handleSettingChange);
+  setupSheetGrip();
   // backdrop: tap to close normal menus; in the dressing room, drag to spin the hero
   let spinDrag = null;
   $('modal').addEventListener('pointerdown', (e) => {

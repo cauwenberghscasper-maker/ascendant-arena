@@ -407,9 +407,9 @@ function updateBossTracker() {
   const pl = G.player, W = window.innerWidth, H = window.innerHeight, m = 44;
   const s = project(tx, 2, tz), d = Math.hypot(tx - pl.x, tz - pl.z);
   // keep the pointer clear of the top HUD stack and the bottom controls
-  // Match the two-row town dock and its wide, short-screen variant; keep boss labels below it.
+  // Match the two-row town dock (with the toasts and boss bar moved below it in portrait) and its wide, short-screen variant.
   const quickDock = hubShortcutsAvailable() && (H > 590 || W >= 760);
-  const yMin = quickDock ? (H > 590 ? 286 : 176) : (Cam.portrait ? 240 : 132), yMax = H - (Cam.portrait ? 310 : 60), xMin = m + 20, xMax = W - m - 20;
+  const yMin = quickDock ? (H > 590 ? 336 : 176) : (Cam.portrait ? 240 : 132), yMax = H - (Cam.portrait ? 310 : 60), xMin = m + 20, xMax = W - m - 20;
   if (s && s[0] > 0 && s[0] < W && s[1] > 30 && s[1] < H - 20) { setHidden('bossPtr', true); return; }
   let dx = -(tx - pl.x), dy = -(tz - pl.z); const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
   const cx = W / 2, cy = (yMin + yMax) / 2;
@@ -465,7 +465,8 @@ function buildDoll() {
 }
 function updateDoll() {
   const root = $('doll');
-  const show = Showcase.on && Showcase.b > 0.85 && (UI.current === 'hero' || UI.current === 'smith');
+  // hidden while the sheet is pulled up over the hero
+  const show = Showcase.on && Showcase.b > 0.85 && !UI.sheetFull && (UI.current === 'hero' || UI.current === 'smith');
   if (!show) { if (!root.hidden) root.hidden = true; return; }
   if (!Doll.built) buildDoll();
   root.hidden = false;
@@ -475,11 +476,12 @@ function updateDoll() {
   const al = Doll.alerts;
   const head = project(pl.x, (2.2 * gs) + Showcase.podium, pl.z), feet = project(pl.x, Showcase.podium, pl.z);
   if (!head || !feet) { root.hidden = true; return; }
-  const W = window.innerWidth, H = window.innerHeight, panel = $('panel').getBoundingClientRect();
+  const W = window.innerWidth, H = window.innerHeight, panel = UI.sheet;
   const chipW = Cam.portrait ? Math.min(138, Math.max(124, W * .34)) : Math.min(158, W * .19);
   const colX = Cam.portrait ? 8 : Math.max(8, Math.min(head[0] - chipW - 48, panel.left - chipW - 100));
   const bottom = Cam.portrait ? panel.top - 10 : H - 16;
   const top = Math.max(12, Math.min(head[1] - 10, bottom - 340));
+  if (bottom - top < 160) { root.hidden = true; return; }
   root.style.left = `${colX}px`; root.style.top = `${top}px`; root.style.width = `${chipW}px`; root.style.maxHeight = `${Math.max(54, bottom - top)}px`;
   DOLL_ORDER.forEach((s, i) => {
     const it = p.gear[s], c = Doll.chips[s];

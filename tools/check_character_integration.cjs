@@ -49,7 +49,7 @@ const dir='audit/evidence/character-integration';fs.mkdirSync(dir,{recursive:tru
  for(const id of ids){
   await page.evaluate(id=>{__game.profile.cls=id;__sim.refreshPlayerStats(false);__dbg.heroTab('Gear')},id);
   await page.waitForTimeout(400);
-  const bytes=await page.screenshot({clip:{x:140,y:0,width:250,height:258}});
+  const bytes=await page.screenshot({clip:{x:140,y:0,width:250,height:464}}); // the hero fills the area above the 45% sheet
   currentImages.push({id,src:'data:image/png;base64,'+bytes.toString('base64')});
  }
  const gallery=await browser.newPage({viewport:{width:1200,height:1000}});

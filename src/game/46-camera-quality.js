@@ -111,6 +111,25 @@ function setShowcase(on) {
   document.getElementById('app').classList.toggle('showcase', on);
   resize(); // higher studio pixel resolution only while inspecting a character
 }
+// Dressing-room framing: the hero (feet to crown) fills ~95% of the free screen height above the portrait sheet
+// (or left of the landscape side panel), right of the paper-doll column. Uses the cached sheet rect; while the
+// sheet is pulled to full height the last framing is kept, since the hero is covered anyway.
+Cam.frame = { dist: 8, yc: 1.2, span: 2.4, offX: 0, offY: 0 };
+function showcaseFrame() {
+  const F = Cam.frame, S = UI.sheet; if (UI.sheetFull || !S.bottom) return F;
+  const w = window.innerWidth, h = window.innerHeight, gs = growthScale(G.player);
+  const chipR = Cam.portrait ? 8 + Math.min(138, Math.max(124, w * .34)) : 8 + Math.min(158, w * .19);
+  const top = 8, bot = Cam.portrait ? S.top - 28 : h - 30;
+  const left = chipR + 6, right = Cam.portrait ? w : S.left - 8;
+  // world span from the podium floor to the hat tip (measured 1.65 x growth); ascended heroes add a crown
+  const lo = Showcase.podium - 0.05, hi = Showcase.podium + 1.72 * gs * (ascTier(G.profile.level) >= 3 ? 1.3 : 1);
+  const px = Math.max(120, (bot - top) * 0.96);
+  F.span = hi - lo; F.yc = (hi + lo) / 2;
+  F.dist = F.span * h / (2 * Math.tan(THREE.MathUtils.degToRad(40) / 2) * px);
+  // the hero's weapon arm reaches further right than its left side, so aim a little left of centre
+  F.offX = w / 2 - ((left + right) / 2 - w * 0.05); F.offY = h / 2 - (top + bot) / 2;
+  return F;
+}
 function updateCamera(dt) {
   const pl = G.mode === 'arena' && G.arena ? G.arena.fighters[0] : G.player;
   Cam.yaw = 0;
@@ -129,13 +148,12 @@ function updateCamera(dt) {
   _cp.set(Cam.fx, th, Cam.fz - 1.5 - tb);
   _cl.set(Cam.fx, 0, Cam.fz);
   if (sb > 0) {
-    // side view: camera east of the hero at chest height
-    const gs = growthScale(G.player);
-    const dist = (Cam.portrait ? 8.4 : 5.4) * gs * (ascTier(G.profile.level) >= 3 ? 1.18 : 1);
+    // side view: camera east of the hero, framed to fill the free area beside the sheet
+    const F = showcaseFrame();
     const dx = 1, dz = 0.3, dl = Math.hypot(dx, dz);
     const sx = Showcase.x, sz = Showcase.z;
-    _cp.lerp(_v3.set(sx + dx / dl * dist, 1.55 * gs, sz + dz / dl * dist), sb);
-    _cl.lerp(_s3.set(sx, 1.15 * gs, sz), sb);
+    _cp.lerp(_v3.set(sx + dx / dl * F.dist, F.yc + F.span * 0.12, sz + dz / dl * F.dist), sb);
+    _cl.lerp(_s3.set(sx, F.yc, sz), sb);
   }
   if (!G.started) {
     Cam.titleT += dt * 0.08;
@@ -144,10 +162,10 @@ function updateCamera(dt) {
   }
   const fovT = lerp(Cam.portrait ? 56 : 44, 40, sb);
   if (Math.abs(camera.fov - fovT) > 0.05) { camera.fov = fovT; camera.updateProjectionMatrix(); }
-  // in the dressing room, shift the picture so the hero sits beside the menu
+  // in the dressing room, shift the picture so the hero sits in the free area beside the menu
   if (sb > 0.001) {
-    const w = window.innerWidth, h = window.innerHeight;
-    camera.setViewOffset(w, h, Cam.portrait ? -w * .17 * sb : w * 0.22 * sb, Cam.portrait ? h * 0.27 * sb : 0, w, h);
+    const w = window.innerWidth, h = window.innerHeight, F = Cam.frame;
+    camera.setViewOffset(w, h, F.offX * sb, F.offY * sb, w, h);
   } else if (camera.view && camera.view.enabled) camera.clearViewOffset();
   const k = 1 - Math.exp(-dt * (G.started ? (Showcase.on || sb > 0 ? 7 : 9) : 3));
   Cam.pos.lerp(_cp, k); Cam.look.lerp(_cl, k);

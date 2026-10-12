@@ -78,7 +78,7 @@ function updateTags() {
     for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; if (near(b, 30)) put(b.x, 2.45 * growthScale(b), b.z, `${b.name} · ${b.level}`, null, 'bot'); }
     for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.nick} · ${e.level}`, e.hp, 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');
-    for (const e of G.enemies) if (e.alive && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
+    for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
       const diff = e.lvl - G.profile.level, lvlCls = diff >= 5 ? ' red' : diff >= 2 ? ' orange' : diff <= -6 ? ' grey' : '';
       put(e.x, h, e.z, e.affixed ? `Elite ${CFG.enemies[e.type].name} ${e.lvl} · ${e.champName}` : e.champ ? `${e.guardian ? 'Rift Lord' : 'Champion'} ${e.lvl} · ${e.champName}` : `${e.guardian ? 'Rift Guardian ' : e.elite ? 'Elite ' : ''}${CFG.enemies[e.type].name} ${e.lvl}`, e.hp / e.maxHp, 'mob' + (e.elite ? ' elite' : '') + lvlCls);
@@ -168,7 +168,11 @@ function updateHUD(dt) {
   const sp = skillPointsFree(p);
   UI.alertT = (UI.alertT || 0) - dt;
   if (UI.alertT <= 0) { UI.alertT = 0.3; UI.anyAlert = Object.values(slotAlerts()).some((a) => a.better || a.canUpgrade); updateGearPrompt(); $('feed').classList.toggle('up', !$('gearPrompt').hidden); }
-  setHidden('hubShortcuts', !hubShortcutsAvailable());
+  { const dock = hubShortcutsAvailable(), bannerOn = bannerT > 0;
+    // the shortcut dock pushes toasts below it, and steps aside while the zone banner shows
+    if (hudCache.dock !== dock) { hudCache.dock = dock; $('hud').classList.toggle('dock', dock); }
+    if (hudCache.bannerOn !== bannerOn) { hudCache.bannerOn = bannerOn; $('hud').classList.toggle('bannerOn', bannerOn); }
+    setHidden('hubShortcuts', !dock); }
   setHidden('navGearDot', !UI.anyAlert); setHidden('navSkillsDot', sp <= 0);
   setHidden('navArtifactsDot', !p.newUnlocks.some(u => u.startsWith('r:')));
   setHidden('navCasesCount', !p.cases.length); setText('navCasesCount', String(p.cases.length));

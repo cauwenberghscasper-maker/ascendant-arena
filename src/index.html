@@ -7,10 +7,11 @@
 <style>
 @@include css/main.css
 </style>
-<link rel="stylesheet" href="assets/art/adventurer-ui.css">
-<link rel="stylesheet" href="assets/art/runescape-ui.css">
 <style>
 @@include css/panels.css
+</style>
+<style>
+@@include css/theme.css
 </style>
 
 
@@ -89,7 +90,7 @@
       <button id="bSpecial" class="cbtn" aria-label="Elemental special attack" hidden><i class="cic"></i><span id="bSpecialLbl">FIRE</span></button>
     </div>
   </div>
-  <div id="modal" hidden><div class="panel scroll" id="panel" role="dialog" aria-modal="true"></div></div>
+  <div id="modal" hidden><div class="panel scroll" id="panel" role="dialog" aria-modal="true"></div><button id="sheetGrip" type="button" aria-label="Expand the list" aria-expanded="false"><i></i></button></div>
   <div id="title">
     <div class="art" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div><div class="sparks" aria-hidden="true"></div>
     <div class="top"><div class="logo">Ascendant<span>Arena</span></div><div class="badge">16 brawlers · endless ascension</div></div>
@@ -101,7 +102,7 @@
     </div>
   </div>
   <div id="doll" hidden aria-label="Equipped gear"></div>
-  <div id="spinHint">Drag beside the menu to turn your hero</div>
+  <div id="spinHint">Drag to turn your hero</div>
   <div id="bootErr" hidden></div>
 </div>
 

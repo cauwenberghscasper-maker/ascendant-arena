@@ -22,11 +22,14 @@ function openModal(html, closable, showcase) {
   $('panel').className = 'panel scroll';
   setShowcase(!!showcase);
   $('modal').classList.toggle('room', !!showcase);
+  if (!showcase) UI.sheetFull = false;
+  $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
   $('panel').innerHTML = html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
   $('modal').hidden = false;
   const body = $('panel').querySelector(':scope > .pBody');
   if (body) { $('panel').classList.remove('scroll'); $('panel').classList.add('dock'); body.scrollTop = scroll; syncMore(); }
   else $('panel').scrollTop = scroll;
+  measureSheet();
   Input.move.id = null; Input.move.active = false; Input.move.sx = Input.move.sy = 0; $('stickBase').classList.remove('on');
   Input.atk.id = null; Input.atk.aiming = false; Input.atk.active = false; $('atkKnob').style.transform = 'translate(0px,0px)';
 }
@@ -55,7 +58,50 @@ function itemGrid(items, o) {
 function itemSummary(it, extra) {
   return `<img src="${thumbFor(it)}" alt="" style="--rc:${rarCol(it.rarity)}"><div class="sx"><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b><small>${CFG.gear.rarity[it.rarity].name} · ${SLOT_LABEL[it.slot]} · item level ${it.ilvl}</small><small>${extra || statLine(it)}</small></div>`;
 }
-UI.close = function () { $('modal').hidden = true; G.modal = false; setShowcase(false); UI.gearSlot = null; UI.current = null; UI.panelKind = null; UI.mergePlan = null; UI.afterClose && UI.afterClose(); UI.afterClose = null; };
+// --- hero sheet (portrait dressing room): a bottom sheet at 45% that the grip drags up to full height and back ---
+// The sheet's rect is cached here (open, resize, drag) so the camera and paper doll never read layout per frame.
+UI.sheet = { top: 0, left: 0, right: 0, bottom: 0 };
+function measureSheet() {
+  if ($('modal').hidden) return;
+  const r = $('panel').getBoundingClientRect(), S = UI.sheet;
+  S.top = r.top; S.left = r.left; S.right = r.right; S.bottom = r.bottom;
+  // the spin hint sits just above the sheet, over the hero's side of the screen
+  const hint = $('spinHint');
+  if (Cam.portrait) { hint.style.top = `${Math.max(8, r.top - 30)}px`; hint.style.left = ''; hint.style.width = ''; }
+  else { hint.style.top = ''; hint.style.left = '16px'; hint.style.width = `${Math.max(120, r.left - 32)}px`; }
+}
+function setSheetFull(full) {
+  UI.sheetFull = full; $('modal').style.removeProperty('--sheet');
+  $('modal').classList.toggle('sheetFull', full);
+  $('sheetGrip').setAttribute('aria-expanded', String(full)); $('sheetGrip').setAttribute('aria-label', full ? 'Show the hero' : 'Expand the list');
+  measureSheet();
+}
+function setupSheetGrip() {
+  const grip = $('sheetGrip'), modal = $('modal'); let drag = null, dragged = false;
+  grip.addEventListener('pointerdown', (e) => {
+    e.stopPropagation(); dragged = false; drag = { id: e.pointerId, y: e.clientY, h: $('panel').getBoundingClientRect().height, moved: false };
+    try { grip.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+  });
+  grip.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dy = e.clientY - drag.y; if (Math.abs(dy) > 6) drag.moved = true; if (!drag.moved) return;
+    modal.classList.add('dragging'); modal.style.setProperty('--sheet', `${Math.round(Math.max(200, drag.h - dy))}px`); measureSheet();
+  });
+  const end = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null; modal.classList.remove('dragging');
+    if (!d.moved) return; // a tap: the click below toggles (keyboards and screen readers click too)
+    // snap to whichever stop the finger ended nearer, and swallow the click that follows the drag
+    const h = $('panel').getBoundingClientRect().height, half = window.innerHeight * 0.45, full = window.innerHeight;
+    dragged = true; setSheetFull(e.type !== 'pointercancel' && h > (half + full) / 2 - 60);
+  };
+  grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
+  grip.addEventListener('click', (e) => { e.stopPropagation(); if (dragged) { dragged = false; return; } if (!Cam.portrait) return; Sfx.play('click'); setSheetFull(!UI.sheetFull); });
+  for (const ev of ['transitionend', 'animationend']) modal.addEventListener(ev, (e) => { if (e.target.id === 'panel') measureSheet(); });
+  // the full-height sheet only exists in portrait; turning the phone drops back to the side panel
+  window.addEventListener('resize', () => requestAnimationFrame(() => { if (UI.sheetFull && !Cam.portrait) setSheetFull(false); else measureSheet(); }));
+}
+UI.close = function () { UI.sheetFull = false; $('modal').classList.remove('sheetFull'); $('modal').hidden = true; G.modal = false; setShowcase(false); UI.gearSlot = null; UI.current = null; UI.panelKind = null; UI.mergePlan = null; UI.afterClose && UI.afterClose(); UI.afterClose = null; };
 const RAR_HEX = { common: 0xcfd6e0, uncommon: 0x8ee06a, rare: 0x58b4ff, epic: 0xc77dff, legendary: 0xffb347, mythic: 0xff4d6d, ancient: 0x2fffd0, divine: 0xfff3a0 };
 const rarityChip = (r) => `<span class="rar ${r}">${CFG.gear.rarity[r].name}</span>`;
 function statLine(it) {
@@ -255,8 +301,8 @@ function heroTab(tab) {
     const reroll = cur && rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '';
     body = `<div class="tiles">${tiles}</div>
       <div class="subRow"><h4 class="sub">${SLOT_LABEL[sel]}s in your bag · ${pieces.length}</h4><small>bag ${p.bag.length}/${CFG.gear.bagMax}</small>${worse ? `<button class="ghost sm" data-act="salvageAll" aria-label="High-alch ${worse} weaker pieces">Alch ${worse}</button>` : ''}</div>
-      ${pieces.length ? `<div class="ilegend"><span><i class="up">▲</i>better</span><span><i class="m1">+1</i>next reforge</span><span><i class="mm">max</i>reforge max</span><span>${gi('m_lock')} kept</span></div>` : ''}
       ${itemGrid(pieces, { act: 'gpick', sel: UI.gearPick, mark, empty: `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
+      ${pieces.length ? `<div class="ilegend"><span><i class="up">▲</i>better</span><span><i class="m1">+1</i>next reforge</span><span><i class="mm">max</i>reforge max</span><span>${gi('m_lock')} kept</span></div>` : ''}
       <h4 class="sub">${SLOT_LABEL[sel]} · worn</h4><div class="list">${cur ? itemRow(cur, reroll, null, { upgrade: can }) : '<p class="fine">Nothing equipped. Choose a piece from your bag above.</p>'}</div>
       <h4 class="sub">Luck</h4><div class="luck">${['rare', 'epic', 'legendary'].concat(HIGH_RAR.filter((h) => highWeights(curTier(), 6)[h] > 0)).map((r) => `<div class="lk ${r}"><span>${CFG.gear.rarity[r].name} guaranteed in</span><b>${Math.max(1, Pi[r] - L[r])} drops</b><i style="--v:${Math.round(L[r] / Pi[r] * 100)}%"></i></div>`).join('')}</div>`;
     if (pick) {
@@ -345,7 +391,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div><button class="ghost sm hm" data-act="openMenu">${gi('m_menu')} Journal</button></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div><button class="ghost sm hm" data-act="openMenu" aria-label="Journal">${gi('m_menu')}<span class="hmT"> Journal</span></button></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
 }
 function openWaypoints() {
   UI.current = 'waypoints';
