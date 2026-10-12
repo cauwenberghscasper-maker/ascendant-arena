@@ -637,7 +637,14 @@ button.inl { margin-left: 8px; vertical-align: middle; }
 .reelWin .rname { display: block; text-align: center; font: 28px/1.1 var(--display); margin-bottom: 8px; color: var(--rc, #fff); animation: winPop .5s cubic-bezier(.2,1.6,.4,1); }
 .reelWin.uncommon { --rc: #8ee06a; } .reelWin.rare { --rc: #58b4ff; } .reelWin.epic { --rc: #c77dff; } .reelWin.legendary { --rc: #ffb347; } .reelWin.mythic { --rc: #ff4d6d; } .reelWin.ancient { --rc: #2fffd0; } .reelWin.divine { --rc: #fff3a0; }
 @keyframes winPop { from { transform: scale(.4); opacity: 0; } }
-.fastGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; justify-items: center; margin: 6px 0 10px; }
+.fastGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin: 6px 0 10px; }
+/* fast-open results: every card the same size in a fixed grid; the best one is outlined, not enlarged, and labels sit under the art */
+.fastGrid .rcard { width: auto; height: auto; padding: 8px 6px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.fastGrid .rcard img { width: 64px; height: 64px; }
+.fastGrid .rcard small { position: relative; z-index: 3; font-size: 13px; line-height: 1.15; text-align: center; }
+.fastGrid .rcard small b { display: block; color: var(--text, #eadfc4); font-weight: 600; font-size: 13px; }
+.fastGrid .rcard.win { transform: none; }
+.fastGrid .rcard::before { inset: 0 !important; }
 @media (prefers-reduced-motion: reduce) { .caseArt.shake, .reelWin .rname, #caseChip.flash { animation: none; } }
 /* ---- idle ---- */
 .vaultBox { background: linear-gradient(140deg, #3a2a0c, #1d2547 60%); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
