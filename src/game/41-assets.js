@@ -88,6 +88,8 @@ function addRimLight(m, k) {
 }
 const outlineMatCache = new Map();
 function outlineMatScaled(base, w) { const k = base + '|' + w.toFixed(4); if (!outlineMatCache.has(k)) outlineMatCache.set(k, makeOutlineMat(base, w)); return outlineMatCache.get(k); }
+// the gear tab's relaxed standing pose joins each rigged hero's clips (assets/data/hero-arms.js)
+function withShowcase(clips, scene) { const c = showcaseClip(THREE, scene); return c ? clips.concat([c]) : clips; }
 const AssetLibrary = {
   entries: new Map(), loader: null, env: null, boot: null, enabled: true,
   setOf(it) { return it && it.name ? it.name.split(' ')[0].toLowerCase() : ''; },
@@ -114,7 +116,7 @@ const AssetLibrary = {
       .then(([gltf, weapon, clips]) => {
         if (def.v4) def.weaponScene = weapon ? weapon.scene : null;
         e.model = this.prepare(gltf.scene, def, id);
-        e.model.animations = def.v4 ? relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
+        e.model.animations = def.v4 ? withShowcase(relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
       })
       .catch((err) => {
         // a v4 hero that fails falls back to the previous adventurer model

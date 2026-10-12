@@ -452,13 +452,18 @@ export function finishHeroesV6(CFG) {
   for (const h of HEROES_V6) if (CFG.classes[h.id]) { CFG.classes[h.id].super = 'h_' + h.id; CFG.classes[h.id].heroV6 = h.id; }
 }
 
+// Painted splash art (FLUX.1 Kontext [dev] repaint of each Codex concept): a wide banner for the hero's details and a
+// square crop for the roster card, in assets/ui/portraits/splash/. Heroes not listed keep their 3D-render portrait.
+export const HERO_SPLASH = ['camedown', 'corrin', 'fenwick', 'halven', 'hob', 'ione', 'jory', 'kallix', 'lysandra', 'moss', 'mott', 'nyssa', 'oko', 'ophira', 'pyrrhos', 'sena', 'sleeper', 'thimble', 'unwritten', 'vell', 'wrenna', 'ysolt'];
+
 // Model registry: assets/hero-v6/<id>/model.json (packed by tools/v4_pack.py), shared adventurer clips.
 export function applyHeroV6Models(manifest, ready) {
   for (const h of HEROES_V6) {
     if (ready && !ready.includes(h.id)) continue;
     manifest['hero.' + h.id] = {
       dir: 'assets/hero-v6/' + h.id + '/', size: h.size, v4: true, v6: true, animated: true, measuredHand: true, character: h.id,
-      handLen: 0.08, weapon: null, attack: h.clip || '1H_Ranged_Shoot', portrait: 'assets/ui/portraits/v6/' + h.id + '.webp',
+      handLen: 0.08, weapon: null, attack: h.clip || '1H_Ranged_Shoot', portrait: HERO_SPLASH.includes(h.id) ? 'assets/ui/portraits/splash/' + h.id + '-card.webp' : 'assets/ui/portraits/v6/' + h.id + '.webp',
+      splash: HERO_SPLASH.includes(h.id) ? 'assets/ui/portraits/splash/' + h.id + '.webp' : null,
       source: 'TRELLIS.2 (MIT) from a Z-Image Turbo (Apache-2.0) concept painted for the Codex, rigged with tools/v4_* + tools/v6_*, Oct 2026',
     };
   }

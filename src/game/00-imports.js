@@ -6,7 +6,7 @@ import { prepareOriginalAdventurer, equipOriginalAdventurer } from './assets/art
 import { createKayKitMotion } from './assets/data/kaykit-motion.js';
 import { applyHeroV4, heroV4Clips, gripV4Weapon, prepareV4Equipment, equipV4Hero } from './assets/data/hero-models-v4.js';
 import { addHeroEyes } from './assets/data/hero-eyes.js';
-import { relaxArms } from './assets/data/hero-arms.js';
+import { relaxArms, showcaseClip } from './assets/data/hero-arms.js';
 import { installHeroesV6, finishHeroesV6, applyHeroV6Models, HERO_V6, HEROES_V6 } from './assets/data/heroes-v6.js';
 import { createHeroSupers } from './assets/data/hero-supers-v6.js';
 import { createHeroFX } from './assets/data/hero-fx-v6.js';

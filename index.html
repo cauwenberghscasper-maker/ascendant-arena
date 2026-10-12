@@ -438,6 +438,25 @@ button.inl { margin-left: 8px; vertical-align: middle; }
 .btier.tier-champion b { color: #9fe3e0; } .btier.tier-legendary b { color: #ffc94a; } .btier.tier-ascendant b { color: #c77dff; } .btier.tier-divine b { color: #ff9a6a; text-shadow: 0 0 8px rgba(255,154,106,.45); }
 .bcard.tier-legendary { box-shadow: inset 0 0 0 1px rgba(255,201,74,.35); } .bcard.tier-ascendant { box-shadow: inset 0 0 0 1px rgba(199,125,255,.4); } .bcard.tier-divine { box-shadow: inset 0 0 0 1px rgba(255,154,106,.5), 0 0 10px rgba(255,154,106,.18); }
 .htitle { margin: 2px 0 6px; color: #d9c9a8; font-style: italic; }
+/* painted splash art: square crops on the roster cards, a wide banner in the hero's details */
+.bport.art { border-radius: 12px !important; background: #0d0f22; box-shadow: 0 0 0 2px rgba(255,255,255,.14), 0 6px 14px rgba(0,0,0,.45); overflow: hidden; }
+.bport.art img, .bport.art img.pxp { border-radius: 12px; image-rendering: auto; }
+.bport.art::after { content: ''; position: absolute; inset: 0; border-radius: 12px; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,.10), transparent 30%, transparent 62%, rgba(0,0,0,.45)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+.bcard.tier-champion .bport.art { box-shadow: 0 0 0 2px #7fc7c2, 0 6px 14px rgba(0,0,0,.45); }
+.bcard.tier-legendary .bport.art { box-shadow: 0 0 0 2px #ffc94a, 0 0 12px rgba(255,201,74,.35), 0 6px 14px rgba(0,0,0,.45); }
+.bcard.tier-ascendant .bport.art { box-shadow: 0 0 0 2px #c77dff, 0 0 12px rgba(199,125,255,.4), 0 6px 14px rgba(0,0,0,.45); }
+.bcard.tier-divine .bport.art { box-shadow: 0 0 0 2px #ff9a6a, 0 0 16px rgba(255,154,106,.5), 0 6px 14px rgba(0,0,0,.45); }
+.bport.art.locked img { filter: grayscale(.7) brightness(.55); }
+.bcard .bport.art { --sz: min(100%, 132px) !important; width: var(--sz); height: auto; aspect-ratio: 1; }
+.hsplash { flex: none; position: relative; margin: 0 0 2px; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 9; background: #0d0f22; box-shadow: 0 0 0 2px #7fc7c2, 0 10px 24px rgba(0,0,0,.5); }
+.hsplash.tier-legendary { box-shadow: 0 0 0 2px #ffc94a, 0 0 18px rgba(255,201,74,.35), 0 10px 24px rgba(0,0,0,.5); }
+.hsplash.tier-ascendant { box-shadow: 0 0 0 2px #c77dff, 0 0 18px rgba(199,125,255,.4), 0 10px 24px rgba(0,0,0,.5); }
+.hsplash.tier-divine { box-shadow: 0 0 0 2px #ff9a6a, 0 0 22px rgba(255,154,106,.5), 0 10px 24px rgba(0,0,0,.5); }
+.hsplash img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; display: block; image-rendering: auto; }
+.hsplash::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(8,8,20,.92)); }
+.hsx { position: absolute; left: 14px; right: 14px; bottom: 10px; z-index: 1; display: flex; flex-direction: column; gap: 2px; text-shadow: 0 2px 6px rgba(0,0,0,.8); }
+.hsx span { font: 700 10.5px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: #ffd98a; }
+.hsx b { font: 24px/1.05 var(--display); color: #fff; } .hsx i { font: italic 600 13px/1.2 var(--body); color: #e8dcc0; }
 .bcard { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; border: 2px solid transparent; border-radius: 14px; background: var(--ink2); padding: 8px 4px 7px; color: var(--text); }
 .bcard b { font: 14px/1 var(--display); } .bcard small { font: 600 10.5px/1 var(--body); color: var(--muted); }
 .bcard.sel { border-color: #9fe8ff; } .bcard.cur .eqd { position: absolute; top: -7px; left: 50%; transform: translateX(-50%); font: 700 9px/1 var(--body); background: var(--good); color: #0c2a17; padding: 3px 6px; border-radius: 6px; }
@@ -1476,7 +1495,7 @@ import { prepareOriginalAdventurer, equipOriginalAdventurer } from './assets/art
 import { createKayKitMotion } from './assets/data/kaykit-motion.js';
 import { applyHeroV4, heroV4Clips, gripV4Weapon, prepareV4Equipment, equipV4Hero } from './assets/data/hero-models-v4.js';
 import { addHeroEyes } from './assets/data/hero-eyes.js';
-import { relaxArms } from './assets/data/hero-arms.js';
+import { relaxArms, showcaseClip } from './assets/data/hero-arms.js';
 import { installHeroesV6, finishHeroesV6, applyHeroV6Models, HERO_V6, HEROES_V6 } from './assets/data/heroes-v6.js';
 import { createHeroSupers } from './assets/data/hero-supers-v6.js';
 import { createHeroFX } from './assets/data/hero-fx-v6.js';
@@ -5742,6 +5761,8 @@ function addRimLight(m, k) {
 }
 const outlineMatCache = new Map();
 function outlineMatScaled(base, w) { const k = base + '|' + w.toFixed(4); if (!outlineMatCache.has(k)) outlineMatCache.set(k, makeOutlineMat(base, w)); return outlineMatCache.get(k); }
+// the gear tab's relaxed standing pose joins each rigged hero's clips (assets/data/hero-arms.js)
+function withShowcase(clips, scene) { const c = showcaseClip(THREE, scene); return c ? clips.concat([c]) : clips; }
 const AssetLibrary = {
   entries: new Map(), loader: null, env: null, boot: null, enabled: true,
   setOf(it) { return it && it.name ? it.name.split(' ')[0].toLowerCase() : ''; },
@@ -5768,7 +5789,7 @@ const AssetLibrary = {
       .then(([gltf, weapon, clips]) => {
         if (def.v4) def.weaponScene = weapon ? weapon.scene : null;
         e.model = this.prepare(gltf.scene, def, id);
-        e.model.animations = def.v4 ? relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
+        e.model.animations = def.v4 ? withShowcase(relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
       })
       .catch((err) => {
         // a v4 hero that fails falls back to the previous adventurer model
@@ -7922,7 +7943,7 @@ const studioFill = new THREE.DirectionalLight(0xafd6ed,1.1); studioFill.visible=
 function setShowcase(on) {
   if (on === Showcase.on) return;
   const pl = G.player;
-  Showcase.on = on;
+  Showcase.on = on; if (pl) pl.showcase = on; // the hero stands in its relaxed gear-tab pose
   studioFill.visible=on; Doll.alertAt=0;
   if (on) {
     Showcase.x = pl.x; Showcase.z = pl.z; Showcase.spin = 0; Showcase.podium = 0.3;
@@ -10080,8 +10101,8 @@ function tierOf(L) { let t = -1; CFG.badges.forEach((b, i) => { if (L >= b.lvl) 
 // brawler portrait: body-colored disc, weapon icon, rim in the earned badge metal
 function brawlerPortrait(id, owned, size) {
   const B = CFG.brawlers[id], p = G.profile, t = owned ? tierOf(masteryOf(p, id)) : -1;
-  const img = brawlerThumb(id);
-  return `<span class="bport ${owned ? '' : 'locked'} ${t >= 0 ? METAL[t] : ''}" style="--bc:${hex(B.body)};--ba:${hex(B.accent)};${size ? `--sz:${size}px` : ''}">${img ? `<img src="${img}" alt="">` : gi('b_' + id)}<span class="wchip">${gi('b_' + id)}</span>${owned ? '' : gi('m_lock', 'lk')}</span>`;
+  const img = brawlerThumb(id), art = ASSET_MANIFEST['hero.' + id]?.splash ? 'art' : '';
+  return `<span class="bport ${art} ${owned ? '' : 'locked'} ${t >= 0 ? METAL[t] : ''}" style="--bc:${hex(B.body)};--ba:${hex(B.accent)};${size ? `--sz:${size}px` : ''}">${img ? `<img src="${img}" alt="">` : gi('b_' + id)}<span class="wchip">${gi('b_' + id)}</span>${owned ? '' : gi('m_lock', 'lk')}</span>`;
 }
 
 // --- Menu tiles ---------------------------------------------------------------------------------
@@ -10267,8 +10288,9 @@ function openBrawlers(sel) {
   const sup = CFG.supers[C.super], sk = CFG.skills[C.skill];
   const free = have ? treeFree(p, sel) : 0, tp = have ? treeOf(p, sel).total : 0;
   const summary = `${brawlerPortrait(sel, have, 68)}<div class="sx"><b>${B.name}${sel === p.cls ? ' · playing' : ''}</b><small>${C.role} · ${A.name}</small><small>${have ? `Mastery ${L}${t >= 0 ? ' · ' + CFG.badges[t].title : ''} · ${free > 0 ? `<span style="color:#ffc94a">${free} tree points free</span>` : `${tp} tree points`}` : `${gi('m_lock')} ${unlockText(A.unlock)}`}</small></div>`;
-  const more = `<p class="bdesc">${A.desc}.</p>
-    ${B.title ? `<p class="fine htitle">${B.full || B.name} · ${B.title}</p>` : ''}
+  const splash = ASSET_MANIFEST['hero.' + sel]?.splash, tierName = { champion: 'Champion', legendary: 'Legendary', ascendant: 'Ascendant', divine: 'Divine' }[B.tier] || '';
+  const more = `${splash ? `<div class="hsplash tier-${B.tier}"><img src="${splash}" alt="" loading="lazy"><div class="hsx"><span>${tierName} · ${C.role}</span><b>${B.full || B.name}</b><i>${B.title || ''}</i></div></div>` : ''}<p class="bdesc">${A.desc}.</p>
+    ${B.title && !splash ? `<p class="fine htitle">${B.full || B.name} · ${B.title}</p>` : ''}
     <div class="kit"><div><span>Super</span><b>${sup.name}</b><small>${sup.desc || 'Tap to auto-aim, drag to aim'}</small></div><div><span>Skill</span><b>${sk ? sk.name : '—'}</b><small>${sk ? sk.desc : ''}</small></div></div>
     ${have ? `<div class="mast"><div class="mrowh"><b>Mastery ${L}</b><span>${L >= 99 ? 'Maxed' : next ? `${next.name} badge at ${next.lvl}` : ''}</span></div><span class="mbar"><i style="--v:${(f * 100).toFixed(1)}%"></i></span>
       <small>${fmtK(xp)} xp · badges give +3% damage and +2% HP each</small></div>` : ''}

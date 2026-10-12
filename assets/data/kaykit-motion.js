@@ -30,6 +30,9 @@ export function createKayKitMotion(THREE, model, clips, def) {
   let previousX, previousZ;
   const lowerIdle = action('Idle', 'lower');
   lowerIdle.play(); lowerIdle.setEffectiveWeight(0);
+  // the gear tab's relaxed standing pose (hero-arms.js showcaseClip), faded in while e.showcase is set
+  const pose = action('Showcase'); let posed = 0;
+  if (pose) pose.play().setEffectiveWeight(0);
   function trigger(name, duration) {
     const next = action(name, 'upper');
     if (!next) return;
@@ -48,7 +51,7 @@ export function createKayKitMotion(THREE, model, clips, def) {
         dead = true; death = action('Death_A');
         if (death) { mixer.stopAllAction(); death.reset().setLoop(THREE.LoopOnce, 1).play(); death.clampWhenFinished = true; }
       }
-      if (dead && e.alive !== false) { dead = false; mixer.stopAllAction(); idle.reset().play(); lowerIdle.reset().play(); for(const r of runs){r.full.reset().play();r.lower.reset().play()} overlay = dodge = null; }
+      if (dead && e.alive !== false) { dead = false; mixer.stopAllAction(); idle.reset().play(); lowerIdle.reset().play(); if (pose) pose.reset().play(); for(const r of runs){r.full.reset().play();r.lower.reset().play()} overlay = dodge = null; }
       if (dead) { mixer.update(dt); return; }
       move += (Math.min(1, Math.max(0, e.moveAmt || 0)) - move) * (1 - Math.exp(-dt * 12));
       // Every shot has an event timestamp; remote peers use the attack impulse.
@@ -70,7 +73,9 @@ export function createKayKitMotion(THREE, model, clips, def) {
         overlay.setEffectiveWeight(overlayWeight);
         if (overlayAge >= overlayDuration) { overlay.stop(); overlay = null; }
       }
-      const body = dodge ? 0 : 1;
+      posed += ((e.showcase && pose ? 1 : 0) - posed) * (1 - Math.exp(-dt * 6));
+      if (pose) pose.setEffectiveWeight(posed * (1 - overlayWeight));
+      const body = (dodge ? 0 : 1) * (1 - posed);
       idle.setEffectiveWeight((1 - move) * (1 - overlayWeight) * body);
       lowerIdle.setEffectiveWeight((1 - move) * overlayWeight * body);
       if (overlay) overlay.setEffectiveWeight(overlayWeight * body);

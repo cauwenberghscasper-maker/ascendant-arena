@@ -137,8 +137,8 @@ function tierOf(L) { let t = -1; CFG.badges.forEach((b, i) => { if (L >= b.lvl) 
 // brawler portrait: body-colored disc, weapon icon, rim in the earned badge metal
 function brawlerPortrait(id, owned, size) {
   const B = CFG.brawlers[id], p = G.profile, t = owned ? tierOf(masteryOf(p, id)) : -1;
-  const img = brawlerThumb(id);
-  return `<span class="bport ${owned ? '' : 'locked'} ${t >= 0 ? METAL[t] : ''}" style="--bc:${hex(B.body)};--ba:${hex(B.accent)};${size ? `--sz:${size}px` : ''}">${img ? `<img src="${img}" alt="">` : gi('b_' + id)}<span class="wchip">${gi('b_' + id)}</span>${owned ? '' : gi('m_lock', 'lk')}</span>`;
+  const img = brawlerThumb(id), art = ASSET_MANIFEST['hero.' + id]?.splash ? 'art' : '';
+  return `<span class="bport ${art} ${owned ? '' : 'locked'} ${t >= 0 ? METAL[t] : ''}" style="--bc:${hex(B.body)};--ba:${hex(B.accent)};${size ? `--sz:${size}px` : ''}">${img ? `<img src="${img}" alt="">` : gi('b_' + id)}<span class="wchip">${gi('b_' + id)}</span>${owned ? '' : gi('m_lock', 'lk')}</span>`;
 }
 
 // --- Menu tiles ---------------------------------------------------------------------------------
@@ -324,8 +324,9 @@ function openBrawlers(sel) {
   const sup = CFG.supers[C.super], sk = CFG.skills[C.skill];
   const free = have ? treeFree(p, sel) : 0, tp = have ? treeOf(p, sel).total : 0;
   const summary = `${brawlerPortrait(sel, have, 68)}<div class="sx"><b>${B.name}${sel === p.cls ? ' · playing' : ''}</b><small>${C.role} · ${A.name}</small><small>${have ? `Mastery ${L}${t >= 0 ? ' · ' + CFG.badges[t].title : ''} · ${free > 0 ? `<span style="color:#ffc94a">${free} tree points free</span>` : `${tp} tree points`}` : `${gi('m_lock')} ${unlockText(A.unlock)}`}</small></div>`;
-  const more = `<p class="bdesc">${A.desc}.</p>
-    ${B.title ? `<p class="fine htitle">${B.full || B.name} · ${B.title}</p>` : ''}
+  const splash = ASSET_MANIFEST['hero.' + sel]?.splash, tierName = { champion: 'Champion', legendary: 'Legendary', ascendant: 'Ascendant', divine: 'Divine' }[B.tier] || '';
+  const more = `${splash ? `<div class="hsplash tier-${B.tier}"><img src="${splash}" alt="" loading="lazy"><div class="hsx"><span>${tierName} · ${C.role}</span><b>${B.full || B.name}</b><i>${B.title || ''}</i></div></div>` : ''}<p class="bdesc">${A.desc}.</p>
+    ${B.title && !splash ? `<p class="fine htitle">${B.full || B.name} · ${B.title}</p>` : ''}
     <div class="kit"><div><span>Super</span><b>${sup.name}</b><small>${sup.desc || 'Tap to auto-aim, drag to aim'}</small></div><div><span>Skill</span><b>${sk ? sk.name : '—'}</b><small>${sk ? sk.desc : ''}</small></div></div>
     ${have ? `<div class="mast"><div class="mrowh"><b>Mastery ${L}</b><span>${L >= 99 ? 'Maxed' : next ? `${next.name} badge at ${next.lvl}` : ''}</span></div><span class="mbar"><i style="--v:${(f * 100).toFixed(1)}%"></i></span>
       <small>${fmtK(xp)} xp · badges give +3% damage and +2% HP each</small></div>` : ''}

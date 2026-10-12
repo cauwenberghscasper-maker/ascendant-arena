@@ -101,7 +101,7 @@ const studioFill = new THREE.DirectionalLight(0xafd6ed,1.1); studioFill.visible=
 function setShowcase(on) {
   if (on === Showcase.on) return;
   const pl = G.player;
-  Showcase.on = on;
+  Showcase.on = on; if (pl) pl.showcase = on; // the hero stands in its relaxed gear-tab pose
   studioFill.visible=on; Doll.alertAt=0;
   if (on) {
     Showcase.x = pl.x; Showcase.z = pl.z; Showcase.spin = 0; Showcase.podium = 0.3;
