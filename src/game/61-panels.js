@@ -383,24 +383,26 @@ function openRiftPanel() {
     <p class="fine">Checkpoints every 5 floors. If you fall or the time runs out, the run ends and you keep everything you earned.</p></div>
     <div class="row end"><button class="ghost" data-act="riftGo" data-f="1">Start at floor 1</button>${cp > 1 ? `<button class="primary big" data-act="riftGo" data-f="${cp}">Start at floor ${cp}</button>` : '<button class="primary big" data-act="riftGo" data-f="1">Enter the Rift</button>'}</div>`);
 }
-// Dungeons: a sealed instance per POI. Three guarded halls, a mini-boss and a chest on a 20 min cooldown.
+// Dungeons: a sealed instance per POI. Pick a plain run or one of your Dungeon Keys (it is used up on entry).
 function openDungeonPanel(poi) {
   UI.current = 'dungeon';
-  const p = G.profile, req = dungeonReq(poi), lvl = dungeonLevel(poi), rec = (p.dungeons || {})[poi.id], left = rec && rec.clears ? dungeonCdLeft(poi.id) : 0, nm = escapeHTML(poi.name);
+  const p = G.profile, req = dungeonReq(poi), V = dungeonVariant(poi.id), lvl = dungeonLevel(poi), rec = (p.dungeons || {})[poi.id], nm = escapeHTML(poi.name), id = escapeHTML(poi.id), keys = p.keys || [];
   if (p.level < req) { openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>${nm}</h3></div><p class="say">The seal holds against heroes below level ${req}. Come back stronger.</p>`); return; }
+  const keyBtns = keys.map((k, i) => `<button class="ghost" data-act="dungeonGo" data-id="${id}" data-key="${i}" title="${k.a.map((a) => CFG.dungeon.keys.affixes[a].d).join(' · ')}">${escapeHTML(keyName(k))} (Lv ${dungeonLevel(poi, k)})</button>`).join('');
   openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>${nm}</h3><span class="cnt">Lv ${lvl}</span></div>
-    <div class="riftCard"><p>Three guarded halls and a mini-boss. Each door opens once its hall is cleared. Monsters here are <b>level ${lvl}</b>, tougher and harder-hitting than outside; the boss calls for help at half health.</p>
-    <p>${left > 0 ? `Chest recharging · ${Math.ceil(left / 60)} min left. Until then the chest holds only XP and gold.` : `Chest ready: guaranteed <b>${poi.zone >= CFG.dungeon.chest.epicFrom ? 'Epic' : 'Rare'} or better</b> gear, gems, shards and a chance at a treasure chest.`}</p>
-    <p class="fine">Cleared ${rec ? rec.clears : 0} times. Falling or leaving resets the dungeon. You enter fully healed.</p></div>
-    <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="dungeonGo" data-id="${escapeHTML(poi.id)}">Enter ${nm} (Lv ${lvl})</button></div>`);
+    <div class="riftCard"><p>${V.blurb}. Each door opens once its hall is cleared. Monsters here are <b>level ${lvl}</b>, tougher and harder-hitting than outside; the boss calls for help at half health.</p>
+    <p>${rec && rec.clears ? 'A plain run pays XP, gold and a <b>Tier 1 Dungeon Key</b>.' : `First clear: guaranteed <b>${poi.zone >= CFG.dungeon.chest.epicFrom ? 'Epic' : 'Rare'} or better</b> gear, gems, shards and a Dungeon Key.`} <b>Keyed runs</b> always fill the chest, and every tier adds a monster level and better loot. Beat the par time (${Math.floor(V.par / 60)}:${String(V.par % 60).padStart(2, '0')}) and the key comes back up to 3 tiers higher.</p>
+    <p class="fine">Cleared ${rec ? rec.clears : 0} times · best key tier here ${rec && rec.best || 0} · your best ever ${p.records.bestKey || 0}. Falling or leaving returns your key one tier lower. You enter fully healed.</p></div>
+    ${keyBtns ? `<div class="row">${keyBtns}</div>` : ''}
+    <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="dungeonGo" data-id="${id}">Enter ${nm} (Lv ${lvl})</button></div>`);
 }
 function openDungeonChest() {
   const r = claimDungeonChest(); if (!r) return;
   UI.current = 'dungeonChest'; Sfx.play('win');
   const rows = r.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('');
-  openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared</div><h2>${r.full ? 'Dungeon chest' : 'Chest recharging'}</h2></div>
+  openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
-    ${rows ? `<div class="list">${rows}</div>` : `<p class="fine">Gear, gems and shards return in ${Math.round(r.cd / 60)} min.</p>`}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}
+    ${rows ? `<div class="list">${rows}</div>` : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
 function openRiftResult(r) {
@@ -561,7 +563,7 @@ function handlePanelClick(e) {
     case 'travel': UI.close(); travelTo(+b.dataset.i); break;
     case 'tier': if (setWorldTier(+b.dataset.t)) openWaypoints(); break;
     case 'riftGo': UI.close(); startRift(+b.dataset.f); break;
-    case 'dungeonGo': { UI.close(); const po = dungeonPois().find((x) => x.id === b.dataset.id); if (!startDungeon(po)) toast('Finish your challenge first', 'bad'); break; }
+    case 'dungeonGo': { UI.close(); const po = dungeonPois().find((x) => x.id === b.dataset.id); if (!startDungeon(po, b.dataset.key != null ? +b.dataset.key : null)) toast('Finish your challenge first', 'bad'); break; }
     case 'offline': claimOffline(G.offline); UI.close(); break;
     case 'tBoss': TestTools.boss(); UI.close(); toast('World boss is on its way'); break;
     case 'tUnlock': TestTools.unlockAll(); break;

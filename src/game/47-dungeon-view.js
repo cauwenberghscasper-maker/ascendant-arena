@@ -22,7 +22,7 @@ function buildDungeonView(D) {
     if (len > 7) for (let k = 1, n = Math.floor(len / 7); k <= n; k++) torches.push([lerp(w.x0, w.x1, k / (n + 1)), lerp(w.z0, w.z1, k / (n + 1))]);
   }
   // pillars in the boss hall
-  const B = D.rooms[3]; for (const sx of [-1, 1]) for (const sz of [-1, 1]) parts.push(part(GEO.cyl8, pal.trim, [B.x + sx * (B.h - 3), 1.8, B.z + sz * (B.h - 3)], null, [0.9, 3.6, 0.9]));
+  const B = D.rooms.at(-1); for (const sx of [-1, 1]) for (const sz of [-1, 1]) parts.push(part(GEO.cyl8, pal.trim, [B.x + sx * (B.h - 3), 1.8, B.z + sz * (B.h - 3)], null, [0.9, 3.6, 0.9]));
   for (const [x, z] of torches) parts.push(part(GEO.box, 0x3a2a1e, [x, 2.1, z], null, [0.25, 0.6, 0.25]));
   const masonry = new THREE.Mesh(mergeParts(parts), matVC); masonry.receiveShadow = true; dungeonGroup.add(masonry);
   // torch flames share one additive mesh so the flicker is a single opacity change

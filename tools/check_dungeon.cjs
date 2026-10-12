@@ -28,7 +28,8 @@ function reset(level = 60) {
   events.length = 0; for (const k in grants) grants[k] = k === 'items' ? [] : 0;
 }
 const dun = W.pois.filter((p) => p.kind === 'dungeon');
-assert.equal(dun.length, W.zones.length - 3); assert(dun.every((p) => /^a\d\d:dungeon:0$/.test(p.id) && p.lvl === W.zones[p.zone].lvl[1]));
+assert.equal(dun.length, (W.zones.length - 1) * 3); assert(dun.every((p) => /^a\d\d:dungeon:[012]$/.test(p.id) && p.lvl === W.zones[p.zone].lvl[1]));
+const VR = (p) => D0.variants[+p.id.slice(-1)];
 function enter(poi, level) { reset(level); Object.assign(c.G.player, { x: poi.x + 1, z: poi.z + 1 }); assert(c.startDungeon(poi)); return c.G.dungeon; }
 function walkable(D, x, z) { const f = { x, z }; c.dungeonClamp(f, 0.55); return f.x === x && f.z === z && !c.pointBlocked(x, z, 0.55); }
 function reach(D) {
@@ -43,10 +44,10 @@ check('only dungeon POIs are listed and layouts are deterministic per id', () =>
   const shapes = new Set();
   for (const p of dun) {
     const a = c.dungeonLayout(p.id), b = c.dungeonLayout(p.id); assert.deepEqual(JSON.parse(JSON.stringify(a)), JSON.parse(JSON.stringify(b)));
-    assert.equal(a.rooms.length, 4); assert.equal(a.cors.length, 3); assert.equal(a.doors.length, 3);
-    assert(a.rooms.slice(0, 3).every((m) => m.x1 - m.x0 === D0.room)); assert.equal(a.rooms[3].h, D0.bossR);
+    const n = VR(p).counts.length; assert.equal(a.rooms.length, n + 1); assert.equal(a.cors.length, n); assert.equal(a.doors.length, n);
+    assert(a.rooms.slice(0, n).every((m) => m.x1 - m.x0 === D0.room)); assert.equal(a.rooms[n].h, D0.bossR); assert(a.rooms[n].boss);
     for (const cr of a.cors) assert.equal(cr.ax === 'z' ? cr.z1 - cr.z0 : cr.x1 - cr.x0, D0.corridor);
-    for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) { const m = a.rooms[i], o = a.rooms[j]; assert(!(m.x0 < o.x1 && m.x1 > o.x0 && m.z0 < o.z1 && m.z1 > o.z0), 'rooms never overlap'); }
+    for (let i = 0; i < a.rooms.length; i++) for (let j = i + 1; j < a.rooms.length; j++) { const m = a.rooms[i], o = a.rooms[j]; assert(!(m.x0 < o.x1 && m.x1 > o.x0 && m.z0 < o.z1 && m.z1 > o.z0), 'rooms never overlap'); }
     shapes.add(a.rooms.map((m) => [m.x - c.DC.x, m.z - c.DC.z].join()).join('|'));
   }
   assert(shapes.size > 1, 'different ids give different layouts');
@@ -54,28 +55,28 @@ check('only dungeon POIs are listed and layouts are deterministic per id', () =>
 check('every room is reachable with doors open, and a locked door seals the next hall', () => {
   for (const p of dun) {
     const D = enter(p, 210);
-    const shut = reach(D); assert(shut(D.rooms[0]), 'first hall is open'); assert(!shut(D.rooms[1]), 'door 1 blocks hall 2'); assert(!shut(D.rooms[3]));
+    const shut = reach(D); assert(shut(D.rooms[0]), 'first hall is open'); assert(!shut(D.rooms[1]), 'door 1 blocks hall 2'); assert(!shut(D.rooms.at(-1)));
     for (const d of D.doors) d.open = true; c.dungeonGrid(D);
     const ok = reach(D); for (const m of D.rooms) assert(ok(m), `room ${m.i} of ${p.id} reachable`); assert(ok(D.chest)); assert(ok(D.exit)); assert(ok(D.exit2));
     c.endDungeon('leave');
   }
 });
-check('entry: full heal, own obstacle grid, rooms hold 6/7/8 monsters plus a 2-mod mini-boss, ~25% elites', () => {
-  let elites = 0, mobs = 0;
+check('entry: full heal, own obstacle grid, halls hold the variant counts plus its mini-boss; Caves ~25% elites, Sanctum mostly elites', () => {
+  let elites = 0, mobs = 0, sElites = 0, sMobs = 0;
   for (const p of dun) {
     const D = enter(p, 210), pl = c.G.player;
     assert.equal(pl.hp, pl.maxHp); assert.equal(c.G.obstacles, c.G.dungeonObstacles); assert.notEqual(c.G.obstacles, c.G.hubObstacles); assert(c.inInstance());
-    assert.deepEqual([...D.rooms.slice(0, 3).map((m) => m.mobs.length)], [...D0.counts]); assert.equal(D.boss.champ.mods.length, D0.boss.mods); assert(!D.boss.rift && D.boss.dungeon);
+    const V = VR(p), n = V.counts.length; assert.deepEqual([...D.rooms.slice(0, n).map((m) => m.mobs.length)], [...V.counts]); assert.equal(D.boss.champ.mods.length, V.mods); assert(!D.boss.rift && D.boss.dungeon);
     assert(D.mobs.every((e) => c.G.enemies.includes(e) && c.G.ents.get(e.id) === e && e.dungeon && !e.rift));
     for (const m of D.rooms) for (const e of m.mobs) assert(c.inRoom(m, e.x, e.z), 'monsters spawn inside their hall');
     assert(D.rooms[0].mobs.every((e) => Math.hypot(e.x - pl.x, e.z - pl.z) > 5), 'no monster on the arrival point');
-    for (const m of D.rooms.slice(0, 3)) for (const e of m.mobs) { mobs++; if (e.elite) elites++; }
+    for (const m of D.rooms.slice(0, n)) for (const e of m.mobs) if (V === D0.variants[0]) { mobs++; if (e.elite) elites++; } else if (V === D0.variants[2]) { sMobs++; if (e.elite) sElites++; }
     assert.deepEqual({ ...D.enterPos }, { x: p.x + 1, z: p.z + 1 }); c.endDungeon('leave');
   }
-  assert(elites / mobs > 0.12 && elites / mobs < 0.4, 'elite share ' + elites / mobs);
+  assert(elites / mobs > 0.12 && elites / mobs < 0.4, 'elite share ' + elites / mobs); assert(sElites / sMobs > 0.45, 'sanctum elite share ' + sElites / sMobs);
 });
-check('difficulty: level max(area max, hero)+4+tier, hp x1.5, damage x1.25; boss hp x12 and damage x1.5 through mobDmg', () => {
-  const p = dun[5];
+check('difficulty: level max(area max, hero)+4+tier, hp x1.5, damage x1.25; Caves boss hp x12 and damage x1.5 through mobDmg', () => {
+  const p = dun.filter((x) => x.id.endsWith(':0'))[5];
   for (const [level, tier] of [[1, 0], [p.lvl + 30, 0], [80, 2]]) {
     reset(level); c.G.profile.worldTier = tier; Object.assign(c.G.player, { x: p.x, z: p.z });
     if (level < c.dungeonReq(p)) { assert(!c.startDungeon(p), 'level requirement = area unlock'); c.G.profile.level = c.dungeonReq(p); }
@@ -102,7 +103,7 @@ check('dungeon monsters never respawn and stay inside the halls', () => {
   c.endDungeon('leave');
 });
 check('doors unlock as halls clear; boss summons adds at half health; chest after the boss', () => {
-  const D = enter(dun[4], 100), cnt = () => c.G.dungeonObstacles.list.length, n0 = cnt();
+  const D = enter(dun.find((p) => p.id.endsWith(':0')), 100), cnt = () => c.G.dungeonObstacles.list.length, n0 = cnt();
   c.stepDungeon(1 / 60); assert(D.doors.every((d) => !d.open));
   D.rooms[0].mobs.forEach((e) => { e.alive = false; }); c.stepDungeon(1 / 60);
   assert(D.doors[0].open && !D.doors[1].open && D.rooms[0].cleared); assert(cnt() < n0); assert.equal(c.G.obstacles, c.G.dungeonObstacles);
@@ -120,25 +121,48 @@ check('doors unlock as halls clear; boss summons adds at half health; chest afte
   c.endDungeon('leave'); assert(!c.G.enemies.some((e) => e.dungeon)); assert(![...c.G.ents.values()].some((e) => e.dungeon));
 });
 function clear(D) { for (const e of D.mobs) e.alive = false; c.stepDungeon(1 / 60); assert(D.bossDead); }
-check('chest: rare+ items at ilvl +4 (epic+ from area 15), gems, shards; 20 min cooldown per id leaves only XP and gold', () => {
+check('chest: first clear rare+ items at ilvl +4 (epic+ from area 15), gems, shards and a Tier 1 key; a plain repeat pays XP, gold and a key', () => {
   for (const p of [dun[0], dun.find((x) => x.zone >= 15)]) {
     let D = enter(p, 90); clear(D); const r = c.claimDungeonChest();
     assert(r.full); assert.equal(r.items.length, D0.chest.items); assert(r.items.every((it) => c.rarIdx(it.rarity) >= (p.zone >= 15 ? 3 : 2) && it.ilvl === Math.max(p.lvl, 90) + 4));
     assert(grants.gems > 0 && grants.shards > 0 && grants.xp > 0 && grants.gold > 0); assert.equal(c.claimDungeonChest(), null, 'one chest per run');
-    const rec = c.G.profile.dungeons[p.id]; assert.equal(rec.clears, 1); assert(Date.now() - rec.t < 5000);
-    const prof = c.G.profile; c.endDungeon('leave');
-    // a second clear inside the cooldown: XP and gold only
+    assert.equal(r.key.t, 1); assert.equal(c.G.profile.keys.length, 1);
+    const rec = c.G.profile.dungeons[p.id]; assert.equal(rec.clears, 1);
+    const prof = c.G.profile; c.endDungeon('leave'); assert.equal(prof.keys.length, 1, 'a cleared plain run gives nothing back on leaving');
     reset(90); c.G.profile = prof; Object.assign(c.G.player, { x: p.x, z: p.z }); assert(c.startDungeon(p)); D = c.G.dungeon; clear(D);
-    assert(c.dungeonCdLeft(p.id) > D0.cooldown - 10); const r2 = c.claimDungeonChest();
+    const r2 = c.claimDungeonChest();
     assert(!r2.full && !r2.items.length && !r2.gems && grants.items.length === 0 && grants.shards === 0 && grants.xp > 0 && grants.gold > 0); assert.equal(prof.dungeons[p.id].clears, 2);
-    c.endDungeon('leave');
-    // the cooldown is per dungeon id and expires
-    prof.dungeons[p.id].t = Date.now() - (D0.cooldown + 1) * 1000; assert.equal(c.dungeonCdLeft(p.id), 0);
-    reset(90); c.G.profile = prof; Object.assign(c.G.player, { x: p.x, z: p.z }); assert(c.startDungeon(p)); clear(c.G.dungeon); assert(c.claimDungeonChest().full); c.endDungeon('leave');
+    assert.equal(prof.keys.length, 2); c.endDungeon('leave');
   }
   // the 10% case roll lands about one run in ten
   let cases = 0; for (let i = 0; i < 200; i++) { const D = enter(dun[1], 60); clear(D); cases += c.claimDungeonChest().case ? 1 : 0; c.endDungeon('leave'); }
   assert(cases > 6 && cases < 40, 'case rolls ' + cases);
+});
+check('keys: used up on entry, +1 monster level per tier, affixes apply; par time sets the upgrade; failing hands it back one tier lower', () => {
+  const p = dun.find((x) => x.id.endsWith(':2')), par = VR(p).par;
+  const run = (key, secs) => { reset(90); c.G.profile.keys = [key]; Object.assign(c.G.player, { x: p.x, z: p.z }); const base = c.dungeonLevel(p);
+    assert(c.startDungeon(p, 0)); const D = c.G.dungeon; assert.equal(c.G.profile.keys.length, 0, 'key consumed'); assert.equal(D.lvl, base + key.t);
+    if (secs == null) return D; c.G.time = secs; clear(D); return D; };
+  for (const [secs, up] of [[par * 0.4, 3], [par * 0.7, 2], [par * 0.95, 1], [par * 2, 0]]) {
+    const D = run({ t: 6, a: [] }, secs); assert.equal(D.newKey.t, 6 + up, `clear in ${secs}s`); assert.equal(c.G.profile.keys[0].t, 6 + up);
+    assert(events.some((x) => x.t === 'dungeonBoss' && x.up === up)); c.endDungeon('leave'); assert.equal(c.G.profile.keys.length, 1);
+  }
+  let D = run({ t: 6, a: [] }); c.endDungeon('leave'); assert.equal(c.G.profile.keys[0].t, 5, 'leaving early: one tier lower');
+  D = run({ t: 1, a: [] }); c.G.player.alive = false; c.stepDungeon(1 / 60); assert.equal(c.G.profile.keys[0].t, 1, 'never below tier 1');
+  // keyed chest: always full, ilvl and gems grow with tier, tier 15+ floors at legendary, Bountiful adds an item
+  D = run({ t: 15, a: ['bountiful', 'gilded'] }, 1); const r = c.claimDungeonChest();
+  assert(r.full); assert.equal(r.items.length, Math.min(6, D0.chest.items + 3) + 1); assert(r.items.every((it) => c.rarIdx(it.rarity) >= 4 && it.ilvl === 90 + 4 + 15));
+  assert.equal(c.G.profile.records.bestKey, 18); assert.equal(c.G.profile.dungeons[p.id].best, 15); c.endDungeon('leave');
+  // Bulwark / Brutal / Swift reach every monster
+  D = run({ t: 3, a: ['bulwark', 'brutal', 'swift'] }); const plain = (() => { c.endDungeon('leave'); return run({ t: 3, a: [] }); })();
+  c.endDungeon('leave'); D = run({ t: 3, a: ['bulwark', 'brutal', 'swift'] });
+  const e = D.rooms[0].mobs[0], ref = { type: e.type, elite: e.elite }; c.setEnemyLevel(ref, D.lvl);
+  assert(Math.abs(e.maxHp / Math.round(ref.maxHp * 1.5) - 1.4) < 0.01); assert(Math.abs(e.atk / ref.atk - 1.25 * 1.3) < 1e-9); assert.equal(e.spd, 1.2); assert(plain.rooms[0].mobs.every((m) => !m.spd));
+  c.endDungeon('leave');
+  // the key list stays sorted best-first and capped
+  reset(90); for (let t = 1; t <= 20; t++) c.addKey(c.makeKey(t)); const ks = c.G.profile.keys;
+  assert.equal(ks.length, D0.keys.max); assert.equal(ks[0].t, 20); assert(ks.every((k, i) => !i || ks[i - 1].t >= k.t)); assert(ks.every((k) => k.a.length === Math.min(3, 1 + Math.floor(k.t / 8)) && new Set(k.a).size === k.a.length));
+  assert(!c.startDungeon(p, 99), 'missing key index refuses entry');
 });
 check('instances exclude each other, shrines and world tier changes; boss timer pauses inside', () => {
   reset(60); const p = dun[3]; Object.assign(c.G.player, { x: p.x, z: p.z });

@@ -585,7 +585,7 @@ function stepEnemy(e, dt) {
     e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.3 * dt);
     if (!plSafe && dp < d.aggro * 0.6) e.state = 'chase';
   }
-  const spm = e.rift ? 1 : CFG.enemies.speedMult || 1; e.x += mx * sp * slow * spm * dt; e.z += mz * sp * slow * spm * dt;
+  const spm = (e.rift ? 1 : CFG.enemies.speedMult || 1) * (e.spd || 1); e.x += mx * sp * slow * spm * dt; e.z += mz * sp * slow * spm * dt;
   e.moveAmt = lerp(e.moveAmt || 0, sp > 0 ? Math.min(1, sp / d.speed) : 0, 1 - Math.exp(-dt * 10));
   if (sp > 0 && e.state !== 'chase') e.facing = Math.atan2(mx, mz);
   e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);

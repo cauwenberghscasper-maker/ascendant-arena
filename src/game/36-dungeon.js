@@ -1,33 +1,50 @@
-// --- Dungeons: one sealed instance per dungeon POI. Three guarded halls, each door opens when its hall is
-// cleared, then a mini-boss room with a reward chest. Like the Rift it stays in G.mode 'hub' (G.dungeon set).
+// --- Dungeons: one sealed instance per dungeon POI (three per area: Caves, Warrens, Sanctum). Guarded halls,
+// each door opens when its hall is cleared, then a mini-boss room with a reward chest. Like the Rift it stays in
+// G.mode 'hub' (G.dungeon set). Dungeon Keys (tier + affixes) push the same dungeon higher forever.
 const DC = { x: 0, z: -1800 }; // dungeon instance centre (arena −1000, rift −1400)
 CFG.dungeon = {
-  room: 18, corridor: 8, corW: 5, bossR: 16, wallR: 0.5, counts: [6, 7, 8], eliteChance: 0.25,
-  lvlAdd: 4, hpMul: 1.5, dmgMul: 1.25, boss: { mods: 2, hp: 12, dmg: 1.5, adds: 2, lvlAdd: 2 },
-  cooldown: 1200, interactR: 3.6, bossBlock: 30,
+  room: 18, corridor: 8, corW: 5, bossR: 16, wallR: 0.5,
+  lvlAdd: 4, hpMul: 1.5, dmgMul: 1.25, boss: { dmg: 1.5, adds: 2, lvlAdd: 2 },
+  // poi n picks the variant: hall sizes, elite share, boss affixes and HP, par time in seconds
+  variants: [
+    { name: 'Caves', counts: [6, 7, 8], elite: 0.25, mods: 2, hp: 12, par: 150, blurb: 'Three guarded halls and a mini-boss' },
+    { name: 'Warrens', counts: [9, 9, 10, 10], elite: 0.1, mods: 2, hp: 10, par: 210, blurb: 'Four crowded halls of swarming monsters and a mini-boss' },
+    { name: 'Sanctum', counts: [4, 5], elite: 0.6, mods: 3, hp: 16, par: 120, blurb: 'Two halls of elites and a three-affix guardian' },
+  ],
+  interactR: 3.6, bossBlock: 30,
   chest: { items: 2, ilvlAdd: 4, epicFrom: 15, gems: [6, 10], shards: [3, 5], caseChance: 0.1, xpFrac: 0.35, gold: [40, 8] },
+  // Dungeon Keys: +1 monster level per tier. Clear under par: the key comes back 1-3 tiers higher; fall or leave: one tier lower.
+  keys: { max: 12, affixes: {
+    bulwark: { name: 'Bulwark', d: 'Monsters +40% HP', bad: true }, brutal: { name: 'Brutal', d: 'Monsters +30% damage', bad: true }, swift: { name: 'Swift', d: 'Monsters +20% speed', bad: true },
+    gilded: { name: 'Gilded', d: '+50% gold' }, bountiful: { name: 'Bountiful', d: '+1 gear item' }, lucky: { name: 'Lucky', d: '+25% treasure chest chance' } } },
 };
+const dungeonVariant = (id) => CFG.dungeon.variants[+String(id).slice(-1)] || CFG.dungeon.variants[0];
+function rollKeyAffixes(t) { const all = Object.keys(CFG.dungeon.keys.affixes), out = []; for (let n = Math.min(3, 1 + Math.floor(t / 8)); out.length < n;) { const a = pick(all); if (!out.includes(a)) out.push(a); } return out; }
+function makeKey(t) { t = Math.max(1, t | 0); return { t, a: rollKeyAffixes(t) }; }
+// keys stay sorted best-first; past the cap the lowest tier falls off
+function addKey(k) { const p = G.profile, ks = p.keys || (p.keys = []); ks.push(k); ks.sort((a, b) => b.t - a.t); ks.length = Math.min(ks.length, CFG.dungeon.keys.max); p.records.bestKey = Math.max(p.records.bestKey || 0, k.t); G.dirty = true; return k; }
+const keyName = (k) => `Tier ${k.t} Key` + (k.a.length ? ' · ' + k.a.map((a) => CFG.dungeon.keys.affixes[a].name).join(', ') : '');
+const keyHas = (D, a) => !!(D.key && D.key.a.includes(a));
 function dungeonPois() { return (CFG.world.pois || []).filter((p) => p.kind === 'dungeon'); }
-function dungeonLevel(poi) { return Math.max(poi.lvl, G.profile.level) + CFG.dungeon.lvlAdd + tierAdd(); }
+function dungeonLevel(poi, key) { return Math.max(poi.lvl, G.profile.level) + CFG.dungeon.lvlAdd + tierAdd() + (key ? key.t : 0); }
 function dungeonReq(poi) { return (CFG.world.zones[poi.zone] || {}).minLevel || 1; }
-function dungeonCdLeft(id, now) { const r = (G.profile.dungeons || {})[id]; return r ? Math.max(0, CFG.dungeon.cooldown - ((now || Date.now()) - r.t) / 1000) : 0; }
 function strSeed(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }
 // Deterministic per POI id: rooms walk north/east/west (never south, so the path cannot fold back onto itself).
 function dungeonLayout(id) {
-  const C = CFG.dungeon, rng = mulberry32(strSeed(id)), rooms = [], cors = [], walls = [], doors = [];
+  const C = CFG.dungeon, rng = mulberry32(strSeed(id)), rooms = [], cors = [], walls = [], doors = [], last = dungeonVariant(id).counts.length;
   const rect = (x, z, hx, hz) => ({ x0: x - hx, x1: x + hx, z0: z - hz, z1: z + hz });
-  for (let i = 0; i < 4; i++) {
-    const h = i === 3 ? C.bossR : C.room / 2;
+  for (let i = 0; i <= last; i++) {
+    const h = i === last ? C.bossR : C.room / 2;
     if (!i) { rooms.push(Object.assign(rect(DC.x, DC.z, h, h), { x: DC.x, z: DC.z, h, i, boss: false })); continue; }
     const a = rooms[i - 1], dirs = [[0, 1], [1, 0], [-1, 0]].sort(() => rng() - 0.5);
     let nr = null, dir = [0, 1];
     for (const d of dirs) {
       const s = a.h + C.corridor + h, x = a.x + d[0] * s, z = a.z + d[1] * s, r = rect(x, z, h, h);
       if (rooms.some((o) => r.x0 < o.x1 + 3 && r.x1 > o.x0 - 3 && r.z0 < o.z1 + 3 && r.z1 > o.z0 - 3)) continue;
-      nr = Object.assign(r, { x, z, h, i, boss: i === 3 }); dir = d; break;
+      nr = Object.assign(r, { x, z, h, i, boss: i === last }); dir = d; break;
     }
     // north never overlaps (no room lies further north yet), so it is the safe fallback
-    if (!nr) { const z = a.z + a.h + C.corridor + h; nr = Object.assign(rect(a.x, z, h, h), { x: a.x, z, h, i, boss: i === 3 }); }
+    if (!nr) { const z = a.z + a.h + C.corridor + h; nr = Object.assign(rect(a.x, z, h, h), { x: a.x, z, h, i, boss: i === last }); }
     rooms.push(nr);
     // corridor from the edge of a to the edge of nr; w is its half width
     const w = C.corW / 2;
@@ -51,7 +68,7 @@ function dungeonLayout(id) {
   };
   for (const r of rooms) { edge(r.x0, r.z0, r.x1, r.z0); edge(r.x0, r.z1, r.x1, r.z1); edge(r.x0, r.z0, r.x0, r.z1); edge(r.x1, r.z0, r.x1, r.z1); }
   for (const c of cors) { if (c.ax === 'z') { seg(c.x0, c.z0, c.x0, c.z1); seg(c.x1, c.z0, c.x1, c.z1); } else { seg(c.x0, c.z0, c.x1, c.z0); seg(c.x0, c.z1, c.x1, c.z1); } }
-  const r0 = rooms[0], b = rooms[3];
+  const r0 = rooms[0], b = rooms[last];
   return { rooms, cors, walls, doors, start: { x: r0.x, z: r0.z0 + 4 }, exit: { x: r0.x - 4, z: r0.z0 + 2.2 }, chest: { x: b.x, z: b.z }, exit2: { x: b.x, z: b.z + 5 } };
 }
 // walls and locked doors as obstacle circles (rebuilt when a door opens: the Grid has no remove)
@@ -79,25 +96,30 @@ function dungeonClamp(f, r) {
 }
 function inRoom(m, x, z) { return x >= m.x0 && x <= m.x1 && z >= m.z0 && z <= m.z1; }
 function dungeonMob(D, type, lvl, room, o) {
-  const C = CFG.dungeon, B = C.boss, zi = D.zone;
+  const C = CFG.dungeon, B = C.boss, V = D.variant, zi = D.zone;
   let e;
-  if (o.boss) { e = makeChampion(type, zi, lvl, B.mods, false); delete e.rift; delete e.riftLvl; e.state = 'idle'; e.r *= 1.25; }
+  if (o.boss) { e = makeChampion(type, zi, lvl, V.mods, false); delete e.rift; delete e.riftLvl; e.state = 'idle'; e.r *= 1.25; }
   else e = makeEnemy(type, zi, { elite: !!o.elite });
   e.dungeon = true; e.temp = true; e.room = room;
   setEnemyLevel(e, lvl);
-  if (o.boss) { e.maxHp = Math.round(e.maxHp / (e.elite ? CFG.enemies.elite.hp : 1) * C.hpMul * B.hp); e.atk *= B.dmg; e.dungeonBoss = true; }
+  if (o.boss) { e.maxHp = Math.round(e.maxHp / (e.elite ? CFG.enemies.elite.hp : 1) * C.hpMul * V.hp); e.atk *= B.dmg; e.dungeonBoss = true; }
   else { e.maxHp = Math.round(e.maxHp * C.hpMul); e.atk *= C.dmgMul; }
+  if (keyHas(D, 'bulwark')) e.maxHp = Math.round(e.maxHp * 1.4);
+  if (keyHas(D, 'brutal')) e.atk *= 1.3;
+  if (keyHas(D, 'swift')) e.spd = 1.2;
   e.hp = e.maxHp; // mobDmg scales from e.atk, so the ×dmgMul above reaches every hit
   e.x = e.hx = e.wx = o.x; e.z = e.hz = e.wz = o.z; if (o.chase) e.state = 'chase';
   G.enemies.push(e); D.mobs.push(e);
   return e;
 }
-function startDungeon(poi) {
-  const p = G.profile, pl = G.player;
-  if (!poi || poi.kind !== 'dungeon' || inInstance() || G.mode !== 'hub' || !pl.alive || activeShrine() || p.level < dungeonReq(poi)) return false;
+// keyIdx: index into profile.keys (consumed on entry) or null for a plain run
+function startDungeon(poi, keyIdx) {
+  const p = G.profile, pl = G.player, key = keyIdx != null ? (p.keys || [])[keyIdx] : null;
+  if (!poi || poi.kind !== 'dungeon' || inInstance() || G.mode !== 'hub' || !pl.alive || activeShrine() || p.level < dungeonReq(poi) || (keyIdx != null && !key)) return false;
   if (G.boss && Math.hypot(G.boss.x - pl.x, G.boss.z - pl.z) < CFG.dungeon.bossBlock) return false;
-  const C = CFG.dungeon, L = dungeonLayout(poi.id), lvl = dungeonLevel(poi), Z = CFG.world.zones[poi.zone];
-  const D = G.dungeon = Object.assign(L, { id: poi.id, poi, zone: poi.zone, lvl, room: 0, mobs: [], boss: null, bossDead: false, chestOpen: false, addsDone: false, enterPos: { x: pl.x, z: pl.z } });
+  if (key) { p.keys.splice(keyIdx, 1); G.dirty = true; }
+  const C = CFG.dungeon, V = dungeonVariant(poi.id), L = dungeonLayout(poi.id), lvl = dungeonLevel(poi, key), Z = CFG.world.zones[poi.zone];
+  const D = G.dungeon = Object.assign(L, { id: poi.id, poi, zone: poi.zone, variant: V, key, lvl, t0: G.time, clearT: 0, newKey: null, room: 0, mobs: [], boss: null, bossDead: false, chestOpen: false, addsDone: false, enterPos: { x: pl.x, z: pl.z } });
   dungeonGrid(D); clearProjectiles();
   pl.x = D.start.x; pl.z = D.start.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
   G.zoneIdx = poi.zone;
@@ -105,14 +127,14 @@ function startDungeon(poi) {
   D.rooms.forEach((m, i) => {
     m.mobs = []; m.cleared = false;
     if (m.boss) return;
-    for (let k = 0; k < C.counts[i]; k++) {
+    for (let k = 0; k < V.counts[i]; k++) {
       // the first hall keeps its southern half free: you arrive there
-      const x = rand(m.x0 + 3, m.x1 - 3), z = rand(i ? m.z0 + 3 : m.z + 1, m.z1 - 3), elite = Math.random() < C.eliteChance;
+      const x = rand(m.x0 + 3, m.x1 - 3), z = rand(i ? m.z0 + 3 : m.z + 1, m.z1 - 3), elite = Math.random() < V.elite;
       m.mobs.push(dungeonMob(D, roster(), lvl, i, { elite, x, z }));
     }
   });
-  const b = D.rooms[3]; D.boss = dungeonMob(D, Z.enemy, lvl + C.boss.lvlAdd, 3, { boss: true, x: b.x, z: b.z + 4 }); b.mobs = [D.boss];
-  ev({ t: 'dungeonStart', name: poi.name, lvl, x: pl.x, z: pl.z }); return true;
+  const n = D.rooms.length - 1, b = D.rooms[n]; D.boss = dungeonMob(D, V === C.variants[1] && Z.alt ? Z.alt : Z.enemy, lvl + C.boss.lvlAdd, n, { boss: true, x: b.x, z: b.z + 4 }); b.mobs = [D.boss];
+  ev({ t: 'dungeonStart', name: poi.name, lvl, key: key ? key.t : 0, x: pl.x, z: pl.z }); return true;
 }
 function stepDungeon(dt) {
   const D = G.dungeon, pl = G.player, C = CFG.dungeon;
@@ -129,10 +151,16 @@ function stepDungeon(dt) {
   const b = D.boss;
   if (b.alive && !D.addsDone && b.hp < b.maxHp * 0.5) {
     D.addsDone = true; const Z = CFG.world.zones[D.zone];
-    for (let k = 0; k < C.boss.adds; k++) { const a = (k / C.boss.adds) * Math.PI * 2; D.rooms[3].mobs.push(dungeonMob(D, Z.alt || Z.enemy, D.lvl, 3, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, chase: true })); }
+    for (let k = 0; k < C.boss.adds; k++) { const a = (k / C.boss.adds) * Math.PI * 2; D.rooms.at(-1).mobs.push(dungeonMob(D, Z.alt || Z.enemy, D.lvl, 3, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, chase: true })); }
     ev({ t: 'dungeonAdds', x: b.x, z: b.z });
   }
-  if (!b.alive && !D.bossDead) { D.bossDead = D.rooms[3].cleared = true; ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: D.poi.name }); }
+  if (!b.alive && !D.bossDead) {
+    D.bossDead = D.rooms.at(-1).cleared = true; D.clearT = G.time - D.t0;
+    // every clear pays a key: a plain run a Tier 1 key, a keyed run its key back 0-3 tiers higher by clear time
+    const par = D.variant.par, up = !D.key ? 0 : D.clearT <= par * 0.5 ? 3 : D.clearT <= par * 0.75 ? 2 : D.clearT <= par ? 1 : 0;
+    D.newKey = addKey(makeKey(D.key ? D.key.t + up : 1));
+    ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: D.poi.name, secs: Math.round(D.clearT), par, key: D.newKey.t, up });
+  }
 }
 function dungeonInteract(pl) {
   const D = G.dungeon, R = CFG.dungeon.interactR, near = (q) => Math.hypot(pl.x - q.x, pl.z - q.z) < R;
@@ -140,32 +168,34 @@ function dungeonInteract(pl) {
   if (near(D.exit) || (D.bossDead && near(D.exit2))) return { kind: 'dungeonLeave', label: 'Leave Dungeon' };
   return null;
 }
-// the chest: always XP and gold; gear, gems, shards and a case chance once per cooldown per dungeon
+// the chest: always XP and gold; gear, gems, shards and a case chance on a keyed run or the first clear of a dungeon.
+// Key tiers raise item count, item level, the rarity floor, gems and the chest chance.
 function claimDungeonChest() {
   const D = G.dungeon; if (!D || !D.bossDead || D.chestOpen) return null;
   D.chestOpen = true;
-  const p = G.profile, C = CFG.dungeon, K = C.chest, now = Date.now(), recs = p.dungeons || (p.dungeons = {});
-  const rec = recs[D.id] || (recs[D.id] = { t: 0, clears: 0 }), full = dungeonCdLeft(D.id, now) <= 0 || !rec.clears;
-  const L = Math.max(D.poi.lvl, p.level), res = { name: D.poi.name, full, xp: 0, gold: 0, items: [], gems: 0, shards: 0, case: false, cd: C.cooldown };
+  const p = G.profile, C = CFG.dungeon, K = C.chest, recs = p.dungeons || (p.dungeons = {});
+  const rec = recs[D.id] || (recs[D.id] = { t: 0, clears: 0 }), full = !!D.key || !rec.clears, t = D.key ? D.key.t : 0;
+  const L = Math.max(D.poi.lvl, p.level), res = { name: D.poi.name, full, xp: 0, gold: 0, items: [], gems: 0, shards: 0, case: false, key: D.newKey, tier: t };
   if (p.level < P.cap) { res.xp = Math.round(xpToNext(p.level) * K.xpFrac); addXp(res.xp, 'dungeon'); }
-  res.gold = Math.round((K.gold[0] + K.gold[1] * L) * Math.pow(CFG.enemies.goldGrowth, L - 1) * tierMul(curTier()).gold); addGold(res.gold);
+  res.gold = Math.round((K.gold[0] + K.gold[1] * L) * Math.pow(CFG.enemies.goldGrowth, L - 1) * tierMul(curTier()).gold * (keyHas(D, 'gilded') ? 1.5 : 1)); addGold(res.gold);
   if (full) {
-    const floor = D.zone >= K.epicFrom ? 'epic' : 'rare';
-    for (let i = 0; i < K.items; i++) {
+    const floor = t >= 15 ? 'legendary' : t >= 5 || D.zone >= K.epicFrom ? 'epic' : 'rare';
+    for (let i = 0, n = Math.min(6, K.items + Math.floor(t / 5)) + (keyHas(D, 'bountiful') ? 1 : 0); i < n; i++) {
       let r = rollLoot(D.zone, true); if (rarIdx(r) < rarIdx(floor)) r = floor;
-      const it = makeItem(pick(CFG.gear.slots), r, L + K.ilvlAdd); res.items.push(it); grantItem(it, 'shrine', { zone: D.zone });
+      const it = makeItem(pick(CFG.gear.slots), r, L + K.ilvlAdd + t); res.items.push(it); grantItem(it, 'shrine', { zone: D.zone });
     }
-    res.gems = Math.round((randInt(K.gems[0], K.gems[1]) + Math.floor(L / 10)) * tierMul(curTier()).gems); addEssence(res.gems);
+    res.gems = Math.round((randInt(K.gems[0], K.gems[1]) + Math.floor(L / 10)) * tierMul(curTier()).gems * (1 + 0.1 * t)); addEssence(res.gems);
     res.shards = randInt(K.shards[0], K.shards[1]); dropShards(res.shards);
-    if (Math.random() < K.caseChance) { res.case = true; addCase('treasure', { l: L + K.ilvlAdd, src: 'dungeon' }); }
-    rec.t = now;
+    if (Math.random() < Math.min(0.6, K.caseChance + 0.02 * t) + (keyHas(D, 'lucky') ? 0.25 : 0)) { res.case = true; addCase('treasure', { l: L + K.ilvlAdd + t, src: 'dungeon' }); }
+    rec.t = Date.now();
   }
-  rec.clears++; G.dirty = true;
+  rec.clears++; rec.best = Math.max(rec.best || 0, t); G.dirty = true;
   ev(Object.assign({ t: 'dungeonChest' }, res, { items: res.items.length }));
   return res;
 }
 function endDungeon(why) {
   const D = G.dungeon; if (!D) return;
+  if (D.key && !D.bossDead) addKey(makeKey(D.key.t - 1)); // a failed keyed run hands the key back one tier lower
   const ids = new Set(D.mobs.map((e) => e.id));
   G.enemies = G.enemies.filter((e) => !ids.has(e.id)); for (const id of ids) G.ents.delete(id);
   clearProjectiles();

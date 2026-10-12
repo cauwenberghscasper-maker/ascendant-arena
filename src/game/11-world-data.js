@@ -114,8 +114,12 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
     // secrets: a walled pocket against the border forest, entered through one narrow gap (gap = +1 north / −1 south)
     add('secret', 0, -s * (M - 9), z0 + L * 0.5, 9, 'Hidden Cache', 'cache', { gap: jit(i, 7) < 0 ? -1 : 1 });
     if (L >= 135) add('secret', 1, s * (M - 9), z0 + L * 0.38, 9, 'Forgotten Hoard', 'cache', { gap: jit(i, 8) < 0 ? -1 : 1 });
-    // cave entrance from area 3 on (Agent D: dungeon instances); the mouth faces the road, the rock mound sits outward
-    if (i >= 3) add('dungeon', 0, s * M * 0.8, z0 + L * 0.72, 9, zn.denName + ' Caves', 'cave', { face: -s });
+    // three cave entrances per combat area (n = variant in CFG.dungeon.variants); mouths face the road, rock mounds sit outward
+    if (!zn.safe) {
+      add('dungeon', 0, s * M * 0.8, z0 + L * 0.72, 9, zn.denName + ' Caves', 'cave', { face: -s });
+      add('dungeon', 1, -s * M * 0.8, z0 + L * 0.45, 9, zn.name + ' Warrens', 'cave', { face: s });
+      add('dungeon', 2, s * M * 0.8, z0 + L * 0.2, 9, zn.lairName + ' Sanctum', 'cave', { face: -s });
+    }
   });
   W.secrets = W.pois.filter((q) => q.kind === 'secret');
   W.mmScale = Math.min(1, 1600 / (W.maxZ - W.minZ)); // minimap base canvas px per metre

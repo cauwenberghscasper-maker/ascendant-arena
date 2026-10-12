@@ -23,11 +23,11 @@ const W = c.config.world, Z = W.zones;
   });
   const ids = W.pois.map((q) => q.id);
   check('POI ids are unique and stable (save keys)', () => {
-    assert.equal(new Set(ids).size, ids.length); assert.equal(ids.length, 159);
-    for (const id of ['a00:landmark:0', 'a01:secret:0', 'a03:dungeon:0', 'a09:secret:1', 'a29:secret:1', 'a29:dungeon:0']) assert(ids.includes(id), id);
-    for (const id of ['a00:dungeon:0', 'a02:dungeon:0', 'a01:secret:1']) assert(!ids.includes(id), id);
+    assert.equal(new Set(ids).size, ids.length); assert.equal(ids.length, 219);
+    for (const id of ['a00:landmark:0', 'a01:secret:0', 'a03:dungeon:0', 'a09:secret:1', 'a29:secret:1', 'a29:dungeon:0', 'a01:dungeon:0', 'a01:dungeon:2', 'a29:dungeon:2']) assert(ids.includes(id), id);
+    for (const id of ['a00:dungeon:0', 'a01:secret:1', 'a05:dungeon:3']) assert(!ids.includes(id), id);
     for (const q of W.pois) assert(new RegExp(`^a${String(q.zone).padStart(2, '0')}:${q.kind}:\\d$`).test(q.id), q.id);
-    const dg = W.pois.filter((q) => q.kind === 'dungeon'); assert.equal(dg.length, Z.length - 3);
+    const dg = W.pois.filter((q) => q.kind === 'dungeon'); assert.equal(dg.length, (Z.length - 1) * 3, 'three caves per combat area');
     for (const q of dg) { assert.equal(q.lvl, Z[q.zone].lvl[1]); assert(Math.abs(Math.abs(q.x) - W.maxX * 0.8) < 2); }
     assert.equal(W.secrets.length, 42); assert(W.secrets.every((q) => q.hidden && Math.abs(q.x) > W.maxX * 0.85));
   });
