@@ -218,8 +218,9 @@ function openCasesFast(k) {
   out.sort((a, b) => rarIdx(b.item.rarity) - rarIdx(a.item.rarity));
   const best = out[0] ? rarIdx(out[0].item.rarity) : 0; Sfx.play(best >= 4 ? 'win' : 'unlock');
   UI.current = 'caseFast';
-  openModal(`<div class="npcHead">${gi('m_caseOpen', 'hd')}<h3>${out.length} chests opened</h3></div><div class="fastGrid">${out.map((r) => `<div class="rcard ${r.item.rarity} ${r === out[0] ? 'win' : ''}"><img src="${thumbFor(r.item)}" alt=""><i></i><small>${CFG.gear.rarity[r.item.rarity].name}</small></div>`).join('')}</div>
-    <p class="fine">All ${out.length} rewards are saved in your bag.${p.bag.length > CFG.gear.bagMax ? ` Your bag is over its limit (${p.bag.length}/${CFG.gear.bagMax}); alch weaker gear so new drops are kept.` : ''} Check your Equipment for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button><button class="primary" data-act="close">Done</button></div>`);
+  const left = p.cases.filter((c) => c.k === k).length;
+  openModal(`<div class="npcHead">${gi('m_caseOpen', 'hd')}<h3>${out.length} chests opened</h3></div><div class="fastGrid">${out.map((r) => `<div class="rcard ${r.item.rarity} ${r === out[0] ? 'win' : ''}"><img src="${thumbFor(r.item)}" alt=""><i></i><small><b>${SLOT_LABEL[r.item.slot]}</b>${CFG.gear.rarity[r.item.rarity].name}</small></div>`).join('')}</div>
+    <p class="fine">All ${out.length} rewards are saved in your bag.${p.bag.length > CFG.gear.bagMax ? ` Your bag is over its limit (${p.bag.length}/${CFG.gear.bagMax}); alch weaker gear so new drops are kept.` : ''} Check your Equipment for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button>${left ? `<button class="ghost" data-act="caseFast" data-k="${k}">${left > 10 ? `Open next 10 (${left} left)` : `Open ${left} more`}</button>` : ''}<button class="primary" data-act="close">Done</button></div>`);
   $('panel').classList.add('wide');
 }
 function openIdle(tab) {
