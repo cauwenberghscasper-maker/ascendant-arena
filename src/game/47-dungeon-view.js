@@ -37,7 +37,8 @@ function buildDungeonView(D) {
   // the reward chest and two exit portals (the second opens beside the chest)
   const chest = new THREE.Group(), body = new THREE.Mesh(mergeParts([part(GEO.box, 0x7a4a24, [0, 0.45, 0], null, [1.6, 0.9, 1.05]), part(GEO.box, 0xffc94a, [0, 0.5, 0.54], null, [0.3, 0.35, 0.06])]), matVC);
   const lid = new THREE.Mesh(mergeParts([part(GEO.box, 0x8a5a2c, [0, 0.15, 0.52], null, [1.66, 0.3, 1.1]), part(GEO.box, 0xffc94a, [0, 0.16, 0.52], null, [1.7, 0.08, 0.2])]), matVC);
-  lid.position.set(0, 0.9, -0.52); // hinge at the back edge chest.add(body, lid); chest.position.set(D.chest.x, 0, D.chest.z); chest.visible = false; dungeonGroup.add(chest);
+  lid.position.set(0, 0.9, -0.52); chest.add(body, lid); // lid pivots on its back edge
+  chest.position.set(D.chest.x, 0, D.chest.z); chest.visible = false; dungeonGroup.add(chest);
   dungeonParts.chest = chest; dungeonParts.lid = lid;
   dungeonParts.portals = [D.exit, D.exit2].map((q, i) => {
     const g = new THREE.Group(), ring = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.4, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
