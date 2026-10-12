@@ -37,8 +37,8 @@
 .subRow { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; min-width: 0; } .subRow h4 { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .subRow small { flex: none; } .subRow h4 { margin: 0; } .subRow small { color: var(--muted); font: 600 11px/1 var(--body); }
 .subRow .ghost.sm { margin-left: auto; }
 /* compact hero picker */
-.panel.dock .bgrid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; }
-.panel.dock .bcard { padding: 6px 2px 5px; } .panel.dock .bcard b { font-size: 12px; } .panel.dock .bcard small { font-size: 9.5px; }
+.panel.dock .bgrid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+.panel.dock .bcard { padding: 8px 2px 7px; gap: 5px; } .panel.dock .bcard b { font-size: 13px; } .panel.dock .bcard small { font-size: 10.5px; }
 .panel.dock .bdet { padding: 10px; gap: 8px; }
 .panel .pBtns > button.primary, .panel .pBtns > button.ghost, .panel .pBtns > button.disabled { padding: 0 10px; font-size: 16px; }
 .pSel .pMoreBtn + .pMoreBtn { margin-left: -4px; }

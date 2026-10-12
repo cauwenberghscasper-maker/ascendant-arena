@@ -297,7 +297,7 @@ function openBrawlers(sel) {
   const cards = CFG.brawlerOrder.filter((id) => !onlyOwned || owned.includes(id)).map((id) => {
     const B = CFG.brawlers[id], have = owned.includes(id), L = masteryOf(p, id);
     return `<button class="bcard ${have ? 'own' : 'locked'} ${id === sel ? 'sel' : ''} ${id === p.cls ? 'cur' : ''}" data-act="bSel" data-id="${id}">
-      ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have, 52)}
+      ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have, 96)}
       <b>${B.name}</b><small>${have ? `Mastery ${L}` : 'Locked'}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
   }).join('');
   const B = CFG.brawlers[sel], A = CFG.attacks[sel], C = CFG.classes[sel], have = owned.includes(sel);
@@ -307,7 +307,7 @@ function openBrawlers(sel) {
   const badges = CFG.badges.map((b, i) => `<div class="bdg ${L >= b.lvl ? 'got' : ''}">${badgeSVG(L >= b.lvl ? i : -1, 'b_' + sel, { static: L < b.lvl })}<small>${b.name}<br>${b.lvl}</small></div>`).join('');
   const sup = CFG.supers[C.super], sk = CFG.skills[C.skill];
   const free = have ? treeFree(p, sel) : 0, tp = have ? treeOf(p, sel).total : 0;
-  const summary = `${brawlerPortrait(sel, have, 46)}<div class="sx"><b>${B.name}${sel === p.cls ? ' · playing' : ''}</b><small>${C.role} · ${A.name}</small><small>${have ? `Mastery ${L}${t >= 0 ? ' · ' + CFG.badges[t].title : ''} · ${free > 0 ? `<span style="color:#ffc94a">${free} tree points free</span>` : `${tp} tree points`}` : `${gi('m_lock')} ${unlockText(A.unlock)}`}</small></div>`;
+  const summary = `${brawlerPortrait(sel, have, 68)}<div class="sx"><b>${B.name}${sel === p.cls ? ' · playing' : ''}</b><small>${C.role} · ${A.name}</small><small>${have ? `Mastery ${L}${t >= 0 ? ' · ' + CFG.badges[t].title : ''} · ${free > 0 ? `<span style="color:#ffc94a">${free} tree points free</span>` : `${tp} tree points`}` : `${gi('m_lock')} ${unlockText(A.unlock)}`}</small></div>`;
   const more = `<p class="bdesc">${A.desc}.</p>
     <div class="kit"><div><span>Super</span><b>${sup.name}</b><small>Tap to auto-aim, drag to aim</small></div><div><span>Skill</span><b>${sk ? sk.name : '—'}</b><small>${sk ? sk.desc : ''}</small></div></div>
     ${have ? `<div class="mast"><div class="mrowh"><b>Mastery ${L}</b><span>${L >= 99 ? 'Maxed' : next ? `${next.name} badge at ${next.lvl}` : ''}</span></div><span class="mbar"><i style="--v:${(f * 100).toFixed(1)}%"></i></span>
