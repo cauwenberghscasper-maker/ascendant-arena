@@ -197,8 +197,10 @@ function spinCase(id) {
     <div class="reel"><div class="strip" id="reelStrip">${cards.map(reelCard).join('')}</div><div class="marker"></div></div>
     <div id="reelOut" class="reelOut"><button class="ghost sm" data-act="reelSkip">Skip</button></div>`, false);
   $('panel').classList.add('wide');
-  const strip = $('reelStrip'), box = strip.parentNode, cw = strip.firstChild.getBoundingClientRect().width + 8, vw = box.getBoundingClientRect().width;
-  const end = WIN * cw + cw / 2 - vw / 2 + (Math.random() - 0.5) * (cw - 26), dur = 5600, t0 = performance.now();
+  // measured in the reel's own layout pixels: menus are drawn zoomed (Menu size), and getBoundingClientRect would
+  // return zoomed sizes while translateX moves in unzoomed ones, so the reel used to stop several cards early
+  const strip = $('reelStrip'), box = strip.parentNode, win = strip.children[WIN], cw = strip.children[1].offsetLeft - strip.firstChild.offsetLeft, vw = box.clientWidth;
+  const end = win.offsetLeft - strip.firstChild.offsetLeft + win.offsetWidth / 2 - vw / 2 + (Math.random() - 0.5) * (win.offsetWidth - 26), dur = 5600, t0 = performance.now();
   let lastIdx = -1;
   Sfx.play('super');
   const step = (now) => {

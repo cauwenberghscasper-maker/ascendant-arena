@@ -17,7 +17,7 @@ function interact() {
 }
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
-  const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + (UI.gearAll && UI.heroTab === 'Gear' ? 'all' : UI.gearSlot) : UI.current === 'collection' ? '|' + UI.collectionSlot : '');
+  const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + (UI.gearAll && UI.heroTab === 'Gear' ? 'all' : UI.gearSlot) : UI.current === 'collection' ? '|' + UI.collectionSlot : UI.current === 'artifacts' ? '|' + UI.artTab + '|' + UI.relicTier : '');
   const prevBody = $('panel').querySelector(':scope > .pBody'), same = UI.panelKind === panelKind;
   const scroll = same ? (prevBody ? prevBody.scrollTop : $('panel').scrollTop) : 0; UI.panelKind = panelKind;
   if (!same) UI.moreOpen = false;
@@ -26,14 +26,34 @@ function openModal(html, closable, showcase) {
   $('modal').classList.toggle('room', !!showcase);
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
-  $('panel').innerHTML = html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
+  const full = html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
+  if (same) { // redraw of the same screen: keep the already-decoded pictures so tiles don't blink on phones
+    const old = new Map(); for (const im of $('panel').querySelectorAll('img')) { const k = im.getAttribute('src'); if (k) (old.get(k) || old.set(k, []).get(k)).push(im); }
+    const tpl = document.createElement('template'); tpl.innerHTML = full;
+    for (const im of tpl.content.querySelectorAll('img')) { const reuse = old.get(im.getAttribute('src')); const o = reuse && reuse.shift(); if (o) { o.className = im.className; o.alt = im.alt; o.style.cssText = im.style.cssText; im.replaceWith(o); } }
+    $('panel').replaceChildren(tpl.content);
+  } else $('panel').innerHTML = full;
   $('modal').hidden = false;
   const body = $('panel').querySelector(':scope > .pBody');
   if (body) { $('panel').classList.remove('scroll'); $('panel').classList.add('dock'); body.scrollTop = scroll; syncMore(); }
   else $('panel').scrollTop = scroll;
+  // a tap that redraws the same screen keeps the tapped button under the finger (no jump when the bar below changes)
+  const A = UI.tapAnchor; UI.tapAnchor = null;
+  if (same && A) { const el = $('panel').querySelector(A.sel), sc = body || $('panel'); if (el) {
+    const d = el.parentElement.getBoundingClientRect().top - A.top; if (Math.abs(d) > 0.5) sc.scrollTop += d;
+    const r = el.getBoundingClientRect(), v = sc.getBoundingClientRect(); if (r.bottom > v.bottom) sc.scrollTop += r.bottom - v.bottom + 4; } }
   measureSheet();
   Input.move.id = null; Input.move.active = false; Input.move.sx = Input.move.sy = 0; $('stickBase').classList.remove('on');
   Input.atk.id = null; Input.atk.aiming = false; Input.atk.active = false; $('atkKnob').style.transform = 'translate(0px,0px)';
+}
+// where a tapped panel button sits, so openModal can put it back in the same place after a redraw
+function panelAnchor(b) {
+  if (!$('panel').contains(b)) return null;
+  const d = b.dataset, esc = (v) => (window.CSS && CSS.escape ? CSS.escape(v) : v);
+  let sel = `[data-act="${esc(d.act)}"]`;
+  for (const k of ['id', 'slot', 'tab', 'k', 'v']) if (d[k] != null && d[k] !== '') sel += `[data-${k}="${esc(d[k])}"]`;
+  if (b.closest('.pBar')) return null; // the action bar is pinned, nothing to keep in place
+  return { sel, top: b.parentElement.getBoundingClientRect().top }; // the parent: a pressed button is nudged by its :active style
 }
 // --- Reusable panel parts ------------------------------------------------------------------------
 // dock(): the header stays on top, the middle scrolls, and the action bar is always on screen.
@@ -563,6 +583,7 @@ function openSettings() {
 
 function handlePanelClick(e) {
   const b = e.target.closest('[data-act]'); if (!b) return;
+  UI.tapAnchor = panelAnchor(b);
   if (b.getAttribute('aria-disabled') === 'true') { Sfx.play('click'); return; }
   const act = b.dataset.act; Sfx.play('click');
   if (!LOCAL_PREVIEW && !TEST_MODE && ['tLevel', 't5', 't100', 'tGold', 'tEss', 'tShards', 'tBoss', 'tUnlock', 'tLegend', 'tFocus'].includes(act)) return;
@@ -626,6 +647,7 @@ function handlePanelClick(e) {
     case 'bTree': openSkills(b.dataset.id); break;
     case 'ownedOnly': UI.ownedOnly = !UI.ownedOnly; if (UI.current === 'artifacts') openArtifacts(UI.artTab); else openBrawlers(); return;
     case 'artTab': openArtifacts(b.dataset.tab); break;
+    case 'relicTier': UI.relicTier = +b.dataset.k; openArtifacts(UI.artTab); break;
     case 'progTab': openProgress(b.dataset.tab); break;
     case 'tWhich': openSkills(b.dataset.w); break;
     case 'tPreset': setPreset(G.profile, TreeView.which, +b.dataset.i); TreeView.keep = true; openSkills(TreeView.which); break;

@@ -1483,6 +1483,10 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .bstats span { font: 600 11.5px/1.15 var(--body); color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bstats b { font: 700 15.5px/1.15 var(--body); color: var(--val); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bstats em { font: 700 11.5px/1.1 var(--body); font-style: normal; white-space: nowrap; }
+/* the ▲/▼ preview sits next to the value, so picking a piece never makes the strip taller (no jump on tap) */
+.bstats > div { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; column-gap: 4px; }
+.bstats > div > span { grid-column: 1 / -1; }
+.bstats > div > em { overflow: hidden; text-overflow: ellipsis; }
 .bstats em.gain { color: var(--gain); } .bstats em.loss { color: var(--loss); }
 
 /* show-filter beside the bag heading */
@@ -1571,6 +1575,50 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 #mapBox { background: linear-gradient(145deg, #1f383aee, #0f2226ee) !important; border: 1px solid #49635b !important; border-image: none !important; }
 .hbtn, .hbtn.ic, #hubShortcuts button { background: linear-gradient(145deg, #233b3c, #13272e) !important; border: 1px solid #597269 !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 3px 10px rgba(4,18,26,.4) !important; }
 #hubShortcuts button span:not(.quickIcon) { color: #ecd08a !important; }
+
+/* Relics: four tiers, four relics each; locked tiers show the level that opens them */
+.rtiers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.rtier { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 10px; border: 2px solid #3b5753; background: linear-gradient(180deg, #183033, #11262a); color: var(--val); font: inherit; cursor: pointer; }
+.rtier b { font: 14px/1.1 var(--display); color: var(--bronze2); white-space: nowrap; }
+.rtier small { font: 600 11.5px/1.1 var(--body); color: var(--label); white-space: nowrap; }
+.rtier.on { border-color: var(--bronze2); background: linear-gradient(180deg, #4a2b20, #2e1a14); box-shadow: inset 0 0 0 1px rgba(255,220,150,.25); }
+.rtier.on small { color: #f4efdf; }
+.rtier.lockd { opacity: .55; cursor: default; border-style: dashed; }
+.rtier.lockd b { color: var(--label); } .rtier .gi { width: 13px; height: 13px; }
+.rtier .rdot { position: absolute; top: 4px; right: 4px; }
+.rtnote { margin: -2px 0 0 !important; }
+.agrid.rt { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+@media (min-width: 700px) { .agrid.rt { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; } }
+
+/* Collection Log: progress bar, per-slot chips with counts, "Still to find" silhouettes above the found items */
+.clogBar { position: relative; height: 22px; border-radius: 6px; background: var(--socket); border: 1px solid #49635b; overflow: hidden; }
+.clogBar i { position: absolute; inset: 0 auto 0 0; width: var(--v); background: linear-gradient(180deg, var(--bronze2), var(--bronze)); }
+.clogBar span { position: relative; display: block; text-align: center; font: 700 12.5px/22px var(--body); color: #f4efdf; text-shadow: 0 1px 2px #000; }
+.clogFilters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.clogF { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; padding: 7px 9px; border-radius: 8px; border: 2px solid #3b5753; background: linear-gradient(180deg, #183033, #11262a); color: var(--val); font: inherit; cursor: pointer; min-width: 0; }
+.clogF b { font: 700 13.5px/1.1 var(--body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.clogF small { font: 700 12px/1 var(--body); color: var(--label); font-variant-numeric: tabular-nums; }
+.clogF.done small { color: var(--gain); }
+.clogF.on { border-color: var(--bronze2); background: linear-gradient(180deg, #4a2b20, #2e1a14); }
+.clogF.on b { color: #ffe3a0; }
+.clogH { display: flex; align-items: baseline; gap: 8px; margin: 2px 0 0 !important; }
+.clogH small { font: 700 12px/1 var(--body); padding: 3px 7px; border-radius: 6px; background: #3b5753; color: #f4efdf; }
+.clogH.got small { background: #4f7f4a; color: #eaffd8; }
+.clogGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 700px) { .clogGrid { grid-template-columns: repeat(5, minmax(0, 1fr)); } .clogFilters { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.clogCard { position: relative; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 4px 7px; border-radius: 10px; border: 2px solid var(--rc, #49635b); background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--rc, #49635b) 22%, transparent), #11262a 75%); color: var(--val); font: inherit; cursor: pointer; text-align: center; }
+.clogCard img { width: 64px; height: 64px; object-fit: contain; }
+.clogCard b { font: 700 12.5px/1.2 var(--body); overflow-wrap: anywhere; }
+.clogCard small { font: 600 11px/1.2 var(--body); color: var(--label); }
+.clogCard .rar, .clogCard [class*="chip"] { font-size: 11px !important; }
+.clogCard.missing { border-style: dashed; border-color: #3b5753; background: #0e1e21; }
+.clogCard.missing img { filter: brightness(0) drop-shadow(0 0 1px rgba(200,220,210,.55)); opacity: .55; }
+.clogCard.missing b { color: #b6c3bf; }
+.clogBadge { position: absolute; top: 4px; right: 4px; min-width: 20px; padding: 2px 5px; border-radius: 6px; font: 800 11px/1.1 var(--body); background: #4f7f4a; color: #eaffd8; }
+.clogBadge.q { background: #26403d; color: #9fb5b0; }
+.clogDone { margin: 0; padding: 10px; border-radius: 8px; background: #1d3a26; color: #d8f5c8; font: 700 13.5px/1.3 var(--body); text-align: center; }
+.clogCard.common { --rc: var(--r-common); } .clogCard.uncommon { --rc: var(--r-uncommon); } .clogCard.rare { --rc: var(--r-rare); } .clogCard.epic { --rc: var(--r-epic); }
+.clogCard.legendary { --rc: var(--r-legendary); } .clogCard.mythic { --rc: var(--myth); } .clogCard.ancient { --rc: var(--anc); } .clogCard.divine { --rc: var(--div); }
 </style>
 
 
@@ -8965,7 +9013,7 @@ function interact() {
 }
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
-  const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + (UI.gearAll && UI.heroTab === 'Gear' ? 'all' : UI.gearSlot) : UI.current === 'collection' ? '|' + UI.collectionSlot : '');
+  const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + (UI.gearAll && UI.heroTab === 'Gear' ? 'all' : UI.gearSlot) : UI.current === 'collection' ? '|' + UI.collectionSlot : UI.current === 'artifacts' ? '|' + UI.artTab + '|' + UI.relicTier : '');
   const prevBody = $('panel').querySelector(':scope > .pBody'), same = UI.panelKind === panelKind;
   const scroll = same ? (prevBody ? prevBody.scrollTop : $('panel').scrollTop) : 0; UI.panelKind = panelKind;
   if (!same) UI.moreOpen = false;
@@ -8974,14 +9022,34 @@ function openModal(html, closable, showcase) {
   $('modal').classList.toggle('room', !!showcase);
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
-  $('panel').innerHTML = html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
+  const full = html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
+  if (same) { // redraw of the same screen: keep the already-decoded pictures so tiles don't blink on phones
+    const old = new Map(); for (const im of $('panel').querySelectorAll('img')) { const k = im.getAttribute('src'); if (k) (old.get(k) || old.set(k, []).get(k)).push(im); }
+    const tpl = document.createElement('template'); tpl.innerHTML = full;
+    for (const im of tpl.content.querySelectorAll('img')) { const reuse = old.get(im.getAttribute('src')); const o = reuse && reuse.shift(); if (o) { o.className = im.className; o.alt = im.alt; o.style.cssText = im.style.cssText; im.replaceWith(o); } }
+    $('panel').replaceChildren(tpl.content);
+  } else $('panel').innerHTML = full;
   $('modal').hidden = false;
   const body = $('panel').querySelector(':scope > .pBody');
   if (body) { $('panel').classList.remove('scroll'); $('panel').classList.add('dock'); body.scrollTop = scroll; syncMore(); }
   else $('panel').scrollTop = scroll;
+  // a tap that redraws the same screen keeps the tapped button under the finger (no jump when the bar below changes)
+  const A = UI.tapAnchor; UI.tapAnchor = null;
+  if (same && A) { const el = $('panel').querySelector(A.sel), sc = body || $('panel'); if (el) {
+    const d = el.parentElement.getBoundingClientRect().top - A.top; if (Math.abs(d) > 0.5) sc.scrollTop += d;
+    const r = el.getBoundingClientRect(), v = sc.getBoundingClientRect(); if (r.bottom > v.bottom) sc.scrollTop += r.bottom - v.bottom + 4; } }
   measureSheet();
   Input.move.id = null; Input.move.active = false; Input.move.sx = Input.move.sy = 0; $('stickBase').classList.remove('on');
   Input.atk.id = null; Input.atk.aiming = false; Input.atk.active = false; $('atkKnob').style.transform = 'translate(0px,0px)';
+}
+// where a tapped panel button sits, so openModal can put it back in the same place after a redraw
+function panelAnchor(b) {
+  if (!$('panel').contains(b)) return null;
+  const d = b.dataset, esc = (v) => (window.CSS && CSS.escape ? CSS.escape(v) : v);
+  let sel = `[data-act="${esc(d.act)}"]`;
+  for (const k of ['id', 'slot', 'tab', 'k', 'v']) if (d[k] != null && d[k] !== '') sel += `[data-${k}="${esc(d[k])}"]`;
+  if (b.closest('.pBar')) return null; // the action bar is pinned, nothing to keep in place
+  return { sel, top: b.parentElement.getBoundingClientRect().top }; // the parent: a pressed button is nudged by its :active style
 }
 // --- Reusable panel parts ------------------------------------------------------------------------
 // dock(): the header stays on top, the middle scrolls, and the action bar is always on screen.
@@ -9511,6 +9579,7 @@ function openSettings() {
 
 function handlePanelClick(e) {
   const b = e.target.closest('[data-act]'); if (!b) return;
+  UI.tapAnchor = panelAnchor(b);
   if (b.getAttribute('aria-disabled') === 'true') { Sfx.play('click'); return; }
   const act = b.dataset.act; Sfx.play('click');
   if (!LOCAL_PREVIEW && !TEST_MODE && ['tLevel', 't5', 't100', 'tGold', 'tEss', 'tShards', 'tBoss', 'tUnlock', 'tLegend', 'tFocus'].includes(act)) return;
@@ -9574,6 +9643,7 @@ function handlePanelClick(e) {
     case 'bTree': openSkills(b.dataset.id); break;
     case 'ownedOnly': UI.ownedOnly = !UI.ownedOnly; if (UI.current === 'artifacts') openArtifacts(UI.artTab); else openBrawlers(); return;
     case 'artTab': openArtifacts(b.dataset.tab); break;
+    case 'relicTier': UI.relicTier = +b.dataset.k; openArtifacts(UI.artTab); break;
     case 'progTab': openProgress(b.dataset.tab); break;
     case 'tWhich': openSkills(b.dataset.w); break;
     case 'tPreset': setPreset(G.profile, TreeView.which, +b.dataset.i); TreeView.keep = true; openSkills(TreeView.which); break;
@@ -10468,16 +10538,25 @@ function trialLog() {
 function openCollection(slot) {
   UI.current = 'collection'; UI.collectionSlot = slot === 'all' || CFG.gear.slots.includes(slot) ? slot : 'all';
   const p = G.profile, found = p.collection || {}, all = COLLECTION_ITEMS;
-  const items = UI.collectionSlot === 'all' ? all : all.filter(d => d.slot === UI.collectionSlot);
-  const count = all.filter(d => found[d.id]).length;
-  const filters = ['all', ...CFG.gear.slots].map(s => `<button class="ghost sm ${s === UI.collectionSlot ? 'on' : ''}" data-act="collectionSlot" data-slot="${s}" aria-pressed="${s === UI.collectionSlot}">${s === 'all' ? 'All' : SLOT_LABEL[s]}</button>`).join('');
-  const cards = items.map(d => `<button class="collectionCard ${d.rarity} ${found[d.id] ? 'found' : ''}" data-act="collectionItem" data-id="${d.id}" aria-label="${d.name}, ${d.rarity}, ${found[d.id] ? 'found' : 'not found'}">
+  const inSlot = (s) => s === 'all' ? all : all.filter(d => d.slot === s);
+  const items = inSlot(UI.collectionSlot), count = all.filter(d => found[d.id]).length;
+  const got = items.filter(d => found[d.id]), miss = items.filter(d => !found[d.id]);
+  // one chip per slot with its own found/total, so it is clear at a glance where items are still missing
+  const filters = ['all', ...CFG.gear.slots].map(s => { const L = inSlot(s), n = L.filter(d => found[d.id]).length;
+    return `<button class="clogF ${s === UI.collectionSlot ? 'on' : ''} ${n === L.length ? 'done' : ''}" data-act="collectionSlot" data-slot="${s}" aria-pressed="${s === UI.collectionSlot}"><b>${s === 'all' ? 'All' : SLOT_LABEL[s]}</b><small>${n}/${L.length}</small></button>`; }).join('');
+  const card = (d) => { const r = found[d.id];
+    return `<button class="clogCard ${d.rarity} ${r ? 'found' : 'missing'}" data-act="collectionItem" data-id="${d.id}" aria-label="${d.name}, ${d.rarity}, ${r ? 'found ' + r.count + ' times' : 'not found yet'}">
+    ${r ? `<span class="clogBadge">✓${r.count > 1 ? ' ×' + fmt(r.count) : ''}</span>` : '<span class="clogBadge q">?</span>'}
     <img src="${collectionIcon({ ...d, collectionId: d.id })}" width="256" height="256" loading="lazy" decoding="async" alt="">
-    <b>${d.name}</b>${rarityChip(d.rarity)}<small>${found[d.id] ? 'Found · ' + found[d.id].count + ' earned' : 'Item level ' + d.minLevel + '+'}</small></button>`).join('');
-  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Collection Log</h3><span class="cnt">${count}/${all.length}</span></div>
-    <p class="fine">Tap an item to plan your hunt. Found records stay after merging or salvaging gear.</p>
-    <div class="collectionFilters">${filters}</div><div class="collectionGrid">${cards}</div>${trialLog()}
-    <div class="row end"><button class="ghost" data-act="mMenu">Menu</button><button class="ghost" data-act="cases">Cases</button></div>`);
+    <b>${d.name}</b>${rarityChip(d.rarity)}<small>${r ? `${SLOT_LABEL[d.slot]}` : `Item level ${d.minLevel}+`}</small></button>`; };
+  const pct = Math.round(count / Math.max(1, all.length) * 100);
+  const head = `<div class="npcHead">${gi('m_hero', 'hd')}<h3>Collection Log</h3><span class="cnt">${count}/${all.length}</span></div>
+    <div class="clogBar" aria-label="${count} of ${all.length} named items found"><i style="--v:${pct}%"></i><span>${count} found · ${all.length - count} to find</span></div>
+    <div class="clogFilters">${filters}</div>`;
+  const body = `${miss.length ? `<h4 class="sub clogH miss">Still to find <small>${miss.length}</small></h4><div class="clogGrid">${miss.map(card).join('')}</div>` : `<p class="clogDone">Every ${UI.collectionSlot === 'all' ? '' : SLOT_LABEL[UI.collectionSlot].toLowerCase() + ' '}item here is in your log.</p>`}
+    ${got.length ? `<h4 class="sub clogH got">Found <small>${got.length}</small></h4><div class="clogGrid">${got.map(card).join('')}</div>` : ''}
+    <p class="fine">Tap an item to see where it drops and how close the guarantee is. Found records stay after reforging or alching gear.</p>${trialLog()}`;
+  openModal(dock(head, body, `<div class="pBtns"><button class="ghost" data-act="mMenu">Journal</button><button class="ghost" data-act="cases">Treasure Chests</button></div>`));
   $('panel').classList.add('wide');
 }
 function openCollectionItem(id) {
@@ -10540,13 +10619,34 @@ function openBrawlers(sel) {
 
 // --- Artifacts ------------------------------------------------------------------------------------------
 function starRow(s) { return '★'.repeat(Math.min(s, 10)) + `<i>${'★'.repeat(Math.max(0, 10 - s))}</i>`; }
+// Relics are shown four at a time in four tiers, in unlock order. A tier opens at the level of its first relic
+// (or as soon as any relic in it is earned), so the screen only grows as the player does.
+function relicTiers() {
+  const ids = Object.keys(CFG.artifacts), out = [];
+  for (let i = 0; i < 4; i++) {
+    const part = ids.slice(Math.round(i * ids.length / 4), Math.round((i + 1) * ids.length / 4));
+    const lv = part.map((id) => CFG.artifacts[id].unlock && CFG.artifacts[id].unlock.level).filter(Boolean);
+    out.push({ n: i, name: ['I', 'II', 'III', 'IV'][i], ids: part, lv: lv.length ? Math.min(...lv) : 1, top: lv.length ? Math.max(...lv) : 1 });
+  }
+  return out;
+}
+const relicTierOpen = (p, t) => p.level >= t.lv || t.ids.some((id) => p.unlocked.artifacts.includes(id));
 function openArtifacts(tab) {
   tab = tab || 'Equip'; UI.current = 'artifacts'; UI.artTab = tab;
   const p = G.profile, fresh = new Set(p.newUnlocks), n = artifactSlotsFor(p), onlyOwned = !!UI.ownedOnly;
+  const tiers = relicTiers(), open = tiers.filter((t) => relicTierOpen(p, t));
+  if (UI.relicTier == null || !open.some((t) => t.n === UI.relicTier)) { // start on a tier with something new, else the newest open tier
+    const f = open.find((t) => t.ids.some((id) => fresh.has('r:' + id))); UI.relicTier = (f || open[open.length - 1] || tiers[0]).n;
+  }
+  const T = tiers[UI.relicTier], next = tiers.find((t) => !relicTierOpen(p, t));
+  const tierBar = `<div class="rtiers" role="tablist" aria-label="Relic tiers">${tiers.map((t) => { const ok = relicTierOpen(p, t), own = t.ids.filter((id) => p.unlocked.artifacts.includes(id)).length, nw = t.ids.some((id) => fresh.has('r:' + id));
+    return ok ? `<button class="rtier ${t.n === T.n ? 'on' : ''}" role="tab" aria-selected="${t.n === T.n}" data-act="relicTier" data-k="${t.n}">${nw ? '<i class="rdot"></i>' : ''}<b>Tier ${t.name}</b><small>${own}/${t.ids.length} owned</small></button>`
+      : `<div class="rtier lockd" aria-label="Tier ${t.name} opens at level ${t.lv}">${gi('m_lock')}<b>Tier ${t.name}</b><small>Level ${t.lv}</small></div>`; }).join('')}</div>`;
+  const tierNote = `<p class="fine rtnote">Tier ${T.name} · relics from level ${T.lv}${T.top > T.lv ? `–${T.top}` : ''}${next ? ` · Tier ${next.name} opens at level ${next.lv}` : ' · every tier open'}</p>`;
   const slots = Array.from({ length: n }, (_, i) => { const id = p.artifacts[i];
     return id ? `<button class="aslot2 full fam-${ART_FAM[id] || 'tech'}" data-act="toggleArt" data-id="${id}">${gi('a_' + id)}<b>${CFG.artifacts[id].name}</b><small>Tap to remove</small></button>`
       : `<div class="aslot2"><span class="plus">+</span><small>Empty slot</small></div>`; }).join('') + (n < 3 ? '<div class="aslot2 lockd">' + gi('m_lock') + '<small>3rd slot at level 30</small></div>' : '');
-  const ids = Object.keys(CFG.artifacts).filter((id) => !onlyOwned || p.unlocked.artifacts.includes(id));
+  const ids = T.ids.filter((id) => !onlyOwned || p.unlocked.artifacts.includes(id));
   const cards = ids.map((id) => {
     const a = CFG.artifacts[id], have = p.unlocked.artifacts.includes(id), on = p.artifacts.includes(id);
     const st = p.artStars[id] || 1;
@@ -10555,12 +10655,12 @@ function openArtifacts(tab) {
   }).join('');
   const tabs = ['Equip', 'Upgrade'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="artTab" data-tab="${t}">${t === 'Upgrade' ? 'Empower' : tabName(t)}</button>`).join('');
   const body = tab === 'Equip'
-    ? `<p class="fine">Socketed relics change how ${CFG.brawlers[p.cls].name}’s ${CFG.attacks[p.cls].name} behaves. Each hero keeps their own relics.</p><div class="aslots2">${slots}</div><div class="agrid">${cards}</div>`
-    : `<p class="fine">Each star makes an artifact stronger. Shards drop from elites, dens, shrines and world bosses (only for artifacts you own).</p><div class="aup">${p.unlocked.artifacts.filter((id) => !onlyOwned || true).map((id) => {
+    ? `<p class="fine">Socketed relics change how ${CFG.brawlers[p.cls].name}’s ${CFG.attacks[p.cls].name} behaves. Each hero keeps their own relics.</p><div class="aslots2">${slots}</div>${tierBar}${tierNote}<div class="agrid rt">${cards || '<p class="fine">No relics owned in this tier yet.</p>'}</div>`
+    : `<p class="fine">Each star makes an artifact stronger. Shards drop from elites, dens, shrines and world bosses (only for artifacts you own).</p>${tierBar}<div class="aup">${T.ids.filter((id) => p.unlocked.artifacts.includes(id)).map((id) => {
         const a = CFG.artifacts[id], st = p.artStars[id] || 1, max = st >= ART_MAX, sh = p.shards[id] || 0, need = artShardCost(st), gm = artGemCost(st), can = !max && sh >= need && p.essence >= gm;
         return `<div class="aurow"><span class="aic own fam-${ART_FAM[id] || 'tech'}">${gi('a_' + id)}</span><div class="aum"><b>${a.name} <span class="stars">${starRow(st)}</span></b><small>${artDesc(id, st)}</small>${max ? '' : `<small class="nx">★${st + 1}: ${artDesc(id, st + 1)}</small>`}
           ${max ? '' : `<span class="sbar"><i style="--v:${Math.min(100, sh / need * 100).toFixed(0)}%"></i><em>${sh}/${need} shards</em></span>`}</div>
-          <button class="${can ? 'primary' : 'disabled'}" data-act="artUp" data-id="${id}" ${can ? '' : 'aria-disabled="true"'}>${max ? 'Max' : `★ ${ICON.ess}${gm}`}</button></div>`; }).join('') || '<p class="fine">Unlock artifacts first.</p>'}</div>`;
+          <button class="${can ? 'primary' : 'disabled'}" data-act="artUp" data-id="${id}" ${can ? '' : 'aria-disabled="true"'}>${max ? 'Max' : `★ ${ICON.ess}${gm}`}</button></div>`; }).join('') || `<p class="fine">No relics owned in Tier ${T.name} yet. ${tierNote.replace(/<[^>]+>/g, '')}</p>`}</div>`;
   openModal(`<div class="npcHead">${gi('m_artifacts', 'hd')}<h3>Relics</h3><span class="cnt">${p.unlocked.artifacts.length}/${Object.keys(CFG.artifacts).length}</span>
     <label class="own"><input type="checkbox" data-act="ownedOnly" ${onlyOwned ? 'checked' : ''}> Owned only</label></div>
     <div class="tabs">${tabs}</div><div class="tabBody">${body}</div>`);
@@ -11153,8 +11253,10 @@ function spinCase(id) {
     <div class="reel"><div class="strip" id="reelStrip">${cards.map(reelCard).join('')}</div><div class="marker"></div></div>
     <div id="reelOut" class="reelOut"><button class="ghost sm" data-act="reelSkip">Skip</button></div>`, false);
   $('panel').classList.add('wide');
-  const strip = $('reelStrip'), box = strip.parentNode, cw = strip.firstChild.getBoundingClientRect().width + 8, vw = box.getBoundingClientRect().width;
-  const end = WIN * cw + cw / 2 - vw / 2 + (Math.random() - 0.5) * (cw - 26), dur = 5600, t0 = performance.now();
+  // measured in the reel's own layout pixels: menus are drawn zoomed (Menu size), and getBoundingClientRect would
+  // return zoomed sizes while translateX moves in unzoomed ones, so the reel used to stop several cards early
+  const strip = $('reelStrip'), box = strip.parentNode, win = strip.children[WIN], cw = strip.children[1].offsetLeft - strip.firstChild.offsetLeft, vw = box.clientWidth;
+  const end = win.offsetLeft - strip.firstChild.offsetLeft + win.offsetWidth / 2 - vw / 2 + (Math.random() - 0.5) * (win.offsetWidth - 26), dur = 5600, t0 = performance.now();
   let lastIdx = -1;
   Sfx.play('super');
   const step = (now) => {

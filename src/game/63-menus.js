@@ -270,16 +270,25 @@ function trialLog() {
 function openCollection(slot) {
   UI.current = 'collection'; UI.collectionSlot = slot === 'all' || CFG.gear.slots.includes(slot) ? slot : 'all';
   const p = G.profile, found = p.collection || {}, all = COLLECTION_ITEMS;
-  const items = UI.collectionSlot === 'all' ? all : all.filter(d => d.slot === UI.collectionSlot);
-  const count = all.filter(d => found[d.id]).length;
-  const filters = ['all', ...CFG.gear.slots].map(s => `<button class="ghost sm ${s === UI.collectionSlot ? 'on' : ''}" data-act="collectionSlot" data-slot="${s}" aria-pressed="${s === UI.collectionSlot}">${s === 'all' ? 'All' : SLOT_LABEL[s]}</button>`).join('');
-  const cards = items.map(d => `<button class="collectionCard ${d.rarity} ${found[d.id] ? 'found' : ''}" data-act="collectionItem" data-id="${d.id}" aria-label="${d.name}, ${d.rarity}, ${found[d.id] ? 'found' : 'not found'}">
+  const inSlot = (s) => s === 'all' ? all : all.filter(d => d.slot === s);
+  const items = inSlot(UI.collectionSlot), count = all.filter(d => found[d.id]).length;
+  const got = items.filter(d => found[d.id]), miss = items.filter(d => !found[d.id]);
+  // one chip per slot with its own found/total, so it is clear at a glance where items are still missing
+  const filters = ['all', ...CFG.gear.slots].map(s => { const L = inSlot(s), n = L.filter(d => found[d.id]).length;
+    return `<button class="clogF ${s === UI.collectionSlot ? 'on' : ''} ${n === L.length ? 'done' : ''}" data-act="collectionSlot" data-slot="${s}" aria-pressed="${s === UI.collectionSlot}"><b>${s === 'all' ? 'All' : SLOT_LABEL[s]}</b><small>${n}/${L.length}</small></button>`; }).join('');
+  const card = (d) => { const r = found[d.id];
+    return `<button class="clogCard ${d.rarity} ${r ? 'found' : 'missing'}" data-act="collectionItem" data-id="${d.id}" aria-label="${d.name}, ${d.rarity}, ${r ? 'found ' + r.count + ' times' : 'not found yet'}">
+    ${r ? `<span class="clogBadge">✓${r.count > 1 ? ' ×' + fmt(r.count) : ''}</span>` : '<span class="clogBadge q">?</span>'}
     <img src="${collectionIcon({ ...d, collectionId: d.id })}" width="256" height="256" loading="lazy" decoding="async" alt="">
-    <b>${d.name}</b>${rarityChip(d.rarity)}<small>${found[d.id] ? 'Found · ' + found[d.id].count + ' earned' : 'Item level ' + d.minLevel + '+'}</small></button>`).join('');
-  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Collection Log</h3><span class="cnt">${count}/${all.length}</span></div>
-    <p class="fine">Tap an item to plan your hunt. Found records stay after merging or salvaging gear.</p>
-    <div class="collectionFilters">${filters}</div><div class="collectionGrid">${cards}</div>${trialLog()}
-    <div class="row end"><button class="ghost" data-act="mMenu">Menu</button><button class="ghost" data-act="cases">Cases</button></div>`);
+    <b>${d.name}</b>${rarityChip(d.rarity)}<small>${r ? `${SLOT_LABEL[d.slot]}` : `Item level ${d.minLevel}+`}</small></button>`; };
+  const pct = Math.round(count / Math.max(1, all.length) * 100);
+  const head = `<div class="npcHead">${gi('m_hero', 'hd')}<h3>Collection Log</h3><span class="cnt">${count}/${all.length}</span></div>
+    <div class="clogBar" aria-label="${count} of ${all.length} named items found"><i style="--v:${pct}%"></i><span>${count} found · ${all.length - count} to find</span></div>
+    <div class="clogFilters">${filters}</div>`;
+  const body = `${miss.length ? `<h4 class="sub clogH miss">Still to find <small>${miss.length}</small></h4><div class="clogGrid">${miss.map(card).join('')}</div>` : `<p class="clogDone">Every ${UI.collectionSlot === 'all' ? '' : SLOT_LABEL[UI.collectionSlot].toLowerCase() + ' '}item here is in your log.</p>`}
+    ${got.length ? `<h4 class="sub clogH got">Found <small>${got.length}</small></h4><div class="clogGrid">${got.map(card).join('')}</div>` : ''}
+    <p class="fine">Tap an item to see where it drops and how close the guarantee is. Found records stay after reforging or alching gear.</p>${trialLog()}`;
+  openModal(dock(head, body, `<div class="pBtns"><button class="ghost" data-act="mMenu">Journal</button><button class="ghost" data-act="cases">Treasure Chests</button></div>`));
   $('panel').classList.add('wide');
 }
 function openCollectionItem(id) {
@@ -342,13 +351,34 @@ function openBrawlers(sel) {
 
 // --- Artifacts ------------------------------------------------------------------------------------------
 function starRow(s) { return '★'.repeat(Math.min(s, 10)) + `<i>${'★'.repeat(Math.max(0, 10 - s))}</i>`; }
+// Relics are shown four at a time in four tiers, in unlock order. A tier opens at the level of its first relic
+// (or as soon as any relic in it is earned), so the screen only grows as the player does.
+function relicTiers() {
+  const ids = Object.keys(CFG.artifacts), out = [];
+  for (let i = 0; i < 4; i++) {
+    const part = ids.slice(Math.round(i * ids.length / 4), Math.round((i + 1) * ids.length / 4));
+    const lv = part.map((id) => CFG.artifacts[id].unlock && CFG.artifacts[id].unlock.level).filter(Boolean);
+    out.push({ n: i, name: ['I', 'II', 'III', 'IV'][i], ids: part, lv: lv.length ? Math.min(...lv) : 1, top: lv.length ? Math.max(...lv) : 1 });
+  }
+  return out;
+}
+const relicTierOpen = (p, t) => p.level >= t.lv || t.ids.some((id) => p.unlocked.artifacts.includes(id));
 function openArtifacts(tab) {
   tab = tab || 'Equip'; UI.current = 'artifacts'; UI.artTab = tab;
   const p = G.profile, fresh = new Set(p.newUnlocks), n = artifactSlotsFor(p), onlyOwned = !!UI.ownedOnly;
+  const tiers = relicTiers(), open = tiers.filter((t) => relicTierOpen(p, t));
+  if (UI.relicTier == null || !open.some((t) => t.n === UI.relicTier)) { // start on a tier with something new, else the newest open tier
+    const f = open.find((t) => t.ids.some((id) => fresh.has('r:' + id))); UI.relicTier = (f || open[open.length - 1] || tiers[0]).n;
+  }
+  const T = tiers[UI.relicTier], next = tiers.find((t) => !relicTierOpen(p, t));
+  const tierBar = `<div class="rtiers" role="tablist" aria-label="Relic tiers">${tiers.map((t) => { const ok = relicTierOpen(p, t), own = t.ids.filter((id) => p.unlocked.artifacts.includes(id)).length, nw = t.ids.some((id) => fresh.has('r:' + id));
+    return ok ? `<button class="rtier ${t.n === T.n ? 'on' : ''}" role="tab" aria-selected="${t.n === T.n}" data-act="relicTier" data-k="${t.n}">${nw ? '<i class="rdot"></i>' : ''}<b>Tier ${t.name}</b><small>${own}/${t.ids.length} owned</small></button>`
+      : `<div class="rtier lockd" aria-label="Tier ${t.name} opens at level ${t.lv}">${gi('m_lock')}<b>Tier ${t.name}</b><small>Level ${t.lv}</small></div>`; }).join('')}</div>`;
+  const tierNote = `<p class="fine rtnote">Tier ${T.name} · relics from level ${T.lv}${T.top > T.lv ? `–${T.top}` : ''}${next ? ` · Tier ${next.name} opens at level ${next.lv}` : ' · every tier open'}</p>`;
   const slots = Array.from({ length: n }, (_, i) => { const id = p.artifacts[i];
     return id ? `<button class="aslot2 full fam-${ART_FAM[id] || 'tech'}" data-act="toggleArt" data-id="${id}">${gi('a_' + id)}<b>${CFG.artifacts[id].name}</b><small>Tap to remove</small></button>`
       : `<div class="aslot2"><span class="plus">+</span><small>Empty slot</small></div>`; }).join('') + (n < 3 ? '<div class="aslot2 lockd">' + gi('m_lock') + '<small>3rd slot at level 30</small></div>' : '');
-  const ids = Object.keys(CFG.artifacts).filter((id) => !onlyOwned || p.unlocked.artifacts.includes(id));
+  const ids = T.ids.filter((id) => !onlyOwned || p.unlocked.artifacts.includes(id));
   const cards = ids.map((id) => {
     const a = CFG.artifacts[id], have = p.unlocked.artifacts.includes(id), on = p.artifacts.includes(id);
     const st = p.artStars[id] || 1;
@@ -357,12 +387,12 @@ function openArtifacts(tab) {
   }).join('');
   const tabs = ['Equip', 'Upgrade'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="artTab" data-tab="${t}">${t === 'Upgrade' ? 'Empower' : tabName(t)}</button>`).join('');
   const body = tab === 'Equip'
-    ? `<p class="fine">Socketed relics change how ${CFG.brawlers[p.cls].name}’s ${CFG.attacks[p.cls].name} behaves. Each hero keeps their own relics.</p><div class="aslots2">${slots}</div><div class="agrid">${cards}</div>`
-    : `<p class="fine">Each star makes an artifact stronger. Shards drop from elites, dens, shrines and world bosses (only for artifacts you own).</p><div class="aup">${p.unlocked.artifacts.filter((id) => !onlyOwned || true).map((id) => {
+    ? `<p class="fine">Socketed relics change how ${CFG.brawlers[p.cls].name}’s ${CFG.attacks[p.cls].name} behaves. Each hero keeps their own relics.</p><div class="aslots2">${slots}</div>${tierBar}${tierNote}<div class="agrid rt">${cards || '<p class="fine">No relics owned in this tier yet.</p>'}</div>`
+    : `<p class="fine">Each star makes an artifact stronger. Shards drop from elites, dens, shrines and world bosses (only for artifacts you own).</p>${tierBar}<div class="aup">${T.ids.filter((id) => p.unlocked.artifacts.includes(id)).map((id) => {
         const a = CFG.artifacts[id], st = p.artStars[id] || 1, max = st >= ART_MAX, sh = p.shards[id] || 0, need = artShardCost(st), gm = artGemCost(st), can = !max && sh >= need && p.essence >= gm;
         return `<div class="aurow"><span class="aic own fam-${ART_FAM[id] || 'tech'}">${gi('a_' + id)}</span><div class="aum"><b>${a.name} <span class="stars">${starRow(st)}</span></b><small>${artDesc(id, st)}</small>${max ? '' : `<small class="nx">★${st + 1}: ${artDesc(id, st + 1)}</small>`}
           ${max ? '' : `<span class="sbar"><i style="--v:${Math.min(100, sh / need * 100).toFixed(0)}%"></i><em>${sh}/${need} shards</em></span>`}</div>
-          <button class="${can ? 'primary' : 'disabled'}" data-act="artUp" data-id="${id}" ${can ? '' : 'aria-disabled="true"'}>${max ? 'Max' : `★ ${ICON.ess}${gm}`}</button></div>`; }).join('') || '<p class="fine">Unlock artifacts first.</p>'}</div>`;
+          <button class="${can ? 'primary' : 'disabled'}" data-act="artUp" data-id="${id}" ${can ? '' : 'aria-disabled="true"'}>${max ? 'Max' : `★ ${ICON.ess}${gm}`}</button></div>`; }).join('') || `<p class="fine">No relics owned in Tier ${T.name} yet. ${tierNote.replace(/<[^>]+>/g, '')}</p>`}</div>`;
   openModal(`<div class="npcHead">${gi('m_artifacts', 'hd')}<h3>Relics</h3><span class="cnt">${p.unlocked.artifacts.length}/${Object.keys(CFG.artifacts).length}</span>
     <label class="own"><input type="checkbox" data-act="ownedOnly" ${onlyOwned ? 'checked' : ''}> Owned only</label></div>
     <div class="tabs">${tabs}</div><div class="tabBody">${body}</div>`);
