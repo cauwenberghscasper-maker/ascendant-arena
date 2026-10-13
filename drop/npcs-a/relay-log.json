@@ -1,0 +1,103 @@
+{
+ "batch": "npcs-a",
+ "files": [
+  {
+   "name": "npc_ida_t1.glb",
+   "ok": true,
+   "bytes": 9750056,
+   "sha256": "4c18a6ee906ca0ab979b72e9ac76c374004b5fd7a334ac9ce19161e94bd507a0",
+   "error": null
+  },
+  {
+   "name": "npc_ida_concept.webp",
+   "ok": true,
+   "bytes": 33286,
+   "sha256": "8120c4d22caa548b08a48588814102275c289fa260e1a5d9d14d3d2c33afe74b",
+   "error": null
+  },
+  {
+   "name": "npc_bo_t1.glb",
+   "ok": true,
+   "bytes": 11831632,
+   "sha256": "9859bc3e2d2130ebecd19e31c97f659d1bcdeeae6049016396eaefc196d71b2e",
+   "error": null
+  },
+  {
+   "name": "npc_bo_concept.webp",
+   "ok": true,
+   "bytes": 24620,
+   "sha256": "6d0f523ce16d640144f0801d9d74799e3e102539e35c8858ae1bd38be855a83e",
+   "error": null
+  },
+  {
+   "name": "npc_mira_t1.glb",
+   "ok": true,
+   "bytes": 10876712,
+   "sha256": "7325f71e2aa3620907143e59a351afcaadcd5eb9e8d0b86e63092a7654b83895",
+   "error": null
+  },
+  {
+   "name": "npc_mira_concept.webp",
+   "ok": true,
+   "bytes": 30678,
+   "sha256": "13da5998d2baa0130541b995ce6c4191f59d9fcdf3618eafb506709ae9719924",
+   "error": null
+  },
+  {
+   "name": "npc_vex_t1.glb",
+   "ok": true,
+   "bytes": 13171812,
+   "sha256": "8be1d986ffca9d8fbb970fb7c995f3d02cfc7702c99bcee18e8ecdb88846f225",
+   "error": null
+  },
+  {
+   "name": "npc_vex_concept.webp",
+   "ok": true,
+   "bytes": 45466,
+   "sha256": "35e9e2685f848924a0c38f435c11a0ee194a5d714fbc781f6f5011a984fe8eab",
+   "error": null
+  },
+  {
+   "name": "npc_lumi_t1.glb",
+   "ok": true,
+   "bytes": 11506616,
+   "sha256": "451d28c158a13671d93f3e42986e9e1c9617211e242843ac5a73d99675e76d31",
+   "error": null
+  },
+  {
+   "name": "npc_lumi_concept.webp",
+   "ok": true,
+   "bytes": 22036,
+   "sha256": "f81edd17c8293cc3e9dd4caeb62144e7ba155ea27bf159b84fea3743121cfcde",
+   "error": null
+  },
+  {
+   "name": "npc_garo_t1.glb",
+   "ok": true,
+   "bytes": 12173408,
+   "sha256": "28cf329674f9cea2865b99a03e1edc682f5ef3146bd7e54e8e3bf1d66bd856e4",
+   "error": null
+  },
+  {
+   "name": "npc_garo_concept.webp",
+   "ok": true,
+   "bytes": 42052,
+   "sha256": "9f9b83086259bdca7c0838bede66176aa32235b1ccc4d513b54382e1c529fb4a",
+   "error": null
+  },
+  {
+   "name": "npc_rho_t1.glb",
+   "ok": true,
+   "bytes": 11410596,
+   "sha256": "5a29845a78a2080b83559b605fc15488a95a4449c1ca862951eea0919cabf78f",
+   "error": null
+  },
+  {
+   "name": "npc_rho_concept.webp",
+   "ok": true,
+   "bytes": 42242,
+   "sha256": "226d782bd5cb096a33e48c6f111fb2b542dafa5034e4fe71692489ffafc18535",
+   "error": null
+  }
+ ]
+}
