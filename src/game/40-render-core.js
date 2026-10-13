@@ -32,7 +32,7 @@ const hemi = new THREE.HemisphereLight(PALETTE.hemiSky, PALETTE.hemiGround, 1.25
 const sun = new THREE.DirectionalLight(PALETTE.sun, 2.7);
 sun.position.set(30, 60, 18);
 // one tight shadow map that follows the hero (High graphics only)
-sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.04;
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.04; sun.shadow.radius = 2.5; // soft PCF edges
 { const c = sun.shadow.camera; c.left = -30; c.right = 30; c.top = 30; c.bottom = -30; c.near = 10; c.far = 140; c.updateProjectionMatrix(); }
 const SUN_OFF = new THREE.Vector3(26, 58, 14);
 scene.add(hemi, sun, sun.target);

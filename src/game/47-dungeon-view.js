@@ -1,5 +1,29 @@
+// dungeon floor: worn flagstones drawn in world space over the area colours (cracks, grout, damp moss, scuffed tops)
+const matDungeonFloor = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82, metalness: 0.02 });
+matDungeonFloor.onBeforeCompile = (sh) => {
+  sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vDW;').replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvDW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+varying vec3 vDW;
+float dh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+vec2 dh2(vec2 p) { return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453); }
+float dn(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(dh(i), dh(i + vec2(1, 0)), f.x), mix(dh(i + vec2(0, 1)), dh(i + vec2(1, 1)), f.x), f.y); }
+vec3 dvor(vec2 p) { vec2 i = floor(p), f = fract(p); float d1 = 8.0, d2 = 8.0; vec2 id = vec2(0.0);
+  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) { vec2 g = vec2(float(x), float(y)); vec2 o = g + dh2(i + g) * 0.8 - f; float d = dot(o, o); if (d < d1) { d2 = d1; d1 = d; id = i + g; } else if (d < d2) d2 = d; }
+  return vec3(sqrt(d2) - sqrt(d1), dh(id), sqrt(d1)); }`).replace('#include <color_fragment>', `#include <color_fragment>
+{ if (vDW.y > -0.2) {
+  vec2 w = vDW.xz * 0.62; vec3 v = dvor(w);
+  float grout = 1.0 - smoothstep(0.02, 0.07, v.x), top = smoothstep(0.06, 0.32, v.x);
+  vec3 base = mix(vec3(dot(diffuseColor.rgb, vec3(.3, .55, .15))), diffuseColor.rgb, 0.4) * vec3(1.0, 0.97, 0.92); // weathered stone tinted by the area
+  vec3 c = base * (0.74 + v.y * 0.34) * (0.9 + dn(vDW.xz * 2.3) * 0.2);
+  c *= 0.92 + top * 0.12;                                                   // rounded stone tops catch the light
+  float moss = smoothstep(0.62, 0.8, dn(vDW.xz * 0.35 + 3.0)) * grout;
+  c = mix(c, c * 0.32, grout); c = mix(c, vec3(0.12, 0.2, 0.09), moss * 0.6);
+  c *= 1.0 - smoothstep(0.86, 0.98, dn(vDW.xz * 1.7 + 9.0)) * 0.25 * (1.0 - grout); // scuffs and stains
+  diffuseColor.rgb = c; } }`).replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n  roughnessFactor = mix(roughnessFactor, 0.45, step(vDW.y, 0.05) * smoothstep(0.7, 0.9, dn(vDW.xz * 0.5 + 1.0)) * 0.6); // damp patches shine');
+};
+matDungeonFloor.customProgramCacheKey = () => 'dungeonFloor1';
 // --- dungeon view: halls built on entry from the area's palette, every geometry/material disposed on exit
-const dungeonParts = { doors: [], chest: null, lid: null, portals: [], flame: null, t: 0 };
+const dungeonParts = { portals: [], flame: null, t: 0, sets: [], lights: [], doorItems: [], doorSet: null, chestItems: [], chestSets: [] };
 function dungeonPalette(zn) {
   const g = Array.isArray(zn.ground) ? zn.ground : null, base = new THREE.Color(g ? g[0] : (zn.mm || '#6a6a6a'));
   const fog = new THREE.Color(zn.fog || 0x333333);
@@ -8,38 +32,45 @@ function dungeonPalette(zn) {
 }
 function buildDungeonView(D) {
   disposeDungeonView();
-  const zn = CFG.world.zones[D.zone], pal = dungeonPalette(zn), rng = mulberry32(strSeed(D.id) ^ 0x9e37), parts = [], torches = [];
+  const zn = CFG.world.zones[D.zone], pal = dungeonPalette(zn), rng = mulberry32(strSeed(D.id) ^ 0x9e37), parts = [];
   // floor: checkered 3 m tiles over halls and corridors, a dark plinth underneath
   const floor = (x0, x1, z0, z1) => { for (let x = x0; x < x1 - 0.01; x += 3) for (let z = z0; z < z1 - 0.01; z += 3) { const w = Math.min(3, x1 - x), d = Math.min(3, z1 - z), c = (Math.floor((x - DC.x) / 3) + Math.floor((z - DC.z) / 3)) & 1 ? pal.a : pal.b;
     parts.push(part(GEO.box, c, [x + w / 2, -0.06 - rng() * 0.03, z + d / 2], null, [w * 0.98, 0.12, d * 0.98])); } };
   for (const m of D.rooms) { floor(m.x0, m.x1, m.z0, m.z1); parts.push(part(GEO.box, pal.trim, [m.x, -0.4, m.z], null, [m.x1 - m.x0 + 2, 0.6, m.z1 - m.z0 + 2])); }
   for (const c of D.cors) { floor(c.x0, c.x1, c.z0, c.z1); parts.push(part(GEO.box, pal.trim, [(c.x0 + c.x1) / 2, -0.4, (c.z0 + c.z1) / 2], null, [c.x1 - c.x0 + 2, 0.6, c.z1 - c.z0 + 2])); }
-  // walls: one box per segment with a cap, torches every few metres on the long ones
+  const masonry = new THREE.Mesh(mergeParts(parts), matDungeonFloor); masonry.receiveShadow = true; dungeonGroup.add(masonry);
+  // walls: generated stone wall sections (each with its own sconce torch), tiled along every wall segment
+  const walls = [];
   for (const w of D.walls) {
-    const len = Math.hypot(w.x1 - w.x0, w.z1 - w.z0), a = Math.atan2(w.x1 - w.x0, w.z1 - w.z0), mx = (w.x0 + w.x1) / 2, mz = (w.z0 + w.z1) / 2;
-    parts.push(part(GEO.box, pal.wall, [mx, 1.6, mz], [0, a, 0], [1, 3.2, len + 1]));
-    parts.push(part(GEO.box, pal.trim, [mx, 3.3, mz], [0, a, 0], [1.25, 0.25, len + 1.2]));
-    if (len > 7) for (let k = 1, n = Math.floor(len / 7); k <= n; k++) torches.push([lerp(w.x0, w.x1, k / (n + 1)), lerp(w.z0, w.z1, k / (n + 1))]);
+    const len = Math.hypot(w.x1 - w.x0, w.z1 - w.z0) + 1, a = Math.atan2(w.x1 - w.x0, w.z1 - w.z0), S = 3.4, tile = 2.24 * S, n = Math.max(1, Math.round(len / tile)), sx = len / (n * tile);
+    for (let k = 0; k < n; k++) { const f = (k + 0.5) / n - 0.5;
+      walls.push({ x: (w.x0 + w.x1) / 2 + Math.sin(a) * f * len, z: (w.z0 + w.z1) / 2 + Math.cos(a) * f * len, ry: a + Math.PI / 2 + (rng() < 0.5 ? Math.PI : 0), s: S, sx, sz: 0.75 }); }
   }
-  // pillars in the boss hall
-  const B = D.rooms.at(-1); for (const sx of [-1, 1]) for (const sz of [-1, 1]) parts.push(part(GEO.cyl8, pal.trim, [B.x + sx * (B.h - 3), 1.8, B.z + sz * (B.h - 3)], null, [0.9, 3.6, 0.9]));
-  for (const [x, z] of torches) parts.push(part(GEO.box, 0x3a2a1e, [x, 2.1, z], null, [0.25, 0.6, 0.25]));
-  const masonry = new THREE.Mesh(mergeParts(parts), matVC); masonry.receiveShadow = true; dungeonGroup.add(masonry);
-  // torch flames share one additive mesh so the flicker is a single opacity change
-  const fp = torches.map(([x, z]) => part(GEO.ico0, 0xffa040, [x, 2.6, z], null, [0.22, 0.34, 0.22]));
-  if (fp.length) { dungeonParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); dungeonGroup.add(dungeonParts.flame); }
-  // doors: iron portcullis per hall, lowered into the floor once the hall is cleared
-  const doorGeo = mergeParts([part(GEO.box, 0x4a4652, [0, 0, 0], null, [1, 1, 1])]);
-  dungeonParts.doors = D.doors.map((d) => {
-    const m = new THREE.Mesh(doorGeo, matVC); m.position.set(d.x, 1.5, d.z); m.scale.set(d.ax === 'x' ? d.w * 2 + 0.4 : 0.5, 3, d.ax === 'x' ? 0.5 : d.w * 2 + 0.4);
-    dungeonGroup.add(m); return m;
+  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'dwall', walls, { bright: 1.25 }));
+  // the boss hall: four chained pillars and braziers; every other hall gets braziers and some clutter by the walls
+  const B = D.rooms.at(-1), braz = [], clutter = [], pillars = [];
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) pillars.push({ x: B.x + sx * (B.h - 3), z: B.z + sz * (B.h - 3), ry: rng() * 6.28, s: 4.2 });
+  D.rooms.forEach((m, i) => {
+    const boss = i === D.rooms.length - 1, ins = 1.6;
+    const corners = [[m.x0 + ins, m.z0 + ins], [m.x1 - ins, m.z1 - ins], [m.x0 + ins, m.z1 - ins], [m.x1 - ins, m.z0 + ins]];
+    corners.slice(0, boss ? 4 : 2).forEach(([x, z]) => braz.push({ x, z, ry: rng() * 6.28, s: 1.7 }));
+    if (!boss && i > 0) { const [x, z] = corners[2 + (i % 2)]; clutter.push({ x, z, ry: rng() * 6.28, s: 1.5 }); }
   });
-  // the reward chest and two exit portals (the second opens beside the chest)
-  const chest = new THREE.Group(), body = new THREE.Mesh(mergeParts([part(GEO.box, 0x7a4a24, [0, 0.45, 0], null, [1.6, 0.9, 1.05]), part(GEO.box, 0xffc94a, [0, 0.5, 0.54], null, [0.3, 0.35, 0.06])]), matVC);
-  const lid = new THREE.Mesh(mergeParts([part(GEO.box, 0x8a5a2c, [0, 0.15, 0.52], null, [1.66, 0.3, 1.1]), part(GEO.box, 0xffc94a, [0, 0.16, 0.52], null, [1.7, 0.08, 0.2])]), matVC);
-  lid.position.set(0, 0.9, -0.52); chest.add(body, lid); // lid pivots on its back edge
-  chest.position.set(D.chest.x, 0, D.chest.z); chest.visible = false; dungeonGroup.add(chest);
-  dungeonParts.chest = chest; dungeonParts.lid = lid;
+  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz), WorldModels.place(dungeonGroup, 'clutter', clutter));
+  // brazier flames share one additive mesh so the flicker is a single opacity change
+  const fp = braz.map((b) => part(GEO.ico0, 0xffa040, [b.x, b.s * 0.98, b.z], null, [0.32, 0.5, 0.32]));
+  if (fp.length) { dungeonParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); dungeonGroup.add(dungeonParts.flame); }
+  // brazier light: a few warm point lights in the biggest halls (high quality only)
+  if (!Q.lowTier) for (const b of braz.filter((_, k) => k % 3 === 0).slice(0, 4)) { const L = new THREE.PointLight(0xffa050, 18, 14, 1.6); L.position.set(b.x, 2.4, b.z); dungeonGroup.add(L); dungeonParts.lights.push(L); }
+  // doors: an iron portcullis in a stone frame per hall, lowered into the floor once the hall is cleared
+  dungeonParts.doorItems = D.doors.map((d) => { const W2 = d.w * 2 + 0.4, S = 3.2; return { x: d.x, z: d.z, y: 0, ry: d.ax === 'x' ? 0 : Math.PI / 2, s: S, sx: W2 / (1.06 * S), sz: 1.4 }; });
+  dungeonParts.doorSet = WorldModels.place(dungeonGroup, 'portcullis', dungeonParts.doorItems);
+  dungeonParts.sets.push(dungeonParts.doorSet);
+  // the reward chest: closed until you open it, then the open one full of gold
+  const cr = Math.atan2(D.exit.x - D.chest.x, D.exit.z - D.chest.z);
+  dungeonParts.chestItems = [{ x: D.chest.x, z: D.chest.z, ry: cr, s: 1.25, hidden: true }, { x: D.chest.x, z: D.chest.z, ry: cr, s: 1.7, hidden: true }];
+  dungeonParts.chestSets = [WorldModels.place(dungeonGroup, 'chest', [dungeonParts.chestItems[0]]), WorldModels.place(dungeonGroup, 'chest_open', [dungeonParts.chestItems[1]], { glow: 0xffc94a, glowK: 0.25 })];
+  dungeonParts.sets.push(...dungeonParts.chestSets);
   dungeonParts.portals = [D.exit, D.exit2].map((q, i) => {
     const g = new THREE.Group(), ring = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.4, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
     const disc = new THREE.Mesh(new THREE.CircleGeometry(1.1, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: swirlTex(), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
@@ -47,11 +78,13 @@ function buildDungeonView(D) {
   });
 }
 function disposeDungeonView() {
+  // generated models first: their geometry and textures belong to the asset cache and must survive
+  for (const h of dungeonParts.sets) WorldModels.dispose(h);
   // matVC is shared with the hub, and swirlTex is cached: keep both
   const geos = new Set(), mats = new Set();
   dungeonGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matVC) mats.add(o.material); });
   geos.forEach((g) => g.dispose()); mats.forEach((m) => m.dispose());
-  dungeonGroup.clear(); dungeonParts.doors = []; dungeonParts.portals = []; dungeonParts.chest = dungeonParts.lid = dungeonParts.flame = null;
+  dungeonGroup.clear(); dungeonParts.sets = []; dungeonParts.lights = []; dungeonParts.portals = []; dungeonParts.flame = null; dungeonParts.doorSet = null; dungeonParts.chestSets = []; dungeonParts.doorItems = []; dungeonParts.chestItems = [];
 }
 function enterDungeonView(on) {
   hubGroup.visible = !on; riftGroup.visible = false; dungeonGroup.visible = on;
@@ -66,7 +99,13 @@ function updateDungeonView(dt) {
   hubGroup.visible = false; // the showcase restores the hub on close; the dungeon keeps it hidden
   const t = (dungeonParts.t += dt);
   if (dungeonParts.flame) dungeonParts.flame.material.opacity = 0.75 + Math.sin(t * 13) * 0.08 + Math.sin(t * 7.3) * 0.08;
-  D.doors.forEach((d, i) => { const m = dungeonParts.doors[i]; if (m && d.open && m.position.y > -1.6) m.position.y = Math.max(-1.6, m.position.y - dt * 2.2); });
-  if (dungeonParts.chest) { dungeonParts.chest.visible = D.bossDead; if (D.chestOpen) dungeonParts.lid.rotation.x = Math.max(-1.9, dungeonParts.lid.rotation.x - dt * 3); }
+  // portcullises sink into the floor once their hall is cleared
+  D.doors.forEach((d, i) => { const it = dungeonParts.doorItems[i]; if (it && d.open && it.y > -3.3) { it.y = Math.max(-3.3, it.y - dt * 2.6); if (dungeonParts.doorSet) dungeonParts.doorSet.dirty = true; } });
+  // the chest appears with the boss's defeat; opening it swaps in the open chest full of gold
+  const [cc, co] = dungeonParts.chestItems;
+  if (cc) { const hc = !D.bossDead || !!D.chestOpen, ho = !D.chestOpen;
+    if (cc.hidden !== hc || co.hidden !== ho) { cc.hidden = hc; co.hidden = ho; for (const h of dungeonParts.chestSets) h.dirty = true; if (D.chestOpen) burst(co.x, 1.2, co.z, 24, 0xffd34a, 4, 0.9, 0.5, 10, 3); } }
+  WorldModels.update();
+  for (const L of dungeonParts.lights) L.intensity = 16 + Math.sin(t * 11 + L.position.x) * 2.5;
   dungeonParts.portals.forEach((g, i) => { g.visible = i === 0 || D.bossDead; g.rotation.y = t * (i ? -0.8 : 0.8); });
 }

@@ -144,17 +144,19 @@ function buildHub() {
   // town: houses, fountain, stalls (one merged mesh)
   const tParts = [];
   const houseAngles = [-2.45, -1.8, -1.1, 1.1, 1.8, 2.45];
+  // town houses: generated timber and stone cottages facing the plaza (one instanced draw per style)
+  const houses = [[], []];
   houseAngles.forEach((a, i) => {
-    const x = T.x + Math.sin(a) * 17, z = T.z + Math.cos(a) * 17, rot = a + Math.PI;
-    const roof = P2.roof[i % P2.roof.length];
-    tParts.push(part(GEO.box, P2.wall, [x, 1.4, z], [0, rot, 0], [4.2, 2.8, 3.6]));
-    tParts.push(part(GEO.box, P2.wood, [x, 0.12, z], [0, rot, 0], [4.5, 0.24, 3.9]));
-    tParts.push(part(GEO.cone4, roof, [x, 3.7, z], [0, rot + Math.PI / 4, 0], [3.6, 1.9, 3.2]));
-    tParts.push(part(GEO.box, P2.wood, [x + Math.sin(rot) * 1.81, 0.8, z + Math.cos(rot) * 1.81], [0, rot, 0], [0.9, 1.6, 0.06]));
-    tParts.push(part(GEO.box, 0x9fd3ff, [x + Math.sin(rot) * 1.81 + Math.cos(rot) * 1.3, 1.7, z + Math.cos(rot) * 1.81 - Math.sin(rot) * 1.3], [0, rot, 0], [0.7, 0.7, 0.06]));
-    tParts.push(part(GEO.box, 0x8a5a3c, [x - Math.cos(rot) * 1.2, 4.0, z + Math.sin(rot) * 1.2], [0, rot, 0], [0.4, 1.0, 0.4]));
-    grid.add({ x, z, r: 2.5 });
+    const x = T.x + Math.sin(a) * 17.5, z = T.z + Math.cos(a) * 17.5;
+    houses[i % 2].push({ x, z, ry: a + Math.PI, s: 6.2 + (i % 3) * 0.4 });
+    grid.add({ x, z, r: 3 });
   });
+  WorldModels.place(hubGroup, 'house_a', houses[0]); WorldModels.place(hubGroup, 'house_b', houses[1]);
+  // the castle behind the arena portal, with two watchtowers flanking the town
+  WorldModels.place(hubGroup, 'keep', [{ x: T.x, z: CFG.world.minZ - 6, ry: 0, s: 15 }]);
+  WorldModels.place(hubGroup, 'tower', [{ x: T.x - 27, z: T.z - 14, ry: 0.5, s: 12 }, { x: T.x + 27, z: T.z - 14, ry: -0.5, s: 12 }]);
+  grid.add({ x: T.x - 27, z: T.z - 14, r: 3.6 }); grid.add({ x: T.x + 27, z: T.z - 14, r: 3.6 });
+
   tParts.push(part(GEO.cyl8, 0xb8bcc6, [T.x, 0.35, T.z], null, [3, 0.7, 3]));
   tParts.push(part(GEO.cyl8, 0x5cc6ff, [T.x, 0.62, T.z], null, [2.6, 0.1, 2.6]));
   tParts.push(part(GEO.cyl8, 0xb8bcc6, [T.x, 1.3, T.z], null, [0.35, 1.8, 0.35]));
@@ -188,13 +190,11 @@ function buildHub() {
       grid.add({ x, z, r: 0.7 });
     }
   });
-  // gates: arches + fence posts
+  // gates: a castle gatehouse over the road + fence posts
+  const gates = [];
   for (let zi = 1; zi < W.zones.length; zi++) {
     const zn = W.zones[zi], gz = zn.z0;
-    tParts.push(part(GEO.box, 0x6f747e, [-3.2, 2.2, gz], null, [0.9, 4.4, 0.9]));
-    tParts.push(part(GEO.box, 0x6f747e, [3.2, 2.2, gz], null, [0.9, 4.4, 0.9]));
-    tParts.push(part(GEO.box, 0x585d67, [0, 4.6, gz], null, [7.4, 0.8, 1.0]));
-    tParts.push(part(GEO.cone4, 0xffc94a, [-3.2, 4.9, gz], [0, Math.PI / 4, 0], [0.6, 0.6, 0.6])); tParts.push(part(GEO.cone4, 0xffc94a, [3.2, 4.9, gz], [0, Math.PI / 4, 0], [0.6, 0.6, 0.6]));
+    gates.push({ x: 0, z: gz, ry: Math.PI, s: 8.2 }); // castle gatehouse over the road (model below)
     grid.add({ x: -3.2, z: gz, r: 0.6 }); grid.add({ x: 3.2, z: gz, r: 0.6 });
     const fence = zi === 1 || zn.biome !== W.zones[zi - 1].biome;
     if (fence) for (let x = W.minX; x <= W.maxX; x += 3) {
@@ -208,6 +208,7 @@ function buildHub() {
     hubParts.barriers.push({ mesh: bm, zone: zi });
     hubParts.gateLabels.push({ x: 0, z: gz, y: 5.6, zone: zi });
   }
+  WorldModels.place(hubGroup, 'gatehouse', gates);
   // monster dens: a ring of bones, rocks and banners so the camp reads from far away
   W.dens.forEach((D, di) => {
     const zc = [0x8a8f99, 0x5b4a3a, 0xbfd3e6, 0x3a2622, 0x3b3566, 0x2b6f6a, 0xd9c48a][W.zones[D.zone].theme];
@@ -224,9 +225,15 @@ function buildHub() {
   { const bg = new THREE.CylinderGeometry(0.7, 1.6, 46, 10, 1, true), bmat = new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
     const caves = W.pois.filter((q) => q.kind === 'dungeon'), bim = new THREE.InstancedMesh(bg, bmat, caves.length), m4 = new THREE.Matrix4();
     caves.forEach((q, i) => bim.setMatrixAt(i, m4.makeTranslation(q.x, 23, q.z))); bim.frustumCulled = false; hubGroup.add(bim); }
-  // ore vein crystals: one instance per vein, hidden while it regrows (updateHubProps)
-  { const oim = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.6, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }), W.nodes.length);
-    oim.instanceMatrix.setUsage(THREE.DynamicDrawUsage); oim.frustumCulled = false; oim.setColorAt(0, _col.set(0xffffff)); hubGroup.add(oim); hubParts.oreIM = oim; G.nodesDirty = true; }
+  // ore veins: a generated ore outcrop per vein (crystal cluster for the rare vein); greyed and sunk while regrowing
+  { const rot = (q) => (q.x < 0 ? Math.PI / 2 : -Math.PI / 2) + (hashf(q.x, q.z) - 0.5) * 1.2;
+    const items = { ore: [], crystal: [] }; hubParts.oreItems = [];
+    W.nodes.forEach((q) => { const k = q.id.endsWith(':3') ? 'crystal' : 'ore', it = { x: q.x, z: q.z, ry: rot(q), s: k === 'ore' ? 2.2 : 2.6, base: k === 'ore' ? 2.2 : 2.6 }; items[k].push(it); hubParts.oreItems.push(it); });
+    hubParts.oreSets = [WorldModels.place(hubGroup, 'ore', items.ore, { shadow: false }), WorldModels.place(hubGroup, 'crystal', items.crystal, { glow: 0x9fe8ff, glowK: 0.5, shadow: false })];
+    G.nodesDirty = true; }
+  // cave mouths down to the dungeons (the rock colliders come from the area art)
+  { const caves = W.pois.filter((q) => q.kind === 'dungeon').map((q) => { const r = q.x < 0 ? Math.PI / 2 : -Math.PI / 2; return { x: q.x - Math.sin(r) * 2.5, z: q.z - Math.cos(r) * 2.5, ry: r, s: 6.4 }; });
+    WorldModels.place(hubGroup, 'cave', caves, { shadow: false, bright: 1.35 }); }
   // waypoint stones: obelisks with a floating crystal
   W.waypoints.forEach((w) => {
     tParts.push(part(GEO.cyl8, 0x6f6a8a, [w.x, 0.25, w.z], null, [1.3, 0.5, 1.3]));

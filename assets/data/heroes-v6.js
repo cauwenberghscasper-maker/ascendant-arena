@@ -454,7 +454,7 @@ export function finishHeroesV6(CFG) {
 
 // Painted splash art (FLUX.1 Kontext [dev] repaint of each Codex concept): a wide banner for the hero's details and a
 // square crop for the roster card, in assets/ui/portraits/splash/. Heroes not listed keep their 3D-render portrait.
-export const HERO_SPLASH = ['camedown', 'corrin', 'fenwick', 'halven', 'hob', 'ione', 'jory', 'kallix', 'lysandra', 'moss', 'mott', 'nyssa', 'oko', 'ophira', 'pyrrhos', 'sena', 'sleeper', 'thimble', 'unwritten', 'vell', 'wrenna', 'ysolt'];
+export const HERO_SPLASH = ['aurvan', 'camedown', 'corrin', 'fenwick', 'halven', 'hob', 'ione', 'jory', 'kallix', 'kerberon', 'lysandra', 'moss', 'mott', 'nyssa', 'oko', 'ophira', 'ourax', 'pyrrhos', 'sena', 'sleeper', 'thimble', 'tychon', 'unwritten', 'vell', 'wrenna', 'ysolt'];
 
 // Model registry: assets/hero-v6/<id>/model.json (packed by tools/v4_pack.py), shared adventurer clips.
 export function applyHeroV6Models(manifest, ready) {

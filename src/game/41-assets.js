@@ -71,6 +71,10 @@ for (const [id, def] of Object.entries(ASSET_MANIFEST)) if (id.startsWith('hero.
 // Hand-painted, fully rigged adventurers (v4) replace them; each keeps its old entry as a fallback.
 applyHeroV4(ASSET_MANIFEST);
 applyHeroV6Models(ASSET_MANIFEST);
+// Townsfolk: generated in the Codex heroes' style (Z-Image Turbo concept -> TRELLIS.2), rigged with tools/v4_* and the shared clips.
+const NPC_MODELS = { ida: 1.8, bo: 1.95, mira: 1.7, vex: 2.05, lumi: 1.9, garo: 2.1, rho: 2.15 };
+for (const [k, size] of Object.entries(NPC_MODELS)) ASSET_MANIFEST['npc.' + k] = { dir: 'assets/npc/' + k + '/', size, v4: true, npc: true, animated: true, measuredHand: true,
+  character: k, handLen: 0.08, weapon: null, attack: 'Cheer', source: 'TRELLIS.2 (MIT) from a Z-Image Turbo (Apache-2.0) concept, rigged with tools/v4_* + tools/v6_*, 13 Oct 2026' };
 // which kind of weapon a brawler holds (mirrors weaponGeometry)
 // the generated weapon a hero holds: always the brawler's own signature weapon (equipped items are not shown on heroes)
 const SIGNATURE_WEAPON = { chain: 'gear.weapon.dragonsoul.focus' }; // Volt carries the Dragonsoul staff
@@ -170,7 +174,7 @@ const AssetLibrary = {
       m.roughness = Math.max(def.style === 'painted-v3' ? 0.7 : 0.35, m.roughness);
       if (m.emissiveMap) { m.emissive.set(0xffffff); m.emissiveIntensity = def.glow || 1; }
       m.userData.baseEmissive = m.emissive.getHex(); m.userData.baseEmissiveI = m.emissiveIntensity; // plain values: clone() copies userData as JSON
-      if (!/^gear\.|^weapon\./.test(id)) addRimLight(m, id.startsWith('hero.') ? 0.55 : 0.4);
+      if (!/^gear\.|^weapon\.|^world\./.test(id)) addRimLight(m, id.startsWith('hero.') ? 0.55 : 0.4);
       m.needsUpdate = true;
       if (outline) {
         // ink outline like the rest of the world: inverted hull built in the parent's space

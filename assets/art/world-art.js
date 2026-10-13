@@ -84,11 +84,9 @@ const POI_ART = {
   obelisk(k){const S=k.s;k.b('box',S.dark,0,.25,0,2,.5,2);k.b('cone4',S.stone,0,3,0,.8,5.5,.8,0,.78,0);k.g('box',S.accent,0,2.4,.42,.2,1.6,.05);k.h(0,0,1);},
   shack(k){const S=k.s;k.b('box',0x6a5a4c,0,1.2,0,4,2.4,3.2);k.b('cone4',S.dark,0,3.2,0,3.2,1.6,2.6,0,.78,0);k.b('box',0x3a2a20,0,.8,1.62,.9,1.6,.05);k.g('box',0xffd99a,1.3,1.4,1.62,.6,.5,.05);k.h(-1,0,1.8);k.h(1,0,1.8);},
   // ore vein: a dark rock mound (the glowing crystals on top are instanced in the hub view so they can be mined away)
-  ore(k){const S=k.s;k.b('crown',S.dark,0,.7,0,1.8,1.3,1.6);k.b('crown',S.stone,1.3,.45,.7,1,.8,1,0,.7,0);k.b('crown',S.stone,-1.1,.35,-.6,.8,.6,.8,0,1.4,0);k.h(0,0,1.6);},
+  ore(k){k.h(0,0,1.6);}, // the outcrop itself is a generated model (src/game/48-world-models.js)
   // cave mouth down to a dungeon: rock mound behind, dark arch and steps toward the road, two torches
-  cave(k){const S=k.s;k.b('crown',S.dark,0,2.2,-6,5.5,4.6,5);k.b('crown',S.stone,-4,1.6,-4,3,3,3,0,.5,0);k.b('crown',S.stone,4,1.6,-4,3,3,3,0,1,0);
-    k.b('box',0x050407,0,1.5,-1.2,3.4,3,.6);k.b('box',S.trim,0,3.2,-1,4.2,.6,1.2);for(let i=0;i<3;i++)k.b('box',S.stone,0,.08-i*.02,.2-i*.5,3,.16,.5);
-    for(const x of[-2.5,2.5]){k.b('cyl',0x4a3426,x,1,.2,.12,2,.12);k.g('ico',0xff9b3d,x,2.2,.2,.3,.4,.3);}k.h(0,-6,5);k.h(-4,-4,2.8);k.h(4,-4,2.8);},
+  cave(k){k.h(0,-6,5);k.h(-4,-4,2.8);k.h(4,-4,2.8);}, // the cave mouth is a generated model placed by the hub view
   // secret pocket: a closed ring of rocks and dark firs with one narrow gap (world +z or −z), cache in the middle
   cache(k,q){const N=22,R=7,skip=q.gap>0?0:N/2;for(let i=0;i<N;i++){if(i===skip)continue;const a=i/N*6.283,x=Math.sin(a)*R,z=Math.cos(a)*R;
       k.b('crown',0x4a4a44,x,.6,z,1.2,1,1.2,0,a,0);k.b('cone',0x1e3a2a,x,3,z,1.2,4.2,1.2);k.h(x,z,1.1);}

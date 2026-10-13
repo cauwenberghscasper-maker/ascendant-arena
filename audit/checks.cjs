@@ -18,7 +18,7 @@ class Obj {
     this.visible = true; this.children = []; this.userData = {};
     this.rotation = {x:0,y:0,z:0};
     this.position = {x:0,y:0,z:0,set(x,y,z){Object.assign(this,{x,y,z});}};
-    this.scale = {x:1,y:1,z:1,setScalar(s){this.x=this.y=this.z=s;}};
+    this.scale = {x:1,y:1,z:1,setScalar(s){this.x=this.y=this.z=s;},set(x,y,z){Object.assign(this,{x,y,z});}};
   }
   add(...items){this.children.push(...items);}
 }
@@ -36,7 +36,8 @@ for (const proposed of [false,true]) {
     const boss = {kind:'boss',zone,x:4,z:4,facing:0,moveAmt:0,attackAnim:0,flashT:0,alive:true,hp:100};
     const G={mode:'hub',player,hubFighters:[],enemies:[],boss};
     const Showcase={on:false};
-    const ctx={THREE:{Group:Obj,Mesh,MeshBasicMaterial:Material,RingGeometry:Geo},CFG:{world:{zones:Array.from({length:7},()=>({coreColor:0xff00ff}))}},
+    const ctx={THREE:{Group:Obj,Mesh,MeshBasicMaterial:Material,RingGeometry:Geo,Color:class{setRGB(){return this;}}},CFG:{world:{zones:Array.from({length:7},(_, i)=>({coreColor:0xff00ff,biome:Math.min(5,i)}))}},
+      AssetLibrary:{has:()=>false,status:()=>'none',request(){},flash(){},disposeInstance(){}},addRimLight(){},
       golemGeos:()=>({body:new Geo(),arm:new Geo(),glow:new Geo()}),geoShadow:new Geo(),matShadow:new Material(),
       flashMaterial:()=>new Material(),addOutline:()=>{},matOutlineBoss:new Material(),angDiff:(a,b)=>b-a,clamp:(x,a,b)=>Math.min(b,Math.max(a,x)),
       AssetSlots:{register:(k,f)=>factories.set(k,f)},views,G,Showcase,Q:{cull:60},camera:{position:{x:0,z:0}},seen:new Set(),

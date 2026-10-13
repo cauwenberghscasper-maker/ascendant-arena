@@ -106,17 +106,22 @@
     }
   ],
   "totals": {
-    "models": 41,
-    "triangles": 528772,
-    "modelJsonBytes": 19320871,
-    "glbBytes": 14489528,
-    "textureBytes": 13434352,
-    "assetBytes": 36902972,
+    "models": 130,
+    "triangles": 1957045,
+    "modelJsonBytes": 99234824,
+    "glbBytes": 74422700,
+    "textureBytes": 40564668,
+    "assetBytes": 179759031,
     "byKind": {
       "enemy": 14,
       "gear": 1,
       "hero": 16,
-      "weapon": 10
+      "hero-v4": 33,
+      "hero-v5": 1,
+      "hero-v6": 27,
+      "npc": 7,
+      "weapon": 10,
+      "world": 21
     }
   },
   "assets": [
@@ -746,6 +751,2150 @@
       ]
     },
     {
+      "path": "assets/hero-v4/ayla/model.json",
+      "jsonBytes": 1910081,
+      "glbBytes": 1432536,
+      "textureBytes": 373620,
+      "triangles": 29257,
+      "vertices": 44704,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/ayla/packed/model.json",
+      "jsonBytes": 656361,
+      "glbBytes": 492244,
+      "textureBytes": 157252,
+      "triangles": 11500,
+      "vertices": 9545,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp"
+      ],
+      "nodeNames": [
+        "world",
+        "geometry_0",
+        "heroRoot",
+        "armL",
+        "elbowL",
+        "handL",
+        "armR",
+        "elbowR",
+        "handR",
+        "legLBone",
+        "kneeL",
+        "ankleL",
+        "legRBone",
+        "kneeR",
+        "ankleR"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/boomer/model.json",
+      "jsonBytes": 874265,
+      "glbBytes": 655672,
+      "textureBytes": 375980,
+      "triangles": 15479,
+      "vertices": 19913,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/brick/model.json",
+      "jsonBytes": 1207517,
+      "glbBytes": 905612,
+      "textureBytes": 373350,
+      "triangles": 19615,
+      "vertices": 27952,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/brick/packed/model.json",
+      "jsonBytes": 667821,
+      "glbBytes": 500840,
+      "textureBytes": 127430,
+      "triangles": 11500,
+      "vertices": 9739,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp"
+      ],
+      "nodeNames": [
+        "world",
+        "geometry_0",
+        "heroRoot",
+        "armL",
+        "elbowL",
+        "handL",
+        "armR",
+        "elbowR",
+        "handR",
+        "legLBone",
+        "kneeL",
+        "ankleL",
+        "legRBone",
+        "kneeR",
+        "ankleR"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/bruno/model.json",
+      "jsonBytes": 1534937,
+      "glbBytes": 1151176,
+      "textureBytes": 335804,
+      "triangles": 24226,
+      "vertices": 35734,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/dax/model.json",
+      "jsonBytes": 814657,
+      "glbBytes": 610968,
+      "textureBytes": 384424,
+      "triangles": 14998,
+      "vertices": 18418,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/ember/model.json",
+      "jsonBytes": 800989,
+      "glbBytes": 600716,
+      "textureBytes": 408362,
+      "triangles": 14999,
+      "vertices": 18052,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/gus/model.json",
+      "jsonBytes": 869021,
+      "glbBytes": 651740,
+      "textureBytes": 406944,
+      "triangles": 15332,
+      "vertices": 19803,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/kiko/model.json",
+      "jsonBytes": 806289,
+      "glbBytes": 604692,
+      "textureBytes": 335334,
+      "triangles": 14999,
+      "vertices": 18195,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/lumi/model.json",
+      "jsonBytes": 1196921,
+      "glbBytes": 897664,
+      "textureBytes": 412338,
+      "triangles": 19938,
+      "vertices": 27600,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/nova/model.json",
+      "jsonBytes": 797281,
+      "glbBytes": 597936,
+      "textureBytes": 329028,
+      "triangles": 14999,
+      "vertices": 17953,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/pip/model.json",
+      "jsonBytes": 1323209,
+      "glbBytes": 992380,
+      "textureBytes": 465008,
+      "triangles": 22148,
+      "vertices": 30508,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/pip/packed/model.json",
+      "jsonBytes": 713021,
+      "glbBytes": 534740,
+      "textureBytes": 148216,
+      "triangles": 11499,
+      "vertices": 10507,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp"
+      ],
+      "nodeNames": [
+        "world",
+        "geometry_0",
+        "heroRoot",
+        "armL",
+        "elbowL",
+        "handL",
+        "armR",
+        "elbowR",
+        "handR",
+        "legLBone",
+        "kneeL",
+        "ankleL",
+        "legRBone",
+        "kneeR",
+        "ankleR"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/ren/model.json",
+      "jsonBytes": 847053,
+      "glbBytes": 635264,
+      "textureBytes": 271200,
+      "triangles": 14999,
+      "vertices": 19286,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/rico/model.json",
+      "jsonBytes": 900881,
+      "glbBytes": 675636,
+      "textureBytes": 379584,
+      "triangles": 15213,
+      "vertices": 20682,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/stella/model.json",
+      "jsonBytes": 889249,
+      "glbBytes": 666912,
+      "textureBytes": 307132,
+      "triangles": 15026,
+      "vertices": 20410,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/vex/model.json",
+      "jsonBytes": 987689,
+      "glbBytes": 740740,
+      "textureBytes": 311380,
+      "triangles": 16905,
+      "vertices": 22644,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/volt/model.json",
+      "jsonBytes": 859065,
+      "glbBytes": 644272,
+      "textureBytes": 692738,
+      "triangles": 14999,
+      "vertices": 19608,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/ayla/model.json",
+      "jsonBytes": 553649,
+      "glbBytes": 415212,
+      "textureBytes": 142130,
+      "triangles": 11982,
+      "vertices": 17096,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/boomer/model.json",
+      "jsonBytes": 321377,
+      "glbBytes": 241008,
+      "textureBytes": 89990,
+      "triangles": 7258,
+      "vertices": 9800,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/brick/model.json",
+      "jsonBytes": 186033,
+      "glbBytes": 139500,
+      "textureBytes": 105784,
+      "triangles": 5000,
+      "vertices": 5402,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/bruno/model.json",
+      "jsonBytes": 265617,
+      "glbBytes": 199188,
+      "textureBytes": 121656,
+      "triangles": 5908,
+      "vertices": 8114,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/dax/model.json",
+      "jsonBytes": 266185,
+      "glbBytes": 199612,
+      "textureBytes": 98226,
+      "triangles": 5802,
+      "vertices": 8167,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/ember/model.json",
+      "jsonBytes": 182121,
+      "glbBytes": 136564,
+      "textureBytes": 97650,
+      "triangles": 5000,
+      "vertices": 5255,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/gus/model.json",
+      "jsonBytes": 275677,
+      "glbBytes": 206732,
+      "textureBytes": 110562,
+      "triangles": 5972,
+      "vertices": 8472,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/kiko/model.json",
+      "jsonBytes": 538553,
+      "glbBytes": 403888,
+      "textureBytes": 114208,
+      "triangles": 11654,
+      "vertices": 16625,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/lumi/model.json",
+      "jsonBytes": 242029,
+      "glbBytes": 181496,
+      "textureBytes": 117614,
+      "triangles": 5262,
+      "vertices": 7423,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/nova/model.json",
+      "jsonBytes": 1003473,
+      "glbBytes": 752580,
+      "textureBytes": 230370,
+      "triangles": 21696,
+      "vertices": 31047,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/ren/model.json",
+      "jsonBytes": 578605,
+      "glbBytes": 433928,
+      "textureBytes": 117014,
+      "triangles": 13018,
+      "vertices": 17718,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/rico/model.json",
+      "jsonBytes": 213641,
+      "glbBytes": 160204,
+      "textureBytes": 98396,
+      "triangles": 5000,
+      "vertices": 6437,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/stella/model.json",
+      "jsonBytes": 184653,
+      "glbBytes": 138464,
+      "textureBytes": 118804,
+      "triangles": 5000,
+      "vertices": 5350,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/volt/model.json",
+      "jsonBytes": 299697,
+      "glbBytes": 224748,
+      "textureBytes": 119594,
+      "triangles": 6634,
+      "vertices": 9174,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v5/lumi/packed/model.json",
+      "jsonBytes": 516909,
+      "glbBytes": 387656,
+      "textureBytes": 155758,
+      "triangles": 8998,
+      "vertices": 7505,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp"
+      ],
+      "nodeNames": [
+        "world",
+        "geometry_0",
+        "heroRoot",
+        "armL",
+        "elbowL",
+        "handL",
+        "armR",
+        "elbowR",
+        "handR",
+        "legLBone",
+        "kneeL",
+        "ankleL",
+        "legRBone",
+        "kneeR",
+        "ankleR"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/aurvan/model.json",
+      "jsonBytes": 801753,
+      "glbBytes": 601288,
+      "textureBytes": 338532,
+      "triangles": 14990,
+      "vertices": 18074,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/camedown/model.json",
+      "jsonBytes": 1124817,
+      "glbBytes": 843588,
+      "textureBytes": 349020,
+      "triangles": 19355,
+      "vertices": 25792,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/corrin/model.json",
+      "jsonBytes": 809421,
+      "glbBytes": 607040,
+      "textureBytes": 378876,
+      "triangles": 14968,
+      "vertices": 18285,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/fenwick/model.json",
+      "jsonBytes": 1290845,
+      "glbBytes": 968108,
+      "textureBytes": 349660,
+      "triangles": 21361,
+      "vertices": 29809,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/halven/model.json",
+      "jsonBytes": 2348685,
+      "glbBytes": 1761488,
+      "textureBytes": 394456,
+      "triangles": 38403,
+      "vertices": 54492,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/hespera/model.json",
+      "jsonBytes": 1691245,
+      "glbBytes": 1268408,
+      "textureBytes": 307728,
+      "triangles": 28493,
+      "vertices": 39006,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/hob/model.json",
+      "jsonBytes": 1449389,
+      "glbBytes": 1087016,
+      "textureBytes": 429266,
+      "triangles": 24818,
+      "vertices": 33315,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/ione/model.json",
+      "jsonBytes": 1790045,
+      "glbBytes": 1342508,
+      "textureBytes": 401538,
+      "triangles": 29427,
+      "vertices": 41453,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/jory/model.json",
+      "jsonBytes": 2540893,
+      "glbBytes": 1905644,
+      "textureBytes": 334966,
+      "triangles": 41715,
+      "vertices": 58931,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/kallix/model.json",
+      "jsonBytes": 1219005,
+      "glbBytes": 914228,
+      "textureBytes": 292654,
+      "triangles": 20024,
+      "vertices": 28172,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/kerberon/model.json",
+      "jsonBytes": 1563549,
+      "glbBytes": 1172636,
+      "textureBytes": 288368,
+      "triangles": 26199,
+      "vertices": 36077,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/lysandra/model.json",
+      "jsonBytes": 985869,
+      "glbBytes": 739376,
+      "textureBytes": 396224,
+      "triangles": 16892,
+      "vertices": 22598,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/moss/model.json",
+      "jsonBytes": 964273,
+      "glbBytes": 723180,
+      "textureBytes": 344388,
+      "triangles": 16161,
+      "vertices": 22176,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/mott/model.json",
+      "jsonBytes": 892617,
+      "glbBytes": 669436,
+      "textureBytes": 379170,
+      "triangles": 14935,
+      "vertices": 20520,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/nyssa/model.json",
+      "jsonBytes": 1833809,
+      "glbBytes": 1375332,
+      "textureBytes": 288788,
+      "triangles": 30064,
+      "vertices": 42488,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/oko/model.json",
+      "jsonBytes": 2143217,
+      "glbBytes": 1607388,
+      "textureBytes": 400152,
+      "triangles": 35875,
+      "vertices": 49531,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/ophira/model.json",
+      "jsonBytes": 1524473,
+      "glbBytes": 1143328,
+      "textureBytes": 393298,
+      "triangles": 24899,
+      "vertices": 35309,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/ourax/model.json",
+      "jsonBytes": 1107617,
+      "glbBytes": 830688,
+      "textureBytes": 396740,
+      "triangles": 19416,
+      "vertices": 25319,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/pyrrhos/model.json",
+      "jsonBytes": 1958273,
+      "glbBytes": 1468680,
+      "textureBytes": 392776,
+      "triangles": 32629,
+      "vertices": 45272,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/sena/model.json",
+      "jsonBytes": 1223193,
+      "glbBytes": 917368,
+      "textureBytes": 379014,
+      "triangles": 20743,
+      "vertices": 28130,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/sleeper/model.json",
+      "jsonBytes": 1741705,
+      "glbBytes": 1306252,
+      "textureBytes": 449766,
+      "triangles": 28187,
+      "vertices": 40423,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/thimble/model.json",
+      "jsonBytes": 1975473,
+      "glbBytes": 1481580,
+      "textureBytes": 432240,
+      "triangles": 32645,
+      "vertices": 45730,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/tychon/model.json",
+      "jsonBytes": 894761,
+      "glbBytes": 671044,
+      "textureBytes": 399610,
+      "triangles": 15384,
+      "vertices": 20481,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/unwritten/model.json",
+      "jsonBytes": 1292889,
+      "glbBytes": 969640,
+      "textureBytes": 414048,
+      "triangles": 22316,
+      "vertices": 29660,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/vell/model.json",
+      "jsonBytes": 1498697,
+      "glbBytes": 1123996,
+      "textureBytes": 374974,
+      "triangles": 25407,
+      "vertices": 34510,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/wrenna/model.json",
+      "jsonBytes": 1194033,
+      "glbBytes": 895500,
+      "textureBytes": 426566,
+      "triangles": 20093,
+      "vertices": 27488,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/hero-v6/ysolt/model.json",
+      "jsonBytes": 1039409,
+      "glbBytes": 779532,
+      "textureBytes": 314026,
+      "triangles": 16888,
+      "vertices": 24034,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/npc/bo/model.json",
+      "jsonBytes": 825533,
+      "glbBytes": 619124,
+      "textureBytes": 459792,
+      "triangles": 14897,
+      "vertices": 18731,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/npc/garo/model.json",
+      "jsonBytes": 1111997,
+      "glbBytes": 833972,
+      "textureBytes": 407946,
+      "triangles": 19398,
+      "vertices": 25440,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/npc/ida/model.json",
+      "jsonBytes": 1248893,
+      "glbBytes": 936644,
+      "textureBytes": 352650,
+      "triangles": 20936,
+      "vertices": 28777,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/npc/lumi/model.json",
+      "jsonBytes": 788113,
+      "glbBytes": 591060,
+      "textureBytes": 394914,
+      "triangles": 14434,
+      "vertices": 17828,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/npc/mira/model.json",
+      "jsonBytes": 805097,
+      "glbBytes": 603796,
+      "textureBytes": 363572,
+      "triangles": 14814,
+      "vertices": 18202,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/npc/rho/model.json",
+      "jsonBytes": 830669,
+      "glbBytes": 622976,
+      "textureBytes": 371828,
+      "triangles": 14897,
+      "vertices": 18868,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
+      "path": "assets/npc/vex/model.json",
+      "jsonBytes": 1099673,
+      "glbBytes": 824728,
+      "textureBytes": 420656,
+      "triangles": 19533,
+      "vertices": 25081,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 1,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0",
+        "rig",
+        "heroRoot",
+        "chest",
+        "head",
+        "upperarml",
+        "lowerarml",
+        "handl",
+        "upperarmr",
+        "lowerarmr",
+        "handr",
+        "upperlegl",
+        "lowerlegl",
+        "footl",
+        "upperlegr",
+        "lowerlegr",
+        "footr"
+      ]
+    },
+    {
       "path": "assets/weapon/ayla/model.json",
       "jsonBytes": 279295,
       "glbBytes": 209444,
@@ -937,6 +3086,405 @@
       ],
       "nodeNames": [
         "body"
+      ]
+    },
+    {
+      "path": "assets/world/boss_abyss/model.json",
+      "jsonBytes": 794137,
+      "glbBytes": 595576,
+      "textureBytes": 363444,
+      "triangles": 16724,
+      "vertices": 24691,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/boss_celestial/model.json",
+      "jsonBytes": 555373,
+      "glbBytes": 416504,
+      "textureBytes": 451192,
+      "triangles": 14000,
+      "vertices": 16557,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/boss_frost/model.json",
+      "jsonBytes": 573853,
+      "glbBytes": 430364,
+      "textureBytes": 420388,
+      "triangles": 14000,
+      "vertices": 17250,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/boss_golem/model.json",
+      "jsonBytes": 651265,
+      "glbBytes": 488424,
+      "textureBytes": 435670,
+      "triangles": 13995,
+      "vertices": 20152,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/boss_magma/model.json",
+      "jsonBytes": 1118057,
+      "glbBytes": 838516,
+      "textureBytes": 324020,
+      "triangles": 22714,
+      "vertices": 35041,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/boss_void/model.json",
+      "jsonBytes": 554153,
+      "glbBytes": 415588,
+      "textureBytes": 260198,
+      "triangles": 13999,
+      "vertices": 16509,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/brazier/model.json",
+      "jsonBytes": 217741,
+      "glbBytes": 163280,
+      "textureBytes": 98886,
+      "triangles": 4859,
+      "vertices": 6638,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/cave/model.json",
+      "jsonBytes": 448473,
+      "glbBytes": 336328,
+      "textureBytes": 761164,
+      "triangles": 4483,
+      "vertices": 15401,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/chest/model.json",
+      "jsonBytes": 278737,
+      "glbBytes": 209028,
+      "textureBytes": 143738,
+      "triangles": 6203,
+      "vertices": 8520,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/chest_open/model.json",
+      "jsonBytes": 692141,
+      "glbBytes": 519080,
+      "textureBytes": 141874,
+      "triangles": 14631,
+      "vertices": 21494,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/clutter/model.json",
+      "jsonBytes": 365309,
+      "glbBytes": 273956,
+      "textureBytes": 129152,
+      "triangles": 7697,
+      "vertices": 11318,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/crystal/model.json",
+      "jsonBytes": 163273,
+      "glbBytes": 122428,
+      "textureBytes": 117710,
+      "triangles": 3500,
+      "vertices": 5001,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/dwall/model.json",
+      "jsonBytes": 448241,
+      "glbBytes": 336156,
+      "textureBytes": 90250,
+      "triangles": 9272,
+      "vertices": 13956,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/gatehouse/model.json",
+      "jsonBytes": 417473,
+      "glbBytes": 313080,
+      "textureBytes": 309856,
+      "triangles": 8998,
+      "vertices": 12884,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/house_a/model.json",
+      "jsonBytes": 564813,
+      "glbBytes": 423584,
+      "textureBytes": 377152,
+      "triangles": 11553,
+      "vertices": 17645,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/house_b/model.json",
+      "jsonBytes": 606665,
+      "glbBytes": 454972,
+      "textureBytes": 394374,
+      "triangles": 12791,
+      "vertices": 18843,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/keep/model.json",
+      "jsonBytes": 591057,
+      "glbBytes": 443268,
+      "textureBytes": 358048,
+      "triangles": 13999,
+      "vertices": 17893,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/ore/model.json",
+      "jsonBytes": 124553,
+      "glbBytes": 93388,
+      "textureBytes": 174680,
+      "triangles": 3484,
+      "vertices": 3554,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/pillar/model.json",
+      "jsonBytes": 295737,
+      "glbBytes": 221776,
+      "textureBytes": 126204,
+      "triangles": 6362,
+      "vertices": 9112,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/portcullis/model.json",
+      "jsonBytes": 245613,
+      "glbBytes": 184184,
+      "textureBytes": 81836,
+      "triangles": 4999,
+      "vertices": 7639,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/tower/model.json",
+      "jsonBytes": 312833,
+      "glbBytes": 234600,
+      "textureBytes": 319398,
+      "triangles": 6999,
+      "vertices": 9562,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
       ]
     }
   ]

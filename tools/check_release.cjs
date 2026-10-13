@@ -204,7 +204,7 @@ check('all equipment shapes and rarities use shipped static art without thumbnai
   const module=fs.readFileSync(path.join(root,'assets/art/premium-icons.js'),'utf8').replace(/export /g,'');
   vm.runInContext(collectionModule+'\n'+module+'\n'+section('const ITEM_NAMES =','const RARITIES =')+
     section('function itemStyle(it) {','function itemElement(it) {')+
-    section('function thumbFor(it) {','const bodyGearCache =')+
+    section('function thumbFor(it) {','function flashMaterial()')+
     '\nthis.names=ITEM_NAMES;',c);
   const manifest=JSON.parse(fs.readFileSync(path.join(root,'assets/ui/premium-v2/manifest.json'),'utf8'));
   const registered=new Set(manifest.assets.map(a=>'assets/ui/premium-v2/'+a.file));

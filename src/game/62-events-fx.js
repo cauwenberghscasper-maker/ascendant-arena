@@ -253,13 +253,14 @@ function updateHubProps(t) {
   }
   pim.position.y = Math.sin(t * 2.4) * 0.08;
   // ore veins: crystals vanish while a vein regrows; rich veins are big and gold, crystal veins purple
-  if (G.nodesDirty && hubParts.oreIM) {
-    G.nodesDirty = false; const oim = hubParts.oreIM, ORE = [0xd88a4a, 0xb8c4d0, 0x9a5aff, 0x6af0ff, 0x2fffd0, 0xfff07a];
-    nodeStates().forEach((st, i) => { const q = st.q, sc = st.t > 0 ? 0 : st.rich ? 1.6 : 1; _e.set(0.3, i, 0.2); _q.setFromEuler(_e);
-      _m4.compose(_v3.set(q.x, 1.7, q.z), _q, _s3.set(sc, sc * 1.6, sc)); oim.setMatrixAt(i, _m4);
-      oim.setColorAt(i, _col.set(st.rich ? 0xffd34a : isRareVein(q) ? 0xc77dff : ORE[CFG.world.zones[q.zone].biome] || 0xd88a4a)); });
-    oim.instanceMatrix.needsUpdate = true; if (oim.instanceColor) oim.instanceColor.needsUpdate = true;
+  if (G.nodesDirty && hubParts.oreItems) {
+    G.nodesDirty = false; const ORE = [0xe0a070, 0xc8d0dc, 0xb59aff, 0x9ff0ff, 0x7fffe0, 0xfff0a0];
+    nodeStates().forEach((st, i) => { const it = hubParts.oreItems[i]; if (!it) return; const rare = isRareVein(st.q);
+      it.s = it.base * (st.t > 0 ? 0.62 : st.rich ? 1.35 : 1); it.y = st.t > 0 ? -0.35 : 0;
+      it.color = st.t > 0 ? 0x5a5a62 : st.rich ? 0xffe27a : rare ? 0xffffff : ORE[CFG.world.zones[st.q.zone].biome] || 0xffffff; });
+    for (const h of hubParts.oreSets) if (h) h.dirty = true;
   }
+  WorldModels.update();
   // shrines
   const cim = hubParts.shrineIM, rim = hubParts.shrineRingIM;
   G.shrines.forEach((sh, i) => {

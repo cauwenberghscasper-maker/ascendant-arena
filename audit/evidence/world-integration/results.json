@@ -1,8 +1,8 @@
 {
   "coverage": {
-    "population": 1186,
-    "obstacles": 4342,
-    "reachableCells": 310777,
+    "population": 1657,
+    "obstacles": 8297,
+    "reachableCells": 608478,
     "zones": [
       {
         "zone": 0,
@@ -11,148 +11,148 @@
       },
       {
         "zone": 1,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 2,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 3,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 4,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 5,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 6,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 7,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 8,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 9,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 10,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 11,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 12,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 13,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 14,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 15,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 16,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 17,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 18,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 19,
-        "patrols": 25,
-        "total": 38
+        "patrols": 30,
+        "total": 53
       },
       {
         "zone": 20,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 21,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 22,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 23,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 24,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 25,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 26,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 27,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 28,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       },
       {
         "zone": 29,
-        "patrols": 30,
-        "total": 45
+        "patrols": 36,
+        "total": 63
       }
     ],
     "unreachable": [],
@@ -161,76 +161,76 @@
   "combat": [
     {
       "level": 1,
-      "hp": 138,
+      "hp": 124,
       "enemyLevel": 1,
-      "enemyDamage": 8,
+      "enemyDamage": 10.584,
       "death": true,
-      "seconds": 17.016666666666666,
-      "simulationMs": 13.099999994039536
+      "seconds": 12.016666666666667,
+      "simulationMs": 32.799999999813735
     },
     {
       "level": 5,
-      "hp": 198,
+      "hp": 178,
       "enemyLevel": 1,
-      "enemyDamage": 8,
+      "enemyDamage": 10.584,
       "death": true,
-      "seconds": 24.016666666666666,
-      "simulationMs": 15.300000011920929
+      "seconds": 15.016666666666667,
+      "simulationMs": 30.5
     },
     {
       "level": 10,
-      "hp": 312,
+      "hp": 281,
       "enemyLevel": 6,
-      "enemyDamage": 13.179574127525,
+      "enemyDamage": 18.76076124972484,
       "death": true,
-      "seconds": 23.016666666666666,
-      "simulationMs": 14.5
+      "seconds": 13.016666666666667,
+      "simulationMs": 13.5
     },
     {
       "level": 25,
-      "hp": 1218,
+      "hp": 1096,
       "enemyLevel": 21,
-      "enemyDamage": 58.92987873540491,
+      "enemyDamage": 98.49766491411565,
       "death": true,
-      "seconds": 21.016666666666666,
-      "simulationMs": 9.700000017881393
+      "seconds": 12.016666666666667,
+      "simulationMs": 17.200000000186265
     },
     {
       "level": 50,
-      "hp": 11776,
+      "hp": 10599,
       "enemyLevel": 46,
-      "enemyDamage": 715.1423510941162,
+      "enemyDamage": 1631.7098869616207,
       "death": true,
-      "seconds": 16.016666666666666,
-      "simulationMs": 6.199999988079071
+      "seconds": 9.016666666666667,
+      "simulationMs": 6.5
     },
     {
       "level": 100,
-      "hp": 1100828,
+      "hp": 990745,
       "enemyLevel": 96,
-      "enemyDamage": 105318.9204958193,
+      "enemyDamage": 355735.625481872,
       "death": true,
-      "seconds": 10.016666666666667,
-      "simulationMs": 4.800000011920929
+      "seconds": 4.016666666666667,
+      "simulationMs": 3
     },
     {
       "level": 200,
-      "hp": 9619033137,
+      "hp": 8657129824,
       "enemyLevel": 196,
-      "enemyDamage": 954357194.8852389,
+      "enemyDamage": 15242017558.809784,
       "death": true,
-      "seconds": 10.016666666666667,
-      "simulationMs": 8.300000011920929
+      "seconds": 1.0166666666666666,
+      "simulationMs": 3.599999999627471
     },
     {
       "levelReward": true
     }
   ],
   "perf": {
-    "medianMs": 24.300000000000182,
-    "p95Ms": 36.69999999999982,
-    "visibleViews": 27,
-    "enemies": 1186
+    "medianMs": 466.6000000000058,
+    "p95Ms": 750,
+    "visibleViews": 6,
+    "enemies": 1657
   },
   "errors": []
 }

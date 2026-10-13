@@ -1,123 +1,4 @@
-// --- characters --------------------------------------------------------------------
-const charGeoCache = new Map();
-function characterGeometry(o) {
-  const key = [o.cls, o.body, o.accent, o.hair, o.look, o.gear ? 'g' : ''].join('|');
-  if (charGeoCache.has(key)) return charGeoCache.get(key);
-  const P2 = PALETTE, parts = [];
-  const dark = new THREE.Color(o.body).multiplyScalar(0.72).getHex();
-  // torso, belt, collar and a chest emblem in the accent colour
-  parts.push(part(GEO.torso, o.body, [0, 0.95, 0], null, [0.42, 0.78, 0.4]));
-  parts.push(part(GEO.cyl14, o.accent, [0, 0.6, 0], null, [0.46, 0.13, 0.44]));
-  parts.push(part(GEO.box, 0xffd34a, [0, 0.6, 0.43], null, [0.14, 0.1, 0.04]));
-  parts.push(part(GEO.cyl14, dark, [0, 1.32, 0], null, [0.33, 0.07, 0.31]));
-  parts.push(part(GEO.sph, o.accent, [0, 1.05, 0.36], null, [0.12, 0.12, 0.05]));
-  // shoulders, arms, hands
-  for (const sx of [-1, 1]) {
-    parts.push(part(GEO.sph, o.accent, [sx * 0.4, 1.24, 0], null, [0.18, 0.15, 0.18]));
-    parts.push(part(GEO.cap, o.body, [sx * 0.52, 0.98, 0], [0, 0, sx * -0.15], [0.095, 0.13, 0.1]));
-    parts.push(part(GEO.sph, P2.skin, [sx * 0.57, 0.66, 0.03], null, [0.1, 0.1, 0.1]));
-  }
-  // head: smooth, a touch bigger so the hero reads from the top-down camera
-  parts.push(part(GEO.sph, P2.skin, [0, 1.6, 0], null, [0.37, 0.355, 0.35]));
-  parts.push(part(GEO.sph, P2.skin, [0.35, 1.6, 0], null, [0.06, 0.08, 0.05])); parts.push(part(GEO.sph, P2.skin, [-0.35, 1.6, 0], null, [0.06, 0.08, 0.05]));
-  for (const sx of [-1, 1]) {
-    parts.push(part(GEO.sph, 0xffffff, [sx * 0.13, 1.63, 0.29], null, [0.075, 0.095, 0.045]));
-    parts.push(part(GEO.sph, P2.eye, [sx * 0.13, 1.62, 0.325], null, [0.05, 0.065, 0.02]));
-    parts.push(part(GEO.sph, 0xffffff, [sx * 0.13 + 0.02, 1.645, 0.345], null, [0.018, 0.02, 0.01]));
-    parts.push(part(GEO.sph, 0xf29a8a, [sx * 0.23, 1.53, 0.27], null, [0.06, 0.03, 0.02]));
-    parts.push(part(GEO.box, new THREE.Color(o.hair || P2.hair).getHex(), [sx * 0.13, 1.76, 0.3], [0, 0, sx * 0.12], [0.11, 0.025, 0.02]));
-  }
-  parts.push(part(GEO.box, 0x8a4a3a, [0, 1.49, 0.33], null, [0.08, 0.02, 0.02]));
-  // brawler head pieces (hidden under a worn helmet)
-  const look = o.look || (CFG.brawlers[o.cls] && CFG.brawlers[o.cls].look);
-  const hairC = o.hair || (CFG.brawlers[o.cls] && CFG.brawlers[o.cls].hair) || P2.hair;
-  const helmetOn = o.gear && o.gear.helmet && o.gear.helmet.rarity !== 'common';
-  if (look && !helmetOn) {
-    switch (look) {
-      case 'cap': parts.push(part(GEO.sph, o.accent, [0, 1.76, -0.03], null, [0.37, 0.2, 0.37])); parts.push(part(GEO.box, o.accent, [0, 1.73, 0.3], [-0.25, 0, 0], [0.42, 0.04, 0.2])); break;
-      case 'bandana': parts.push(part(GEO.sph, hairC, [0, 1.75, -0.05], null, [0.36, 0.2, 0.36])); parts.push(part(GEO.cyl8, o.accent, [0, 1.74, 0], null, [0.36, 0.08, 0.36])); parts.push(part(GEO.box, o.accent, [0, 1.72, -0.4], [0.5, 0, 0], [0.08, 0.2, 0.06])); break;
-      case 'mohawk': parts.push(part(GEO.box, hairC, [0, 1.92, -0.04], null, [0.09, 0.22, 0.48])); break;
-      case 'visor': parts.push(part(GEO.sph, hairC, [0, 1.76, -0.06], null, [0.35, 0.18, 0.35])); parts.push(part(GEO.box, o.accent, [0, 1.65, 0.3], null, [0.5, 0.1, 0.08])); break;
-      case 'helm': parts.push(part(GEO.cyl8, P2.steel, [0, 1.78, -0.02], null, [0.38, 0.28, 0.38])); parts.push(part(GEO.box, o.accent, [0, 1.98, -0.02], null, [0.08, 0.2, 0.44])); break;
-      case 'goggles': parts.push(part(GEO.sph, hairC, [0, 1.76, -0.05], null, [0.36, 0.2, 0.36])); parts.push(part(GEO.cyl8, o.accent, [0.12, 1.66, 0.31], [Math.PI / 2, 0, 0], [0.09, 0.05, 0.09])); parts.push(part(GEO.cyl8, o.accent, [-0.12, 1.66, 0.31], [Math.PI / 2, 0, 0], [0.09, 0.05, 0.09])); break;
-      case 'hood': parts.push(part(GEO.cone7, o.accent, [0, 1.92, -0.04], null, [0.42, 0.62, 0.42])); break;
-      case 'beanie': parts.push(part(GEO.sph, o.accent, [0, 1.8, -0.02], null, [0.37, 0.25, 0.37])); parts.push(part(GEO.ico0, 0xffffff, [0, 2.04, -0.02], null, [0.08, 0.08, 0.08])); break;
-      case 'ponytail': parts.push(part(GEO.sph, hairC, [0, 1.75, -0.05], null, [0.36, 0.2, 0.36])); parts.push(part(GEO.box, hairC, [0, 1.6, -0.38], [0.4, 0, 0], [0.12, 0.38, 0.12])); break;
-      case 'wizard': parts.push(part(GEO.cyl8, o.accent, [0, 1.8, 0], null, [0.56, 0.05, 0.56])); parts.push(part(GEO.cone7, o.accent, [0, 2.22, -0.03], [-0.15, 0, 0], [0.34, 0.85, 0.34])); break;
-      case 'horns': parts.push(part(GEO.sph, hairC, [0, 1.75, -0.05], null, [0.36, 0.2, 0.36])); parts.push(part(GEO.cone4, 0xf1ead6, [0.24, 1.95, 0], [0, 0, -0.5], [0.07, 0.26, 0.07])); parts.push(part(GEO.cone4, 0xf1ead6, [-0.24, 1.95, 0], [0, 0, 0.5], [0.07, 0.26, 0.07])); break;
-      case 'crown': parts.push(part(GEO.sph, hairC, [0, 1.75, -0.05], null, [0.36, 0.2, 0.36])); parts.push(part(GEO.cyl8, 0xffc94a, [0, 1.92, 0], null, [0.26, 0.1, 0.26])); for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; parts.push(part(GEO.cone4, 0xffc94a, [Math.sin(a) * 0.22, 2.02, Math.cos(a) * 0.22], null, [0.05, 0.14, 0.05])); } break;
-    }
-  }
-  switch (o.gear || look ? 'geared' : o.cls) {
-    case 'geared': break;
-    case 'warrior':
-      parts.push(part(GEO.cyl8, P2.steel, [0, 1.78, -0.02], null, [0.38, 0.28, 0.38]));
-      parts.push(part(GEO.box, o.accent === P2.steel ? 0xd9573b : 0xd9573b, [0, 1.98, -0.02], null, [0.08, 0.2, 0.44]));
-      break;
-    case 'ranger':
-      parts.push(part(GEO.cone7, o.accent, [0, 1.92, -0.04], null, [0.42, 0.62, 0.42]));
-      break;
-    case 'mage':
-      parts.push(part(GEO.cyl8, o.accent, [0, 1.8, 0], null, [0.56, 0.05, 0.56]));
-      parts.push(part(GEO.cone7, o.accent, [0, 2.22, -0.03], [-0.15, 0, 0], [0.34, 0.85, 0.34]));
-      break;
-    default:
-      parts.push(part(GEO.sph, o.hair || P2.hair, [0, 1.75, -0.05], null, [0.38, 0.22, 0.38]));
-  }
-  const g = mergeParts(parts);
-  charGeoCache.set(key, g);
-  return g;
-}
-const legGeoCache = new Map();
-function legGeometry(color) {
-  if (legGeoCache.has(color)) return legGeoCache.get(color);
-  const g = mergeParts([part(GEO.cap, color, [0, -0.25, 0], null, [0.095, 0.16, 0.1])]);
-  legGeoCache.set(color, g); return g;
-}
-const weaponGeoCache = new Map();
-function weaponGeometry(cls, rarity) {
-  const key = cls + '|' + (rarity || '');
-  if (weaponGeoCache.has(key)) return weaponGeoCache.get(key);
-  const P2 = Object.assign({}, PALETTE), parts = [];
-  if (rarity && rarity !== 'common') { const T = GEAR_TONES[rarity]; P2.steel = T.metal; P2.gold = T.trim; }
-  // brawlers hold the weapon of their attack type
-  const kind = CFG.attacks[cls] ? CFG.attacks[cls].kind : null, ac = CFG.attacks[cls] ? CFG.attacks[cls].color : 0xffd34a;
-  if (kind === 'wave') cls = 'warrior'; else if (kind === 'arrow') cls = 'ranger'; else if (kind === 'orb' || kind === 'spark') cls = 'mage';
-  if (kind === 'tracer' || kind === 'pellet' || kind === 'rail') {
-    const len = kind === 'rail' ? 1.15 : kind === 'pellet' ? 0.75 : 0.6;
-    parts.push(part(GEO.box, 0x3a3f4b, [0, 0, 0.25 + len / 2], null, [0.12, 0.13, len]));
-    parts.push(part(GEO.box, P2.steel, [0, 0.03, 0.3 + len], null, [kind === 'pellet' ? 0.14 : 0.07, 0.07, 0.12]));
-    parts.push(part(GEO.box, P2.wood, [0, -0.13, 0.22], [0.3, 0, 0], [0.09, 0.24, 0.12]));
-    if (kind === 'rail') parts.push(part(GEO.cyl8, ac, [0, 0.13, 0.55], [Math.PI / 2, 0, 0], [0.05, 0.35, 0.05]));
-    if (kind === 'tracer' && cls === 'gatling') for (let i = 0; i < 3; i++) parts.push(part(GEO.cyl8, P2.steel, [Math.sin(i * 2.1) * 0.06, Math.cos(i * 2.1) * 0.06, 0.95], [Math.PI / 2, 0, 0], [0.03, 0.4, 0.03]));
-  } else if (kind === 'missile' || kind === 'shell' || kind === 'lob') {
-    parts.push(part(GEO.cyl8, 0x4a5a3a, [0, 0.12, 0.35], [Math.PI / 2, 0, 0], [0.14, 0.75, 0.14]));
-    parts.push(part(GEO.cyl8, ac, [0, 0.12, 0.74], [Math.PI / 2, 0, 0], [0.16, 0.06, 0.16]));
-    parts.push(part(GEO.box, P2.wood, [0, -0.06, 0.25], null, [0.08, 0.2, 0.1]));
-  } else if (kind === 'disc' || kind === 'chakram') {
-    parts.push(part(GEO.cyl8, ac, [0, 0.05, 0.35], null, [0.32, 0.04, 0.32]));
-    parts.push(part(GEO.cyl8, P2.steel, [0, 0.05, 0.35], null, [0.12, 0.06, 0.12]));
-  } else if (kind === 'flame') {
-    parts.push(part(GEO.cyl8, 0x8a2b0e, [0, 0.0, 0.45], [Math.PI / 2, 0, 0], [0.09, 0.7, 0.09]));
-    parts.push(part(GEO.cyl8, 0xffb347, [0, 0.0, 0.82], [Math.PI / 2, 0, 0], [0.12, 0.08, 0.12]));
-    parts.push(part(GEO.cyl8, 0xd9573b, [0, -0.05, -0.35], null, [0.14, 0.4, 0.14]));
-  }
-  if (parts.length) { const g = mergeParts(parts); weaponGeoCache.set(key, g); return g; }
-  if (cls === 'warrior') {
-    parts.push(part(GEO.box, P2.steel, [0, 0, 0.65], null, [0.12, 0.05, 1.0]));
-    parts.push(part(GEO.box, P2.gold, [0, 0, 0.12], null, [0.42, 0.08, 0.1]));
-    parts.push(part(GEO.box, P2.wood, [0, 0, -0.08], null, [0.08, 0.08, 0.3]));
-  } else if (cls === 'ranger') {
-    parts.push(part(GEO.torusHalf, P2.wood, [0, 0, 0.25], [0, Math.PI / 2, Math.PI / 2], [0.55, 0.55, 0.55]));
-    parts.push(part(GEO.box, 0xeeeeee, [0, 0, 0.25], null, [0.02, 1.08, 0.02]));
-  } else if (cls === 'mage') {
-    parts.push(part(GEO.cyl7, P2.wood, [0, 0.25, 0.1], null, [0.05, 1.5, 0.05]));
-    parts.push(part(GEO.ico0, 0xb99cff, [0, 1.05, 0.1], null, [0.17, 0.17, 0.17]));
-  } else {
-    parts.push(part(GEO.box, P2.wood, [0, 0, 0.42], [0.2, 0, 0], [0.09, 0.09, 0.85]));
-  }
-  const g = mergeParts(parts); weaponGeoCache.set(key, g); return g;
-}
+// --- characters: every hero, townsperson and monster is a generated 3D model (assets/), never primitives ---
 // Gear look: rarity sets the metal, the item's style (its name) sets the shape.
 const GEAR_TONES = {
   common: { main: 0x8b6f4e, trim: 0x5a4632, metal: 0x9aa1ad, glow: 0xd8d2c0 },
@@ -131,76 +12,6 @@ const GEAR_TONES = {
 };
 const gearGeoCache = new Map();
 function gearSignature(gear) { if (!gear) return ''; return CFG.gear.slots.map((s) => gear[s] ? gear[s].rarity.slice(0, 2) + itemStyle(gear[s]) + (gear[s].up >= 5 ? '+' : '') + (itemElement(gear[s]) || '') : '-').join(''); }
-function gearGeometry(gear) {
-  const sig = gearSignature(gear);
-  if (gearGeoCache.has(sig)) return gearGeoCache.get(sig);
-  const parts = [];
-  const h = gear.helmet, c = gear.chest, a = gear.accessory;
-  if (h) {
-    const T = GEAR_TONES[h.rarity] || GEAR_TONES.common, st = itemStyle(h);
-    if (st === 0) { // Cap
-      parts.push(part(GEO.dodec, T.main, [0, 1.76, -0.03], null, [0.37, 0.2, 0.37]));
-      parts.push(part(GEO.box, T.trim, [0, 1.73, 0.3], [-0.25, 0, 0], [0.42, 0.04, 0.18]));
-    } else if (st === 1) { // Helm
-      parts.push(part(GEO.cyl8, T.metal, [0, 1.78, -0.02], null, [0.39, 0.32, 0.39]));
-      parts.push(part(GEO.dodec, T.metal, [0, 1.93, -0.02], null, [0.36, 0.14, 0.36]));
-      parts.push(part(GEO.box, T.trim, [0, 2.04, -0.02], null, [0.08, 0.22, 0.46]));
-      parts.push(part(GEO.box, T.trim, [0, 1.68, 0.33], null, [0.42, 0.05, 0.05]));
-    } else { // Hood
-      parts.push(part(GEO.cone7, T.main, [0, 1.93, -0.05], null, [0.44, 0.66, 0.44]));
-      parts.push(part(GEO.cyl8, T.trim, [0, 1.68, -0.03], null, [0.45, 0.06, 0.45]));
-    }
-  }
-  if (c) {
-    const T = GEAR_TONES[c.rarity] || GEAR_TONES.common, st = itemStyle(c);
-    if (st === 0) { // Vest
-      parts.push(part(GEO.cyl7, T.main, [0, 1.0, 0], null, [0.46, 0.56, 0.46]));
-      parts.push(part(GEO.box, T.trim, [0, 1.0, 0.43], null, [0.08, 0.5, 0.06]));
-    } else if (st === 1) { // Plate
-      parts.push(part(GEO.cyl7, T.metal, [0, 1.0, 0], null, [0.47, 0.6, 0.47]));
-      parts.push(part(GEO.box, T.main, [0, 1.02, 0.42], null, [0.5, 0.42, 0.08]));
-      parts.push(part(GEO.dodec, T.metal, [0.5, 1.26, 0], null, [0.24, 0.17, 0.24]));
-      parts.push(part(GEO.dodec, T.metal, [-0.5, 1.26, 0], null, [0.24, 0.17, 0.24]));
-      parts.push(part(GEO.box, T.trim, [0, 0.74, 0], null, [0.98, 0.07, 0.98]));
-    } else { // Robe
-      parts.push(part(GEO.cyl7, T.main, [0, 0.72, 0], null, [0.5, 1.1, 0.5]));
-      parts.push(part(GEO.cyl7, T.trim, [0, 0.2, 0], null, [0.52, 0.08, 0.52]));
-      parts.push(part(GEO.box, T.trim, [0, 1.1, 0.46], null, [0.1, 0.6, 0.05]));
-    }
-  }
-  if (a) {
-    const el = itemElement(a);
-    const T = Object.assign({}, GEAR_TONES[a.rarity] || GEAR_TONES.common, el ? { glow: CFG.elements[el].color } : {}), st = itemStyle(a);
-    if (st === 0) { // Charm on the belt
-      parts.push(part(GEO.ico0, T.glow, [-0.36, 0.55, 0.32], null, [0.11, 0.14, 0.11]));
-      parts.push(part(GEO.box, T.trim, [-0.36, 0.68, 0.32], null, [0.03, 0.12, 0.03]));
-    } else if (st === 1) { // Ring on the off hand
-      parts.push(part(GEO.torusHalf, T.glow, [-0.56, 0.72, 0.05], [Math.PI / 2, 0, 0], [0.11, 0.11, 0.3]));
-      parts.push(part(GEO.ico0, T.glow, [-0.56, 0.72, 0.17], null, [0.07, 0.07, 0.07]));
-    } else { // Amulet
-      parts.push(part(GEO.torusHalf, T.trim, [0, 1.36, 0.06], [Math.PI, 0, 0], [0.3, 0.3, 0.3]));
-      parts.push(part(GEO.ico0, T.glow, [0, 1.12, 0.44], null, [0.12, 0.15, 0.1]));
-    }
-  }
-  if (gear.weapon && gear.weapon.rarity !== 'common') {
-    const T = GEAR_TONES[gear.weapon.rarity] || GEAR_TONES.common;
-    const big = rarIdx(gear.weapon.rarity) >= 4 ? 0.15 : 0.09;
-    parts.push(part(GEO.ico0, T.glow, [0.62, 0.52, 0.3], null, [big, big, big]));
-    if (rarIdx(gear.weapon.rarity) >= 4) parts.push(part(GEO.cone4, T.glow, [0, 2.45, -0.1], null, [0.12, 0.25, 0.12]));
-  }
-  const g = parts.length ? mergeParts(parts) : null;
-  gearGeoCache.set(sig, g); return g;
-}
-const bootGeoCache = new Map();
-function bootGeometry(it) {
-  const key = it.rarity + itemStyle(it);
-  if (bootGeoCache.has(key)) return bootGeoCache.get(key);
-  const T = GEAR_TONES[it.rarity] || GEAR_TONES.common, st = itemStyle(it);
-  const parts = [part(GEO.box, T.main, [0, -0.38, 0.03], null, [0.22, st === 2 ? 0.34 : 0.24, 0.27])];
-  parts.push(part(GEO.box, T.trim, [0, st === 2 ? -0.22 : -0.27, 0.03], null, [0.24, 0.05, 0.29]));
-  if (st === 1) parts.push(part(GEO.box, T.metal, [0, -0.44, 0.17], null, [0.2, 0.1, 0.06]));
-  const g = mergeParts(parts); bootGeoCache.set(key, g); return g;
-}
 const Thumbs = { r: null, scene: null, cam: null, cache: new Map(), size: 128 };
 const PremiumPortraits = createPremiumPortraits(THREE, () => { thumbInit(); return Thumbs.r; });
 function thumbKey(it) { return [it.slot, it.rarity, itemStyle(it), itemElement(it) || '', it.up >= 5 ? '+' : ''].join('|'); }
@@ -257,25 +68,9 @@ const PixelPortraits = {
 };
 // painted portrait (crop of the hero's concept art) when the brawler has a generated model, else a live 3D render
 function brawlerThumb(id) {
-  const reviewedPortrait = ASSET_MANIFEST['hero.' + id]?.portrait;
-  if (reviewedPortrait && AssetLibrary.enabled) return reviewedPortrait;
-  if (ASSET_MANIFEST['hero.' + id] && AssetLibrary.enabled) return PixelPortraits.url('assets/ui/portraits/' + id + '.webp');
-  const tint = G.profile ? badgeTint(G.profile, id) : null, key = 'br|' + id + '|' + (tint || '');
-  if (Thumbs.cache.has(key)) return Thumbs.cache.get(key);
-  try {
-    thumbInit();
-    const B = CFG.brawlers[id], c = CFG.classes[id];
-    const holder = new THREE.Group();
-    holder.add(new THREE.Mesh(characterGeometry({ cls: id, body: c.body, accent: tint || c.accent, hair: B.hair, look: B.look }), matVC));
-    const w = new THREE.Mesh(weaponGeometry(id, null), matVC); w.position.set(0.56, 0.95, 0.2); w.rotation.set(-0.9, 0, -0.25); holder.add(w);
-    holder.rotation.y = -0.5;
-    Thumbs.scene.add(holder);
-    Thumbs.cam.fov = 30; Thumbs.cam.updateProjectionMatrix(); Thumbs.cam.position.set(0.15, 1.55, 3.3); Thumbs.cam.lookAt(0.1, 1.32, 0);
-    Thumbs.r.render(Thumbs.scene, Thumbs.cam);
-    const url = Thumbs.r.domElement.toDataURL('image/png');
-    Thumbs.scene.remove(holder);
-    Thumbs.cache.set(key, url); return url;
-  } catch (e) { Thumbs.cache.set(key, ''); return ''; }
+  const def = ASSET_MANIFEST['hero.' + id];
+  if (def && def.portrait) return def.portrait;
+  return def ? PixelPortraits.url('assets/ui/portraits/' + id + '.webp') : '';
 }
 // --- item icons: hand-drawn vector art per item shape (slot + style), coloured by rarity ---------------------
 // Chunky toy style: dark ink outline, two-tone gradients, glowing gems; epic+ sparkles, legendary+ glow, ancient+ halo.
@@ -350,44 +145,7 @@ function thumbFor(it) {
   const src = Thumbs.cache.get(key);
   return PremiumPortraits.item(it, src || '');
 }
-const bodyGearCache = new Map();
-function mergeKeep(geos) {
-  let total = 0; for (const g of geos) total += g.attributes.position.count;
-  const pos = new Float32Array(total * 3), nor = new Float32Array(total * 3), col = new Float32Array(total * 3); let o = 0;
-  for (const g of geos) { pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3); col.set(g.attributes.color.array, o * 3); o += g.attributes.position.count; }
-  const m = new THREE.BufferGeometry(); m.setAttribute('position', new THREE.BufferAttribute(pos, 3)); m.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); m.setAttribute('color', new THREE.BufferAttribute(col, 3)); m.computeBoundingSphere(); return m;
-}
-function bodyWithGear(o) {
-  const cg = characterGeometry(o); if (!o.gear) return cg;
-  // a common helmet is hidden so the brawler's own head piece shows
-  let gear2 = o.gear.helmet && o.gear.helmet.rarity === 'common' ? Object.assign({}, o.gear, { helmet: null }) : o.gear;
-  // a generated weapon model shows its rarity itself, so drop the built-in rarity orb
-  const genWeapon = true; // the held weapon model shows its rarity itself
-  if (genWeapon) gear2 = Object.assign({}, gear2, { weapon: null });
-  const gg = gearGeometry(gear2); if (!gg) return cg;
-  const key = [o.cls, o.body, o.accent, o.hair].join('|') + '#' + gearSignature(o.gear) + (genWeapon ? '#gw' : '');
-  let m = bodyGearCache.get(key); if (!m) { m = mergeKeep([cg, gg]); bodyGearCache.set(key, m); if (bodyGearCache.size > 40) bodyGearCache.delete(bodyGearCache.keys().next().value); }
-  return m;
-}
-// RuneScape-style skillcape: earned at mastery 99, colour per mastery type
-const capeGeoCache = new Map();
-function capeGeometry(color) {
-  if (capeGeoCache.has(color)) return capeGeoCache.get(color);
-  const g = mergeParts([part(GEO.box, color, [0, -0.45, 0], null, [0.62, 0.95, 0.05]), part(GEO.box, 0xffd34a, [0, -0.9, 0.01], null, [0.64, 0.08, 0.06]), part(GEO.box, 0xffd34a, [0, -0.02, 0.01], null, [0.5, 0.06, 0.06])]);
-  capeGeoCache.set(color, g); return g;
-}
 function flashMaterial() { const m = matVC.clone(); m.emissive = new THREE.Color(0x000000); return m; }
-// heroes get a rim light so they pop off any ground colour (gold for you, cyan for other players)
-function heroMaterial(rimColor, strength) {
-  const m = flashMaterial(); m.userData.rim = { value: new THREE.Color(rimColor) }; m.userData.rimK = { value: strength };
-  m.onBeforeCompile = (sh) => {
-    sh.uniforms.uRim = m.userData.rim; sh.uniforms.uRimK = m.userData.rimK;
-    sh.fragmentShader = 'uniform vec3 uRim; uniform float uRimK;\n' + sh.fragmentShader.replace('#include <opaque_fragment>',
-      'float rimF = pow(1.0 - clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0), 2.2);\noutgoingLight += uRim * rimF * uRimK;\n#include <opaque_fragment>');
-  };
-  m.customProgramCacheKey = () => 'heroRim';
-  return m;
-}
 // Ascended forms: level 100 aura, 150 wings, 200 crown (+ trail, see updateHubProps)
 const ASC = { pillar: null, ring: null, wing: null, crown: null };
 function ascGeos() {
@@ -449,75 +207,40 @@ function addAscended(root, pivot, tier) {
   return out;
 }
 
+// Characters are only ever their 3D model: while it loads you see the shadow and ring, never a code-built body.
+// If a model can't load, the next stand-in model in the list is used (still a real model, never primitives).
+const STANDIN_MODELS = ['hero.wave', 'hero.arrow', 'hero.orb'];
 AssetSlots.register('character', (o) => {
   const root = new THREE.Group();
   const shadow = new THREE.Mesh(geoShadow, matShadow); shadow.scale.setScalar(0.62); shadow.position.y = 0.03; root.add(shadow);
   const pivot = new THREE.Group(); root.add(pivot);
-  const mat = o.xray ? heroMaterial(0xfff6dc, 0.45) : o.peer ? heroMaterial(0x7fe8ff, 0.55) : heroMaterial(0xffffff, 0.3);
-  // body + worn gear share one mesh (and one outline) to keep draw calls low on phones
-  const body = new THREE.Mesh(bodyWithGear(o), mat); body.castShadow = true; pivot.add(body);
-  const bodyOl = addOutline(pivot, body.geometry);
-  if (o.cape) { const cp = new THREE.Mesh(capeGeometry(o.cape), mat); cp.position.set(0, 1.3, -0.36); cp.castShadow = true; pivot.add(cp); o.capeMesh = cp; }
-  const legs = [];
-  for (const sx of [-0.15, 0.15]) {
-    const l = new THREE.Mesh(legGeometry(PALETTE.pants), mat); l.position.set(sx, 0.52, 0); pivot.add(l); legs.push(l);
-    if (o.gear && o.gear.boots) l.add(new THREE.Mesh(bootGeometry(o.gear.boots), mat));
-  }
-  const wPivot = new THREE.Group(); wPivot.position.set(0.56, 0.88, 0.12); pivot.add(wPivot);
-  wPivot.visible = HELD_WEAPONS; // hidden for now: separate weapons never sit right in these generated hands (comes back with heroes generated holding them)
-  // the equipped weapon item, gripped in the fist (a generated 3D model replaces it when the item has one)
-  const heldIt = heldItemFor(o), IW = itemWeaponGeometry(heldIt);
-  const grip = new THREE.Group(); grip.rotation.fromArray(HOLD_ROT[IW.style]); wPivot.add(grip);
-  weaponOffset(grip, IW.style);
-  let weapon = new THREE.Mesh(IW.geo, mat); weapon.castShadow = true; weapon.position.y = -GRIP_Y[IW.style]; grip.add(weapon);
-  const weaponGlow = new THREE.Mesh(IW.glow, glowMat(IW.glowColor)); weaponGlow.position.y = -GRIP_Y[IW.style]; grip.add(weaponGlow);
-  // generated models swap in once loaded: the brawler's body (legs swing on their own pivots) and the held weapon
-  const hId = AssetLibrary.has('hero.' + o.cls) ? 'hero.' + o.cls : null;
-  const wId = ASSET_MANIFEST[hId]?.animated ? null : AssetLibrary.idForItem(heldIt);
-  let hero = null, heroLegs = null, heroMotion = null, clipMotion = null, gearDispose = null, aura = null, hDone = !hId, wDone = !wId;
+  const tint = new THREE.Color(); // status glow (armour, slow, haste, hit flash), applied to the model's own materials
+  const want = o.model || ('hero.' + o.cls);
+  const queue = [want, ...STANDIN_MODELS].filter((id, i, a) => AssetLibrary.has(id) && a.indexOf(id) === i);
+  let hero = null, heroLegs = null, heroMotion = null, clipMotion = null, gearDispose = null, aura = null, popT = 0;
   const asc = HERO_OVERLAYS && o.asc ? addAscended(root, pivot, o.asc) : null;
   const swapModels = () => {
-    if (!hDone) {
-      const st = AssetLibrary.status(hId);
-      if (st === 'ready') {
-        hero = AssetLibrary.instance(hId); pivot.add(hero);
-        body.visible = bodyOl.visible = false; for (const l of legs) l.visible = false;
-        const L = hero.getObjectByName('legLPivot'), R = hero.getObjectByName('legRPivot'); if (L && R) heroLegs = [L, R];
-        const def = ASSET_MANIFEST[hId];
-        const worn = HERO_OVERLAYS ? o.gear : o.gear && { weapon: o.gear.weapon }; // overlays off: no gear pieces (orb, rings, gem) on the body
-        if (def.original) gearDispose = equipOriginalAdventurer(hero, def, worn, THREE);
-        else if (def.v4) gearDispose = equipV4Hero(hero, worn, THREE);
-        if (asc) asc.bindHero(hero, def);
-        if (def.animated) {
-          clipMotion = createKayKitMotion(THREE, hero, hero.animations, def);
-          wPivot.visible = false;
-          if (o.capeMesh) o.capeMesh.visible = false;
-        }
-        heroMotion = def.armRig ? bindHeroMotion(hero) : null;
-        // the weapon's grip goes to the centre of the modelled fist (found in the mesh), else the stored hand point
-        const hp = def.rig ? def.rig.hand : def.hand;
-        if (def.fist) wPivot.position.copy(def.fist); else if (hp) wPivot.position.set(hp[0] * def.size, hp[1] * def.size, hp[2] * def.size);
-        const fo = HERO_GRIP_OFF[o.cls]; if (fo && !def.measuredHand) wPivot.position.add(_v3.fromArray(fo));
-        if (heroMotion) {
-          // The grip inherits wrist/arm motion instead of floating beside a static arm.
-          hero.updateMatrixWorld(true); heroMotion.handR.attach(wPivot);
-          wPivot.position.set(0, 0, 0); wPivot.rotation.set(0, 0, 0);
-        }
-        const ar = gearAuraRarity(o.gear);
-        if (HERO_OVERLAYS && ar && !o.peer) {
-          aura = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.3).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: auraTexture(), color: RAR_HEX[ar], transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
-          aura.position.y = 0.04; aura.userData.k = rarIdx(ar); root.add(aura);
-        }
+    while (queue.length) {
+      const id = queue[0], st = AssetLibrary.status(id);
+      if (st === 'none') AssetLibrary.request(id);
+      if (st === 'failed') { queue.shift(); continue; }
+      if (st !== 'ready') return;
+      queue.length = 0;
+      hero = AssetLibrary.instance(id); pivot.add(hero); popT = 0.001;
+      const L = hero.getObjectByName('legLPivot'), R = hero.getObjectByName('legRPivot'); if (L && R) heroLegs = [L, R];
+      const def = ASSET_MANIFEST[id];
+      const worn = HERO_OVERLAYS ? o.gear : o.gear && { weapon: o.gear.weapon }; // overlays off: no gear pieces (orb, rings, gem) on the body
+      if (!def.npc) { if (def.original) gearDispose = equipOriginalAdventurer(hero, def, worn, THREE); else if (def.v4) gearDispose = equipV4Hero(hero, worn, THREE); }
+      if (asc) asc.bindHero(hero, def);
+      if (def.animated) clipMotion = createKayKitMotion(THREE, hero, hero.animations, def);
+      heroMotion = def.armRig ? bindHeroMotion(hero) : null;
+      const ar = gearAuraRarity(o.gear);
+      if (HERO_OVERLAYS && ar && !o.peer) {
+        aura = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.3).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: auraTexture(), color: RAR_HEX[ar], transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
+        aura.position.y = 0.04; aura.userData.k = rarIdx(ar); root.add(aura);
       }
-      if (st === 'failed' || hero) hDone = true;
-    }
-    if (!wDone) {
-      const st = AssetLibrary.status(wId);
-      if (st === 'ready') { const m = AssetLibrary.instance(wId); grip.remove(weapon); grip.remove(weaponGlow); weapon = m; grip.rotation.set(0.08, 0, -0.07); grip.add(m); }
-      if (st === 'ready' || st === 'failed') wDone = true;
     }
   };
-  if (hId) AssetLibrary.request(hId); if (wId) AssetLibrary.request(wId);
   swapModels();
   let ring = null;
   if (o.ring) {
@@ -529,7 +252,7 @@ AssetSlots.register('character', (o) => {
     }
     ring.position.y = 0.3; ring.renderOrder = 0; root.add(ring); // sits above the bumpiest ground; the offset keeps it under the hero
   }
-  let phase = Math.random() * 6, deadT = 0, sq = 1;
+  let phase = Math.random() * 6, deadT = 0;
   return {
     root, ring,
     update(e, dt, t) {
@@ -537,32 +260,27 @@ AssetSlots.register('character', (o) => {
       root.rotation.y += angDiff(root.rotation.y, e.facing) * (1 - Math.exp(-dt * 18));
       const amt = e.moveAmt || 0;
       phase += dt * amt * 11;
-      legs[0].rotation.x = Math.sin(phase) * 0.8 * amt; legs[1].rotation.x = -Math.sin(phase) * 0.8 * amt;
-      pivot.position.y = Math.abs(Math.sin(phase)) * 0.09 * amt + (amt < 0.1 ? Math.sin(t * 2 + phase) * 0.015 : 0);
-      if (!hDone || !wDone) swapModels();
+      if (!hero) swapModels();
+      pivot.position.y = 0;
       if (heroLegs) { heroLegs[0].rotation.x = Math.sin(phase) * 0.7 * amt; heroLegs[1].rotation.x = -Math.sin(phase) * 0.7 * amt; hero.rotation.x = amt * 0.06; }
-      if (heroMotion) { animateHeroMotion(heroMotion, phase, amt, e.attackAnim || 0, t, dt); pivot.position.y = Math.abs(Math.sin(phase)) * 0.006 * amt + (amt < 0.1 ? Math.sin(t * 2 + phase) * 0.005 : 0); }
-      if (clipMotion) { clipMotion.update(e, dt); pivot.position.y = 0; }
+      if (heroMotion) animateHeroMotion(heroMotion, phase, amt, e.attackAnim || 0, t, dt);
+      if (clipMotion) clipMotion.update(e, dt);
+      // the model arrives with a quick pop instead of appearing out of nowhere
+      if (popT > 0 && popT < 1) { popT = Math.min(1, popT + dt * 5); const k = 1 - Math.pow(1 - popT, 3); pivot.scale.setScalar(0.6 + 0.4 * k + Math.sin(popT * Math.PI) * 0.08); } else pivot.scale.setScalar(1);
       if (aura) { const k = 0.5 + aura.userData.k * 0.06; aura.material.opacity = k * (0.8 + Math.sin(t * 3) * 0.2); aura.rotation.y = t * 0.4; }
-      if (!heroMotion) wPivot.rotation.x = -(e.attackAnim || 0) * 1.4;
-      const tsq = e.dashT > 0 ? 0.78 : 1; sq = lerp(sq, tsq, 1 - Math.exp(-dt * 20));
-      pivot.scale.set(1 + (1 - sq) * 0.6, sq, 1 + (1 - sq) * 0.6);
-      if (clipMotion) pivot.scale.setScalar(1);
       const f = e.flashT > 0 ? 0.9 : 0;
-      if (e.armorT > 0) mat.emissive.setRGB(0.35 + f, 0.28 + f, 0.05 + f);
-      else if (e.slowT > 0) mat.emissive.setRGB(f, 0.15 + f, 0.35 + f);
-      else if (e.swiftT > 0) mat.emissive.setRGB(f, 0.25 + f, 0.1 + f);
-      else mat.emissive.setRGB(f, f, f);
-      if (hero) AssetLibrary.flash(hero, mat.emissive.r * 0.6, mat.emissive.g * 0.6, mat.emissive.b * 0.6);
-      mat.opacity = 1; mat.transparent = false;
-      if (o.xray) mat.userData.rimK.value = e.invulnT > 0 && e.dashT <= 0 ? 1.2 + Math.sin(t * 20) * 0.4 : 0.45;
+      if (e.armorT > 0) tint.setRGB(0.35 + f, 0.28 + f, 0.05 + f);
+      else if (e.slowT > 0) tint.setRGB(f, 0.15 + f, 0.35 + f);
+      else if (e.swiftT > 0) tint.setRGB(f, 0.25 + f, 0.1 + f);
+      else if (o.xray && e.invulnT > 0 && e.dashT <= 0) { const k = 0.25 + Math.sin(t * 20) * 0.15; tint.setRGB(k + f, k + f, k * 0.8 + f); }
+      else tint.setRGB(f, f, f);
+      if (hero) AssetLibrary.flash(hero, tint.r * 0.6, tint.g * 0.6, tint.b * 0.6);
       if (e.alive === false) { deadT += dt; const s = Math.max(0, 1 - Math.max(0, deadT - (clipMotion ? .8 : 0)) * 2.5); root.scale.setScalar(s); root.visible = s > 0; }
       else { deadT = 0; root.scale.setScalar(1); root.visible = true; }
       if (ring) { if (o.xray) { ring.rotation.y = -root.rotation.y + e.facing; ring.material.opacity = 0.42 + Math.sin(t * 4) * 0.1; if (ring.userData.tm) ring.userData.tm.opacity = ring.material.opacity; } else ring.rotation.y += dt * 0.6; }
-      if (o.capeMesh) o.capeMesh.rotation.x = 0.12 + amt * 0.45 + Math.sin(t * 6) * 0.04 * (0.3 + amt);
       if (asc) asc.update(t, amt);
     },
-    dispose() { if (clipMotion) clipMotion.dispose(); AssetLibrary.disposeInstance(hero); if(gearDispose)gearDispose(); AssetLibrary.disposeInstance(weapon); weaponGlow.material.dispose(); mat.dispose(); if (aura) { aura.geometry.dispose(); aura.material.dispose(); } if (ring) { ring.geometry.dispose(); ring.material.dispose(); if (ring.userData.tm) ring.userData.tm.dispose(); } if (asc) for (const m of asc.mats) m.dispose(); },
+    dispose() { if (clipMotion) clipMotion.dispose(); AssetLibrary.disposeInstance(hero); if (gearDispose) gearDispose(); if (aura) { aura.geometry.dispose(); aura.material.dispose(); } if (ring) { ring.geometry.dispose(); ring.material.dispose(); if (ring.userData.tm) ring.userData.tm.dispose(); } if (asc) for (const m of asc.mats) m.dispose(); },
   };
 });
 

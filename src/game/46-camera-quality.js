@@ -19,7 +19,7 @@ function viewFor(e) {
     v.cls = e.cls; v.sig = e.isPlayer ? playerViewSig(e.cls) : '';
   } else if (e.kind === 'enemy') v = AssetSlots.create('enemy', { type: e.type, elite: e.elite });
   else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone });
-  else if (e.kind === 'npc') v = AssetSlots.create('npc', { body: e.def.body, accent: e.def.accent });
+  else if (e.kind === 'npc') v = AssetSlots.create('npc', { id: e.def.id });
   dynGroup.add(v.root); views.set(e, v);
   return v;
 }
@@ -139,7 +139,7 @@ function updateCamera(dt) {
   Showcase.b = clamp(Showcase.b + (Showcase.on ? dt / 0.45 : -dt / 0.45), 0, 1);
   const sb = Showcase.b * Showcase.b * (3 - 2 * Showcase.b);
   // angled top-down: camera south of the player, looking north
-  let zoom = Math.min(CFG.growth.zoomCap, 1 + CFG.growth.zoomPerLevel * (G.profile.level - 1) * (G.mode === 'arena' ? 0.5 : 1));
+  let zoom = Math.min(CFG.growth.zoomCap, 1 + CFG.growth.zoomPerLevel * (G.profile.level - 1) * (G.mode === 'arena' ? 0.5 : 1)) * (LOCAL_PREVIEW && window.__camZoom || 1); // __camZoom: local tours only
   // frame the world boss with the hero when you fight it, so it is never hidden under the top bar
   let fx = pl.x, fz = pl.z + 1.5;
   const bb = G.mode === 'hub' ? G.boss : null;
@@ -313,11 +313,70 @@ const Pixel = {
   },
   render() {
     renderer.info.autoReset = false; renderer.info.reset(); // count both world and pixel post passes
-    if (!this.active) { renderer.render(scene, camera); return; }
+    if (!this.active) { if (Post.on()) Post.render(); else renderer.render(scene, camera); return; }
     this.mat.uniforms.near.value = camera.near; this.mat.uniforms.far.value = camera.far;
     renderer.setRenderTarget(this.rt); renderer.render(scene, camera);
     renderer.setRenderTarget(null); renderer.render(this.scene, this.cam);
   },
 };
+// --- cinematic post (High graphics, smooth renderer only) ------------------------------------------------------
+// The world renders into an HDR multisampled target; bright parts are blurred at quarter and eighth size for a soft
+// bloom (crystals, lava, portals, torches, gold), then one pass tone-maps, grades (warm light, cool shade, a touch of
+// contrast and saturation) and vignettes. Six small passes in all; off on the low tier and in the pixel-art look.
+const Post = {
+  ready: false, w: 0, h: 0,
+  on() { return hqOn() && !(G.profile && G.profile.settings.fx === false) && renderer.capabilities.isWebGL2; },
+  init() {
+    if (this.ready) return; this.ready = true;
+    const rt = (w, h, o) => new THREE.WebGLRenderTarget(w, h, Object.assign({ type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false }, o || {}));
+    this.main = rt(2, 2, { depthBuffer: true, samples: 4 });
+    this.a = [rt(2, 2), rt(2, 2)]; this.b = [rt(2, 2), rt(2, 2)];
+    const vs = 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
+    const quad = (fs, u) => new THREE.ShaderMaterial({ uniforms: u, vertexShader: vs, fragmentShader: fs, depthTest: false, depthWrite: false });
+    this.bright = quad(`uniform sampler2D t; uniform float thr; uniform vec2 tx; varying vec2 vUv;
+      void main() { vec3 c = (texture2D(t, vUv + tx * vec2(-1.,-1.)).rgb + texture2D(t, vUv + tx * vec2(1.,-1.)).rgb + texture2D(t, vUv + tx * vec2(-1.,1.)).rgb + texture2D(t, vUv + tx * vec2(1.,1.)).rgb) * .25;
+        float l = max(c.r, max(c.g, c.b)); gl_FragColor = vec4(c * smoothstep(thr, thr + 0.6, l), 1.0); }`, { t: { value: null }, thr: { value: 0.78 }, tx: { value: new THREE.Vector2() } });
+    this.blur = quad(`uniform sampler2D t; uniform vec2 dir; varying vec2 vUv;
+      void main() { vec3 c = texture2D(t, vUv).rgb * .227027;
+        c += (texture2D(t, vUv + dir * 1.3846).rgb + texture2D(t, vUv - dir * 1.3846).rgb) * .316216;
+        c += (texture2D(t, vUv + dir * 3.2308).rgb + texture2D(t, vUv - dir * 3.2308).rgb) * .070270;
+        gl_FragColor = vec4(c, 1.0); }`, { t: { value: null }, dir: { value: new THREE.Vector2() } });
+    this.final = quad(`uniform sampler2D t; uniform sampler2D b1; uniform sampler2D b2; uniform float bloom; uniform float dark; varying vec2 vUv;
+      void main() {
+        vec3 c = texture2D(t, vUv).rgb + (texture2D(b1, vUv).rgb * .65 + texture2D(b2, vUv).rgb * .55) * bloom;
+        float l = dot(c, vec3(.2126, .7152, .0722));
+        c = mix(c * vec3(.94, .98, 1.06), c * vec3(1.05, 1.0, .93), smoothstep(.05, .7, l)); // cool shade, warm light
+        c = mix(vec3(l), c, 1.08);                                                           // a touch more colour
+        c = pow(max(c, 0.0), vec3(1.04));                                                    // a little contrast
+        vec2 v = vUv - .5; c *= 1. - dot(v, v) * dark;
+        gl_FragColor = vec4(c, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`, { t: { value: this.main.texture }, b1: { value: this.a[0].texture }, b2: { value: this.b[0].texture }, bloom: { value: 0.9 }, dark: { value: 0.55 } });
+    this.final.toneMapped = true;
+    this.scene = new THREE.Scene(); this.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.final); this.quad.frustumCulled = false; this.scene.add(this.quad);
+    this.cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  },
+  size() {
+    const v = renderer.getDrawingBufferSize(_post2), w = Math.max(2, v.x | 0), h = Math.max(2, v.y | 0);
+    if (w === this.w && h === this.h) return; this.w = w; this.h = h;
+    this.main.setSize(w, h);
+    const w4 = Math.max(2, w >> 2), h4 = Math.max(2, h >> 2), w8 = Math.max(2, w >> 3), h8 = Math.max(2, h >> 3);
+    this.a.forEach((r) => r.setSize(w4, h4)); this.b.forEach((r) => r.setSize(w8, h8));
+  },
+  pass(mat, target) { this.quad.material = mat; renderer.setRenderTarget(target); renderer.render(this.scene, this.cam); },
+  render() {
+    this.init(); this.size();
+    renderer.setRenderTarget(this.main); renderer.render(scene, camera);
+    // in dungeons and at night the glow carries more of the mood
+    this.final.uniforms.bloom.value = dungeonGroup.visible ? 1.15 : 0.85;
+    this.bright.uniforms.t.value = this.main.texture; this.bright.uniforms.tx.value.set(1 / this.w, 1 / this.h); this.pass(this.bright, this.a[0]);
+    const blur = (src, dst, x, y) => { this.blur.uniforms.t.value = src.texture; this.blur.uniforms.dir.value.set(x, y); this.pass(this.blur, dst); };
+    blur(this.a[0], this.a[1], 1 / this.a[0].width, 0); blur(this.a[1], this.a[0], 0, 1 / this.a[0].height);
+    blur(this.a[0], this.b[1], 2 / this.a[0].width, 0); blur(this.b[1], this.b[0], 0, 1 / this.b[0].height);
+    this.pass(this.final, null);
+  },
+};
+const _post2 = new THREE.Vector2();
 
 

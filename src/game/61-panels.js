@@ -198,6 +198,7 @@ function itemRow(it, right, extra, opts) {
 }
 function openNpc(def) {
   UI.current = 'npc:' + def.id;
+  { const n = (G.npcs || []).find((x) => x.def === def); if (n) { n.lastAttack = G.time; n.motionClip = 'Cheer'; } } // the townsperson waves when you talk
   const p = G.profile, j = p.job;
   let body = '', btns = '';
   if (j && j.npc === def.id) {
@@ -577,6 +578,7 @@ function openSettings() {
     <label class="tgl sel"><span><b>Menu size</b><small>Compact fits more items and stats on screen. Large makes text and buttons bigger</small></span>
       <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
+    ${tg('fx', 'Cinematic effects', 'Bloom on crystals, lava, torches and magic, soft shadows and colour grading (with High graphics)')}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
