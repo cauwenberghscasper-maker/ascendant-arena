@@ -354,8 +354,9 @@ function heroTab(tab) {
     const pick = pieces.find((b) => b.id === UI.gearPick) || null; if (!pick) UI.gearPick = null;
     const mark = (it) => isBetter(it, p.gear[it.slot]) ? { cls: 'up', text: '▲', label: 'better than equipped' } : next.has(it.id) ? { cls: 'mat1', text: '+1', label: 'used by the next merge' } : all.has(it.id) ? { cls: 'mat', text: 'max', label: 'used by Merge max' } : null;
     const L = p.luck, Pi = CFG.loot.pity;
-    const reroll = cur && rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '';
-    const filt = `<div class="bagFilter" role="group" aria-label="Show"><button class="${all0 ? '' : 'on'}" data-act="gearAll" data-v="0" aria-pressed="${!all0}">${SLOT_LABEL[sel]}s</button><button class="${all0 ? 'on' : ''}" data-act="gearAll" data-v="1" aria-pressed="${all0}">All gear</button></div>`;
+    const reroll = (cur && rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '')
+      + (cur ? `<button class="ghost sm" data-act="unequip" data-slot="${sel}">Unequip</button>` : '');
+    const filt = `<div class="bagFilter" role="group" aria-label="Show"><button class="${all0 ? '' : 'on'}" data-act="gearAll" data-v="0" aria-pressed="${!all0}">${SLOT_LABEL[sel] === 'Accessory' ? 'Accessories' : SLOT_LABEL[sel] + 's'}</button><button class="${all0 ? 'on' : ''}" data-act="gearAll" data-v="1" aria-pressed="${all0}">All gear</button></div>`;
     body = `${statStrip(pick)}<div class="tiles">${tiles}</div>
       <div class="subRow"><h4 class="sub">Bag · ${pieces.length}</h4>${filt}<small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
       ${itemGrid(pieces, { act: 'gwear', mark, empty: all0 ? 'Your bag is empty. Monsters, elites, dens, shrines and world bosses drop gear.' : `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
@@ -365,9 +366,20 @@ function heroTab(tab) {
     if (!cur) {
       bar = selBar('', '', '', 'Tap a piece in your bag to wear it.');
     } else {
-      const note = max ? 'This piece is at its maximum level.' : one.n ? '' : `${mergeCostHTML(cur)} · tap a piece to wear it`;
-      bar = selBar('', `<button class="${can && !max ? 'primary' : 'ghost'}" data-act="upgradeHere" data-slot="${sel}" ${max ? 'disabled' : ''}>${max ? 'Max level' : `Reforge +1 ${costHTML(upgradeCost(cur), upgradeEssence(cur))}`}</button>`
-        + `<button class="ghost" data-act="unequip" data-slot="${sel}">Unequip</button><button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Reforge max${mp.n > 1 ? ` +${mp.n}` : ''}</button>`, '', note);
+      // what each Reforge eats, shown above its own button: the actual bag pieces, or what is still missing
+      const need = mergeRequired(cur), have = mergeCandidates(cur).length, noun = SLOT_LABEL[sel].toLowerCase();
+      const byId = new Map(p.bag.map((b) => [b.id, b]));
+      const thumbs = (ids, k) => `<span class="rcpT">${ids.slice(0, k).map((id) => { const b = byId.get(id); return b ? `<img src="${thumbFor(b)}" alt="" style="--rc:${rarCol(b.rarity)}">` : ''; }).join('')}${ids.length > k ? `<em>+${ids.length - k}</em>` : ''}</span>`;
+      const lack = (n) => `<span class="rcpMiss">Need ${n} more ${noun}${n > 1 ? 's' : ''} weaker than the one you wear</span>`;
+      const short = (g, e) => p.gold < g ? 'Not enough coins' : p.essence < e ? 'Not enough gems' : '';
+      const col1 = max ? '<span class="rcpL">Max level reached</span>'
+        : have < need ? `<span class="rcpL">+1 uses ${need} ${noun}${need > 1 ? 's' : ''}</span>${lack(need - have)}`
+        : `<span class="rcpL">+1 uses</span>${thumbs(one.materials.length ? one.materials : mergeCandidates(cur).slice(0, need).map((m) => m.id), 4)}${!one.n ? `<span class="rcpMiss">${short(upgradeCost(cur), upgradeEssence(cur))}</span>` : ''}`;
+      const col2 = max ? '' : mp.n > 1 ? `<span class="rcpL">+${mp.n} uses ${mp.materials.length}</span>${thumbs(mp.materials, 4)}`
+        : `<span class="rcpL">Max</span><span class="rcpMiss">${have < need ? 'Nothing to reforge yet' : 'Only +1 possible now'}</span>`;
+      bar = `<div class="rcp"><div>${col1}</div><div>${col2}</div></div><div class="pBtns rcpBtns">`
+        + `<button class="${can && !max ? 'primary' : 'disabled'}" data-act="upgradeHere" data-slot="${sel}" ${can && !max ? '' : 'disabled'}>${max ? 'Max level' : `Reforge +1 <small>${costHTML(upgradeCost(cur), upgradeEssence(cur))}</small>`}</button>`
+        + `<button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Reforge max${mp.n > 1 ? ` +${mp.n} <small>${costHTML(mp.gold, mp.ess)}</small>` : ''}</button></div>`;
     }
   } else if (tab === 'Attacks') {
     const cur = resolvedAttack(p), av = availableAttacks(p), fresh = new Set(p.newUnlocks);
