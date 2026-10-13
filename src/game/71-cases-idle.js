@@ -220,8 +220,8 @@ function reelFinish(card) {
   Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
   if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
   const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
-  $('reelOut').innerHTML = `${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Alch weaker gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
-    <div class="row end">${res.kept ? `<button class="ghost" data-act="salvage2" data-id="${it.id}">Alch ${ICON.coin}${fmtK(salvageValue(it))}</button>${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">${wearWord(it.slot)}</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
+  $('reelOut').innerHTML = `${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
+    <div class="row end">${res.kept ? `${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">${wearWord(it.slot)}</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
     ${left.length ? `<button class="primary gold" data-act="caseOpen" data-id="${left[0].id}">Open next (${left.length})</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
 function openCasesFast(k) {
@@ -233,7 +233,7 @@ function openCasesFast(k) {
   UI.current = 'caseFast';
   const left = p.cases.filter((c) => c.k === k).length;
   openModal(`<div class="npcHead">${gi('m_caseOpen', 'hd')}<h3>${out.length} chests opened</h3></div><div class="fastGrid">${out.map((r) => `<div class="rcard ${r.item.rarity} ${r === out[0] ? 'win' : ''}"><img src="${thumbFor(r.item)}" alt=""><i></i><small><b>${SLOT_LABEL[r.item.slot]}</b>${CFG.gear.rarity[r.item.rarity].name}</small></div>`).join('')}</div>
-    <p class="fine">All ${out.length} rewards are saved in your bag.${p.bag.length > CFG.gear.bagMax ? ` Your bag is over its limit (${p.bag.length}/${CFG.gear.bagMax}); alch weaker gear so new drops are kept.` : ''} Check your Equipment for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button>${left ? `<button class="ghost" data-act="caseFast" data-k="${k}">${left > 10 ? `Open next 10 (${left} left)` : `Open ${left} more`}</button>` : ''}<button class="primary" data-act="close">Done</button></div>`);
+    <p class="fine">All ${out.length} rewards are saved in your bag.${p.bag.length > CFG.gear.bagMax ? ` Your bag is over its limit (${p.bag.length}/${CFG.gear.bagMax}); reforge with older gear so new drops are kept.` : ''} Check your Equipment for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button>${left ? `<button class="ghost" data-act="caseFast" data-k="${k}">${left > 10 ? `Open next 10 (${left} left)` : `Open ${left} more`}</button>` : ''}<button class="primary" data-act="close">Done</button></div>`);
   $('panel').classList.add('wide');
 }
 function openIdle(tab) {

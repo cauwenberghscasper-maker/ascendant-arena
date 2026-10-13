@@ -353,26 +353,19 @@ function heroTab(tab) {
     const pieces = p.bag.filter(bagOf).sort((x, y) => (all0 && x.slot !== y.slot ? order.indexOf(x.slot) - order.indexOf(y.slot) : isBetter(y, x) ? 1 : isBetter(x, y) ? -1 : 0));
     const pick = pieces.find((b) => b.id === UI.gearPick) || null; if (!pick) UI.gearPick = null;
     const mark = (it) => isBetter(it, p.gear[it.slot]) ? { cls: 'up', text: '▲', label: 'better than equipped' } : next.has(it.id) ? { cls: 'mat1', text: '+1', label: 'used by the next merge' } : all.has(it.id) ? { cls: 'mat', text: 'max', label: 'used by Merge max' } : null;
-    const worse = p.bag.filter((b) => !b.locked && !isBetter(b, p.gear[b.slot]) && rarIdx(b.rarity) < 4).length;
     const L = p.luck, Pi = CFG.loot.pity;
     const reroll = cur && rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '';
     const filt = `<div class="bagFilter" role="group" aria-label="Show"><button class="${all0 ? '' : 'on'}" data-act="gearAll" data-v="0" aria-pressed="${!all0}">${SLOT_LABEL[sel]}s</button><button class="${all0 ? 'on' : ''}" data-act="gearAll" data-v="1" aria-pressed="${all0}">All gear</button></div>`;
     body = `${statStrip(pick)}<div class="tiles">${tiles}</div>
-      <div class="subRow"><h4 class="sub">Bag · ${pieces.length}</h4>${filt}<small>${p.bag.length}/${CFG.gear.bagMax}</small>${worse ? `<button class="ghost sm" data-act="salvageAll" aria-label="High-alch ${worse} weaker pieces">Alch ${worse}</button>` : ''}</div>
-      ${itemGrid(pieces, { act: 'gpick', sel: UI.gearPick, mark, empty: all0 ? 'Your bag is empty. Monsters, elites, dens, shrines and world bosses drop gear.' : `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
+      <div class="subRow"><h4 class="sub">Bag · ${pieces.length}</h4>${filt}<small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
+      ${itemGrid(pieces, { act: 'gwear', mark, empty: all0 ? 'Your bag is empty. Monsters, elites, dens, shrines and world bosses drop gear.' : `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
       ${pieces.length ? `<div class="ilegend"><span><i class="up">▲</i>better</span><span><i class="m1">+1</i>next reforge</span><span><i class="mm">max</i>reforge max</span><span>${gi('m_lock')} kept</span></div>` : ''}
       <h4 class="sub">${SLOT_LABEL[sel]} · worn</h4><div class="list">${cur ? itemRow(cur, reroll, null, { upgrade: can }) : '<p class="fine">Nothing equipped. Choose a piece from your bag above.</p>'}</div>
       <h4 class="sub">Luck</h4><div class="luck">${['rare', 'epic', 'legendary'].concat(HIGH_RAR.filter((h) => highWeights(curTier(), 6)[h] > 0)).map((r) => `<div class="lk ${r}"><span>${CFG.gear.rarity[r].name} guaranteed in</span><b>${Math.max(1, Pi[r] - L[r])} drops</b><i style="--v:${Math.round(L[r] / Pi[r] * 100)}%"></i></div>`).join('')}</div>`;
-    if (pick) {
-      const better = isBetter(pick, cur), se = salvageEssence(pick);
-      bar = selBar(itemSummary(pick, `${better ? '<span class="gain">Better than equipped</span> · ' : ''}Alch: ${ICON.coin}${fmtK(salvageValue(pick))}${se ? ` ${ICON.ess}${se}` : ''}`) + `<button class="pMoreBtn" data-act="gpick" data-id="" aria-label="Deselect">✕</button>`,
-        `<button class="ghost" data-act="protectGear" data-id="${escapeHTML(pick.id)}">${pick.locked ? 'Unprotect' : 'Protect'}</button>`
-        + `<button class="ghost" data-act="salvage" data-id="${escapeHTML(pick.id)}" ${pick.locked ? 'disabled' : ''}>Alch</button><button class="primary" data-act="equip" data-id="${escapeHTML(pick.id)}">${wearWord(pick.slot)}</button>`,
-        `<div class="list">${itemRow(pick, '', 'In your bag', { better })}${cur ? itemRow(cur, '', 'Worn now') : '<p class="fine">Empty slot</p>'}</div>`);
-    } else if (!cur) {
-      bar = selBar('', '', '', 'Choose a piece from your bag to equip it.');
+    if (!cur) {
+      bar = selBar('', '', '', 'Tap a piece in your bag to wear it.');
     } else {
-      const note = max ? 'This piece is at its maximum level.' : one.n ? '' : `${mergeCostHTML(cur)} · tap a piece to wear, protect or alch it`;
+      const note = max ? 'This piece is at its maximum level.' : one.n ? '' : `${mergeCostHTML(cur)} · tap a piece to wear it`;
       bar = selBar('', `<button class="${can && !max ? 'primary' : 'ghost'}" data-act="upgradeHere" data-slot="${sel}" ${max ? 'disabled' : ''}>${max ? 'Max level' : `Reforge +1 ${costHTML(upgradeCost(cur), upgradeEssence(cur))}`}</button>`
         + `<button class="ghost" data-act="unequip" data-slot="${sel}">Unequip</button><button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Reforge max${mp.n > 1 ? ` +${mp.n}` : ''}</button>`, '', note);
     }
@@ -656,6 +649,10 @@ function handlePanelClick(e) {
     case 'credits': creditsPanel(); break;
     case 'openSettings': openSettings(); break;
     case 'equip': equipItem(b.dataset.id); UI.gearPick = null; Showcase.spin = 0; heroTab('Gear'); break;
+    case 'gwear': { // one tap on a bag piece wears it; the old piece goes back into the bag
+      const it = G.profile.bag.find((x) => x.id === b.dataset.id); if (!it) break;
+      if (equipItem(it.id)) { Sfx.play('equipped'); UI.gearSlot = it.slot; UI.gearPickSlot = it.slot; UI.gearPick = null; Showcase.spin = 0; }
+      heroTab('Gear'); break; }
     case 'gpick': { UI.gearPick = b.dataset.id && UI.gearPick !== b.dataset.id ? b.dataset.id : null;
       // in "All gear" a pick also selects its slot, so the compare and the buttons are about that slot
       const it = UI.gearPick && G.profile.bag.find((x) => x.id === UI.gearPick); if (it && it.slot !== UI.gearSlot) { UI.gearSlot = it.slot; UI.gearPickSlot = it.slot; }

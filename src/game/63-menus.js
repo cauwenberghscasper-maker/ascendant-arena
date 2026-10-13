@@ -287,7 +287,7 @@ function openCollection(slot) {
     <div class="clogFilters">${filters}</div>`;
   const body = `${miss.length ? `<h4 class="sub clogH miss">Still to find <small>${miss.length}</small></h4><div class="clogGrid">${miss.map(card).join('')}</div>` : `<p class="clogDone">Every ${UI.collectionSlot === 'all' ? '' : SLOT_LABEL[UI.collectionSlot].toLowerCase() + ' '}item here is in your log.</p>`}
     ${got.length ? `<h4 class="sub clogH got">Found <small>${got.length}</small></h4><div class="clogGrid">${got.map(card).join('')}</div>` : ''}
-    <p class="fine">Tap an item to see where it drops and how close the guarantee is. Found records stay after reforging or alching gear.</p>${trialLog()}`;
+    <p class="fine">Tap an item to see where it drops and how close the guarantee is. Found records stay after reforging gear.</p>${trialLog()}`;
   openModal(dock(head, body, `<div class="pBtns"><button class="ghost" data-act="mMenu">Journal</button><button class="ghost" data-act="cases">Treasure Chests</button></div>`));
   $('panel').classList.add('wide');
 }
