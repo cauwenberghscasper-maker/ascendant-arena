@@ -1,0 +1,299 @@
+{
+ "batch": "world-a",
+ "files": [
+  {
+   "name": "boss_golem_t1.glb",
+   "ok": true,
+   "bytes": 12485740,
+   "sha256": "294a4d1eee3674b6191afa076006085ca06ff2d1c2c63a15fd6185f1161bc47f",
+   "error": null
+  },
+  {
+   "name": "boss_golem_concept.webp",
+   "ok": true,
+   "bytes": 52374,
+   "sha256": "206c40826e9839dc2b6976132a3d03355fadf3e6bb9e71d419230636c5926684",
+   "error": null
+  },
+  {
+   "name": "boss_frost_t1.glb",
+   "ok": true,
+   "bytes": 11720904,
+   "sha256": "465b76907422abad2c56c2711f362ed8a9063d442ca5a59ecf14f56298fc13db",
+   "error": null
+  },
+  {
+   "name": "boss_frost_concept.webp",
+   "ok": true,
+   "bytes": 42496,
+   "sha256": "31c21e921232c7c18f531bda01d4819594b77ade6b10f6e0d9303e248ea6bb17",
+   "error": null
+  },
+  {
+   "name": "boss_magma_t1.glb",
+   "ok": true,
+   "bytes": 12745368,
+   "sha256": "77406723000fc57b418321fe6132d01f45403a9d88e5f2caebff7fff3f9e9171",
+   "error": null
+  },
+  {
+   "name": "boss_magma_concept.webp",
+   "ok": true,
+   "bytes": 44624,
+   "sha256": "a4a545cf7920f3ff1d4c08b9322ca80f6a525940764ead8c82b0973df6e782d7",
+   "error": null
+  },
+  {
+   "name": "boss_void_t1.glb",
+   "ok": true,
+   "bytes": 10264884,
+   "sha256": "d45de7a01100e0a4260eca54398ae25c43016fe0998c2af518717b60e2c33df7",
+   "error": null
+  },
+  {
+   "name": "boss_void_concept.webp",
+   "ok": true,
+   "bytes": 38708,
+   "sha256": "1a461f0c6f4621de8f7ca329a2454a4f9739671f6747f59f8a847d075ee3b03f",
+   "error": null
+  },
+  {
+   "name": "boss_abyss_t1.glb",
+   "ok": true,
+   "bytes": 14770336,
+   "sha256": "8145ad83918c1c1dea605307183d45540643d9f27d41e455b6e49e5ce3cd7e3c",
+   "error": null
+  },
+  {
+   "name": "boss_abyss_concept.webp",
+   "ok": true,
+   "bytes": 31126,
+   "sha256": "9fbf15a660b81465cc9ad472a0888ebdfe89c5f59c650c885c0a85f99554eaab",
+   "error": null
+  },
+  {
+   "name": "boss_celestial_t1.glb",
+   "ok": true,
+   "bytes": 10476888,
+   "sha256": "1f70e6304cae7e4f47f52a93b5482ed4fed9641506fa7fa8e1f18b92a3e92b89",
+   "error": null
+  },
+  {
+   "name": "boss_celestial_concept.webp",
+   "ok": true,
+   "bytes": 41240,
+   "sha256": "0a69fb53c1d83cbafff6fdbea8ca28beb196f478fe4d7efaf90e6af9cc5aa07d",
+   "error": null
+  },
+  {
+   "name": "cave_t1.glb",
+   "ok": true,
+   "bytes": 10246880,
+   "sha256": "4f69977a881faec4985be80dfea96cd284ada34f41bfccf03578c2ae861f05eb",
+   "error": null
+  },
+  {
+   "name": "cave_concept.webp",
+   "ok": true,
+   "bytes": 28302,
+   "sha256": "69badfae4ab37f6b99b5fe7072f04c85a16f3c11ab0b9cf8fa6eba4fb45ab66e",
+   "error": null
+  },
+  {
+   "name": "ore_t1.glb",
+   "ok": true,
+   "bytes": 11215252,
+   "sha256": "92cf1db3294a541bf45f5231453dd11becb75cd2e5e695356a4cad8ea3eda3f0",
+   "error": null
+  },
+  {
+   "name": "ore_concept.webp",
+   "ok": true,
+   "bytes": 19840,
+   "sha256": "48482fe1108333c5a4c91a2050eaac272d61a3956ab4e735d07dbc2cc0d7e9bc",
+   "error": null
+  },
+  {
+   "name": "crystal_t1.glb",
+   "ok": true,
+   "bytes": 9200936,
+   "sha256": "c58083f162b3ac5e37f4386ef37cbe7ddddb2584995145f9307a993821e87549",
+   "error": null
+  },
+  {
+   "name": "crystal_concept.webp",
+   "ok": true,
+   "bytes": 15430,
+   "sha256": "78a9bfb58fd3c53e084726cc2e3ed36be12f4fca936867402211f8ddcec5a982",
+   "error": null
+  },
+  {
+   "name": "chest_t1.glb",
+   "ok": true,
+   "bytes": 10462228,
+   "sha256": "58c547d2a2ef926fe2d8058ee3c5c0981c65c3cd2591464996cfea251a03d399",
+   "error": null
+  },
+  {
+   "name": "chest_concept.webp",
+   "ok": true,
+   "bytes": 30538,
+   "sha256": "518f5b9e09df206897ecd7f01ee38160c579cc99a45214544ae9749b9ea39238",
+   "error": null
+  },
+  {
+   "name": "chest_open_t1.glb",
+   "ok": true,
+   "bytes": 9892908,
+   "sha256": "cded219667af7128d1534b45981fec25aea90bc1d20e13e1e12bf21df74b80d4",
+   "error": null
+  },
+  {
+   "name": "chest_open_concept.webp",
+   "ok": true,
+   "bytes": 38154,
+   "sha256": "953471646554cce11588d2f486c54ce29d70a345ebdeade5453b3d6b1470d2ee",
+   "error": null
+  },
+  {
+   "name": "pillar_t1.glb",
+   "ok": true,
+   "bytes": 10398928,
+   "sha256": "35cab75299afe24df1f414690098ce9dcc6123f8a96902fda72bdfd37bb6e345",
+   "error": null
+  },
+  {
+   "name": "pillar_concept.webp",
+   "ok": true,
+   "bytes": 20258,
+   "sha256": "8536ce4d576e1ef537f2058abd2ed6d394b3c528c85d342b0b2ad320d13670e7",
+   "error": null
+  },
+  {
+   "name": "brazier_t1.glb",
+   "ok": true,
+   "bytes": 9298784,
+   "sha256": "602e8c60919c2617d624f93245b5d0a556b67f601742264b2a4db52a5349dc3a",
+   "error": null
+  },
+  {
+   "name": "brazier_concept.webp",
+   "ok": true,
+   "bytes": 20782,
+   "sha256": "b2b74a9178b1be78b8d0f6a3a95f4752cbb1ad4494c371b65d35988e354d2324",
+   "error": null
+  },
+  {
+   "name": "portcullis_t1.glb",
+   "ok": true,
+   "bytes": 10407508,
+   "sha256": "f4fec1173d3324c9451473aa5d259b758f629613d76c565f7809381bb1deb85c",
+   "error": null
+  },
+  {
+   "name": "portcullis_concept.webp",
+   "ok": true,
+   "bytes": 26444,
+   "sha256": "5c34ab07a3e3c6257924a1a350ba501d70008b31888fac8106cc5b825598b755",
+   "error": null
+  },
+  {
+   "name": "dwall_t1.glb",
+   "ok": true,
+   "bytes": 9105264,
+   "sha256": "94abb2d5f05688dc911deb6909a8e7ff7e9d2e26f839131ca66fb51619fa6296",
+   "error": null
+  },
+  {
+   "name": "dwall_concept.webp",
+   "ok": true,
+   "bytes": 17130,
+   "sha256": "ba8d674dfdf1d0b1bee621de4d44dc6e3835d6ba0598e8cb54c3b427a64d7fac",
+   "error": null
+  },
+  {
+   "name": "clutter_t1.glb",
+   "ok": true,
+   "bytes": 9545036,
+   "sha256": "8b8ab9de16bfc98e73ed4b03a493b7a2c2afb241791c5a58c6208d265907afd4",
+   "error": null
+  },
+  {
+   "name": "clutter_concept.webp",
+   "ok": true,
+   "bytes": 24698,
+   "sha256": "27e81d2e3fd4c1cd52f91d86832ccf06c9063d3713a09cb95bddf0d22b79c0d2",
+   "error": null
+  },
+  {
+   "name": "keep_t1.glb",
+   "ok": true,
+   "bytes": 9154796,
+   "sha256": "6fd24635cb3776b8ab62853137728be8341feeb84a13d5b50a83cf2bb03a9c55",
+   "error": null
+  },
+  {
+   "name": "keep_concept.webp",
+   "ok": true,
+   "bytes": 40816,
+   "sha256": "0973d474a3d9f586309f5e91f40055218787ac3945bcfed07b43f3b5f43fcb2c",
+   "error": null
+  },
+  {
+   "name": "tower_t1.glb",
+   "ok": true,
+   "bytes": 9033544,
+   "sha256": "b3f7158f8aca6c3ff78fbc2b1e7e30b45003a96f37c2a9c23ffc067104841f53",
+   "error": null
+  },
+  {
+   "name": "tower_concept.webp",
+   "ok": true,
+   "bytes": 20372,
+   "sha256": "8619c9cd164ec8796acca088ab12cf687b1d96c9c38a2bdaf2c1fd350b195e54",
+   "error": null
+  },
+  {
+   "name": "gatehouse_t1.glb",
+   "ok": true,
+   "bytes": 8330236,
+   "sha256": "cde51b56ba8d40350371ece95d27f05843c215b3ed244ef3ca3aafbf357d67e4",
+   "error": null
+  },
+  {
+   "name": "gatehouse_concept.webp",
+   "ok": true,
+   "bytes": 34358,
+   "sha256": "c738f99b62998602c27d250c9617dd119b3fb777602a1216ca5e0b691a001c4b",
+   "error": null
+  },
+  {
+   "name": "house_a_t1.glb",
+   "ok": true,
+   "bytes": 10312036,
+   "sha256": "7b47edad8a291a807f90e638c21e7f4af4190729f695205124e9b78af0cb1889",
+   "error": null
+  },
+  {
+   "name": "house_a_concept.webp",
+   "ok": true,
+   "bytes": 36022,
+   "sha256": "8716abd33751dcb7e29599f720418a508539e9e5706a609f525bee862201fa03",
+   "error": null
+  },
+  {
+   "name": "house_b_t1.glb",
+   "ok": true,
+   "bytes": 11429960,
+   "sha256": "274dd329cd2a20aa28cd70eae03f17e66dc6e2718f53a808457b601be7a03fef",
+   "error": null
+  },
+  {
+   "name": "house_b_concept.webp",
+   "ok": true,
+   "bytes": 52556,
+   "sha256": "f6e961e26abfa6e4110e28e0e2a3d687c9b8cd9170d9fd2341bc9a099d622f04",
+   "error": null
+  }
+ ]
+}
