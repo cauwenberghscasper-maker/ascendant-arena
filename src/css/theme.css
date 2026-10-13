@@ -1,16 +1,16 @@
-/* ===== Readable RuneScape theme (loaded last) =====
-   Carved stone panels, gold titles and a parchment palette, but one body font (Rubik), bigger text,
+/* ===== Readable adventure theme (loaded before ui-v2.css) =====
+   Deep teal-slate panels with sage borders and sand-gold trim (the adventurer palette), one body font (Rubik), bigger text,
    flat cards instead of boxes-in-boxes, and 48px touch targets. Replaces the old adventurer-ui.css and
    runescape-ui.css skins; main.css keeps its older layers, so the rules here use !important to win them.
    The `border-image: none` lines stay on purpose: they keep the retired pixel frames from coming back. */
 :root {
-  --stone: #2e271d; --stone2: #221c14; --stone3: #3b3226; --edge: #120f0a; --trim: #5c4c33; --line: #4f4230;
-  --text: #eadfc4; --muted: #c7b892; --gold: #ffd75e; --gold2: #e9c46a; --tabRed: #9b3420; --tabRed2: #6e2416;
+  --stone: #1a3134; --stone2: #13272e; --stone3: #233b3c; --edge: #071518; --trim: #49635b; --line: #42605a;
+  --text: #f0eee3; --muted: #abc0bc; --gold: #ecd08a; --gold2: #d9bc78; --tabRed: #663e3b; --tabRed2: #4a2c2a;
   --r-common: #cfd6e0; --r-uncommon: #8ee06a; --r-rare: #58b4ff; --r-epic: #c77dff; --r-legendary: #ffb347;
   --rare: #58b4ff; --epic: #c77dff; --myth: #ff4d6d; --anc: #2fffd0; --div: #fff3a0;
   --body: 'Rubik', system-ui, -apple-system, 'Segoe UI', sans-serif; --display: var(--body); --numbers: var(--body);
   --title: 'Cinzel', Georgia, serif;
-  --ink: #2e271d; --ink2: #221c14; --ink3: #3b3226; --goldDeep: #6b4f25;
+  --ink: #1a3134; --ink2: #13272e; --ink3: #233b3c; --goldDeep: #c2ab71;
 }
 
 /* ---- type: Rubik everywhere in panels; Cinzel 700 only for titles ---- */
@@ -48,19 +48,19 @@
 .statgrid b small { font-size: 13px !important; font-weight: 500 !important; }
 .item .nm, .bcard b, .ctile b, .acard b, .aslot2 b, .aslot b, .art b, .atk .an b, .node b, .feat b, .key b, .tgl b, .savebox b, .mpbox b, .nc b, .tierc b, .od b,
 .collectionCard b, .caseHero b, .pSel .sx b, .classCard b, .mm b, .aum b, .menuPanel .mtile b, .mtile b {
-  font-family: var(--body) !important; font-weight: 700 !important; letter-spacing: 0 !important; text-transform: none !important; color: #f3e3b8 !important; -webkit-text-fill-color: currentColor; background: none !important; text-shadow: none !important; }
+  font-family: var(--body) !important; font-weight: 700 !important; letter-spacing: 0 !important; text-transform: none !important; color: #f4efdf !important; -webkit-text-fill-color: currentColor; background: none !important; text-shadow: none !important; }
 .item .nm, .tgl b, .savebox b, .mpbox b, .nc b, .node b, .pSel .sx b, .menuPanel .mtile b, .mtile b { font-size: 16px !important; line-height: 1.25 !important; }
 .bcard b, .ctile b, .acard b, .aslot2 b, .aslot b, .art b, .atk .an b, .feat b, .key b, .tierc b, .od b, .collectionCard b, .mm b, .aum b { font-size: 15px !important; line-height: 1.25 !important; }
 .caseHero b { font-size: 20px !important; }
 .item .nm em { color: var(--gold) !important; }
-.item .st { color: var(--text) !important; font-size: 14px !important; } .item .st.aff { color: #ffe08a !important; }
+.item .st { color: var(--text) !important; font-size: 14px !important; } .item .st.aff { color: #ecd08a !important; }
 .perk { color: #b8ecff !important; background: rgba(127,216,255,.08) !important; }
 
 /* ---- the panel: carved stone tablet with a thin gold inner line ---- */
 .panel {
-  background: linear-gradient(180deg, #3a3126 0%, var(--stone) 40%, #261f17 100%) !important;
+  background: linear-gradient(180deg, #1f383a 0%, var(--stone) 40%, #102328 100%) !important;
   border: 2px solid var(--edge) !important; border-image: none !important; border-radius: 16px !important; padding: 16px !important;
-  box-shadow: inset 0 0 0 2px var(--trim), inset 0 0 0 3px #1d1811, inset 0 0 0 4px rgba(233,196,106,.25), 0 18px 50px rgba(0,0,0,.55) !important; }
+  box-shadow: inset 0 0 0 2px var(--trim), inset 0 0 0 3px #0b1c20, inset 0 0 0 4px rgba(233,196,106,.25), 0 18px 50px rgba(0,0,0,.55) !important; }
 .panel::before, .panel::after { display: none !important; }
 .panel.dock > .pBody { gap: 12px; }
 .pBar { border-top: 1px solid var(--trim) !important; box-shadow: 0 -1px 0 var(--edge); }
@@ -75,7 +75,7 @@
 /* rows of a list read as one block; selected / earned / equipped get the gold line */
 .tile.sel, .bcard.sel, .ctile.sel, .acard.on, .atk.on, .art.on, .key.on, .tierc.on, .node.has, .aslot.full, .aslot2.full, .road.next, .feat.got, .item.alert, .mtile:focus-visible, .petCards .equipped {
   border-color: var(--gold2) !important; box-shadow: 0 0 0 1px rgba(233,196,106,.5) !important; }
-.tierc.on, .road.next { background: #332a1c !important; }
+.tierc.on, .road.next { background: #22403f !important; }
 .aslot, .aslot2:not(.full) { border-style: dashed !important; background: transparent !important; }
 /* rarity colours come back on gear tiles, rows and the paper doll */
 .tile.uncommon, .dchip.uncommon, .item.uncommon { border-color: var(--r-uncommon) !important; }
@@ -86,7 +86,7 @@
 .tile.ancient, .dchip.ancient, .item.ancient { border-color: var(--anc) !important; }
 .tile.divine, .dchip.divine, .item.divine { border-color: var(--div) !important; }
 .item { border-left-width: 4px !important; }
-.tile.sel { box-shadow: 0 0 0 2px var(--gold) !important; background: #332a1c !important; }
+.tile.sel { box-shadow: 0 0 0 2px var(--gold) !important; background: #22403f !important; }
 .dchip.sel { box-shadow: 0 0 0 2px var(--gold) !important; }
 .ctile.sel { border-color: var(--cc, var(--gold2)) !important; }
 /* stats: a two-column list split by hairlines, not eighteen boxes */
@@ -103,35 +103,35 @@
   text-transform: none !important; letter-spacing: 0 !important; image-rendering: auto; }
 .panel button.ghost.sm, .pMoreBtn { font-size: 15px !important; padding: 0 14px !important; }
 .panel button.primary, #gearPrompt button.primary, #playBtn {
-  background: linear-gradient(180deg, #8c6a35 0%, #6b4f25 55%, #4f3a1a 100%) !important; border: 1px solid #d9b462 !important; color: var(--gold) !important;
-  box-shadow: inset 0 1px 0 rgba(255,231,160,.45), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 0 #1a130a !important; text-shadow: 0 1px 0 #000 !important; }
-.panel button.primary.gold { background: linear-gradient(180deg, #b0822f 0%, #82601f 55%, #5e4313 100%) !important; }
-.panel button.primary:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,231,160,.3), 0 1px 0 #1a130a !important; }
+  background: linear-gradient(180deg, #ddc28a 0%, #c2ab71 55%, #9c7d48 100%) !important; border: 1px solid #eddaa4 !important; color: var(--gold) !important;
+  box-shadow: inset 0 1px 0 rgba(255,231,160,.45), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 0 #04121a !important; text-shadow: 0 1px 0 #000 !important; }
+.panel button.primary.gold { background: linear-gradient(180deg, #e6cd92 0%, #b89a5e 55%, #8f7140 100%) !important; }
+.panel button.primary:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,231,160,.3), 0 1px 0 #04121a !important; }
 .panel button.ghost, .menuSections button, #gearPrompt button.ghost, .pMoreBtn, .tzoom button, #coach button {
-  background: linear-gradient(180deg, #4a3f2f, #382f23) !important; border: 1px solid #7b6644 !important; color: #f3e3b8 !important;
-  box-shadow: inset 0 1px 0 rgba(255,236,190,.12), 0 2px 0 #14100b !important; text-shadow: 0 1px 0 #000 !important; }
-/* disabled stays legible: #b9aa88 on #2a241b is 6.9:1 */
+  background: linear-gradient(180deg, #2f4b47, #22393a) !important; border: 1px solid #6f8a7f !important; color: #f4efdf !important;
+  box-shadow: inset 0 1px 0 rgba(255,236,190,.12), 0 2px 0 #04121a !important; text-shadow: 0 1px 0 #000 !important; }
+/* disabled stays legible: #a9bdb8 on #172e31 is 6.9:1 */
 .panel button.disabled, .panel button[disabled], .panel button[aria-disabled="true"].primary {
-  background: #2a241b !important; border: 1px dashed #5f5038 !important; color: #b9aa88 !important; box-shadow: none !important; text-shadow: none !important; opacity: 1 !important; }
-.panel button.warn { background: linear-gradient(180deg, var(--tabRed), var(--tabRed2)) !important; border: 1px solid #c4724f !important; color: #ffe1c4 !important; }
+  background: #172e31 !important; border: 1px dashed #4a655d !important; color: #a9bdb8 !important; box-shadow: none !important; text-shadow: none !important; opacity: 1 !important; }
+.panel button.warn { background: linear-gradient(180deg, var(--tabRed), var(--tabRed2)) !important; border: 1px solid #a57066 !important; color: #f6e2dc !important; }
 .panel .x { width: 48px !important; height: 48px !important; padding: 0 !important; top: 10px !important; right: 10px !important; font-size: 24px !important;
-  background: linear-gradient(180deg, #5a2a1e, #3f1c13) !important; border: 1px solid #a5583b !important; color: #ffd9b5 !important; }
+  background: linear-gradient(180deg, #663e3b, #4a2c2a) !important; border: 1px solid #a57066 !important; color: #f6e2dc !important; }
 .panel > .npcHead, .panel > .menuHead, .panel > .treeTop { padding-right: 58px !important; }
 .panel h3 { padding-right: 0 !important; }
 /* tabs: the selected one is the classic red-brown */
 .tabs { gap: 6px !important; padding: 0 !important; background: transparent !important; }
 /* tabs share the row and wrap to two lines rather than scroll out of sight */
 .tabs .tab { min-height: 48px !important; font-size: 15px !important; padding: 2px 8px !important; flex: 1 1 auto; white-space: normal !important; line-height: 1.1 !important; }
-.tab { background: linear-gradient(180deg, #43392b, #31291f) !important; border: 1px solid #6b5a3c !important; color: #e3d2a6 !important; box-shadow: none !important; text-shadow: none !important; }
+.tab { background: linear-gradient(180deg, #294440, #1d3437) !important; border: 1px solid #597269 !important; color: #d7e0d6 !important; box-shadow: none !important; text-shadow: none !important; }
 .tab.on, .menuSections button[aria-pressed="true"] {
-  background: linear-gradient(180deg, var(--tabRed), var(--tabRed2)) !important; border: 1px solid #e0a35b !important; color: var(--gold) !important;
+  background: linear-gradient(180deg, var(--tabRed), var(--tabRed2)) !important; border: 1px solid #eddaa4 !important; color: var(--gold) !important;
   box-shadow: inset 0 1px 0 rgba(255,200,150,.3) !important; text-shadow: 0 1px 0 #000 !important; }
 .panel button:focus-visible, .tab:focus-visible, .dchip:focus-visible, .mtile:focus-visible { outline: 3px solid #fff !important; outline-offset: 2px; }
 
 /* ---- small chips and badges ---- */
-.heroHead .lv, .lvlBadge, .menuHead .lv { border-image: none !important; background: linear-gradient(180deg, #4a3f2f, #2d261c) !important; border: 1px solid #8a7448 !important;
+.heroHead .lv, .lvlBadge, .menuHead .lv { border-image: none !important; background: linear-gradient(180deg, #2f4b47, #193337) !important; border: 1px solid #c2ab71 !important;
   border-radius: 10px !important; color: var(--gold) !important; font-family: var(--body) !important; font-weight: 700 !important; }
-.goldchip, .esschip, .xpchip, .npcHead .cnt { background: #231d15 !important; border: 1px solid var(--line) !important; border-radius: 8px !important; color: #f3e3b8 !important; box-shadow: none !important; font-size: 15px !important; }
+.goldchip, .esschip, .xpchip, .npcHead .cnt { background: #12282c !important; border: 1px solid var(--line) !important; border-radius: 8px !important; color: #f4efdf !important; box-shadow: none !important; font-size: 15px !important; }
 .mergeNotice { background: rgba(122,38,24,.18) !important; border-color: rgba(197,114,79,.45) !important; color: #f0d9b8 !important; font-size: 14px !important; }
 .ilegend { font-size: 13px !important; gap: 6px 12px !important; }
 .ilegend .gi { width: 14px; height: 14px; }
@@ -139,18 +139,18 @@
 .igt .iu { font: 700 13px/1 var(--body) !important; }
 .thumb, .tile { border-radius: 10px !important; }
 .panel input:not([type="checkbox"]):not([type="range"]), .panel select, .panel textarea {
-  min-height: 48px; background: #17130e !important; border: 1px solid #7b6644 !important; border-radius: 10px !important; color: var(--text) !important; font-size: 16px !important; }
-.tgl { min-height: 64px; } .tgl .sw { width: 52px; height: 32px; border-radius: 16px; background: #4a3f2f; } .tgl .sw::after { width: 26px; height: 26px; }
+  min-height: 48px; background: #0b1c20 !important; border: 1px solid #6f8a7f !important; border-radius: 10px !important; color: var(--text) !important; font-size: 16px !important; }
+.tgl { min-height: 64px; } .tgl .sw { width: 52px; height: 32px; border-radius: 16px; background: #2f4b47; } .tgl .sw::after { width: 26px; height: 26px; }
 .tgl input:checked + .sw { background: #5f9a45; } .tgl input:checked + .sw::after { transform: translateX(20px); }
 .savebox { border-left: 4px solid #8d8aa6 !important; } .savebox.on { border-left-color: #8abb5a !important; } .savebox.playtest { border-left-color: var(--gold2) !important; }
-.mpbox b { color: #f3e3b8 !important; } .mpbox small { color: var(--muted) !important; }
-.pre { min-height: 48px; min-width: 48px; border-radius: 10px !important; background: #231d15 !important; color: var(--muted) !important; box-shadow: inset 0 0 0 1px var(--line) !important; font-size: 16px !important; }
-.pre.on { background: #43392b !important; color: var(--gold) !important; box-shadow: inset 0 0 0 2px var(--gold2) !important; }
+.mpbox b { color: #f4efdf !important; } .mpbox small { color: var(--muted) !important; }
+.pre { min-height: 48px; min-width: 48px; border-radius: 10px !important; background: #12282c !important; color: var(--muted) !important; box-shadow: inset 0 0 0 1px var(--line) !important; font-size: 16px !important; }
+.pre.on { background: #294440 !important; color: var(--gold) !important; box-shadow: inset 0 0 0 2px var(--gold2) !important; }
 .tzoom button { width: 48px !important; height: 48px !important; }
-.treeWrap { border-radius: 10px !important; background: #17130e !important; }
-.road { min-height: 48px; } .road .rl { background: #3b3226 !important; font-weight: 700 !important; font-size: 15px !important; }
+.treeWrap { border-radius: 10px !important; background: #0b1c20 !important; }
+.road { min-height: 48px; } .road .rl { background: #233b3c !important; font-weight: 700 !important; font-size: 15px !important; }
 .roadlist > * { flex-shrink: 0; }
-.rw { display: inline-flex; align-items: center; gap: 4px; padding: 5px 8px !important; background: #3b3226 !important; color: #eadfc4 !important; }
+.rw { display: inline-flex; align-items: center; gap: 4px; padding: 5px 8px !important; background: #233b3c !important; color: #f0eee3 !important; }
 .rw.zone { background: #1f4d34 !important; color: #b6f5cb !important; }
 .ncb button { min-height: 48px !important; }
 .ctile { min-height: 132px; }
@@ -158,18 +158,18 @@
 .menuPanel .mtile .gi.pxi { width: 40px !important; height: 40px !important; }
 
 /* ---- journal: two clear section buttons, then six tiles ---- */
-.menuSections button { color: #e3d2a6 !important; }
+.menuSections button { color: #d7e0d6 !important; }
 .menuPanel .mtile { justify-content: center; gap: 6px; }
 
 /* ---- paper doll: the same stone chips as the panel (placement and behaviour unchanged) ---- */
 #doll .dchip { background: rgba(34,28,20,.94) !important; border: 2px solid var(--line) !important; min-height: 56px !important; }
-#doll .dchip b { font: 700 15px/1.2 var(--body) !important; color: #f3e3b8 !important; }
+#doll .dchip b { font: 700 15px/1.2 var(--body) !important; color: #f4efdf !important; }
 #doll .dchip small { color: var(--muted) !important; }
 #doll .dchip.uncommon small { color: var(--r-uncommon) !important; } #doll .dchip.rare small { color: var(--r-rare) !important; } #doll .dchip.epic small { color: var(--r-epic) !important; }
 #doll .dchip.legendary small { color: var(--r-legendary) !important; } #doll .dchip.mythic small { color: var(--myth) !important; } #doll .dchip.ancient small { color: var(--anc) !important; } #doll .dchip.divine small { color: var(--div) !important; }
 #doll .dchip.uncommon { border-color: var(--r-uncommon) !important; } #doll .dchip.rare { border-color: var(--r-rare) !important; } #doll .dchip.epic { border-color: var(--r-epic) !important; }
 #doll .dchip.legendary { border-color: var(--r-legendary) !important; } #doll .dchip.mythic { border-color: var(--myth) !important; } #doll .dchip.ancient { border-color: var(--anc) !important; } #doll .dchip.divine { border-color: var(--div) !important; }
-#doll .dchip img { background: #17130e; border-radius: 8px; }
+#doll .dchip img { background: #0b1c20; border-radius: 8px; }
 
 /* the paper-doll chips beside the hero pick the slot, so the tile row only returns when the sheet covers them */
 #modal.room:not(.sheetFull) .panel.dock .tiles { display: none !important; }
@@ -181,7 +181,7 @@
 /* ---- hero view: hero above, a bottom sheet below that the grip drags to full height ---- */
 #modal.room { cursor: grab; }
 #sheetGrip { display: none; }
-#spinHint { font: 600 14px/1.3 var(--body) !important; color: #f3e3b8 !important; text-shadow: 0 1px 3px #000; }
+#spinHint { font: 600 14px/1.3 var(--body) !important; color: #f4efdf !important; text-shadow: 0 1px 3px #000; }
 #modal.sheetFull ~ #spinHint { display: none !important; }
 @media (max-aspect-ratio: 1/1) {
   #modal.room { --sheet: clamp(340px, 45dvh, 100dvh); padding: 0 var(--sar) 0 var(--sal); place-items: end center;
@@ -194,7 +194,7 @@
   #modal.room #sheetGrip { display: block; position: absolute; z-index: 2; left: 50%; bottom: calc(var(--sheet) - 24px); width: 128px; height: 48px; margin-left: -64px;
     border: 0; background: transparent; padding: 0; touch-action: none; cursor: ns-resize; transition: bottom .22s ease-out; }
   #modal.room.dragging #sheetGrip { transition: none; }
-  #sheetGrip i { position: absolute; left: 34px; right: 34px; bottom: 13px; height: 6px; border-radius: 3px; background: #a8946a; box-shadow: 0 1px 0 #000; }
+  #sheetGrip i { position: absolute; left: 34px; right: 34px; bottom: 13px; height: 6px; border-radius: 3px; background: #8fa89e; box-shadow: 0 1px 0 #000; }
   #sheetGrip:focus-visible { outline: 3px solid #fff; outline-offset: -4px; border-radius: 10px; }
   #spinHint { left: calc(8px + min(138px, max(124px, 34vw)) + 6px) !important; right: 8px !important; width: auto !important; transform: none !important; bottom: auto !important; text-align: center; }
   /* compact sheet header: level, name, Journal and close on one row */
@@ -225,17 +225,17 @@
   #hudTR { grid-template-columns: repeat(2, 48px) !important; gap: 6px !important; }
   .hbtn.ic { width: 48px !important; height: 48px !important; }
 }
-.hbtn, .hbtn.ic, #hubShortcuts button { border-image: none !important; background: linear-gradient(180deg, #43392b, #2d261c) !important; border: 1px solid #7b6644 !important; border-radius: 10px !important;
+.hbtn, .hbtn.ic, #hubShortcuts button { border-image: none !important; background: linear-gradient(180deg, #294440, #193337) !important; border: 1px solid #6f8a7f !important; border-radius: 10px !important;
   box-shadow: inset 0 1px 0 rgba(255,230,170,.12), 0 3px 10px rgba(0,0,0,.35) !important; }
 #hubShortcuts button span:not(.quickIcon) { font: 700 14px/1.1 var(--body) !important; color: var(--gold) !important; text-shadow: 0 1px 0 #000; }
 #hubShortcuts b { font: 700 13px/1 var(--body) !important; }
 #gearPrompt button { min-height: 48px !important; }
 #gearPrompt .gn { font: 700 16px/1.2 var(--body) !important; } #gearPrompt .gc { font-size: 13px !important; }
 #coach button { min-width: 48px; }
-.toast, #gearPrompt, #objective, #banner span { background: linear-gradient(180deg, #3b3226ee, #2a231aee) !important; border: 1px solid #7b6644 !important; border-image: none !important; border-radius: 10px !important; color: var(--text) !important; }
-#coach { border-image: none !important; background: linear-gradient(180deg, #3b3226ee, #2a231aee) !important; border: 1px solid #7b6644 !important; border-radius: 12px !important; }
-.cbtn, #atk, #stickBase, #stickKnob, #atkKnob { border-image: none !important; border: 2px solid #c5b582a6 !important; border-radius: 50% !important; background: #2a231acc !important; image-rendering: auto !important; }
-#bSuper span { border-radius: 50% !important; } #stickKnob, #atkKnob { background: #8a7448c7 !important; }
+.toast, #gearPrompt, #objective, #banner span { background: linear-gradient(180deg, #1d3638ee, #13272eee) !important; border: 1px solid #6f8a7f !important; border-image: none !important; border-radius: 10px !important; color: var(--text) !important; }
+#coach { border-image: none !important; background: linear-gradient(180deg, #1d3638ee, #13272eee) !important; border: 1px solid #6f8a7f !important; border-radius: 12px !important; }
+.cbtn, #atk, #stickBase, #stickKnob, #atkKnob { border-image: none !important; border: 2px solid #c5b582a6 !important; border-radius: 50% !important; background: #173437bb !important; image-rendering: auto !important; }
+#bSuper span { border-radius: 50% !important; } #stickKnob, #atkKnob { background: #7e9d91c7 !important; }
 .bport, .thumb, .bar, .bar i, .tag .tb, .tag .tb i, .treeWrap { border-radius: 8px !important; }
 .bport img, img.pxp, .thumb, .tile img, .dchip img, .item img, .caseArt img, .mergePreview img, .collectionCard img, .collectionFocus img { image-rendering: auto !important; }
 #title .logo, #title .logo span { font-family: var(--title) !important; }

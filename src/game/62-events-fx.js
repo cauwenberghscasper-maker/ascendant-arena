@@ -478,17 +478,18 @@ function onGearPrompt(e) {
 }
 
 // --- paper doll: slot callouts pinned to the hero in the dressing room ---
-const DOLL_ORDER = ['helmet', 'weapon', 'chest', 'accessory', 'boots'];
+const DOLL_ORDER = ['helmet', 'weapon', 'chest', 'accessory', 'boots'], DOLL_SLOT = 58;
 const Doll = { built: false, chips: {}, alerts: null, alertAt: 0 };
 function buildDoll() {
   const root = $('doll');
   for (const s of DOLL_ORDER) {
     const c = document.createElement('button'); c.className = 'dchip'; c.dataset.slot = s;
-    c.innerHTML = '<img alt=""><span><b></b><small></small></span><i class="rdot" hidden></i>';
+    c.innerHTML = '<img alt=""><span><b></b><small></small></span><em class="du"></em><i class="rdot" hidden></i>';
     c.addEventListener('click', (e) => { e.stopPropagation(); Sfx.play('click'); UI.gearSlot = s; heroTab('Gear'); });
     root.appendChild(c); Doll.chips[s] = c;
   }
   Doll.built = true;
+  Doll.sat = parseFloat(getComputedStyle(root).paddingTop) || 0; // #doll's padding is the notch inset
 }
 function updateDoll() {
   const root = $('doll');
@@ -504,20 +505,25 @@ function updateDoll() {
   const head = project(pl.x, (2.2 * gs) + Showcase.podium, pl.z), feet = project(pl.x, Showcase.podium, pl.z);
   if (!head || !feet) { root.hidden = true; return; }
   const W = window.innerWidth, H = window.innerHeight, panel = UI.sheet;
-  const chipW = Cam.portrait ? Math.min(138, Math.max(124, W * .34)) : Math.min(158, W * .19);
-  const colX = Cam.portrait ? 8 : Math.max(8, Math.min(head[0] - chipW - 48, panel.left - chipW - 100));
-  const bottom = Cam.portrait ? panel.top - 10 : H - 16;
-  const top = Math.max(12, Math.min(head[1] - 10, bottom - 340));
-  if (bottom - top < 160) { root.hidden = true; return; }
-  root.style.left = `${colX}px`; root.style.top = `${top}px`; root.style.width = `${chipW}px`; root.style.maxHeight = `${Math.max(54, bottom - top)}px`;
+  // item sockets around the hero: portrait puts helmet, armor and boots on the left and weapon and accessory on
+  // the right (a classic paper doll); landscape keeps one column left of the hero
+  const sz = DOLL_SLOT, gap = 8, bottom = Cam.portrait ? panel.top - 12 : H - 16;
+  const top = Cam.portrait ? 12 + Doll.sat : Math.max(12, Math.min(head[1] - 10, bottom - 5 * (sz + gap)));
+  const avail = bottom - top, need = Cam.portrait ? 3 * sz + 2 * gap : 5 * sz + 4 * gap;
+  if (avail < need) { root.hidden = true; return; }
+  const step = Cam.portrait ? Math.min(sz + 40, (avail - sz) / 2) : sz + gap;
+  const colL = Cam.portrait ? 10 : Math.max(8, Math.min(head[0] - sz - 64, panel.left - sz - 110)), colR = W - 10 - sz;
+  const at = Cam.portrait ? { helmet: [colL, 0], chest: [colL, 1], boots: [colL, 2], weapon: [colR, 0.5], accessory: [colR, 1.5] } : null;
   DOLL_ORDER.forEach((s, i) => {
-    const it = p.gear[s], c = Doll.chips[s];
+    const it = p.gear[s], c = Doll.chips[s], xy = at ? at[s] : [colL, i];
+    c.style.transform = `translate(${Math.round(xy[0])}px,${Math.round(top + xy[1] * step)}px)`;
     const sig = it ? it.id + it.up : 'empty';
     if (c.dataset.sig !== sig) {
       c.dataset.sig = sig; c.className = 'dchip ' + (it ? it.rarity : 'empty');
       const img = c.querySelector('img'); img.hidden = !it; if (it) img.src = thumbFor(it); else img.removeAttribute('src');
       c.querySelector('b').textContent = SLOT_LABEL[s];
-      c.querySelector('small').textContent = it ? `${CFG.gear.rarity[it.rarity].name}${it.up ? ' +' + it.up : ''}` : 'Empty · equip';
+      c.querySelector('small').textContent = it ? CFG.gear.rarity[it.rarity].name : 'Empty';
+      c.querySelector('.du').textContent = it && it.up ? '+' + it.up : '';
       c.setAttribute('aria-label', `${SLOT_LABEL[s]} · ${it ? it.name + ' · inspect and upgrade' : 'empty'}`);
     }
     c.querySelector('.rdot').hidden = !(al[s].better || al[s].canUpgrade);

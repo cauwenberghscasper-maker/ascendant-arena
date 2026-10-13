@@ -34,7 +34,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Touch and keyboard controls | `src/game/51-input.js` |
 | Camera, adaptive quality, pixel-art pass | `src/game/46-camera-quality.js` |
 | Game loop, startup | `src/game/80-main-loop.js`, `90-boot.js` |
-| Page markup, head, styles | `src/index.html`, `src/css/main.css`, `src/css/panels.css` |
+| Page markup, head, styles | `src/index.html`, `src/css/main.css`, `src/css/panels.css`; the current menu look and the Menu size zoom: `src/css/ui-v2.css` (loaded last) |
 
 After editing: `node tools/build.cjs`, then run the checks.
 

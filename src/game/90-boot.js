@@ -58,6 +58,7 @@ function boot(hotData) {
   // phones: start at 2x at most and let quality only step down
   setDpr(Math.min(window.devicePixelRatio || 1, CFG.quality.maxDpr));
   if (G.profile.settings.calm) Q.locked = true;
+  applyUiSize();
   window.addEventListener('resize', resize);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { G.paused = true; if (Sfx.ctx) Sfx.ctx.suspend(); G.dirty = false; saveNow(true); }
