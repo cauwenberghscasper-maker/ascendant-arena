@@ -1,26 +1,1988 @@
 {
- "batch": "battle-d",
+ "batch": "world-b",
  "jobs": [
   {
-   "space": "fffiloni/diffusers-image-outpaint",
-   "api": "auto",
-   "files": [
-    "image"
-   ],
-   "name": "battle_talla",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "tree_oak_concept",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/battle-c/battle_l3.png",
-    "width": 1024,
-    "height": 1824,
-    "overlap_percentage": 10,
-    "num_inference_steps": 10,
-    "resize_option": "Full",
-    "alignment": "Middle",
-    "prompt_input": "dramatic stormy twilight fantasy sky with moonlit clouds above, ancient ruined stone castle bridge and cobblestones with glowing embers below, painterly stylized 3D animated-film look, no text",
-    "overlap_left": true,
-    "overlap_right": true,
-    "overlap_top": true,
-    "overlap_bottom": true
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A big broadleaf meadow oak tree: thick gnarled brown trunk with roots, lush round bright green leaf canopy in several puffy clumps.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7000,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "tree_oak_t1",
+   "from": {
+    "image": "tree_oak_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "tree_ash_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall dark forest fir tree: straight brown trunk, layered deep green needle tiers, a few cones, slightly crooked top.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7001,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "tree_ash_t1",
+   "from": {
+    "image": "tree_ash_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "tree_snow_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A snowy mountain pine tree: layered dark green needle tiers heavily covered in thick white snow, icicles, brown trunk.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7002,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "tree_snow_t1",
+   "from": {
+    "image": "tree_snow_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "tree_ember_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A charred dead volcanic tree: twisted black burnt trunk and bare branches with glowing orange lava cracks, a few embers, no leaves.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7003,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "tree_ember_t1",
+   "from": {
+    "image": "tree_ember_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "tree_crystal_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A magical crystal tree: twisted pale stone trunk with branches ending in clusters of glowing violet and blue crystals instead of leaves.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7004,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "tree_crystal_t1",
+   "from": {
+    "image": "tree_crystal_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "tree_coral_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A deep-sea coral tree: branching teal and turquoise coral with glowing bioluminescent tips, small shells and seaweed at its base.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7005,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "tree_coral_t1",
+   "from": {
+    "image": "tree_coral_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "tree_gold_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A celestial golden blossom tree: elegant white bark trunk, a canopy of glowing golden and cream leaves, small floating light motes.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7006,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "tree_gold_t1",
+   "from": {
+    "image": "tree_gold_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "rock_a_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A cluster of three mossy grey boulders of different sizes with patches of green moss and a few small grass tufts.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7007,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "rock_a_t1",
+   "from": {
+    "image": "rock_a_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "rock_b_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall jagged standing rock spire of layered grey stone with cracks and a little moss.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7008,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "rock_b_t1",
+   "from": {
+    "image": "rock_b_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bush_a_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A round leafy green bush made of several soft puffy leaf clumps.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7009,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "bush_a_t1",
+   "from": {
+    "image": "bush_a_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bush_flower_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A leafy green bush covered in small pink, white and yellow flowers.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7010,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "bush_flower_t1",
+   "from": {
+    "image": "bush_flower_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "tuft_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A small clump of tall wild grass blades with a few little blue and yellow wildflowers.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7011,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "tuft_t1",
+   "from": {
+    "image": "tuft_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mushrooms_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A cluster of fantasy mushrooms of different heights with red caps and white spots and two glowing blue mushrooms.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7012,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "mushrooms_t1",
+   "from": {
+    "image": "mushrooms_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "berry_bush_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A small round bush with dark green leaves covered in bright glowing pink glowberries.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7013,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "berry_bush_t1",
+   "from": {
+    "image": "berry_bush_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "rift_gate_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A rift portal gate: a tall upright ring of jagged black obsidian stones with glowing crimson and violet runes, standing on a cracked dark stone base, the middle of the ring is empty and open.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7014,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "rift_gate_t1",
+   "from": {
+    "image": "rift_gate_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lantern_post_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A medieval iron street lantern on a tall dark iron post with a stone base and a warm glowing yellow lantern.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7015,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "lantern_post_t1",
+   "from": {
+    "image": "lantern_post_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fence_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A straight section of rustic wooden fence: three wooden posts with two horizontal rails, weathered planks.",
+    "resolution": "1152x896 ( 9:7 )",
+    "seed": 7016,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "fence_t1",
+   "from": {
+    "image": "fence_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "standing_stone_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall ancient standing stone menhir with carved glowing runes and moss, slightly leaning.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7017,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "standing_stone_t1",
+   "from": {
+    "image": "standing_stone_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "war_tent_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A goblin war camp tent made of patched hides on crooked wooden poles, a tattered red war banner on a spear beside it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7018,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "war_tent_t1",
+   "from": {
+    "image": "war_tent_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bone_pile_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A pile of old animal bones, skulls and broken ribs with a rusty shield.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7019,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "bone_pile_t1",
+   "from": {
+    "image": "bone_pile_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "shrine_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A small mystical challenge shrine: a carved stone altar pedestal with a glowing golden orb floating above it, four small stone pillars around it.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7020,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "shrine_t1",
+   "from": {
+    "image": "shrine_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "banner_pole_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall wooden pole with a long hanging blue and gold heraldic banner.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7021,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "banner_pole_t1",
+   "from": {
+    "image": "banner_pole_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "signpost_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A wooden crossroads signpost with three arrow-shaped direction boards on a post, small stones at its base.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7022,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "signpost_t1",
+   "from": {
+    "image": "signpost_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "quarry_wall_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A curved rocky quarry cliff wall of layered grey stone with wooden support beams, a hanging lantern and a few pickaxes leaning against it.",
+    "resolution": "1152x896 ( 9:7 )",
+    "seed": 7023,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "quarry_wall_t1",
+   "from": {
+    "image": "quarry_wall_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mine_cart_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A wooden mine cart with iron bands and wheels on a short rail track, filled with chunks of copper and iron ore.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7024,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "mine_cart_t1",
+   "from": {
+    "image": "mine_cart_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ore_pile_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A pile of rough rocks with glittering copper and silver ore chunks and a pickaxe stuck in it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7025,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "ore_pile_t1",
+   "from": {
+    "image": "ore_pile_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "windmill_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A rustic old windmill: round stone tower base, wooden upper body, four large cloth sail blades, small door.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7026,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "windmill_t1",
+   "from": {
+    "image": "windmill_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bell_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A huge ancient bronze bell half sunk and tilted into the ground, covered in green patina and moss, with a broken wooden bell frame beside it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7027,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "bell_t1",
+   "from": {
+    "image": "bell_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fairy_ring_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A fairy ring: a circle of large glowing magical mushrooms in pink, cyan and lime around a mossy stone in the middle.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7028,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "fairy_ring_t1",
+   "from": {
+    "image": "fairy_ring_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "elder_stump_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A gigantic ancient tree stump with huge spreading roots, visible tree rings on top, moss and small mushrooms.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7029,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "elder_stump_t1",
+   "from": {
+    "image": "elder_stump_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ribcage_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. The giant skeleton ribcage of a long dead colossal beast, curved white rib bones arching out of the ground with a skull at one end.",
+    "resolution": "1152x896 ( 9:7 )",
+    "seed": 7030,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "ribcage_t1",
+   "from": {
+    "image": "ribcage_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "wind_arch_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A natural windswept rock arch of weathered pale stone with snow on top.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7031,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "wind_arch_t1",
+   "from": {
+    "image": "wind_arch_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "colossus_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. The broken remains of a giant stone colossus statue: two huge stone legs standing on a pedestal and the fallen cracked head beside them.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7032,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "colossus_t1",
+   "from": {
+    "image": "colossus_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "sundial_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A large ancient desert sundial: a round stone dais with carved gold hour markers and a tall stone gnomon blade.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7033,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "sundial_t1",
+   "from": {
+    "image": "sundial_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "black_spire_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall jagged black obsidian spire with a small glowing blue crystal at its tip, surrounded by smaller black rocks.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7034,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "black_spire_t1",
+   "from": {
+    "image": "black_spire_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "frozen_fall_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A frozen waterfall: a cliff of dark rock with a cascade of glowing pale blue ice falling down into a frozen pool with icicles.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7035,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "frozen_fall_t1",
+   "from": {
+    "image": "frozen_fall_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mine_lift_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. An old mine lift headframe: tall wooden scaffold tower with a big pulley wheel on top over a dark shaft, a mine cart beside it.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7036,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "mine_lift_t1",
+   "from": {
+    "image": "mine_lift_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "cauldron_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A huge black witch cauldron bubbling with glowing green brew on a small fire, with a stirring stick and a few potion bottles beside it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7037,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "cauldron_t1",
+   "from": {
+    "image": "cauldron_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lava_forge_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A volcanic dwarven lava forge: black stone furnace with glowing molten lava, an anvil and a channel of flowing lava.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7038,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "lava_forge_t1",
+   "from": {
+    "image": "lava_forge_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "chapel_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A burnt ruined stone chapel: blackened walls, broken pointed roof beams, a small bell tower, scorch marks.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7039,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "chapel_t1",
+   "from": {
+    "image": "chapel_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "dragon_skull_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A gigantic dragon skull half buried in the ground with long curved horns, sharp teeth and glowing orange embers in its eye sockets.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7040,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "dragon_skull_t1",
+   "from": {
+    "image": "dragon_skull_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "sapphire_brazier_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall carved stone brazier pedestal holding a burning cluster of glowing blue sapphire crystals and blue fire.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7041,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "sapphire_brazier_t1",
+   "from": {
+    "image": "sapphire_brazier_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crystal_arch_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. An arch made of two huge glowing violet crystal pillars curving toward each other with a ring of light between them.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7042,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "crystal_arch_t1",
+   "from": {
+    "image": "crystal_arch_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "upside_tower_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A magical upturned stone tower floating upside down above the ground, roof pointing down, with small rocks floating around it.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7043,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "upside_tower_t1",
+   "from": {
+    "image": "upside_tower_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mirror_maze_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A group of tall standing magic mirrors in ornate silver frames arranged in a small maze, glowing pale blue glass.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7044,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "mirror_maze_t1",
+   "from": {
+    "image": "mirror_maze_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crashed_star_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A crashed fallen star: a glowing golden crystal meteor in a cracked crater ring of dark rocks, sparkles.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7045,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "crashed_star_t1",
+   "from": {
+    "image": "crashed_star_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ghost_ship_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A haunted ghost ship wreck: a broken wooden sailing ship hull tilted on its side with a torn glowing green ghostly sail.",
+    "resolution": "1152x896 ( 9:7 )",
+    "seed": 7046,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "ghost_ship_t1",
+   "from": {
+    "image": "ghost_ship_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "waterwheel_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. An old stone mill house with a large wooden water wheel on its side and a small stream.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7047,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "waterwheel_t1",
+   "from": {
+    "image": "waterwheel_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "pearl_clam_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A giant open sea clam shell with a large glowing white pearl inside, coral and seaweed around it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7048,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "pearl_clam_t1",
+   "from": {
+    "image": "pearl_clam_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lighthouse_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A dark seaside lighthouse with red and white stripes, a glowing lamp room on top and rocks at its base.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7049,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "lighthouse_t1",
+   "from": {
+    "image": "lighthouse_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "leviathan_spine_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. The long curved backbone of a sea leviathan: a row of huge vertebrae with tall spikes rising out of the ground, barnacles.",
+    "resolution": "1152x896 ( 9:7 )",
+    "seed": 7050,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "leviathan_spine_t1",
+   "from": {
+    "image": "leviathan_spine_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "geyser_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A steaming geyser: a ring of dark rocks around a hot pool with a tall white steam plume shooting up.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7051,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "geyser_t1",
+   "from": {
+    "image": "geyser_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "glass_chimney_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall black volcanic glass chimney rock with violet glowing cracks and purple crystals around its base.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7052,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "glass_chimney_t1",
+   "from": {
+    "image": "glass_chimney_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "storm_rod_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall metal storm lightning rod tower with glowing blue rings around it and crackling lightning at its tip, on a stone base.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7053,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "storm_rod_t1",
+   "from": {
+    "image": "storm_rod_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "moon_gate_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A celestial moon gate: a tall circular white marble ring gateway with a glowing silver crescent moon at the top, on a stone platform.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7054,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "moon_gate_t1",
+   "from": {
+    "image": "moon_gate_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "sky_altar_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A heavenly sky altar: round white and gold marble platform with four golden pillars and a glowing golden ring floating above the altar.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7055,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "sky_altar_t1",
+   "from": {
+    "image": "sky_altar_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "camp_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A hunter's camp: a small canvas tent, a crackling campfire with logs around it, a wooden crate and a deer hide drying rack.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7056,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "camp_t1",
+   "from": {
+    "image": "camp_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ruined_tower_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A ruined round stone watchtower with broken crumbling top and fallen stones around its base, ivy.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7057,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "ruined_tower_t1",
+   "from": {
+    "image": "ruined_tower_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "statue_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. An old weathered stone statue of a hero knight raising a sword on a square pedestal, moss.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7058,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "statue_t1",
+   "from": {
+    "image": "statue_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "well_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A medieval stone wishing well with a small wooden roof, rope and bucket.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7059,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "well_t1",
+   "from": {
+    "image": "well_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "broken_cart_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A broken wooden merchant cart tipped over with a broken wheel, spilled crates and sacks.",
+    "resolution": "1152x896 ( 9:7 )",
+    "seed": 7060,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "broken_cart_t1",
+   "from": {
+    "image": "broken_cart_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "graves_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A small old graveyard: several crooked stone gravestones, a celtic cross and a dead tree, a little iron fence.",
+    "resolution": "1152x896 ( 9:7 )",
+    "seed": 7061,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "graves_t1",
+   "from": {
+    "image": "graves_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "rune_obelisk_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall dark stone obelisk carved with glowing teal runes on a stepped base.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 7062,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "rune_obelisk_t1",
+   "from": {
+    "image": "rune_obelisk_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hermit_shack_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, RuneScape-style fantasy MMORPG, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A small crooked hermit's shack: wooden planks, mossy thatched roof, a glowing window, a chimney and a barrel.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7063,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "hermit_shack_t1",
+   "from": {
+    "image": "hermit_shack_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
    }
   }
  ]
