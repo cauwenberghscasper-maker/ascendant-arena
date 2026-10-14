@@ -1,5 +1,5 @@
 {
- "batch": "test-3d",
+ "batch": "test-3d-b",
  "jobs": [
   {
    "name": "chapel_ms_a",
@@ -56,60 +56,6 @@
    "ext": ".glb"
   },
   {
-   "name": "colossus_ms_a",
-   "space": "microsoft/TRELLIS.2",
-   "api": "/image_to_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/world-b/colossus_concept.webp",
-    "seed": 7,
-    "resolution": "1536"
-   },
-   "noout": true
-  },
-  {
-   "name": "colossus_ms",
-   "space": "microsoft/TRELLIS.2",
-   "api": "/extract_glb",
-   "args": {
-    "decimation_target": 120000,
-    "texture_size": 2048
-   },
-   "ext": ".glb"
-  },
-  {
-   "name": "shrine_ms_a",
-   "space": "microsoft/TRELLIS.2",
-   "api": "/image_to_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/world-b/shrine_concept.webp",
-    "seed": 7,
-    "resolution": "1536"
-   },
-   "noout": true
-  },
-  {
-   "name": "shrine_ms",
-   "space": "microsoft/TRELLIS.2",
-   "api": "/extract_glb",
-   "args": {
-    "decimation_target": 120000,
-    "texture_size": 2048
-   },
-   "ext": ".glb"
-  },
-  {
    "name": "chapel_hy",
    "space": "tencent/Hunyuan3D-2.1",
    "api": "/generation_all",
@@ -138,46 +84,6 @@
    ],
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/world-b/lava_forge_concept.webp",
-    "steps": 40,
-    "guidance_scale": 5.0,
-    "seed": 7,
-    "octree_resolution": 384,
-    "check_box_rembg": true,
-    "num_chunks": 8000,
-    "randomize_seed": false
-   },
-   "ext": ".glb",
-   "pick": 1
-  },
-  {
-   "name": "colossus_hy",
-   "space": "tencent/Hunyuan3D-2.1",
-   "api": "/generation_all",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/world-b/colossus_concept.webp",
-    "steps": 40,
-    "guidance_scale": 5.0,
-    "seed": 7,
-    "octree_resolution": 384,
-    "check_box_rembg": true,
-    "num_chunks": 8000,
-    "randomize_seed": false
-   },
-   "ext": ".glb",
-   "pick": 1
-  },
-  {
-   "name": "shrine_hy",
-   "space": "tencent/Hunyuan3D-2.1",
-   "api": "/generation_all",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/world-b/shrine_concept.webp",
     "steps": 40,
     "guidance_scale": 5.0,
     "seed": 7,
