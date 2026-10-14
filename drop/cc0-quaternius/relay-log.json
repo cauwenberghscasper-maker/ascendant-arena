@@ -1,0 +1,26 @@
+{
+ "batch": "cc0-quaternius",
+ "files": [
+  {
+   "name": "stylized_nature_megakit.zip",
+   "ok": true,
+   "bytes": 104088529,
+   "sha256": "298f6732b872e4cf7b30e6e7abf9641c7f6dc6b326df37ac089533ed7e3d58c9",
+   "error": null
+  },
+  {
+   "name": "medieval_village_megakit.zip",
+   "ok": true,
+   "bytes": 100025527,
+   "sha256": "58c3e1b9713ee85749ade230c36e1195af5d96951435532b4411e993b46387bd",
+   "error": null
+  },
+  {
+   "name": "fantasy_props_megakit.zip",
+   "ok": true,
+   "bytes": 73727082,
+   "sha256": "0bc1e5843c9f245c44bda82f97f738b09f88fe51bb34d2a69a7847a969f868e3",
+   "error": null
+  }
+ ]
+}
