@@ -1,0 +1,12 @@
+{
+ "batch": "battle-d",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "battle_talla",
+   "ok": false,
+   "error": "Value 1824 is greater than maximum value 1536.",
+   "sec": 1.0
+  }
+ ]
+}
