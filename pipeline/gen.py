@@ -26,6 +26,11 @@ for job in spec['jobs']:
             try: clients[job['space']] = Client(job['space'], token=tok, verbose=False)
             except TypeError: clients[job['space']] = Client(job['space'], hf_token=tok, verbose=False)
         c = clients[job['space']]
+        if job.get('probe'):
+            # just describe the Space's endpoints (names, parameters, defaults) for writing the real jobs
+            info = c.view_api(print_info=False, return_format='dict') or {}
+            json.dump(info, open(os.path.join(out, name + '.json'), 'w'), indent=1, default=str)
+            log.append({'name': name, 'ok': True, 'file': name + '.json', 'sec': round(time.time() - t0, 1)}); print(json.dumps(log[-1])); continue
         for pre in job.get('pre', []): c.predict(api_name=pre)
         args = dict(job.get('args', {}))
         for k, src in job.get('from', {}).items():
