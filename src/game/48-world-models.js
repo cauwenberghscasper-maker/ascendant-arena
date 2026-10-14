@@ -58,11 +58,11 @@ const WorldModels = {
   },
   update() {
     for (const h of this.sets) { if (!h.ready) this.tryBuild(h); else if (h.dirty) this.sync(h); }
-    // bands beyond the fog are skipped entirely (main and shadow pass)
     // cells beyond the fog are skipped (main and shadow pass); small props fade out sooner than trees and buildings
     const cx = camera.position.x, cz = camera.position.z, far = (Q.lowTier ? 95 : 140) + 20;
-    for (const h of this.sets) { const f = h.opts.far ? Math.min(far, h.opts.far) : far;
-      for (const im of h.meshes) { const b = im.boundingSphere; if (b) im.visible = Math.hypot(b.center.x - cx, b.center.z - cz) - b.radius < f; } }
+    // opts.far caps the distance, opts.near starts a far-LOD set where the full set (far: same value) stops, opts.horizon never culls
+    for (const h of this.sets) { const f = h.opts.far ? Math.min(far, h.opts.far) : far, n = h.opts.near || 0; if (h.opts.horizon) continue;
+      for (const im of h.meshes) { const b = im.boundingSphere; if (b) { const d = Math.hypot(b.center.x - cx, b.center.z - cz) - b.radius; im.visible = d < f && d >= n; } } }
   },
   // free a handle's instance buffers and materials (the model's geometry and textures stay cached)
   dispose(h) {

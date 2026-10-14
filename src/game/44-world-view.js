@@ -268,6 +268,18 @@ function buildHub() {
   const townMesh = new THREE.Mesh(mergeParts(tParts), worldArt.material); townMesh.castShadow = true; townMesh.receiveShadow = true; hubGroup.add(townMesh);
   // per-area art: gate trims, lair ring, skyline and this area's points of interest (their colliders join the grid first)
   W.zones.forEach((zn, zi) => { for (const o of worldArt.zoneLandmarks(hubGroup, W, zi, REGION_ART[zn.theme])) grid.add(o); });
+  // landmark, runestone and minor-POI models (sized to their clearing), and the walled secret pockets as boulders and trees
+  { const PM = new Map(), add = (n, it, o) => { if (!PM.has(n)) PM.set(n, { items: [], o }); PM.get(n).items.push(it); };
+    for (const q of W.pois) {
+      if (q.art === 'cache') { if (!hasWM('rock_a') || !hasWM('tree_ash')) continue;
+        poiLayout(q, null, () => {}).forEach((h2, i) => add(i % 3 === 1 ? 'tree_ash' : 'rock_a', { x: h2.x, z: h2.z, ry: hashf(h2.x, h2.z) * 6, s: i % 3 === 1 ? 7 : Math.max(1.6, h2.r * 1.7) }));
+        if (hasWM('chest')) add('chest', { x: q.x, z: q.z, ry: q.gap > 0 ? 0 : Math.PI, s: 0.9 });
+        continue; }
+      const pm = POI_MODEL[q.art]; if (!pm || !hasWM(pm[0])) continue;
+      const b = WORLD_MODEL_BOX[pm[0]], sc = Math.min(pm[1], 2 * q.r * 0.95 / Math.max(b[0], b[1]));
+      add(pm[0], { x: q.x, z: q.z, ry: poiRotation(q), s: sc }, q.kind === 'rune' || /crystal|star|moon|brazier|altar|rod/.test(pm[0]) ? { glow: 0x9fdcff, glowK: 0.1 } : {});
+    }
+    for (const [n, v] of PM) WorldModels.place(hubGroup, n, v.items, v.o); }
   {
     const wim = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.45, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }), W.waypoints.length);
     wim.instanceMatrix.setUsage(THREE.DynamicDrawUsage); wim.frustumCulled = false; wim.setColorAt(0, _col.set(0xffffff)); hubGroup.add(wim); hubParts.wpIM = wim;
@@ -341,6 +353,12 @@ function buildHub() {
     let b = batches.get(key); if (!b) batches.set(key, b = { geo, list: [], useColor, opts });
     for (const it of list) b.list.push(it);
   }
+  // generated models replace the primitive props wherever one exists: name -> [items], placed once after all areas
+  const MB = new Map(), MBO = {};
+  const mput = (name, it, opts, key) => { const k = key || name; if (!MB.has(k)) { MB.set(k, []); MBO[k] = { name, opts: opts || {} }; } MB.get(k).push(it); };
+  const _col2 = new THREE.Color(), soft = (c, k) => _col.set(0xffffff).lerp(_col2.set(c), k).getHex(); // a gentle per-instance tint over the painted texture
+  const TREE_MODEL = { round: ['tree_oak', 5.4], pine: ['tree_ash', 7.2], snowPine: ['tree_snow', 6.8], dead: ['tree_ember', 5], crystal: ['tree_crystal', 4.8], coral: ['tree_coral', 4.8], blossom: ['tree_gold', 5.6] };
+  const treeSet = (name) => hasWM(name + '_lod') ? [{ far: 58 }, { near: 58, shadow: false }] : [{}, null];
   // Props per area: the theme sets the defaults (counts per 160 m of road), each area's look overrides them.
   const THEME_DECO = [
     { tree: 'round', trees: 190, rocks: 50, tufts: 1500, tuftC: [0x6d9a4a, 0x82ad55], flowers: 260, flowerC: [0xff7aa8, 0xffd34a, 0xffffff, 0xb08cff], bushes: 220, logs: 16, fungi: 60, ruins: 2, flies: 70, ponds: 6 },
@@ -419,20 +437,39 @@ function buildHub() {
       }
       for (let q = 0; q < 4; q++) blocks.push({ x: c.x + (rng() - 0.5) * rad, z: c.z + (rng() - 0.5) * rad, s: 0.4 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
     }
-    bat(bushGeo, bushes, true, { receive: true });
-    bat(logGeo, logs, true, { receive: true }); bat(stumpGeo, stumps, true);
-    bat(stemGeo, stems, true, { shadow: false }); bat(capGeo, caps, true, D.glowCaps ? { mat: glowTint, shadow: false } : { shadow: false });
-    bat(pillarGeo, pillars, true, { receive: true }); bat(blockGeo, blocks, true, { receive: true });
+    const rot = (it) => (it.ry != null ? it.ry : hashf(it.x, it.z) * 6);
+    if (hasWM('bush_a')) bushes.forEach((b, i) => mput(hasWM('bush_flower') && (th === 0 || th === 6) && i % 3 === 0 ? 'bush_flower' : 'bush_a', { x: b.x, z: b.z, ry: rot(b), s: 1.5 * b.s, color: soft(b.c, 0.35) }, { far: 110 }));
+    else bat(bushGeo, bushes, true, { receive: true });
+    if (hasWM('log')) logs.forEach((l) => mput('log', { x: l.x, z: l.z, ry: l.ry, s: 0.75 * l.s, color: soft(l.c, 0.3) }, { far: 110 })); else bat(logGeo, logs, true, { receive: true });
+    if (hasWM('stump')) stumps.forEach((l) => mput('stump', { x: l.x, z: l.z, ry: rot(l), s: 0.75 * l.s }, { far: 110 })); else bat(stumpGeo, stumps, true);
+    if (hasWM('mushrooms')) caps.forEach((c, i) => { if (i % 2) return; mput('mushrooms', { x: c.x, z: c.z, ry: rot(c), s: 0.7 * c.s, color: soft(c.c, 0.4) }, D.glowCaps ? { far: 90, shadow: false, glow: 0x7fffe0, glowK: 0.3 } : { far: 90, shadow: false }, D.glowCaps ? 'mushrooms_glow' : 'mushrooms'); });
+    else { bat(stemGeo, stems, true, { shadow: false }); bat(capGeo, caps, true, D.glowCaps ? { mat: glowTint, shadow: false } : { shadow: false }); }
+    if (hasWM('ruin_pillar')) { pillars.forEach((q) => mput('ruin_pillar', { x: q.x, z: q.z, ry: q.ry, s: 1.5 * q.sy + 0.6, color: soft(q.c, 0.45) })); blocks.forEach((q) => mput(hasWM('ruin_block') ? 'ruin_block' : 'rock_a', { x: q.x, z: q.z, ry: q.ry, s: 0.75 * q.s, color: soft(q.c, 0.45) }, { far: 110 })); }
+    else { bat(pillarGeo, pillars, true, { receive: true }); bat(blockGeo, blocks, true, { receive: true }); }
     if (D.glowCaps || th === 1) for (const st of caps) flies.push({ x: st.x, z: st.z });
     for (let i = 0; i < cnt(D.flies); i++) { const q2 = rng() < 0.7 ? near() : rnd(); flies.push(q2); }
     for (let i = 0, kk = 0; i < Math.round((D.ponds || 0) * Math.max(k, 0.6)) && kk < 300; kk++) { const c = rnd(); if (!placeOk(c.x, c.z, 5)) continue; ponds.push({ x: c.x, z: c.z, s: 2.5 + rng() * 2.5 }); grid.add({ x: c.x, z: c.z, r: 1.5 }); i++; }
-    if (tree === 'round' || tree === 'pine' || tree === 'snowPine' || tree === 'blossom') bat(trunkGeo, trunks, false);
-    const topGeo = { round: roundGeo, blossom: roundGeo, pine: pineGeo, snowPine: pineGeo, dead: deadGeo, coral: worldArt.coralGeo, crystal: crystalGeo }[tree];
-    if (topGeo) bat(topGeo, tops, true, tree === 'crystal' || tree === 'coral' ? { mat: glowTint } : null);
-    bat(rockGeo, rocks, true, { receive: true }); bat(spikeGeo, spikes, true);
-    bat(tuftGeo, tufts, true, { shadow: false }); bat(flowerGeo, flowers, true, { shadow: false });
+    const TM = TREE_MODEL[tree];
+    if (TM && hasWM(TM[0])) {
+      // one tree model per theme; near cells draw the full mesh, far cells its light LOD (when generated)
+      const [full, lod] = treeSet(TM[0]), glowT = tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {};
+      tops.forEach((t) => { const it = { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: TM[1] * t.s, color: soft(t.c, 0.22) };
+        mput(TM[0], it, Object.assign({}, glowT, full)); if (lod) mput(TM[0] + '_lod', it, Object.assign({}, glowT, lod)); });
+    } else {
+      if (tree === 'round' || tree === 'pine' || tree === 'snowPine' || tree === 'blossom') bat(trunkGeo, trunks, false);
+      const topGeo = { round: roundGeo, blossom: roundGeo, pine: pineGeo, snowPine: pineGeo, dead: deadGeo, coral: worldArt.coralGeo, crystal: crystalGeo }[tree];
+      if (topGeo) bat(topGeo, tops, true, tree === 'crystal' || tree === 'coral' ? { mat: glowTint } : null);
+    }
+    if (hasWM('rock_a')) { rocks.forEach((r) => mput('rock_a', { x: r.x, z: r.z, ry: r.ry, s: 1.25 * r.s, color: soft(r.c, 0.55) }, { far: 120 }));
+      spikes.forEach((r) => mput(hasWM('rock_b') ? 'rock_b' : 'rock_a', { x: r.x, z: r.z, ry: hashf(r.z, r.x) * 6, s: 2.1 * r.s, color: soft(r.c, 0.55) }, { far: 120 })); }
+    else { bat(rockGeo, rocks, true, { receive: true }); bat(spikeGeo, spikes, true); }
+    // grass and flowers: a third as many model clumps (each covers more ground), close range only
+    if (hasWM('tuft')) { tufts.forEach((t, i) => { if (i % 3 === 0) mput('tuft', { x: t.x, z: t.z, ry: t.ry, s: 0.55 * t.s, color: soft(t.c, 0.5) }, { far: 60, shadow: false }); });
+      flowers.forEach((f, i) => { if (i % 3 === 0) mput(hasWM('bush_flower') ? 'bush_flower' : 'tuft', { x: f.x, z: f.z, ry: hashf(f.x, f.z) * 6, s: 0.6 * f.s }, { far: 60, shadow: false }, 'flowers'); }); }
+    else { bat(tuftGeo, tufts, true, { shadow: false }); bat(flowerGeo, flowers, true, { shadow: false }); }
   });
   for (const b of batches.values()) inst(b.geo, b.list, b.useColor, b.opts);
+  for (const [k, items] of MB) WorldModels.place(hubGroup, MBO[k].name, items, MBO[k].opts);
   // glowing lava pools in the Ember Wastes (decor)
   if (lava.length) {
     const lim = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 10).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff }), lava.length);
@@ -440,7 +477,9 @@ function buildHub() {
     lim.computeBoundingSphere(); hubGroup.add(lim); hubParts.lavaIM = lim;
   }
   // ponds: dark water with a lighter rim and lily pads
-  if (ponds.length) {
+  if (ponds.length && hasWM('pond')) { const pb = WORLD_MODEL_BOX.pond;
+    WorldModels.place(hubGroup, 'pond', ponds.map((pd2) => ({ x: pd2.x, z: pd2.z, y: 0.02, ry: hashf(pd2.x, pd2.z) * 6, sx: 2.3 * pd2.s / pb[0], sz: 1.8 * pd2.s / pb[1], sy: 0.9, s: 1 })), { shadow: false }); }
+  else if (ponds.length) {
     const rimIM = new THREE.InstancedMesh(new THREE.CircleGeometry(1.12, 14).rotateX(-Math.PI / 2), new THREE.MeshToonMaterial({ color: 0x6a5f45, gradientMap: toonRamp }), ponds.length);
     const wIM = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 24).rotateX(-Math.PI / 2), worldArt.waterMaterial, ponds.length);
     ponds.forEach((pd2, i) => { _m4.compose(_v3.set(pd2.x, 0.06, pd2.z), _q.identity(), _s3.set(pd2.s, 1, pd2.s * 0.75)); rimIM.setMatrixAt(i, _m4); _m4.compose(_v3.set(pd2.x, 0.09, pd2.z), _q.identity(), _s3.set(pd2.s, 1, pd2.s * 0.75)); wIM.setMatrixAt(i, _m4); });
@@ -468,17 +507,30 @@ function buildHub() {
     if (zi <= 2) { bTrunks.push({ x, z, s, y: 1.6 }); bTops.push({ x, z, s, y: 1.6, c: zi === 2 ? P2.snowPine[0] : P2.pine[Math.floor(rng() * 3)] }); }
     else bTops.push({ x, z, s: s * 1.2, y: 1.6, c: zi === 3 ? 0x2b1c17 : zi === 5 ? 0x1b4f58 : zi === 6 ? 0xe8d3a3 : 0x4a4378 });
   }
-  inst(trunkGeo, bTrunks, false, { shadow: false }); inst(pineGeo, bTops, true, { shadow: false });
+  if (hasWM('tree_ash')) {
+    // the wall of woods uses each theme's tree (its light LOD when generated); no shadows this far out
+    const bt = (th) => [, 'tree_ash', 'tree_ash', 'tree_snow', 'tree_ember', 'tree_crystal', 'tree_coral', 'tree_gold'][th + 1] || 'tree_ash';
+    bTops.forEach((t) => { const th = W.zones[zoneAt(t.z)].theme, nm = hasWM(bt(th)) ? bt(th) : 'tree_ash', m = hasWM(nm + '_lod') ? nm + '_lod' : nm;
+      mput(m, { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: (th <= 2 ? 7.5 : 6) * t.s, color: soft(t.c, 0.25) }, { shadow: false }, 'border_' + m); });
+    for (const k of [...MB.keys()].filter((k) => k.startsWith('border_'))) WorldModels.place(hubGroup, MBO[k].name, MB.get(k), MBO[k].opts);
+  } else { inst(trunkGeo, bTrunks, false, { shadow: false }); inst(pineGeo, bTops, true, { shadow: false }); }
+  // horizon: each theme's distant landmass beyond the woods (mountains, volcanoes, sea stacks, floating isles, sky temples)
+  { const HZ = ['mountain', 'mountain', 'snow_mountain', 'volcano', 'floating_isle', 'sea_stack', 'sky_temple'], hz = new Map();
+    W.zones.forEach((zn, zi) => { const nm = HZ[zn.theme]; if (!hasWM(nm)) return; if (!hz.has(nm)) hz.set(nm, []);
+      for (const side of [-1, 1]) for (let j = 0; j < 2; j++) { const x = side * (W.maxX + 48 + ((zi + j) % 2) * 16), z = zn.z0 + (j + 0.5) * zn.len / 2 + (hashf(zi, j) - 0.5) * 20;
+        hz.get(nm).push({ x, z, y: nm === 'floating_isle' || nm === 'sky_temple' ? 14 + hashf(z, x) * 10 : -1, ry: hashf(x, z) * 6, s: 34 + hashf(z, zi) * 14 }); } });
+    for (const [nm, items] of hz) WorldModels.place(hubGroup, nm, items, { shadow: false, horizon: true, glow: nm === 'volcano' ? 0xff6a2a : 0, glowK: 0.25 }); }
 
   // challenge shrines: stone rings (static) + floating crystals (state colour)
   {
     const sParts = [];
-    for (const sp of CFG.shrines.list) {
+    if (hasWM('shrine')) WorldModels.place(hubGroup, 'shrine', CFG.shrines.list.map((sp) => ({ x: sp.x, z: sp.z, ry: sp.x < 0 ? Math.PI / 2 : -Math.PI / 2, s: 3.2 })), { glow: 0xc9b8ff, glowK: 0.1 });
+    else for (const sp of CFG.shrines.list) {
       for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2; sParts.push(part(GEO.box, 0x8f8aa8, [sp.x + Math.sin(a) * 3.6, 0.45, sp.z + Math.cos(a) * 3.6], [0, a, 0], [0.6, 0.9, 0.6])); }
       sParts.push(part(GEO.cyl8, 0x6f6a8a, [sp.x, 0.25, sp.z], null, [1.1, 0.5, 1.1]));
       sParts.push(part(GEO.cyl8, 0xb9b3d8, [sp.x, 0.52, sp.z], null, [0.8, 0.08, 0.8]));
     }
-    const sm2 = new THREE.Mesh(mergeParts(sParts), matVC); sm2.castShadow = true; hubGroup.add(sm2);
+    if (sParts.length) { const sm2 = new THREE.Mesh(mergeParts(sParts), matVC); sm2.castShadow = true; hubGroup.add(sm2); }
     const crys = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.55, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }), CFG.shrines.list.length);
     crys.instanceMatrix.setUsage(THREE.DynamicDrawUsage); crys.frustumCulled = false; crys.setColorAt(0, _col.set(0xffffff)); hubGroup.add(crys); hubParts.shrineIM = crys;
     const sring = new THREE.InstancedMesh(new THREE.RingGeometry(3.2, 3.5, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6, depthWrite: false }), CFG.shrines.list.length);
@@ -524,33 +576,43 @@ function paintSky(top, hor) {
 }
 
 // --- arena ------------------------------------------------------------------------------
+// walkable top of the generated Rift and arena floors, as a fraction of the model's height
+const RIFT_FLOOR_TOP = 1, ARENA_FLOOR_TOP = 1;
 const arenaParts = { gas: null };
 // Rift sanctum: an obsidian disc floating in the void, with rune rings and crystal pylons
 const riftParts = {};
 function buildRift() {
   const R = CFG.rift, grid = new Grid(6), rp = [], rng = mulberry32(777);
+  // generated sanctum: an obsidian platform, six pylons and a ring of drifting shards (colliders stay the same)
+  const riftModels = hasWM('rift_floor') && hasWM('rift_pylon');
+  if (riftModels) { const fb = WORLD_MODEL_BOX.rift_floor, fs = 2 * (R.r + 2.5) / Math.max(fb[0], fb[1]);
+    WorldModels.place(riftGroup, 'rift_floor', [{ x: RC.x, z: RC.z, y: -RIFT_FLOOR_TOP * fs, s: fs }], { shadow: false, glow: 0xff5d8f, glowK: 0.12, far: 400 });
+    WorldModels.place(riftGroup, 'rift_pylon', [0, 1, 2, 3, 4, 5].map((i) => { const a = (i / 6) * Math.PI * 2 + 0.52; return { x: RC.x + Math.sin(a) * 13, z: RC.z + Math.cos(a) * 13, ry: a + Math.PI, s: 4.2 }; }), { glow: 0xb06bff, glowK: 0.18, far: 400 });
+    if (hasWM('rift_shard')) WorldModels.place(riftGroup, 'rift_shard', Array.from({ length: 22 }, () => { const a = rng() * Math.PI * 2, r = R.r + 6 + rng() * 14; return { x: RC.x + Math.sin(a) * r, z: RC.z + Math.cos(a) * r, y: -3 + rng() * 7, ry: rng() * 6, rx: (rng() - 0.5) * 0.8, s: 2 + rng() * 3.5 }; }), { shadow: false, glow: 0xff5d8f, glowK: 0.3, far: 400 });
+    for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.52; grid.add({ x: RC.x + Math.sin(a) * 13, z: RC.z + Math.cos(a) * 13, r: 1.15 }); }
+  }
   // floor: concentric tile rings
-  for (let ring = 0; ring < 6; ring++) {
+  if (!riftModels) for (let ring = 0; ring < 6; ring++) {
     const r0 = ring * 4, n = Math.max(6, ring * 10);
     for (let i = 0; i < n; i++) {
       const a = (i + 0.5) / n * Math.PI * 2, rr = r0 + 2, c = (i + ring) % 2 ? 0x2a2140 : 0x231b37;
       rp.push(part(GEO.box, c, [RC.x + Math.sin(a) * rr, -0.06 - rng() * 0.04, RC.z + Math.cos(a) * rr], [0, a, 0], [Math.max(2.2, rr * 6.28 / n * 1.04), 0.14, 3.9]));
     }
   }
-  rp.push(part(GEO.cyl8, 0x15101f, [RC.x, -0.9, RC.z], null, [R.r + 2.5, 1.6, R.r + 2.5]));
+  if (!riftModels) rp.push(part(GEO.cyl8, 0x15101f, [RC.x, -0.9, RC.z], null, [R.r + 2.5, 1.6, R.r + 2.5]));
   // jagged rim
-  for (let i = 0; i < 36; i++) { const a = (i / 36) * Math.PI * 2, r = R.r + 1.2 + rng() * 0.8; rp.push(part(GEO.ico0, i % 3 ? 0x2a1f3d : 0x3b2a55, [RC.x + Math.sin(a) * r, 0.4 + rng() * 0.6, RC.z + Math.cos(a) * r], [rng(), a, rng()], [0.9 + rng() * 0.6, 1.2 + rng() * 1.6, 0.9])); }
+  if (!riftModels) for (let i = 0; i < 36; i++) { const a = (i / 36) * Math.PI * 2, r = R.r + 1.2 + rng() * 0.8; rp.push(part(GEO.ico0, i % 3 ? 0x2a1f3d : 0x3b2a55, [RC.x + Math.sin(a) * r, 0.4 + rng() * 0.6, RC.z + Math.cos(a) * r], [rng(), a, rng()], [0.9 + rng() * 0.6, 1.2 + rng() * 1.6, 0.9])); }
   // pylons (obstacles)
-  for (let i = 0; i < 6; i++) {
+  if (!riftModels) for (let i = 0; i < 6; i++) {
     const a = (i / 6) * Math.PI * 2 + 0.52, x = RC.x + Math.sin(a) * 13, z = RC.z + Math.cos(a) * 13;
     rp.push(part(GEO.cyl8, 0x1f1830, [x, 0.3, z], null, [1.3, 0.6, 1.3]));
     rp.push(part(GEO.ico0, 0x3b2a55, [x, 1.7, z], [0, a, 0], [0.75, 2.4, 0.75]));
     grid.add({ x, z, r: 1.15 });
   }
   // floating shards around the edge
-  for (let i = 0; i < 26; i++) { const a = rng() * Math.PI * 2, r = R.r + 5 + rng() * 14; rp.push(part(GEO.ico0, [0xff5d8f, 0xa36bff, 0x5b3aa0][i % 3], [RC.x + Math.sin(a) * r, -2 + rng() * 7, RC.z + Math.cos(a) * r], [rng() * 3, rng() * 3, 0], [0.6 + rng() * 1.4, 1.2 + rng() * 2.4, 0.6 + rng()])); }
-  worldArt.rift(rp, RC, R.r);
-  const riftMasonry = new THREE.Mesh(mergeParts(rp), worldArt.material); riftMasonry.receiveShadow = true; riftGroup.add(riftMasonry);
+  if (!riftModels) for (let i = 0; i < 26; i++) { const a = rng() * Math.PI * 2, r = R.r + 5 + rng() * 14; rp.push(part(GEO.ico0, [0xff5d8f, 0xa36bff, 0x5b3aa0][i % 3], [RC.x + Math.sin(a) * r, -2 + rng() * 7, RC.z + Math.cos(a) * r], [rng() * 3, rng() * 3, 0], [0.6 + rng() * 1.4, 1.2 + rng() * 2.4, 0.6 + rng()])); }
+  if (!riftModels) { worldArt.rift(rp, RC, R.r);
+    const riftMasonry = new THREE.Mesh(mergeParts(rp), worldArt.material); riftMasonry.receiveShadow = true; riftGroup.add(riftMasonry); }
   // glowing rune rings + pylon crystals
   const glow = (c, o) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: o, blending: THREE.AdditiveBlending, depthWrite: false });
   riftParts.rings = [];
@@ -579,19 +641,29 @@ function buildArena() {
   arenaGroup.position.set(0, 0, 0);
   // floor tiles
   const fParts = [];
-  const tile = 3;
-  for (let x = -h; x < h; x += tile) for (let z = -h; z < h; z += tile) {
+  const tile = 3, arenaModels = hasWM('arena_floor') && hasWM('arena_wall');
+  if (arenaModels) {
+    // generated colosseum: a paved floor, wall sections along each side, towers at the corners, crates as cover
+    const fb = WORLD_MODEL_BOX.arena_floor, fs = (2 * h + 3) / Math.min(fb[0], fb[1]);
+    WorldModels.place(arenaGroup, 'arena_floor', [{ x: AC.x, z: AC.z, y: -ARENA_FLOOR_TOP * fs, s: fs }], { shadow: false, far: 400 });
+    const wb = WORLD_MODEL_BOX.arena_wall, segs = Math.max(2, Math.round((2 * h + 2.4) / 9)), seg = (2 * h + 2.4) / segs, ws = seg / wb[0], walls = [];
+    for (const sd of [-1, 1]) for (let i = 0; i < segs; i++) { const u = -h - 1.2 + (i + 0.5) * seg;
+      walls.push({ x: AC.x + u, z: AC.z + sd * (h + 0.6 + wb[1] * ws * 0.3), ry: sd > 0 ? Math.PI : 0, s: ws }, { x: AC.x + sd * (h + 0.6 + wb[1] * ws * 0.3), z: AC.z + u, ry: -sd * Math.PI / 2, s: ws }); }
+    WorldModels.place(arenaGroup, 'arena_wall', walls, { far: 400 });
+    if (hasWM('arena_tower')) WorldModels.place(arenaGroup, 'arena_tower', [[-1, -1], [-1, 1], [1, -1], [1, 1]].map(([sx, sz]) => ({ x: AC.x + sx * (h + 1.5), z: AC.z + sz * (h + 1.5), ry: Math.atan2(-sx, -sz), s: 8 })), { far: 400 });
+  }
+  if (!arenaModels) for (let x = -h; x < h; x += tile) for (let z = -h; z < h; z += tile) {
     const c = ((x + z) / tile) % 2 === 0 ? P2.arenaA : P2.arenaB;
     fParts.push(part(GEO.box, c, [AC.x + x + tile / 2, -0.05, AC.z + z + tile / 2], null, [tile, 0.1, tile]));
   }
   fParts.push(part(GEO.box, P2.arenaRim, [AC.x, -0.2, AC.z], null, [h * 2 + 30, 0.2, h * 2 + 30]));
   // walls
-  for (const s of [-1, 1]) {
+  if (!arenaModels) for (const s of [-1, 1]) {
     fParts.push(part(GEO.box, P2.arenaWall, [AC.x + s * (h + 0.6), 0.8, AC.z], null, [1.2, 1.6, h * 2 + 2.4]));
     fParts.push(part(GEO.box, P2.arenaWall, [AC.x, 0.8, AC.z + s * (h + 0.6)], null, [h * 2 + 2.4, 1.6, 1.2]));
   }
   // banners / pillars at corners
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+  if (!arenaModels) for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
     fParts.push(part(GEO.box, 0x584874, [AC.x + sx * (h + 0.6), 2.2, AC.z + sz * (h + 0.6)], null, [1.6, 4.4, 1.6]));
     fParts.push(part(GEO.cone4, 0xffc94a, [AC.x + sx * (h + 0.6), 5.0, AC.z + sz * (h + 0.6)], [0, Math.PI / 4, 0], [1.3, 1.2, 1.3]));
   }
@@ -599,19 +671,23 @@ function buildArena() {
   const quad = [[6, 6], [8, 6], [6, 8], [16, 4], [16, 6], [4, 16], [6, 16], [14, 14], [19, 10], [10, 19], [21, 2], [2, 21]];
   const crates = [];
   for (const [qx, qz] of quad) for (const sx of [-1, 1]) for (const sz of [-1, 1]) crates.push([AC.x + qx * sx, AC.z + qz * sz]);
+  if (hasWM('arena_crate')) WorldModels.place(arenaGroup, 'arena_crate', crates.map(([x, z]) => ({ x, z, ry: hashf(x, z) > 0.5 ? 0 : Math.PI / 2, s: 1.75 })), { far: 400 });
   for (const [x, z] of crates) {
+    if (hasWM('arena_crate')) { grid.add({ x, z, r: 1.15 }); continue; }
     fParts.push(part(GEO.box, P2.crate, [x, 0.8, z], null, [1.9, 1.6, 1.9]));
     fParts.push(part(GEO.box, P2.crateBand, [x, 0.8, z], null, [1.96, 0.25, 1.96]));
     fParts.push(part(GEO.box, P2.crateBand, [x, 1.62, z], null, [1.6, 0.06, 1.6]));
     grid.add({ x, z, r: 1.15 });
   }
   // grass tufts outside walls
-  const rng = mulberry32(99);
+  const rng = mulberry32(99), tuftsA = [];
   for (let i = 0; i < 40; i++) {
     const a = rng() * Math.PI * 2, d = h + 4 + rng() * 10;
+    if (hasWM('bush_a')) { tuftsA.push({ x: AC.x + Math.sin(a) * d, z: AC.z + Math.cos(a) * d, ry: rng() * 6, s: 1.2 + rng() }); continue; }
     fParts.push(part(GEO.dodec, 0x6faa4f, [AC.x + Math.sin(a) * d, 0.3, AC.z + Math.cos(a) * d], null, [1 + rng(), 0.7 + rng(), 1 + rng()]));
   }
-  worldArt.arena(fParts, AC, h);
+  WorldModels.place(arenaGroup, 'bush_a', tuftsA, { far: 400 });
+  if (!arenaModels) worldArt.arena(fParts, AC, h);
   const arenaMasonry = new THREE.Mesh(mergeParts(fParts), worldArt.material); arenaMasonry.receiveShadow = true; arenaMasonry.castShadow = true; arenaGroup.add(arenaMasonry);
   const gas = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 7, 64, 1, true), new THREE.MeshBasicMaterial({ color: P2.gas, transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false }));
   gas.position.set(AC.x, 3.5, AC.z); arenaGroup.add(gas); arenaParts.gas = gas;

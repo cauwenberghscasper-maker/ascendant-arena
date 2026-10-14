@@ -300,6 +300,7 @@ function updateHubProps(t) {
   if (hubParts.lavaIM) hubParts.lavaIM.material.color.setRGB(1, 0.38 + Math.sin(t * 1.7) * 0.06, 0.1);
 }
 function updateArenaProps(t) {
+  WorldModels.update();
   const ar = G.arena; if (!ar) return;
   arenaParts.gas.scale.set(ar.gasR, 1, ar.gasR);
   arenaParts.gas.material.opacity = 0.22 + Math.sin(t * 2) * 0.06;
