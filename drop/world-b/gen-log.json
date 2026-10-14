@@ -1,0 +1,774 @@
+{
+ "batch": "world-b",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "tree_oak_concept",
+   "ok": true,
+   "file": "tree_oak_concept.webp",
+   "sec": 9.8
+  },
+  {
+   "name": "tree_oak_t1",
+   "ok": true,
+   "file": "tree_oak_t1.glb",
+   "sec": 57.8
+  },
+  {
+   "name": "tree_ash_concept",
+   "ok": true,
+   "file": "tree_ash_concept.webp",
+   "sec": 9.0
+  },
+  {
+   "name": "tree_ash_t1",
+   "ok": true,
+   "file": "tree_ash_t1.glb",
+   "sec": 40.5
+  },
+  {
+   "name": "tree_snow_concept",
+   "ok": true,
+   "file": "tree_snow_concept.webp",
+   "sec": 10.9
+  },
+  {
+   "name": "tree_snow_t1",
+   "ok": true,
+   "file": "tree_snow_t1.glb",
+   "sec": 48.1
+  },
+  {
+   "name": "tree_ember_concept",
+   "ok": true,
+   "file": "tree_ember_concept.webp",
+   "sec": 9.0
+  },
+  {
+   "name": "tree_ember_t1",
+   "ok": true,
+   "file": "tree_ember_t1.glb",
+   "sec": 32.0
+  },
+  {
+   "name": "tree_crystal_concept",
+   "ok": true,
+   "file": "tree_crystal_concept.webp",
+   "sec": 9.5
+  },
+  {
+   "name": "tree_crystal_t1",
+   "ok": true,
+   "file": "tree_crystal_t1.glb",
+   "sec": 70.5
+  },
+  {
+   "name": "tree_coral_concept",
+   "ok": true,
+   "file": "tree_coral_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "tree_coral_t1",
+   "ok": true,
+   "file": "tree_coral_t1.glb",
+   "sec": 61.4
+  },
+  {
+   "name": "tree_gold_concept",
+   "ok": true,
+   "file": "tree_gold_concept.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "tree_gold_t1",
+   "ok": true,
+   "file": "tree_gold_t1.glb",
+   "sec": 43.2
+  },
+  {
+   "name": "rock_a_concept",
+   "ok": true,
+   "file": "rock_a_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "rock_a_t1",
+   "ok": true,
+   "file": "rock_a_t1.glb",
+   "sec": 40.7
+  },
+  {
+   "name": "rock_b_concept",
+   "ok": true,
+   "file": "rock_b_concept.webp",
+   "sec": 8.7
+  },
+  {
+   "name": "rock_b_t1",
+   "ok": true,
+   "file": "rock_b_t1.glb",
+   "sec": 38.7
+  },
+  {
+   "name": "bush_a_concept",
+   "ok": true,
+   "file": "bush_a_concept.webp",
+   "sec": 9.0
+  },
+  {
+   "name": "bush_a_t1",
+   "ok": true,
+   "file": "bush_a_t1.glb",
+   "sec": 42.6
+  },
+  {
+   "name": "bush_flower_concept",
+   "ok": true,
+   "file": "bush_flower_concept.webp",
+   "sec": 8.3
+  },
+  {
+   "name": "bush_flower_t1",
+   "ok": true,
+   "file": "bush_flower_t1.glb",
+   "sec": 35.1
+  },
+  {
+   "name": "tuft_concept",
+   "ok": true,
+   "file": "tuft_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "tuft_t1",
+   "ok": true,
+   "file": "tuft_t1.glb",
+   "sec": 42.0
+  },
+  {
+   "name": "mushrooms_concept",
+   "ok": true,
+   "file": "mushrooms_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mushrooms_t1",
+   "ok": true,
+   "file": "mushrooms_t1.glb",
+   "sec": 47.1
+  },
+  {
+   "name": "berry_bush_concept",
+   "ok": true,
+   "file": "berry_bush_concept.webp",
+   "sec": 9.8
+  },
+  {
+   "name": "berry_bush_t1",
+   "ok": true,
+   "file": "berry_bush_t1.glb",
+   "sec": 64.9
+  },
+  {
+   "name": "rift_gate_concept",
+   "ok": true,
+   "file": "rift_gate_concept.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "rift_gate_t1",
+   "ok": true,
+   "file": "rift_gate_t1.glb",
+   "sec": 53.7
+  },
+  {
+   "name": "lantern_post_concept",
+   "ok": true,
+   "file": "lantern_post_concept.webp",
+   "sec": 9.5
+  },
+  {
+   "name": "lantern_post_t1",
+   "ok": false,
+   "error": "Client error '403 Forbidden' for url 'https://prithivmlmods-trellis-2-text-to-3d.hf.space/gradio_api/file=/tmp/gradio/900e5c3760d48af017df522f76edb2fae0b12f6ddaee6fbfc8ec53d28081690c/trellis_output_2026-10-14T210049.rrd'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
+   "sec": 42.2
+  },
+  {
+   "name": "fence_concept",
+   "ok": true,
+   "file": "fence_concept.webp",
+   "sec": 10.2
+  },
+  {
+   "name": "fence_t1",
+   "ok": true,
+   "file": "fence_t1.glb",
+   "sec": 37.5
+  },
+  {
+   "name": "standing_stone_concept",
+   "ok": true,
+   "file": "standing_stone_concept.webp",
+   "sec": 11.4
+  },
+  {
+   "name": "standing_stone_t1",
+   "ok": true,
+   "file": "standing_stone_t1.glb",
+   "sec": 30.9
+  },
+  {
+   "name": "war_tent_concept",
+   "ok": true,
+   "file": "war_tent_concept.webp",
+   "sec": 8.2
+  },
+  {
+   "name": "war_tent_t1",
+   "ok": true,
+   "file": "war_tent_t1.glb",
+   "sec": 35.9
+  },
+  {
+   "name": "bone_pile_concept",
+   "ok": true,
+   "file": "bone_pile_concept.webp",
+   "sec": 9.5
+  },
+  {
+   "name": "bone_pile_t1",
+   "ok": true,
+   "file": "bone_pile_t1.glb",
+   "sec": 32.0
+  },
+  {
+   "name": "shrine_concept",
+   "ok": true,
+   "file": "shrine_concept.webp",
+   "sec": 9.1
+  },
+  {
+   "name": "shrine_t1",
+   "ok": true,
+   "file": "shrine_t1.glb",
+   "sec": 24.9
+  },
+  {
+   "name": "banner_pole_concept",
+   "ok": true,
+   "file": "banner_pole_concept.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "banner_pole_t1",
+   "ok": true,
+   "file": "banner_pole_t1.glb",
+   "sec": 19.9
+  },
+  {
+   "name": "signpost_concept",
+   "ok": true,
+   "file": "signpost_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "signpost_t1",
+   "ok": true,
+   "file": "signpost_t1.glb",
+   "sec": 19.8
+  },
+  {
+   "name": "quarry_wall_concept",
+   "ok": true,
+   "file": "quarry_wall_concept.webp",
+   "sec": 9.3
+  },
+  {
+   "name": "quarry_wall_t1",
+   "ok": true,
+   "file": "quarry_wall_t1.glb",
+   "sec": 39.5
+  },
+  {
+   "name": "mine_cart_concept",
+   "ok": true,
+   "file": "mine_cart_concept.webp",
+   "sec": 8.9
+  },
+  {
+   "name": "mine_cart_t1",
+   "ok": true,
+   "file": "mine_cart_t1.glb",
+   "sec": 45.1
+  },
+  {
+   "name": "ore_pile_concept",
+   "ok": true,
+   "file": "ore_pile_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "ore_pile_t1",
+   "ok": true,
+   "file": "ore_pile_t1.glb",
+   "sec": 37.4
+  },
+  {
+   "name": "windmill_concept",
+   "ok": true,
+   "file": "windmill_concept.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "windmill_t1",
+   "ok": true,
+   "file": "windmill_t1.glb",
+   "sec": 39.2
+  },
+  {
+   "name": "bell_concept",
+   "ok": true,
+   "file": "bell_concept.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "bell_t1",
+   "ok": true,
+   "file": "bell_t1.glb",
+   "sec": 45.8
+  },
+  {
+   "name": "fairy_ring_concept",
+   "ok": true,
+   "file": "fairy_ring_concept.webp",
+   "sec": 10.5
+  },
+  {
+   "name": "fairy_ring_t1",
+   "ok": true,
+   "file": "fairy_ring_t1.glb",
+   "sec": 37.5
+  },
+  {
+   "name": "elder_stump_concept",
+   "ok": true,
+   "file": "elder_stump_concept.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "elder_stump_t1",
+   "ok": true,
+   "file": "elder_stump_t1.glb",
+   "sec": 56.4
+  },
+  {
+   "name": "ribcage_concept",
+   "ok": true,
+   "file": "ribcage_concept.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "ribcage_t1",
+   "ok": true,
+   "file": "ribcage_t1.glb",
+   "sec": 36.1
+  },
+  {
+   "name": "wind_arch_concept",
+   "ok": true,
+   "file": "wind_arch_concept.webp",
+   "sec": 6.2
+  },
+  {
+   "name": "wind_arch_t1",
+   "ok": true,
+   "file": "wind_arch_t1.glb",
+   "sec": 41.8
+  },
+  {
+   "name": "colossus_concept",
+   "ok": true,
+   "file": "colossus_concept.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "colossus_t1",
+   "ok": true,
+   "file": "colossus_t1.glb",
+   "sec": 24.6
+  },
+  {
+   "name": "sundial_concept",
+   "ok": true,
+   "file": "sundial_concept.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "sundial_t1",
+   "ok": true,
+   "file": "sundial_t1.glb",
+   "sec": 35.8
+  },
+  {
+   "name": "black_spire_concept",
+   "ok": true,
+   "file": "black_spire_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "black_spire_t1",
+   "ok": true,
+   "file": "black_spire_t1.glb",
+   "sec": 50.6
+  },
+  {
+   "name": "frozen_fall_concept",
+   "ok": true,
+   "file": "frozen_fall_concept.webp",
+   "sec": 10.3
+  },
+  {
+   "name": "frozen_fall_t1",
+   "ok": true,
+   "file": "frozen_fall_t1.glb",
+   "sec": 52.9
+  },
+  {
+   "name": "mine_lift_concept",
+   "ok": true,
+   "file": "mine_lift_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mine_lift_t1",
+   "ok": true,
+   "file": "mine_lift_t1.glb",
+   "sec": 37.5
+  },
+  {
+   "name": "cauldron_concept",
+   "ok": true,
+   "file": "cauldron_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "cauldron_t1",
+   "ok": true,
+   "file": "cauldron_t1.glb",
+   "sec": 30.0
+  },
+  {
+   "name": "lava_forge_concept",
+   "ok": true,
+   "file": "lava_forge_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "lava_forge_t1",
+   "ok": true,
+   "file": "lava_forge_t1.glb",
+   "sec": 58.7
+  },
+  {
+   "name": "chapel_concept",
+   "ok": true,
+   "file": "chapel_concept.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "chapel_t1",
+   "ok": true,
+   "file": "chapel_t1.glb",
+   "sec": 46.6
+  },
+  {
+   "name": "dragon_skull_concept",
+   "ok": true,
+   "file": "dragon_skull_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "dragon_skull_t1",
+   "ok": true,
+   "file": "dragon_skull_t1.glb",
+   "sec": 35.4
+  },
+  {
+   "name": "sapphire_brazier_concept",
+   "ok": true,
+   "file": "sapphire_brazier_concept.webp",
+   "sec": 13.0
+  },
+  {
+   "name": "sapphire_brazier_t1",
+   "ok": true,
+   "file": "sapphire_brazier_t1.glb",
+   "sec": 46.7
+  },
+  {
+   "name": "crystal_arch_concept",
+   "ok": true,
+   "file": "crystal_arch_concept.webp",
+   "sec": 8.8
+  },
+  {
+   "name": "crystal_arch_t1",
+   "ok": true,
+   "file": "crystal_arch_t1.glb",
+   "sec": 29.2
+  },
+  {
+   "name": "upside_tower_concept",
+   "ok": true,
+   "file": "upside_tower_concept.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "upside_tower_t1",
+   "ok": true,
+   "file": "upside_tower_t1.glb",
+   "sec": 53.2
+  },
+  {
+   "name": "mirror_maze_concept",
+   "ok": true,
+   "file": "mirror_maze_concept.webp",
+   "sec": 8.9
+  },
+  {
+   "name": "mirror_maze_t1",
+   "ok": true,
+   "file": "mirror_maze_t1.glb",
+   "sec": 48.9
+  },
+  {
+   "name": "crashed_star_concept",
+   "ok": true,
+   "file": "crashed_star_concept.webp",
+   "sec": 8.6
+  },
+  {
+   "name": "crashed_star_t1",
+   "ok": true,
+   "file": "crashed_star_t1.glb",
+   "sec": 39.2
+  },
+  {
+   "name": "ghost_ship_concept",
+   "ok": true,
+   "file": "ghost_ship_concept.webp",
+   "sec": 9.3
+  },
+  {
+   "name": "ghost_ship_t1",
+   "ok": true,
+   "file": "ghost_ship_t1.glb",
+   "sec": 29.3
+  },
+  {
+   "name": "waterwheel_concept",
+   "ok": true,
+   "file": "waterwheel_concept.webp",
+   "sec": 9.8
+  },
+  {
+   "name": "waterwheel_t1",
+   "ok": true,
+   "file": "waterwheel_t1.glb",
+   "sec": 56.3
+  },
+  {
+   "name": "pearl_clam_concept",
+   "ok": true,
+   "file": "pearl_clam_concept.webp",
+   "sec": 10.3
+  },
+  {
+   "name": "pearl_clam_t1",
+   "ok": true,
+   "file": "pearl_clam_t1.glb",
+   "sec": 50.8
+  },
+  {
+   "name": "lighthouse_concept",
+   "ok": true,
+   "file": "lighthouse_concept.webp",
+   "sec": 9.8
+  },
+  {
+   "name": "lighthouse_t1",
+   "ok": true,
+   "file": "lighthouse_t1.glb",
+   "sec": 28.5
+  },
+  {
+   "name": "leviathan_spine_concept",
+   "ok": true,
+   "file": "leviathan_spine_concept.webp",
+   "sec": 10.4
+  },
+  {
+   "name": "leviathan_spine_t1",
+   "ok": true,
+   "file": "leviathan_spine_t1.glb",
+   "sec": 23.0
+  },
+  {
+   "name": "geyser_concept",
+   "ok": true,
+   "file": "geyser_concept.webp",
+   "sec": 10.9
+  },
+  {
+   "name": "geyser_t1",
+   "ok": true,
+   "file": "geyser_t1.glb",
+   "sec": 60.9
+  },
+  {
+   "name": "glass_chimney_concept",
+   "ok": true,
+   "file": "glass_chimney_concept.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "glass_chimney_t1",
+   "ok": true,
+   "file": "glass_chimney_t1.glb",
+   "sec": 27.8
+  },
+  {
+   "name": "storm_rod_concept",
+   "ok": true,
+   "file": "storm_rod_concept.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "storm_rod_t1",
+   "ok": true,
+   "file": "storm_rod_t1.glb",
+   "sec": 25.3
+  },
+  {
+   "name": "moon_gate_concept",
+   "ok": true,
+   "file": "moon_gate_concept.webp",
+   "sec": 8.5
+  },
+  {
+   "name": "moon_gate_t1",
+   "ok": true,
+   "file": "moon_gate_t1.glb",
+   "sec": 34.7
+  },
+  {
+   "name": "sky_altar_concept",
+   "ok": true,
+   "file": "sky_altar_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "sky_altar_t1",
+   "ok": true,
+   "file": "sky_altar_t1.glb",
+   "sec": 31.4
+  },
+  {
+   "name": "camp_concept",
+   "ok": true,
+   "file": "camp_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "camp_t1",
+   "ok": true,
+   "file": "camp_t1.glb",
+   "sec": 37.3
+  },
+  {
+   "name": "ruined_tower_concept",
+   "ok": true,
+   "file": "ruined_tower_concept.webp",
+   "sec": 8.4
+  },
+  {
+   "name": "ruined_tower_t1",
+   "ok": true,
+   "file": "ruined_tower_t1.glb",
+   "sec": 47.2
+  },
+  {
+   "name": "statue_concept",
+   "ok": true,
+   "file": "statue_concept.webp",
+   "sec": 9.0
+  },
+  {
+   "name": "statue_t1",
+   "ok": true,
+   "file": "statue_t1.glb",
+   "sec": 25.0
+  },
+  {
+   "name": "well_concept",
+   "ok": true,
+   "file": "well_concept.webp",
+   "sec": 12.8
+  },
+  {
+   "name": "well_t1",
+   "ok": true,
+   "file": "well_t1.glb",
+   "sec": 34.6
+  },
+  {
+   "name": "broken_cart_concept",
+   "ok": true,
+   "file": "broken_cart_concept.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "broken_cart_t1",
+   "ok": true,
+   "file": "broken_cart_t1.glb",
+   "sec": 27.9
+  },
+  {
+   "name": "graves_concept",
+   "ok": true,
+   "file": "graves_concept.webp",
+   "sec": 9.0
+  },
+  {
+   "name": "graves_t1",
+   "ok": true,
+   "file": "graves_t1.glb",
+   "sec": 28.8
+  },
+  {
+   "name": "rune_obelisk_concept",
+   "ok": true,
+   "file": "rune_obelisk_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "rune_obelisk_t1",
+   "ok": true,
+   "file": "rune_obelisk_t1.glb",
+   "sec": 30.1
+  },
+  {
+   "name": "hermit_shack_concept",
+   "ok": true,
+   "file": "hermit_shack_concept.webp",
+   "sec": 9.6
+  },
+  {
+   "name": "hermit_shack_t1",
+   "ok": true,
+   "file": "hermit_shack_t1.glb",
+   "sec": 36.8
+  }
+ ]
+}
