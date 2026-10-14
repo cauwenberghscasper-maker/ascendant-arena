@@ -41,7 +41,12 @@ for job in spec['jobs']:
                 else: data = urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'gen'}), timeout=60).read()
                 enc.append(base64.b64encode(data).decode())
             args[k] = json.dumps(enc)
-        res = c.predict(api_name=job['api'], **args)
+        api = job['api']
+        names = list((c.view_api(print_info=False, return_format='dict') or {}).get('named_endpoints', {}).keys())
+        if api not in names:
+            pick = [n for n in names if 'infer' in n.lower()] or [n for n in names if 'generate' in n.lower()] or names
+            print('endpoints', names, '->', pick[:1]); api = pick[0]
+        res = c.predict(api_name=api, **args)
         ext = job.get('ext', '.webp')
         # some Spaces return the picture inline as a base64 data URL
         def data_urls(x):
