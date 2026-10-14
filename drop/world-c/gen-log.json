@@ -1,0 +1,246 @@
+{
+ "batch": "world-c",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "battle_tall_a",
+   "ok": true,
+   "file": "battle_tall_a.webp",
+   "sec": 13.0
+  },
+  {
+   "name": "battle_tall_b",
+   "ok": false,
+   "error": "Value 20 is greater than maximum value 12.",
+   "sec": 0.5
+  },
+  {
+   "name": "ruin_pillar_concept",
+   "ok": true,
+   "file": "ruin_pillar_concept.webp",
+   "sec": 6.6
+  },
+  {
+   "name": "ruin_pillar_t1",
+   "ok": true,
+   "file": "ruin_pillar_t1.glb",
+   "sec": 33.0
+  },
+  {
+   "name": "ruin_block_concept",
+   "ok": true,
+   "file": "ruin_block_concept.webp",
+   "sec": 9.4
+  },
+  {
+   "name": "ruin_block_t1",
+   "ok": true,
+   "file": "ruin_block_t1.glb",
+   "sec": 23.6
+  },
+  {
+   "name": "log_concept",
+   "ok": true,
+   "file": "log_concept.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "log_t1",
+   "ok": true,
+   "file": "log_t1.glb",
+   "sec": 34.9
+  },
+  {
+   "name": "stump_concept",
+   "ok": true,
+   "file": "stump_concept.webp",
+   "sec": 8.8
+  },
+  {
+   "name": "stump_t1",
+   "ok": true,
+   "file": "stump_t1.glb",
+   "sec": 42.1
+  },
+  {
+   "name": "pond_concept",
+   "ok": true,
+   "file": "pond_concept.webp",
+   "sec": 6.1
+  },
+  {
+   "name": "pond_t1",
+   "ok": true,
+   "file": "pond_t1.glb",
+   "sec": 23.7
+  },
+  {
+   "name": "rift_floor_concept",
+   "ok": true,
+   "file": "rift_floor_concept.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "rift_floor_t1",
+   "ok": true,
+   "file": "rift_floor_t1.glb",
+   "sec": 30.4
+  },
+  {
+   "name": "rift_pylon_concept",
+   "ok": true,
+   "file": "rift_pylon_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "rift_pylon_t1",
+   "ok": true,
+   "file": "rift_pylon_t1.glb",
+   "sec": 41.2
+  },
+  {
+   "name": "rift_shard_concept",
+   "ok": true,
+   "file": "rift_shard_concept.webp",
+   "sec": 9.9
+  },
+  {
+   "name": "rift_shard_t1",
+   "ok": true,
+   "file": "rift_shard_t1.glb",
+   "sec": 33.5
+  },
+  {
+   "name": "arena_floor_concept",
+   "ok": true,
+   "file": "arena_floor_concept.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "arena_floor_t1",
+   "ok": true,
+   "file": "arena_floor_t1.glb",
+   "sec": 23.6
+  },
+  {
+   "name": "arena_wall_concept",
+   "ok": true,
+   "file": "arena_wall_concept.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "arena_wall_t1",
+   "ok": true,
+   "file": "arena_wall_t1.glb",
+   "sec": 32.4
+  },
+  {
+   "name": "arena_tower_concept",
+   "ok": true,
+   "file": "arena_tower_concept.webp",
+   "sec": 9.7
+  },
+  {
+   "name": "arena_tower_t1",
+   "ok": true,
+   "file": "arena_tower_t1.glb",
+   "sec": 39.1
+  },
+  {
+   "name": "arena_crate_concept",
+   "ok": true,
+   "file": "arena_crate_concept.webp",
+   "sec": 16.1
+  },
+  {
+   "name": "arena_crate_t1",
+   "ok": true,
+   "file": "arena_crate_t1.glb",
+   "sec": 34.5
+  },
+  {
+   "name": "dungeon_tile_concept",
+   "ok": true,
+   "file": "dungeon_tile_concept.webp",
+   "sec": 13.4
+  },
+  {
+   "name": "dungeon_tile_t1",
+   "ok": true,
+   "file": "dungeon_tile_t1.glb",
+   "sec": 54.4
+  },
+  {
+   "name": "mountain_concept",
+   "ok": true,
+   "file": "mountain_concept.webp",
+   "sec": 13.7
+  },
+  {
+   "name": "mountain_t1",
+   "ok": true,
+   "file": "mountain_t1.glb",
+   "sec": 40.4
+  },
+  {
+   "name": "snow_mountain_concept",
+   "ok": true,
+   "file": "snow_mountain_concept.webp",
+   "sec": 9.5
+  },
+  {
+   "name": "snow_mountain_t1",
+   "ok": true,
+   "file": "snow_mountain_t1.glb",
+   "sec": 41.8
+  },
+  {
+   "name": "volcano_concept",
+   "ok": true,
+   "file": "volcano_concept.webp",
+   "sec": 8.4
+  },
+  {
+   "name": "volcano_t1",
+   "ok": true,
+   "file": "volcano_t1.glb",
+   "sec": 27.0
+  },
+  {
+   "name": "floating_isle_concept",
+   "ok": true,
+   "file": "floating_isle_concept.webp",
+   "sec": 8.6
+  },
+  {
+   "name": "floating_isle_t1",
+   "ok": true,
+   "file": "floating_isle_t1.glb",
+   "sec": 44.0
+  },
+  {
+   "name": "sea_stack_concept",
+   "ok": true,
+   "file": "sea_stack_concept.webp",
+   "sec": 9.3
+  },
+  {
+   "name": "sea_stack_t1",
+   "ok": true,
+   "file": "sea_stack_t1.glb",
+   "sec": 36.8
+  },
+  {
+   "name": "sky_temple_concept",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 0s left). Try again in 0:47:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
+  },
+  {
+   "name": "sky_temple_t1",
+   "ok": false,
+   "error": "input job failed: sky_temple_concept",
+   "sec": 0.4
+  }
+ ]
+}
