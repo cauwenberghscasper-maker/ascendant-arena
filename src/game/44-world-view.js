@@ -157,21 +157,19 @@ function buildHub() {
   WorldModels.place(hubGroup, 'tower', [{ x: T.x - 27, z: T.z - 14, ry: 0.5, s: 12 }, { x: T.x + 27, z: T.z - 14, ry: -0.5, s: 12 }]);
   grid.add({ x: T.x - 27, z: T.z - 14, r: 3.6 }); grid.add({ x: T.x + 27, z: T.z - 14, r: 3.6 });
 
-  tParts.push(part(GEO.cyl8, 0xb8bcc6, [T.x, 0.35, T.z], null, [3, 0.7, 3]));
-  tParts.push(part(GEO.cyl8, 0x5cc6ff, [T.x, 0.62, T.z], null, [2.6, 0.1, 2.6]));
-  tParts.push(part(GEO.cyl8, 0xb8bcc6, [T.x, 1.3, T.z], null, [0.35, 1.8, 0.35]));
-  tParts.push(part(GEO.cyl8, 0x8ad9ff, [T.x, 2.25, T.z], null, [0.9, 0.2, 0.9]));
+  // the plaza fountain and two market stalls (generated models)
+  WorldModels.place(hubGroup, 'fountain', [{ x: T.x, z: T.z, ry: 0, s: 4.6 }]);
+  { const st = [-1, 1].map((sd) => { const a = Math.PI - sd * 0.75; return { x: T.x + Math.sin(a) * 13, z: T.z + Math.cos(a) * 13, ry: a + Math.PI, s: 3.4 }; });
+    WorldModels.place(hubGroup, 'stall', st); for (const it of st) grid.add({ x: it.x, z: it.z, r: 1.9 }); }
   grid.add({ x: T.x, z: T.z, r: 3 });
   // lanterns around the plaza
   for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + 0.2, x = T.x + Math.sin(a) * 11.5, z = T.z + Math.cos(a) * 11.5; tParts.push(part(GEO.box, 0x4b4f58, [x, 1.1, z], null, [0.14, 2.2, 0.14])); tParts.push(part(GEO.box, 0xffd98a, [x, 2.3, z], null, [0.34, 0.34, 0.34])); }
   // smith anvil + stall
   const sm = NPC_DEFS.find((n) => n.id === 'garo');
-  tParts.push(part(GEO.box, 0x4b4f58, [sm.x + 1.6, 0.45, sm.z - 0.6], null, [1.0, 0.5, 0.5]));
-  tParts.push(part(GEO.box, 0x34373e, [sm.x + 1.6, 0.15, sm.z - 0.6], null, [0.6, 0.3, 0.4]));
+  WorldModels.place(hubGroup, 'forge', [{ x: sm.x + 2.4, z: sm.z - 0.8, ry: -Math.PI / 2 - 0.4, s: 2.8 }]); grid.add({ x: sm.x + 2.4, z: sm.z - 0.8, r: 1.6 });
   // portal arch (stone)
-  tParts.push(part(GEO.box, 0x6c5a8e, [PORTAL.x - 2.6, 1.9, PORTAL.z], null, [0.8, 3.8, 0.8]));
-  tParts.push(part(GEO.box, 0x6c5a8e, [PORTAL.x + 2.6, 1.9, PORTAL.z], null, [0.8, 3.8, 0.8]));
-  tParts.push(part(GEO.box, 0x584874, [PORTAL.x, 4.0, PORTAL.z], null, [6.2, 0.7, 0.9]));
+  // arena gate: generated purple-and-gold archway around the portal swirl
+  WorldModels.place(hubGroup, 'arena_gate', [{ x: PORTAL.x, z: PORTAL.z - 0.3, ry: 0, s: 7.2 }]);
   grid.add({ x: PORTAL.x - 2.6, z: PORTAL.z, r: 0.6 }); grid.add({ x: PORTAL.x + 2.6, z: PORTAL.z, r: 0.6 });
   // rift gate: obsidian ring with a crimson-violet swirl (endless floors)
   { const RG = CFG.rift.gate;

@@ -106,12 +106,12 @@
     }
   ],
   "totals": {
-    "models": 130,
-    "triangles": 1957045,
-    "modelJsonBytes": 99234824,
-    "glbBytes": 74422700,
-    "textureBytes": 40564668,
-    "assetBytes": 179759031,
+    "models": 134,
+    "triangles": 1987758,
+    "modelJsonBytes": 100676588,
+    "glbBytes": 75503920,
+    "textureBytes": 41820788,
+    "assetBytes": 182516682,
     "byKind": {
       "enemy": 14,
       "gear": 1,
@@ -121,7 +121,7 @@
       "hero-v6": 27,
       "npc": 7,
       "weapon": 10,
-      "world": 21
+      "world": 25
     }
   },
   "assets": [
@@ -3089,6 +3089,25 @@
       ]
     },
     {
+      "path": "assets/world/arena_gate/model.json",
+      "jsonBytes": 336553,
+      "glbBytes": 252388,
+      "textureBytes": 295282,
+      "triangles": 6999,
+      "vertices": 10449,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/world/boss_abyss/model.json",
       "jsonBytes": 794137,
       "glbBytes": 595576,
@@ -3336,6 +3355,44 @@
       ]
     },
     {
+      "path": "assets/world/forge/model.json",
+      "jsonBytes": 360753,
+      "glbBytes": 270540,
+      "textureBytes": 363832,
+      "triangles": 7228,
+      "vertices": 11288,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/fountain/model.json",
+      "jsonBytes": 291725,
+      "glbBytes": 218768,
+      "textureBytes": 233340,
+      "triangles": 7000,
+      "vertices": 8768,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/world/gatehouse/model.json",
       "jsonBytes": 417473,
       "glbBytes": 313080,
@@ -3456,6 +3513,25 @@
       "textureBytes": 81836,
       "triangles": 4999,
       "vertices": 7639,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/stall/model.json",
+      "jsonBytes": 452733,
+      "glbBytes": 339524,
+      "textureBytes": 363666,
+      "triangles": 9486,
+      "vertices": 14060,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
