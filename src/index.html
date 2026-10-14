@@ -13,6 +13,7 @@
 <style>
 @@include css/theme.css
 @@include css/ui-v2.css
+@@include css/title.css
 </style>
 
 
@@ -92,16 +93,53 @@
     </div>
   </div>
   <div id="modal" hidden><div class="panel scroll" id="panel" role="dialog" aria-modal="true"></div><button id="sheetGrip" type="button" aria-label="Expand the list" aria-expanded="false"><i></i></button></div>
-  <div id="title">
-    <div class="art" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div><div class="sparks" aria-hidden="true"></div>
-    <div class="top"><div class="logo">Ascendant<span>Arena</span></div><div class="badge">27 heroes · endless ascension</div></div>
+  <div id="title" class="v3">
+    <div class="tbg" aria-hidden="true"><i></i><i></i></div><div class="shade" aria-hidden="true"></div>
+    <div class="embers" aria-hidden="true"></div><div class="tframe" aria-hidden="true"></div>
+    <div class="top"><div class="logo">Ascendant<span>Arena</span></div><div class="flourish" aria-hidden="true"><i></i></div><div class="badge">27 heroes · endless ascension</div></div>
+    <div class="window" aria-hidden="true"><i></i><i></i><div class="glint"></div></div>
     <div class="bottom">
-      <div class="tagline">Start weak. Hunt monsters, beat world bosses, collect legendary gear, then prove it in the arena.</div>
-      <div id="loading">Loading the world…</div>
+      <div class="heroPlate" aria-live="polite"><b class="hn"></b><small class="ht"></small></div>
+      <div class="medals" role="tablist" aria-label="Heroes"></div>
+      <div id="loading"><span>Loading the world…</span><i class="bar"><b></b></i></div>
       <button id="playBtn" hidden>PLAY</button>
       <div class="hint">Left thumb moves · right thumb aims</div>
     </div>
   </div>
+  <script>
+  // title showcase: the Codex heroes' splash art in an arched window, cross-fading every few seconds (runs before the game script loads)
+  (function () {
+    var H = [['wrenna', 'Wrenna Vael', 'The Drowned Cartographer', 58], ['hespera', 'Hespera', 'The Evening Star Who Buried the Sun', 64],
+      ['kallix', 'Kallix', 'The Thief of the First Fire', 50], ['ophira', 'Ophira', 'The Gorgon Who Looked Away', 48],
+      ['aurvan', 'Aurvan', 'The First Moon\u2019s Keeper', 56], ['sena', 'Sena', 'The Youngest Fate', 50]];
+    var T = document.getElementById('title'), bg = T.querySelectorAll('.tbg i'), win = T.querySelectorAll('.window i');
+    var hn = T.querySelector('.hn'), ht = T.querySelector('.ht'), plate = T.querySelector('.heroPlate'), medals = T.querySelector('.medals');
+    var src = function (h) { return 'assets/ui/portraits/splash/' + h[0] + '.webp'; }, cur = -1, layer = 0, timer = 0;
+    H.forEach(function (h, i) {
+      var b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-label', h[1]);
+      b.style.backgroundImage = 'url(assets/ui/portraits/splash/' + h[0] + '-card.webp)';
+      b.addEventListener('click', function () { show(i); restart(); }); medals.appendChild(b);
+    });
+    var ems = T.querySelector('.embers');
+    for (var e = 0; e < 18; e++) { var s = document.createElement('i'); s.style.left = (Math.random() * 100) + '%'; s.style.animationDelay = (-Math.random() * 9) + 's';
+      s.style.animationDuration = (6 + Math.random() * 6) + 's'; s.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px'); s.style.setProperty('--s', (0.6 + Math.random() * 0.9).toFixed(2)); ems.appendChild(s); }
+    function show(i) {
+      if (i === cur) return; cur = i; layer ^= 1; var h = H[i];
+      [bg, win].forEach(function (L) { var on = L[layer], off = L[layer ^ 1];
+        on.style.backgroundImage = 'url(' + src(h) + ')'; on.style.setProperty('--fx', h[3] + '%');
+        on.classList.remove('on'); void on.offsetWidth; on.classList.add('on'); off.classList.remove('on'); });
+      plate.classList.remove('in'); void plate.offsetWidth; hn.textContent = h[1]; ht.textContent = h[2]; plate.classList.add('in');
+      [].forEach.call(medals.children, function (m, k) { m.classList.toggle('on', k === i); m.setAttribute('aria-selected', k === i); });
+      var nx = new Image(); nx.src = src(H[(i + 1) % H.length]); // warm the next slide
+    }
+    function restart() { clearInterval(timer); timer = setInterval(function () { if (T.hidden) return clearInterval(timer); show((cur + 1) % H.length); }, 5200); }
+    show(0); restart();
+    // loading bar: eases toward 90% while the game script parses and boots, then fills
+    var bar = T.querySelector('#loading .bar b'), p = 0.04;
+    (function tick() { var done = window.__gameBooted; p += ((done ? 1 : 0.92) - p) * (done ? 0.25 : 0.012);
+      bar.style.transform = 'scaleX(' + p.toFixed(3) + ')'; if (!done || p < 0.995) requestAnimationFrame(tick); })();
+  })();
+  </script>
   <div id="doll" hidden aria-label="Equipped gear"></div>
   <div id="spinHint">Drag to turn your hero</div>
   <div id="bootErr" hidden></div>

@@ -1645,14 +1645,112 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
   text-shadow: 0 1px 0 rgba(255,246,214,.65) !important;
   box-shadow: inset 0 0 0 1px #f8e9bb, inset 0 0 0 3px rgba(122,86,36,.5), inset 0 2px 0 rgba(255,255,255,.35), inset 0 -4px 0 rgba(60,36,10,.28),
     0 3px 0 #120a03, 0 7px 16px rgba(0,0,0,.45) !important; }
-#bAct { height: 48px; padding: 0 30px !important; right: 4px; animation: actIn .2s ease-out, actGlow 2.4s ease-in-out .2s infinite; }
+#bAct { height: 36px; padding: 0 22px !important; right: 6px; font-size: 13.5px !important; letter-spacing: .04em; border-radius: 8px !important;
+  animation: actIn .2s ease-out, actGlow 2.4s ease-in-out .2s infinite; }
 /* gold rivets at both ends of the plaque */
-#bAct::before, #bAct::after { content: ''; position: absolute; top: 50%; width: 8px; height: 8px; transform: translateY(-50%) rotate(45deg);
+#bAct::before, #bAct::after { content: ''; position: absolute; top: 50%; width: 6px; height: 6px; transform: translateY(-50%) rotate(45deg);
   background: radial-gradient(circle at 35% 30%, #fff6d2 0 18%, #e2b75a 45%, #7a5322 100%); border: 1px solid #3a2410; box-shadow: 0 1px 0 rgba(255,240,200,.4); pointer-events: none; }
-#bAct::before { left: 10px; } #bAct::after { right: 10px; }
+#bAct::before { left: 8px; } #bAct::after { right: 8px; }
 #bAct:active, #playBtn:active { transform: translateY(2px); box-shadow: inset 0 0 0 1px #f8e9bb, inset 0 0 0 3px rgba(122,86,36,.5), inset 0 2px 4px rgba(60,36,10,.35), 0 1px 0 #120a03 !important; }
 @keyframes actGlow { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255,214,120,0)); } 50% { filter: drop-shadow(0 0 7px rgba(255,214,120,.55)); } }
 #playBtn { border-width: 3px !important; border-radius: 12px !important; font-size: 24px !important; letter-spacing: .1em; }
+/* ---- title / loading screen v3: the Codex heroes in a gold arched window over a blurred copy of their art ---- */
+#title.v3 { --gold1: #f7e3a8; --gold2: #ddc28a; --gold3: #9c7a43; --ink: #0b1719;
+  justify-content: flex-start; gap: clamp(8px, 1.6vh, 16px); background: #08121a; overflow: hidden;
+  padding: calc(22px + var(--sat, 0px)) 16px calc(18px + var(--sab, 0px)); }
+#title.v3 .art, #title.v3 .sparks { display: none; }
+
+/* backdrop: the same splash, blurred and darkened, slowly drifting */
+#title.v3 .tbg { position: absolute; inset: 0; }
+#title.v3 .tbg i { position: absolute; inset: -8%; background: center 30% / cover no-repeat; background-position-x: var(--fx, 50%);
+  filter: blur(18px) saturate(1.2) brightness(.5); opacity: 0; transition: opacity 1.6s ease; transform: scale(1.1); }
+#title.v3 .tbg i.on { opacity: 1; animation: tDrift 9s ease-in-out forwards; }
+@keyframes tDrift { from { transform: scale(1.18) translateX(2%); } to { transform: scale(1.08) translateX(-2%); } }
+#title.v3 .shade { background:
+  radial-gradient(120% 70% at 50% 42%, transparent 35%, rgba(4,10,14,.75) 100%),
+  linear-gradient(180deg, rgba(6,12,18,.55) 0%, rgba(6,12,18,0) 22%, rgba(6,12,18,0) 58%, rgba(6,12,18,.88) 80%, #050b10 100%) !important; }
+
+/* a thin gold frame with corner studs around the whole screen */
+#title.v3 .tframe { position: absolute; inset: calc(8px + var(--sat, 0px)) 8px calc(8px + var(--sab, 0px)); border: 1px solid rgba(236,208,138,.28);
+  box-shadow: inset 0 0 0 3px rgba(5,11,16,.5), inset 0 0 0 4px rgba(236,208,138,.12); pointer-events: none; }
+#title.v3 .tframe::before, #title.v3 .tframe::after { content: ''; position: absolute; top: -5px; width: 9px; height: 9px; transform: rotate(45deg);
+  background: linear-gradient(135deg, var(--gold1), var(--gold3)); box-shadow: 0 0 6px rgba(255,214,120,.5); }
+#title.v3 .tframe::before { left: -5px; } #title.v3 .tframe::after { right: -5px; }
+
+/* embers drifting up */
+#title.v3 .embers { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+#title.v3 .embers i { position: absolute; bottom: -12px; width: 5px; height: 5px; border-radius: 50%; transform: scale(var(--s, 1));
+  background: radial-gradient(circle, #fff3c4 0 25%, #ffb347 50%, rgba(255,120,30,0) 72%); filter: blur(.3px);
+  animation: tEmber 9s linear infinite; opacity: 0; }
+@keyframes tEmber { 0% { transform: translate(0, 0) scale(var(--s)); opacity: 0; } 12% { opacity: .9; } 70% { opacity: .55; }
+  100% { transform: translate(var(--dx), -105vh) scale(calc(var(--s) * .4)); opacity: 0; } }
+
+/* logo */
+#title.v3 .top { gap: 6px; z-index: 2; }
+#title.v3 .logo { font: 700 clamp(22px, 6.4vw, 40px)/1 var(--title, 'Cinzel', Georgia, serif) !important; letter-spacing: .32em !important;
+  color: #e9dcbc !important; text-shadow: 0 2px 0 #000, 0 0 18px rgba(0,0,0,.6) !important; text-align: center; padding-left: .32em; }
+#title.v3 .logo span { display: block; margin-top: 2px; font-size: 2.05em !important; letter-spacing: .06em !important; padding-left: 0;
+  background: linear-gradient(180deg, #fff6d6 0%, #f3d98f 38%, #d2a24f 62%, #8c5e22 100%) !important; -webkit-background-clip: text !important; background-clip: text !important;
+  color: transparent !important; text-shadow: none !important; filter: drop-shadow(0 3px 0 #1a0f05) drop-shadow(0 0 16px rgba(255,200,110,.35)) !important; }
+#title.v3 .flourish { position: relative; width: min(240px, 60vw); height: 10px; }
+#title.v3 .flourish::before, #title.v3 .flourish::after { content: ''; position: absolute; top: 4px; width: 44%; height: 1px; }
+#title.v3 .flourish::before { left: 0; background: linear-gradient(90deg, transparent, var(--gold2)); }
+#title.v3 .flourish::after { right: 0; background: linear-gradient(270deg, transparent, var(--gold2)); }
+#title.v3 .flourish i { position: absolute; left: 50%; top: 0; width: 9px; height: 9px; transform: translateX(-50%) rotate(45deg);
+  border: 1px solid var(--gold2); background: #1a1208; box-shadow: 0 0 8px rgba(255,214,120,.5); }
+#title.v3 .badge { font: 600 10.5px/1 var(--body) !important; letter-spacing: .28em !important; color: #d8c9a2 !important; background: rgba(6,12,18,.55) !important;
+  border: 1px solid rgba(221,194,138,.3) !important; border-radius: 99px !important; padding: 6px 12px !important; }
+
+/* the arched window with the hero */
+#title.v3 .window { position: relative; z-index: 1; flex: 0 1 auto; height: min(46vh, 112vw, 540px); aspect-ratio: 4 / 5; max-width: 90vw;
+  border-radius: 50% 50% 14px 14px / 34% 34% 14px 14px; overflow: hidden; isolation: isolate;
+  box-shadow: 0 0 0 2px #1a0f05, 0 0 0 4px var(--gold2), 0 0 0 5px #6b4c22, 0 0 0 8px rgba(5,11,16,.8), 0 0 0 9px rgba(236,208,138,.35),
+    0 18px 50px rgba(0,0,0,.65), 0 0 60px rgba(255,190,110,.18); }
+#title.v3 .window i { position: absolute; inset: -4%; background: center 26% / cover no-repeat; background-position-x: var(--fx, 50%);
+  opacity: 0; transition: opacity 1.3s ease; }
+#title.v3 .window i.on { opacity: 1; animation: tKen 7s ease-out forwards; }
+@keyframes tKen { from { transform: scale(1.14) translateY(1.5%); } to { transform: scale(1.02) translateY(-1%); } }
+#title.v3 .window::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255,240,200,.35), inset 0 -60px 50px -20px rgba(5,11,16,.85), inset 0 30px 40px -30px rgba(255,230,170,.25); }
+#title.v3 .glint { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(115deg, transparent 40%, rgba(255,245,215,.16) 50%, transparent 60%) no-repeat; background-size: 250% 100%; animation: tGlint 5.2s ease-in-out infinite; }
+@keyframes tGlint { 0%, 55% { background-position: 130% 0; } 100% { background-position: -30% 0; } }
+
+/* hero name plate, medallions, loading bar */
+#title.v3 .bottom { gap: clamp(8px, 1.4vh, 14px); z-index: 2; margin-top: 4px; }
+#title.v3 .heroPlate { display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 44px; text-align: center; }
+#title.v3 .heroPlate b { font: 700 clamp(20px, 5.6vw, 28px)/1 var(--title, 'Cinzel', Georgia, serif); letter-spacing: .08em; color: #f1d996;
+  text-shadow: 0 2px 0 #000, 0 0 14px rgba(0,0,0,.8); }
+#title.v3 .heroPlate small { font: italic 500 13px/1.25 var(--body); color: #d6ccb2; text-shadow: 0 1px 4px #000; letter-spacing: .02em; }
+#title.v3 .heroPlate.in b, #title.v3 .heroPlate.in small { animation: tPlate .7s ease-out; }
+#title.v3 .heroPlate.in small { animation-duration: .85s; }
+@keyframes tPlate { from { transform: translateY(6px); letter-spacing: .16em; } to { transform: none; } }
+#title.v3 .medals { display: flex; gap: 9px; justify-content: center; }
+#title.v3 .medals button { width: 40px; height: 40px; padding: 0; border-radius: 50%; background: center / cover no-repeat #10181c; cursor: pointer;
+  border: 2px solid #6b5530; box-shadow: 0 0 0 2px #0b1214, 0 3px 6px rgba(0,0,0,.5); filter: saturate(.55) brightness(.7); transition: transform .3s, filter .3s, border-color .3s, box-shadow .3s; }
+#title.v3 .medals button.on { transform: scale(1.18); filter: none; border-color: var(--gold1); box-shadow: 0 0 0 2px #1a0f05, 0 0 14px rgba(255,214,120,.6); }
+#title.v3 #loading { display: flex; flex-direction: column; align-items: center; gap: 7px; font: 600 12px/1 var(--body) !important; letter-spacing: .14em; text-transform: uppercase; color: #cbbf9f !important; }
+#title.v3 #loading[hidden] { display: none; }
+#title.v3 #loading .bar { position: relative; display: block; width: min(240px, 62vw); height: 6px; border-radius: 3px; overflow: hidden;
+  background: #0b1416; box-shadow: inset 0 0 0 1px #4b3d22, 0 0 0 1px #000; }
+#title.v3 #loading .bar b { position: absolute; inset: 0; transform-origin: left; transform: scaleX(.04);
+  background: linear-gradient(90deg, #8c5e22, #f3d98f 70%, #fff6d6); box-shadow: 0 0 10px rgba(255,214,120,.6); }
+#title.v3 #loading .bar b::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  background-size: 40% 100%; background-repeat: no-repeat; animation: tShine 1.4s linear infinite; }
+@keyframes tShine { from { background-position: -40% 0; } to { background-position: 140% 0; } }
+#title.v3 #playBtn { min-width: 220px; height: 58px; animation: tPlay .5s ease-out both, actGlow 2.4s ease-in-out .5s infinite; }
+@keyframes tPlay { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+#title.v3 .hint { font: 500 11.5px/1.3 var(--body) !important; color: #9fa79e !important; letter-spacing: .04em; }
+
+/* landscape: window on the left, the rest on the right */
+@media (min-aspect-ratio: 1/1) {
+  #title.v3 { display: grid !important; grid-template-columns: auto minmax(260px, 420px); grid-template-rows: auto 1fr; column-gap: clamp(24px, 5vw, 70px);
+    justify-content: center; align-content: center; padding: 22px 28px; }
+  #title.v3 .window { grid-column: 1; grid-row: 1 / span 2; height: min(84vh, 640px); }
+  #title.v3 .top { grid-column: 2; grid-row: 1; align-self: end; }
+  #title.v3 .bottom { grid-column: 2; grid-row: 2; margin-top: 18px; align-self: start; }
+}
+@media (prefers-reduced-motion: reduce) { #title.v3 *, #title.v3 *::before, #title.v3 *::after { animation: none !important; } }
 </style>
 
 
@@ -1732,16 +1830,53 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
     </div>
   </div>
   <div id="modal" hidden><div class="panel scroll" id="panel" role="dialog" aria-modal="true"></div><button id="sheetGrip" type="button" aria-label="Expand the list" aria-expanded="false"><i></i></button></div>
-  <div id="title">
-    <div class="art" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div><div class="sparks" aria-hidden="true"></div>
-    <div class="top"><div class="logo">Ascendant<span>Arena</span></div><div class="badge">27 heroes · endless ascension</div></div>
+  <div id="title" class="v3">
+    <div class="tbg" aria-hidden="true"><i></i><i></i></div><div class="shade" aria-hidden="true"></div>
+    <div class="embers" aria-hidden="true"></div><div class="tframe" aria-hidden="true"></div>
+    <div class="top"><div class="logo">Ascendant<span>Arena</span></div><div class="flourish" aria-hidden="true"><i></i></div><div class="badge">27 heroes · endless ascension</div></div>
+    <div class="window" aria-hidden="true"><i></i><i></i><div class="glint"></div></div>
     <div class="bottom">
-      <div class="tagline">Start weak. Hunt monsters, beat world bosses, collect legendary gear, then prove it in the arena.</div>
-      <div id="loading">Loading the world…</div>
+      <div class="heroPlate" aria-live="polite"><b class="hn"></b><small class="ht"></small></div>
+      <div class="medals" role="tablist" aria-label="Heroes"></div>
+      <div id="loading"><span>Loading the world…</span><i class="bar"><b></b></i></div>
       <button id="playBtn" hidden>PLAY</button>
       <div class="hint">Left thumb moves · right thumb aims</div>
     </div>
   </div>
+  <script>
+  // title showcase: the Codex heroes' splash art in an arched window, cross-fading every few seconds (runs before the game script loads)
+  (function () {
+    var H = [['wrenna', 'Wrenna Vael', 'The Drowned Cartographer', 58], ['hespera', 'Hespera', 'The Evening Star Who Buried the Sun', 64],
+      ['kallix', 'Kallix', 'The Thief of the First Fire', 50], ['ophira', 'Ophira', 'The Gorgon Who Looked Away', 48],
+      ['aurvan', 'Aurvan', 'The First Moon\u2019s Keeper', 56], ['sena', 'Sena', 'The Youngest Fate', 50]];
+    var T = document.getElementById('title'), bg = T.querySelectorAll('.tbg i'), win = T.querySelectorAll('.window i');
+    var hn = T.querySelector('.hn'), ht = T.querySelector('.ht'), plate = T.querySelector('.heroPlate'), medals = T.querySelector('.medals');
+    var src = function (h) { return 'assets/ui/portraits/splash/' + h[0] + '.webp'; }, cur = -1, layer = 0, timer = 0;
+    H.forEach(function (h, i) {
+      var b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-label', h[1]);
+      b.style.backgroundImage = 'url(assets/ui/portraits/splash/' + h[0] + '-card.webp)';
+      b.addEventListener('click', function () { show(i); restart(); }); medals.appendChild(b);
+    });
+    var ems = T.querySelector('.embers');
+    for (var e = 0; e < 18; e++) { var s = document.createElement('i'); s.style.left = (Math.random() * 100) + '%'; s.style.animationDelay = (-Math.random() * 9) + 's';
+      s.style.animationDuration = (6 + Math.random() * 6) + 's'; s.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px'); s.style.setProperty('--s', (0.6 + Math.random() * 0.9).toFixed(2)); ems.appendChild(s); }
+    function show(i) {
+      if (i === cur) return; cur = i; layer ^= 1; var h = H[i];
+      [bg, win].forEach(function (L) { var on = L[layer], off = L[layer ^ 1];
+        on.style.backgroundImage = 'url(' + src(h) + ')'; on.style.setProperty('--fx', h[3] + '%');
+        on.classList.remove('on'); void on.offsetWidth; on.classList.add('on'); off.classList.remove('on'); });
+      plate.classList.remove('in'); void plate.offsetWidth; hn.textContent = h[1]; ht.textContent = h[2]; plate.classList.add('in');
+      [].forEach.call(medals.children, function (m, k) { m.classList.toggle('on', k === i); m.setAttribute('aria-selected', k === i); });
+      var nx = new Image(); nx.src = src(H[(i + 1) % H.length]); // warm the next slide
+    }
+    function restart() { clearInterval(timer); timer = setInterval(function () { if (T.hidden) return clearInterval(timer); show((cur + 1) % H.length); }, 5200); }
+    show(0); restart();
+    // loading bar: eases toward 90% while the game script parses and boots, then fills
+    var bar = T.querySelector('#loading .bar b'), p = 0.04;
+    (function tick() { var done = window.__gameBooted; p += ((done ? 1 : 0.92) - p) * (done ? 0.25 : 0.012);
+      bar.style.transform = 'scaleX(' + p.toFixed(3) + ')'; if (!done || p < 0.995) requestAnimationFrame(tick); })();
+  })();
+  </script>
   <div id="doll" hidden aria-label="Equipped gear"></div>
   <div id="spinHint">Drag to turn your hero</div>
   <div id="bootErr" hidden></div>
