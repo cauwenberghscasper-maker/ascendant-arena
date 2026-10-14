@@ -4,93 +4,93 @@
  "jobs": [
   {
    "name": "hespera_splash",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "hespera_splash.webp",
+   "sec": 38.2
   },
   {
    "name": "fountain_concept",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "fountain_concept.webp",
+   "sec": 6.1
   },
   {
    "name": "stall_concept",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "stall_concept.webp",
+   "sec": 9.3
   },
   {
    "name": "lodestone_concept",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "lodestone_concept.webp",
+   "sec": 8.8
   },
   {
    "name": "forge_concept",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "forge_concept.webp",
+   "sec": 7.1
   },
   {
    "name": "arena_gate_concept",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "arena_gate_concept.webp",
+   "sec": 6.5
   },
   {
    "name": "w_pip_concept",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "w_pip_concept.webp",
+   "sec": 6.4
   },
   {
    "name": "w_vex_concept",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "w_vex_concept.webp",
+   "sec": 9.0
   },
   {
    "name": "fountain_t1",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "fountain_t1.glb",
+   "sec": 38.9
   },
   {
    "name": "stall_t1",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "stall_t1.glb",
+   "sec": 40.1
   },
   {
    "name": "lodestone_t1",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "lodestone_t1.glb",
+   "sec": 44.8
   },
   {
    "name": "forge_t1",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "forge_t1.glb",
+   "sec": 42.2
   },
   {
    "name": "arena_gate_t1",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "arena_gate_t1.glb",
+   "sec": 37.3
   },
   {
    "name": "w_pip_t1",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "w_pip_t1.glb",
+   "sec": 21.2
   },
   {
    "name": "w_vex_t1",
-   "ok": false,
-   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
-   "sec": 0.0
+   "ok": true,
+   "file": "w_vex_t1.glb",
+   "sec": 19.7
   }
  ]
 }
