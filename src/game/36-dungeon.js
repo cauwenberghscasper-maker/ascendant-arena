@@ -221,6 +221,7 @@ function claimDungeonChest() {
       ev({ t: 'radiant', name: it.name, n: S.n, odds: res.odds, x: D.chest.x, z: D.chest.z });
     }
   }
+  if (typeof craftDungeonLoot === 'function') res.craft = craftDungeonLoot(D, !rec.clears && !D.variant.trial);
   rec.clears++; rec.best = Math.max(rec.best || 0, t); G.dirty = true;
   ev(Object.assign({ t: 'dungeonChest' }, res, { items: res.items.length }));
   return res;

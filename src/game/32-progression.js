@@ -35,7 +35,7 @@ function addXp(amount, reason) {
   G.dirty = true;
 }
 function addGold(n, quiet) {
-  if (n > 0) n *= 1 + masteryBonus('scav') + ((G.player && G.player.mods && G.player.mods.goldFind) || 0);
+  if (n > 0) n *= 1 + masteryBonus('scav') + ((G.player && G.player.mods && G.player.mods.goldFind) || 0) + (typeof craftBonuses === 'function' ? craftBonuses(G.profile).gold : 0);
   if (n > 0 && G.profile.settings.fastXp) n *= P.testGoldMult;
   G.profile.gold += Math.round(n); G.dirty = true; if (!quiet) ev({ t: 'gold', amt: Math.round(n) });
 }

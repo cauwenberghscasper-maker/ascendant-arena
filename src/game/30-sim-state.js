@@ -98,7 +98,10 @@ function applyStats(f, ctx, src) {
   f.maxHp = Math.round(f.maxHp * (1 + A.hp)); f.dmg *= 1 + A.dmg;
   const pet = petBonuses(src, ctx);
   f.maxHp = Math.round(f.maxHp * (1 + pet.hp)); f.dmg *= 1 + pet.damage;
-  f.atkSpeed = A.atkSpeed + (arts.trigger ? artVal('trigger', arts.trigger) : 0); f.critBonus = A.crit + (arts.lens ? artVal('lens', arts.lens) : 0); f.gearSuper += A.superGain;
+  // Masterwork upgrades and crafted set bonuses (world only; the arena stays even)
+  const CU = ctx === 'hub' && typeof craftBonuses === 'function' ? craftBonuses(src) : null, SBn = CU ? setBonuses(src.gear) : null;
+  if (CU) { f.maxHp = Math.round(f.maxHp * (1 + CU.hp + SBn.hp)); f.dmg *= 1 + CU.dmg + SBn.dmg; }
+  f.atkSpeed = A.atkSpeed + (CU ? CU.atkSpeed : 0) + (arts.trigger ? artVal('trigger', arts.trigger) : 0); f.critBonus = A.crit + (arts.lens ? artVal('lens', arts.lens) : 0); f.gearSuper += A.superGain;
   f.critBonus += m.crit; f.critDmg = A.critDmg + m.critDmg; f.lifesteal = A.lifesteal + m.lifesteal; f.armor = A.armor + m.armor; f.cdr = A.cdr + m.cdr; f.regenMult = 1 + m.regen;
   // keystones now live as ◆ nodes in the Hero tree
   const K = f.keys = BM.keys;
@@ -113,7 +116,7 @@ function applyStats(f, ctx, src) {
   // non-signature attacks use a class-neutral damage baseline so every class can run every attack
   f.dmgAlt = ctx === 'arena' ? f.dmg * (CFG.classes.novice.arenaDmg / c.arenaDmg) : f.dmg / c.atkMult;
   f.cdr = Math.min(0.5, f.cdr);
-  f.speed = CFG.player.speed * c.speedMult * (1 + m.speed + g.speed + A.move);
+  f.speed = CFG.player.speed * c.speedMult * (1 + m.speed + g.speed + A.move + (CU ? CU.move : 0));
   f.hp = Math.max(1, Math.round(f.maxHp * ratio));
   f.ammo = Math.min(f.ammo, f.ammoMax);
 }

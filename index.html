@@ -1654,6 +1654,36 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 #bAct:active, #playBtn:active { transform: translateY(2px); box-shadow: inset 0 0 0 1px #f8e9bb, inset 0 0 0 3px rgba(122,86,36,.5), inset 0 2px 4px rgba(60,36,10,.35), 0 1px 0 #120a03 !important; }
 @keyframes actGlow { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255,214,120,0)); } 50% { filter: drop-shadow(0 0 7px rgba(255,214,120,.55)); } }
 #playBtn { border-width: 3px !important; border-radius: 12px !important; font-size: 24px !important; letter-spacing: .1em; }
+
+/* ---- crafting: material chips, biome picker, set and secret cards (Garo's Craft and Masterwork tabs) ---- */
+.mats { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.mats.center { justify-content: center; margin: 10px 0 4px; }
+.mat { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px 3px 5px; border-radius: 99px; font: 600 11.5px/1.2 var(--body); color: #eadfc3;
+  background: rgba(10, 14, 18, .55); border: 1px solid rgba(221, 194, 138, .22); white-space: nowrap; }
+.mat b { color: #fff3cf; font-weight: 700; }
+.mat i, .matdot { display: inline-block; width: 11px; height: 11px; flex: none; background: var(--mc, #ccc); box-shadow: 0 0 6px var(--mc, #ccc), inset 0 -2px 0 rgba(0,0,0,.35); }
+.mat.k-ore i { border-radius: 2px; transform: rotate(45deg) scale(.85); }
+.mat.k-part i { border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+.mat.k-core i, .matdot { border-radius: 50%; }
+.mat.k-soul i { border-radius: 50%; background: radial-gradient(circle, #fff, var(--mc) 55%, #5a1030); }
+.mat.missing { border-color: rgba(255, 93, 108, .45); color: #d9a3a3; }
+.mat.missing b { color: #ff8a8a; }
+.mat.gold { gap: 3px; }
+.mat.gold svg, .mat.gold img { width: 13px; height: 13px; }
+.bpicks { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; margin: 8px 0; }
+.bpick { flex: 1 0 auto; display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 10px; font: 700 12px/1 var(--title, Georgia, serif); letter-spacing: .04em;
+  color: #d8cba8; background: rgba(10, 14, 18, .6); border: 1px solid rgba(221, 194, 138, .2); }
+.bpick i { width: 9px; height: 9px; border-radius: 50%; background: var(--mc); box-shadow: 0 0 8px var(--mc); }
+.bpick.on { color: #1b1206; background: linear-gradient(180deg, #f7e3a8, #c99a4e); border-color: #fff0c0; }
+.bpick.locked { opacity: .45; }
+.card.craftSet { border-left: 3px solid var(--mc); }
+.card.craftSet h4, .card.secret h4 { margin: 0 0 4px; }
+.card.craftSet em { color: #f3d98f; font-style: normal; }
+.card.secret { margin-top: 10px; background: linear-gradient(180deg, rgba(60, 30, 80, .35), rgba(10, 14, 18, .5)); border: 1px solid rgba(199, 125, 255, .3); }
+.craftRow { align-items: center; }
+.craftRow .meta { min-width: 0; }
+.craftRow > button { flex: none; min-width: 84px; }
+.fl.mat small { opacity: .65; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -2566,8 +2596,8 @@ for (const id in CFG.brawlers) {
 }
 CFG.trees2 = { resetBase: 200, presets: 3 };
 const NO_ARTS = {};
-function unlockText(u) { if (!u) return ''; if (u.level) return `Reach level ${u.level}`; if (u.streak) return `Reach a ${u.streak} kill streak`; if (u.shrines) return `Complete ${u.shrines} challenge shrine${u.shrines > 1 ? 's' : ''}`; if (u.bosses) return 'Help defeat a world boss'; return ''; }
-function unlockMet(u, p) { if (!u) return true; if (u.level && p.level < u.level) return false; if (u.shrines && (p.stats.shrines || 0) < u.shrines) return false; if (u.bosses && (p.stats.bosses || 0) < u.bosses) return false; if (u.streak && (p.stats.bestStreak || 0) < u.streak) return false; return true; }
+function unlockText(u) { if (!u) return ''; if (u.level) return `Reach level ${u.level}`; if (u.streak) return `Reach a ${u.streak} kill streak`; if (u.shrines) return `Complete ${u.shrines} challenge shrine${u.shrines > 1 ? 's' : ''}`; if (u.bosses) return 'Help defeat a world boss'; if (u.sigils != null) return `Only in ${BIOMES[u.sigils].name} dungeons · ${sigilHave(CFG.craft.biomes[u.sigils].hero)}/${CFG.craft.sigil.need} oaths`; return ''; }
+function unlockMet(u, p) { if (!u) return true; if (u.level && p.level < u.level) return false; if (u.shrines && (p.stats.shrines || 0) < u.shrines) return false; if (u.bosses && (p.stats.bosses || 0) < u.bosses) return false; if (u.streak && (p.stats.bestStreak || 0) < u.streak) return false; if (u.sigils != null && sigilHave(CFG.craft.biomes[u.sigils].hero, p) < CFG.craft.sigil.need) return false; return true; }
 
 // ---------------------------------------------------------------------
 // 2. UTIL
@@ -2936,6 +2966,8 @@ function sanitizeProfile(p) {
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));
   if (CFG.world && CFG.world.waypoints) out.waypoints = out.waypoints.filter((i) => Number.isInteger(i) && i >= 0 && i < CFG.world.waypoints.length);
   { const m = out.mine && typeof out.mine === 'object' ? out.mine : {}; out.mine = { ore: Math.max(0, +m.ore || 0), pick: Math.max(0, Math.min(20, m.pick | 0)), mined: Math.max(0, m.mined | 0), museum: m.museum && typeof m.museum === 'object' && !Array.isArray(m.museum) ? m.museum : {} }; }
+  { const c = out.craft && typeof out.craft === 'object' && !Array.isArray(out.craft) ? out.craft : {}, obj = (o) => (o && typeof o === 'object' && !Array.isArray(o) ? o : {}), num = (o) => { const r = {}; for (const k in obj(o)) { const v = +o[k]; if (v > 0 && isFinite(v)) r[k] = Math.floor(v); } return r; };
+    out.craft = { mats: num(c.mats), upg: num(c.upg), sig: num(c.sig), pity: num(c.pity), relics: num(c.relics) }; }
   out.login = { n: Math.max(0, (out.login && out.login.n) | 0), last: out.login && Number.isInteger(out.login.last) ? out.login.last : -1 };
   out.weekly = { wk: (out.weekly && out.weekly.wk) | 0, done: !!(out.weekly && out.weekly.done) };
   out.essence = Math.max(0, out.essence | 0);
@@ -3131,7 +3163,10 @@ function applyStats(f, ctx, src) {
   f.maxHp = Math.round(f.maxHp * (1 + A.hp)); f.dmg *= 1 + A.dmg;
   const pet = petBonuses(src, ctx);
   f.maxHp = Math.round(f.maxHp * (1 + pet.hp)); f.dmg *= 1 + pet.damage;
-  f.atkSpeed = A.atkSpeed + (arts.trigger ? artVal('trigger', arts.trigger) : 0); f.critBonus = A.crit + (arts.lens ? artVal('lens', arts.lens) : 0); f.gearSuper += A.superGain;
+  // Masterwork upgrades and crafted set bonuses (world only; the arena stays even)
+  const CU = ctx === 'hub' && typeof craftBonuses === 'function' ? craftBonuses(src) : null, SBn = CU ? setBonuses(src.gear) : null;
+  if (CU) { f.maxHp = Math.round(f.maxHp * (1 + CU.hp + SBn.hp)); f.dmg *= 1 + CU.dmg + SBn.dmg; }
+  f.atkSpeed = A.atkSpeed + (CU ? CU.atkSpeed : 0) + (arts.trigger ? artVal('trigger', arts.trigger) : 0); f.critBonus = A.crit + (arts.lens ? artVal('lens', arts.lens) : 0); f.gearSuper += A.superGain;
   f.critBonus += m.crit; f.critDmg = A.critDmg + m.critDmg; f.lifesteal = A.lifesteal + m.lifesteal; f.armor = A.armor + m.armor; f.cdr = A.cdr + m.cdr; f.regenMult = 1 + m.regen;
   // keystones now live as ◆ nodes in the Hero tree
   const K = f.keys = BM.keys;
@@ -3146,7 +3181,7 @@ function applyStats(f, ctx, src) {
   // non-signature attacks use a class-neutral damage baseline so every class can run every attack
   f.dmgAlt = ctx === 'arena' ? f.dmg * (CFG.classes.novice.arenaDmg / c.arenaDmg) : f.dmg / c.atkMult;
   f.cdr = Math.min(0.5, f.cdr);
-  f.speed = CFG.player.speed * c.speedMult * (1 + m.speed + g.speed + A.move);
+  f.speed = CFG.player.speed * c.speedMult * (1 + m.speed + g.speed + A.move + (CU ? CU.move : 0));
   f.hp = Math.max(1, Math.round(f.maxHp * ratio));
   f.ammo = Math.min(f.ammo, f.ammoMax);
 }
@@ -3961,7 +3996,7 @@ function addXp(amount, reason) {
   G.dirty = true;
 }
 function addGold(n, quiet) {
-  if (n > 0) n *= 1 + masteryBonus('scav') + ((G.player && G.player.mods && G.player.mods.goldFind) || 0);
+  if (n > 0) n *= 1 + masteryBonus('scav') + ((G.player && G.player.mods && G.player.mods.goldFind) || 0) + (typeof craftBonuses === 'function' ? craftBonuses(G.profile).gold : 0);
   if (n > 0 && G.profile.settings.fastXp) n *= P.testGoldMult;
   G.profile.gold += Math.round(n); G.dirty = true; if (!quiet) ev({ t: 'gold', amt: Math.round(n) });
 }
@@ -4364,6 +4399,7 @@ function rewardEnemyKill(e) {
   if (e.elite) { addEssence(Math.round(randInt(E.essence[0], E.essence[1]) * TM.gems * (e.guardian ? 2 : 1))); dropShards(randInt(E.shards[0], E.shards[1])); }
   else if (e.den != null && Math.random() < 0.06 * TM.gems) addEssence(1);
   if (e.den != null && Math.random() < 0.02) dropShards(1);
+  if (typeof craftKillDrop === 'function') craftKillDrop(e);
   checkAchievements();
 }
 
@@ -5144,6 +5180,7 @@ function endBoss(killed) {
     }
     loot.essence = Math.round((randInt(L.essence[0], L.essence[1]) + Math.floor(b.lvl / 5)) * tierMul(curTier()).gems); addEssence(loot.essence);
     loot.shards = randInt(L.shards[0], L.shards[1]); dropShards(loot.shards);
+    if (typeof craftBossDrop === 'function') loot.mats = craftBossDrop(b.zone);
     const ft = Math.round(G.time - (b.spawnT || G.time)); if (ft > 0 && (!p.records.fastBoss || ft < p.records.fastBoss)) p.records.fastBoss = ft;
     addMastery('w:' + G.player.attackId, 300 * contrib + 40);
     if (Math.random() < loot.tomeChance && p.level < P.cap) { loot.tomeXp = Math.round(xpToNext(p.level) * L.tomeXpFrac); addXp(loot.tomeXp, 'tome'); }
@@ -5693,6 +5730,7 @@ function claimDungeonChest() {
       ev({ t: 'radiant', name: it.name, n: S.n, odds: res.odds, x: D.chest.x, z: D.chest.z });
     }
   }
+  if (typeof craftDungeonLoot === 'function') res.craft = craftDungeonLoot(D, !rec.clears && !D.variant.trial);
   rec.clears++; rec.best = Math.max(rec.best || 0, t); G.dirty = true;
   ev(Object.assign({ t: 'dungeonChest' }, res, { items: res.items.length }));
   return res;
@@ -5737,7 +5775,7 @@ function mineNode(st) {
   if (!st || st.t > 0 || G.profile.level < CFG.world.zones[st.q.zone].minLevel) return null;
   const M = CFG.mining, p = G.profile, m = mineState(), q = st.q, rare = isRareVein(q);
   const res = { name: veinName(q, st), rich: st.rich, ore: Math.round(randInt(M.ore[0], M.ore[1]) * (rare ? M.rareMul : 1) * (st.rich ? M.richMul : 1) * (1 + M.pickYield * m.pick)), geodes: 0, pet: false };
-  m.ore += res.ore; m.mined++;
+  m.ore += res.ore; m.mined++; if (typeof craftMineDrop === 'function') { craftMineDrop(q, res.ore); res.oreName = (CFG.craft.biomes[zoneBiome(q.zone)] || {}).oreN || 'ore'; }
   const gc = geodeChance(m, rare); for (let i = 0; i < res.ore; i++) if (Math.random() < gc) res.geodes++;
   for (let i = 0; i < res.geodes; i++) addCase('geode', { l: Math.max(q.lvl, p.level), src: 'mine' });
   if (Math.random() < 1 / M.pet) res.pet = findMiningPet();
@@ -5811,6 +5849,161 @@ function comingUp(now) {
   return out.sort((a, b) => a.t - b.t);
 }
 // --- end daily
+// --- Crafting: materials, Garo's crafted sets, Masterwork upgrades and dungeon-only heroes and relics -------------
+// Every biome has three materials: ore (Mining), a monster part (kills; elites and bosses drop more) and a core
+// (dungeon chests only). Titan Souls come from world bosses. Garo crafts a five-piece set per biome from them
+// (3 and 5 piece bonuses) and sells permanent Masterwork upgrades whose later ranks need every biome's materials.
+// Each biome's dungeons also hide one hero you cannot recruit any other way (collect their oaths) and one relic.
+CFG.craft = {
+  biomes: [
+    { ore: 'copper', oreN: 'Copper Ore', part: 'thornhide', partN: 'Thornhide', core: 'verdant', coreN: 'Verdant Core', set: 'Thornwarden', color: 0x7fc65a,
+      hero: 'fenwick', relic: { name: 'Heart of the Hollow Oak', slot: 'accessory', rarity: 'legendary', aff: { hp: 0.18, lifesteal: 0.07, armor: 0.1 } } },
+    { ore: 'iron', oreN: 'Iron Ore', part: 'frostfang', partN: 'Frost Fang', core: 'glacial', coreN: 'Glacial Core', set: 'Frostbound', color: 0x9fd8ff,
+      hero: 'lysandra', relic: { name: 'Avalanche Crown', slot: 'helmet', rarity: 'legendary', aff: { armor: 0.11, hp: 0.18, critDmg: 0.35 } } },
+    { ore: 'obsidian', oreN: 'Obsidian Shard', part: 'emberscale', partN: 'Ember Scale', core: 'magma', coreN: 'Magma Core', set: 'Cinderforged', color: 0xff7a3a,
+      hero: 'kallix', relic: { name: 'Brand of the First Fire', slot: 'weapon', rarity: 'mythic', aff: { dmg: 0.16, critDmg: 0.4, atkSpeed: 0.14 } } },
+    { ore: 'mithril', oreN: 'Mithril Ore', part: 'arcdust', partN: 'Arcane Dust', core: 'void', coreN: 'Void Core', set: 'Runebound', color: 0xc08aff,
+      hero: 'vell', relic: { name: 'Ley-Woven Mantle', slot: 'chest', rarity: 'mythic', aff: { cdr: 0.15, superGain: 0.18, dmg: 0.14 } } },
+    { ore: 'abyssal', oreN: 'Abyssal Ore', part: 'pearl', partN: 'Abyssal Pearl', core: 'tidal', coreN: 'Tidal Core', set: 'Deepcaller', color: 0x3fe0d0,
+      hero: 'ione', relic: { name: 'Tidewalker Striders', slot: 'boots', rarity: 'ancient', aff: { move: 0.09, atkSpeed: 0.15, lifesteal: 0.07 } } },
+    { ore: 'starsteel', oreN: 'Starsteel Ore', part: 'starfeather', partN: 'Star Feather', core: 'solar', coreN: 'Solar Core', set: 'Starward', color: 0xfff07a,
+      hero: 'aurvan', relic: { name: 'Halo of the First Dawn', slot: 'accessory', rarity: 'ancient', aff: { crit: 0.12, critDmg: 0.45, dmg: 0.16 } } },
+  ],
+  titan: { id: 'titansoul', name: 'Titan Soul', color: 0xff5d8f },
+  // monster parts: chance per normal kill, guaranteed range for elites (guardians double), per world-boss kill
+  part: { chance: 0.07, den: 0.1, elite: [1, 3], boss: [6, 10] },
+  // dungeon chests: cores by variant (Caves, Warrens, Sanctum, Trial) + 1 per 4 key tiers; first clear +2
+  core: { variant: [1, 1, 2, 3], perTiers: 4, first: 2, parts: [2, 5] },
+  // dungeon-only heroes: oaths (code: sigil) per chest (variant chances, + per key tier); relics: chance per chest with a pity count
+  sigil: { need: 6, chance: [0.14, 0.14, 0.3, 0.45], perTier: 0.02 },
+  relic: { chance: 0.03, sanctum: 2, perTier: 0.005, pity: 50 },
+  // crafted sets: rarity per biome, item level = the biome's top level (or yours, if higher) + 2
+  setRarity: ['epic', 'epic', 'legendary', 'legendary', 'mythic', 'ancient'],
+  setCost: { ore: [50, 1.35], part: [18, 1.35], core: [2, 1], gold: 6 },
+  setBonus: { 3: { dmg: 0.05, hp: 0.05 }, 5: { dmg: 0.08, hp: 0.1 }, perBiome: 0.25 },
+  // Masterwork: permanent hero upgrades. Rank r uses biome floor(r * 6 / max); the last two ranks also need Titan Souls.
+  upgrades: {
+    whetstone: { name: 'Whetstone', d: (v) => `+${pct(v)} damage`, max: 12, per: 0.03, k: 'dmg' },
+    plating: { name: 'Reinforced Plating', d: (v) => `+${pct(v)} max HP`, max: 12, per: 0.04, k: 'hp' },
+    bracers: { name: 'Swift Bracers', d: (v) => `+${pct(v)} attack speed`, max: 8, per: 0.02, k: 'atkSpeed' },
+    treads: { name: 'Trail Treads', d: (v) => `+${pct(v)} move speed`, max: 6, per: 0.015, k: 'move' },
+    satchel: { name: 'Prospector’s Satchel', d: (v) => `+${pct(v)} ore and monster parts`, max: 10, per: 0.1, k: 'find' },
+    purse: { name: 'Merchant’s Purse', d: (v) => `+${pct(v)} gold`, max: 10, per: 0.05, k: 'gold' },
+  },
+};
+const CB = CFG.craft.biomes;
+// every material by id -> { name, biome, kind, color }
+const MATS = (() => { const o = {}; CB.forEach((b, i) => { o[b.ore] = { name: b.oreN, biome: i, kind: 'ore', color: b.color }; o[b.part] = { name: b.partN, biome: i, kind: 'part', color: b.color }; o[b.core] = { name: b.coreN, biome: i, kind: 'core', color: b.color }; });
+  o[CFG.craft.titan.id] = { name: CFG.craft.titan.name, biome: -1, kind: 'soul', color: CFG.craft.titan.color }; return o; })();
+// dungeon-only heroes: their Level Road unlock is replaced by sigils from that biome's dungeons
+CB.forEach((b, i) => { if (CFG.attacks[b.hero]) CFG.attacks[b.hero].unlock = { sigils: i }; });
+function craftState(p) {
+  p = p || G.profile; const c = p.craft && typeof p.craft === 'object' ? p.craft : (p.craft = {});
+  for (const k of ['mats', 'upg', 'sig', 'pity', 'relics']) if (!c[k] || typeof c[k] !== 'object' || Array.isArray(c[k])) c[k] = {};
+  return c;
+}
+const matCount = (id, p) => craftState(p).mats[id] | 0;
+const upgRank = (id, p) => Math.min(CFG.craft.upgrades[id].max, craftState(p).upg[id] | 0);
+// summed Masterwork effects: { dmg, hp, atkSpeed, move, find, gold }
+function craftBonuses(p) { const o = { dmg: 0, hp: 0, atkSpeed: 0, move: 0, find: 0, gold: 0 }; if (!p) return o;
+  for (const id in CFG.craft.upgrades) { const U = CFG.craft.upgrades[id]; o[U.k] += U.per * upgRank(id, p); } return o; }
+const zoneBiome = (zi) => ((CFG.world.zones[zi] || {}).biome) | 0;
+// add materials; `quiet` skips the pickup line (batched callers report themselves)
+function addMats(list, quiet) {
+  const c = craftState(), got = [];
+  for (const [id, n0] of list) { const n = Math.round(n0); if (!MATS[id] || n <= 0) continue; c.mats[id] = (c.mats[id] | 0) + n; got.push([id, n]); }
+  if (got.length) { G.dirty = true; if (!quiet) ev({ t: 'mats', got }); }
+  return got;
+}
+const findMul = () => 1 + craftBonuses(G.profile).find;
+// kills: the area's monster part (normal kills sometimes, elites always)
+function craftKillDrop(e) {
+  if (!e || e.zone == null || e.rift) return;
+  const P2 = CFG.craft.part, b = CB[zoneBiome(e.zone)]; if (!b) return;
+  let n = 0;
+  if (e.elite) n = randInt(P2.elite[0], P2.elite[1]) * (e.guardian ? 2 : 1);
+  else if (Math.random() < (e.den != null ? P2.den : P2.chance) * findMul()) n = 1;
+  if (n) addMats([[b.part, n * (e.elite ? findMul() : 1)]]);
+}
+// world boss: parts and a core of its biome, ore, and a Titan Soul
+function craftBossDrop(zone) {
+  const b = CB[zoneBiome(zone)], P2 = CFG.craft.part; if (!b) return [];
+  return addMats([[b.part, randInt(P2.boss[0], P2.boss[1]) * findMul()], [b.core, 1], [b.ore, 10 * findMul()], [CFG.craft.titan.id, 1]]);
+}
+// mining: the vein's ore as a crafting material (alongside the pickaxe ore counter)
+function craftMineDrop(q, ore) { const b = CB[zoneBiome(q.zone)]; if (b) addMats([[b.ore, ore * findMul()]], true); }
+// dungeon chest: cores and parts, then the biome's hero sigil and relic rolls
+function craftDungeonLoot(D, first) {
+  const C = CFG.craft, b = CB[zoneBiome(D.zone)], c = craftState(), p = G.profile; if (!b) return {};
+  const vi = Math.max(0, CFG.dungeon.variants.indexOf(D.variant)), t = D.key ? D.key.t : 0;
+  const cores = (C.core.variant[vi] || 1) + Math.floor(t / C.core.perTiers) + (first ? C.core.first : 0);
+  const out = { biome: zoneBiome(D.zone), mats: addMats([[b.core, cores], [b.part, randInt(C.core.parts[0], C.core.parts[1]) * findMul()]], true) };
+  // hero sigil (until the hero is yours)
+  const hid = b.hero, owned = p.unlocked.attacks.includes(hid) || hid === STARTER_HERO;
+  if (CFG.brawlers[hid] && !owned && (c.sig[hid] | 0) < C.sigil.need && Math.random() < (C.sigil.chance[vi] || 0.14) + C.sigil.perTier * t) {
+    c.sig[hid] = (c.sig[hid] | 0) + 1; out.sigil = { id: hid, n: c.sig[hid], need: C.sigil.need };
+    if (c.sig[hid] >= C.sigil.need) checkUnlocks();
+  }
+  // relic: rare, doubled in the Sanctum, guaranteed after `pity` chests without one in this biome
+  const key = 'b' + out.biome; c.pity[key] = (c.pity[key] | 0) + 1;
+  const chance = (C.relic.chance + C.relic.perTier * t) * (vi === 2 ? C.relic.sanctum : 1);
+  if (Math.random() < chance || c.pity[key] >= C.relic.pity) { c.pity[key] = 0; out.relic = makeRelic(out.biome, Math.max(D.poi.lvl, p.level) + CFG.dungeon.chest.ilvlAdd + t); }
+  G.dirty = true; return out;
+}
+function makeRelic(bi, ilvl) {
+  const R = CB[bi].relic, it = makeItem(R.slot, R.rarity, ilvl, R.name, { aff: Object.assign({}, R.aff) });
+  it.relic = bi; const c = craftState(); c.relics[bi] = (c.relics[bi] | 0) + 1;
+  giveItem(it); ev({ t: 'relic', name: it.name, n: c.relics[bi] }); return it;
+}
+// straight into the bag (crafted and relic items never become cases or get auto-salvaged)
+function giveItem(it) {
+  const p = G.profile; p.bag.push(it); G.dirty = true;
+  const better = isBetter(it, p.gear[it.slot]); if (better) G.gearPrompts.push(it.id);
+  ev({ t: 'drop', item: it, better, source: 'craft' }); checkAchievements(); return it;
+}
+// --- crafted sets
+const biomeTop = (bi) => { let L = 1; for (const z of CFG.world.zones) if (z.biome === bi) L = Math.max(L, z.lvl ? z.lvl[1] : z.minLevel || 1); return L; };
+const biomeReached = (bi, p) => CFG.world.zones.some((z) => z.biome === bi && (p || G.profile).level >= (z.minLevel || 1));
+function setPieceCost(bi, slot) {
+  const S = CFG.craft.setCost, b = CB[bi], w = slot === 'weapon' ? 1.4 : 1;
+  return { mats: [[b.ore, Math.round(S.ore[0] * Math.pow(S.ore[1], bi) * w)], [b.part, Math.round(S.part[0] * Math.pow(S.part[1], bi) * w)], [b.core, S.core[0] + S.core[1] * bi]],
+    gold: Math.round(CFG.forge.base * Math.pow(CFG.forge.growth, Math.max(biomeTop(bi), G.profile.level) - 1) * S.gold * w) };
+}
+const canPay = (cost, p) => (p || G.profile).gold >= (cost.gold || 0) && cost.mats.every(([id, n]) => matCount(id, p) >= n);
+function pay(cost) { const p = G.profile, c = craftState(); p.gold -= cost.gold || 0; for (const [id, n] of cost.mats) c.mats[id] -= n; G.dirty = true; }
+function craftSetPiece(bi, slot) {
+  const cost = setPieceCost(bi, slot), b = CB[bi]; if (!b || !canPay(cost) || !biomeReached(bi)) return null;
+  pay(cost);
+  const r = CFG.craft.setRarity[bi], it = makeItem(slot, r, Math.max(biomeTop(bi), G.profile.level) + 2, null, {});
+  it.name = `${b.set} ${it.name.split(' ').pop()}`; it.set = bi;
+  // crafted pieces carry one extra affix at the top of its range
+  const extra = Object.keys(CFG.affixes).filter((k) => !(k in it.aff)); if (extra.length) { const k = pick(extra); it.aff[k] = Math.round(CFG.affixes[k].max * (1 + 0.1 * rarIdx(r)) * 100) / 100; }
+  giveItem(it); ev({ t: 'crafted', name: it.name }); return it;
+}
+// equipped pieces per set -> { dmg, hp }
+function setBonuses(gear) {
+  const o = { dmg: 0, hp: 0, sets: {} }, SB = CFG.craft.setBonus; if (!gear) return o;
+  for (const s of CFG.gear.slots) { const it = gear[s]; if (it && it.set != null) o.sets[it.set] = (o.sets[it.set] || 0) + 1; }
+  for (const bi in o.sets) { const n = o.sets[bi], k = 1 + SB.perBiome * bi; for (const t of [3, 5]) if (n >= t) { o.dmg += SB[t].dmg * k; o.hp += SB[t].hp * k; } }
+  return o;
+}
+// --- Masterwork upgrades
+function upgCost(id, rank) {
+  const U = CFG.craft.upgrades[id], bi = Math.min(5, Math.floor(rank * 6 / U.max)), b = CB[bi];
+  const mats = [[b.ore, Math.round((30 + 12 * rank) * Math.pow(1.2, bi))], [b.part, Math.round((10 + 5 * rank) * Math.pow(1.2, bi))]];
+  if (rank >= 2) mats.push([b.core, 1 + Math.floor(rank / 3)]);
+  if (rank >= U.max - 2) mats.push([CFG.craft.titan.id, rank - U.max + 3]);
+  return { mats, gold: Math.round(CFG.forge.base * Math.pow(CFG.forge.growth, Math.max(1, biomeTop(bi) - 10)) * (3 + rank)), biome: bi };
+}
+function buyUpgrade(id) {
+  const U = CFG.craft.upgrades[id], r = upgRank(id); if (!U || r >= U.max) return false;
+  const cost = upgCost(id, r); if (!canPay(cost)) return false;
+  pay(cost); craftState().upg[id] = r + 1; refreshPlayerStats(false);
+  ev({ t: 'masterwork', name: U.name, rank: r + 1 }); return true;
+}
+// sigil hero progress, for the roster and unlock checks
+const sigilHave = (hid, p) => craftState(p).sig[hid] | 0;
+// --- end crafting
 // ---------------------------------------------------------------------
 // 6. RENDER — Three.js scene, procedural assets behind AssetSlots
 // ---------------------------------------------------------------------
@@ -9237,7 +9430,9 @@ function openSmith(tab) {
       const mp = maxUpgradePlan(it);
       return itemRow(it, `<div class="col"><button class="${can ? 'primary' : 'ghost'}" data-act="${mp.n > 1 ? 'upgradeMax2' : 'upgrade'}" data-slot="${s}" ${max ? 'disabled' : ''}>${max ? 'Max' : mp.n > 1 ? `Reforge… +${mp.n}` : `Reforge… ${costHTML(cost, ess)}`}</button>${mergeCostHTML(it)}</div>`, null, { upgrade: can });
     }).join('') + '</div>';
-  } else if (tab === 'Gems') {
+  } else if (tab === 'Craft') body = craftTabHTML(p);
+  else if (tab === 'Masterwork') body = masterworkTabHTML(p);
+  else if (tab === 'Gems') {
     const pr = gemPrice(p), row = (n) => { let c = 0; for (let i = 0; i < n; i++) c += Math.round(30 * Math.pow(CFG.enemies.goldGrowth, p.level - 1) * Math.pow(1.03, (p.gemBuys || 0) + i)); return `<button class="${p.gold >= c ? 'primary' : 'disabled'}" data-act="gems" data-n="${n}" ${p.gold >= c ? '' : 'aria-disabled="true"'}>${ICON.ess}${n} for ${ICON.coin}${fmtK(c)}</button>`; };
     body = `<p class="say">“Got more gold than you need? I’ll trade you gems. The price climbs a little with every gem and cools down over time.”</p>
       <div class="gemx"><div><span>Current price</span><b>${ICON.coin}${fmtK(pr)} <small>per gem</small></b></div><div class="row">${row(10)}${row(50)}${row(200)}</div></div>
@@ -9249,9 +9444,45 @@ function openSmith(tab) {
     }).join('') + '</div><p class="fine">Prices are fixed. Epic pieces only drop from monsters, world bosses and their perks are stronger.</p>';
   }
   const upAlert = Object.values(slotAlerts()).some((a) => a.canUpgrade);
-  const tabs = ['Upgrade', 'Gems', 'Forge'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${tabName(t)}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
+  const tabs = ['Upgrade', 'Craft', 'Masterwork', 'Gems', 'Forge'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${tabName(t)}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
   openModal(dock(`<div class="npcHead"><span class="dotc" style="background:#8a5a3c"></span><h3>Garo’s Smithy</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
     <div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, tab === 'Upgrade' ? selBar('', '', '', 'Each Reforge… shows every piece the smith will melt down before you confirm.') : ''), true, true);
+}
+// --- crafting tabs (src/game/39-crafting.js)
+const hex6 = (c) => '#' + c.toString(16).padStart(6, '0');
+function matChip(id, need, p) { const M = MATS[id], have = matCount(id, p), ok = need == null || have >= need;
+  return `<span class="mat k-${M.kind}${ok ? '' : ' missing'}"><i style="--mc:${hex6(M.color)}"></i>${M.name} <b>${need == null ? fmtK(have) : `${fmtK(have)}/${fmtK(need)}`}</b></span>`; }
+function costChips(cost, p) { return cost.mats.map(([id, n]) => matChip(id, n, p)).join('') + `<span class="mat gold${p.gold >= cost.gold ? '' : ' missing'}">${ICON.coin}<b>${fmtK(cost.gold)}</b></span>`; }
+function craftTabHTML(p) {
+  const C = CFG.craft, bi = clamp(UI.craftBiome == null ? Math.max(0, CB.findIndex((b, i) => !biomeReached(i + 1, p))) : UI.craftBiome, 0, 5), b = CB[bi], open = biomeReached(bi, p);
+  const minL = Math.min(...CFG.world.zones.filter((z) => z.biome === bi).map((z) => z.minLevel || 1));
+  const picks = CB.map((x, i) => `<button class="bpick ${i === bi ? 'on' : ''}${biomeReached(i, p) ? '' : ' locked'}" data-act="craftBiome" data-b="${i}" style="--mc:${hex6(x.color)}"><i></i>${BIOMES[i].name.split(' ').pop()}</button>`).join('');
+  const SB = C.setBonus, k = 1 + SB.perBiome * bi, worn = setBonuses(p.gear).sets[bi] || 0;
+  const rows = CFG.gear.slots.map((s) => {
+    const cost = setPieceCost(bi, s), can = open && canPay(cost, p), noun = ITEM_NAMES[s][s === 'weapon' ? 0 : 1];
+    return `<div class="item ${C.setRarity[bi]} craftRow"><div class="meta"><div class="slot">${SLOT_LABEL[s]} · item level ${Math.max(biomeTop(bi), p.level) + 2}</div><div class="nm">${b.set} ${noun} ${rarityChip(C.setRarity[bi])}</div><div class="st">Random affixes + one perfect bonus affix</div><div class="mats">${costChips(cost, p)}</div></div>
+      <button class="${can ? 'primary' : 'disabled'}" data-act="craftPiece" data-b="${bi}" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div>`;
+  }).join('');
+  const hero = CFG.brawlers[b.hero], heroHave = p.unlocked.attacks.includes(b.hero), relicN = craftState(p).relics[bi] | 0;
+  return `<p class="say">“Bring me what the land gives up: ore from the mines, parts from its monsters and the cores that only its dungeons hold. I’ll make you something no monster drops.”</p>
+    <div class="bpicks">${picks}</div>
+    <div class="card craftSet" style="--mc:${hex6(b.color)}"><h4>${b.set} set · ${BIOMES[bi].name}</h4>
+      <p>${open ? `Wear 3 pieces: +${pct(SB[3].dmg * k)} damage, +${pct(SB[3].hp * k)} HP · all 5: another +${pct(SB[5].dmg * k)} damage, +${pct(SB[5].hp * k)} HP <em>(wearing ${worn}/5)</em>` : `Opens at level ${minL}, when you can reach ${BIOMES[bi].name}.`}</p>
+      <div class="mats">${matChip(b.ore, null, p)}${matChip(b.part, null, p)}${matChip(b.core, null, p)}${matChip(C.titan.id, null, p)}</div>
+      <p class="fine">${b.oreN}: mine it in this biome’s quarries · ${b.partN}: its monsters (elites always drop some) · ${b.coreN}: its dungeon chests only · Titan Souls: world bosses</p></div>
+    <div class="list">${rows}</div>
+    <div class="card secret"><h4>Hidden in ${BIOMES[bi].name} dungeons</h4>
+      <p>${hero ? (heroHave ? `<b>${hero.name}</b> fights for you.` : `<b>${hero.name}</b> cannot be recruited any other way. Their oaths drop from this biome’s dungeon chests (Sanctums and Trials more often, higher keys more): <b>${sigilHave(b.hero, p)}/${C.sigil.need}</b>.`) : ''}</p>
+      <p>Relic: <b>${b.relic.name}</b> ${rarityChip(b.relic.rarity)} · a rare chest find here (twice as likely in the Sanctum, certain after ${C.relic.pity} chests without one) · found ${relicN}×</p></div>`;
+}
+function masterworkTabHTML(p) {
+  const C = CFG.craft, rows = Object.keys(C.upgrades).map((id) => {
+    const U = C.upgrades[id], r = upgRank(id, p), max = r >= U.max, cost = max ? null : upgCost(id, r), can = !max && canPay(cost, p);
+    return `<div class="item craftRow mw"><div class="meta"><div class="slot">Rank ${r}/${U.max}${max ? ' · mastered' : ` · next uses ${BIOMES[cost.biome].name} materials`}</div><div class="nm">${U.name}</div><div class="st">${r ? U.d(U.per * r) : 'Not started'}${max ? '' : ` → <b>${U.d(U.per * (r + 1))}</b>`}</div>${max ? '' : `<div class="mats">${costChips(cost, p)}</div>`}</div>
+      <button class="${can ? 'primary' : 'disabled'}" data-act="buyUpg" data-id="${id}" ${can ? '' : 'aria-disabled="true"'}>${max ? 'Max' : 'Upgrade'}</button></div>`;
+  }).join('');
+  return `<p class="say">“Masterwork lasts forever and follows every hero you play. The early ranks take woodland copper; the last ones need every land’s materials and a Titan Soul or two.”</p><div class="list">${rows}</div>
+    <p class="fine">Masterwork and set bonuses apply in the world, dungeons and the Rift; the Arena keeps fights even.</p>`;
 }
 function openArenaPanel() {
   UI.current = 'arena';
@@ -9514,6 +9745,12 @@ function openTrialPanel(zi) {
     <p class="fine">Kill chain: ${ch.n ? `${ch.n} × ${escapeHTML(CFG.enemies[ch.type] ? CFG.enemies[ch.type].name : ch.type)}` : 'none'} · keep killing one kind of monster without falling to raise the Radiant chance (up to ×${T.chainMax} at ${(T.chainMax - 1) * T.chainStep}). Trials taken ${S.n} · Radiants found ${S.rad}.</p></div>
     <div class="row end"><button class="ghost" data-act="close">Not now</button>${S.sig >= T.sigilCost ? `<button class="ghost" data-act="trialForge" data-z="${zi}">Forge relic (${T.sigilCost} sigils)</button>` : ''}<button class="primary big" data-act="trialGo" data-z="${zi}">Begin the Trial (Lv ${lvl})</button></div>`);
 }
+function craftChestHTML(c) {
+  if (!c || !c.mats) return ''; const p = G.profile;
+  return `<div class="mats center">${c.mats.map(([id, n]) => `<span class="mat k-${MATS[id].kind}"><i style="--mc:${hex6(MATS[id].color)}"></i>+${n} ${MATS[id].name}</span>`).join('')}</div>`
+    + (c.sigil ? `<p class="say">${CFG.brawlers[c.sigil.id].name}’s oath · <b>${Math.min(c.sigil.n, c.sigil.need)}/${c.sigil.need}</b>${c.sigil.n >= c.sigil.need ? ' · they join you!' : ''}</p>` : '')
+    + (c.relic ? `<h2 class="center">Relic found</h2><div class="list">${itemRow(c.relic, '', `Relic · ${BIOMES[c.biome].name} dungeons only`)}</div>` : '');
+}
 function openDungeonChest() {
   const r = claimDungeonChest(); if (!r) return;
   UI.current = 'dungeonChest'; Sfx.play('win');
@@ -9521,7 +9758,7 @@ function openDungeonChest() {
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
     ${r.radiant ? `<h2 class="center">✦ RADIANT ✦</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
-    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}
+    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}${craftChestHTML(r.craft)}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
 function openRiftResult(r) {
@@ -9635,6 +9872,9 @@ function handlePanelClick(e) {
     case 'upgrade': openMerge(b.dataset.slot, false, 'smith'); break;
     case 'forge': if (buyForge(b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; openSmith('Forge'); } break;
     case 'smithTab': openSmith(b.dataset.tab); break;
+    case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
+    case 'craftPiece': if (craftSetPiece(+b.dataset.b, b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
+    case 'buyUpg': if (buyUpgrade(b.dataset.id)) Sfx.play('unlock'); openSmith('Masterwork'); break;
     case 'queue': queueArena(); break;
     case 'hub': UI.close(); leaveArena(); break;
     case 'again': UI.close(); leaveArena(); queueArena(); break;
@@ -9853,7 +10093,13 @@ function processEvents() {
       case 'radiant': G.slowT = 1.4; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 22); SpriteFX.play('nova', 'gold', e.x, 1, e.z, 14, { delay: 0.2 }); burst(e.x, 1, e.z, 60, 0xfff07a, 9, 1.2, 0.3, 4, 2); Sfx.play('radiant');
         showBanner('✦ RADIANT ✦', `${escapeHTML(e.name)} · trial ${e.n} · 1 in ${fmt(e.odds)}`, 'gold'); Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> found <b>${escapeHTML(e.name)}</b> after ${e.n} trials!`, 'boss'); break;
       case 'mined': burst(e.x, 1.6, e.z, 14, e.rich ? 0xffd34a : 0xb8c4d0, 4, 0.6, 0.2, 3, 1); Sfx.play('hit');
-        showToast(`${e.name}: +${e.ore} ore${e.geodes ? ` · ${e.geodes} Geode${e.geodes > 1 ? 's' : ''}!` : ''}`, e.geodes || e.rich ? 'good' : ''); break;
+        showToast(`${e.name}: +${e.ore} ${e.oreName || 'ore'}${e.geodes ? ` · ${e.geodes} Geode${e.geodes > 1 ? 's' : ''}!` : ''}`, e.geodes || e.rich ? 'good' : ''); break;
+      case 'mats': { const A = UI.matAcc || (UI.matAcc = {}), now = performance.now(); // pickups of one material stack on one feed line
+        for (const [id, n] of e.got) { const a = A[id] && now - A[id].t < 5500 ? A[id] : (A[id] = { n: 0 }); a.n += n; a.t = now;
+          Feed.add(`<i class="matdot" style="--mc:#${MATS[id].color.toString(16).padStart(6, '0')}"></i> +${a.n} <b>${MATS[id].name}</b> <small>(${fmtK(matCount(id))})</small>`, 'mat', 'mat' + id); } break; }
+      case 'crafted': showToast(`Garo crafted ${escapeHTML(e.name)}`, 'rare'); Sfx.play('unlock'); break;
+      case 'masterwork': showToast(`${e.name} · rank ${e.rank}`, 'good'); break;
+      case 'relic': G.slowT = 1; Sfx.play('radiant'); showBanner('Relic found!', `${escapeHTML(e.name)} · only these dungeons hold it`, 'gold'); Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> found the relic <b>${escapeHTML(e.name)}</b>!`, 'boss'); break;
       case 'mineral': if (e.first) showToast(`New for the Museum: ${e.name} (${e.n} kinds · +${e.n}% XP)`, 'good'); break;
       case 'minePet': G.slowT = 1.4; Sfx.play('radiant'); SpriteFX.play('pillar', 'venom', G.player.x, 0, G.player.z, 18);
         showBanner(e.had ? 'Pet found again!' : 'A pet in the rock!', e.had ? `+${CFG.mining.petGems} gems` : `${PET_DEFS[e.id].name} joins you · 1 in ${fmt(CFG.mining.pet)}`, 'gold');
@@ -10601,7 +10847,7 @@ function openBrawlers(sel) {
     const B = CFG.brawlers[id], have = owned.includes(id), L = masteryOf(p, id);
     return `<button class="bcard ${have ? 'own' : 'locked'} ${id === sel ? 'sel' : ''} ${id === p.cls ? 'cur' : ''} tier-${B.tier || 'adventurer'}" data-act="bSel" data-id="${id}">
       ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have, 96)}
-      <b>${B.name}</b><small>${have ? `Mastery ${L}` : `Lv ${CFG.attacks[id].unlock && CFG.attacks[id].unlock.level ? CFG.attacks[id].unlock.level : '—'}`}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
+      <b>${B.name}</b><small>${have ? `Mastery ${L}` : (CFG.attacks[id].unlock && CFG.attacks[id].unlock.sigils != null ? `Dungeon · ${sigilHave(id)}/${CFG.craft.sigil.need}` : `Lv ${CFG.attacks[id].unlock && CFG.attacks[id].unlock.level ? CFG.attacks[id].unlock.level : '—'}`)}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
   };
   // one section per tier, from the champions up to the divines
   const HERO_TIERS = [['adventurer', 'Adventurers'], ['champion', 'Champions'], ['legendary', 'Legendaries'], ['ascendant', 'Ascendants'], ['divine', 'Divines']];
@@ -11561,7 +11807,7 @@ function boot(hotData) {
   if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
   window.__gameBooted = true;
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
-  if (LOCAL_PREVIEW) window.__dbg = { Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
+  if (LOCAL_PREVIEW) window.__dbg = { craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
   const btn = $('playBtn'), label = btn.textContent;

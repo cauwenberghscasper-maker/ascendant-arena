@@ -164,6 +164,7 @@ function rewardEnemyKill(e) {
   if (e.elite) { addEssence(Math.round(randInt(E.essence[0], E.essence[1]) * TM.gems * (e.guardian ? 2 : 1))); dropShards(randInt(E.shards[0], E.shards[1])); }
   else if (e.den != null && Math.random() < 0.06 * TM.gems) addEssence(1);
   if (e.den != null && Math.random() < 0.02) dropShards(1);
+  if (typeof craftKillDrop === 'function') craftKillDrop(e);
   checkAchievements();
 }
 
@@ -944,6 +945,7 @@ function endBoss(killed) {
     }
     loot.essence = Math.round((randInt(L.essence[0], L.essence[1]) + Math.floor(b.lvl / 5)) * tierMul(curTier()).gems); addEssence(loot.essence);
     loot.shards = randInt(L.shards[0], L.shards[1]); dropShards(loot.shards);
+    if (typeof craftBossDrop === 'function') loot.mats = craftBossDrop(b.zone);
     const ft = Math.round(G.time - (b.spawnT || G.time)); if (ft > 0 && (!p.records.fastBoss || ft < p.records.fastBoss)) p.records.fastBoss = ft;
     addMastery('w:' + G.player.attackId, 300 * contrib + 40);
     if (Math.random() < loot.tomeChance && p.level < P.cap) { loot.tomeXp = Math.round(xpToNext(p.level) * L.tomeXpFrac); addXp(loot.tomeXp, 'tome'); }

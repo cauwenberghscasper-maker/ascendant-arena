@@ -98,6 +98,8 @@ function sanitizeProfile(p) {
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));
   if (CFG.world && CFG.world.waypoints) out.waypoints = out.waypoints.filter((i) => Number.isInteger(i) && i >= 0 && i < CFG.world.waypoints.length);
   { const m = out.mine && typeof out.mine === 'object' ? out.mine : {}; out.mine = { ore: Math.max(0, +m.ore || 0), pick: Math.max(0, Math.min(20, m.pick | 0)), mined: Math.max(0, m.mined | 0), museum: m.museum && typeof m.museum === 'object' && !Array.isArray(m.museum) ? m.museum : {} }; }
+  { const c = out.craft && typeof out.craft === 'object' && !Array.isArray(out.craft) ? out.craft : {}, obj = (o) => (o && typeof o === 'object' && !Array.isArray(o) ? o : {}), num = (o) => { const r = {}; for (const k in obj(o)) { const v = +o[k]; if (v > 0 && isFinite(v)) r[k] = Math.floor(v); } return r; };
+    out.craft = { mats: num(c.mats), upg: num(c.upg), sig: num(c.sig), pity: num(c.pity), relics: num(c.relics) }; }
   out.login = { n: Math.max(0, (out.login && out.login.n) | 0), last: out.login && Number.isInteger(out.login.last) ? out.login.last : -1 };
   out.weekly = { wk: (out.weekly && out.weekly.wk) | 0, done: !!(out.weekly && out.weekly.done) };
   out.essence = Math.max(0, out.essence | 0);

@@ -265,3 +265,33 @@
 #bAct:active, #playBtn:active { transform: translateY(2px); box-shadow: inset 0 0 0 1px #f8e9bb, inset 0 0 0 3px rgba(122,86,36,.5), inset 0 2px 4px rgba(60,36,10,.35), 0 1px 0 #120a03 !important; }
 @keyframes actGlow { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255,214,120,0)); } 50% { filter: drop-shadow(0 0 7px rgba(255,214,120,.55)); } }
 #playBtn { border-width: 3px !important; border-radius: 12px !important; font-size: 24px !important; letter-spacing: .1em; }
+
+/* ---- crafting: material chips, biome picker, set and secret cards (Garo's Craft and Masterwork tabs) ---- */
+.mats { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.mats.center { justify-content: center; margin: 10px 0 4px; }
+.mat { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px 3px 5px; border-radius: 99px; font: 600 11.5px/1.2 var(--body); color: #eadfc3;
+  background: rgba(10, 14, 18, .55); border: 1px solid rgba(221, 194, 138, .22); white-space: nowrap; }
+.mat b { color: #fff3cf; font-weight: 700; }
+.mat i, .matdot { display: inline-block; width: 11px; height: 11px; flex: none; background: var(--mc, #ccc); box-shadow: 0 0 6px var(--mc, #ccc), inset 0 -2px 0 rgba(0,0,0,.35); }
+.mat.k-ore i { border-radius: 2px; transform: rotate(45deg) scale(.85); }
+.mat.k-part i { border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+.mat.k-core i, .matdot { border-radius: 50%; }
+.mat.k-soul i { border-radius: 50%; background: radial-gradient(circle, #fff, var(--mc) 55%, #5a1030); }
+.mat.missing { border-color: rgba(255, 93, 108, .45); color: #d9a3a3; }
+.mat.missing b { color: #ff8a8a; }
+.mat.gold { gap: 3px; }
+.mat.gold svg, .mat.gold img { width: 13px; height: 13px; }
+.bpicks { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; margin: 8px 0; }
+.bpick { flex: 1 0 auto; display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 10px; font: 700 12px/1 var(--title, Georgia, serif); letter-spacing: .04em;
+  color: #d8cba8; background: rgba(10, 14, 18, .6); border: 1px solid rgba(221, 194, 138, .2); }
+.bpick i { width: 9px; height: 9px; border-radius: 50%; background: var(--mc); box-shadow: 0 0 8px var(--mc); }
+.bpick.on { color: #1b1206; background: linear-gradient(180deg, #f7e3a8, #c99a4e); border-color: #fff0c0; }
+.bpick.locked { opacity: .45; }
+.card.craftSet { border-left: 3px solid var(--mc); }
+.card.craftSet h4, .card.secret h4 { margin: 0 0 4px; }
+.card.craftSet em { color: #f3d98f; font-style: normal; }
+.card.secret { margin-top: 10px; background: linear-gradient(180deg, rgba(60, 30, 80, .35), rgba(10, 14, 18, .5)); border: 1px solid rgba(199, 125, 255, .3); }
+.craftRow { align-items: center; }
+.craftRow .meta { min-width: 0; }
+.craftRow > button { flex: none; min-width: 84px; }
+.fl.mat small { opacity: .65; }

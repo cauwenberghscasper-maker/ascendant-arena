@@ -239,7 +239,9 @@ function openSmith(tab) {
       const mp = maxUpgradePlan(it);
       return itemRow(it, `<div class="col"><button class="${can ? 'primary' : 'ghost'}" data-act="${mp.n > 1 ? 'upgradeMax2' : 'upgrade'}" data-slot="${s}" ${max ? 'disabled' : ''}>${max ? 'Max' : mp.n > 1 ? `Reforge… +${mp.n}` : `Reforge… ${costHTML(cost, ess)}`}</button>${mergeCostHTML(it)}</div>`, null, { upgrade: can });
     }).join('') + '</div>';
-  } else if (tab === 'Gems') {
+  } else if (tab === 'Craft') body = craftTabHTML(p);
+  else if (tab === 'Masterwork') body = masterworkTabHTML(p);
+  else if (tab === 'Gems') {
     const pr = gemPrice(p), row = (n) => { let c = 0; for (let i = 0; i < n; i++) c += Math.round(30 * Math.pow(CFG.enemies.goldGrowth, p.level - 1) * Math.pow(1.03, (p.gemBuys || 0) + i)); return `<button class="${p.gold >= c ? 'primary' : 'disabled'}" data-act="gems" data-n="${n}" ${p.gold >= c ? '' : 'aria-disabled="true"'}>${ICON.ess}${n} for ${ICON.coin}${fmtK(c)}</button>`; };
     body = `<p class="say">“Got more gold than you need? I’ll trade you gems. The price climbs a little with every gem and cools down over time.”</p>
       <div class="gemx"><div><span>Current price</span><b>${ICON.coin}${fmtK(pr)} <small>per gem</small></b></div><div class="row">${row(10)}${row(50)}${row(200)}</div></div>
@@ -251,9 +253,45 @@ function openSmith(tab) {
     }).join('') + '</div><p class="fine">Prices are fixed. Epic pieces only drop from monsters, world bosses and their perks are stronger.</p>';
   }
   const upAlert = Object.values(slotAlerts()).some((a) => a.canUpgrade);
-  const tabs = ['Upgrade', 'Gems', 'Forge'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${tabName(t)}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
+  const tabs = ['Upgrade', 'Craft', 'Masterwork', 'Gems', 'Forge'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${tabName(t)}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
   openModal(dock(`<div class="npcHead"><span class="dotc" style="background:#8a5a3c"></span><h3>Garo’s Smithy</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
     <div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, tab === 'Upgrade' ? selBar('', '', '', 'Each Reforge… shows every piece the smith will melt down before you confirm.') : ''), true, true);
+}
+// --- crafting tabs (src/game/39-crafting.js)
+const hex6 = (c) => '#' + c.toString(16).padStart(6, '0');
+function matChip(id, need, p) { const M = MATS[id], have = matCount(id, p), ok = need == null || have >= need;
+  return `<span class="mat k-${M.kind}${ok ? '' : ' missing'}"><i style="--mc:${hex6(M.color)}"></i>${M.name} <b>${need == null ? fmtK(have) : `${fmtK(have)}/${fmtK(need)}`}</b></span>`; }
+function costChips(cost, p) { return cost.mats.map(([id, n]) => matChip(id, n, p)).join('') + `<span class="mat gold${p.gold >= cost.gold ? '' : ' missing'}">${ICON.coin}<b>${fmtK(cost.gold)}</b></span>`; }
+function craftTabHTML(p) {
+  const C = CFG.craft, bi = clamp(UI.craftBiome == null ? Math.max(0, CB.findIndex((b, i) => !biomeReached(i + 1, p))) : UI.craftBiome, 0, 5), b = CB[bi], open = biomeReached(bi, p);
+  const minL = Math.min(...CFG.world.zones.filter((z) => z.biome === bi).map((z) => z.minLevel || 1));
+  const picks = CB.map((x, i) => `<button class="bpick ${i === bi ? 'on' : ''}${biomeReached(i, p) ? '' : ' locked'}" data-act="craftBiome" data-b="${i}" style="--mc:${hex6(x.color)}"><i></i>${BIOMES[i].name.split(' ').pop()}</button>`).join('');
+  const SB = C.setBonus, k = 1 + SB.perBiome * bi, worn = setBonuses(p.gear).sets[bi] || 0;
+  const rows = CFG.gear.slots.map((s) => {
+    const cost = setPieceCost(bi, s), can = open && canPay(cost, p), noun = ITEM_NAMES[s][s === 'weapon' ? 0 : 1];
+    return `<div class="item ${C.setRarity[bi]} craftRow"><div class="meta"><div class="slot">${SLOT_LABEL[s]} · item level ${Math.max(biomeTop(bi), p.level) + 2}</div><div class="nm">${b.set} ${noun} ${rarityChip(C.setRarity[bi])}</div><div class="st">Random affixes + one perfect bonus affix</div><div class="mats">${costChips(cost, p)}</div></div>
+      <button class="${can ? 'primary' : 'disabled'}" data-act="craftPiece" data-b="${bi}" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div>`;
+  }).join('');
+  const hero = CFG.brawlers[b.hero], heroHave = p.unlocked.attacks.includes(b.hero), relicN = craftState(p).relics[bi] | 0;
+  return `<p class="say">“Bring me what the land gives up: ore from the mines, parts from its monsters and the cores that only its dungeons hold. I’ll make you something no monster drops.”</p>
+    <div class="bpicks">${picks}</div>
+    <div class="card craftSet" style="--mc:${hex6(b.color)}"><h4>${b.set} set · ${BIOMES[bi].name}</h4>
+      <p>${open ? `Wear 3 pieces: +${pct(SB[3].dmg * k)} damage, +${pct(SB[3].hp * k)} HP · all 5: another +${pct(SB[5].dmg * k)} damage, +${pct(SB[5].hp * k)} HP <em>(wearing ${worn}/5)</em>` : `Opens at level ${minL}, when you can reach ${BIOMES[bi].name}.`}</p>
+      <div class="mats">${matChip(b.ore, null, p)}${matChip(b.part, null, p)}${matChip(b.core, null, p)}${matChip(C.titan.id, null, p)}</div>
+      <p class="fine">${b.oreN}: mine it in this biome’s quarries · ${b.partN}: its monsters (elites always drop some) · ${b.coreN}: its dungeon chests only · Titan Souls: world bosses</p></div>
+    <div class="list">${rows}</div>
+    <div class="card secret"><h4>Hidden in ${BIOMES[bi].name} dungeons</h4>
+      <p>${hero ? (heroHave ? `<b>${hero.name}</b> fights for you.` : `<b>${hero.name}</b> cannot be recruited any other way. Their oaths drop from this biome’s dungeon chests (Sanctums and Trials more often, higher keys more): <b>${sigilHave(b.hero, p)}/${C.sigil.need}</b>.`) : ''}</p>
+      <p>Relic: <b>${b.relic.name}</b> ${rarityChip(b.relic.rarity)} · a rare chest find here (twice as likely in the Sanctum, certain after ${C.relic.pity} chests without one) · found ${relicN}×</p></div>`;
+}
+function masterworkTabHTML(p) {
+  const C = CFG.craft, rows = Object.keys(C.upgrades).map((id) => {
+    const U = C.upgrades[id], r = upgRank(id, p), max = r >= U.max, cost = max ? null : upgCost(id, r), can = !max && canPay(cost, p);
+    return `<div class="item craftRow mw"><div class="meta"><div class="slot">Rank ${r}/${U.max}${max ? ' · mastered' : ` · next uses ${BIOMES[cost.biome].name} materials`}</div><div class="nm">${U.name}</div><div class="st">${r ? U.d(U.per * r) : 'Not started'}${max ? '' : ` → <b>${U.d(U.per * (r + 1))}</b>`}</div>${max ? '' : `<div class="mats">${costChips(cost, p)}</div>`}</div>
+      <button class="${can ? 'primary' : 'disabled'}" data-act="buyUpg" data-id="${id}" ${can ? '' : 'aria-disabled="true"'}>${max ? 'Max' : 'Upgrade'}</button></div>`;
+  }).join('');
+  return `<p class="say">“Masterwork lasts forever and follows every hero you play. The early ranks take woodland copper; the last ones need every land’s materials and a Titan Soul or two.”</p><div class="list">${rows}</div>
+    <p class="fine">Masterwork and set bonuses apply in the world, dungeons and the Rift; the Arena keeps fights even.</p>`;
 }
 function openArenaPanel() {
   UI.current = 'arena';
@@ -516,6 +554,12 @@ function openTrialPanel(zi) {
     <p class="fine">Kill chain: ${ch.n ? `${ch.n} × ${escapeHTML(CFG.enemies[ch.type] ? CFG.enemies[ch.type].name : ch.type)}` : 'none'} · keep killing one kind of monster without falling to raise the Radiant chance (up to ×${T.chainMax} at ${(T.chainMax - 1) * T.chainStep}). Trials taken ${S.n} · Radiants found ${S.rad}.</p></div>
     <div class="row end"><button class="ghost" data-act="close">Not now</button>${S.sig >= T.sigilCost ? `<button class="ghost" data-act="trialForge" data-z="${zi}">Forge relic (${T.sigilCost} sigils)</button>` : ''}<button class="primary big" data-act="trialGo" data-z="${zi}">Begin the Trial (Lv ${lvl})</button></div>`);
 }
+function craftChestHTML(c) {
+  if (!c || !c.mats) return ''; const p = G.profile;
+  return `<div class="mats center">${c.mats.map(([id, n]) => `<span class="mat k-${MATS[id].kind}"><i style="--mc:${hex6(MATS[id].color)}"></i>+${n} ${MATS[id].name}</span>`).join('')}</div>`
+    + (c.sigil ? `<p class="say">${CFG.brawlers[c.sigil.id].name}’s oath · <b>${Math.min(c.sigil.n, c.sigil.need)}/${c.sigil.need}</b>${c.sigil.n >= c.sigil.need ? ' · they join you!' : ''}</p>` : '')
+    + (c.relic ? `<h2 class="center">Relic found</h2><div class="list">${itemRow(c.relic, '', `Relic · ${BIOMES[c.biome].name} dungeons only`)}</div>` : '');
+}
 function openDungeonChest() {
   const r = claimDungeonChest(); if (!r) return;
   UI.current = 'dungeonChest'; Sfx.play('win');
@@ -523,7 +567,7 @@ function openDungeonChest() {
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
     ${r.radiant ? `<h2 class="center">✦ RADIANT ✦</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
-    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}
+    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}${craftChestHTML(r.craft)}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
 function openRiftResult(r) {
@@ -637,6 +681,9 @@ function handlePanelClick(e) {
     case 'upgrade': openMerge(b.dataset.slot, false, 'smith'); break;
     case 'forge': if (buyForge(b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; openSmith('Forge'); } break;
     case 'smithTab': openSmith(b.dataset.tab); break;
+    case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
+    case 'craftPiece': if (craftSetPiece(+b.dataset.b, b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
+    case 'buyUpg': if (buyUpgrade(b.dataset.id)) Sfx.play('unlock'); openSmith('Masterwork'); break;
     case 'queue': queueArena(); break;
     case 'hub': UI.close(); leaveArena(); break;
     case 'again': UI.close(); leaveArena(); queueArena(); break;

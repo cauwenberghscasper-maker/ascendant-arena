@@ -23,7 +23,7 @@ function mineNode(st) {
   if (!st || st.t > 0 || G.profile.level < CFG.world.zones[st.q.zone].minLevel) return null;
   const M = CFG.mining, p = G.profile, m = mineState(), q = st.q, rare = isRareVein(q);
   const res = { name: veinName(q, st), rich: st.rich, ore: Math.round(randInt(M.ore[0], M.ore[1]) * (rare ? M.rareMul : 1) * (st.rich ? M.richMul : 1) * (1 + M.pickYield * m.pick)), geodes: 0, pet: false };
-  m.ore += res.ore; m.mined++;
+  m.ore += res.ore; m.mined++; if (typeof craftMineDrop === 'function') { craftMineDrop(q, res.ore); res.oreName = (CFG.craft.biomes[zoneBiome(q.zone)] || {}).oreN || 'ore'; }
   const gc = geodeChance(m, rare); for (let i = 0; i < res.ore; i++) if (Math.random() < gc) res.geodes++;
   for (let i = 0; i < res.geodes; i++) addCase('geode', { l: Math.max(q.lvl, p.level), src: 'mine' });
   if (Math.random() < 1 / M.pet) res.pet = findMiningPet();

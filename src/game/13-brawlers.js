@@ -157,6 +157,6 @@ for (const id in CFG.brawlers) {
 }
 CFG.trees2 = { resetBase: 200, presets: 3 };
 const NO_ARTS = {};
-function unlockText(u) { if (!u) return ''; if (u.level) return `Reach level ${u.level}`; if (u.streak) return `Reach a ${u.streak} kill streak`; if (u.shrines) return `Complete ${u.shrines} challenge shrine${u.shrines > 1 ? 's' : ''}`; if (u.bosses) return 'Help defeat a world boss'; return ''; }
-function unlockMet(u, p) { if (!u) return true; if (u.level && p.level < u.level) return false; if (u.shrines && (p.stats.shrines || 0) < u.shrines) return false; if (u.bosses && (p.stats.bosses || 0) < u.bosses) return false; if (u.streak && (p.stats.bestStreak || 0) < u.streak) return false; return true; }
+function unlockText(u) { if (!u) return ''; if (u.level) return `Reach level ${u.level}`; if (u.streak) return `Reach a ${u.streak} kill streak`; if (u.shrines) return `Complete ${u.shrines} challenge shrine${u.shrines > 1 ? 's' : ''}`; if (u.bosses) return 'Help defeat a world boss'; if (u.sigils != null) return `Only in ${BIOMES[u.sigils].name} dungeons · ${sigilHave(CFG.craft.biomes[u.sigils].hero)}/${CFG.craft.sigil.need} oaths`; return ''; }
+function unlockMet(u, p) { if (!u) return true; if (u.level && p.level < u.level) return false; if (u.shrines && (p.stats.shrines || 0) < u.shrines) return false; if (u.bosses && (p.stats.bosses || 0) < u.bosses) return false; if (u.streak && (p.stats.bestStreak || 0) < u.streak) return false; if (u.sigils != null && sigilHave(CFG.craft.biomes[u.sigils].hero, p) < CFG.craft.sigil.need) return false; return true; }
 

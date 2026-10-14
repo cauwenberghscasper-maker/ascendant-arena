@@ -318,7 +318,7 @@ function openBrawlers(sel) {
     const B = CFG.brawlers[id], have = owned.includes(id), L = masteryOf(p, id);
     return `<button class="bcard ${have ? 'own' : 'locked'} ${id === sel ? 'sel' : ''} ${id === p.cls ? 'cur' : ''} tier-${B.tier || 'adventurer'}" data-act="bSel" data-id="${id}">
       ${fresh.has('a:' + id) ? '<i class="rdot"></i>' : ''}${brawlerPortrait(id, have, 96)}
-      <b>${B.name}</b><small>${have ? `Mastery ${L}` : `Lv ${CFG.attacks[id].unlock && CFG.attacks[id].unlock.level ? CFG.attacks[id].unlock.level : '—'}`}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
+      <b>${B.name}</b><small>${have ? `Mastery ${L}` : (CFG.attacks[id].unlock && CFG.attacks[id].unlock.sigils != null ? `Dungeon · ${sigilHave(id)}/${CFG.craft.sigil.need}` : `Lv ${CFG.attacks[id].unlock && CFG.attacks[id].unlock.level ? CFG.attacks[id].unlock.level : '—'}`)}</small>${id === p.cls ? '<span class="eqd">Playing</span>' : ''}</button>`;
   };
   // one section per tier, from the champions up to the divines
   const HERO_TIERS = [['adventurer', 'Adventurers'], ['champion', 'Champions'], ['legendary', 'Legendaries'], ['ascendant', 'Ascendants'], ['divine', 'Divines']];
