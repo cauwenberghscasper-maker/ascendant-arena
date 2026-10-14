@@ -453,6 +453,10 @@ function openSkills(which) {
   TreeView.which = which; UI.current = 'skills';
   const T = treeOf(p, which), free = treeFree(p, which), title = `${CFG.brawlers[which].name}’s tree`;
   const src = `${T.total} points · ${T.level} from level ${p.level} + ${T.mastery} from mastery ${masteryOf(p, which)} · only for ${CFG.brawlers[which].name}`;
+  const lp = treeLayerProgress(T.nodes, T.st.sets[T.st.active]);
+  if (TreeView.ringOf === which && lp.layer > TreeView.ring) TreeView.keep = false;
+  TreeView.ring = lp.layer; TreeView.ringOf = which;
+  const ringTxt = lp.layer >= lp.of ? 'Whole tree unlocked' : `Ring ${lp.layer} of ${lp.of} · ${lp.done}/${lp.total} at rank ${TREE_GATE} to reveal the next ring`;
   const presets = T.st.sets.map((_, i) => `<button class="pre ${T.st.active === i ? 'on' : ''}" data-act="tPreset" data-i="${i}">${i + 1}</button>`).join('');
   const bopts = ownedBrawlers(p).map((id) => `<option value="${id}" ${id === which ? 'selected' : ''}>${CFG.brawlers[id].name}${treeFree(p, id) > 0 ? ' •' : ''}</option>`).join('');
   openModal(`<div class="treeTop">
@@ -461,14 +465,15 @@ function openSkills(which) {
       <div class="tinfo"><b>${title}</b><span class="tpts ${free > 0 ? 'hot' : ''}">${free} point${free === 1 ? '' : 's'} to spend</span><small>${src}</small></div>
       <div class="tact"><span class="pres">Build ${presets}</span><button class="ghost sm" data-act="tReset">Reset ${ICON.coin}${fmtK(treeResetCost(p))}</button></div>
     </div>
-    <div class="treeWrap"><canvas id="treeCv"></canvas><div class="tzoom"><button data-act="tZoom" data-z="in" aria-label="Zoom in">+</button><button data-act="tZoom" data-z="out" aria-label="Zoom out">−</button><button data-act="tZoom" data-z="fit" aria-label="Show the whole tree">Fit</button></div><div id="nodeCard" hidden></div><div class="thint">Drag to move · pinch or +/− to zoom · tap a node</div></div>`, true);
+    <div class="treeWrap"><canvas id="treeCv"></canvas><div class="tzoom"><button data-act="tZoom" data-z="in" aria-label="Zoom in">+</button><button data-act="tZoom" data-z="out" aria-label="Zoom out">−</button><button data-act="tZoom" data-z="fit" aria-label="Show the whole tree">Fit</button></div><div id="nodeCard" hidden></div><div class="thint">${ringTxt}</div></div>`, true);
   $('panel').classList.add('treePanel'); $('panel').classList.remove('scroll');
   setupTreeCanvas();
   renderNodeCard();
 }
 const TZ_MIN = 6, TZ_MAX = 150;
 // the whole tree fits the canvas (with room for the labels around it)
-function treeFit(w, h) { return Math.min(w, h * 1.1) / 2 / 18.2; }
+function treeShownR() { const T = treeOf(G.profile, TreeView.which), set = T.st.sets[T.st.active], L = treeLayer(T.nodes, set); let r = 0; for (const id in T.nodes) if (nodeShown(T.nodes, set, id, L)) r = Math.max(r, Math.hypot(T.nodes[id].x, T.nodes[id].y)); return r; }
+function treeFit(w, h) { return Math.min(w, h * 1.1) / 2 / (treeShownR() + 4.4); }
 function treeZoom(how) {
   const cx = TreeView.w / 2, cy = TreeView.h / 2, wx = (cx - TreeView.ox) / TreeView.s, wy = (cy - TreeView.oy) / TreeView.s;
   if (how === 'fit') { TreeView.s = treeFit(TreeView.w, TreeView.h); TreeView.ox = TreeView.w / 2; TreeView.oy = TreeView.h / 2; return; }
@@ -495,7 +500,8 @@ function setupTreeCanvas() {
     const pt = TreeView.ptrs.get(e.pointerId); TreeView.ptrs.delete(e.pointerId); if (TreeView.ptrs.size < 2) TreeView.pinch = null;
     if (pt && TreeView.moved < 8 && e.type === 'pointerup') {
       const [wx, wy] = toWorld(e.offsetX, e.offsetY), T = treeOf(G.profile, TreeView.which);
-      let best = null, bd = 0.9; for (const id in T.nodes) { const n = T.nodes[id], d = Math.hypot(n.x - wx, n.y - wy); if (d < bd) { bd = d; best = id; } }
+      const set = T.st.sets[T.st.active], L = treeLayer(T.nodes, set);
+      let best = null, bd = 0.9; for (const id in T.nodes) { if (!nodeShown(T.nodes, set, id, L)) continue; const n = T.nodes[id], d = Math.hypot(n.x - wx, n.y - wy); if (d < bd) { bd = d; best = id; } }
       TreeView.sel = best; renderNodeCard(); if (best) Sfx.play('click');
     }
   };
@@ -514,6 +520,7 @@ function treeImg(url) { let im = treeImgs.get(url); if (!im) { im = new Image();
 function drawTree() {
   const cv = TreeView.cv, g = cv.getContext('2d'), dpr = TreeView.dpr, p = G.profile, which = TreeView.which;
   const T = treeOf(p, which), set = T.st.sets[T.st.active], free = treeFree(p, which), t = performance.now() / 1000;
+  const L = treeLayer(T.nodes, set), shown = (id) => nodeShown(T.nodes, set, id, L);
   g.setTransform(dpr, 0, 0, dpr, 0, 0); g.imageSmoothingEnabled = false;
   g.fillStyle = '#100e16'; g.fillRect(0, 0, TreeView.w, TreeView.h);
   const S = TreeView.s, X = (x) => Math.round(TreeView.ox + x * S), Y = (y) => Math.round(TreeView.oy + y * S);
@@ -526,7 +533,7 @@ function drawTree() {
   for (const id in T.nodes) {
     const n = T.nodes[id];
     for (const l of n.links) {
-      if (l < id) continue; const m = T.nodes[l];
+      if (l < id || !shown(id) || !shown(l)) continue; const m = T.nodes[l];
       const both = owned(id) && owned(l), one = owned(id) || owned(l);
       const col = both ? PX_FAM[branchFam(n.start ? l : id)].ink[1] : null;
       g.lineCap = 'butt'; g.lineWidth = both ? px + 2 : px;
@@ -538,9 +545,10 @@ function drawTree() {
   // nodes
   const label = (txt, x, y, size, col) => { const numeric = /^[\d/×+−.%∞]+$/.test(txt); g.font = `700 ${size}px ${numeric ? 'Rubik, sans-serif' : "'Arena Numerals', 'Pixelify Sans', monospace"}`; g.textAlign = 'center'; g.fillStyle = '#000'; g.fillText(txt, x, y + 2); g.fillStyle = col; g.fillText(txt, x, y); };
   for (const id in T.nodes) {
+    if (!shown(id)) continue;
     const n = T.nodes[id], info = nodeInfo(n), cx = X(n.x), cy = Y(n.y);
     if (cx < -80 || cy < -80 || cx > TreeView.w + 80 || cy > TreeView.h + 80) continue;
-    const rank = set[id] || 0, open = nodeOpen(T.nodes, set, id), can = open && rank < nodeMax(n) && free >= n.cost, lit = rank > 0 || n.start;
+    const rank = set[id] || 0, open = nodeOpen(T.nodes, set, id, L), can = open && rank < nodeMax(n) && free >= n.cost, lit = rank > 0 || n.start;
     const size = Math.max(16, Math.round((n.start ? 1.35 : n.big ? 1.2 : 0.86) * S / 8) * 8), h = size / 2;
     const fam = lit ? (n.start ? 'gold' : branchFam(id)) : open ? 'steel' : 'parch';
     const im = treeImg(PixelIcons.url(info.icon, fam));
@@ -560,7 +568,8 @@ function drawTree() {
   // branch names
   if (S > 7) {
     const own = { pow: 1, rhy: 1, uti: 1 };
-    CFG.treeBranches.forEach((b) => { const r = 15.6; label(b.name.toUpperCase(), X(Math.cos(b.angle) * r), Y(Math.sin(b.angle) * r) + 5, clamp(Math.round(S * 0.5), 12, 20), own[b.id] ? '#a8925a' : '#6e6878'); });
+    const r = treeShownR() + 1.8;
+    CFG.treeBranches.forEach((b) => { label(b.name.toUpperCase(), X(Math.cos(b.angle) * r), Y(Math.sin(b.angle) * r) + 5, clamp(Math.round(S * 0.5), 12, 20), own[b.id] ? '#a8925a' : '#6e6878'); });
   }
 }
 function renderNodeCard() {
@@ -571,7 +580,7 @@ function renderNodeCard() {
   const open = nodeOpen(T.nodes, set, id), free = treeFree(p, which), can = canSpend(p, which, id);
   let cur = '';
   if (info.kind && rank) { const tot = {}; for (const k in info.kind.eff) tot[k] = info.kind.eff[k] * rank; cur = `Now: ${info.kind.fmt(tot)}`; }
-  const why = rank >= mx ? 'Maxed' : !open ? 'Unlock a connected node first' : free < n.cost ? `Needs ${n.cost} point${n.cost > 1 ? 's' : ''}` : '';
+  const why = rank >= mx ? 'Maxed' : !open ? ((n.depth || 0) > treeLayer(T.nodes, set) ? `Raise the inner ring to rank ${TREE_GATE} first` : 'Unlock a connected node first') : free < n.cost ? `Needs ${n.cost} point${n.cost > 1 ? 's' : ''}` : '';
   el.innerHTML = `<div class="nc">${gi(info.icon, n.big ? 'key' : '')}<div><b>${info.name}</b><small>${n.big ? 'Keystone · 3 points' : mx === Infinity ? `Rank ${rank} · no limit` : `Rank ${rank}/${mx}`}</small><p>${info.desc}</p>${cur ? `<p class="cur">${cur}</p>` : ''}</div></div>
     <div class="ncb">${why ? `<span class="why">${why}</span>` : ''}<button class="${can ? 'primary' : 'disabled'}" data-act="tSpend" data-n="1" ${can ? '' : 'aria-disabled="true"'}>+1</button>${!n.big ? `<button class="${can ? 'ghost' : 'disabled'}" data-act="tSpend" data-n="${mx === Infinity ? 10 : 5}" ${can ? '' : 'aria-disabled="true"'}>+${mx === Infinity ? 10 : 'max'}</button>` : ''}</div>`;
   el.hidden = false;

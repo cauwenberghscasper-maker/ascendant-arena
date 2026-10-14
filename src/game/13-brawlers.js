@@ -122,6 +122,9 @@ function buildTree(spec) {
     add({ id, kind, x: Math.cos(a) * ringR, y: Math.sin(a) * ringR, max: 10 });
     link(id, `${spec.branches[i].id}_c0`); link(id, `${spec.branches[(i + 1) % nb].id}_c0`);
   });
+  // layer = steps from the core; layer N+1 opens once every layer-N node has its required ranks (see treeLayer)
+  nodes.core.depth = 0; const q = ['core'];
+  while (q.length) { const c = nodes[q.shift()]; for (const l of c.links) if (nodes[l].depth == null) { nodes[l].depth = c.depth + 1; q.push(l); } }
   return nodes;
 }
 const K = (key) => ({ key });

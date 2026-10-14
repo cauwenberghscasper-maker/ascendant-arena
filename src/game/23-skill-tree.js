@@ -6,8 +6,30 @@ function treeOf(p, which) { if (!CFG.brawlerTrees[which]) which = p.cls; return 
 function treeSpent(nodes, set) { let n = 0; for (const id in set) { const nd = nodes[id]; if (nd) n += set[id] * nd.cost; } return n; }
 function treeFree(p, which) { const T = treeOf(p, which); return T.total - treeSpent(T.nodes, T.st.sets[T.st.active]); }
 const skillPointsFree = (p) => Math.max(0, treeFree(p, p.cls));
-function nodeOpen(nodes, set, id) { const n = nodes[id]; if (!n) return false; if (n.start) return true; return n.links.some((l) => (set[l] || 0) > 0 || (nodes[l] && nodes[l].start)); }
 function nodeMax(n) { return n.kind && NODE_KINDS[n.kind] && NODE_KINDS[n.kind].inf ? Infinity : n.max; }
+// The tree opens one layer at a time: the next layer appears once every node in the current one has
+// at least TREE_GATE ranks (or is maxed, for nodes with fewer ranks than that).
+const TREE_GATE = 3;
+const layerNeed = (n) => Math.min(TREE_GATE, nodeMax(n));
+function treeDepthMax(nodes) { let d = 0; for (const id in nodes) d = Math.max(d, nodes[id].depth || 0); return d; }
+function treeLayer(nodes, set) {
+  const top = treeDepthMax(nodes); let d = 1;
+  while (d < top && Object.keys(nodes).every((id) => nodes[id].depth !== d || (set[id] || 0) >= layerNeed(nodes[id]))) d++;
+  return d;
+}
+// how far the current layer is: { layer, of, done, total }
+function treeLayerProgress(nodes, set) {
+  const layer = treeLayer(nodes, set); let done = 0, total = 0;
+  for (const id in nodes) if (nodes[id].depth === layer) { total++; if ((set[id] || 0) >= layerNeed(nodes[id])) done++; }
+  return { layer, of: treeDepthMax(nodes), done, total };
+}
+// shown on the tree screen: unlocked layers, plus anything already learned (older saves)
+function nodeShown(nodes, set, id, layer) { const n = nodes[id]; return !!n && (n.start || (set[id] || 0) > 0 || (n.depth || 0) <= (layer != null ? layer : treeLayer(nodes, set))); }
+function nodeOpen(nodes, set, id, layer) {
+  const n = nodes[id]; if (!n) return false; if (n.start) return true;
+  if ((n.depth || 0) > (layer != null ? layer : treeLayer(nodes, set))) return false;
+  return n.links.some((l) => (set[l] || 0) > 0 || (nodes[l] && nodes[l].start));
+}
 function canSpend(p, which, id) {
   const T = treeOf(p, which), set = T.st.sets[T.st.active], n = T.nodes[id]; if (!n) return false;
   return (set[id] || 0) < nodeMax(n) && nodeOpen(T.nodes, set, id) && treeFree(p, which) >= n.cost;
