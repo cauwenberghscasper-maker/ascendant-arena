@@ -490,7 +490,7 @@ function buildHub() {
   }
   // ponds: dark water with a lighter rim and lily pads
   if (ponds.length && hasWM('pond')) { const pb = WORLD_MODEL_BOX.pond;
-    WorldModels.place(hubGroup, 'pond', ponds.map((pd2) => ({ x: pd2.x, z: pd2.z, y: 0.02, ry: hashf(pd2.x, pd2.z) * 6, sx: 2.3 * pd2.s / pb[0], sz: 1.8 * pd2.s / pb[1], sy: 0.9, s: 1 })), { shadow: false }); }
+    WorldModels.place(hubGroup, 'pond', ponds.map((pd2) => ({ x: pd2.x, z: pd2.z, y: -0.24, ry: hashf(pd2.x, pd2.z) * 6, sx: 2.3 * pd2.s / pb[0], sz: 1.8 * pd2.s / pb[1], sy: 0.85, s: 1 })), { shadow: false }); }
   else if (ponds.length) {
     const rimIM = new THREE.InstancedMesh(new THREE.CircleGeometry(1.12, 14).rotateX(-Math.PI / 2), new THREE.MeshToonMaterial({ color: 0x6a5f45, gradientMap: toonRamp }), ponds.length);
     const wIM = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 24).rotateX(-Math.PI / 2), worldArt.waterMaterial, ponds.length);
@@ -527,10 +527,10 @@ function buildHub() {
     for (const k of [...MB.keys()].filter((k) => k.startsWith('border_'))) WorldModels.place(hubGroup, MBO[k].name, MB.get(k), MBO[k].opts);
   } else { inst(trunkGeo, bTrunks, false, { shadow: false }); inst(pineGeo, bTops, true, { shadow: false }); }
   // horizon: each theme's distant landmass beyond the woods (mountains, volcanoes, sea stacks, floating isles, sky temples)
-  { const HZ = ['mountain', 'mountain', 'snow_mountain', 'volcano', 'floating_isle', 'sea_stack', 'sky_temple'], hz = new Map();
+  { const HZ = ['mountain', 'mountain', 'snow_mountain', hasWM('volcano') ? 'volcano' : 'mountain', 'floating_isle', 'sea_stack', hasWM('sky_temple') ? 'sky_temple' : 'floating_isle'], hz = new Map();
     W.zones.forEach((zn, zi) => { const nm = HZ[zn.theme]; if (!hasWM(nm)) return; if (!hz.has(nm)) hz.set(nm, []);
       for (const side of [-1, 1]) for (let j = 0; j < 2; j++) { const x = side * (W.maxX + 48 + ((zi + j) % 2) * 16), z = zn.z0 + (j + 0.5) * zn.len / 2 + (hashf(zi, j) - 0.5) * 20;
-        hz.get(nm).push({ x, z, y: nm === 'floating_isle' || nm === 'sky_temple' ? 14 + hashf(z, x) * 10 : -1, ry: hashf(x, z) * 6, s: 34 + hashf(z, zi) * 14 }); } });
+        hz.get(nm).push({ x, z, y: nm === 'floating_isle' || nm === 'sky_temple' ? 14 + hashf(z, x) * 10 : -1, ry: hashf(x, z) * 6, s: 34 + hashf(z, zi) * 14, color: zn.theme === 3 ? 0x8a5a4a : zn.theme === 6 ? 0xfff0d0 : 0xffffff }); } });
     for (const [nm, items] of hz) WorldModels.place(hubGroup, nm, items, { shadow: false, horizon: true, glow: nm === 'volcano' ? 0xff6a2a : 0, glowK: 0.25 }); }
 
   // challenge shrines: stone rings (static) + floating crystals (state colour)
@@ -589,17 +589,17 @@ function paintSky(top, hor) {
 
 // --- arena ------------------------------------------------------------------------------
 // walkable top of the generated Rift and arena floors, as a fraction of the model's height
-const RIFT_FLOOR_TOP = 1, ARENA_FLOOR_TOP = 1;
+const RIFT_FLOOR_TOP = 0.934, ARENA_FLOOR_TOP = 0.05, ARENA_FLOOR_INNER = 0.9; // measured on the generated meshes
 const arenaParts = { gas: null };
 // Rift sanctum: an obsidian disc floating in the void, with rune rings and crystal pylons
 const riftParts = {};
 function buildRift() {
   const R = CFG.rift, grid = new Grid(6), rp = [], rng = mulberry32(777);
   // generated sanctum: an obsidian platform, six pylons and a ring of drifting shards (colliders stay the same)
-  const riftModels = hasWM('rift_floor') && hasWM('rift_pylon');
+  const PYLON = hasWM('rift_pylon') ? 'rift_pylon' : 'black_spire', riftModels = hasWM('rift_floor') && hasWM(PYLON);
   if (riftModels) { const fb = WORLD_MODEL_BOX.rift_floor, fs = 2 * (R.r + 2.5) / Math.max(fb[0], fb[1]);
     WorldModels.place(riftGroup, 'rift_floor', [{ x: RC.x, z: RC.z, y: -RIFT_FLOOR_TOP * fs, s: fs }], { shadow: false, glow: 0xff5d8f, glowK: 0.12, far: 400 });
-    WorldModels.place(riftGroup, 'rift_pylon', [0, 1, 2, 3, 4, 5].map((i) => { const a = (i / 6) * Math.PI * 2 + 0.52; return { x: RC.x + Math.sin(a) * 13, z: RC.z + Math.cos(a) * 13, ry: a + Math.PI, s: 4.2 }; }), { glow: 0xb06bff, glowK: 0.18, far: 400 });
+    WorldModels.place(riftGroup, PYLON, [0, 1, 2, 3, 4, 5].map((i) => { const a = (i / 6) * Math.PI * 2 + 0.52; return { x: RC.x + Math.sin(a) * 13, z: RC.z + Math.cos(a) * 13, ry: a + Math.PI, s: 4.6 }; }), { glow: 0xb06bff, glowK: 0.18, far: 400 });
     if (hasWM('rift_shard')) WorldModels.place(riftGroup, 'rift_shard', Array.from({ length: 22 }, () => { const a = rng() * Math.PI * 2, r = R.r + 6 + rng() * 14; return { x: RC.x + Math.sin(a) * r, z: RC.z + Math.cos(a) * r, y: -3 + rng() * 7, ry: rng() * 6, rx: (rng() - 0.5) * 0.8, s: 2 + rng() * 3.5 }; }), { shadow: false, glow: 0xff5d8f, glowK: 0.3, far: 400 });
     for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.52; grid.add({ x: RC.x + Math.sin(a) * 13, z: RC.z + Math.cos(a) * 13, r: 1.15 }); }
   }
@@ -653,15 +653,15 @@ function buildArena() {
   arenaGroup.position.set(0, 0, 0);
   // floor tiles
   const fParts = [];
-  const tile = 3, arenaModels = hasWM('arena_floor') && hasWM('arena_wall');
+  const tile = 3, arenaModels = hasWM('arena_floor');
   if (arenaModels) {
     // generated colosseum: a paved floor, wall sections along each side, towers at the corners, crates as cover
-    const fb = WORLD_MODEL_BOX.arena_floor, fs = (2 * h + 3) / Math.min(fb[0], fb[1]);
-    WorldModels.place(arenaGroup, 'arena_floor', [{ x: AC.x, z: AC.z, y: -ARENA_FLOOR_TOP * fs, s: fs }], { shadow: false, far: 400 });
-    const wb = WORLD_MODEL_BOX.arena_wall, segs = Math.max(2, Math.round((2 * h + 2.4) / 9)), seg = (2 * h + 2.4) / segs, ws = seg / wb[0], walls = [];
+    const fb = WORLD_MODEL_BOX.arena_floor, fs = (2 * h + 2.4) / (Math.min(fb[0], fb[1]) * ARENA_FLOOR_INNER); // the walled pit: its inner sand fits the arena
+    WorldModels.place(arenaGroup, 'arena_floor', [{ x: AC.x, z: AC.z, y: -ARENA_FLOOR_TOP * fs * 0.5, s: 1, sx: fs, sz: fs, sy: fs * 0.5 }], { shadow: false, far: 400 }); // walls at half height keep the edges in view
+    const wb = WORLD_MODEL_BOX.arena_wall || [1, 1], segs = Math.max(2, Math.round((2 * h + 2.4) / 9)), seg = (2 * h + 2.4) / segs, ws = seg / wb[0], walls = [];
     for (const sd of [-1, 1]) for (let i = 0; i < segs; i++) { const u = -h - 1.2 + (i + 0.5) * seg;
       walls.push({ x: AC.x + u, z: AC.z + sd * (h + 0.6 + wb[1] * ws * 0.3), ry: sd > 0 ? Math.PI : 0, s: ws }, { x: AC.x + sd * (h + 0.6 + wb[1] * ws * 0.3), z: AC.z + u, ry: -sd * Math.PI / 2, s: ws }); }
-    WorldModels.place(arenaGroup, 'arena_wall', walls, { far: 400 });
+    if (hasWM('arena_wall')) WorldModels.place(arenaGroup, 'arena_wall', walls, { far: 400 });
     if (hasWM('arena_tower')) WorldModels.place(arenaGroup, 'arena_tower', [[-1, -1], [-1, 1], [1, -1], [1, 1]].map(([sx, sz]) => ({ x: AC.x + sx * (h + 1.5), z: AC.z + sz * (h + 1.5), ry: Math.atan2(-sx, -sz), s: 8 })), { far: 400 });
   }
   if (!arenaModels) for (let x = -h; x < h; x += tile) for (let z = -h; z < h; z += tile) {
@@ -683,9 +683,10 @@ function buildArena() {
   const quad = [[6, 6], [8, 6], [6, 8], [16, 4], [16, 6], [4, 16], [6, 16], [14, 14], [19, 10], [10, 19], [21, 2], [2, 21]];
   const crates = [];
   for (const [qx, qz] of quad) for (const sx of [-1, 1]) for (const sz of [-1, 1]) crates.push([AC.x + qx * sx, AC.z + qz * sz]);
-  if (hasWM('arena_crate')) WorldModels.place(arenaGroup, 'arena_crate', crates.map(([x, z]) => ({ x, z, ry: hashf(x, z) > 0.5 ? 0 : Math.PI / 2, s: 1.75 })), { far: 400 });
+  const CRATE = hasWM('arena_crate') ? 'arena_crate' : 'crate';
+  if (hasWM(CRATE)) WorldModels.place(arenaGroup, CRATE, crates.map(([x, z]) => ({ x, z, ry: hashf(x, z) > 0.5 ? 0 : Math.PI / 2, s: 1.75 })), { far: 400 });
   for (const [x, z] of crates) {
-    if (hasWM('arena_crate')) { grid.add({ x, z, r: 1.15 }); continue; }
+    if (hasWM(CRATE)) { grid.add({ x, z, r: 1.15 }); continue; }
     fParts.push(part(GEO.box, P2.crate, [x, 0.8, z], null, [1.9, 1.6, 1.9]));
     fParts.push(part(GEO.box, P2.crateBand, [x, 0.8, z], null, [1.96, 0.25, 1.96]));
     fParts.push(part(GEO.box, P2.crateBand, [x, 1.62, z], null, [1.6, 0.06, 1.6]));

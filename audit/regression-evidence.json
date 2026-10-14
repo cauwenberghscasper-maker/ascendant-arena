@@ -106,12 +106,12 @@
     }
   ],
   "totals": {
-    "models": 239,
-    "triangles": 2677342,
-    "modelJsonBytes": 130305409,
-    "glbBytes": 97722828,
-    "textureBytes": 59841468,
-    "assetBytes": 230422299,
+    "models": 252,
+    "triangles": 2849524,
+    "modelJsonBytes": 136910434,
+    "glbBytes": 102676264,
+    "textureBytes": 62734974,
+    "assetBytes": 239925851,
     "byKind": {
       "enemy": 14,
       "gear": 1,
@@ -121,7 +121,7 @@
       "hero-v6": 27,
       "npc": 7,
       "weapon": 10,
-      "world": 128
+      "world": 141
     }
   },
   "assets": [
@@ -3146,12 +3146,50 @@
       ]
     },
     {
+      "path": "assets/world/arena_floor/model.json",
+      "jsonBytes": 592041,
+      "glbBytes": 444004,
+      "textureBytes": 299998,
+      "triangles": 16000,
+      "vertices": 17330,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/world/arena_gate/model.json",
       "jsonBytes": 336553,
       "glbBytes": 252388,
       "textureBytes": 295282,
       "triangles": 6999,
       "vertices": 10449,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/arena_tower/model.json",
+      "jsonBytes": 508769,
+      "glbBytes": 381552,
+      "textureBytes": 269152,
+      "triangles": 15998,
+      "vertices": 14210,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -3824,6 +3862,25 @@
       ]
     },
     {
+      "path": "assets/world/floating_isle/model.json",
+      "jsonBytes": 643497,
+      "glbBytes": 482596,
+      "textureBytes": 179676,
+      "triangles": 15995,
+      "vertices": 19263,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/world/flower_1/model.json",
       "jsonBytes": 27993,
       "glbBytes": 20968,
@@ -4194,6 +4251,25 @@
       ]
     },
     {
+      "path": "assets/world/log/model.json",
+      "jsonBytes": 917229,
+      "glbBytes": 687896,
+      "textureBytes": 162340,
+      "triangles": 18517,
+      "vertices": 28769,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/world/mine_cart/model.json",
       "jsonBytes": 341297,
       "glbBytes": 255948,
@@ -4257,6 +4333,25 @@
       "textureBytes": 270300,
       "triangles": 15998,
       "vertices": 18123,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/mountain/model.json",
+      "jsonBytes": 749245,
+      "glbBytes": 561908,
+      "textureBytes": 275646,
+      "triangles": 15997,
+      "vertices": 23228,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -4364,6 +4459,25 @@
       ]
     },
     {
+      "path": "assets/world/pond/model.json",
+      "jsonBytes": 562765,
+      "glbBytes": 422048,
+      "textureBytes": 240278,
+      "triangles": 15999,
+      "vertices": 16232,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/world/portcullis/model.json",
       "jsonBytes": 245613,
       "glbBytes": 184184,
@@ -4421,12 +4535,50 @@
       ]
     },
     {
+      "path": "assets/world/rift_floor/model.json",
+      "jsonBytes": 606049,
+      "glbBytes": 454512,
+      "textureBytes": 277524,
+      "triangles": 15998,
+      "vertices": 17856,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/world/rift_gate/model.json",
       "jsonBytes": 545705,
       "glbBytes": 409252,
       "textureBytes": 206726,
       "triangles": 16000,
       "vertices": 15592,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/rift_shard/model.json",
+      "jsonBytes": 159921,
+      "glbBytes": 119916,
+      "textureBytes": 85956,
+      "triangles": 3676,
+      "vertices": 4825,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -4494,6 +4646,44 @@
       ]
     },
     {
+      "path": "assets/world/ruin_block/model.json",
+      "jsonBytes": 132701,
+      "glbBytes": 99500,
+      "textureBytes": 97352,
+      "triangles": 3006,
+      "vertices": 4003,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/ruin_pillar/model.json",
+      "jsonBytes": 499377,
+      "glbBytes": 374508,
+      "textureBytes": 273012,
+      "triangles": 15997,
+      "vertices": 13858,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/world/ruined_tower/model.json",
       "jsonBytes": 702873,
       "glbBytes": 527128,
@@ -4551,6 +4741,25 @@
       ]
     },
     {
+      "path": "assets/world/sea_stack/model.json",
+      "jsonBytes": 602653,
+      "glbBytes": 451964,
+      "textureBytes": 370354,
+      "triangles": 16000,
+      "vertices": 17730,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/world/signpost/model.json",
       "jsonBytes": 171393,
       "glbBytes": 128520,
@@ -4576,6 +4785,25 @@
       "textureBytes": 277492,
       "triangles": 15998,
       "vertices": 14662,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/snow_mountain/model.json",
+      "jsonBytes": 523697,
+      "glbBytes": 392748,
+      "textureBytes": 306192,
+      "triangles": 15999,
+      "vertices": 14767,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -4679,6 +4907,25 @@
       "textureBytes": 341712,
       "triangles": 15997,
       "vertices": 17265,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/stump/model.json",
+      "jsonBytes": 107081,
+      "glbBytes": 80284,
+      "textureBytes": 56026,
+      "triangles": 3000,
+      "vertices": 3044,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
