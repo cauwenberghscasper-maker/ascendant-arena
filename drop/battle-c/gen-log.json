@@ -1,0 +1,42 @@
+{
+ "batch": "battle-c",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "battle_p1",
+   "ok": true,
+   "file": "battle_p1.png",
+   "sec": 10.3
+  },
+  {
+   "name": "battle_p2",
+   "ok": true,
+   "file": "battle_p2.png",
+   "sec": 11.2
+  },
+  {
+   "name": "battle_p3",
+   "ok": true,
+   "file": "battle_p3.png",
+   "sec": 6.5
+  },
+  {
+   "name": "battle_l1",
+   "ok": true,
+   "file": "battle_l1.png",
+   "sec": 6.2
+  },
+  {
+   "name": "battle_l2",
+   "ok": true,
+   "file": "battle_l2.png",
+   "sec": 5.9
+  },
+  {
+   "name": "battle_l3",
+   "ok": true,
+   "file": "battle_l3.png",
+   "sec": 5.7
+  }
+ ]
+}
