@@ -1,136 +1,26 @@
 {
- "batch": "battle-c",
+ "batch": "battle-d",
  "jobs": [
   {
-   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
+   "space": "fffiloni/diffusers-image-outpaint",
    "api": "auto",
-   "b64": {
-    "images_b64_json": [
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
-    ]
-   },
-   "name": "battle_p1",
+   "files": [
+    "image"
+   ],
+   "name": "battle_talla",
    "args": {
-    "prompt": "Epic fantasy battle painting. The four characters from the reference images fight each other on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic stormy sky filling the upper part. Absolutely no text, no letters, no logo, no title, no watermark anywhere in the image.",
-    "seed": 11,
-    "randomize_seed": false,
-    "width": 896,
-    "height": 1600,
-    "steps": 4,
-    "guidance_scale": 1.0
-   }
-  },
-  {
-   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
-   "api": "auto",
-   "b64": {
-    "images_b64_json": [
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
-    ]
-   },
-   "name": "battle_p2",
-   "args": {
-    "prompt": "Epic fantasy battle painting. The four characters from the reference images fight each other on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic stormy sky filling the upper part. Absolutely no text, no letters, no logo, no title, no watermark anywhere in the image.",
-    "seed": 23,
-    "randomize_seed": false,
-    "width": 896,
-    "height": 1600,
-    "steps": 4,
-    "guidance_scale": 1.0
-   }
-  },
-  {
-   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
-   "api": "auto",
-   "b64": {
-    "images_b64_json": [
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
-    ]
-   },
-   "name": "battle_p3",
-   "args": {
-    "prompt": "Epic fantasy battle painting. The four characters from the reference images fight each other on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic stormy sky filling the upper part. Absolutely no text, no letters, no logo, no title, no watermark anywhere in the image.",
-    "seed": 37,
-    "randomize_seed": false,
-    "width": 896,
-    "height": 1600,
-    "steps": 4,
-    "guidance_scale": 1.0
-   }
-  },
-  {
-   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
-   "api": "auto",
-   "b64": {
-    "images_b64_json": [
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
-    ]
-   },
-   "name": "battle_l1",
-   "args": {
-    "prompt": "Epic fantasy battle painting. The four characters from the reference images fight each other on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic stormy sky filling the upper part. Absolutely no text, no letters, no logo, no title, no watermark anywhere in the image.",
-    "seed": 11,
-    "randomize_seed": false,
-    "width": 1600,
-    "height": 896,
-    "steps": 4,
-    "guidance_scale": 1.0
-   }
-  },
-  {
-   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
-   "api": "auto",
-   "b64": {
-    "images_b64_json": [
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
-    ]
-   },
-   "name": "battle_l2",
-   "args": {
-    "prompt": "Epic fantasy battle painting. The four characters from the reference images fight each other on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic stormy sky filling the upper part. Absolutely no text, no letters, no logo, no title, no watermark anywhere in the image.",
-    "seed": 23,
-    "randomize_seed": false,
-    "width": 1600,
-    "height": 896,
-    "steps": 4,
-    "guidance_scale": 1.0
-   }
-  },
-  {
-   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
-   "api": "auto",
-   "b64": {
-    "images_b64_json": [
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
-     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
-    ]
-   },
-   "name": "battle_l3",
-   "args": {
-    "prompt": "Epic fantasy battle painting. The four characters from the reference images fight each other on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic stormy sky filling the upper part. Absolutely no text, no letters, no logo, no title, no watermark anywhere in the image.",
-    "seed": 37,
-    "randomize_seed": false,
-    "width": 1600,
-    "height": 896,
-    "steps": 4,
-    "guidance_scale": 1.0
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/battle-c/battle_l3.png",
+    "width": 1024,
+    "height": 1824,
+    "overlap_percentage": 10,
+    "num_inference_steps": 10,
+    "resize_option": "Full",
+    "alignment": "Middle",
+    "prompt_input": "dramatic stormy twilight fantasy sky with moonlit clouds above, ancient ruined stone castle bridge and cobblestones with glowing embers below, painterly stylized 3D animated-film look, no text",
+    "overlap_left": true,
+    "overlap_right": true,
+    "overlap_top": true,
+    "overlap_bottom": true
    }
   }
  ]
