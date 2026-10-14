@@ -192,11 +192,14 @@ function openMenu(section) {
   $('panel').classList.add('menuPanel');
 }
 function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><b>${x.t ? '⏳' : '✦'}</b><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }
+// a model for every calendar day (same order as CFG.daily.days): chests use their chest art, the rest a 3D reward model
+const DAILY_ART = [{ case: 'treasure' }, { model: 'gems', col: '#58b4ff' }, { model: 'geode', col: '#c77dff' }, { model: 'key', col: '#2fffd0' }, { case: 'treasure' }, { model: 'ore', col: '#ffb347' }, { case: 'boss' }];
 // the login calendar: seven days that never reset, the weekly Colossus bonus and the full coming-up list
 function openDaily() {
   UI.current = 'daily';
   const now = Date.now(), L = loginState(), i = L.n % 7, ready = loginReady(now), wk = G.profile.weekly, wdone = wk && wk.wk === weekNum(now) && wk.done;
-  const tiles = CFG.daily.days.map((d, k) => `<div class="rcard ${k === 6 ? 'legendary' : k === 3 ? 'epic' : 'rare'} ${k < i ? 'win' : ''}" style="opacity:${k < i ? 0.55 : 1}"><small><b>Day ${k + 1}</b>${k < i ? '✓ claimed' : escapeHTML(d)}${k === i && ready ? ' · today' : ''}</small></div>`).join('');
+  const art = (k) => { const a = DAILY_ART[k]; return a.case ? caseArt(a.case) : `<span class="caseArt" style="--cc:${a.col}"><img src="${PremiumPortraits.reward(a.model)}" width="256" height="256" alt=""></span>`; };
+  const tiles = CFG.daily.days.map((d, k) => `<div class="rcard ${k === 6 ? 'legendary' : k === 3 ? 'epic' : 'rare'} ${k < i ? 'win' : ''}" style="opacity:${k < i ? 0.55 : 1}">${art(k)}<small><b>Day ${k + 1}</b>${k < i ? '✓ claimed' : escapeHTML(d)}${k === i && ready ? ' · today' : ''}</small></div>`).join('');
   openModal(`<div class="npcHead">${gi('m_progress', 'hd')}<h3>Daily rewards</h3><span class="cnt">Week ${Math.floor(L.n / 7) + 1}</span></div>
     <p class="fine">One reward per day. Missing a day never resets your calendar: you just pick up where you left off. Rewards grow every full week.</p>
     <div class="fastGrid">${tiles}</div>

@@ -146,7 +146,9 @@
 .mpbox b { color: #f4efdf !important; } .mpbox small { color: var(--muted) !important; }
 .pre { min-height: 48px; min-width: 48px; border-radius: 10px !important; background: #12282c !important; color: var(--muted) !important; box-shadow: inset 0 0 0 1px var(--line) !important; font-size: 16px !important; }
 .pre.on { background: #294440 !important; color: var(--gold) !important; box-shadow: inset 0 0 0 2px var(--gold2) !important; }
-.tzoom button { width: 48px !important; height: 48px !important; }
+.tzoom button { width: 36px !important; height: 36px !important; min-height: 36px !important; padding: 0 !important; font-size: 18px !important; }
+.tzoom button:last-child { font-size: 10px !important; }
+.tzoom { gap: 4px !important; }
 .treeWrap { border-radius: 10px !important; background: #0b1c20 !important; }
 .road { min-height: 48px; } .road .rl { background: #233b3c !important; font-weight: 700 !important; font-size: 15px !important; }
 .roadlist > * { flex-shrink: 0; }

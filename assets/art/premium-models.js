@@ -113,6 +113,37 @@ export function createPremiumPortraits(THREE, getRenderer) {
     }
     return root;
   }
+  // daily-reward models: gems, a geode, a dungeon key and a heap of ore
+  function reward(kind) {
+    if(kind==='gems') {
+      const {root,add}=builder([0xd8304a,0xe8c06a,0x2fd38a,0x3f8cff]), oct=(m,p,s,r)=>add(new THREE.OctahedronGeometry(1),m,p,s,r);
+      oct(3,[0,.15,0],[.5,.62,.42],[0,.4,0]);oct(0,[-.62,-.18,.22],[.36,.44,.3],[0,.2,.35]);oct(2,[.6,-.2,.25],[.34,.42,.3],[0,-.3,-.3]);
+      oct(0,[.25,-.38,.62],[.24,.3,.2],[0,.5,.2]);oct(2,[-.3,-.42,.62],[.2,.26,.18],[0,.1,-.4]);oct(3,[.05,-.4,-.5],[.26,.3,.22]);
+      return root;
+    }
+    if(kind==='geode') {
+      // split geode, open face toward +z (the camera), crystals growing out of the cut
+      const {root,add}=builder([0x6b6258,0x8a7f72,0xe2d4ff,0x9a5cff]);
+      add(new THREE.SphereGeometry(1,10,7,0,Math.PI*2,0,Math.PI/2),0,[0,0,0],[1,1,.8],[-Math.PI/2,0,0]);
+      add(new THREE.TorusGeometry(.93,.09,5,12),1,[0,0,0],[1,1,.6]);
+      add(new THREE.CircleGeometry(.9,12),4,[0,0,-.04]);
+      const oct=(m,p,s,r)=>add(new THREE.OctahedronGeometry(1),m,p,s,r);
+      for(const [x,y,s,c] of [[0,0,.34,3],[-.4,.3,.26,2],[.4,.3,.27,3],[-.05,.58,.22,2],[.32,-.36,.26,2],[-.36,-.32,.25,3],[.62,-.02,.2,2],[-.62,.02,.2,3],[.02,-.6,.22,3],[.55,.5,.15,2],[-.55,.5,.15,3],[.5,-.55,.15,3],[-.5,-.55,.15,2]])oct(c,[x,y,s*.55],[s,s,s*.9],[.3+x,.4+y,0]);
+      root.rotation.set(-.15,.3,0);
+      return root;
+    }
+    if(kind==='key') {
+      const {root,add,box,cyl,gem}=builder([0x2b3f52,0xe2b85c,0xc9d4dc,0x4ff0d8]);
+      add(new THREE.TorusGeometry(.42,.17,6,12),1,[0,.95,0]);gem([0,.95,0],[.24,.3,.16]);
+      cyl(1,[0,.42,0],[.2,.18,.2]);cyl(2,[0,-.25,0],[.12,1.3,.12]);cyl(1,[0,.2,0],[.17,.1,.17]);
+      box(1,[.26,-.7,0],[.42,.18,.16]);box(1,[.33,-.46,0],[.26,.16,.16]);box(1,[.2,-.88,0],[.3,.14,.16]);
+      root.rotation.set(0,0,-.7);return root;
+    }
+    const {root,add}=builder([0x5d5a63,0xd27a3a,0xdfe6ee,0xffb35c]), rock=(m,p,s,r)=>add(new THREE.DodecahedronGeometry(1),m,p,s,r);
+    rock(0,[0,0,0],[.7,.55,.6],[.3,.2,0]);rock(0,[-.72,-.2,.2],[.45,.38,.42],[0,.6,.2]);rock(0,[.68,-.22,.15],[.42,.36,.4],[.4,0,.3]);
+    for(const [x,y,z,m,s] of [[.15,.3,.45,1,.16],[-.25,.08,.52,2,.13],[.4,.05,.42,1,.12],[-.7,.0,.5,1,.11],[.7,0,.45,2,.12],[0,.45,.1,2,.12],[-.45,.35,.2,1,.1]])rock(m,[x,y,z],[s,s,s]);
+    return root;
+  }
   const scene=new THREE.Scene();scene.add(new THREE.HemisphereLight(0xfff1da,0x24324b,2.1));
   const key=new THREE.DirectionalLight(0xffebce,3.5);key.position.set(-3,5,5);scene.add(key);
   const rim=new THREE.DirectionalLight(0x8cbeff,2.2);rim.position.set(3,2,-3);scene.add(rim);
@@ -139,5 +170,6 @@ export function createPremiumPortraits(THREE, getRenderer) {
   return {
     item(it,fallback){const key=['item',it.slot,it.rarity,(it.name||'').split(' ').pop(),it.elem||''].join('-');return request(key,()=>equipment(it),fallback);},
     case(kind){return request('case-'+kind,()=>treasure(kind));},
+    reward(kind){return request('reward-'+kind,()=>reward(kind));},
   };
 }
