@@ -23,7 +23,8 @@ for job in spec['jobs']:
     name, t0 = job['name'], time.time()
     try:
         if job['space'] not in clients:
-            clients[job['space']] = Client(job['space'], hf_token=tok, verbose=False)
+            try: clients[job['space']] = Client(job['space'], token=tok, verbose=False)
+            except TypeError: clients[job['space']] = Client(job['space'], hf_token=tok, verbose=False)
         c = clients[job['space']]
         for pre in job.get('pre', []): c.predict(api_name=pre)
         args = dict(job.get('args', {}))
