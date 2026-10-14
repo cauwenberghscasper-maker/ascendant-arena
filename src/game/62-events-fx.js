@@ -293,7 +293,7 @@ function updateHubProps(t) {
   CFG.world.waypoints.forEach((w, i) => {
     const have = p.waypoints.includes(i);
     _e.set(0, t * 1.5 + i, 0); _q.setFromEuler(_e);
-    _m4.compose(_v3.set(w.x, 4.2 + Math.sin(t * 2 + i) * 0.2, w.z), _q, _s3.set(1, 1.5, 1));
+    _m4.compose(_v3.set(w.x, 4.6 + Math.sin(t * 2 + i) * 0.2, w.z), _q, _s3.set(0.6, 0.9, 0.6)); // attunement gem over the lodestone
     wim.setMatrixAt(i, _m4); wim.setColorAt(i, _col.set(have ? 0x9fe8ff : 0x7d7a96));
   });
   wim.instanceMatrix.needsUpdate = true; if (wim.instanceColor) wim.instanceColor.needsUpdate = true;

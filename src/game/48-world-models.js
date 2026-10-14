@@ -6,7 +6,7 @@ const WORLD_MODEL_BOX = {
   boss_golem: [1.04, .55], boss_frost: [.99, .51], boss_magma: [1.01, .47], boss_void: [1, .5], boss_abyss: [.91, 1.16], boss_celestial: [.74, .39],
   cave: [1.5, 1.21], ore: [1.4, 1.19], crystal: [1.05, 1.05], chest: [1.46, 1.37], chest_open: [1.13, 1.07], pillar: [.62, .61], brazier: [.86, .84],
   portcullis: [1.06, .56], dwall: [2.24, .48], clutter: [2.44, 2.16], keep: [1.08, 1.07], tower: [.58, .6], gatehouse: [1.28, .63], house_a: [.94, .94], house_b: [.91, .9],
-  fountain: [1.25, 1.26], stall: [1.01, 1.29], forge: [1.3, 1.25], arena_gate: [1.19, .61],
+  fountain: [1.25, 1.26], stall: [1.01, 1.29], forge: [1.3, 1.25], arena_gate: [1.19, .61], lodestone: [.72, .72],
 };
 for (const k in WORLD_MODEL_BOX) ASSET_MANIFEST['world.' + k] = { dir: 'assets/world/' + k + '/', size: 1, world: true,
   source: 'TRELLIS.2 (MIT) from a Z-Image Turbo (Apache-2.0) concept, cleaned with tools/v10_prop.cjs, 13 Oct 2026' };

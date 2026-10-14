@@ -233,12 +233,8 @@ function buildHub() {
   { const caves = W.pois.filter((q) => q.kind === 'dungeon').map((q) => { const r = q.x < 0 ? Math.PI / 2 : -Math.PI / 2; return { x: q.x - Math.sin(r) * 2.5, z: q.z - Math.cos(r) * 2.5, ry: r, s: 6.4 }; });
     WorldModels.place(hubGroup, 'cave', caves, { shadow: false, bright: 1.35 }); }
   // waypoint stones: obelisks with a floating crystal
-  W.waypoints.forEach((w) => {
-    tParts.push(part(GEO.cyl8, 0x6f6a8a, [w.x, 0.25, w.z], null, [1.3, 0.5, 1.3]));
-    tParts.push(part(GEO.box, 0x8f8aa8, [w.x, 1.6, w.z], [0, Math.PI / 4, 0], [0.7, 2.6, 0.7]));
-    tParts.push(part(GEO.cone4, 0xb9b3d8, [w.x, 3.2, w.z], null, [0.55, 0.6, 0.55]));
-    grid.add({ x: w.x, z: w.z, r: 0.9 });
-  });
+  W.waypoints.forEach((w) => grid.add({ x: w.x, z: w.z, r: 1.1 }));
+  WorldModels.place(hubGroup, 'lodestone', W.waypoints.map((w, i) => ({ x: w.x, z: w.z, ry: (i * 1.7) % 6.28, s: 3.6 })), { glow: 0x7fe8ff, glowK: 0.18 });
   worldArt.town(tParts, T, houseAngles, P2);
   const townMesh = new THREE.Mesh(mergeParts(tParts), worldArt.material); townMesh.castShadow = true; townMesh.receiveShadow = true; hubGroup.add(townMesh);
   // per-area art: gate trims, lair ring, skyline and this area's points of interest (their colliders join the grid first)

@@ -6843,12 +6843,8 @@ function buildHub() {
   { const caves = W.pois.filter((q) => q.kind === 'dungeon').map((q) => { const r = q.x < 0 ? Math.PI / 2 : -Math.PI / 2; return { x: q.x - Math.sin(r) * 2.5, z: q.z - Math.cos(r) * 2.5, ry: r, s: 6.4 }; });
     WorldModels.place(hubGroup, 'cave', caves, { shadow: false, bright: 1.35 }); }
   // waypoint stones: obelisks with a floating crystal
-  W.waypoints.forEach((w) => {
-    tParts.push(part(GEO.cyl8, 0x6f6a8a, [w.x, 0.25, w.z], null, [1.3, 0.5, 1.3]));
-    tParts.push(part(GEO.box, 0x8f8aa8, [w.x, 1.6, w.z], [0, Math.PI / 4, 0], [0.7, 2.6, 0.7]));
-    tParts.push(part(GEO.cone4, 0xb9b3d8, [w.x, 3.2, w.z], null, [0.55, 0.6, 0.55]));
-    grid.add({ x: w.x, z: w.z, r: 0.9 });
-  });
+  W.waypoints.forEach((w) => grid.add({ x: w.x, z: w.z, r: 1.1 }));
+  WorldModels.place(hubGroup, 'lodestone', W.waypoints.map((w, i) => ({ x: w.x, z: w.z, ry: (i * 1.7) % 6.28, s: 3.6 })), { glow: 0x7fe8ff, glowK: 0.18 });
   worldArt.town(tParts, T, houseAngles, P2);
   const townMesh = new THREE.Mesh(mergeParts(tParts), worldArt.material); townMesh.castShadow = true; townMesh.receiveShadow = true; hubGroup.add(townMesh);
   // per-area art: gate trims, lair ring, skyline and this area's points of interest (their colliders join the grid first)
@@ -8161,7 +8157,7 @@ const WORLD_MODEL_BOX = {
   boss_golem: [1.04, .55], boss_frost: [.99, .51], boss_magma: [1.01, .47], boss_void: [1, .5], boss_abyss: [.91, 1.16], boss_celestial: [.74, .39],
   cave: [1.5, 1.21], ore: [1.4, 1.19], crystal: [1.05, 1.05], chest: [1.46, 1.37], chest_open: [1.13, 1.07], pillar: [.62, .61], brazier: [.86, .84],
   portcullis: [1.06, .56], dwall: [2.24, .48], clutter: [2.44, 2.16], keep: [1.08, 1.07], tower: [.58, .6], gatehouse: [1.28, .63], house_a: [.94, .94], house_b: [.91, .9],
-  fountain: [1.25, 1.26], stall: [1.01, 1.29], forge: [1.3, 1.25], arena_gate: [1.19, .61],
+  fountain: [1.25, 1.26], stall: [1.01, 1.29], forge: [1.3, 1.25], arena_gate: [1.19, .61], lodestone: [.72, .72],
 };
 for (const k in WORLD_MODEL_BOX) ASSET_MANIFEST['world.' + k] = { dir: 'assets/world/' + k + '/', size: 1, world: true,
   source: 'TRELLIS.2 (MIT) from a Z-Image Turbo (Apache-2.0) concept, cleaned with tools/v10_prop.cjs, 13 Oct 2026' };
@@ -9770,7 +9766,7 @@ function updateHubProps(t) {
   CFG.world.waypoints.forEach((w, i) => {
     const have = p.waypoints.includes(i);
     _e.set(0, t * 1.5 + i, 0); _q.setFromEuler(_e);
-    _m4.compose(_v3.set(w.x, 4.2 + Math.sin(t * 2 + i) * 0.2, w.z), _q, _s3.set(1, 1.5, 1));
+    _m4.compose(_v3.set(w.x, 4.6 + Math.sin(t * 2 + i) * 0.2, w.z), _q, _s3.set(0.6, 0.9, 0.6)); // attunement gem over the lodestone
     wim.setMatrixAt(i, _m4); wim.setColorAt(i, _col.set(have ? 0x9fe8ff : 0x7d7a96));
   });
   wim.instanceMatrix.needsUpdate = true; if (wim.instanceColor) wim.instanceColor.needsUpdate = true;

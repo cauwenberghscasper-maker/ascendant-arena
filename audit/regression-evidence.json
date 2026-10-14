@@ -106,22 +106,22 @@
     }
   ],
   "totals": {
-    "models": 134,
-    "triangles": 1987758,
-    "modelJsonBytes": 100676588,
-    "glbBytes": 75503920,
-    "textureBytes": 41820788,
-    "assetBytes": 182516682,
+    "models": 137,
+    "triangles": 2005757,
+    "modelJsonBytes": 101279987,
+    "glbBytes": 75956392,
+    "textureBytes": 42810940,
+    "assetBytes": 184111118,
     "byKind": {
       "enemy": 14,
       "gear": 1,
       "hero": 16,
-      "hero-v4": 33,
+      "hero-v4": 35,
       "hero-v5": 1,
       "hero-v6": 27,
       "npc": 7,
       "weapon": 10,
-      "world": 25
+      "world": 26
     }
   },
   "assets": [
@@ -1597,6 +1597,25 @@
       ]
     },
     {
+      "path": "assets/hero-v4/weapons/pip/model.json",
+      "jsonBytes": 173337,
+      "glbBytes": 129976,
+      "textureBytes": 427600,
+      "triangles": 6000,
+      "vertices": 7711,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
       "path": "assets/hero-v4/weapons/ren/model.json",
       "jsonBytes": 578605,
       "glbBytes": 433928,
@@ -1641,6 +1660,25 @@
       "textureBytes": 118804,
       "triangles": 5000,
       "vertices": 5350,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/hero-v4/weapons/vex/model.json",
+      "jsonBytes": 159837,
+      "glbBytes": 119852,
+      "textureBytes": 395244,
+      "triangles": 5999,
+      "vertices": 6867,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -3456,6 +3494,25 @@
       "textureBytes": 358048,
       "triangles": 13999,
       "vertices": 17893,
+      "meshes": 1,
+      "materials": 1,
+      "animations": 0,
+      "skins": 0,
+      "images": [
+        "basecolor.webp",
+        "texture-1.webp"
+      ],
+      "nodeNames": [
+        "geometry_0"
+      ]
+    },
+    {
+      "path": "assets/world/lodestone/model.json",
+      "jsonBytes": 270225,
+      "glbBytes": 202644,
+      "textureBytes": 167308,
+      "triangles": 6000,
+      "vertices": 8264,
       "meshes": 1,
       "materials": 1,
       "animations": 0,

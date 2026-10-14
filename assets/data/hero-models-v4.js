@@ -18,11 +18,11 @@ export const HERO_V4 = {
   disc:     { name: 'kiko',   size: 1.95, hand: 0.0981, weapon: { id: 'kiko', length: 0.62, hold: 'forward' } },
   orb:      { name: 'lumi',   size: 1.85, hand: 0.0784, weapon: { id: 'lumi', length: 1.3, hold: 'up' } },
   seeker:   { name: 'nova',   size: 1.95, hand: 0.0841, weapon: { id: 'nova', length: 0.85, hold: 'up' } },
-  bolt:     { name: 'pip',    size: 1.7,  hand: 0.0773, weapon: { id: 'rico', length: 0.42, tint: 0xf0c27a, hold: 'aim' } },
+  bolt:     { name: 'pip',    size: 1.7,  hand: 0.0773, weapon: { id: 'pip', length: 0.55, hold: 'aim' } },
   chakram:  { name: 'ren',    size: 2.0,  hand: 0.0944, weapon: { id: 'ren', length: 1.0, hold: 'forward' } },
   smg:      { name: 'rico',   size: 2.0,  hand: 0.1024, weapon: { id: 'rico', length: 0.52, hold: 'aim' } },
   starfall: { name: 'stella', size: 1.95, hand: 0.0697, weapon: { id: 'stella', length: 0.95, hold: 'up' } },
-  rail:     { name: 'vex',    size: 2.0,  hand: 0.0704, weapon: { id: 'ayla', length: 1.3, tint: 0x9fc4ff, hold: 'forward' } },
+  rail:     { name: 'vex',    size: 2.0,  hand: 0.0704, weapon: { id: 'vex', length: 0.85, hold: 'aim' } },
   chain:    { name: 'volt',   size: 2.05, hand: 0.0715, weapon: { id: 'volt', length: 1.15, hold: 'up' } },
 };
 
