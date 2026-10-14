@@ -1,0 +1,42 @@
+{
+ "batch": "test-3d-b",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "chapel_ms_a",
+   "ok": true,
+   "sec": 139.6,
+   "res": "\n    <div class=\"previewer-container\">\n        <div class=\"tips-wrapper\">\n            <div class=\"tips-icon\">\ud83d\udca1Tips</div>\n            <div class=\"tips-text\">\n                <p>\u25cf <b>Render Mode</b> - Click on the circular buttons to switch between different render modes.</p>\n                <p>\u25cf <b>V"
+  },
+  {
+   "name": "chapel_ms",
+   "ok": true,
+   "file": "chapel_ms.glb",
+   "sec": 51.1
+  },
+  {
+   "name": "lava_forge_ms_a",
+   "ok": false,
+   "error": "RuntimeError",
+   "sec": 125.7
+  },
+  {
+   "name": "lava_forge_ms",
+   "ok": true,
+   "file": "lava_forge_ms.glb",
+   "sec": 37.4
+  },
+  {
+   "name": "chapel_hy",
+   "ok": true,
+   "file": "chapel_hy.glb",
+   "sec": 169.3
+  },
+  {
+   "name": "lava_forge_hy",
+   "ok": true,
+   "file": "lava_forge_hy.glb",
+   "sec": 143.4
+  }
+ ]
+}
