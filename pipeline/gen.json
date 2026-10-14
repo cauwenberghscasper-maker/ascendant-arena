@@ -1,97 +1,130 @@
 {
- "batch": "credits-b",
+ "batch": "battle-a",
  "jobs": [
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "lodestone2_concept",
-   "args": {
-    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, isolated single solid object, three-quarter view, plain light grey studio background, soft even light, no ground. A lodestone waypoint shrine: one tall solid carved grey runestone obelisk standing on a round stepped stone base, glowing cyan runes carved into the stone, a cyan crystal set into the very top of the stone, everything solid and connected.",
-    "resolution": "864x1152 ( 3:4 )",
-    "seed": 3131,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "w_pip2_concept",
-   "args": {
-    "prompt": "Stylized 3D game weapon asset render, hand-painted textures, chunky readable shapes, isolated single weapon, seen from directly above (top-down view), plain light grey studio background, soft even light. A small gnome crossbow shaped like a letter T: a short polished brass bow with two curved limbs spread wide left and right across the front, taut string, a dark walnut stock running straight back from the middle, little brass gears and a winding crank on the stock, one bolt loaded.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 5151,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "w_vex2_concept",
-   "args": {
-    "prompt": "Stylized 3D game weapon asset render, hand-painted textures, chunky readable shapes, isolated single weapon, seen from directly above (top-down view), plain light grey studio background, soft even light. An elegant elven crossbow shaped like a letter T: wide silver and pale blue leaf-shaped bow limbs spread left and right across the front, taut string, a slim white wood stock with silver inlay running straight back from the middle, a glowing blue bolt loaded.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 6161,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "lodestone2_t1",
-   "from": {
-    "image": "lodestone2_concept"
+   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
+   "api": "/infer",
+   "b64": {
+    "images_b64_json": [
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
+    ]
    },
+   "name": "battle_klein_p1",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "Epic fantasy battle key art for a game title screen. The four characters from the reference images fight each other in one dramatic scene on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic sky, empty space at the top for a logo.",
+    "seed": 11,
+    "randomize_seed": false,
+    "width": 768,
+    "height": 1344,
+    "steps": 4,
+    "guidance_scale": 1.0
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "w_pip2_t1",
-   "from": {
-    "image": "w_pip2_concept"
+   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
+   "api": "/infer",
+   "b64": {
+    "images_b64_json": [
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
+    ]
    },
+   "name": "battle_klein_p2",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "Epic fantasy battle key art for a game title screen. The four characters from the reference images fight each other in one dramatic scene on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic sky, empty space at the top for a logo.",
+    "seed": 23,
+    "randomize_seed": false,
+    "width": 768,
+    "height": 1344,
+    "steps": 4,
+    "guidance_scale": 1.0
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "w_vex2_t1",
-   "from": {
-    "image": "w_vex2_concept"
+   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
+   "api": "/infer",
+   "b64": {
+    "images_b64_json": [
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
+    ]
    },
+   "name": "battle_klein_l1",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "Epic fantasy battle key art for a game title screen. The four characters from the reference images fight each other in one dramatic scene on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic sky, empty space at the top for a logo.",
+    "seed": 11,
+    "randomize_seed": false,
+    "width": 1344,
+    "height": 768,
+    "steps": 4,
+    "guidance_scale": 1.0
+   }
+  },
+  {
+   "space": "prithivMLmods/Flux.2-Klein-Edit-Ultra-Fast",
+   "api": "/infer",
+   "b64": {
+    "images_b64_json": [
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/ophira.png"
+    ]
+   },
+   "name": "battle_klein_l2",
+   "args": {
+    "prompt": "Epic fantasy battle key art for a game title screen. The four characters from the reference images fight each other in one dramatic scene on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame; the gorgon warrior (image 4) raises her glowing green shield. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic sky, empty space at the top for a logo.",
+    "seed": 23,
+    "randomize_seed": false,
+    "width": 1344,
+    "height": 768,
+    "steps": 4,
+    "guidance_scale": 1.0
+   }
+  },
+  {
+   "space": "akhaliq/Qwen-Image-Edit-2511-LoRAs-Fast",
+   "api": "/infer",
+   "b64": {
+    "images_b64_json": [
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png"
+    ]
+   },
+   "name": "battle_qwen_a",
+   "args": {
+    "prompt": "Epic fantasy battle key art for a game title screen. The three characters from the reference images fight each other in one dramatic scene on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic sky, empty space at the top for a logo.",
+    "seed": 11,
+    "randomize_seed": false,
+    "steps": 4,
+    "guidance_scale": 1.0
+   }
+  },
+  {
+   "space": "akhaliq/Qwen-Image-Edit-2511-LoRAs-Fast",
+   "api": "/infer",
+   "b64": {
+    "images_b64_json": [
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/aurvan.png",
+     "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/kallix.png"
+    ]
+   },
+   "name": "battle_qwen_b",
+   "args": {
+    "prompt": "Epic fantasy battle key art for a game title screen. The three characters from the reference images fight each other in one dramatic scene on a ruined castle bridge at twilight: the fiery woman (image 1) hurls a cracked burning cinder of a dead sun at the horned moon sage (image 2), who blocks with a glowing silver crescent moon and swirling frost; the grinning fire thief (image 3) leaps in with a fistful of stolen flame. Keep each character's exact face, outfit and colours. Dynamic action poses, clashing fire and moonlight magic, sparks and embers, full bodies visible, painterly stylized 3D animated-film look, cinematic rim lighting, deep dramatic sky, empty space at the top for a logo.",
+    "seed": 23,
+    "randomize_seed": false,
+    "steps": 4,
+    "guidance_scale": 1.0
    }
   }
  ]

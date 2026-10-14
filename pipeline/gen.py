@@ -3,7 +3,7 @@ gen.json: {"batch": "...", "jobs": [{"name": "x", "space": "owner/space", "api":
            "files": ["argname"], "from": {"argname": "earlier_job_name"}, "ext": ".glb", "pre": ["/start_session"]}]}
 Image/file arguments listed in "files" are URLs or earlier outputs; every output file with the job's ext is saved as
 out/<name><ext>. A log with timings and errors goes to out/gen-log.json."""
-import json, os, shutil, sys, time
+import base64, json, os, shutil, sys, time, urllib.request
 from gradio_client import Client, handle_file
 from huggingface_hub import whoami
 
@@ -33,8 +33,28 @@ for job in spec['jobs']:
             args[k] = done[src]
         for k in job.get('files', []) + list(job.get('from', {})):
             args[k] = handle_file(args[k])
+        # reference images sent as a JSON array of base64 strings (FLUX.2 Klein, Qwen Image Edit)
+        for k, srcs in job.get('b64', {}).items():
+            enc = []
+            for u in srcs:
+                if u.startswith('job:'): data = open(done[u[4:]], 'rb').read()
+                else: data = urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'gen'}), timeout=60).read()
+                enc.append(base64.b64encode(data).decode())
+            args[k] = json.dumps(enc)
         res = c.predict(api_name=job['api'], **args)
         ext = job.get('ext', '.webp')
+        # some Spaces return the picture inline as a base64 data URL
+        def data_urls(x):
+            if isinstance(x, str): return [x] if x.startswith('data:image') else []
+            if isinstance(x, dict): return sum((data_urls(v) for v in x.values()), [])
+            if isinstance(x, (list, tuple)): return sum((data_urls(v) for v in x), [])
+            return []
+        inline = data_urls(res)
+        if inline:
+            dst = os.path.join(out, name + '.png'); open(dst, 'wb').write(base64.b64decode(inline[0].split(',', 1)[1])); done[name] = dst
+            log.append({'name': name, 'ok': True, 'file': os.path.basename(dst), 'sec': round(time.time() - t0, 1)})
+            print(json.dumps(log[-1])); json.dump({'batch': spec.get('batch'), 'user': me.get('name'), 'jobs': log}, open(os.path.join(out, 'gen-log.json'), 'w'), indent=1)
+            continue
         hits = [f for f in files_in(res) if f.lower().endswith(ext) or (ext == '.webp' and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')))]
         if not hits: raise RuntimeError('no %s output in %r' % (ext, res)[:500])
         dst = os.path.join(out, name + os.path.splitext(hits[0])[1].lower())
