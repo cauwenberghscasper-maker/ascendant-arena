@@ -2,7 +2,7 @@ name: asset relay
 on:
   push:
     branches: [asset-pipeline]
-    paths: ['pipeline/requests.json', 'pipeline/*.py', '.github/workflows/relay.yml']
+    paths: ['pipeline/requests.json', 'pipeline/blender_weights.py', '.github/workflows/relay.yml']
 permissions:
   contents: write
 concurrency: { group: asset-drop, cancel-in-progress: false }

@@ -4,7 +4,7 @@ name: generate with HF credits
 on:
   push:
     branches: [asset-pipeline]
-    paths: ['pipeline/gen.json', 'pipeline/gen.py', '.github/workflows/generate.yml']
+    paths: ['pipeline/gen.json']
   workflow_dispatch:
 permissions:
   contents: write
