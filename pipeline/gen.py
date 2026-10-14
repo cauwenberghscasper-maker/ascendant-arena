@@ -52,6 +52,10 @@ for job in spec['jobs']:
             pick = [n for n in names if 'infer' in n.lower()] or [n for n in names if 'generate' in n.lower()] or names
             print('endpoints', names, '->', pick[:1]); api = pick[0]
         res = c.predict(api_name=api, **args)
+        if job.get('noout'):
+            # a stateful step (e.g. TRELLIS.2 image_to_3d before extract_glb): nothing to save
+            done[name] = None; log.append({'name': name, 'ok': True, 'sec': round(time.time() - t0, 1), 'res': str(res)[:300]}); print(json.dumps(log[-1]))
+            json.dump({'batch': spec.get('batch'), 'user': me.get('name'), 'jobs': log}, open(os.path.join(out, 'gen-log.json'), 'w'), indent=1); continue
         ext = job.get('ext', '.webp')
         # some Spaces return the picture inline as a base64 data URL
         def data_urls(x):
@@ -67,8 +71,9 @@ for job in spec['jobs']:
             continue
         hits = [f for f in files_in(res) if f.lower().endswith(ext) or (ext == '.webp' and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')))]
         if not hits: raise RuntimeError('no %s output in %r' % (ext, res)[:500])
-        dst = os.path.join(out, name + os.path.splitext(hits[0])[1].lower())
-        shutil.copy(hits[0], dst); done[name] = dst
+        hit = hits[min(job.get('pick', 0), len(hits) - 1)]  # e.g. Hunyuan returns the white mesh first, the textured one second
+        dst = os.path.join(out, name + os.path.splitext(hit)[1].lower())
+        shutil.copy(hit, dst); done[name] = dst
         log.append({'name': name, 'ok': True, 'file': os.path.basename(dst), 'sec': round(time.time() - t0, 1)})
     except Exception as e:
         log.append({'name': name, 'ok': False, 'error': str(e)[:800], 'sec': round(time.time() - t0, 1)})
