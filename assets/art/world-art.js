@@ -98,11 +98,11 @@ export const POI_ART_IDS = Object.keys(POI_ART);
 export const POI_MODEL = {
   windmill: ['windmill', 13], bell: ['bell', 6.5], fairyRing: ['fairy_ring', 4.5], elderStump: ['elder_stump', 6.5], ribcage: ['ribcage', 9],
   windArch: ['wind_arch', 11], colossus: ['colossus', 11], sundial: ['sundial', 5], blackSpire: ['black_spire', 16], frozenFall: ['frozen_fall', 11],
-  mineHead: ['mine_lift', 10], cauldron: ['cauldron', 4.5], forge: ['lava_forge', 6], chapel: ['chapel', 10], dragonSkull: ['dragon_skull', 7.5],
+  mineHead: ['mine_lift', 10], cauldron: ['kettle', 4.2], forge: ['lava_forge', 6], chapel: ['chapel', 10], dragonSkull: ['dragon_skull', 7.5],
   brazier: ['sapphire_brazier', 7], crystalArch: ['crystal_arch', 10], invertedTower: ['upside_tower', 12], mirrors: ['mirror_maze', 5], crashedStar: ['crashed_star', 6],
   ghostShip: ['ghost_ship', 9], waterwheel: ['waterwheel', 8], clam: ['pearl_clam', 5], lighthouse: ['lighthouse', 14], spine: ['leviathan_spine', 7],
   geyser: ['geyser', 9], chimney: ['glass_chimney', 13], stormRod: ['storm_rod', 15], moonGate: ['moon_gate', 11], skyAltar: ['sky_altar', 7],
-  camp: ['camp', 3.5], tower: ['ruined_tower', 9], statue: ['statue', 6], well: ['well', 4], cart: ['broken_cart', 3], graves: ['graves', 3.5],
+  camp: ['camp', 3.5], tower: ['ruined_tower', 9], statue: ['statue', 6], well: ['well', 4], cart: ['wagon', 2.6], graves: ['graves', 3.5],
   obelisk: ['rune_obelisk', 5], shack: ['hermit_shack', 5],
 };
 // world rotation of a POI's front (+z faces the road) — the same frame poiLayout uses

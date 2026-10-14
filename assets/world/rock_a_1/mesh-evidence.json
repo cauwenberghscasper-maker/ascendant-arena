@@ -1,0 +1,13 @@
+{
+ "source_sha256": "63b54a1770e63bab2f7fae61e66fa9fbd9405aa7dfbe0f75d72a099b581d857a",
+ "triangles": 342,
+ "joints": 0,
+ "textures": [
+  {
+   "path": "basecolor.webp",
+   "px": 512,
+   "bytes": 36684
+  }
+ ],
+ "kb": 50
+}

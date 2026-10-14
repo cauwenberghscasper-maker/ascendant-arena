@@ -33,10 +33,13 @@ async function main() {
     const cell = span * 0.015, key = (x, z) => Math.floor(x / cell) + ':' + Math.floor(z / cell), foot = new Set();
     for (const v of P) { const y = (v[1] - lo[1]) / H; if (y > Number(process.env.PLATE || 0.07) && y < Number(process.env.PLATE || 0.07) + 0.09) for (let dx = -3; dx <= 3; dx++) for (let dz = -3; dz <= 3; dz++) foot.add(key(v[0] + dx * cell, v[2] + dz * cell)); }
     const PL = Number(process.env.PLATE || 0.07), low = (i) => (P[i][1] - lo[1]) / H < PL;
+    // FLAT=1: also drop near-horizontal low triangles inside the footprint (the ground slab under grass, bushes and rocks)
+    const flat = (a, b, c) => { const u = [0, 1, 2].map((k) => P[b][k] - P[a][k]), v = [0, 1, 2].map((k) => P[c][k] - P[a][k]);
+      const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]], l = Math.hypot(...n) || 1; return Math.abs(n[1] / l) > 0.85; };
     const kept = []; let plate = 0;
     for (let k = 0; k < ia.length; k += 3) {
       const [a1, b1, c1] = [ia[k], ia[k + 1], ia[k + 2]];
-      if (low(a1) && low(b1) && low(c1) && !foot.has(key((P[a1][0] + P[b1][0] + P[c1][0]) / 3, (P[a1][2] + P[b1][2] + P[c1][2]) / 3))) { plate++; continue; }
+      if (low(a1) && low(b1) && low(c1) && (!foot.has(key((P[a1][0] + P[b1][0] + P[c1][0]) / 3, (P[a1][2] + P[b1][2] + P[c1][2]) / 3)) || (process.env.FLAT && flat(a1, b1, c1)))) { plate++; continue; }
       kept.push(a1, b1, c1);
     }
     ia = kept;

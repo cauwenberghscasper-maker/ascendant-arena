@@ -90,8 +90,8 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += gGlowC * gGlow * 1.4;');
 };
 matGround.customProgramCacheKey = () => 'ground4';
-const worldArt = createWorldArt({THREE, GEO, part, mergeParts, hasModel: (n) => !!WORLD_MODEL_BOX[n] });
-const hasWM = (n) => !!WORLD_MODEL_BOX[n]; // a generated world model exists (src/game/48-world-models.js)
+const worldArt = createWorldArt({THREE, GEO, part, mergeParts, hasModel: (n) => hasWorldModel(n) });
+const hasWM = (n) => hasWorldModel(n); // a generated world model exists (src/game/48-world-models.js)
 const zoneGround = (zi) => { const g = CFG.world.zones[zi].ground; return typeof g === 'string' ? PALETTE[g] : g; };
 const zonePath = (zi) => PALETTE[CFG.world.zones[zi].path] || PALETTE.path;
 function groundColorAt(x, z, r) {
@@ -171,6 +171,18 @@ function buildHub() {
   // smith anvil + stall
   const sm = NPC_DEFS.find((n) => n.id === 'garo');
   WorldModels.place(hubGroup, 'forge', [{ x: sm.x + 2.4, z: sm.z - 0.8, ry: -Math.PI / 2 - 0.4, s: 2.8 }]); grid.add({ x: sm.x + 2.4, z: sm.z - 0.8, r: 1.6 });
+  // town dressing from the hand-made prop kit: a working smithy, market goods, plaza benches, training dummies, a wagon
+  { const D = new Map(), put = (n, x, z, ry, s, r) => { if (!hasWM(n)) return; if (!D.has(n)) D.set(n, []); D.get(n).push({ x: T.x + x, z: T.z + z, ry, s }); if (r) grid.add({ x: T.x + x, z: T.z + z, r }); };
+    const gx = sm.x - T.x, gz = sm.z - T.z;
+    put('anvil', gx + 1.4, gz + 2.0, 0.3, 0.75, 0.6); put('weapon_rack', gx - 1.9, gz - 2.2, 0.6, 1.5, 0.7); put('workbench', gx + 3.8, gz + 1.8, -0.2, 1.0, 1.1);
+    put('barrel', gx + 4.6, gz - 1.9, 0, 1.05, 0.5); put('barrel', gx + 4.9, gz - 0.9, 1, 1.0, 0.5); put('bucket', gx + 2.6, gz + 2.6, 0, 0.42); put('crate', gx - 3.2, gz - 0.6, 0.4, 0.95, 0.6);
+    put('stall_kit_1', -14.5, -6, Math.PI / 2, 2.7, 1.4); put('farm_crate', -13.2, -3.6, 0.2, 0.42); put('farm_crate', -13.0, -8.4, -0.3, 0.42); put('barrel', -16.4, -3.4, 0, 1.0, 0.5);
+    put('stall_kit_2', 15.6, -8, -Math.PI / 2, 2.7, 1.6); put('crate', 14.0, -10.6, 0.3, 0.9, 0.6); put('crate', 14.3, -11.5, 1.1, 0.75); put('barrel', 17.2, -5.6, 0.5, 1.0, 0.5);
+    for (let k = 0; k < 4; k++) { const a = Math.PI / 4 + k * Math.PI / 2; put('bench', Math.sin(a) * 7.2, Math.cos(a) * 7.2, a, 0.78, 0.7); }
+    houseAngles.forEach((a, i) => { put(i % 2 ? 'crate' : 'barrel', Math.sin(a + 0.2) * 14.6, Math.cos(a + 0.2) * 14.6, a * 3, 1.0, 0.55);
+      if (i % 3 === 0) put('barrel', Math.sin(a + 0.27) * 14.4, Math.cos(a + 0.27) * 14.4, a, 0.95, 0.5); });
+    put('dummy', -5, -12.6, 0, 1.9, 0.4); put('dummy', 5, -12.6, 0, 1.9, 0.4); put('wagon', 6, 15.5, 0.3, 1.6, 1.3);
+    for (const [n, list] of D) WorldModels.place(hubGroup, n, list); }
   // portal arch (stone)
   // arena gate: generated purple-and-gold archway around the portal swirl
   WorldModels.place(hubGroup, 'arena_gate', [{ x: PORTAL.x, z: PORTAL.z - 0.3, ry: 0, s: 7.2 }]);
@@ -203,7 +215,7 @@ function buildHub() {
     gates.push({ x: 0, z: gz, ry: Math.PI, s: 8.2 }); // castle gatehouse over the road (model below)
     grid.add({ x: -3.2, z: gz, r: 0.6 }); grid.add({ x: 3.2, z: gz, r: 0.6 });
     const fence = zi === 1 || zn.biome !== W.zones[zi - 1].biome;
-    if (fence && hasWM('fence')) { const fw = WORLD_MODEL_BOX.fence[0]; for (let x = W.minX + 2.5; x <= W.maxX - 2.5; x += 5) { if (Math.abs(x) < 6) continue; fences.push({ x, z: gz, ry: 0, s: 5.1 / fw }); } }
+    if (fence && hasWM('fence')) { const fw = WORLD_MODEL_BOX.fence[0]; for (let x = W.minX + 2; x <= W.maxX - 2; x += 4) { if (Math.abs(x) < 6) continue; fences.push({ x, z: gz, ry: 0, s: 4.05 / fw }); } }
     else if (fence) for (let x = W.minX; x <= W.maxX; x += 3) {
       if (Math.abs(x) < 4) continue;
       tParts.push(part(GEO.box, P2.fence, [x, 0.7, gz], [0, 0, 0], [0.24, 1.4, 0.24]));
@@ -357,8 +369,8 @@ function buildHub() {
   const MB = new Map(), MBO = {};
   const mput = (name, it, opts, key) => { const k = key || name; if (!MB.has(k)) { MB.set(k, []); MBO[k] = { name, opts: opts || {} }; } MB.get(k).push(it); };
   const _col2 = new THREE.Color(), soft = (c, k) => _col.set(0xffffff).lerp(_col2.set(c), k).getHex(); // a gentle per-instance tint over the painted texture
-  const TREE_MODEL = { round: ['tree_oak', 5.4], pine: ['tree_ash', 7.2], snowPine: ['tree_snow', 6.8], dead: ['tree_ember', 5], crystal: ['tree_crystal', 4.8], coral: ['tree_coral', 4.8], blossom: ['tree_gold', 5.6] };
-  const treeSet = (name) => hasWM(name + '_lod') ? [{ far: 58 }, { near: 58, shadow: false }] : [{}, null];
+  const TREE_MODEL = { round: ['tree_oak', 7], pine: ['tree_ash', 8], snowPine: ['tree_snow', 7.5], dead: ['tree_ember', 7.5], crystal: ['tree_crystal', 8], coral: ['tree_coral', 8], blossom: ['tree_gold', 7] };
+  const treeSet = (name) => hasWM(name + '_lod') ? [{ far: 52 }, { near: 52, shadow: false }] : [{}, null];
   // Props per area: the theme sets the defaults (counts per 160 m of road), each area's look overrides them.
   const THEME_DECO = [
     { tree: 'round', trees: 190, rocks: 50, tufts: 1500, tuftC: [0x6d9a4a, 0x82ad55], flowers: 260, flowerC: [0xff7aa8, 0xffd34a, 0xffffff, 0xb08cff], bushes: 220, logs: 16, fungi: 60, ruins: 2, flies: 70, ponds: 6 },
@@ -453,7 +465,7 @@ function buildHub() {
     if (TM && hasWM(TM[0])) {
       // one tree model per theme; near cells draw the full mesh, far cells its light LOD (when generated)
       const [full, lod] = treeSet(TM[0]), glowT = tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {};
-      tops.forEach((t) => { const it = { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: TM[1] * t.s, color: soft(t.c, 0.22) };
+      tops.forEach((t) => { const it = { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: TM[1] * t.s, color: soft(t.c, 0.1) };
         mput(TM[0], it, Object.assign({}, glowT, full)); if (lod) mput(TM[0] + '_lod', it, Object.assign({}, glowT, lod)); });
     } else {
       if (tree === 'round' || tree === 'pine' || tree === 'snowPine' || tree === 'blossom') bat(trunkGeo, trunks, false);
@@ -461,11 +473,11 @@ function buildHub() {
       if (topGeo) bat(topGeo, tops, true, tree === 'crystal' || tree === 'coral' ? { mat: glowTint } : null);
     }
     if (hasWM('rock_a')) { rocks.forEach((r) => mput('rock_a', { x: r.x, z: r.z, ry: r.ry, s: 1.25 * r.s, color: soft(r.c, 0.55) }, { far: 120 }));
-      spikes.forEach((r) => mput(hasWM('rock_b') ? 'rock_b' : 'rock_a', { x: r.x, z: r.z, ry: hashf(r.z, r.x) * 6, s: 2.1 * r.s, color: soft(r.c, 0.55) }, { far: 120 })); }
+      spikes.forEach((r) => mput(hasWM('rock_b') ? 'rock_b' : 'rock_a', { x: r.x, z: r.z, ry: hashf(r.z, r.x) * 6, s: 1.3 * r.s, sy: hasWM('rock_b') ? 1 : 1.9, color: soft(r.c, 0.55) }, { far: 120 })); }
     else { bat(rockGeo, rocks, true, { receive: true }); bat(spikeGeo, spikes, true); }
     // grass and flowers: a third as many model clumps (each covers more ground), close range only
     if (hasWM('tuft')) { tufts.forEach((t, i) => { if (i % 3 === 0) mput('tuft', { x: t.x, z: t.z, ry: t.ry, s: 0.55 * t.s, color: soft(t.c, 0.5) }, { far: 60, shadow: false }); });
-      flowers.forEach((f, i) => { if (i % 3 === 0) mput(hasWM('bush_flower') ? 'bush_flower' : 'tuft', { x: f.x, z: f.z, ry: hashf(f.x, f.z) * 6, s: 0.6 * f.s }, { far: 60, shadow: false }, 'flowers'); }); }
+      flowers.forEach((f, i) => { if (i % 3 === 0) mput(hasWM('flower') ? 'flower' : 'tuft', { x: f.x, z: f.z, ry: hashf(f.x, f.z) * 6, s: 0.6 * f.s }, { far: 60, shadow: false }, 'flowers'); }); }
     else { bat(tuftGeo, tufts, true, { shadow: false }); bat(flowerGeo, flowers, true, { shadow: false }); }
   });
   for (const b of batches.values()) inst(b.geo, b.list, b.useColor, b.opts);

@@ -30,7 +30,8 @@ def externalize(blob, out, size):
         px = size if is_base else size // 2
         if max(tex.size) > px:
             tex = tex.resize((px, px), Image.LANCZOS)
-        name = 'basecolor.webp' if is_base else f'texture-{i}.webp'
+        # the first base colour keeps its old name; kit models with several materials number the rest
+        name = ('basecolor.webp' if i == min(base) else f'basecolor-{i}.webp') if is_base else f'texture-{i}.webp'
         tex.convert('RGBA' if is_base and tex.mode == 'RGBA' else 'RGB').save(out / name, 'WEBP', quality=90 if is_base else 85, method=6)
         img.pop('mimeType', None)
         img['uri'] = name

@@ -7032,8 +7032,8 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += gGlowC * gGlow * 1.4;');
 };
 matGround.customProgramCacheKey = () => 'ground4';
-const worldArt = createWorldArt({THREE, GEO, part, mergeParts, hasModel: (n) => !!WORLD_MODEL_BOX[n] });
-const hasWM = (n) => !!WORLD_MODEL_BOX[n]; // a generated world model exists (src/game/48-world-models.js)
+const worldArt = createWorldArt({THREE, GEO, part, mergeParts, hasModel: (n) => hasWorldModel(n) });
+const hasWM = (n) => hasWorldModel(n); // a generated world model exists (src/game/48-world-models.js)
 const zoneGround = (zi) => { const g = CFG.world.zones[zi].ground; return typeof g === 'string' ? PALETTE[g] : g; };
 const zonePath = (zi) => PALETTE[CFG.world.zones[zi].path] || PALETTE.path;
 function groundColorAt(x, z, r) {
@@ -7113,6 +7113,18 @@ function buildHub() {
   // smith anvil + stall
   const sm = NPC_DEFS.find((n) => n.id === 'garo');
   WorldModels.place(hubGroup, 'forge', [{ x: sm.x + 2.4, z: sm.z - 0.8, ry: -Math.PI / 2 - 0.4, s: 2.8 }]); grid.add({ x: sm.x + 2.4, z: sm.z - 0.8, r: 1.6 });
+  // town dressing from the hand-made prop kit: a working smithy, market goods, plaza benches, training dummies, a wagon
+  { const D = new Map(), put = (n, x, z, ry, s, r) => { if (!hasWM(n)) return; if (!D.has(n)) D.set(n, []); D.get(n).push({ x: T.x + x, z: T.z + z, ry, s }); if (r) grid.add({ x: T.x + x, z: T.z + z, r }); };
+    const gx = sm.x - T.x, gz = sm.z - T.z;
+    put('anvil', gx + 1.4, gz + 2.0, 0.3, 0.75, 0.6); put('weapon_rack', gx - 1.9, gz - 2.2, 0.6, 1.5, 0.7); put('workbench', gx + 3.8, gz + 1.8, -0.2, 1.0, 1.1);
+    put('barrel', gx + 4.6, gz - 1.9, 0, 1.05, 0.5); put('barrel', gx + 4.9, gz - 0.9, 1, 1.0, 0.5); put('bucket', gx + 2.6, gz + 2.6, 0, 0.42); put('crate', gx - 3.2, gz - 0.6, 0.4, 0.95, 0.6);
+    put('stall_kit_1', -14.5, -6, Math.PI / 2, 2.7, 1.4); put('farm_crate', -13.2, -3.6, 0.2, 0.42); put('farm_crate', -13.0, -8.4, -0.3, 0.42); put('barrel', -16.4, -3.4, 0, 1.0, 0.5);
+    put('stall_kit_2', 15.6, -8, -Math.PI / 2, 2.7, 1.6); put('crate', 14.0, -10.6, 0.3, 0.9, 0.6); put('crate', 14.3, -11.5, 1.1, 0.75); put('barrel', 17.2, -5.6, 0.5, 1.0, 0.5);
+    for (let k = 0; k < 4; k++) { const a = Math.PI / 4 + k * Math.PI / 2; put('bench', Math.sin(a) * 7.2, Math.cos(a) * 7.2, a, 0.78, 0.7); }
+    houseAngles.forEach((a, i) => { put(i % 2 ? 'crate' : 'barrel', Math.sin(a + 0.2) * 14.6, Math.cos(a + 0.2) * 14.6, a * 3, 1.0, 0.55);
+      if (i % 3 === 0) put('barrel', Math.sin(a + 0.27) * 14.4, Math.cos(a + 0.27) * 14.4, a, 0.95, 0.5); });
+    put('dummy', -5, -12.6, 0, 1.9, 0.4); put('dummy', 5, -12.6, 0, 1.9, 0.4); put('wagon', 6, 15.5, 0.3, 1.6, 1.3);
+    for (const [n, list] of D) WorldModels.place(hubGroup, n, list); }
   // portal arch (stone)
   // arena gate: generated purple-and-gold archway around the portal swirl
   WorldModels.place(hubGroup, 'arena_gate', [{ x: PORTAL.x, z: PORTAL.z - 0.3, ry: 0, s: 7.2 }]);
@@ -7145,7 +7157,7 @@ function buildHub() {
     gates.push({ x: 0, z: gz, ry: Math.PI, s: 8.2 }); // castle gatehouse over the road (model below)
     grid.add({ x: -3.2, z: gz, r: 0.6 }); grid.add({ x: 3.2, z: gz, r: 0.6 });
     const fence = zi === 1 || zn.biome !== W.zones[zi - 1].biome;
-    if (fence && hasWM('fence')) { const fw = WORLD_MODEL_BOX.fence[0]; for (let x = W.minX + 2.5; x <= W.maxX - 2.5; x += 5) { if (Math.abs(x) < 6) continue; fences.push({ x, z: gz, ry: 0, s: 5.1 / fw }); } }
+    if (fence && hasWM('fence')) { const fw = WORLD_MODEL_BOX.fence[0]; for (let x = W.minX + 2; x <= W.maxX - 2; x += 4) { if (Math.abs(x) < 6) continue; fences.push({ x, z: gz, ry: 0, s: 4.05 / fw }); } }
     else if (fence) for (let x = W.minX; x <= W.maxX; x += 3) {
       if (Math.abs(x) < 4) continue;
       tParts.push(part(GEO.box, P2.fence, [x, 0.7, gz], [0, 0, 0], [0.24, 1.4, 0.24]));
@@ -7299,8 +7311,8 @@ function buildHub() {
   const MB = new Map(), MBO = {};
   const mput = (name, it, opts, key) => { const k = key || name; if (!MB.has(k)) { MB.set(k, []); MBO[k] = { name, opts: opts || {} }; } MB.get(k).push(it); };
   const _col2 = new THREE.Color(), soft = (c, k) => _col.set(0xffffff).lerp(_col2.set(c), k).getHex(); // a gentle per-instance tint over the painted texture
-  const TREE_MODEL = { round: ['tree_oak', 5.4], pine: ['tree_ash', 7.2], snowPine: ['tree_snow', 6.8], dead: ['tree_ember', 5], crystal: ['tree_crystal', 4.8], coral: ['tree_coral', 4.8], blossom: ['tree_gold', 5.6] };
-  const treeSet = (name) => hasWM(name + '_lod') ? [{ far: 58 }, { near: 58, shadow: false }] : [{}, null];
+  const TREE_MODEL = { round: ['tree_oak', 7], pine: ['tree_ash', 8], snowPine: ['tree_snow', 7.5], dead: ['tree_ember', 7.5], crystal: ['tree_crystal', 8], coral: ['tree_coral', 8], blossom: ['tree_gold', 7] };
+  const treeSet = (name) => hasWM(name + '_lod') ? [{ far: 52 }, { near: 52, shadow: false }] : [{}, null];
   // Props per area: the theme sets the defaults (counts per 160 m of road), each area's look overrides them.
   const THEME_DECO = [
     { tree: 'round', trees: 190, rocks: 50, tufts: 1500, tuftC: [0x6d9a4a, 0x82ad55], flowers: 260, flowerC: [0xff7aa8, 0xffd34a, 0xffffff, 0xb08cff], bushes: 220, logs: 16, fungi: 60, ruins: 2, flies: 70, ponds: 6 },
@@ -7395,7 +7407,7 @@ function buildHub() {
     if (TM && hasWM(TM[0])) {
       // one tree model per theme; near cells draw the full mesh, far cells its light LOD (when generated)
       const [full, lod] = treeSet(TM[0]), glowT = tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {};
-      tops.forEach((t) => { const it = { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: TM[1] * t.s, color: soft(t.c, 0.22) };
+      tops.forEach((t) => { const it = { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: TM[1] * t.s, color: soft(t.c, 0.1) };
         mput(TM[0], it, Object.assign({}, glowT, full)); if (lod) mput(TM[0] + '_lod', it, Object.assign({}, glowT, lod)); });
     } else {
       if (tree === 'round' || tree === 'pine' || tree === 'snowPine' || tree === 'blossom') bat(trunkGeo, trunks, false);
@@ -7403,11 +7415,11 @@ function buildHub() {
       if (topGeo) bat(topGeo, tops, true, tree === 'crystal' || tree === 'coral' ? { mat: glowTint } : null);
     }
     if (hasWM('rock_a')) { rocks.forEach((r) => mput('rock_a', { x: r.x, z: r.z, ry: r.ry, s: 1.25 * r.s, color: soft(r.c, 0.55) }, { far: 120 }));
-      spikes.forEach((r) => mput(hasWM('rock_b') ? 'rock_b' : 'rock_a', { x: r.x, z: r.z, ry: hashf(r.z, r.x) * 6, s: 2.1 * r.s, color: soft(r.c, 0.55) }, { far: 120 })); }
+      spikes.forEach((r) => mput(hasWM('rock_b') ? 'rock_b' : 'rock_a', { x: r.x, z: r.z, ry: hashf(r.z, r.x) * 6, s: 1.3 * r.s, sy: hasWM('rock_b') ? 1 : 1.9, color: soft(r.c, 0.55) }, { far: 120 })); }
     else { bat(rockGeo, rocks, true, { receive: true }); bat(spikeGeo, spikes, true); }
     // grass and flowers: a third as many model clumps (each covers more ground), close range only
     if (hasWM('tuft')) { tufts.forEach((t, i) => { if (i % 3 === 0) mput('tuft', { x: t.x, z: t.z, ry: t.ry, s: 0.55 * t.s, color: soft(t.c, 0.5) }, { far: 60, shadow: false }); });
-      flowers.forEach((f, i) => { if (i % 3 === 0) mput(hasWM('bush_flower') ? 'bush_flower' : 'tuft', { x: f.x, z: f.z, ry: hashf(f.x, f.z) * 6, s: 0.6 * f.s }, { far: 60, shadow: false }, 'flowers'); }); }
+      flowers.forEach((f, i) => { if (i % 3 === 0) mput(hasWM('flower') ? 'flower' : 'tuft', { x: f.x, z: f.z, ry: hashf(f.x, f.z) * 6, s: 0.6 * f.s }, { far: 60, shadow: false }, 'flowers'); }); }
     else { bat(tuftGeo, tufts, true, { shadow: false }); bat(flowerGeo, flowers, true, { shadow: false }); }
   });
   for (const b of batches.values()) inst(b.geo, b.list, b.useColor, b.opts);
@@ -8592,25 +8604,60 @@ function updateDungeonView(dt) {
 // Placements become one InstancedMesh per model and group, so a whole town or dungeon costs a few draw calls.
 // <world-boxes> generated by tools/v10_boxes.cjs from assets/world/*/box.json: name -> [width, depth] at height 1
 const WORLD_MODEL_BOX = {
-  arena_gate: [1.19, 0.61], boss_abyss: [0.91, 1.16], boss_celestial: [0.74, 0.39], boss_frost: [0.99, 0.51], boss_golem: [1.04, 0.55], boss_magma: [1.01, 0.47],
-  boss_void: [1, 0.5], brazier: [0.86, 0.84], cave: [1.5, 1.21], chest: [1.46, 1.37], chest_open: [1.13, 1.07], clutter: [2.44, 2.16],
-  crystal: [1.04, 1.05], dwall: [2.24, 0.48], forge: [1.3, 1.25], fountain: [1.25, 1.26], gatehouse: [1.27, 0.63], house_a: [0.94, 0.94],
-  house_b: [0.91, 0.9], keep: [1.07, 1.07], lodestone: [0.72, 0.72], ore: [1.4, 1.19], pillar: [0.61, 0.61], portcullis: [1.06, 0.56],
-  stall: [1.01, 1.29], tower: [0.58, 0.6],
+  anvil: [1.95, 0.72], arena_gate: [1.19, 0.61], banner_pole: [0.34, 0.17], barrel_1: [0.78, 0.78], bell: [1.3, 0.99], bench: [5.21, 1],
+  black_spire: [0.81, 0.78], bone_pile: [2.4, 2.53], boss_abyss: [0.91, 1.16], boss_celestial: [0.74, 0.39], boss_frost: [0.99, 0.51], boss_golem: [1.04, 0.55],
+  boss_magma: [1.01, 0.47], boss_void: [1, 0.5], brazier: [0.86, 0.84], bucket: [1.48, 1.31], bush_a_1: [1.21, 1.24], bush_a_2: [3.36, 3.16],
+  bush_a_3: [0.77, 0.83], bush_flower_1: [1.21, 1.24], cage: [1.06, 1.1], camp: [3, 2.73], cave: [1.5, 1.21], chest: [1.46, 1.37],
+  chest_open: [1.13, 1.07], clutter: [2.44, 2.16], crate_1: [0.91, 0.98], crate_2: [1.02, 1.02], crystal: [1.04, 1.05], dragon_skull: [1.29, 1.6],
+  dummy: [0.43, 0.31], dwall: [2.24, 0.48], elder_stump: [1.33, 1.42], fairy_ring: [2.91, 2.91], farm_crate: [2.93, 1.7], fence: [2.46, 0.14],
+  flower_1: [0.72, 0.77], flower_2: [0.67, 0.66], forge: [1.3, 1.25], fountain: [1.25, 1.26], frozen_fall: [1.46, 1.4], gatehouse: [1.27, 0.63],
+  geyser: [2.14, 2.08], ghost_ship: [0.79, 0.5], glass_chimney: [0.75, 0.78], graves: [0.8, 0.77], hermit_shack: [1.13, 1.23], house_a: [0.94, 0.94],
+  house_b: [0.91, 0.9], keep: [1.07, 1.07], kettle: [1.21, 1.16], lantern_post: [0.26, 0.5], leviathan_spine: [3.81, 1.53], lighthouse: [0.66, 0.7],
+  lodestone: [0.72, 0.72], mine_cart: [1.01, 0.81], mine_lift: [0.85, 0.59], mirror_maze: [1.6, 1.54], moon_gate: [1.15, 0.89], mushrooms_1: [1.22, 1.68],
+  ore: [1.4, 1.19], ore_pile: [1.46, 1.54], pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39],
+  ribcage: [2.8, 1.29], rift_gate: [1.15, 1.15], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3], rock_a_3: [1.48, 1.5], ruined_tower: [1.24, 1.08],
+  rune_obelisk: [0.52, 0.52], sapphire_brazier: [0.66, 0.66], signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], stall: [1.01, 1.29], stall_kit_1: [0.7, 0.35],
+  stall_kit_2: [1.15, 0.4], standing_stone: [0.7, 0.73], statue: [0.65, 0.64], sundial: [1.74, 1.75], torch: [0.34, 0.6], tower: [0.58, 0.6],
+  tree_ash_1: [0.68, 0.62], tree_ash_2: [0.78, 0.71], tree_ash_3: [0.57, 0.53], tree_ash_lod_1: [0.68, 0.62], tree_ash_lod_2: [0.78, 0.71], tree_ash_lod_3: [0.57, 0.53],
+  tree_coral_1: [0.71, 0.72], tree_coral_2: [0.55, 0.6], tree_coral_lod_1: [0.71, 0.72], tree_coral_lod_2: [0.55, 0.6], tree_crystal_1: [0.81, 0.69], tree_crystal_2: [0.56, 0.49],
+  tree_crystal_lod_1: [0.81, 0.69], tree_crystal_lod_2: [0.56, 0.49], tree_ember_1: [0.48, 0.48], tree_ember_2: [0.62, 0.6], tree_ember_lod_1: [0.48, 0.48], tree_ember_lod_2: [0.62, 0.6],
+  tree_gold_1: [0.43, 0.45], tree_gold_2: [0.52, 0.6], tree_gold_lod_1: [0.43, 0.45], tree_gold_lod_2: [0.52, 0.6], tree_oak_1: [0.43, 0.45], tree_oak_2: [0.41, 0.4],
+  tree_oak_3: [0.52, 0.6], tree_oak_lod_1: [0.43, 0.45], tree_oak_lod_2: [0.41, 0.4], tree_oak_lod_3: [0.52, 0.6], tree_snow_1: [0.78, 0.71], tree_snow_2: [0.57, 0.53],
+  tree_snow_3: [0.74, 0.71], tree_snow_lod_1: [0.78, 0.71], tree_snow_lod_2: [0.57, 0.53], tree_snow_lod_3: [0.74, 0.71], tuft_1: [0.48, 0.55], tuft_2: [1.23, 1.13],
+  upside_tower: [0.78, 0.57], wagon: [1.28, 2.63], war_tent: [0.9, 0.93], weapon_rack: [1.25, 0.89], well: [0.68, 0.74], wind_arch: [1.43, 0.72],
+  windmill: [0.99, 0.68], workbench: [2.26, 1.15],
 };
 // </world-boxes>
 for (const k in WORLD_MODEL_BOX) ASSET_MANIFEST['world.' + k] = { dir: 'assets/world/' + k + '/', size: 1, world: true,
   source: 'TRELLIS.2 (MIT) from a Z-Image Turbo (Apache-2.0) concept, cleaned with tools/v10_prop.cjs, 13 Oct 2026' };
+// variants: 'tree_oak' also means tree_oak_1, tree_oak_2 ... (hand-made kit models come in several shapes)
+const _wmVars = new Map();
+function worldVariants(name) {
+  if (_wmVars.has(name)) return _wmVars.get(name);
+  const re = new RegExp('^' + name + '_\\d+$'), vs = WORLD_MODEL_BOX[name] ? [name] : Object.keys(WORLD_MODEL_BOX).filter((k) => re.test(k)).sort();
+  _wmVars.set(name, vs); return vs;
+}
+const hasWorldModel = (name) => worldVariants(name).length > 0;
+// which variant an item gets: stable per position, so a tree and its far LOD always pick the same shape
+const variantIndex = (it, n) => Math.min(n - 1, Math.floor((((Math.sin(it.x * 12.9898 + it.z * 78.233) * 43758.5453) % 1) + 1) % 1 * n));
 const WorldModels = {
   sets: [],
   // items: [{ x, y, z, ry, s (uniform) or sx/sy/sz, color }] -> a handle whose items can be moved or hidden later
   place(group, name, items, opts = {}) {
+    if (!WORLD_MODEL_BOX[name]) {
+      // a base name with variants: split the items between them
+      const vs = worldVariants(name); if (vs.length) { const parts = vs.map(() => []); for (const it of items) parts[variantIndex(it, vs.length)].push(it);
+        const hs = vs.map((v, i) => this.place(group, v, parts[i], opts)); return { multi: hs, items }; }
+    }
     const id = 'world.' + name, h = { id, group, items, meshes: [], mats: [], ready: false, opts, dirty: true };
     if (!items.length || !AssetLibrary.has(id)) return h;
-    AssetLibrary.request(id); this.sets.push(h); this.tryBuild(h); return h;
+    // stream: a set downloads once the camera comes within reach of its nearest item (horizon sets load at once)
+    h.box = items.reduce((b, it) => [Math.min(b[0], it.x), Math.max(b[1], it.x), Math.min(b[2], it.z), Math.max(b[3], it.z)], [Infinity, -Infinity, Infinity, -Infinity]);
+    this.sets.push(h); if (opts.horizon) this.want(h); return h;
   },
+  want(h) { if (!h.requested) { h.requested = true; AssetLibrary.request(h.id); } this.tryBuild(h); },
   tryBuild(h) {
-    if (h.ready || h.dead) return;
+    if (h.ready || h.dead || !h.requested) return;
     const st = AssetLibrary.status(h.id); if (st !== 'ready') return;
     const model = AssetLibrary.entries.get(h.id).model; model.updateMatrixWorld(true);
     const inv = new THREE.Matrix4().copy(model.matrixWorld).invert();
@@ -8645,7 +8692,11 @@ const WorldModels = {
     }
   },
   update() {
-    for (const h of this.sets) { if (!h.ready) this.tryBuild(h); else if (h.dirty) this.sync(h); }
+    const px = camera.position.x, pz = camera.position.z;
+    for (const h of this.sets) {
+      if (!h.requested) { const b = h.box, dx = Math.max(b[0] - px, 0, px - b[1]), dz = Math.max(b[2] - pz, 0, pz - b[3]); if (dx * dx + dz * dz < 230 * 230) this.want(h); continue; }
+      if (!h.ready) this.tryBuild(h); else if (h.dirty) this.sync(h);
+    }
     // cells beyond the fog are skipped (main and shadow pass); small props fade out sooner than trees and buildings
     const cx = camera.position.x, cz = camera.position.z, far = (Q.lowTier ? 95 : 140) + 20;
     // opts.far caps the distance, opts.near starts a far-LOD set where the full set (far: same value) stops, opts.horizon never culls
@@ -8660,7 +8711,7 @@ const WorldModels = {
     h.meshes = []; h.mats = []; this.sets = this.sets.filter((x) => x !== h);
   },
   // footprint half-size of a model at scale s
-  half(name, s) { const b = WORLD_MODEL_BOX[name] || [1, 1]; return [b[0] * s / 2, b[1] * s / 2]; },
+  half(name, s) { const b = WORLD_MODEL_BOX[name] || WORLD_MODEL_BOX[worldVariants(name)[0]] || [1, 1]; return [b[0] * s / 2, b[1] * s / 2]; },
 };
 const _wm = new THREE.Matrix4();
 // ---------------------------------------------------------------------
@@ -11807,7 +11858,7 @@ function boot(hotData) {
   if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
   window.__gameBooted = true;
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
-  if (LOCAL_PREVIEW) window.__dbg = { craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
+  if (LOCAL_PREVIEW) window.__dbg = { CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
   const btn = $('playBtn'), label = btn.textContent;
