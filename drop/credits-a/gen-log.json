@@ -1,0 +1,96 @@
+{
+ "batch": "credits-a",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "hespera_splash",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "fountain_concept",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "stall_concept",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "lodestone_concept",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "forge_concept",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "arena_gate_concept",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "w_pip_concept",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "w_vex_concept",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "fountain_t1",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "stall_t1",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "lodestone_t1",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "forge_t1",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "arena_gate_t1",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "w_pip_t1",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  },
+  {
+   "name": "w_vex_t1",
+   "ok": false,
+   "error": "Client.__init__() got an unexpected keyword argument 'hf_token'",
+   "sec": 0.0
+  }
+ ]
+}
