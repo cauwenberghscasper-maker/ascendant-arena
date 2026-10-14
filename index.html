@@ -1633,6 +1633,24 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .rcpBtns > button small { display: block; font: 700 12.5px/1.1 var(--body); opacity: .95; }
 .panel .rcpBtns > button small, .panel .rcpBtns > button small * { color: inherit !important; opacity: 1 !important; text-shadow: none !important; }
 .panel .rcpBtns > button.primary small { color: #2b1d0c !important; }
+
+/* ---- world action button (Talk to…, Blacksmith, Play Arena, Travel) and the title Play button: a forged gold plaque.
+   The old pixel frame drew its dark centre over the sand gradient, leaving dark ink on a dark plate. ---- */
+#bAct, #playBtn {
+  border-image: none !important; border: 2px solid #1a0f05 !important; border-radius: 10px !important;
+  background: linear-gradient(180deg, #f6e2a6 0%, #e2c88e 34%, #c09d60 64%, #8d6c37 100%) !important;
+  color: #2b1a08 !important; font: 700 17px/1 var(--title, 'Cinzel', Georgia, serif) !important; letter-spacing: .05em;
+  text-shadow: 0 1px 0 rgba(255,246,214,.65) !important;
+  box-shadow: inset 0 0 0 1px #f8e9bb, inset 0 0 0 3px rgba(122,86,36,.5), inset 0 2px 0 rgba(255,255,255,.35), inset 0 -4px 0 rgba(60,36,10,.28),
+    0 3px 0 #120a03, 0 7px 16px rgba(0,0,0,.45) !important; }
+#bAct { height: 48px; padding: 0 30px !important; right: 4px; animation: actIn .2s ease-out, actGlow 2.4s ease-in-out .2s infinite; }
+/* gold rivets at both ends of the plaque */
+#bAct::before, #bAct::after { content: ''; position: absolute; top: 50%; width: 8px; height: 8px; transform: translateY(-50%) rotate(45deg);
+  background: radial-gradient(circle at 35% 30%, #fff6d2 0 18%, #e2b75a 45%, #7a5322 100%); border: 1px solid #3a2410; box-shadow: 0 1px 0 rgba(255,240,200,.4); pointer-events: none; }
+#bAct::before { left: 10px; } #bAct::after { right: 10px; }
+#bAct:active, #playBtn:active { transform: translateY(2px); box-shadow: inset 0 0 0 1px #f8e9bb, inset 0 0 0 3px rgba(122,86,36,.5), inset 0 2px 4px rgba(60,36,10,.35), 0 1px 0 #120a03 !important; }
+@keyframes actGlow { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255,214,120,0)); } 50% { filter: drop-shadow(0 0 7px rgba(255,214,120,.55)); } }
+#playBtn { border-width: 3px !important; border-radius: 12px !important; font-size: 24px !important; letter-spacing: .1em; }
 </style>
 
 
