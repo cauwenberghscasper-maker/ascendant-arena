@@ -93,6 +93,20 @@ const POI_ART = {
     k.b('box',0x6a4a30,0,.45,0,1.2,.7,.8);k.b('box',0xd9a441,0,.86,0,1.24,.14,.84);k.g('crystal',0xfff07a,0,1.6,0,.25,.7,.25);},
 };
 export const POI_ART_IDS = Object.keys(POI_ART);
+// Generated 3D model for each point of interest: [model in assets/world/, height in metres]. The builder above still
+// supplies the colliders (h); its primitives are only drawn while a model is missing.
+export const POI_MODEL = {
+  windmill: ['windmill', 13], bell: ['bell', 6.5], fairyRing: ['fairy_ring', 4.5], elderStump: ['elder_stump', 6.5], ribcage: ['ribcage', 9],
+  windArch: ['wind_arch', 11], colossus: ['colossus', 11], sundial: ['sundial', 5], blackSpire: ['black_spire', 16], frozenFall: ['frozen_fall', 11],
+  mineHead: ['mine_lift', 10], cauldron: ['cauldron', 4.5], forge: ['lava_forge', 6], chapel: ['chapel', 10], dragonSkull: ['dragon_skull', 7.5],
+  brazier: ['sapphire_brazier', 7], crystalArch: ['crystal_arch', 10], invertedTower: ['upside_tower', 12], mirrors: ['mirror_maze', 5], crashedStar: ['crashed_star', 6],
+  ghostShip: ['ghost_ship', 9], waterwheel: ['waterwheel', 8], clam: ['pearl_clam', 5], lighthouse: ['lighthouse', 14], spine: ['leviathan_spine', 7],
+  geyser: ['geyser', 9], chimney: ['glass_chimney', 13], stormRod: ['storm_rod', 15], moonGate: ['moon_gate', 11], skyAltar: ['sky_altar', 7],
+  camp: ['camp', 3.5], tower: ['ruined_tower', 9], statue: ['statue', 6], well: ['well', 4], cart: ['broken_cart', 3], graves: ['graves', 3.5],
+  obelisk: ['rune_obelisk', 5], shack: ['hermit_shack', 5],
+};
+// world rotation of a POI's front (+z faces the road) — the same frame poiLayout uses
+export const poiRotation = (q) => (q.art === 'cache' ? 0 : (q.x < 0 ? Math.PI / 2 : -Math.PI / 2));
 export function poiLayout(q, style, emit) {
   // landmarks and caves turn their front (+z) to the road; secret pockets keep world axes for their gap
   const rot = q.art === 'cache' ? 0 : (q.x < 0 ? Math.PI / 2 : -Math.PI / 2), cs = Math.cos(rot), sn = Math.sin(rot), hits = [];
@@ -102,7 +116,7 @@ export function poiLayout(q, style, emit) {
   return hits;
 }
 
-export function createWorldArt({THREE, GEO, part, mergeParts}) {
+export function createWorldArt({THREE, GEO, part, mergeParts, hasModel = () => false}) {
   const box=GEO.box, cone=GEO.cone7, cyl=GEO.cyl7;
   const crown=new THREE.IcosahedronGeometry(1,1), crystal=new THREE.CylinderGeometry(.65,1,1,6);
   const ring=new THREE.TorusGeometry(1,.055,4,32), disk=new THREE.CylinderGeometry(1,1,1,16);
@@ -188,7 +202,7 @@ export function createWorldArt({THREE, GEO, part, mergeParts}) {
     const zn=W.zones[zi], th=zn.theme!=null?zn.theme:zi, style=styleArg||REGION_ART[th], parts=[], glow=[];
     // Existing lair is the focal landmark; its central combat disc remains unobstructed.
     const lair=W.lairs[zi];
-    if(lair){
+    if(lair&&!hasModel('standing_stone')){
       for(let i=0;i<8;i++){
         const a=i*Math.PI/4+Math.PI/8,x=lair.x+Math.sin(a)*9.5,z=lair.z+Math.cos(a)*9.5;
         add(parts,box,style.dark,[x,.16,z],[1.35,.32,1.12],[0,a,0]);
@@ -201,7 +215,7 @@ export function createWorldArt({THREE, GEO, part, mergeParts}) {
       }
     }
     // Region gates: stepped bases, engraved lintels, distinct stone and metal treatments.
-    if(zi>0){for(const x of [-3.2,3.2]){
+    if(zi>0&&!hasModel('gatehouse')){for(const x of [-3.2,3.2]){
       add(parts,box,style.dark,[x,.18,zn.z0],[1.14,.36,1.16]);
       add(parts,box,style.trim,[x,3.87,zn.z0],[1.03,.17,1.04]);
       add(parts,box,style.accent,[x,2.7,zn.z0-.48],[.24,1.4,.06]);
@@ -210,7 +224,7 @@ export function createWorldArt({THREE, GEO, part, mergeParts}) {
       for(let i=-2;i<=2;i++)add(parts,crystal,style.accent,[i*.85,4.53,zn.z0-.53],[.12,.28,.08],[0,0,.45]);
     }
     // Distant silhouettes live beyond collision bounds: biome-specific horizon architecture.
-    for(const side of [-1,1])for(let j=0;j<4;j++){
+    if(!hasModel('mountain'))for(const side of [-1,1])for(let j=0;j<4;j++){
       const x=side*(W.maxX+9+j%2*5),z=zn.z0+23+j*(zn.z1-zn.z0-42)/3;
       if(th<=3){
         add(parts,crown,style.dark,[x,3,z],[8,6+(j%3)*2,10],[.2,j,.1]);
@@ -223,8 +237,9 @@ export function createWorldArt({THREE, GEO, part, mergeParts}) {
     }
     // This area's landmarks, caves and secret pockets join the same two meshes (no extra draw calls per POI).
     const P={box,cyl,cone,cone4:GEO.cone4,crown,crystal,ring,disk,ico:GEO.ico0,dodec:GEO.dodec,half:GEO.torusHalf}, hits=[];
-    for(const q of W.pois)if(q.zone===zi)hits.push(...poiLayout(q,style,(lit,g,c,p,s,r)=>add(lit?glow:parts,P[g],c,p,s,r)));
-    const m=new THREE.Mesh(mesh(parts),material);m.name='World art / '+style.name;m.castShadow=true;m.receiveShadow=true;group.add(m);
+    for(const q of W.pois)if(q.zone===zi){const skip=q.art==='cache'?hasModel('rock_a')&&hasModel('tree_ash'):POI_MODEL[q.art]&&hasModel(POI_MODEL[q.art][0]);hits.push(...poiLayout(q,style,skip?()=>{}:(lit,g,c,p,s,r)=>add(lit?glow:parts,P[g],c,p,s,r)));}
+    if(!parts.length&&!glow.length)return hits;
+    const m=new THREE.Mesh(parts.length?mesh(parts):new THREE.BufferGeometry(),material);m.name='World art / '+style.name;m.castShadow=true;m.receiveShadow=true;group.add(m);
     if(glow.length){const g=new THREE.Mesh(mergeParts(glow),glowMaterial);g.name='Lair crystals / '+style.name;group.add(g);}
     return hits;
   }

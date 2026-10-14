@@ -90,7 +90,8 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += gGlowC * gGlow * 1.4;');
 };
 matGround.customProgramCacheKey = () => 'ground4';
-const worldArt = createWorldArt({THREE, GEO, part, mergeParts});
+const worldArt = createWorldArt({THREE, GEO, part, mergeParts, hasModel: (n) => !!WORLD_MODEL_BOX[n] });
+const hasWM = (n) => !!WORLD_MODEL_BOX[n]; // a generated world model exists (src/game/48-world-models.js)
 const zoneGround = (zi) => { const g = CFG.world.zones[zi].ground; return typeof g === 'string' ? PALETTE[g] : g; };
 const zonePath = (zi) => PALETTE[CFG.world.zones[zi].path] || PALETTE.path;
 function groundColorAt(x, z, r) {
@@ -163,7 +164,10 @@ function buildHub() {
     WorldModels.place(hubGroup, 'stall', st); for (const it of st) grid.add({ x: it.x, z: it.z, r: 1.9 }); }
   grid.add({ x: T.x, z: T.z, r: 3 });
   // lanterns around the plaza
-  for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + 0.2, x = T.x + Math.sin(a) * 11.5, z = T.z + Math.cos(a) * 11.5; tParts.push(part(GEO.box, 0x4b4f58, [x, 1.1, z], null, [0.14, 2.2, 0.14])); tParts.push(part(GEO.box, 0xffd98a, [x, 2.3, z], null, [0.34, 0.34, 0.34])); }
+  { const lamps = []; for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + 0.2, x = T.x + Math.sin(a) * 11.5, z = T.z + Math.cos(a) * 11.5;
+      if (hasWM('lantern_post')) { lamps.push({ x, z, ry: a + Math.PI, s: 3.4 }); grid.add({ x, z, r: 0.35 }); }
+      else { tParts.push(part(GEO.box, 0x4b4f58, [x, 1.1, z], null, [0.14, 2.2, 0.14])); tParts.push(part(GEO.box, 0xffd98a, [x, 2.3, z], null, [0.34, 0.34, 0.34])); } }
+    WorldModels.place(hubGroup, 'lantern_post', lamps, { glow: 0xffd99a, glowK: 0.12 }); }
   // smith anvil + stall
   const sm = NPC_DEFS.find((n) => n.id === 'garo');
   WorldModels.place(hubGroup, 'forge', [{ x: sm.x + 2.4, z: sm.z - 0.8, ry: -Math.PI / 2 - 0.4, s: 2.8 }]); grid.add({ x: sm.x + 2.4, z: sm.z - 0.8, r: 1.6 });
@@ -173,52 +177,66 @@ function buildHub() {
   grid.add({ x: PORTAL.x - 2.6, z: PORTAL.z, r: 0.6 }); grid.add({ x: PORTAL.x + 2.6, z: PORTAL.z, r: 0.6 });
   // rift gate: obsidian ring with a crimson-violet swirl (endless floors)
   { const RG = CFG.rift.gate;
-    for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2, x = RG.x + Math.sin(a) * 2.6, z = RG.z + Math.cos(a) * 2.6; tParts.push(part(GEO.ico0, 0x2a1f3d, [x, 0.35, z], [0, a, 0], [0.55, 0.7 + (i % 3) * 0.25, 0.55])); }
-    tParts.push(part(GEO.cyl8, 0x1f1830, [RG.x, 0.12, RG.z], null, [2.3, 0.24, 2.3]));
+    if (hasWM('rift_gate')) WorldModels.place(hubGroup, 'rift_gate', [{ x: RG.x, z: RG.z + 0.2, ry: 0, s: 5.6 }], { glow: 0xff3d8e, glowK: 0.12 });
+    else for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2, x = RG.x + Math.sin(a) * 2.6, z = RG.z + Math.cos(a) * 2.6; tParts.push(part(GEO.ico0, 0x2a1f3d, [x, 0.35, z], [0, a, 0], [0.55, 0.7 + (i % 3) * 0.25, 0.55])); }
+    if (!hasWM('rift_gate')) { tParts.push(part(GEO.cyl8, 0x1f1830, [RG.x, 0.12, RG.z], null, [2.3, 0.24, 2.3]));
     tParts.push(part(GEO.box, 0x2a1f3d, [RG.x - 1.9, 1.7, RG.z], [0, 0, 0.12], [0.6, 3.4, 0.6])); tParts.push(part(GEO.box, 0x2a1f3d, [RG.x + 1.9, 1.7, RG.z], [0, 0, -0.12], [0.6, 3.4, 0.6]));
-    tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x - 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4])); tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x + 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4]));
+    tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x - 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4])); tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x + 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4])); }
     grid.add({ x: RG.x - 1.9, z: RG.z, r: 0.5 }); grid.add({ x: RG.x + 1.9, z: RG.z, r: 0.5 }); }
   // lair standing stones (one ring per zone)
+  const lairStones = [];
   W.lairList.forEach((l) => {
     const stone = [P2.stone, 0x5f6b4f, 0xa9bcd0, 0x3b2f2b, 0x4a4378, 0x2f5d64, 0xeadfc0][W.zones[l.zone].theme] || P2.stone;
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2 + Math.PI / 8, x = l.x + Math.sin(a) * 9.5, z = l.z + Math.cos(a) * 9.5;
-      tParts.push(part(GEO.box, stone, [x, 1.3, z], [0, a, 0.05 * (i % 3)], [1.1, 2.6, 0.8]));
-      if (i % 2 === 0) tParts.push(part(GEO.box, 0x6f747e, [x, 2.75, z], [0, a, 0], [1.3, 0.35, 1.0]));
+      if (hasWM('standing_stone')) lairStones.push({ x, z, ry: a + Math.PI, s: 3.4 + (i % 3) * 0.35, color: W.zones[l.zone].theme >= 2 ? stone : 0xffffff });
+      else { tParts.push(part(GEO.box, stone, [x, 1.3, z], [0, a, 0.05 * (i % 3)], [1.1, 2.6, 0.8]));
+        if (i % 2 === 0) tParts.push(part(GEO.box, 0x6f747e, [x, 2.75, z], [0, a, 0], [1.3, 0.35, 1.0])); }
       grid.add({ x, z, r: 0.7 });
     }
   });
+  WorldModels.place(hubGroup, 'standing_stone', lairStones, { glow: 0x9fe8ff, glowK: 0.08 });
   // gates: a castle gatehouse over the road + fence posts
-  const gates = [];
+  const gates = [], fences = [];
   for (let zi = 1; zi < W.zones.length; zi++) {
     const zn = W.zones[zi], gz = zn.z0;
     gates.push({ x: 0, z: gz, ry: Math.PI, s: 8.2 }); // castle gatehouse over the road (model below)
     grid.add({ x: -3.2, z: gz, r: 0.6 }); grid.add({ x: 3.2, z: gz, r: 0.6 });
     const fence = zi === 1 || zn.biome !== W.zones[zi - 1].biome;
-    if (fence) for (let x = W.minX; x <= W.maxX; x += 3) {
+    if (fence && hasWM('fence')) { const fw = WORLD_MODEL_BOX.fence[0]; for (let x = W.minX + 2.5; x <= W.maxX - 2.5; x += 5) { if (Math.abs(x) < 6) continue; fences.push({ x, z: gz, ry: 0, s: 5.1 / fw }); } }
+    else if (fence) for (let x = W.minX; x <= W.maxX; x += 3) {
       if (Math.abs(x) < 4) continue;
       tParts.push(part(GEO.box, P2.fence, [x, 0.7, gz], [0, 0, 0], [0.24, 1.4, 0.24]));
     }
-    if (fence) { tParts.push(part(GEO.box, P2.fence, [(W.minX - 4) / 2, 1.0, gz], null, [-W.minX - 4, 0.12, 0.12]));
+    if (fence && !hasWM('fence')) { tParts.push(part(GEO.box, P2.fence, [(W.minX - 4) / 2, 1.0, gz], null, [-W.minX - 4, 0.12, 0.12]));
     tParts.push(part(GEO.box, P2.fence, [(W.maxX + 4) / 2, 1.0, gz], null, [W.maxX - 4, 0.12, 0.12])); }
     const bm = new THREE.Mesh(new THREE.PlaneGeometry(W.maxX - W.minX, 5), new THREE.MeshBasicMaterial({ color: P2.gateLocked, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
     bm.position.set(0, 2.5, gz); hubGroup.add(bm);
     hubParts.barriers.push({ mesh: bm, zone: zi });
     hubParts.gateLabels.push({ x: 0, z: gz, y: 5.6, zone: zi });
   }
-  WorldModels.place(hubGroup, 'gatehouse', gates);
+  WorldModels.place(hubGroup, 'gatehouse', gates); WorldModels.place(hubGroup, 'fence', fences);
   // monster dens: a ring of bones, rocks and banners so the camp reads from far away
+  const den = { tent: [], banner: [], bones: [], rock: [] };
   W.dens.forEach((D, di) => {
     const zc = [0x8a8f99, 0x5b4a3a, 0xbfd3e6, 0x3a2622, 0x3b3566, 0x2b6f6a, 0xd9c48a][W.zones[D.zone].theme];
-    for (let i = 0; i < 12; i++) {
+    if (hasWM('war_tent')) for (let i = 0; i < 12; i++) {
+      // a war camp ring: tents and banners at the quarters, bone piles and boulders between (no colliders: the den stays open)
+      const a = (i / 12) * Math.PI * 2 + di, x = D.x + Math.sin(a) * (D.r + 2.2), z = D.z + Math.cos(a) * (D.r + 2.2), face = a + Math.PI;
+      (i % 6 === 0 ? den.tent : i % 6 === 3 ? den.banner : i % 2 ? den.bones : den.rock).push({ x, z, ry: face + (hashf(x, z) - 0.5) * 0.6,
+        s: i % 6 === 0 ? 3.6 : i % 6 === 3 ? 4.6 : i % 2 ? 1.5 : 1.7 + hashf(z, x), color: i % 2 || i % 3 ? 0xffffff : zc });
+    }
+    else for (let i = 0; i < 12; i++) {
       const a = (i / 12) * Math.PI * 2 + di, x = D.x + Math.sin(a) * (D.r + 1.2), z = D.z + Math.cos(a) * (D.r + 1.2);
       if (i % 4 === 0) { tParts.push(part(GEO.box, 0x5a4632, [x, 1.4, z], null, [0.18, 2.8, 0.18])); tParts.push(part(GEO.box, 0xc23b3b, [x + 0.45, 2.3, z], null, [0.8, 0.9, 0.05])); }
       else if (i % 2) tParts.push(part(GEO.dodec, zc, [x, 0.4, z], [0, a, 0], [0.8, 0.6, 0.7]));
       else tParts.push(part(GEO.box, 0xf1ead6, [x, 0.12, z], [0, a, 0.2], [0.9, 0.12, 0.14]));
     }
-    tParts.push(part(GEO.cyl8, 0x4a3426, [D.x, 0.2, D.z], null, [1.2, 0.4, 1.2]));
+    if (!hasWM('war_tent')) tParts.push(part(GEO.cyl8, 0x4a3426, [D.x, 0.2, D.z], null, [1.2, 0.4, 1.2]));
     hubParts.denLabels.push({ x: D.x, z: D.z, y: 3.6, den: di });
   });
+  WorldModels.place(hubGroup, 'war_tent', den.tent); WorldModels.place(hubGroup, 'banner_pole', den.banner);
+  WorldModels.place(hubGroup, 'bone_pile', den.bones, { far: 90 }); WorldModels.place(hubGroup, 'rock_a', den.rock);
   // dungeon beacons: a tall soft pillar of light over every cave, seen from the road
   { const bg = new THREE.CylinderGeometry(0.7, 1.6, 46, 10, 1, true), bmat = new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
     const caves = W.pois.filter((q) => q.kind === 'dungeon'), bim = new THREE.InstancedMesh(bg, bmat, caves.length), m4 = new THREE.Matrix4();
@@ -229,13 +247,24 @@ function buildHub() {
     W.nodes.forEach((q) => { const k = q.id.endsWith(':3') ? 'crystal' : 'ore', it = { x: q.x, z: q.z, ry: rot(q), s: k === 'ore' ? 2.2 : 2.6, base: k === 'ore' ? 2.2 : 2.6 }; items[k].push(it); hubParts.oreItems.push(it); });
     hubParts.oreSets = [WorldModels.place(hubGroup, 'ore', items.ore, { shadow: false }), WorldModels.place(hubGroup, 'crystal', items.crystal, { glow: 0x9fe8ff, glowK: 0.5, shadow: false })];
     G.nodesDirty = true; }
+  // quarries: each area's veins sit in one Mine with a rock wall behind, a cart, an ore pile, a signpost and a lantern
+  { const L = { wall: [], cart: [], pile: [], sign: [], lamp: [] }; hubParts.mineLabels = [];
+    for (const m of W.mines) { const s = m.side, face = -s * Math.PI / 2, P = (dx, dz) => ({ x: m.x + s * dx, z: m.z + dz });
+      L.wall.push(Object.assign(P(10, 0), { ry: face, s: 7 })); for (const dz of [-6, 0, 6]) grid.add(Object.assign(P(10.5, dz), { r: 2.6 }));
+      L.cart.push(Object.assign(P(-1, -10), { ry: face + 0.4, s: 1.9 })); grid.add(Object.assign(P(-1, -10), { r: 1.2 }));
+      L.pile.push(Object.assign(P(-1, 10), { ry: face - 0.6, s: 1.8 })); grid.add(Object.assign(P(-1, 10), { r: 1.1 }));
+      L.sign.push(Object.assign(P(-9, -3), { ry: face, s: 2.6 })); grid.add(Object.assign(P(-9, -3), { r: 0.4 }));
+      L.lamp.push(Object.assign(P(-9, 4), { ry: face, s: 3.2 })); grid.add(Object.assign(P(-9, 4), { r: 0.4 }));
+      hubParts.mineLabels.push({ x: m.x, z: m.z, y: 4.2, name: m.name, zone: m.zone }); }
+    WorldModels.place(hubGroup, 'quarry_wall', L.wall); WorldModels.place(hubGroup, 'mine_cart', L.cart); WorldModels.place(hubGroup, 'ore_pile', L.pile);
+    WorldModels.place(hubGroup, 'signpost', L.sign); WorldModels.place(hubGroup, 'lantern_post', L.lamp, { glow: 0xffd99a, glowK: 0.12 }); }
   // cave mouths down to the dungeons (the rock colliders come from the area art)
   { const caves = W.pois.filter((q) => q.kind === 'dungeon').map((q) => { const r = q.x < 0 ? Math.PI / 2 : -Math.PI / 2; return { x: q.x - Math.sin(r) * 2.5, z: q.z - Math.cos(r) * 2.5, ry: r, s: 6.4 }; });
     WorldModels.place(hubGroup, 'cave', caves, { shadow: false, bright: 1.35 }); }
   // waypoint stones: obelisks with a floating crystal
   W.waypoints.forEach((w) => grid.add({ x: w.x, z: w.z, r: 1.1 }));
   WorldModels.place(hubGroup, 'lodestone', W.waypoints.map((w, i) => ({ x: w.x, z: w.z, ry: (i * 1.7) % 6.28, s: 3.6 })), { glow: 0x7fe8ff, glowK: 0.18 });
-  worldArt.town(tParts, T, houseAngles, P2);
+  if (!hasWM('house_a')) worldArt.town(tParts, T, houseAngles, P2);
   const townMesh = new THREE.Mesh(mergeParts(tParts), worldArt.material); townMesh.castShadow = true; townMesh.receiveShadow = true; hubGroup.add(townMesh);
   // per-area art: gate trims, lair ring, skyline and this area's points of interest (their colliders join the grid first)
   W.zones.forEach((zn, zi) => { for (const o of worldArt.zoneLandmarks(hubGroup, W, zi, REGION_ART[zn.theme])) grid.add(o); });
