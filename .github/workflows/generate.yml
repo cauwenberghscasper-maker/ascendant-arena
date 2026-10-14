@@ -1,0 +1,36 @@
+name: generate with HF credits
+# Runs Hugging Face Spaces (Z-Image Turbo, FLUX Kontext, TRELLIS.2) with the account's own token, so ZeroGPU
+# use beyond the daily PRO quota is paid from the account's prepaid credits. Outputs go to the asset-drop branch.
+on:
+  push:
+    branches: [asset-pipeline]
+    paths: ['pipeline/gen.json', 'pipeline/gen.py', '.github/workflows/generate.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: asset-drop, cancel-in-progress: false }
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install -q "gradio_client>=1.10" huggingface_hub
+      - name: generate
+        env: { HF_TOKEN: '${{ secrets.HF_TOKEN }}' }
+        run: |
+          if [ -z "$HF_TOKEN" ]; then echo "::error::Add a repository secret named HF_TOKEN (Settings > Secrets and variables > Actions)"; exit 1; fi
+          python pipeline/gen.py pipeline/gen.json out
+      - name: publish to asset-drop
+        if: always()
+        run: |
+          [ -d out ] || exit 0
+          git config user.name "asset-relay"; git config user.email "actions@users.noreply.github.com"
+          B=$(python3 -c "import json;print(json.load(open('pipeline/gen.json')).get('batch','gen'))")
+          mkdir -p /tmp/drop && cp -r out/. /tmp/drop/
+          git fetch origin asset-drop
+          git checkout -q -B asset-drop origin/asset-drop
+          mkdir -p "drop/$B" && cp -r /tmp/drop/. "drop/$B/"
+          git add "drop/$B" && git commit -qm "generate $B" && git push -q origin asset-drop

@@ -1,0 +1,235 @@
+{
+ "batch": "credits-a",
+ "jobs": [
+  {
+   "name": "hespera_splash",
+   "space": "mcp-tools/FLUX.1-Kontext-Dev",
+   "api": "/infer",
+   "files": [
+    "input_image"
+   ],
+   "args": {
+    "input_image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/assets/heroes/concepts/hespera.png",
+    "prompt": "Turn this into cinematic splash art: the same character, same face, outfit and colours, in a dynamic three-quarter throwing pose slinging a cracked burning cinder of a dead sun, a bright evening star shining behind her, violet and orange twilight sky, glowing embers, painterly animated-film lighting, waist-up framing",
+    "steps": 20
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fountain_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, isolated single object, three-quarter view from above, plain light grey studio background, soft even light, no ground. A town square fountain: round two-tier white stone fountain with carved rim, clear blue water pools, small water spouts, a golden orb statue on top.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 758338,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "stall_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, isolated single object, three-quarter view from above, plain light grey studio background, soft even light, no ground. A medieval market stall: wooden stall with a red and cream striped cloth canopy, counter covered with baskets of apples, bread loaves and pumpkins, crates stacked beside it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 685464,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lodestone_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, isolated single object, three-quarter view, plain light grey studio background, soft even light, no ground. A lodestone waypoint shrine: tall carved grey runestone obelisk on a round stepped stone platform, glowing cyan rune lines carved into it, a floating glowing cyan crystal hovering above its tip.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 220185,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "forge_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, isolated single object, three-quarter view from above, plain light grey studio background, soft even light, no ground. A blacksmith forge corner: stone forge hearth with glowing orange coals and a small chimney, heavy iron anvil on a tree stump, water barrel, hammers and tongs on a rack.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 497733,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "arena_gate_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, isolated single object, front three-quarter view, plain light grey studio background, soft even light, no ground. An arena portal gate: tall arched gateway of carved purple-grey stone with golden trim and two crossed swords emblem on the keystone, empty open archway, torches on both pillars.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 828628,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "w_pip_concept",
+   "args": {
+    "prompt": "Stylized 3D game weapon asset render, hand-painted textures, chunky readable shapes, isolated single weapon, straight side view, plain light grey studio background, soft even light. A small gnome crossbow: polished brass and dark walnut stock, little gears and a winding crank, short curved brass limbs, string drawn, a bolt loaded, perfectly straight and upright stock.",
+    "resolution": "1248x832 ( 3:2 )",
+    "seed": 4242,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "w_vex_concept",
+   "args": {
+    "prompt": "Stylized 3D game weapon asset render, hand-painted textures, chunky readable shapes, isolated single weapon, straight side view, plain light grey studio background, soft even light. An elegant elven crossbow: silver and pale blue enamel, leaf-shaped engraved limbs, white wood stock with silver inlay, a glowing blue bolt loaded, perfectly straight stock.",
+    "resolution": "1248x832 ( 3:2 )",
+    "seed": 4343,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "fountain_t1",
+   "from": {
+    "image": "fountain_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "stall_t1",
+   "from": {
+    "image": "stall_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "lodestone_t1",
+   "from": {
+    "image": "lodestone_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "forge_t1",
+   "from": {
+    "image": "forge_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "arena_gate_t1",
+   "from": {
+    "image": "arena_gate_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "w_pip_t1",
+   "from": {
+    "image": "w_pip_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "w_vex_t1",
+   "from": {
+    "image": "w_vex_concept"
+   },
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 50000,
+    "texture_size": 2048,
+    "seed": 7
+   }
+  }
+ ]
+}

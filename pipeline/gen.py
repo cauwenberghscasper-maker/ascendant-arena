@@ -1,0 +1,45 @@
+"""Run a list of Hugging Face Space calls with the account's token (credits pay for ZeroGPU beyond the quota).
+gen.json: {"batch": "...", "jobs": [{"name": "x", "space": "owner/space", "api": "/fn", "args": {...},
+           "files": ["argname"], "from": {"argname": "earlier_job_name"}, "ext": ".glb", "pre": ["/start_session"]}]}
+Image/file arguments listed in "files" are URLs or earlier outputs; every output file with the job's ext is saved as
+out/<name><ext>. A log with timings and errors goes to out/gen-log.json."""
+import json, os, shutil, sys, time
+from gradio_client import Client, handle_file
+from huggingface_hub import whoami
+
+spec, out = json.load(open(sys.argv[1])), sys.argv[2]
+os.makedirs(out, exist_ok=True)
+tok = os.environ['HF_TOKEN']
+me = whoami(token=tok); print('running as', me.get('name'), 'pro' if me.get('isPro') else '')
+clients, done, log = {}, {}, []
+
+def files_in(x):
+    if isinstance(x, str): return [x] if os.path.isfile(x) else []
+    if isinstance(x, dict): return sum((files_in(v) for k, v in x.items() if k in ('path', 'value', 'image', 'name') or isinstance(v, (dict, list, tuple))), [])
+    if isinstance(x, (list, tuple)): return sum((files_in(v) for v in x), [])
+    return []
+
+for job in spec['jobs']:
+    name, t0 = job['name'], time.time()
+    try:
+        if job['space'] not in clients:
+            clients[job['space']] = Client(job['space'], hf_token=tok, verbose=False)
+        c = clients[job['space']]
+        for pre in job.get('pre', []): c.predict(api_name=pre)
+        args = dict(job.get('args', {}))
+        for k, src in job.get('from', {}).items():
+            if src not in done: raise RuntimeError('input job failed: ' + src)
+            args[k] = done[src]
+        for k in job.get('files', []) + list(job.get('from', {})):
+            args[k] = handle_file(args[k])
+        res = c.predict(api_name=job['api'], **args)
+        ext = job.get('ext', '.webp')
+        hits = [f for f in files_in(res) if f.lower().endswith(ext) or (ext == '.webp' and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')))]
+        if not hits: raise RuntimeError('no %s output in %r' % (ext, res)[:500])
+        dst = os.path.join(out, name + os.path.splitext(hits[0])[1].lower())
+        shutil.copy(hits[0], dst); done[name] = dst
+        log.append({'name': name, 'ok': True, 'file': os.path.basename(dst), 'sec': round(time.time() - t0, 1)})
+    except Exception as e:
+        log.append({'name': name, 'ok': False, 'error': str(e)[:800], 'sec': round(time.time() - t0, 1)})
+    print(json.dumps(log[-1]))
+    json.dump({'batch': spec.get('batch'), 'user': me.get('name'), 'jobs': log}, open(os.path.join(out, 'gen-log.json'), 'w'), indent=1)
