@@ -1,0 +1,42 @@
+{
+ "batch": "credits-b",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "lodestone2_concept",
+   "ok": true,
+   "file": "lodestone2_concept.webp",
+   "sec": 10.2
+  },
+  {
+   "name": "w_pip2_concept",
+   "ok": true,
+   "file": "w_pip2_concept.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "w_vex2_concept",
+   "ok": true,
+   "file": "w_vex2_concept.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lodestone2_t1",
+   "ok": true,
+   "file": "lodestone2_t1.glb",
+   "sec": 31.8
+  },
+  {
+   "name": "w_pip2_t1",
+   "ok": true,
+   "file": "w_pip2_t1.glb",
+   "sec": 20.6
+  },
+  {
+   "name": "w_vex2_t1",
+   "ok": true,
+   "file": "w_vex2_t1.glb",
+   "sec": 22.6
+  }
+ ]
+}
