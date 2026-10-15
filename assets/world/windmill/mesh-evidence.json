@@ -1,18 +1,18 @@
 {
- "source_sha256": "da5ee1b32ebaa6e0efc7f49890946ade43e258e5b6ea3f14b9f56c4c6931b081",
- "triangles": 15998,
+ "source_sha256": "0c572ef9ce4a2e46895763e839deaa66f93dbebf0e1189b013576864f4b61b2f",
+ "triangles": 10000,
  "joints": 0,
  "textures": [
   {
    "path": "basecolor.webp",
-   "px": 1024,
-   "bytes": 394584
+   "px": 512,
+   "bytes": 134838
   },
   {
    "path": "texture-1.webp",
-   "px": 512,
-   "bytes": 52676
+   "px": 256,
+   "bytes": 19128
   }
  ],
- "kb": 1092
+ "kb": 617
 }

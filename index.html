@@ -6359,9 +6359,25 @@ const AssetLibrary = {
   },
   has(id) { return this.enabled && !!ASSET_MANIFEST[id]; },
   status(id) { const e = id && this.entries.get(id); return e ? e.state : 'none'; },
-  request(id) {
+  // downloads run a few at a time (heroes and monsters first, then nearer world models), so a phone never
+  // fetches, decodes and uploads dozens of models in the same moment
+  queue: [], active: 0, maxActive: 3,
+  request(id, prio) {
     if (!id || !this.has(id) || this.entries.has(id)) return;
-    const e = { state: 'loading', model: null }; this.entries.set(id, e);
+    const e = { state: 'queued', model: null, prio: prio == null ? (id.startsWith('world.') ? 100 : 0) : prio }; this.entries.set(id, e);
+    this.queue.push(id); this.pump();
+  },
+  pump() {
+    while (this.active < this.maxActive && this.queue.length) {
+      let bi = 0; for (let i = 1; i < this.queue.length; i++) if (this.entries.get(this.queue[i]).prio < this.entries.get(this.queue[bi]).prio) bi = i;
+      const id = this.queue.splice(bi, 1)[0], e = this.entries.get(id); if (!e || e.state !== 'queued') continue;
+      this.active++; e.state = 'loading';
+      this.load(id, e).finally(() => { this.active--; this.pump(); });
+    }
+  },
+  // a queued download moves up when something needs it sooner (prio: lower first; world models use their distance)
+  bump(id, prio) { const e = this.entries.get(id); if (e && e.state === 'queued' && prio < e.prio) e.prio = prio; },
+  load(id, e) {
     const def = ASSET_MANIFEST[id];
     const load = (d) => fetch(d.dir + (d.file || 'model.json')).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return d.file ? r.arrayBuffer() : r.json(); })
       .then((pack) => {
@@ -6370,9 +6386,10 @@ const AssetLibrary = {
         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         return this.loader.parseAsync(bytes.buffer, d.dir); // textures load from the same folder
       });
-    this.init().then(() => Promise.all([load(def), def.v4 && def.weapon ? load(def.weapon).catch(() => null) : null, def.v4 ? this.adventurerClips() : null]))
+    return this.init().then(() => Promise.all([load(def), def.v4 && def.weapon ? load(def.weapon).catch(() => null) : null, def.v4 ? this.adventurerClips() : null]))
       .then(([gltf, weapon, clips]) => {
         if (def.v4) def.weaponScene = weapon ? weapon.scene : null;
+        if (id.startsWith('world.')) this.shareTextures(gltf.scene);
         e.model = this.prepare(gltf.scene, def, id);
         e.model.animations = def.v4 ? withShowcase(relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
       })
@@ -6381,6 +6398,13 @@ const AssetLibrary = {
         if (def.v4 && def.fallback && !def.fellBack) { def.fellBack = true; this.entries.delete(id); ASSET_MANIFEST[id] = def.fallback; console.warn('v4 hero not loaded, using the previous model:', id, err); this.request(id); return; }
         e.state = 'failed'; console.warn('3D asset not loaded, keeping the built-in model:', id, err);
       });
+  },
+  // world models name their textures 'tx:<hash>' (tools/v12_optimize_world.py): one GPU texture per image, however
+  // many models use it (every kit tree variant shares its bark and leaves)
+  texCache: new Map(),
+  shareTextures(scene) {
+    scene.traverse((o) => { if (!o.isMesh) return; for (const k of ['map', 'emissiveMap']) { const t = o.material[k]; if (!t || !t.name || !t.name.startsWith('tx:')) continue;
+      const c = this.texCache.get(t.name); if (c && c !== t) { o.material[k] = c; if (t.image && t.image.close) t.image.close(); t.dispose(); } else if (!c) this.texCache.set(t.name, t); } });
   },
   // shared KayKit clips for the v4 heroes, fetched once on first use
   adventurerClips() {
@@ -7392,10 +7416,10 @@ function buildHub() {
       for (let q = 0; q < 4; q++) blocks.push({ x: c.x + (rng() - 0.5) * rad, z: c.z + (rng() - 0.5) * rad, s: 0.4 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
     }
     const rot = (it) => (it.ry != null ? it.ry : hashf(it.x, it.z) * 6);
-    if (hasWM('bush_a')) bushes.forEach((b, i) => mput(hasWM('bush_flower') && (th === 0 || th === 6) && i % 3 === 0 ? 'bush_flower' : 'bush_a', { x: b.x, z: b.z, ry: rot(b), s: 1.5 * b.s, color: soft(b.c, 0.35) }, { far: 110 }));
+    if (hasWM('bush_a')) bushes.forEach((b, i) => mput(hasWM('bush_flower') && (th === 0 || th === 6) && i % 3 === 0 ? 'bush_flower' : 'bush_a', { x: b.x, z: b.z, ry: rot(b), s: 1.5 * b.s, color: soft(b.c, 0.35) }, { far: 100, shadow: false }));
     else bat(bushGeo, bushes, true, { receive: true });
-    if (hasWM('log')) logs.forEach((l) => mput('log', { x: l.x, z: l.z, ry: l.ry, s: 0.75 * l.s, color: soft(l.c, 0.3) }, { far: 110 })); else bat(logGeo, logs, true, { receive: true });
-    if (hasWM('stump')) stumps.forEach((l) => mput('stump', { x: l.x, z: l.z, ry: rot(l), s: 0.75 * l.s }, { far: 110 })); else bat(stumpGeo, stumps, true);
+    if (hasWM('log')) logs.forEach((l) => mput('log', { x: l.x, z: l.z, ry: l.ry, s: 0.75 * l.s, color: soft(l.c, 0.3) }, { far: 100, shadow: false })); else bat(logGeo, logs, true, { receive: true });
+    if (hasWM('stump')) stumps.forEach((l) => mput('stump', { x: l.x, z: l.z, ry: rot(l), s: 0.75 * l.s }, { far: 100, shadow: false })); else bat(stumpGeo, stumps, true);
     if (hasWM('mushrooms')) caps.forEach((c, i) => { if (i % 2) return; mput('mushrooms', { x: c.x, z: c.z, ry: rot(c), s: 0.7 * c.s, color: soft(c.c, 0.4) }, D.glowCaps ? { far: 90, shadow: false, glow: 0x7fffe0, glowK: 0.3 } : { far: 90, shadow: false }, D.glowCaps ? 'mushrooms_glow' : 'mushrooms'); });
     else { bat(stemGeo, stems, true, { shadow: false }); bat(capGeo, caps, true, D.glowCaps ? { mat: glowTint, shadow: false } : { shadow: false }); }
     if (hasWM('ruin_pillar')) { pillars.forEach((q) => mput('ruin_pillar', { x: q.x, z: q.z, ry: q.ry, s: 1.5 * q.sy + 0.6, color: soft(q.c, 0.45) })); blocks.forEach((q) => mput(hasWM('ruin_block') ? 'ruin_block' : 'rock_a', { x: q.x, z: q.z, ry: q.ry, s: 0.75 * q.s, color: soft(q.c, 0.45) }, { far: 110 })); }
@@ -7414,7 +7438,7 @@ function buildHub() {
       const topGeo = { round: roundGeo, blossom: roundGeo, pine: pineGeo, snowPine: pineGeo, dead: deadGeo, coral: worldArt.coralGeo, crystal: crystalGeo }[tree];
       if (topGeo) bat(topGeo, tops, true, tree === 'crystal' || tree === 'coral' ? { mat: glowTint } : null);
     }
-    if (hasWM('rock_a')) { rocks.forEach((r) => mput('rock_a', { x: r.x, z: r.z, ry: r.ry, s: 1.25 * r.s, color: soft(r.c, 0.55) }, { far: 120 }));
+    if (hasWM('rock_a')) { rocks.forEach((r) => mput('rock_a', { x: r.x, z: r.z, ry: r.ry, s: 1.25 * r.s, color: soft(r.c, 0.55) }, { far: 110, shadow: false }));
       spikes.forEach((r) => mput(hasWM('rock_b') ? 'rock_b' : 'rock_a', { x: r.x, z: r.z, ry: hashf(r.z, r.x) * 6, s: 1.3 * r.s, sy: hasWM('rock_b') ? 1 : 1.9, color: soft(r.c, 0.55) }, { far: 120 })); }
     else { bat(rockGeo, rocks, true, { receive: true }); bat(spikeGeo, spikes, true); }
     // grass and flowers: a third as many model clumps (each covers more ground), close range only
@@ -7473,7 +7497,7 @@ function buildHub() {
     W.zones.forEach((zn, zi) => { const nm = HZ[zn.theme]; if (!hasWM(nm)) return; if (!hz.has(nm)) hz.set(nm, []);
       for (const side of [-1, 1]) for (let j = 0; j < 2; j++) { const x = side * (W.maxX + 48 + ((zi + j) % 2) * 16), z = zn.z0 + (j + 0.5) * zn.len / 2 + (hashf(zi, j) - 0.5) * 20;
         hz.get(nm).push({ x, z, y: nm === 'floating_isle' || nm === 'sky_temple' ? 14 + hashf(z, x) * 10 : -1, ry: hashf(x, z) * 6, s: 34 + hashf(z, zi) * 14, color: zn.theme === 3 ? 0x8a5a4a : zn.theme === 6 ? 0xfff0d0 : 0xffffff }); } });
-    for (const [nm, items] of hz) WorldModels.place(hubGroup, nm, items, { shadow: false, horizon: true, glow: nm === 'volcano' ? 0xff6a2a : 0, glowK: 0.25 }); }
+    for (const [nm, items] of hz) WorldModels.place(hubGroup, nm, items, { shadow: false, horizon: true, far: 230, glow: nm === 'volcano' ? 0xff6a2a : 0, glowK: 0.25 }); }
 
   // challenge shrines: stone rings (static) + floating crystals (state colour)
   {
@@ -8332,7 +8356,13 @@ function updateCompanion(dt,t) {
 // --- adaptive quality ----------------------------------------------------------------------------
 // Render scale: pick once, then only ever step DOWN after sustained slowness.
 // Every scale change reallocates the canvas, which shows as a flash on phones, so changes are rare.
-const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.quality.cullFar, lowTier: false, lastChange: 0, locked: false };
+const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.quality.cullFar, lowTier: false, noPost: false, lastChange: 0, locked: false };
+// phones and small devices start lighter: a lower pixel-ratio cap, a smaller shadow map, fewer parallel downloads,
+// and on weak ones no cinematic post pass at all (the adaptive steps below can still go further)
+const DEVICE = (() => { const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches, mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8;
+  return { touch, weak: touch && (mem <= 4 || cores <= 4) }; })();
+if (DEVICE.touch) { CFG.quality.maxDpr = DEVICE.weak ? 1.25 : 1.6; sun.shadow.mapSize.set(1024, 1024); AssetLibrary.maxActive = 2; }
+if (DEVICE.weak) Q.noPost = true;
 function setDpr(d) { Q.dpr = clamp(d, CFG.quality.minDpr, Math.min(window.devicePixelRatio || 1, CFG.quality.maxDpr)); renderer.setPixelRatio(Q.dpr); resize(); Q.lastChange = performance.now(); }
 function qualityTick(dt) {
   Q.frames++; Q.acc += dt;
@@ -8342,7 +8372,10 @@ function qualityTick(dt) {
   if (Q.fps < CFG.quality.downFps) Q.slowWindows++; else Q.slowWindows = 0;
   if (Q.slowWindows >= 3 && performance.now() - Q.lastChange > 10000) {
     Q.slowWindows = 0;
-    if (Q.dpr > CFG.quality.minDpr + 0.01) setDpr(Q.dpr - 0.25);
+    // cheapest visual losses first: the bloom/grade pass, then the shadow map size, then resolution, then the low tier
+    if (!Q.noPost && Post.on()) { Q.noPost = true; Q.lastChange = performance.now(); }
+    else if (sun.shadow.mapSize.x > 1024) { sun.shadow.mapSize.set(1024, 1024); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } Q.lastChange = performance.now(); }
+    else if (Q.dpr > CFG.quality.minDpr + 0.01) setDpr(Q.dpr - 0.25);
     else if (!Q.lowTier) { Q.lowTier = true; Q.cull = CFG.quality.cullNear; scene.fog.far = 95; }
   }
 }
@@ -8433,11 +8466,11 @@ const Pixel = {
 // contrast and saturation) and vignettes. Six small passes in all; off on the low tier and in the pixel-art look.
 const Post = {
   ready: false, w: 0, h: 0,
-  on() { return hqOn() && !(G.profile && G.profile.settings.fx === false) && renderer.capabilities.isWebGL2; },
+  on() { return hqOn() && !Q.noPost && !(G.profile && G.profile.settings.fx === false) && renderer.capabilities.isWebGL2; },
   init() {
     if (this.ready) return; this.ready = true;
     const rt = (w, h, o) => new THREE.WebGLRenderTarget(w, h, Object.assign({ type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false }, o || {}));
-    this.main = rt(2, 2, { depthBuffer: true, samples: 4 });
+    this.main = rt(2, 2, { depthBuffer: true, samples: DEVICE.touch ? 2 : 4 });
     this.a = [rt(2, 2), rt(2, 2)]; this.b = [rt(2, 2), rt(2, 2)];
     const vs = 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
     const quad = (fs, u) => new THREE.ShaderMaterial({ uniforms: u, vertexShader: vs, fragmentShader: fs, depthTest: false, depthWrite: false });
@@ -8605,30 +8638,30 @@ function updateDungeonView(dt) {
 // Placements become one InstancedMesh per model and group, so a whole town or dungeon costs a few draw calls.
 // <world-boxes> generated by tools/v10_boxes.cjs from assets/world/*/box.json: name -> [width, depth] at height 1
 const WORLD_MODEL_BOX = {
-  anvil: [1.95, 0.72], arena_floor: [6.65, 6.69], arena_gate: [1.19, 0.61], arena_tower: [0.74, 0.74], banner_pole: [0.34, 0.17], barrel_1: [0.78, 0.78],
+  anvil: [1.95, 0.72], arena_floor: [6.65, 6.69], arena_gate: [1.19, 0.61], arena_tower: [0.74, 0.74], banner_pole: [0.33, 0.17], barrel_1: [0.78, 0.78],
   bell: [1.3, 0.99], bench: [5.21, 1], black_spire: [0.81, 0.78], bone_pile: [2.4, 2.53], boss_abyss: [0.91, 1.16], boss_celestial: [0.74, 0.39],
   boss_frost: [0.99, 0.51], boss_golem: [1.04, 0.55], boss_magma: [1.01, 0.47], boss_void: [1, 0.5], brazier: [0.86, 0.84], bucket: [1.48, 1.31],
-  bush_a_1: [1.21, 1.24], bush_a_2: [3.36, 3.16], bush_a_3: [0.77, 0.83], bush_flower_1: [1.21, 1.24], cage: [1.06, 1.1], camp: [3, 2.73],
+  bush_a_1: [1.21, 1.24], bush_a_2: [3.36, 3.16], bush_a_3: [0.77, 0.83], bush_flower_1: [1.21, 1.24], cage: [1.06, 1.1], camp: [3.01, 2.74],
   cave: [1.5, 1.21], chest: [1.46, 1.37], chest_open: [1.13, 1.07], clutter: [2.44, 2.16], crate_1: [0.91, 0.98], crate_2: [1.02, 1.02],
   crystal: [1.04, 1.05], dragon_skull: [1.29, 1.6], dummy: [0.43, 0.31], dwall: [2.24, 0.48], elder_stump: [1.33, 1.42], fairy_ring: [2.91, 2.91],
   farm_crate: [2.93, 1.7], fence: [2.46, 0.14], floating_isle: [0.93, 0.98], flower_1: [0.72, 0.77], flower_2: [0.67, 0.66], forge: [1.3, 1.25],
-  fountain: [1.25, 1.26], frozen_fall: [1.46, 1.4], gatehouse: [1.27, 0.63], geyser: [2.14, 2.08], ghost_ship: [0.79, 0.5], glass_chimney: [0.75, 0.78],
-  graves: [0.8, 0.77], hermit_shack: [1.13, 1.23], house_a: [0.94, 0.94], house_b: [0.91, 0.9], keep: [1.07, 1.07], kettle: [1.21, 1.16],
-  lantern_post: [0.26, 0.5], leviathan_spine: [3.81, 1.53], lighthouse: [0.66, 0.7], lodestone: [0.72, 0.72], log: [2, 1.15], mine_cart: [1.01, 0.81],
-  mine_lift: [0.85, 0.59], mirror_maze: [1.6, 1.54], moon_gate: [1.15, 0.89], mountain: [0.79, 0.82], mushrooms_1: [1.22, 1.68], ore: [1.4, 1.19],
-  ore_pile: [1.46, 1.54], pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61], pond: [3.02, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39],
-  ribcage: [2.8, 1.29], rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15], rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3],
-  rock_a_3: [1.48, 1.5], ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61], ruined_tower: [1.24, 1.08], rune_obelisk: [0.52, 0.52], sapphire_brazier: [0.66, 0.66],
-  sea_stack: [0.91, 0.9], signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], snow_mountain: [1.35, 1.41], stall: [1.01, 1.29], stall_kit_1: [0.7, 0.35],
-  stall_kit_2: [1.15, 0.4], standing_stone: [0.7, 0.73], statue: [0.65, 0.64], stump: [1.12, 1.05], sundial: [1.74, 1.75], torch: [0.34, 0.6],
+  fountain: [1.25, 1.26], frozen_fall: [1.46, 1.4], gatehouse: [1.27, 0.63], geyser: [2.13, 2.08], ghost_ship: [0.79, 0.5], glass_chimney: [0.75, 0.78],
+  graves: [0.8, 0.77], hermit_shack: [1.11, 1.22], house_a: [0.94, 0.94], house_b: [0.91, 0.9], keep: [1.07, 1.07], kettle: [1.21, 1.16],
+  lantern_post: [0.26, 0.5], leviathan_spine: [3.82, 1.53], lighthouse: [0.66, 0.7], lodestone: [0.72, 0.72], log: [2, 1.15], mine_cart: [1.01, 0.81],
+  mine_lift: [0.85, 0.59], mirror_maze: [1.6, 1.53], moon_gate: [1.15, 0.89], mountain: [0.79, 0.82], mushrooms_1: [1.22, 1.68], ore: [1.4, 1.19],
+  ore_pile: [1.43, 1.53], pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61], pond: [2.99, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39],
+  ribcage: [2.8, 1.26], rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15], rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3],
+  rock_a_3: [1.48, 1.5], ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61], ruined_tower: [1.24, 1.06], rune_obelisk: [0.52, 0.51], sapphire_brazier: [0.65, 0.63],
+  sea_stack: [0.9, 0.88], signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], snow_mountain: [1.34, 1.39], stall: [1.01, 1.29], stall_kit_1: [0.7, 0.35],
+  stall_kit_2: [1.15, 0.4], standing_stone: [0.69, 0.73], statue: [0.65, 0.64], stump: [1.12, 1.05], sundial: [1.74, 1.75], torch: [0.34, 0.6],
   tower: [0.58, 0.6], tree_ash_1: [0.68, 0.62], tree_ash_2: [0.78, 0.71], tree_ash_3: [0.57, 0.53], tree_ash_lod_1: [0.68, 0.62], tree_ash_lod_2: [0.78, 0.71],
   tree_ash_lod_3: [0.57, 0.53], tree_coral_1: [0.71, 0.72], tree_coral_2: [0.55, 0.6], tree_coral_lod_1: [0.71, 0.72], tree_coral_lod_2: [0.55, 0.6], tree_crystal_1: [0.81, 0.69],
   tree_crystal_2: [0.56, 0.49], tree_crystal_lod_1: [0.81, 0.69], tree_crystal_lod_2: [0.56, 0.49], tree_ember_1: [0.48, 0.48], tree_ember_2: [0.62, 0.6], tree_ember_lod_1: [0.48, 0.48],
   tree_ember_lod_2: [0.62, 0.6], tree_gold_1: [0.43, 0.45], tree_gold_2: [0.52, 0.6], tree_gold_lod_1: [0.43, 0.45], tree_gold_lod_2: [0.52, 0.6], tree_oak_1: [0.43, 0.45],
   tree_oak_2: [0.41, 0.4], tree_oak_3: [0.52, 0.6], tree_oak_lod_1: [0.43, 0.45], tree_oak_lod_2: [0.41, 0.4], tree_oak_lod_3: [0.52, 0.6], tree_snow_1: [0.78, 0.71],
   tree_snow_2: [0.57, 0.53], tree_snow_3: [0.74, 0.71], tree_snow_lod_1: [0.78, 0.71], tree_snow_lod_2: [0.57, 0.53], tree_snow_lod_3: [0.74, 0.71], tuft_1: [0.48, 0.55],
-  tuft_2: [1.23, 1.13], upside_tower: [0.78, 0.57], wagon: [1.28, 2.63], war_tent: [0.9, 0.93], weapon_rack: [1.25, 0.89], well: [0.68, 0.74],
-  wind_arch: [1.43, 0.72], windmill: [0.99, 0.68], workbench: [2.26, 1.15],
+  tuft_2: [1.23, 1.13], upside_tower: [0.77, 0.56], wagon: [1.28, 2.63], war_tent: [0.9, 0.94], weapon_rack: [1.25, 0.89], well: [0.68, 0.74],
+  wind_arch: [1.45, 0.72], windmill: [0.99, 0.68], workbench: [2.26, 1.15],
 };
 // </world-boxes>
 for (const k in WORLD_MODEL_BOX) ASSET_MANIFEST['world.' + k] = { dir: 'assets/world/' + k + '/', size: 1, world: true,
@@ -8656,12 +8689,12 @@ const WorldModels = {
     if (!items.length || !AssetLibrary.has(id)) return h;
     // stream: a set downloads once the camera comes within reach of its nearest item (horizon sets load at once)
     h.box = items.reduce((b, it) => [Math.min(b[0], it.x), Math.max(b[1], it.x), Math.min(b[2], it.z), Math.max(b[3], it.z)], [Infinity, -Infinity, Infinity, -Infinity]);
-    this.sets.push(h); if (opts.horizon) this.want(h); return h;
+    this.sets.push(h); return h;
   },
-  want(h) { if (!h.requested) { h.requested = true; AssetLibrary.request(h.id); } this.tryBuild(h); },
+  want(h, d) { if (!h.requested) { h.requested = true; AssetLibrary.request(h.id, 100 + (d || 0)); } else if (d != null) AssetLibrary.bump(h.id, 100 + d); this.tryBuild(h); },
   tryBuild(h) {
-    if (h.ready || h.dead || !h.requested) return;
-    const st = AssetLibrary.status(h.id); if (st !== 'ready') return;
+    if (h.ready || h.dead || !h.requested) return false;
+    const st = AssetLibrary.status(h.id); if (st !== 'ready') return false;
     const model = AssetLibrary.entries.get(h.id).model; model.updateMatrixWorld(true);
     const inv = new THREE.Matrix4().copy(model.matrixWorld).invert();
     // world-spanning sets are cut into 64 m cells so the camera (and the shadow camera) skip far ones
@@ -8681,6 +8714,9 @@ const WorldModels = {
       }
     }
     h.ready = true; h.dirty = true; this.sync(h);
+    // upload the textures now, one set at a time, instead of all at once on the next frame
+    for (const m of h.mats) for (const k of ['map', 'emissiveMap']) if (m[k] && !m[k].userData.up) { renderer.initTexture(m[k]); m[k].userData.up = true; }
+    return true;
   },
   sync(h) {
     if (!h.ready || !h.dirty) return; h.dirty = false;
@@ -8695,15 +8731,19 @@ const WorldModels = {
     }
   },
   update() {
-    const px = camera.position.x, pz = camera.position.z;
+    const px = camera.position.x, pz = camera.position.z, view = Q.lowTier ? 95 : 140; let builds = 0; // at most two new sets are built per frame
     for (const h of this.sets) {
-      if (!h.requested) { const b = h.box, dx = Math.max(b[0] - px, 0, px - b[1]), dz = Math.max(b[2] - pz, 0, pz - b[3]); if (dx * dx + dz * dz < 230 * 230) this.want(h); continue; }
-      if (!h.ready) this.tryBuild(h); else if (h.dirty) this.sync(h);
+      if (!h.ready) { const b = h.box, dx = Math.max(b[0] - px, 0, px - b[1]), dz = Math.max(b[2] - pz, 0, pz - b[3]), d = Math.sqrt(dx * dx + dz * dz);
+        // fetch a set once the camera is within its draw distance plus a margin; nearer sets jump the queue
+        // one-off landmarks wait until ~110 m (they sit deep in the fog before that); spread-out sets load at view range
+        if (d < Math.min(h.opts.horizon ? 240 : h.items.length <= 4 ? 80 : view, h.opts.far || 999) + 30) { if (!h.requested) this.want(h, d); else if (builds < 2 && this.tryBuild(h)) builds++; else AssetLibrary.bump(h.id, 100 + d); }
+        continue; }
+      if (h.dirty) this.sync(h);
     }
     // cells beyond the fog are skipped (main and shadow pass); small props fade out sooner than trees and buildings
     const cx = camera.position.x, cz = camera.position.z, far = (Q.lowTier ? 95 : 140) + 20;
     // opts.far caps the distance, opts.near starts a far-LOD set where the full set (far: same value) stops, opts.horizon never culls
-    for (const h of this.sets) { const f = h.opts.far ? Math.min(far, h.opts.far) : far, n = h.opts.near || 0; if (h.opts.horizon) continue;
+    for (const h of this.sets) { const f = h.opts.far ? (h.opts.horizon ? h.opts.far : Math.min(far, h.opts.far)) : far, n = h.opts.near || 0;
       for (const im of h.meshes) { const b = im.boundingSphere; if (b) { const d = Math.hypot(b.center.x - cx, b.center.z - cz) - b.radius; im.visible = d < f && d >= n; } } }
   },
   // free a handle's instance buffers and materials (the model's geometry and textures stay cached)
@@ -11860,8 +11900,10 @@ function boot(hotData) {
   window.addEventListener('pagehide', () => saveNow(true));
   if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
   window.__gameBooted = true;
+  // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
+  if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
-  if (LOCAL_PREVIEW) window.__dbg = { CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
+  if (LOCAL_PREVIEW) window.__dbg = { THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
   const btn = $('playBtn'), label = btn.textContent;

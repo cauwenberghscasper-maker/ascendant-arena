@@ -450,10 +450,10 @@ function buildHub() {
       for (let q = 0; q < 4; q++) blocks.push({ x: c.x + (rng() - 0.5) * rad, z: c.z + (rng() - 0.5) * rad, s: 0.4 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
     }
     const rot = (it) => (it.ry != null ? it.ry : hashf(it.x, it.z) * 6);
-    if (hasWM('bush_a')) bushes.forEach((b, i) => mput(hasWM('bush_flower') && (th === 0 || th === 6) && i % 3 === 0 ? 'bush_flower' : 'bush_a', { x: b.x, z: b.z, ry: rot(b), s: 1.5 * b.s, color: soft(b.c, 0.35) }, { far: 110 }));
+    if (hasWM('bush_a')) bushes.forEach((b, i) => mput(hasWM('bush_flower') && (th === 0 || th === 6) && i % 3 === 0 ? 'bush_flower' : 'bush_a', { x: b.x, z: b.z, ry: rot(b), s: 1.5 * b.s, color: soft(b.c, 0.35) }, { far: 100, shadow: false }));
     else bat(bushGeo, bushes, true, { receive: true });
-    if (hasWM('log')) logs.forEach((l) => mput('log', { x: l.x, z: l.z, ry: l.ry, s: 0.75 * l.s, color: soft(l.c, 0.3) }, { far: 110 })); else bat(logGeo, logs, true, { receive: true });
-    if (hasWM('stump')) stumps.forEach((l) => mput('stump', { x: l.x, z: l.z, ry: rot(l), s: 0.75 * l.s }, { far: 110 })); else bat(stumpGeo, stumps, true);
+    if (hasWM('log')) logs.forEach((l) => mput('log', { x: l.x, z: l.z, ry: l.ry, s: 0.75 * l.s, color: soft(l.c, 0.3) }, { far: 100, shadow: false })); else bat(logGeo, logs, true, { receive: true });
+    if (hasWM('stump')) stumps.forEach((l) => mput('stump', { x: l.x, z: l.z, ry: rot(l), s: 0.75 * l.s }, { far: 100, shadow: false })); else bat(stumpGeo, stumps, true);
     if (hasWM('mushrooms')) caps.forEach((c, i) => { if (i % 2) return; mput('mushrooms', { x: c.x, z: c.z, ry: rot(c), s: 0.7 * c.s, color: soft(c.c, 0.4) }, D.glowCaps ? { far: 90, shadow: false, glow: 0x7fffe0, glowK: 0.3 } : { far: 90, shadow: false }, D.glowCaps ? 'mushrooms_glow' : 'mushrooms'); });
     else { bat(stemGeo, stems, true, { shadow: false }); bat(capGeo, caps, true, D.glowCaps ? { mat: glowTint, shadow: false } : { shadow: false }); }
     if (hasWM('ruin_pillar')) { pillars.forEach((q) => mput('ruin_pillar', { x: q.x, z: q.z, ry: q.ry, s: 1.5 * q.sy + 0.6, color: soft(q.c, 0.45) })); blocks.forEach((q) => mput(hasWM('ruin_block') ? 'ruin_block' : 'rock_a', { x: q.x, z: q.z, ry: q.ry, s: 0.75 * q.s, color: soft(q.c, 0.45) }, { far: 110 })); }
@@ -472,7 +472,7 @@ function buildHub() {
       const topGeo = { round: roundGeo, blossom: roundGeo, pine: pineGeo, snowPine: pineGeo, dead: deadGeo, coral: worldArt.coralGeo, crystal: crystalGeo }[tree];
       if (topGeo) bat(topGeo, tops, true, tree === 'crystal' || tree === 'coral' ? { mat: glowTint } : null);
     }
-    if (hasWM('rock_a')) { rocks.forEach((r) => mput('rock_a', { x: r.x, z: r.z, ry: r.ry, s: 1.25 * r.s, color: soft(r.c, 0.55) }, { far: 120 }));
+    if (hasWM('rock_a')) { rocks.forEach((r) => mput('rock_a', { x: r.x, z: r.z, ry: r.ry, s: 1.25 * r.s, color: soft(r.c, 0.55) }, { far: 110, shadow: false }));
       spikes.forEach((r) => mput(hasWM('rock_b') ? 'rock_b' : 'rock_a', { x: r.x, z: r.z, ry: hashf(r.z, r.x) * 6, s: 1.3 * r.s, sy: hasWM('rock_b') ? 1 : 1.9, color: soft(r.c, 0.55) }, { far: 120 })); }
     else { bat(rockGeo, rocks, true, { receive: true }); bat(spikeGeo, spikes, true); }
     // grass and flowers: a third as many model clumps (each covers more ground), close range only
@@ -531,7 +531,7 @@ function buildHub() {
     W.zones.forEach((zn, zi) => { const nm = HZ[zn.theme]; if (!hasWM(nm)) return; if (!hz.has(nm)) hz.set(nm, []);
       for (const side of [-1, 1]) for (let j = 0; j < 2; j++) { const x = side * (W.maxX + 48 + ((zi + j) % 2) * 16), z = zn.z0 + (j + 0.5) * zn.len / 2 + (hashf(zi, j) - 0.5) * 20;
         hz.get(nm).push({ x, z, y: nm === 'floating_isle' || nm === 'sky_temple' ? 14 + hashf(z, x) * 10 : -1, ry: hashf(x, z) * 6, s: 34 + hashf(z, zi) * 14, color: zn.theme === 3 ? 0x8a5a4a : zn.theme === 6 ? 0xfff0d0 : 0xffffff }); } });
-    for (const [nm, items] of hz) WorldModels.place(hubGroup, nm, items, { shadow: false, horizon: true, glow: nm === 'volcano' ? 0xff6a2a : 0, glowK: 0.25 }); }
+    for (const [nm, items] of hz) WorldModels.place(hubGroup, nm, items, { shadow: false, horizon: true, far: 230, glow: nm === 'volcano' ? 0xff6a2a : 0, glowK: 0.25 }); }
 
   // challenge shrines: stone rings (static) + floating crystals (state colour)
   {

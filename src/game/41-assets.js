@@ -105,9 +105,25 @@ const AssetLibrary = {
   },
   has(id) { return this.enabled && !!ASSET_MANIFEST[id]; },
   status(id) { const e = id && this.entries.get(id); return e ? e.state : 'none'; },
-  request(id) {
+  // downloads run a few at a time (heroes and monsters first, then nearer world models), so a phone never
+  // fetches, decodes and uploads dozens of models in the same moment
+  queue: [], active: 0, maxActive: 3,
+  request(id, prio) {
     if (!id || !this.has(id) || this.entries.has(id)) return;
-    const e = { state: 'loading', model: null }; this.entries.set(id, e);
+    const e = { state: 'queued', model: null, prio: prio == null ? (id.startsWith('world.') ? 100 : 0) : prio }; this.entries.set(id, e);
+    this.queue.push(id); this.pump();
+  },
+  pump() {
+    while (this.active < this.maxActive && this.queue.length) {
+      let bi = 0; for (let i = 1; i < this.queue.length; i++) if (this.entries.get(this.queue[i]).prio < this.entries.get(this.queue[bi]).prio) bi = i;
+      const id = this.queue.splice(bi, 1)[0], e = this.entries.get(id); if (!e || e.state !== 'queued') continue;
+      this.active++; e.state = 'loading';
+      this.load(id, e).finally(() => { this.active--; this.pump(); });
+    }
+  },
+  // a queued download moves up when something needs it sooner (prio: lower first; world models use their distance)
+  bump(id, prio) { const e = this.entries.get(id); if (e && e.state === 'queued' && prio < e.prio) e.prio = prio; },
+  load(id, e) {
     const def = ASSET_MANIFEST[id];
     const load = (d) => fetch(d.dir + (d.file || 'model.json')).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return d.file ? r.arrayBuffer() : r.json(); })
       .then((pack) => {
@@ -116,9 +132,10 @@ const AssetLibrary = {
         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         return this.loader.parseAsync(bytes.buffer, d.dir); // textures load from the same folder
       });
-    this.init().then(() => Promise.all([load(def), def.v4 && def.weapon ? load(def.weapon).catch(() => null) : null, def.v4 ? this.adventurerClips() : null]))
+    return this.init().then(() => Promise.all([load(def), def.v4 && def.weapon ? load(def.weapon).catch(() => null) : null, def.v4 ? this.adventurerClips() : null]))
       .then(([gltf, weapon, clips]) => {
         if (def.v4) def.weaponScene = weapon ? weapon.scene : null;
+        if (id.startsWith('world.')) this.shareTextures(gltf.scene);
         e.model = this.prepare(gltf.scene, def, id);
         e.model.animations = def.v4 ? withShowcase(relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
       })
@@ -127,6 +144,13 @@ const AssetLibrary = {
         if (def.v4 && def.fallback && !def.fellBack) { def.fellBack = true; this.entries.delete(id); ASSET_MANIFEST[id] = def.fallback; console.warn('v4 hero not loaded, using the previous model:', id, err); this.request(id); return; }
         e.state = 'failed'; console.warn('3D asset not loaded, keeping the built-in model:', id, err);
       });
+  },
+  // world models name their textures 'tx:<hash>' (tools/v12_optimize_world.py): one GPU texture per image, however
+  // many models use it (every kit tree variant shares its bark and leaves)
+  texCache: new Map(),
+  shareTextures(scene) {
+    scene.traverse((o) => { if (!o.isMesh) return; for (const k of ['map', 'emissiveMap']) { const t = o.material[k]; if (!t || !t.name || !t.name.startsWith('tx:')) continue;
+      const c = this.texCache.get(t.name); if (c && c !== t) { o.material[k] = c; if (t.image && t.image.close) t.image.close(); t.dispose(); } else if (!c) this.texCache.set(t.name, t); } });
   },
   // shared KayKit clips for the v4 heroes, fetched once on first use
   adventurerClips() {

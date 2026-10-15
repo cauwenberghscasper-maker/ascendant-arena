@@ -107,11 +107,11 @@
   ],
   "totals": {
     "models": 252,
-    "triangles": 2849524,
-    "modelJsonBytes": 136910434,
-    "glbBytes": 102676264,
-    "textureBytes": 62734974,
-    "assetBytes": 239925851,
+    "triangles": 2477758,
+    "modelJsonBytes": 121512954,
+    "glbBytes": 91128192,
+    "textureBytes": 35155314,
+    "assetBytes": 206962471,
     "byKind": {
       "enemy": 14,
       "gear": 1,
@@ -127,19 +127,19 @@
   "assets": [
     {
       "path": "assets/enemy/beetle/model.json",
-      "jsonBytes": 511039,
-      "glbBytes": 383252,
-      "textureBytes": 534520,
-      "triangles": 13525,
-      "vertices": 15017,
+      "jsonBytes": 395377,
+      "glbBytes": 296508,
+      "textureBytes": 435868,
+      "triangles": 10975,
+      "vertices": 11447,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
         "basecolor.webp",
-        "emissive.webp",
-        "metalrough.webp"
+        "texture-1.webp",
+        "texture-2.webp"
       ],
       "nodeNames": [
         "body"
@@ -147,8 +147,8 @@
     },
     {
       "path": "assets/enemy/boar/model.json",
-      "jsonBytes": 349915,
-      "glbBytes": 262408,
+      "jsonBytes": 350045,
+      "glbBytes": 262508,
       "textureBytes": 325692,
       "triangles": 8248,
       "vertices": 10565,
@@ -166,19 +166,19 @@
     },
     {
       "path": "assets/enemy/crawler/model.json",
-      "jsonBytes": 621007,
-      "glbBytes": 465728,
-      "textureBytes": 439748,
-      "triangles": 16371,
-      "vertices": 18287,
+      "jsonBytes": 387533,
+      "glbBytes": 290624,
+      "textureBytes": 386280,
+      "triangles": 10931,
+      "vertices": 11166,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
         "basecolor.webp",
-        "emissive.webp",
-        "metalrough.webp"
+        "texture-1.webp",
+        "texture-2.webp"
       ],
       "nodeNames": [
         "body"
@@ -186,8 +186,8 @@
     },
     {
       "path": "assets/enemy/drowned/model.json",
-      "jsonBytes": 336203,
-      "glbBytes": 252124,
+      "jsonBytes": 336333,
+      "glbBytes": 252224,
       "textureBytes": 369752,
       "triangles": 8574,
       "vertices": 9946,
@@ -206,19 +206,19 @@
     },
     {
       "path": "assets/enemy/fireimp/model.json",
-      "jsonBytes": 639971,
-      "glbBytes": 479952,
-      "textureBytes": 282268,
-      "triangles": 15692,
-      "vertices": 19204,
+      "jsonBytes": 417809,
+      "glbBytes": 313332,
+      "textureBytes": 247634,
+      "triangles": 10989,
+      "vertices": 12286,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
         "basecolor.webp",
-        "emissive.webp",
-        "metalrough.webp"
+        "texture-1.webp",
+        "texture-2.webp"
       ],
       "nodeNames": [
         "body"
@@ -226,8 +226,8 @@
     },
     {
       "path": "assets/enemy/imp/model.json",
-      "jsonBytes": 268363,
-      "glbBytes": 201244,
+      "jsonBytes": 268497,
+      "glbBytes": 201348,
       "textureBytes": 263196,
       "triangles": 6998,
       "vertices": 7882,
@@ -245,8 +245,8 @@
     },
     {
       "path": "assets/enemy/sentinel/model.json",
-      "jsonBytes": 474651,
-      "glbBytes": 355960,
+      "jsonBytes": 474781,
+      "glbBytes": 356060,
       "textureBytes": 261256,
       "triangles": 12229,
       "vertices": 14041,
@@ -265,8 +265,8 @@
     },
     {
       "path": "assets/enemy/seraph/model.json",
-      "jsonBytes": 435555,
-      "glbBytes": 326640,
+      "jsonBytes": 435693,
+      "glbBytes": 326744,
       "textureBytes": 311874,
       "triangles": 10830,
       "vertices": 13003,
@@ -284,8 +284,8 @@
     },
     {
       "path": "assets/enemy/slime/model.json",
-      "jsonBytes": 374463,
-      "glbBytes": 280820,
+      "jsonBytes": 374601,
+      "glbBytes": 280924,
       "textureBytes": 272390,
       "triangles": 10680,
       "vertices": 10756,
@@ -303,8 +303,8 @@
     },
     {
       "path": "assets/enemy/spider/model.json",
-      "jsonBytes": 395547,
-      "glbBytes": 296632,
+      "jsonBytes": 395677,
+      "glbBytes": 296732,
       "textureBytes": 362338,
       "triangles": 10851,
       "vertices": 11495,
@@ -322,18 +322,18 @@
     },
     {
       "path": "assets/enemy/warden/model.json",
-      "jsonBytes": 561907,
-      "glbBytes": 421404,
-      "textureBytes": 453644,
-      "triangles": 15077,
-      "vertices": 16470,
+      "jsonBytes": 391553,
+      "glbBytes": 293640,
+      "textureBytes": 400672,
+      "triangles": 10991,
+      "vertices": 11308,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
         "basecolor.webp",
-        "metalrough.webp"
+        "texture-1.webp"
       ],
       "nodeNames": [
         "body"
@@ -341,8 +341,8 @@
     },
     {
       "path": "assets/enemy/wolf/model.json",
-      "jsonBytes": 276963,
-      "glbBytes": 207696,
+      "jsonBytes": 277097,
+      "glbBytes": 207796,
       "textureBytes": 379252,
       "triangles": 7139,
       "vertices": 8155,
@@ -361,8 +361,8 @@
     },
     {
       "path": "assets/enemy/wraith/model.json",
-      "jsonBytes": 260123,
-      "glbBytes": 195064,
+      "jsonBytes": 260253,
+      "glbBytes": 195164,
       "textureBytes": 302882,
       "triangles": 6997,
       "vertices": 7566,
@@ -381,18 +381,18 @@
     },
     {
       "path": "assets/enemy/yeti/model.json",
-      "jsonBytes": 849467,
-      "glbBytes": 637072,
-      "textureBytes": 313276,
-      "triangles": 19788,
-      "vertices": 25837,
+      "jsonBytes": 404349,
+      "glbBytes": 303236,
+      "textureBytes": 284736,
+      "triangles": 10907,
+      "vertices": 11810,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
         "basecolor.webp",
-        "metalrough.webp"
+        "texture-1.webp"
       ],
       "nodeNames": [
         "body"
@@ -2689,11 +2689,11 @@
     },
     {
       "path": "assets/npc/bo/model.json",
-      "jsonBytes": 825533,
-      "glbBytes": 619124,
-      "textureBytes": 459792,
-      "triangles": 14897,
-      "vertices": 18731,
+      "jsonBytes": 443073,
+      "glbBytes": 332280,
+      "textureBytes": 445568,
+      "triangles": 8989,
+      "vertices": 9745,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -2724,11 +2724,11 @@
     },
     {
       "path": "assets/npc/garo/model.json",
-      "jsonBytes": 1111997,
-      "glbBytes": 833972,
-      "textureBytes": 407946,
-      "triangles": 19398,
-      "vertices": 25440,
+      "jsonBytes": 433401,
+      "glbBytes": 325024,
+      "textureBytes": 395712,
+      "triangles": 8934,
+      "vertices": 9498,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -2759,11 +2759,11 @@
     },
     {
       "path": "assets/npc/ida/model.json",
-      "jsonBytes": 1248893,
-      "glbBytes": 936644,
-      "textureBytes": 352650,
-      "triangles": 20936,
-      "vertices": 28777,
+      "jsonBytes": 413345,
+      "glbBytes": 309984,
+      "textureBytes": 343864,
+      "triangles": 8927,
+      "vertices": 8962,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -2794,11 +2794,11 @@
     },
     {
       "path": "assets/npc/lumi/model.json",
-      "jsonBytes": 788113,
-      "glbBytes": 591060,
-      "textureBytes": 394914,
-      "triangles": 14434,
-      "vertices": 17828,
+      "jsonBytes": 405609,
+      "glbBytes": 304180,
+      "textureBytes": 381506,
+      "triangles": 8963,
+      "vertices": 8747,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -2829,11 +2829,11 @@
     },
     {
       "path": "assets/npc/mira/model.json",
-      "jsonBytes": 805097,
-      "glbBytes": 603796,
-      "textureBytes": 363572,
-      "triangles": 14814,
-      "vertices": 18202,
+      "jsonBytes": 427801,
+      "glbBytes": 320824,
+      "textureBytes": 353922,
+      "triangles": 8926,
+      "vertices": 9350,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -2864,11 +2864,11 @@
     },
     {
       "path": "assets/npc/rho/model.json",
-      "jsonBytes": 830669,
-      "glbBytes": 622976,
-      "textureBytes": 371828,
-      "triangles": 14897,
-      "vertices": 18868,
+      "jsonBytes": 439089,
+      "glbBytes": 329292,
+      "textureBytes": 359696,
+      "triangles": 8904,
+      "vertices": 9656,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -2899,11 +2899,11 @@
     },
     {
       "path": "assets/npc/vex/model.json",
-      "jsonBytes": 1099673,
-      "glbBytes": 824728,
-      "textureBytes": 420656,
-      "triangles": 19533,
-      "vertices": 25081,
+      "jsonBytes": 425245,
+      "glbBytes": 318908,
+      "textureBytes": 406392,
+      "triangles": 8961,
+      "vertices": 9274,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
@@ -3128,9 +3128,9 @@
     },
     {
       "path": "assets/world/anvil/model.json",
-      "jsonBytes": 28089,
-      "glbBytes": 21040,
-      "textureBytes": 72290,
+      "jsonBytes": 28337,
+      "glbBytes": 21228,
+      "textureBytes": 0,
       "triangles": 750,
       "vertices": 610,
       "meshes": 1,
@@ -3138,8 +3138,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/e9bea2e61159e9f1.webp"
       ],
       "nodeNames": [
         "Anvil"
@@ -3147,9 +3146,9 @@
     },
     {
       "path": "assets/world/arena_floor/model.json",
-      "jsonBytes": 592041,
-      "glbBytes": 444004,
-      "textureBytes": 299998,
+      "jsonBytes": 592173,
+      "glbBytes": 444104,
+      "textureBytes": 0,
       "triangles": 16000,
       "vertices": 17330,
       "meshes": 1,
@@ -3157,8 +3156,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/0d344de7165d659d.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3166,9 +3164,9 @@
     },
     {
       "path": "assets/world/arena_gate/model.json",
-      "jsonBytes": 336553,
-      "glbBytes": 252388,
-      "textureBytes": 295282,
+      "jsonBytes": 336681,
+      "glbBytes": 252484,
+      "textureBytes": 0,
       "triangles": 6999,
       "vertices": 10449,
       "meshes": 1,
@@ -3176,8 +3174,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/c0d3952151233bc4.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3185,9 +3182,9 @@
     },
     {
       "path": "assets/world/arena_tower/model.json",
-      "jsonBytes": 508769,
-      "glbBytes": 381552,
-      "textureBytes": 269152,
+      "jsonBytes": 508905,
+      "glbBytes": 381652,
+      "textureBytes": 0,
       "triangles": 15998,
       "vertices": 14210,
       "meshes": 1,
@@ -3195,8 +3192,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/c40a1dfe6229e61d.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3204,18 +3200,17 @@
     },
     {
       "path": "assets/world/banner_pole/model.json",
-      "jsonBytes": 231661,
-      "glbBytes": 173720,
-      "textureBytes": 108226,
-      "triangles": 5000,
-      "vertices": 7118,
+      "jsonBytes": 115801,
+      "glbBytes": 86824,
+      "textureBytes": 0,
+      "triangles": 2482,
+      "vertices": 3524,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/cdd3c0eccdd33438.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3223,9 +3218,9 @@
     },
     {
       "path": "assets/world/barrel_1/model.json",
-      "jsonBytes": 55745,
-      "glbBytes": 41784,
-      "textureBytes": 172874,
+      "jsonBytes": 56077,
+      "glbBytes": 42032,
+      "textureBytes": 0,
       "triangles": 824,
       "vertices": 1305,
       "meshes": 1,
@@ -3233,10 +3228,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp"
+        "../_tex/943afc1711e5e7c6.webp",
+        "../_tex/e9bea2e61159e9f1.webp"
       ],
       "nodeNames": [
         "Barrel"
@@ -3244,18 +3237,17 @@
     },
     {
       "path": "assets/world/bell/model.json",
-      "jsonBytes": 551641,
-      "glbBytes": 413704,
-      "textureBytes": 283608,
-      "triangles": 15995,
-      "vertices": 15816,
+      "jsonBytes": 374749,
+      "glbBytes": 281036,
+      "textureBytes": 0,
+      "triangles": 9998,
+      "vertices": 10977,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/a60840b5f2f6af9a.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3263,9 +3255,9 @@
     },
     {
       "path": "assets/world/bench/model.json",
-      "jsonBytes": 22025,
-      "glbBytes": 16492,
-      "textureBytes": 172874,
+      "jsonBytes": 22349,
+      "glbBytes": 16736,
+      "textureBytes": 0,
       "triangles": 404,
       "vertices": 422,
       "meshes": 1,
@@ -3273,10 +3265,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp"
+        "../_tex/943afc1711e5e7c6.webp",
+        "../_tex/e9bea2e61159e9f1.webp"
       ],
       "nodeNames": [
         "Bench"
@@ -3284,18 +3274,17 @@
     },
     {
       "path": "assets/world/black_spire/model.json",
-      "jsonBytes": 555825,
-      "glbBytes": 416844,
-      "textureBytes": 248242,
-      "triangles": 16000,
-      "vertices": 15974,
+      "jsonBytes": 382929,
+      "glbBytes": 287172,
+      "textureBytes": 0,
+      "triangles": 9998,
+      "vertices": 11286,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/ebae94948afb35f3.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3303,18 +3292,17 @@
     },
     {
       "path": "assets/world/bone_pile/model.json",
-      "jsonBytes": 447193,
-      "glbBytes": 335368,
-      "textureBytes": 75214,
-      "triangles": 9256,
-      "vertices": 13921,
+      "jsonBytes": 119977,
+      "glbBytes": 89956,
+      "textureBytes": 0,
+      "triangles": 2946,
+      "vertices": 3539,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/fd6aa94f270b9d18.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3322,9 +3310,9 @@
     },
     {
       "path": "assets/world/boss_abyss/model.json",
-      "jsonBytes": 794137,
-      "glbBytes": 595576,
-      "textureBytes": 363444,
+      "jsonBytes": 794269,
+      "glbBytes": 595676,
+      "textureBytes": 0,
       "triangles": 16724,
       "vertices": 24691,
       "meshes": 1,
@@ -3332,8 +3320,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/b17d526831be1184.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3341,9 +3328,9 @@
     },
     {
       "path": "assets/world/boss_celestial/model.json",
-      "jsonBytes": 555373,
-      "glbBytes": 416504,
-      "textureBytes": 451192,
+      "jsonBytes": 555505,
+      "glbBytes": 416604,
+      "textureBytes": 0,
       "triangles": 14000,
       "vertices": 16557,
       "meshes": 1,
@@ -3351,8 +3338,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/499eb56515a36d23.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3360,9 +3346,9 @@
     },
     {
       "path": "assets/world/boss_frost/model.json",
-      "jsonBytes": 573853,
-      "glbBytes": 430364,
-      "textureBytes": 420388,
+      "jsonBytes": 573985,
+      "glbBytes": 430464,
+      "textureBytes": 0,
       "triangles": 14000,
       "vertices": 17250,
       "meshes": 1,
@@ -3370,8 +3356,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/924ece99f471a86a.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3379,9 +3364,9 @@
     },
     {
       "path": "assets/world/boss_golem/model.json",
-      "jsonBytes": 651265,
-      "glbBytes": 488424,
-      "textureBytes": 435670,
+      "jsonBytes": 651393,
+      "glbBytes": 488520,
+      "textureBytes": 0,
       "triangles": 13995,
       "vertices": 20152,
       "meshes": 1,
@@ -3389,8 +3374,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/cf66f25bd2f569c0.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3398,9 +3382,9 @@
     },
     {
       "path": "assets/world/boss_magma/model.json",
-      "jsonBytes": 1118057,
-      "glbBytes": 838516,
-      "textureBytes": 324020,
+      "jsonBytes": 1118189,
+      "glbBytes": 838616,
+      "textureBytes": 0,
       "triangles": 22714,
       "vertices": 35041,
       "meshes": 1,
@@ -3408,8 +3392,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/e04b52af7eac227a.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3417,9 +3400,9 @@
     },
     {
       "path": "assets/world/boss_void/model.json",
-      "jsonBytes": 554153,
-      "glbBytes": 415588,
-      "textureBytes": 260198,
+      "jsonBytes": 554281,
+      "glbBytes": 415684,
+      "textureBytes": 0,
       "triangles": 13999,
       "vertices": 16509,
       "meshes": 1,
@@ -3427,8 +3410,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/f6b5fef36c0dab9d.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3436,9 +3418,9 @@
     },
     {
       "path": "assets/world/brazier/model.json",
-      "jsonBytes": 217741,
-      "glbBytes": 163280,
-      "textureBytes": 98886,
+      "jsonBytes": 217869,
+      "glbBytes": 163376,
+      "textureBytes": 0,
       "triangles": 4859,
       "vertices": 6638,
       "meshes": 1,
@@ -3446,8 +3428,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/8e3f9bd72dd116bf.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3455,9 +3436,9 @@
     },
     {
       "path": "assets/world/bucket/model.json",
-      "jsonBytes": 33373,
-      "glbBytes": 25004,
-      "textureBytes": 172874,
+      "jsonBytes": 33533,
+      "glbBytes": 25124,
+      "textureBytes": 0,
       "triangles": 976,
       "vertices": 834,
       "meshes": 1,
@@ -3465,10 +3446,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp"
+        "../_tex/943afc1711e5e7c6.webp",
+        "../_tex/e9bea2e61159e9f1.webp"
       ],
       "nodeNames": [
         "Bucket_Wooden_1"
@@ -3476,9 +3455,9 @@
     },
     {
       "path": "assets/world/bush_a_1/model.json",
-      "jsonBytes": 66993,
-      "glbBytes": 50220,
-      "textureBytes": 42174,
+      "jsonBytes": 67261,
+      "glbBytes": 50420,
+      "textureBytes": 0,
       "triangles": 900,
       "vertices": 1800,
       "meshes": 1,
@@ -3486,7 +3465,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/d4e7e840940de052.webp"
       ],
       "nodeNames": [
         "Bush_Common"
@@ -3494,9 +3473,9 @@
     },
     {
       "path": "assets/world/bush_a_2/model.json",
-      "jsonBytes": 12225,
-      "glbBytes": 9144,
-      "textureBytes": 60868,
+      "jsonBytes": 12497,
+      "glbBytes": 9348,
+      "textureBytes": 0,
       "triangles": 288,
       "vertices": 243,
       "meshes": 1,
@@ -3504,7 +3483,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/ff96c10150d42e88.webp"
       ],
       "nodeNames": [
         "Fern_1"
@@ -3512,9 +3491,9 @@
     },
     {
       "path": "assets/world/bush_a_3/model.json",
-      "jsonBytes": 16497,
-      "glbBytes": 12348,
-      "textureBytes": 60868,
+      "jsonBytes": 16777,
+      "glbBytes": 12556,
+      "textureBytes": 0,
       "triangles": 360,
       "vertices": 360,
       "meshes": 1,
@@ -3522,7 +3501,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/ff96c10150d42e88.webp"
       ],
       "nodeNames": [
         "Plant_1_Big"
@@ -3530,9 +3509,9 @@
     },
     {
       "path": "assets/world/bush_flower_1/model.json",
-      "jsonBytes": 94893,
-      "glbBytes": 71144,
-      "textureBytes": 89344,
+      "jsonBytes": 95517,
+      "glbBytes": 71612,
+      "textureBytes": 0,
       "triangles": 1368,
       "vertices": 2515,
       "meshes": 1,
@@ -3540,8 +3519,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/24801a51399cded6.webp",
+        "../_tex/d0a9eb7ef6bd7736.webp"
       ],
       "nodeNames": [
         "Bush_Common_Flowers"
@@ -3549,9 +3528,9 @@
     },
     {
       "path": "assets/world/cage/model.json",
-      "jsonBytes": 183113,
-      "glbBytes": 137308,
-      "textureBytes": 72290,
+      "jsonBytes": 183165,
+      "glbBytes": 137348,
+      "textureBytes": 0,
       "triangles": 4588,
       "vertices": 4510,
       "meshes": 1,
@@ -3559,8 +3538,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/e9bea2e61159e9f1.webp"
       ],
       "nodeNames": [
         "Cage_Small"
@@ -3568,18 +3546,17 @@
     },
     {
       "path": "assets/world/camp/model.json",
-      "jsonBytes": 683293,
-      "glbBytes": 512444,
-      "textureBytes": 430268,
-      "triangles": 15999,
-      "vertices": 20752,
+      "jsonBytes": 483457,
+      "glbBytes": 362568,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 15053,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/a1aae01cc63d4fbb.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3587,18 +3564,17 @@
     },
     {
       "path": "assets/world/cave/model.json",
-      "jsonBytes": 448473,
-      "glbBytes": 336328,
-      "textureBytes": 761164,
+      "jsonBytes": 201129,
+      "glbBytes": 150820,
+      "textureBytes": 0,
       "triangles": 4483,
-      "vertices": 15401,
+      "vertices": 6121,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/c3149dbac0ec5284.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3606,9 +3582,9 @@
     },
     {
       "path": "assets/world/chest/model.json",
-      "jsonBytes": 278737,
-      "glbBytes": 209028,
-      "textureBytes": 143738,
+      "jsonBytes": 278865,
+      "glbBytes": 209124,
+      "textureBytes": 0,
       "triangles": 6203,
       "vertices": 8520,
       "meshes": 1,
@@ -3616,8 +3592,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/f340a237b55e63b0.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3625,9 +3600,9 @@
     },
     {
       "path": "assets/world/chest_open/model.json",
-      "jsonBytes": 692141,
-      "glbBytes": 519080,
-      "textureBytes": 141874,
+      "jsonBytes": 692269,
+      "glbBytes": 519176,
+      "textureBytes": 0,
       "triangles": 14631,
       "vertices": 21494,
       "meshes": 1,
@@ -3635,8 +3610,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/c993b046acd9fe20.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3644,9 +3618,9 @@
     },
     {
       "path": "assets/world/clutter/model.json",
-      "jsonBytes": 365309,
-      "glbBytes": 273956,
-      "textureBytes": 129152,
+      "jsonBytes": 365437,
+      "glbBytes": 274052,
+      "textureBytes": 0,
       "triangles": 7697,
       "vertices": 11318,
       "meshes": 1,
@@ -3654,8 +3628,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/f514a4b149949c4e.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3663,9 +3636,9 @@
     },
     {
       "path": "assets/world/crate_1/model.json",
-      "jsonBytes": 65021,
-      "glbBytes": 48740,
-      "textureBytes": 172874,
+      "jsonBytes": 65353,
+      "glbBytes": 48988,
+      "textureBytes": 0,
       "triangles": 1576,
       "vertices": 1426,
       "meshes": 1,
@@ -3673,10 +3646,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp"
+        "../_tex/943afc1711e5e7c6.webp",
+        "../_tex/e9bea2e61159e9f1.webp"
       ],
       "nodeNames": [
         "Crate_Wooden"
@@ -3684,9 +3655,9 @@
     },
     {
       "path": "assets/world/crate_2/model.json",
-      "jsonBytes": 16221,
-      "glbBytes": 12140,
-      "textureBytes": 102838,
+      "jsonBytes": 16237,
+      "glbBytes": 12152,
+      "textureBytes": 0,
       "triangles": 230,
       "vertices": 460,
       "meshes": 1,
@@ -3694,8 +3665,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/e20aa9c6fb53eadb.webp"
       ],
       "nodeNames": [
         "Prop_Crate"
@@ -3703,9 +3673,9 @@
     },
     {
       "path": "assets/world/crystal/model.json",
-      "jsonBytes": 163273,
-      "glbBytes": 122428,
-      "textureBytes": 117710,
+      "jsonBytes": 163401,
+      "glbBytes": 122524,
+      "textureBytes": 0,
       "triangles": 3500,
       "vertices": 5001,
       "meshes": 1,
@@ -3713,8 +3683,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/934a2675218877de.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3722,18 +3691,17 @@
     },
     {
       "path": "assets/world/dragon_skull/model.json",
-      "jsonBytes": 602545,
-      "glbBytes": 451884,
-      "textureBytes": 331528,
-      "triangles": 15992,
-      "vertices": 17726,
+      "jsonBytes": 412289,
+      "glbBytes": 309192,
+      "textureBytes": 0,
+      "triangles": 9997,
+      "vertices": 12385,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/2290d8209aa8f8f9.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3741,9 +3709,9 @@
     },
     {
       "path": "assets/world/dummy/model.json",
-      "jsonBytes": 80513,
-      "glbBytes": 60360,
-      "textureBytes": 230748,
+      "jsonBytes": 80801,
+      "glbBytes": 60576,
+      "textureBytes": 0,
       "triangles": 2858,
       "vertices": 1995,
       "meshes": 1,
@@ -3751,12 +3719,9 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp",
-        "basecolor-4.webp",
-        "texture-5.webp"
+        "../_tex/943afc1711e5e7c6.webp",
+        "../_tex/e9bea2e61159e9f1.webp",
+        "../_tex/63c284588b5176f9.webp"
       ],
       "nodeNames": [
         "Dummy"
@@ -3764,9 +3729,9 @@
     },
     {
       "path": "assets/world/dwall/model.json",
-      "jsonBytes": 448241,
-      "glbBytes": 336156,
-      "textureBytes": 90250,
+      "jsonBytes": 448377,
+      "glbBytes": 336256,
+      "textureBytes": 0,
       "triangles": 9272,
       "vertices": 13956,
       "meshes": 1,
@@ -3774,8 +3739,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/d059d08bcb0013e7.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3783,18 +3747,17 @@
     },
     {
       "path": "assets/world/elder_stump/model.json",
-      "jsonBytes": 525953,
-      "glbBytes": 394440,
-      "textureBytes": 283358,
-      "triangles": 15998,
-      "vertices": 14852,
+      "jsonBytes": 355773,
+      "glbBytes": 266804,
+      "textureBytes": 0,
+      "triangles": 9999,
+      "vertices": 10265,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/03e978f7e6c0700b.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3802,18 +3765,17 @@
     },
     {
       "path": "assets/world/fairy_ring/model.json",
-      "jsonBytes": 654793,
-      "glbBytes": 491068,
-      "textureBytes": 438042,
-      "triangles": 16000,
-      "vertices": 19683,
+      "jsonBytes": 457137,
+      "glbBytes": 342828,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 14066,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/108daed8f4a57034.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3821,9 +3783,9 @@
     },
     {
       "path": "assets/world/farm_crate/model.json",
-      "jsonBytes": 128413,
-      "glbBytes": 96284,
-      "textureBytes": 323242,
+      "jsonBytes": 128969,
+      "glbBytes": 96700,
+      "textureBytes": 0,
       "triangles": 4028,
       "vertices": 2758,
       "meshes": 1,
@@ -3831,12 +3793,9 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp",
-        "basecolor-4.webp",
-        "texture-5.webp"
+        "../_tex/943afc1711e5e7c6.webp",
+        "../_tex/e9bea2e61159e9f1.webp",
+        "../_tex/b4ed9f546cac50b9.webp"
       ],
       "nodeNames": [
         "FarmCrate_Apple"
@@ -3844,9 +3803,9 @@
     },
     {
       "path": "assets/world/fence/model.json",
-      "jsonBytes": 4577,
-      "glbBytes": 3408,
-      "textureBytes": 102838,
+      "jsonBytes": 4589,
+      "glbBytes": 3416,
+      "textureBytes": 0,
       "triangles": 40,
       "vertices": 80,
       "meshes": 1,
@@ -3854,8 +3813,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/e20aa9c6fb53eadb.webp"
       ],
       "nodeNames": [
         "Prop_WoodenFence_Single"
@@ -3863,18 +3821,17 @@
     },
     {
       "path": "assets/world/floating_isle/model.json",
-      "jsonBytes": 643497,
-      "glbBytes": 482596,
-      "textureBytes": 179676,
-      "triangles": 15995,
-      "vertices": 19263,
+      "jsonBytes": 74793,
+      "glbBytes": 56068,
+      "textureBytes": 0,
+      "triangles": 1965,
+      "vertices": 2141,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/31428f098aaac4ca.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3882,9 +3839,9 @@
     },
     {
       "path": "assets/world/flower_1/model.json",
-      "jsonBytes": 27993,
-      "glbBytes": 20968,
-      "textureBytes": 112008,
+      "jsonBytes": 28625,
+      "glbBytes": 21444,
+      "textureBytes": 0,
       "triangles": 755,
       "vertices": 581,
       "meshes": 1,
@@ -3892,8 +3849,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/ff96c10150d42e88.webp",
+        "../_tex/d0a9eb7ef6bd7736.webp"
       ],
       "nodeNames": [
         "Flower_3_Group"
@@ -3901,9 +3858,9 @@
     },
     {
       "path": "assets/world/flower_2/model.json",
-      "jsonBytes": 20877,
-      "glbBytes": 15632,
-      "textureBytes": 60868,
+      "jsonBytes": 21153,
+      "glbBytes": 15840,
+      "textureBytes": 0,
       "triangles": 615,
       "vertices": 433,
       "meshes": 1,
@@ -3911,7 +3868,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/ff96c10150d42e88.webp"
       ],
       "nodeNames": [
         "Clover_2"
@@ -3919,9 +3876,9 @@
     },
     {
       "path": "assets/world/forge/model.json",
-      "jsonBytes": 360753,
-      "glbBytes": 270540,
-      "textureBytes": 363832,
+      "jsonBytes": 360881,
+      "glbBytes": 270636,
+      "textureBytes": 0,
       "triangles": 7228,
       "vertices": 11288,
       "meshes": 1,
@@ -3929,8 +3886,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/5ed1e25beb5d0002.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3938,9 +3894,9 @@
     },
     {
       "path": "assets/world/fountain/model.json",
-      "jsonBytes": 291725,
-      "glbBytes": 218768,
-      "textureBytes": 233340,
+      "jsonBytes": 291853,
+      "glbBytes": 218864,
+      "textureBytes": 0,
       "triangles": 7000,
       "vertices": 8768,
       "meshes": 1,
@@ -3948,8 +3904,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/1cf40d44b5d55dfc.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3957,18 +3912,17 @@
     },
     {
       "path": "assets/world/frozen_fall/model.json",
-      "jsonBytes": 620393,
-      "glbBytes": 465268,
-      "textureBytes": 316562,
-      "triangles": 15993,
-      "vertices": 18395,
+      "jsonBytes": 425517,
+      "glbBytes": 319112,
+      "textureBytes": 0,
+      "triangles": 9997,
+      "vertices": 12881,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/cc7293e2f4fbfe15.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3976,9 +3930,9 @@
     },
     {
       "path": "assets/world/gatehouse/model.json",
-      "jsonBytes": 417473,
-      "glbBytes": 313080,
-      "textureBytes": 309856,
+      "jsonBytes": 417601,
+      "glbBytes": 313176,
+      "textureBytes": 0,
       "triangles": 8998,
       "vertices": 12884,
       "meshes": 1,
@@ -3986,8 +3940,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/7a3b7d90d34033bb.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -3995,18 +3948,17 @@
     },
     {
       "path": "assets/world/geyser/model.json",
-      "jsonBytes": 596825,
-      "glbBytes": 447592,
-      "textureBytes": 312246,
-      "triangles": 16000,
-      "vertices": 17509,
+      "jsonBytes": 412765,
+      "glbBytes": 309548,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 12402,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/fca2fe58e8a05f80.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4014,18 +3966,17 @@
     },
     {
       "path": "assets/world/ghost_ship/model.json",
-      "jsonBytes": 660761,
-      "glbBytes": 495544,
-      "textureBytes": 321430,
-      "triangles": 15993,
-      "vertices": 19911,
+      "jsonBytes": 460461,
+      "glbBytes": 345320,
+      "textureBytes": 0,
+      "triangles": 9999,
+      "vertices": 14193,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/e427ea77a3c7a6e8.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4033,18 +3984,17 @@
     },
     {
       "path": "assets/world/glass_chimney/model.json",
-      "jsonBytes": 537505,
-      "glbBytes": 403104,
-      "textureBytes": 271752,
-      "triangles": 16000,
-      "vertices": 15287,
+      "jsonBytes": 368173,
+      "glbBytes": 276104,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 10732,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/ff7778b8d96857cf.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4052,18 +4002,17 @@
     },
     {
       "path": "assets/world/graves/model.json",
-      "jsonBytes": 597713,
-      "glbBytes": 448260,
-      "textureBytes": 193942,
-      "triangles": 15996,
-      "vertices": 17546,
+      "jsonBytes": 414573,
+      "glbBytes": 310904,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 12472,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/e711c41a10894b7e.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4071,18 +4020,17 @@
     },
     {
       "path": "assets/world/hermit_shack/model.json",
-      "jsonBytes": 707677,
-      "glbBytes": 530732,
-      "textureBytes": 353390,
-      "triangles": 16000,
-      "vertices": 21666,
+      "jsonBytes": 556433,
+      "glbBytes": 417300,
+      "textureBytes": 0,
+      "triangles": 11515,
+      "vertices": 17335,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/5f35987fd65fba07.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4090,9 +4038,9 @@
     },
     {
       "path": "assets/world/house_a/model.json",
-      "jsonBytes": 564813,
-      "glbBytes": 423584,
-      "textureBytes": 377152,
+      "jsonBytes": 564945,
+      "glbBytes": 423684,
+      "textureBytes": 0,
       "triangles": 11553,
       "vertices": 17645,
       "meshes": 1,
@@ -4100,8 +4048,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/a3e6ed04fd263cb8.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4109,9 +4056,9 @@
     },
     {
       "path": "assets/world/house_b/model.json",
-      "jsonBytes": 606665,
-      "glbBytes": 454972,
-      "textureBytes": 394374,
+      "jsonBytes": 606797,
+      "glbBytes": 455072,
+      "textureBytes": 0,
       "triangles": 12791,
       "vertices": 18843,
       "meshes": 1,
@@ -4119,8 +4066,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/1242e6bdc54f439c.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4128,9 +4074,9 @@
     },
     {
       "path": "assets/world/keep/model.json",
-      "jsonBytes": 591057,
-      "glbBytes": 443268,
-      "textureBytes": 358048,
+      "jsonBytes": 591185,
+      "glbBytes": 443364,
+      "textureBytes": 0,
       "triangles": 13999,
       "vertices": 17893,
       "meshes": 1,
@@ -4138,8 +4084,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/c724d3551f275087.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4147,9 +4092,9 @@
     },
     {
       "path": "assets/world/kettle/model.json",
-      "jsonBytes": 68825,
-      "glbBytes": 51592,
-      "textureBytes": 72290,
+      "jsonBytes": 68877,
+      "glbBytes": 51632,
+      "textureBytes": 0,
       "triangles": 2020,
       "vertices": 1581,
       "meshes": 1,
@@ -4157,8 +4102,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/e9bea2e61159e9f1.webp"
       ],
       "nodeNames": [
         "Cauldron"
@@ -4166,9 +4110,9 @@
     },
     {
       "path": "assets/world/lantern_post/model.json",
-      "jsonBytes": 147137,
-      "glbBytes": 110328,
-      "textureBytes": 232788,
+      "jsonBytes": 147993,
+      "glbBytes": 110968,
+      "textureBytes": 0,
       "triangles": 3288,
       "vertices": 3601,
       "meshes": 6,
@@ -4176,12 +4120,9 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp",
-        "basecolor-4.webp",
-        "texture-5.webp"
+        "../_tex/e20aa9c6fb53eadb.webp",
+        "../_tex/e9bea2e61159e9f1.webp",
+        "../_tex/e6a2f3f8c751329c.webp"
       ],
       "nodeNames": [
         "Corner_Exterior_Wood",
@@ -4195,18 +4136,17 @@
     },
     {
       "path": "assets/world/leviathan_spine/model.json",
-      "jsonBytes": 664269,
-      "glbBytes": 498176,
-      "textureBytes": 291222,
-      "triangles": 15998,
-      "vertices": 20039,
+      "jsonBytes": 480505,
+      "glbBytes": 360352,
+      "textureBytes": 0,
+      "triangles": 10414,
+      "vertices": 14818,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/b735c61cb4113272.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4214,18 +4154,17 @@
     },
     {
       "path": "assets/world/lighthouse/model.json",
-      "jsonBytes": 584969,
-      "glbBytes": 438700,
-      "textureBytes": 440992,
-      "triangles": 15999,
-      "vertices": 17067,
+      "jsonBytes": 409981,
+      "glbBytes": 307460,
+      "textureBytes": 0,
+      "triangles": 9999,
+      "vertices": 12300,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/715dbd92ece2db66.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4233,9 +4172,9 @@
     },
     {
       "path": "assets/world/lodestone/model.json",
-      "jsonBytes": 270225,
-      "glbBytes": 202644,
-      "textureBytes": 167308,
+      "jsonBytes": 270353,
+      "glbBytes": 202740,
+      "textureBytes": 0,
       "triangles": 6000,
       "vertices": 8264,
       "meshes": 1,
@@ -4243,8 +4182,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/2efab0036ba8900a.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4252,18 +4190,17 @@
     },
     {
       "path": "assets/world/log/model.json",
-      "jsonBytes": 917229,
-      "glbBytes": 687896,
-      "textureBytes": 162340,
-      "triangles": 18517,
-      "vertices": 28769,
+      "jsonBytes": 82017,
+      "glbBytes": 61488,
+      "textureBytes": 0,
+      "triangles": 2471,
+      "vertices": 2258,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/a44c148df81ca7b7.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4271,18 +4208,17 @@
     },
     {
       "path": "assets/world/mine_cart/model.json",
-      "jsonBytes": 341297,
-      "glbBytes": 255948,
-      "textureBytes": 113920,
-      "triangles": 7229,
-      "vertices": 10558,
+      "jsonBytes": 134921,
+      "glbBytes": 101164,
+      "textureBytes": 0,
+      "triangles": 2987,
+      "vertices": 4087,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/ecdd16d1123719d8.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4290,18 +4226,17 @@
     },
     {
       "path": "assets/world/mine_lift/model.json",
-      "jsonBytes": 658489,
-      "glbBytes": 493840,
-      "textureBytes": 311012,
-      "triangles": 15996,
-      "vertices": 19825,
+      "jsonBytes": 461609,
+      "glbBytes": 346180,
+      "textureBytes": 0,
+      "triangles": 9999,
+      "vertices": 14236,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/071f28d9475e082e.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4309,18 +4244,17 @@
     },
     {
       "path": "assets/world/mirror_maze/model.json",
-      "jsonBytes": 690393,
-      "glbBytes": 517768,
-      "textureBytes": 448162,
-      "triangles": 15999,
-      "vertices": 21018,
+      "jsonBytes": 505481,
+      "glbBytes": 379084,
+      "textureBytes": 0,
+      "triangles": 10596,
+      "vertices": 15700,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/613d8dfc2ab7121e.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4328,18 +4262,17 @@
     },
     {
       "path": "assets/world/moon_gate/model.json",
-      "jsonBytes": 613181,
-      "glbBytes": 459860,
-      "textureBytes": 270300,
-      "triangles": 15998,
-      "vertices": 18123,
+      "jsonBytes": 428713,
+      "glbBytes": 321508,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 13000,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/a3169b74ddc636dd.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4347,18 +4280,17 @@
     },
     {
       "path": "assets/world/mountain/model.json",
-      "jsonBytes": 749245,
-      "glbBytes": 561908,
-      "textureBytes": 275646,
-      "triangles": 15997,
-      "vertices": 23228,
+      "jsonBytes": 77789,
+      "glbBytes": 58316,
+      "textureBytes": 0,
+      "triangles": 1900,
+      "vertices": 2273,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/4dca7fe015a807a9.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4366,9 +4298,9 @@
     },
     {
       "path": "assets/world/mushrooms_1/model.json",
-      "jsonBytes": 23793,
-      "glbBytes": 17820,
-      "textureBytes": 45724,
+      "jsonBytes": 23981,
+      "glbBytes": 17960,
+      "textureBytes": 0,
       "triangles": 880,
       "vertices": 555,
       "meshes": 1,
@@ -4376,7 +4308,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/76faa91f1b3494f7.webp"
       ],
       "nodeNames": [
         "Mushroom_Common"
@@ -4384,9 +4316,9 @@
     },
     {
       "path": "assets/world/ore/model.json",
-      "jsonBytes": 124553,
-      "glbBytes": 93388,
-      "textureBytes": 174680,
+      "jsonBytes": 124681,
+      "glbBytes": 93484,
+      "textureBytes": 0,
       "triangles": 3484,
       "vertices": 3554,
       "meshes": 1,
@@ -4394,8 +4326,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/48af52ed31c9f600.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4403,18 +4334,17 @@
     },
     {
       "path": "assets/world/ore_pile/model.json",
-      "jsonBytes": 203561,
-      "glbBytes": 152644,
-      "textureBytes": 92528,
-      "triangles": 4999,
-      "vertices": 6062,
+      "jsonBytes": 131185,
+      "glbBytes": 98364,
+      "textureBytes": 0,
+      "triangles": 2987,
+      "vertices": 3947,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/24bd3d422fb10d0a.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4422,18 +4352,17 @@
     },
     {
       "path": "assets/world/pearl_clam/model.json",
-      "jsonBytes": 588169,
-      "glbBytes": 441100,
-      "textureBytes": 345882,
-      "triangles": 15998,
-      "vertices": 17185,
+      "jsonBytes": 408397,
+      "glbBytes": 306272,
+      "textureBytes": 0,
+      "triangles": 9997,
+      "vertices": 12239,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/02dee05398f83212.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4441,9 +4370,9 @@
     },
     {
       "path": "assets/world/pillar/model.json",
-      "jsonBytes": 295737,
-      "glbBytes": 221776,
-      "textureBytes": 126204,
+      "jsonBytes": 295865,
+      "glbBytes": 221872,
+      "textureBytes": 0,
       "triangles": 6362,
       "vertices": 9112,
       "meshes": 1,
@@ -4451,8 +4380,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/b8a962d6fed4a766.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4460,18 +4388,17 @@
     },
     {
       "path": "assets/world/pond/model.json",
-      "jsonBytes": 562765,
-      "glbBytes": 422048,
-      "textureBytes": 240278,
-      "triangles": 15999,
-      "vertices": 16232,
+      "jsonBytes": 142841,
+      "glbBytes": 107104,
+      "textureBytes": 0,
+      "triangles": 2987,
+      "vertices": 4384,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/f52292e957954038.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4479,9 +4406,9 @@
     },
     {
       "path": "assets/world/portcullis/model.json",
-      "jsonBytes": 245613,
-      "glbBytes": 184184,
-      "textureBytes": 81836,
+      "jsonBytes": 245741,
+      "glbBytes": 184280,
+      "textureBytes": 0,
       "triangles": 4999,
       "vertices": 7639,
       "meshes": 1,
@@ -4489,8 +4416,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/450ad66989358fc1.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4498,18 +4424,17 @@
     },
     {
       "path": "assets/world/quarry_wall/model.json",
-      "jsonBytes": 600889,
-      "glbBytes": 450640,
-      "textureBytes": 215900,
-      "triangles": 15998,
-      "vertices": 17662,
+      "jsonBytes": 419857,
+      "glbBytes": 314868,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 12668,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/f106e077ca0a1dcc.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4517,18 +4442,17 @@
     },
     {
       "path": "assets/world/ribcage/model.json",
-      "jsonBytes": 901053,
-      "glbBytes": 675764,
-      "textureBytes": 284318,
-      "triangles": 19022,
-      "vertices": 28011,
+      "jsonBytes": 901145,
+      "glbBytes": 675832,
+      "textureBytes": 0,
+      "triangles": 19023,
+      "vertices": 28009,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/5a1b7f26e9cefb3a.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4536,9 +4460,9 @@
     },
     {
       "path": "assets/world/rift_floor/model.json",
-      "jsonBytes": 606049,
-      "glbBytes": 454512,
-      "textureBytes": 277524,
+      "jsonBytes": 606185,
+      "glbBytes": 454612,
+      "textureBytes": 0,
       "triangles": 15998,
       "vertices": 17856,
       "meshes": 1,
@@ -4546,8 +4470,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/c41200f8f34cec4f.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4555,18 +4478,17 @@
     },
     {
       "path": "assets/world/rift_gate/model.json",
-      "jsonBytes": 545705,
-      "glbBytes": 409252,
-      "textureBytes": 206726,
-      "triangles": 16000,
-      "vertices": 15592,
+      "jsonBytes": 367569,
+      "glbBytes": 275652,
+      "textureBytes": 0,
+      "triangles": 9997,
+      "vertices": 10708,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/3e41eedd92bfb83d.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4574,9 +4496,9 @@
     },
     {
       "path": "assets/world/rift_shard/model.json",
-      "jsonBytes": 159921,
-      "glbBytes": 119916,
-      "textureBytes": 85956,
+      "jsonBytes": 160049,
+      "glbBytes": 120012,
+      "textureBytes": 0,
       "triangles": 3676,
       "vertices": 4825,
       "meshes": 1,
@@ -4584,8 +4506,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/8553af24c3fa32f1.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4593,9 +4514,9 @@
     },
     {
       "path": "assets/world/rock_a_1/model.json",
-      "jsonBytes": 14061,
-      "glbBytes": 10520,
-      "textureBytes": 36684,
+      "jsonBytes": 14249,
+      "glbBytes": 10660,
+      "textureBytes": 0,
       "triangles": 342,
       "vertices": 351,
       "meshes": 1,
@@ -4603,7 +4524,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/0181f6fcd8cbdafa.webp"
       ],
       "nodeNames": [
         "Rock_Medium_1"
@@ -4611,9 +4532,9 @@
     },
     {
       "path": "assets/world/rock_a_2/model.json",
-      "jsonBytes": 10557,
-      "glbBytes": 7892,
-      "textureBytes": 36684,
+      "jsonBytes": 10745,
+      "glbBytes": 8032,
+      "textureBytes": 0,
       "triangles": 244,
       "vertices": 249,
       "meshes": 1,
@@ -4621,7 +4542,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/0181f6fcd8cbdafa.webp"
       ],
       "nodeNames": [
         "Rock_Medium_2"
@@ -4629,9 +4550,9 @@
     },
     {
       "path": "assets/world/rock_a_3/model.json",
-      "jsonBytes": 20305,
-      "glbBytes": 15204,
-      "textureBytes": 36684,
+      "jsonBytes": 20493,
+      "glbBytes": 15344,
+      "textureBytes": 0,
       "triangles": 522,
       "vertices": 531,
       "meshes": 1,
@@ -4639,7 +4560,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/0181f6fcd8cbdafa.webp"
       ],
       "nodeNames": [
         "Rock_Medium_3"
@@ -4647,9 +4568,9 @@
     },
     {
       "path": "assets/world/ruin_block/model.json",
-      "jsonBytes": 132701,
-      "glbBytes": 99500,
-      "textureBytes": 97352,
+      "jsonBytes": 132829,
+      "glbBytes": 99596,
+      "textureBytes": 0,
       "triangles": 3006,
       "vertices": 4003,
       "meshes": 1,
@@ -4657,8 +4578,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/01505874bcca1b83.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4666,18 +4586,17 @@
     },
     {
       "path": "assets/world/ruin_pillar/model.json",
-      "jsonBytes": 499377,
-      "glbBytes": 374508,
-      "textureBytes": 273012,
-      "triangles": 15997,
-      "vertices": 13858,
+      "jsonBytes": 124825,
+      "glbBytes": 93592,
+      "textureBytes": 0,
+      "triangles": 2999,
+      "vertices": 3707,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/522799b132dc0655.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4685,18 +4604,17 @@
     },
     {
       "path": "assets/world/ruined_tower/model.json",
-      "jsonBytes": 702873,
-      "glbBytes": 527128,
-      "textureBytes": 450624,
-      "triangles": 15996,
-      "vertices": 21487,
+      "jsonBytes": 531257,
+      "glbBytes": 398416,
+      "textureBytes": 0,
+      "triangles": 10991,
+      "vertices": 16548,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/a5f64de1f521d777.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4704,18 +4622,17 @@
     },
     {
       "path": "assets/world/rune_obelisk/model.json",
-      "jsonBytes": 339745,
-      "glbBytes": 254784,
-      "textureBytes": 210206,
-      "triangles": 8000,
-      "vertices": 10271,
+      "jsonBytes": 172957,
+      "glbBytes": 129692,
+      "textureBytes": 0,
+      "triangles": 3986,
+      "vertices": 5216,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/094ccf847bf0f8b4.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4723,18 +4640,17 @@
     },
     {
       "path": "assets/world/sapphire_brazier/model.json",
-      "jsonBytes": 724285,
-      "glbBytes": 543188,
-      "textureBytes": 456372,
-      "triangles": 15997,
-      "vertices": 22292,
+      "jsonBytes": 585233,
+      "glbBytes": 438900,
+      "textureBytes": 0,
+      "triangles": 11919,
+      "vertices": 18296,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/a1562f549e7697bc.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4742,18 +4658,17 @@
     },
     {
       "path": "assets/world/sea_stack/model.json",
-      "jsonBytes": 602653,
-      "glbBytes": 451964,
-      "textureBytes": 370354,
-      "triangles": 16000,
-      "vertices": 17730,
+      "jsonBytes": 85497,
+      "glbBytes": 64096,
+      "textureBytes": 0,
+      "triangles": 1990,
+      "vertices": 2535,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/4a5504dad3dcb0f8.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4761,18 +4676,17 @@
     },
     {
       "path": "assets/world/signpost/model.json",
-      "jsonBytes": 171393,
-      "glbBytes": 128520,
-      "textureBytes": 71164,
-      "triangles": 5000,
-      "vertices": 4858,
+      "jsonBytes": 97121,
+      "glbBytes": 72816,
+      "textureBytes": 0,
+      "triangles": 2500,
+      "vertices": 2818,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/70458005009a9938.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4780,18 +4694,17 @@
     },
     {
       "path": "assets/world/sky_altar/model.json",
-      "jsonBytes": 520881,
-      "glbBytes": 390636,
-      "textureBytes": 277492,
-      "triangles": 15998,
-      "vertices": 14662,
+      "jsonBytes": 353921,
+      "glbBytes": 265416,
+      "textureBytes": 0,
+      "triangles": 9998,
+      "vertices": 10196,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/4ded7e51b2e3ba0f.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4799,18 +4712,17 @@
     },
     {
       "path": "assets/world/snow_mountain/model.json",
-      "jsonBytes": 523697,
-      "glbBytes": 392748,
-      "textureBytes": 306192,
-      "triangles": 15999,
-      "vertices": 14767,
+      "jsonBytes": 86033,
+      "glbBytes": 64500,
+      "textureBytes": 0,
+      "triangles": 1990,
+      "vertices": 2553,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/0f4bdc44cd1ae5de.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4818,9 +4730,9 @@
     },
     {
       "path": "assets/world/stall/model.json",
-      "jsonBytes": 452733,
-      "glbBytes": 339524,
-      "textureBytes": 363666,
+      "jsonBytes": 452865,
+      "glbBytes": 339624,
+      "textureBytes": 0,
       "triangles": 9486,
       "vertices": 14060,
       "meshes": 1,
@@ -4828,8 +4740,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/a61a63737e606ae8.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4837,9 +4748,9 @@
     },
     {
       "path": "assets/world/stall_kit_1/model.json",
-      "jsonBytes": 72717,
-      "glbBytes": 54512,
-      "textureBytes": 230748,
+      "jsonBytes": 73265,
+      "glbBytes": 54924,
+      "textureBytes": 0,
       "triangles": 1496,
       "vertices": 1650,
       "meshes": 1,
@@ -4847,12 +4758,9 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp",
-        "basecolor-4.webp",
-        "texture-5.webp"
+        "../_tex/e9bea2e61159e9f1.webp",
+        "../_tex/943afc1711e5e7c6.webp",
+        "../_tex/63c284588b5176f9.webp"
       ],
       "nodeNames": [
         "Stall_Empty"
@@ -4860,9 +4768,9 @@
     },
     {
       "path": "assets/world/stall_kit_2/model.json",
-      "jsonBytes": 200717,
-      "glbBytes": 150512,
-      "textureBytes": 230748,
+      "jsonBytes": 201281,
+      "glbBytes": 150936,
+      "textureBytes": 0,
       "triangles": 3936,
       "vertices": 4451,
       "meshes": 1,
@@ -4870,12 +4778,9 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp",
-        "basecolor-4.webp",
-        "texture-5.webp"
+        "../_tex/e9bea2e61159e9f1.webp",
+        "../_tex/943afc1711e5e7c6.webp",
+        "../_tex/63c284588b5176f9.webp"
       ],
       "nodeNames": [
         "Stall_Cart_Empty"
@@ -4883,18 +4788,17 @@
     },
     {
       "path": "assets/world/standing_stone/model.json",
-      "jsonBytes": 260189,
-      "glbBytes": 195116,
-      "textureBytes": 160146,
-      "triangles": 5525,
-      "vertices": 8030,
+      "jsonBytes": 106777,
+      "glbBytes": 80056,
+      "textureBytes": 0,
+      "triangles": 2460,
+      "vertices": 3192,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/8f99978ef6c13115.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4902,18 +4806,17 @@
     },
     {
       "path": "assets/world/statue/model.json",
-      "jsonBytes": 590233,
-      "glbBytes": 442648,
-      "textureBytes": 341712,
-      "triangles": 15997,
-      "vertices": 17265,
+      "jsonBytes": 406705,
+      "glbBytes": 305004,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 12177,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/b9276e68af47bf84.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4921,9 +4824,9 @@
     },
     {
       "path": "assets/world/stump/model.json",
-      "jsonBytes": 107081,
-      "glbBytes": 80284,
-      "textureBytes": 56026,
+      "jsonBytes": 107209,
+      "glbBytes": 80380,
+      "textureBytes": 0,
       "triangles": 3000,
       "vertices": 3044,
       "meshes": 1,
@@ -4931,8 +4834,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/68a989ac51ee0324.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4940,18 +4842,17 @@
     },
     {
       "path": "assets/world/sundial/model.json",
-      "jsonBytes": 583025,
-      "glbBytes": 437244,
-      "textureBytes": 282442,
-      "triangles": 15992,
-      "vertices": 16994,
+      "jsonBytes": 401965,
+      "glbBytes": 301448,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 11997,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/9bb1c4e501bdc721.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4959,9 +4860,9 @@
     },
     {
       "path": "assets/world/torch/model.json",
-      "jsonBytes": 43057,
-      "glbBytes": 32268,
-      "textureBytes": 72290,
+      "jsonBytes": 43105,
+      "glbBytes": 32304,
+      "textureBytes": 0,
       "triangles": 970,
       "vertices": 1040,
       "meshes": 1,
@@ -4969,8 +4870,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/e9bea2e61159e9f1.webp"
       ],
       "nodeNames": [
         "Torch_Metal"
@@ -4978,9 +4878,9 @@
     },
     {
       "path": "assets/world/tower/model.json",
-      "jsonBytes": 312833,
-      "glbBytes": 234600,
-      "textureBytes": 319398,
+      "jsonBytes": 312961,
+      "glbBytes": 234696,
+      "textureBytes": 0,
       "triangles": 6999,
       "vertices": 9562,
       "meshes": 1,
@@ -4988,8 +4888,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/0c813dc986832fc5.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -4997,9 +4896,9 @@
     },
     {
       "path": "assets/world/tree_ash_1/model.json",
-      "jsonBytes": 224573,
-      "glbBytes": 168404,
-      "textureBytes": 99108,
+      "jsonBytes": 225209,
+      "glbBytes": 168880,
+      "textureBytes": 0,
       "triangles": 3947,
       "vertices": 5246,
       "meshes": 1,
@@ -5007,8 +4906,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/52cc415ea55f6a98.webp"
       ],
       "nodeNames": [
         "Pine_1"
@@ -5016,9 +4915,9 @@
     },
     {
       "path": "assets/world/tree_ash_2/model.json",
-      "jsonBytes": 209485,
-      "glbBytes": 157088,
-      "textureBytes": 99108,
+      "jsonBytes": 210121,
+      "glbBytes": 157564,
+      "textureBytes": 0,
       "triangles": 3648,
       "vertices": 4926,
       "meshes": 1,
@@ -5026,8 +4925,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/52cc415ea55f6a98.webp"
       ],
       "nodeNames": [
         "Pine_2"
@@ -5035,9 +4934,9 @@
     },
     {
       "path": "assets/world/tree_ash_3/model.json",
-      "jsonBytes": 202641,
-      "glbBytes": 151956,
-      "textureBytes": 99108,
+      "jsonBytes": 203277,
+      "glbBytes": 152432,
+      "textureBytes": 0,
       "triangles": 3370,
       "vertices": 4888,
       "meshes": 1,
@@ -5045,8 +4944,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/52cc415ea55f6a98.webp"
       ],
       "nodeNames": [
         "Pine_4"
@@ -5054,9 +4953,9 @@
     },
     {
       "path": "assets/world/tree_ash_lod_1/model.json",
-      "jsonBytes": 27257,
-      "glbBytes": 20416,
-      "textureBytes": 31486,
+      "jsonBytes": 27873,
+      "glbBytes": 20880,
+      "textureBytes": 0,
       "triangles": 471,
       "vertices": 564,
       "meshes": 1,
@@ -5064,8 +4963,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/0d63f99a3da28bb8.webp",
+        "../_tex/da4132bd96b0ce16.webp"
       ],
       "nodeNames": [
         "Pine_1"
@@ -5073,9 +4972,9 @@
     },
     {
       "path": "assets/world/tree_ash_lod_2/model.json",
-      "jsonBytes": 26905,
-      "glbBytes": 20152,
-      "textureBytes": 31486,
+      "jsonBytes": 27521,
+      "glbBytes": 20616,
+      "textureBytes": 0,
       "triangles": 474,
       "vertices": 557,
       "meshes": 1,
@@ -5083,8 +4982,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/0d63f99a3da28bb8.webp",
+        "../_tex/da4132bd96b0ce16.webp"
       ],
       "nodeNames": [
         "Pine_2"
@@ -5092,9 +4991,9 @@
     },
     {
       "path": "assets/world/tree_ash_lod_3/model.json",
-      "jsonBytes": 30193,
-      "glbBytes": 22620,
-      "textureBytes": 31486,
+      "jsonBytes": 30817,
+      "glbBytes": 23088,
+      "textureBytes": 0,
       "triangles": 470,
       "vertices": 665,
       "meshes": 1,
@@ -5102,8 +5001,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/0d63f99a3da28bb8.webp",
+        "../_tex/da4132bd96b0ce16.webp"
       ],
       "nodeNames": [
         "Pine_4"
@@ -5111,9 +5010,9 @@
     },
     {
       "path": "assets/world/tree_coral_1/model.json",
-      "jsonBytes": 607985,
-      "glbBytes": 455964,
-      "textureBytes": 147378,
+      "jsonBytes": 608609,
+      "glbBytes": 456432,
+      "textureBytes": 0,
       "triangles": 10089,
       "vertices": 14805,
       "meshes": 1,
@@ -5121,8 +5020,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/7440b5586b876888.webp",
+        "../_tex/6baac4275d48589a.webp"
       ],
       "nodeNames": [
         "TwistedTree_3"
@@ -5130,9 +5029,9 @@
     },
     {
       "path": "assets/world/tree_coral_2/model.json",
-      "jsonBytes": 595521,
-      "glbBytes": 446616,
-      "textureBytes": 147378,
+      "jsonBytes": 596145,
+      "glbBytes": 447084,
+      "textureBytes": 0,
       "triangles": 9600,
       "vertices": 14576,
       "meshes": 1,
@@ -5140,8 +5039,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/7440b5586b876888.webp",
+        "../_tex/6baac4275d48589a.webp"
       ],
       "nodeNames": [
         "TwistedTree_4"
@@ -5149,9 +5048,9 @@
     },
     {
       "path": "assets/world/tree_coral_lod_1/model.json",
-      "jsonBytes": 36369,
-      "glbBytes": 27252,
-      "textureBytes": 66124,
+      "jsonBytes": 36977,
+      "glbBytes": 27708,
+      "textureBytes": 0,
       "triangles": 604,
       "vertices": 802,
       "meshes": 1,
@@ -5159,8 +5058,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/4aeaa0b0c75f5ed3.webp",
+        "../_tex/8586ed00882f3257.webp"
       ],
       "nodeNames": [
         "TwistedTree_3"
@@ -5168,9 +5067,9 @@
     },
     {
       "path": "assets/world/tree_coral_lod_2/model.json",
-      "jsonBytes": 34929,
-      "glbBytes": 26172,
-      "textureBytes": 66124,
+      "jsonBytes": 35537,
+      "glbBytes": 26628,
+      "textureBytes": 0,
       "triangles": 573,
       "vertices": 770,
       "meshes": 1,
@@ -5178,8 +5077,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/4aeaa0b0c75f5ed3.webp",
+        "../_tex/8586ed00882f3257.webp"
       ],
       "nodeNames": [
         "TwistedTree_4"
@@ -5187,9 +5086,9 @@
     },
     {
       "path": "assets/world/tree_crystal_1/model.json",
-      "jsonBytes": 579833,
-      "glbBytes": 434848,
-      "textureBytes": 147404,
+      "jsonBytes": 580457,
+      "glbBytes": 435316,
+      "textureBytes": 0,
       "triangles": 9564,
       "vertices": 14064,
       "meshes": 1,
@@ -5197,8 +5096,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/7440b5586b876888.webp",
+        "../_tex/7d9c009bd32731a0.webp"
       ],
       "nodeNames": [
         "TwistedTree_1"
@@ -5206,9 +5105,9 @@
     },
     {
       "path": "assets/world/tree_crystal_2/model.json",
-      "jsonBytes": 576925,
-      "glbBytes": 432668,
-      "textureBytes": 147404,
+      "jsonBytes": 577553,
+      "glbBytes": 433140,
+      "textureBytes": 0,
       "triangles": 9134,
       "vertices": 13407,
       "meshes": 1,
@@ -5216,8 +5115,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/7440b5586b876888.webp",
+        "../_tex/7d9c009bd32731a0.webp"
       ],
       "nodeNames": [
         "TwistedTree_2"
@@ -5225,9 +5124,9 @@
     },
     {
       "path": "assets/world/tree_crystal_lod_1/model.json",
-      "jsonBytes": 34121,
-      "glbBytes": 25564,
-      "textureBytes": 62360,
+      "jsonBytes": 34729,
+      "glbBytes": 26020,
+      "textureBytes": 0,
       "triangles": 570,
       "vertices": 743,
       "meshes": 1,
@@ -5235,8 +5134,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/4aeaa0b0c75f5ed3.webp",
+        "../_tex/2bff98c4d6f1819a.webp"
       ],
       "nodeNames": [
         "TwistedTree_1"
@@ -5244,9 +5143,9 @@
     },
     {
       "path": "assets/world/tree_crystal_lod_2/model.json",
-      "jsonBytes": 33537,
-      "glbBytes": 25128,
-      "textureBytes": 62360,
+      "jsonBytes": 34145,
+      "glbBytes": 25584,
+      "textureBytes": 0,
       "triangles": 547,
       "vertices": 732,
       "meshes": 1,
@@ -5254,8 +5153,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/4aeaa0b0c75f5ed3.webp",
+        "../_tex/2bff98c4d6f1819a.webp"
       ],
       "nodeNames": [
         "TwistedTree_2"
@@ -5263,9 +5162,9 @@
     },
     {
       "path": "assets/world/tree_ember_1/model.json",
-      "jsonBytes": 344729,
-      "glbBytes": 258520,
-      "textureBytes": 86110,
+      "jsonBytes": 345005,
+      "glbBytes": 258728,
+      "textureBytes": 0,
       "triangles": 5802,
       "vertices": 7936,
       "meshes": 1,
@@ -5273,7 +5172,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/ae239ddf993ec5bf.webp"
       ],
       "nodeNames": [
         "DeadTree_3"
@@ -5281,9 +5180,9 @@
     },
     {
       "path": "assets/world/tree_ember_2/model.json",
-      "jsonBytes": 333361,
-      "glbBytes": 249996,
-      "textureBytes": 86110,
+      "jsonBytes": 333641,
+      "glbBytes": 250204,
+      "textureBytes": 0,
       "triangles": 5702,
       "vertices": 7653,
       "meshes": 1,
@@ -5291,7 +5190,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/ae239ddf993ec5bf.webp"
       ],
       "nodeNames": [
         "DeadTree_4"
@@ -5299,9 +5198,9 @@
     },
     {
       "path": "assets/world/tree_ember_lod_1/model.json",
-      "jsonBytes": 24937,
-      "glbBytes": 18676,
-      "textureBytes": 18724,
+      "jsonBytes": 25209,
+      "glbBytes": 18880,
+      "textureBytes": 0,
       "triangles": 452,
       "vertices": 517,
       "meshes": 1,
@@ -5309,7 +5208,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/738b0ac59b6b396c.webp"
       ],
       "nodeNames": [
         "DeadTree_3"
@@ -5317,9 +5216,9 @@
     },
     {
       "path": "assets/world/tree_ember_lod_2/model.json",
-      "jsonBytes": 24425,
-      "glbBytes": 18292,
-      "textureBytes": 18724,
+      "jsonBytes": 24697,
+      "glbBytes": 18496,
+      "textureBytes": 0,
       "triangles": 444,
       "vertices": 505,
       "meshes": 1,
@@ -5327,7 +5226,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/738b0ac59b6b396c.webp"
       ],
       "nodeNames": [
         "DeadTree_4"
@@ -5335,9 +5234,9 @@
     },
     {
       "path": "assets/world/tree_gold_1/model.json",
-      "jsonBytes": 226877,
-      "glbBytes": 170132,
-      "textureBytes": 147946,
+      "jsonBytes": 227501,
+      "glbBytes": 170600,
+      "textureBytes": 0,
       "triangles": 3505,
       "vertices": 5749,
       "meshes": 1,
@@ -5345,8 +5244,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/828a8bffaba0af54.webp"
       ],
       "nodeNames": [
         "CommonTree_3"
@@ -5354,9 +5253,9 @@
     },
     {
       "path": "assets/world/tree_gold_2/model.json",
-      "jsonBytes": 210761,
-      "glbBytes": 158044,
-      "textureBytes": 147946,
+      "jsonBytes": 211385,
+      "glbBytes": 158512,
+      "textureBytes": 0,
       "triangles": 3182,
       "vertices": 4873,
       "meshes": 1,
@@ -5364,8 +5263,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/828a8bffaba0af54.webp"
       ],
       "nodeNames": [
         "CommonTree_5"
@@ -5373,9 +5272,9 @@
     },
     {
       "path": "assets/world/tree_gold_lod_1/model.json",
-      "jsonBytes": 33037,
-      "glbBytes": 24752,
-      "textureBytes": 57458,
+      "jsonBytes": 33645,
+      "glbBytes": 25208,
+      "textureBytes": 0,
       "triangles": 490,
       "vertices": 763,
       "meshes": 1,
@@ -5383,8 +5282,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/0d63f99a3da28bb8.webp",
+        "../_tex/43e76399a601fac0.webp"
       ],
       "nodeNames": [
         "CommonTree_3"
@@ -5392,9 +5291,9 @@
     },
     {
       "path": "assets/world/tree_gold_lod_2/model.json",
-      "jsonBytes": 30313,
-      "glbBytes": 22708,
-      "textureBytes": 57458,
+      "jsonBytes": 30925,
+      "glbBytes": 23168,
+      "textureBytes": 0,
       "triangles": 476,
       "vertices": 676,
       "meshes": 1,
@@ -5402,8 +5301,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/0d63f99a3da28bb8.webp",
+        "../_tex/43e76399a601fac0.webp"
       ],
       "nodeNames": [
         "CommonTree_5"
@@ -5411,9 +5310,9 @@
     },
     {
       "path": "assets/world/tree_oak_1/model.json",
-      "jsonBytes": 226877,
-      "glbBytes": 170132,
-      "textureBytes": 147822,
+      "jsonBytes": 227501,
+      "glbBytes": 170600,
+      "textureBytes": 0,
       "triangles": 3505,
       "vertices": 5749,
       "meshes": 1,
@@ -5421,8 +5320,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/c0b1e5423951a1e2.webp"
       ],
       "nodeNames": [
         "CommonTree_3"
@@ -5430,9 +5329,9 @@
     },
     {
       "path": "assets/world/tree_oak_2/model.json",
-      "jsonBytes": 247817,
-      "glbBytes": 185836,
-      "textureBytes": 147822,
+      "jsonBytes": 248441,
+      "glbBytes": 186304,
+      "textureBytes": 0,
       "triangles": 4066,
       "vertices": 5900,
       "meshes": 1,
@@ -5440,8 +5339,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/c0b1e5423951a1e2.webp"
       ],
       "nodeNames": [
         "CommonTree_4"
@@ -5449,9 +5348,9 @@
     },
     {
       "path": "assets/world/tree_oak_3/model.json",
-      "jsonBytes": 210761,
-      "glbBytes": 158044,
-      "textureBytes": 147822,
+      "jsonBytes": 211385,
+      "glbBytes": 158512,
+      "textureBytes": 0,
       "triangles": 3182,
       "vertices": 4873,
       "meshes": 1,
@@ -5459,8 +5358,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/c0b1e5423951a1e2.webp"
       ],
       "nodeNames": [
         "CommonTree_5"
@@ -5468,9 +5367,9 @@
     },
     {
       "path": "assets/world/tree_oak_lod_1/model.json",
-      "jsonBytes": 33037,
-      "glbBytes": 24752,
-      "textureBytes": 55766,
+      "jsonBytes": 33645,
+      "glbBytes": 25208,
+      "textureBytes": 0,
       "triangles": 490,
       "vertices": 763,
       "meshes": 1,
@@ -5478,8 +5377,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/0d63f99a3da28bb8.webp",
+        "../_tex/24801a51399cded6.webp"
       ],
       "nodeNames": [
         "CommonTree_3"
@@ -5487,9 +5386,9 @@
     },
     {
       "path": "assets/world/tree_oak_lod_2/model.json",
-      "jsonBytes": 29777,
-      "glbBytes": 22308,
-      "textureBytes": 55766,
+      "jsonBytes": 30385,
+      "glbBytes": 22764,
+      "textureBytes": 0,
       "triangles": 485,
       "vertices": 630,
       "meshes": 1,
@@ -5497,8 +5396,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/0d63f99a3da28bb8.webp",
+        "../_tex/24801a51399cded6.webp"
       ],
       "nodeNames": [
         "CommonTree_4"
@@ -5506,9 +5405,9 @@
     },
     {
       "path": "assets/world/tree_oak_lod_3/model.json",
-      "jsonBytes": 30313,
-      "glbBytes": 22708,
-      "textureBytes": 55766,
+      "jsonBytes": 30925,
+      "glbBytes": 23168,
+      "textureBytes": 0,
       "triangles": 476,
       "vertices": 676,
       "meshes": 1,
@@ -5516,8 +5415,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/0d63f99a3da28bb8.webp",
+        "../_tex/24801a51399cded6.webp"
       ],
       "nodeNames": [
         "CommonTree_5"
@@ -5525,9 +5424,9 @@
     },
     {
       "path": "assets/world/tree_snow_1/model.json",
-      "jsonBytes": 209485,
-      "glbBytes": 157088,
-      "textureBytes": 100948,
+      "jsonBytes": 210121,
+      "glbBytes": 157564,
+      "textureBytes": 0,
       "triangles": 3648,
       "vertices": 4926,
       "meshes": 1,
@@ -5535,8 +5434,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/1e2a93320f427435.webp"
       ],
       "nodeNames": [
         "Pine_2"
@@ -5544,9 +5443,9 @@
     },
     {
       "path": "assets/world/tree_snow_2/model.json",
-      "jsonBytes": 202641,
-      "glbBytes": 151956,
-      "textureBytes": 100948,
+      "jsonBytes": 203277,
+      "glbBytes": 152432,
+      "textureBytes": 0,
       "triangles": 3370,
       "vertices": 4888,
       "meshes": 1,
@@ -5554,8 +5453,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/d666b5b0b38b9162.webp",
+        "../_tex/1e2a93320f427435.webp"
       ],
       "nodeNames": [
         "Pine_4"
@@ -5563,9 +5462,9 @@
     },
     {
       "path": "assets/world/tree_snow_3/model.json",
-      "jsonBytes": 93505,
-      "glbBytes": 70104,
-      "textureBytes": 100948,
+      "jsonBytes": 94129,
+      "glbBytes": 70572,
+      "textureBytes": 0,
       "triangles": 1646,
       "vertices": 2315,
       "meshes": 1,
@@ -5573,8 +5472,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/26db41869b5fe6a6.webp",
+        "../_tex/ffbc5588ae7b139b.webp"
       ],
       "nodeNames": [
         "Pine_5"
@@ -5582,9 +5481,9 @@
     },
     {
       "path": "assets/world/tree_snow_lod_1/model.json",
-      "jsonBytes": 26905,
-      "glbBytes": 20152,
-      "textureBytes": 32440,
+      "jsonBytes": 27521,
+      "glbBytes": 20616,
+      "textureBytes": 0,
       "triangles": 474,
       "vertices": 557,
       "meshes": 1,
@@ -5592,8 +5491,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/ede8bf5557c0fe1b.webp",
+        "../_tex/75a14cf0f031ea13.webp"
       ],
       "nodeNames": [
         "Pine_2"
@@ -5601,9 +5500,9 @@
     },
     {
       "path": "assets/world/tree_snow_lod_2/model.json",
-      "jsonBytes": 30193,
-      "glbBytes": 22620,
-      "textureBytes": 32440,
+      "jsonBytes": 30817,
+      "glbBytes": 23088,
+      "textureBytes": 0,
       "triangles": 470,
       "vertices": 665,
       "meshes": 1,
@@ -5611,8 +5510,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/ede8bf5557c0fe1b.webp",
+        "../_tex/75a14cf0f031ea13.webp"
       ],
       "nodeNames": [
         "Pine_4"
@@ -5620,18 +5519,18 @@
     },
     {
       "path": "assets/world/tree_snow_lod_3/model.json",
-      "jsonBytes": 43933,
-      "glbBytes": 32924,
-      "textureBytes": 32440,
+      "jsonBytes": 29353,
+      "glbBytes": 21988,
+      "textureBytes": 0,
       "triangles": 410,
-      "vertices": 1075,
+      "vertices": 668,
       "meshes": 1,
       "materials": 2,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "basecolor-1.webp"
+        "../_tex/ede8bf5557c0fe1b.webp",
+        "../_tex/75a14cf0f031ea13.webp"
       ],
       "nodeNames": [
         "Pine_5"
@@ -5639,9 +5538,9 @@
     },
     {
       "path": "assets/world/tuft_1/model.json",
-      "jsonBytes": 8169,
-      "glbBytes": 6100,
-      "textureBytes": 1530,
+      "jsonBytes": 8445,
+      "glbBytes": 6308,
+      "textureBytes": 0,
       "triangles": 155,
       "vertices": 153,
       "meshes": 1,
@@ -5649,7 +5548,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/db0fb48f8877c676.webp"
       ],
       "nodeNames": [
         "Grass_Common_Short"
@@ -5657,9 +5556,9 @@
     },
     {
       "path": "assets/world/tuft_2/model.json",
-      "jsonBytes": 23933,
-      "glbBytes": 17924,
-      "textureBytes": 1530,
+      "jsonBytes": 24209,
+      "glbBytes": 18132,
+      "textureBytes": 0,
       "triangles": 494,
       "vertices": 559,
       "meshes": 1,
@@ -5667,7 +5566,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp"
+        "../_tex/db0fb48f8877c676.webp"
       ],
       "nodeNames": [
         "Grass_Wispy_Short"
@@ -5675,18 +5574,17 @@
     },
     {
       "path": "assets/world/upside_tower/model.json",
-      "jsonBytes": 732633,
-      "glbBytes": 549448,
-      "textureBytes": 350596,
-      "triangles": 15994,
-      "vertices": 22606,
+      "jsonBytes": 631041,
+      "glbBytes": 473256,
+      "textureBytes": 0,
+      "triangles": 13052,
+      "vertices": 19674,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/46bf26796cb5b1f8.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -5694,9 +5592,9 @@
     },
     {
       "path": "assets/world/wagon/model.json",
-      "jsonBytes": 90077,
-      "glbBytes": 67532,
-      "textureBytes": 102838,
+      "jsonBytes": 90105,
+      "glbBytes": 67552,
+      "textureBytes": 0,
       "triangles": 1672,
       "vertices": 2331,
       "meshes": 1,
@@ -5704,8 +5602,7 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/5e1c82275a3ff439.webp"
       ],
       "nodeNames": [
         "Prop_Wagon"
@@ -5713,18 +5610,17 @@
     },
     {
       "path": "assets/world/war_tent/model.json",
-      "jsonBytes": 414797,
-      "glbBytes": 311072,
-      "textureBytes": 103232,
-      "triangles": 8271,
-      "vertices": 13004,
+      "jsonBytes": 166945,
+      "glbBytes": 125184,
+      "textureBytes": 0,
+      "triangles": 3468,
+      "vertices": 5146,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/cf61e4f480600dcf.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -5732,9 +5628,9 @@
     },
     {
       "path": "assets/world/weapon_rack/model.json",
-      "jsonBytes": 79161,
-      "glbBytes": 59344,
-      "textureBytes": 172874,
+      "jsonBytes": 79321,
+      "glbBytes": 59464,
+      "textureBytes": 0,
       "triangles": 2084,
       "vertices": 1994,
       "meshes": 1,
@@ -5742,10 +5638,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp"
+        "../_tex/2ecddecee10d8d06.webp",
+        "../_tex/c6cf8ba8d7cd4197.webp"
       ],
       "nodeNames": [
         "WeaponStand"
@@ -5753,18 +5647,17 @@
     },
     {
       "path": "assets/world/well/model.json",
-      "jsonBytes": 639377,
-      "glbBytes": 479508,
-      "textureBytes": 304814,
-      "triangles": 15994,
-      "vertices": 19109,
+      "jsonBytes": 449265,
+      "glbBytes": 336924,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 13773,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/577edc27c7bd7628.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -5772,18 +5665,17 @@
     },
     {
       "path": "assets/world/wind_arch/model.json",
-      "jsonBytes": 749793,
-      "glbBytes": 562320,
-      "textureBytes": 247822,
-      "triangles": 15998,
-      "vertices": 23246,
+      "jsonBytes": 660969,
+      "glbBytes": 495700,
+      "textureBytes": 0,
+      "triangles": 13315,
+      "vertices": 20715,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/98282467f1153999.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -5791,18 +5683,17 @@
     },
     {
       "path": "assets/world/windmill/model.json",
-      "jsonBytes": 671385,
-      "glbBytes": 503512,
-      "textureBytes": 447260,
-      "triangles": 15998,
-      "vertices": 20308,
+      "jsonBytes": 478225,
+      "glbBytes": 358644,
+      "textureBytes": 0,
+      "triangles": 10000,
+      "vertices": 14859,
       "meshes": 1,
       "materials": 1,
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp"
+        "../_tex/54e473eb283cb7ed.webp"
       ],
       "nodeNames": [
         "geometry_0"
@@ -5810,9 +5701,9 @@
     },
     {
       "path": "assets/world/workbench/model.json",
-      "jsonBytes": 66025,
-      "glbBytes": 49492,
-      "textureBytes": 172874,
+      "jsonBytes": 66353,
+      "glbBytes": 49740,
+      "textureBytes": 0,
       "triangles": 1368,
       "vertices": 1380,
       "meshes": 1,
@@ -5820,10 +5711,8 @@
       "animations": 0,
       "skins": 0,
       "images": [
-        "basecolor.webp",
-        "texture-1.webp",
-        "basecolor-2.webp",
-        "texture-3.webp"
+        "../_tex/2ecddecee10d8d06.webp",
+        "../_tex/c6cf8ba8d7cd4197.webp"
       ],
       "nodeNames": [
         "Workbench"

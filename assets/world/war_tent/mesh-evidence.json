@@ -1,6 +1,6 @@
 {
- "source_sha256": "4d58bfd6b283d57ef595f46415cdbbf28a22b5f22db611afb9dd26b39631be71",
- "triangles": 8271,
+ "source_sha256": "e35914157533c1bacd537c5f87195c05008281a40b86397e0e71f852305e1b19",
+ "triangles": 3468,
  "joints": 0,
  "textures": [
   {
@@ -14,5 +14,5 @@
    "bytes": 776
   }
  ],
- "kb": 506
+ "kb": 469
 }

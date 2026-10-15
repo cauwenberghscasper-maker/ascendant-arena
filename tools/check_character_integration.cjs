@@ -20,7 +20,7 @@ const dir='audit/evidence/character-integration';fs.mkdirSync(dir,{recursive:tru
  await page.evaluate(images=>{review.paused=true;document.body.innerHTML='<main style="max-width:none;margin:0;padding:16px"><h1>Original heroes · idle and moving attack</h1><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+images.map(x=>'<figure style="margin:0;background:#1b3438"><img style="width:100%;height:260px;object-fit:cover" src="'+x.src+'"><figcaption>'+x.id+' · '+x.mode+'</figcaption></figure>').join('')+'</div></main>';},images);
  await page.setViewportSize({width:1400,height:1100});await page.screenshot({path:dir+'/roster.png',fullPage:true});
  await page.goto('http://127.0.0.1:8766/');await page.waitForFunction(()=>window.__gameBooted,null,{timeout:60000});await page.locator('#playBtn').click();
- await page.evaluate(async()=>{const ids=Object.keys(__manifest).filter(k=>k.startsWith('hero.'));ids.forEach(id=>__assets.request(id));while(ids.some(id=>__assets.status(id)==='loading'))await new Promise(r=>setTimeout(r,30))});
+ await page.evaluate(async()=>{const ids=Object.keys(__manifest).filter(k=>k.startsWith('hero.'));ids.forEach(id=>__assets.request(id));while(ids.some(id=>['loading','queued'].includes(__assets.status(id))))await new Promise(r=>setTimeout(r,30))});
  for(const id of ids)for(const rarity of ['legendary','rare',null]){
   const result=await page.evaluate(({id,rarity})=>{
    const T=__THREE,gear=Object.fromEntries(__sim.CFG.gear.slots.map(s=>[s,rarity?__sim.makeItem(s,rarity,40):null]));

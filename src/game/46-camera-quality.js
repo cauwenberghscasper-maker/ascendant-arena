@@ -224,7 +224,13 @@ function updateCompanion(dt,t) {
 // --- adaptive quality ----------------------------------------------------------------------------
 // Render scale: pick once, then only ever step DOWN after sustained slowness.
 // Every scale change reallocates the canvas, which shows as a flash on phones, so changes are rare.
-const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.quality.cullFar, lowTier: false, lastChange: 0, locked: false };
+const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.quality.cullFar, lowTier: false, noPost: false, lastChange: 0, locked: false };
+// phones and small devices start lighter: a lower pixel-ratio cap, a smaller shadow map, fewer parallel downloads,
+// and on weak ones no cinematic post pass at all (the adaptive steps below can still go further)
+const DEVICE = (() => { const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches, mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8;
+  return { touch, weak: touch && (mem <= 4 || cores <= 4) }; })();
+if (DEVICE.touch) { CFG.quality.maxDpr = DEVICE.weak ? 1.25 : 1.6; sun.shadow.mapSize.set(1024, 1024); AssetLibrary.maxActive = 2; }
+if (DEVICE.weak) Q.noPost = true;
 function setDpr(d) { Q.dpr = clamp(d, CFG.quality.minDpr, Math.min(window.devicePixelRatio || 1, CFG.quality.maxDpr)); renderer.setPixelRatio(Q.dpr); resize(); Q.lastChange = performance.now(); }
 function qualityTick(dt) {
   Q.frames++; Q.acc += dt;
@@ -234,7 +240,10 @@ function qualityTick(dt) {
   if (Q.fps < CFG.quality.downFps) Q.slowWindows++; else Q.slowWindows = 0;
   if (Q.slowWindows >= 3 && performance.now() - Q.lastChange > 10000) {
     Q.slowWindows = 0;
-    if (Q.dpr > CFG.quality.minDpr + 0.01) setDpr(Q.dpr - 0.25);
+    // cheapest visual losses first: the bloom/grade pass, then the shadow map size, then resolution, then the low tier
+    if (!Q.noPost && Post.on()) { Q.noPost = true; Q.lastChange = performance.now(); }
+    else if (sun.shadow.mapSize.x > 1024) { sun.shadow.mapSize.set(1024, 1024); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } Q.lastChange = performance.now(); }
+    else if (Q.dpr > CFG.quality.minDpr + 0.01) setDpr(Q.dpr - 0.25);
     else if (!Q.lowTier) { Q.lowTier = true; Q.cull = CFG.quality.cullNear; scene.fog.far = 95; }
   }
 }
@@ -325,11 +334,11 @@ const Pixel = {
 // contrast and saturation) and vignettes. Six small passes in all; off on the low tier and in the pixel-art look.
 const Post = {
   ready: false, w: 0, h: 0,
-  on() { return hqOn() && !(G.profile && G.profile.settings.fx === false) && renderer.capabilities.isWebGL2; },
+  on() { return hqOn() && !Q.noPost && !(G.profile && G.profile.settings.fx === false) && renderer.capabilities.isWebGL2; },
   init() {
     if (this.ready) return; this.ready = true;
     const rt = (w, h, o) => new THREE.WebGLRenderTarget(w, h, Object.assign({ type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false }, o || {}));
-    this.main = rt(2, 2, { depthBuffer: true, samples: 4 });
+    this.main = rt(2, 2, { depthBuffer: true, samples: DEVICE.touch ? 2 : 4 });
     this.a = [rt(2, 2), rt(2, 2)]; this.b = [rt(2, 2), rt(2, 2)];
     const vs = 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
     const quad = (fs, u) => new THREE.ShaderMaterial({ uniforms: u, vertexShader: vs, fragmentShader: fs, depthTest: false, depthWrite: false });
