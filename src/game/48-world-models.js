@@ -108,9 +108,11 @@ const WorldModels = {
     }
     // cells beyond the fog are skipped (main and shadow pass); small props fade out sooner than trees and buildings
     const cx = camera.position.x, cz = camera.position.z, far = (Q.lowTier ? 95 : 140) + 20;
-    // opts.far caps the distance, opts.near starts a far-LOD set where the full set (far: same value) stops, opts.horizon never culls
+    // opts.far caps the distance, opts.near starts a far-LOD set where the full set (far: same value) stops, opts.horizon never culls.
+    // d is the gap to the edge of a cell's bounding sphere: it goes negative when the camera is over the cell, which must
+    // still count as near (a `d >= 0` test hid the fountain, lanterns and whole 64 m tree cells right under the camera)
     for (const h of this.sets) { const f = h.opts.far ? (h.opts.horizon ? h.opts.far : Math.min(far, h.opts.far)) : far, n = h.opts.near || 0;
-      for (const im of h.meshes) { const b = im.boundingSphere; if (b) { const d = Math.hypot(b.center.x - cx, b.center.z - cz) - b.radius; im.visible = d < f && d >= n; } } }
+      for (const im of h.meshes) { const b = im.boundingSphere; if (b) { const d = Math.hypot(b.center.x - cx, b.center.z - cz) - b.radius; im.visible = d < f && (n <= 0 || d >= n); } } }
   },
   // free a handle's instance buffers and materials (the model's geometry and textures stay cached)
   dispose(h) {
