@@ -1,6 +1,7 @@
 // ---------------------------------------------------------------------
 // 11. MULTIPLAYER — real players share the open world.
-// Two transports, merged per play session:
+// Public site and store apps: one Supabase Realtime lobby (presence for who is here, broadcast for movement).
+// Inside the Claude artifact, two transports instead, merged per play session:
 //   1. the artifact's live room (presence, ~8 updates a second) when this view can join it;
 //   2. a small shared database doc per player (mp/<your id>, one entry per open session), about once
 //      a second while you move — works wherever the database works, including your own second device.
@@ -10,7 +11,7 @@
 const MP = {
   room: null, roomState: 'none', roomPeers: 0, db: null, dbState: 'none', dbPeers: 0, uid: null, sid: Math.random().toString(36).slice(2, 10),
   peers: new Map(), list: [], seq: 0, aim: 0, sendT: 0, last: '', dbT: 0, dbLast: '', dbBeat: 0, dbBusy: false, dbBackoff: 0, dbDoc: null, sent: 0, dbSent: 0, err: '',
-  get state() { return this.roomState === 'on' || this.dbState === 'on' || this.dbState === 'readonly' ? 'on' : this.roomState === 'connecting' || this.dbState === 'connecting' ? 'connecting' : 'off'; },
+  get state() { return RT.state === 'on' || this.roomState === 'on' || this.dbState === 'on' || this.dbState === 'readonly' ? 'on' : RT.state === 'connecting' || RT.state === 'joining' || this.roomState === 'connecting' || this.dbState === 'connecting' ? 'connecting' : 'off'; },
 };
 function mpNick(p) { if (!p.nick) { p.nick = 'Hero' + (1000 + Math.floor(Math.random() * 9000)); G.dirty = true; } return p.nick; }
 function cleanNick(s) { return String(s || '').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 14); }
@@ -19,8 +20,12 @@ const mpNum = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
 const MP_STALE = 45000;
 
 async function mpInit() {
-  if (LOCAL_PREVIEW || TEST_MODE) { MP.roomState = MP.dbState = 'off'; return; }
-  const c = window.claude; if (!c || typeof c.use !== 'function') { MP.err = 'no platform'; return; }
+  // test sessions never join; a local preview joins only a separate dev lobby, and only with ?mp=1
+  const localMp = LOCAL_PREVIEW && new URLSearchParams(location.search).get('mp') === '1';
+  if (TEST_MODE || (LOCAL_PREVIEW && !localMp)) { MP.roomState = MP.dbState = RT.state = 'off'; return; }
+  const c = window.claude;
+  if (!c || typeof c.use !== 'function') { MP.roomState = MP.dbState = 'off'; rtConnect(); window.addEventListener('pagehide', rtLeave); return; }
+  RT.state = 'off';
   // live room
   (async () => {
     try {
@@ -43,6 +48,83 @@ async function mpInit() {
       window.addEventListener('pagehide', () => { if (MP.dbDoc) MP.dbDoc.update({ s: { [MP.sid]: null } }).catch(() => {}); });
     } catch (e) { MP.dbState = 'off'; MP.err = 'db ' + (e && e.code || e); }
   })();
+}
+// --- Lobby: Supabase Realtime (public site, store apps) ---------------------------------------------------------
+// Everyone in the open world joins one channel today: the lobby. mpRoomKey() is the only place that decides which
+// channel a player belongs to. Partitioning later = return another key (per area band, World Tier, or a numbered
+// shard once a room passes MP_ROOM_CAP); mpUpdate then leaves the old channel and joins the new one on the same
+// socket, and the peers of the old room disappear. Presence says who is in the room (nick, hero, level, mode);
+// broadcast 'st' carries movement about 4 times a second while something changes, plus a beat every 3 s.
+const MP_ROOM_CAP = 60;
+function mpRoomKey() { return LOCAL_PREVIEW ? 'dev-lobby' : 'lobby'; }
+const RT = { ws: null, state: 'none', topic: '', key: '', joinRef: '', ref: 0, retry: 0, backoff: 1, hbT: 25, sendT: 0, beatT: 0, last: '', tracked: '', present: 0, sent: 0 };
+function rtSend(topic, event, payload, joinRef) {
+  if (!RT.ws || RT.ws.readyState !== 1) return false;
+  RT.ws.send(JSON.stringify({ topic, event, payload, ref: String(++RT.ref), join_ref: joinRef === undefined ? RT.joinRef : joinRef })); return true;
+}
+function rtConnect() {
+  if (RT.ws) return;
+  RT.state = 'connecting';
+  let ws;
+  try { ws = new WebSocket(SUPA.url.replace(/^http/, 'ws') + '/realtime/v1/websocket?apikey=' + encodeURIComponent(SUPA.key) + '&vsn=1.0.0'); }
+  catch (e) { RT.state = 'off'; MP.err = 'lobby ' + (e && e.message || e); return; }
+  RT.ws = ws;
+  ws.onopen = () => { RT.backoff = 1; RT.hbT = 25; rtJoin(mpRoomKey()); };
+  ws.onmessage = (m) => { let d; try { d = JSON.parse(m.data); } catch (e) { return; } rtMessage(d); };
+  ws.onclose = () => { if (RT.ws !== ws) return; RT.ws = null; RT.topic = ''; rtDropPeers(); if (RT.state !== 'off') { RT.state = 'connecting'; RT.retry = RT.backoff; RT.backoff = Math.min(30, RT.backoff * 2); } };
+  ws.onerror = () => { MP.err = 'lobby connection'; };
+}
+function rtJoin(key) {
+  if (RT.topic) { rtSend(RT.topic, 'phx_leave', {}); rtDropPeers(); }
+  RT.key = key; RT.topic = 'realtime:aa-' + key; RT.joinRef = String(++RT.ref); RT.state = 'joining'; RT.last = RT.tracked = '';
+  // the join's own ref is its join_ref, so the server's phx_reply can be matched to it
+  if (RT.ws && RT.ws.readyState === 1) RT.ws.send(JSON.stringify({ topic: RT.topic, event: 'phx_join', ref: RT.joinRef, join_ref: RT.joinRef,
+    payload: { config: { broadcast: { ack: false, self: false }, presence: { enabled: true, key: MP.sid }, private: false } } }));
+}
+if (LOCAL_PREVIEW) window.__mp = { MP, RT, roomKey: () => mpRoomKey() };
+function rtLeave() { if (RT.topic) rtSend(RT.topic, 'phx_leave', {}); RT.state = 'off'; if (RT.ws) RT.ws.close(); }
+function rtCount() { mpRebuild(); RT.present = MP.list.filter((e) => e.via === 'rt').length; }
+function rtDropPeers() { for (const [k, e] of MP.peers) if (e.via === 'rt') MP.peers.delete(k); RT.present = 0; mpRebuild(); }
+function rtMetas(byKey, add) {
+  for (const key in byKey) {
+    const metas = byKey[key] && byKey[key].metas; if (!metas || !metas.length || key === MP.sid) continue;
+    if (add) mpApply(key.slice(0, 16), metas[metas.length - 1], 'rt', false);
+    else { const e = MP.peers.get(key.slice(0, 16)); if (e && e.via === 'rt') MP.peers.delete(key.slice(0, 16)); }
+  }
+}
+function rtMessage(d) {
+  if (!d || d.topic !== RT.topic) return;
+  const P = d.payload || {};
+  switch (d.event) {
+    case 'phx_reply':
+      if (d.ref === RT.joinRef && RT.state === 'joining') {
+        if (P.status === 'ok') { RT.state = 'on'; RT.sendT = 0; rtTrack(); }
+        else { RT.state = 'off'; MP.err = 'lobby join ' + JSON.stringify(P.response || P).slice(0, 80); }
+      }
+      break;
+    case 'presence_state': rtMetas(P, true); rtCount(); break;
+    case 'presence_diff': rtMetas(P.joins || {}, true); rtMetas(P.leaves || {}, false); rtCount(); break;
+    case 'broadcast': if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
+    case 'phx_error': case 'phx_close': if (RT.state !== 'off') { RT.topic = ''; rtDropPeers(); RT.state = 'connecting'; RT.retry = RT.backoff; RT.backoff = Math.min(30, RT.backoff * 2); } break;
+  }
+}
+// presence holds the slow-changing card (nick, hero, level, mode); it is re-sent only when one of those changes
+function rtTrack() {
+  const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al].join('|'); if (card === RT.tracked) return;
+  RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
+}
+function rtUpdate(dt) {
+  if (RT.state === 'off' || RT.state === 'none') return;
+  if (!RT.ws) { if ((RT.retry -= dt) <= 0) rtConnect(); return; }
+  if ((RT.hbT -= dt) <= 0) { RT.hbT = 25; rtSend('phoenix', 'heartbeat', {}, null); }
+  if (RT.ws.readyState === 1 && !RT.topic && (RT.retry -= dt) <= 0) rtJoin(mpRoomKey());
+  if (RT.state !== 'on' || !G.started) return;
+  if (mpRoomKey() !== RT.key) { rtJoin(mpRoomKey()); return; } // partition change: move to the new room
+  RT.sendT -= dt; RT.beatT -= dt;
+  if (RT.sendT > 0) return;
+  RT.sendT = 0.25; rtTrack();
+  const s = mpState(), key = JSON.stringify(Object.assign({}, s, { t: 0 }));
+  if (key !== RT.last || RT.beatT <= 0) { RT.last = key; RT.beatT = 3; s.t = Date.now(); if (rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'st', payload: s })) RT.sent++; }
 }
 function mpClear() { MP.peers.clear(); MP.list = []; }
 // one remote session: update (or create) its hero from a presence object
@@ -68,7 +150,7 @@ function mpApply(key, s, via, guest) {
 }
 function mpRebuild() {
   const now = Date.now();
-  for (const [k, e] of MP.peers) if (now - (e.seenAt || 0) > MP_STALE && e.via === 'db') MP.peers.delete(k);
+  for (const [k, e] of MP.peers) if (now - (e.seenAt || 0) > MP_STALE && (e.via === 'db' || e.via === 'rt')) MP.peers.delete(k);
   MP.list = [...MP.peers.values()];
 }
 function mpRoomPeers(ch) {
@@ -121,12 +203,13 @@ function mpState() {
 }
 function mpUpdate(dt) {
   // smooth other players toward where they said they are
-  const k = 1 - Math.exp(-dt * (MP.roomState === 'on' ? 10 : 4));
+  const k = 1 - Math.exp(-dt * (MP.roomState === 'on' || RT.state === 'on' ? 8 : 4));
   for (const e of MP.list) {
     if (Math.hypot(e.tx - e.x, e.tz - e.z) > 25) { e.x = e.tx; e.z = e.tz; }
     else { e.x += (e.tx - e.x) * k; e.z += (e.tz - e.z) * k; }
     e.facing += angDiff(e.facing, e.tf) * k; e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
   }
+  rtUpdate(dt);
   if (!G.started) return;
   MP.sendT -= dt; MP.dbT -= dt; MP.dbBeat -= dt;
   // room: ~8 times a second, only when something changed
@@ -168,8 +251,8 @@ function openPlayers() {
   }).join('');
   const st = (x) => ({ on: 'connected', connecting: 'connecting…', off: 'not available here', none: 'starting…', readonly: 'read only' })[x] || x;
   openModal(`<div class="npcHead">${gi('m_players', 'hd')}<h3>Fellow Adventurers</h3><span class="cnt">${mpSummary()}</span></div>
-    ${rows ? `<div class="list">${rows}</div>` : `<p class="say">No one else is in the world right now. Open this game on a second device or invite a friend, and they show up here and on your minimap.</p>`}
-    <div class="mpdiag"><b>Connection</b><small>Live room: ${st(MP.roomState)}${MP.roomState === 'on' ? ` · ${MP.roomPeers} here` : ''} · Shared world: ${st(MP.dbState)}${MP.dbState !== 'off' ? ` · ${MP.dbPeers} seen` : ''} · sent ${MP.sent + MP.dbSent}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>
-    <small>Same account on two devices works. Friends join when you invite them by email from the Share menu; people who open a public link can watch others but may not appear themselves.</small></div>`);
+    ${rows ? `<div class="list">${rows}</div>` : `<p class="say">No one else is in the lobby right now. Open the game on a second device or send a friend the link, and they show up here and on your minimap.</p>`}
+    <div class="mpdiag"><b>Connection</b><small>${RT.state !== 'off' ? `Lobby: ${st(RT.state === 'joining' ? 'connecting' : RT.state)}${RT.state === 'on' ? ` · ${RT.present + 1} of ${MP_ROOM_CAP} here · sent ${RT.sent}` : ''}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>` : `Live room: ${st(MP.roomState)}${MP.roomState === 'on' ? ` · ${MP.roomPeers} here` : ''} · Shared world: ${st(MP.dbState)}${MP.dbState !== 'off' ? ` · ${MP.dbPeers} seen` : ''} · sent ${MP.sent + MP.dbSent}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>`}
+    ${RT.state !== 'off' ? `<small>Everyone playing the game online meets in this lobby. Your nickname, hero and level are shared, nothing else.</small>` : `<small>Same account on two devices works. Friends join when you invite them by email from the Share menu; people who open a public link can watch others but may not appear themselves.</small>`}</div>`);
 }
 
