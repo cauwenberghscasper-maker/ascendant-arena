@@ -940,6 +940,7 @@ function endBoss(killed) {
   if (!killed) return;
   const L = CFG.boss.loot, p = G.profile;
   const contrib = b.total > 0 ? (b.dmgBy[G.player.id] || 0) / b.total : 0;
+  if (!(contrib > 0)) { ev({ t: 'bossDown' }); return; } // you never hit it (others or bots won): no loot popup, just the news
   const loot = { name: b.name || CFG.boss.name, essence: 0, contrib, eligible: contrib >= L.minContrib, gold: 0, item: null, tomeXp: 0,
     rareChance: Math.min(L.rareMax, L.rareBase + contrib * L.rareScale),
     epicChance: Math.min(L.epicMax, contrib * L.epicScale),

@@ -5178,6 +5178,7 @@ function endBoss(killed) {
   if (!killed) return;
   const L = CFG.boss.loot, p = G.profile;
   const contrib = b.total > 0 ? (b.dmgBy[G.player.id] || 0) / b.total : 0;
+  if (!(contrib > 0)) { ev({ t: 'bossDown' }); return; } // you never hit it (others or bots won): no loot popup, just the news
   const loot = { name: b.name || CFG.boss.name, essence: 0, contrib, eligible: contrib >= L.minContrib, gold: 0, item: null, tomeXp: 0,
     rareChance: Math.min(L.rareMax, L.rareBase + contrib * L.rareScale),
     epicChance: Math.min(L.epicMax, contrib * L.epicScale),
@@ -11498,7 +11499,8 @@ function mobHitRecv(P) {
 // its own hero. The others mirror the timer and the boss ('bst' 4 times a second, their own level scaling, HP as a
 // share) and send their hits ('bhit'). When the boss dies ('bend'), each game pays its own loot: share = your damage
 // over the boss's max HP. If the leader leaves, the next lowest sid takes over with the boss as it is.
-const BOSS = { killedAt: -99, sent: 0, got: 0 };
+// every boss has a uid (leader sid + its id); a uid that ended here never comes back as a mirror, so one boss pays once
+const BOSS = { killedAt: -99, sent: 0, got: 0, ended: new Set() };
 function bossLeader() {
   const peers = RT.state === 'on' ? MP.list.filter((e) => e.via === 'rt' && e.md === 'hub') : [];
   let L = G.mode === 'hub' && !inInstance() ? MP.sid : null;
@@ -11513,13 +11515,14 @@ function bossSend() {
   if (!bossLeading()) return;
   const b = G.boss;
   const s = { s: b ? 2 : G.bossWarned ? 1 : 0, l: G.bossLair, tm: Math.round(G.bossTimer * 10) / 10 };
+  if (b) { if (!b.uid) b.uid = MP.sid + '-' + b.id; s.u = b.uid; }
   if (b) Object.assign(s, { x: Math.round(b.x * 10) / 10, z: Math.round(b.z * 10) / 10, h: Math.max(b.hp > 0 ? 1 : 0, Math.round(b.hp / b.maxHp * 1000)), f: Math.round(b.facing * 100) / 100, m: b.moveAmt > 0.5 ? 1 : 0, life: Math.round(b.life), r: b.retreat ? 1 : 0 });
   if (bossMsg('bst', s)) BOSS.sent++;
 }
 function mpBossAttack(o) { if (bossLeading()) bossMsg('batk', o); }
-function mpBossEnd(killed) { if (bossLeading()) bossMsg('bend', { k: killed ? 1 : 0 }); }
+function mpBossEnd(killed) { const b = G.boss; if (b && b.uid) BOSS.ended.add(b.uid); if (bossLeading()) { if (b && !b.uid) b.uid = MP.sid + '-' + b.id; bossMsg('bend', { k: killed ? 1 : 0, u: b ? b.uid : '' }); } }
 // our hit on the boss the leader runs; a kill here shares loot by your damage over max HP
-function mpBossHit(b, amt) { b.myHitT = G.time; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); } bossMsg('bhit', { to: bossLeader(), f: Math.round(Math.min(1, amt / b.maxHp) * 10000) / 10000 }); }
+function mpBossHit(b, amt) { b.myHitT = G.time; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); if (b.uid) BOSS.ended.add(b.uid); } bossMsg('bhit', { to: bossLeader(), f: Math.round(Math.min(1, amt / b.maxHp) * 10000) / 10000 }); }
 function bossRecv(event, sid, P) {
   if (!G.started || G.mode !== 'hub' || inInstance()) return;
   if (event === 'bhit') { // another player's hit on the boss we run
@@ -11532,7 +11535,8 @@ function bossRecv(event, sid, P) {
   BOSS.got++;
   if (event === 'batk') { if (G.boss && G.boss.alive) bossAttack(G.boss, P, true); return; }
   if (event === 'bend') {
-    if (G.boss) { const b = G.boss; if (P.k) b.total = Math.max(b.total, b.maxHp); endBoss(!!P.k && b.total > 0 && (b.dmgBy[G.player.id] || 0) > 0); } // your loot: your damage over max HP
+    if (P.u) BOSS.ended.add(P.u);
+    if (G.boss && (!P.u || !G.boss.uid || G.boss.uid === P.u)) { const b = G.boss; if (P.k) b.total = Math.max(b.total, b.maxHp); endBoss(!!P.k && b.total > 0 && (b.dmgBy[G.player.id] || 0) > 0); } // your loot: your damage over max HP
     else { G.bossTimer = CFG.boss.interval; G.bossWarned = false; }
     BOSS.killedAt = G.time; return;
   }
@@ -11542,7 +11546,9 @@ function bossRecv(event, sid, P) {
   if (P.s === 0) { G.bossWarned = false; return; }
   if (P.s === 1) { if (!G.bossWarned && !G.boss) { G.bossWarned = true; ev({ t: 'bossWarn', lair: currentLair().name, secs: Math.ceil(G.bossTimer) }); } return; }
   if (P.s !== 2) return;
-  if (!G.boss) { if (G.time - BOSS.killedAt < 3) return; G.bossWarned = true; spawnBoss(); }
+  if (typeof P.u !== 'string' || BOSS.ended.has(P.u)) return; // this boss already ended here (we killed our copy of it)
+  if (G.boss && G.boss.uid && G.boss.uid !== P.u) { BOSS.ended.add(G.boss.uid); endBoss(false); } // a stale copy of an older boss
+  if (!G.boss) { if (G.time - BOSS.killedAt < 3) return; G.bossWarned = true; spawnBoss(); G.boss.uid = P.u; }
   const b = G.boss; b.sx = mpNum(P.x, b.x); b.sz = mpNum(P.z, b.z); b.sf = mpNum(P.f, b.facing); b.moveAmt = P.m ? 1 : 0; b.life = mpNum(P.life, b.life);
   if (P.r && !b.retreat) { b.retreat = 1; b.invulnT = 99; ev({ t: 'bossGone', name: b.name }); }
   const want = Math.max(1, clamp(mpNum(P.h, 1000), 0, 1000) / 1000 * b.maxHp); if (want < b.hp || G.time - (b.myHitT ?? -9) > 0.8) b.hp = want;
