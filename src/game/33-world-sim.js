@@ -370,6 +370,12 @@ function addHubBots() {
 }
 function removeHubBots() { G.hubFighters = [G.player]; }
 function initHubWorld() {
+  // a fixed seed, so every player's world has the same monster in the same slot (G.enemies index) and the
+  // multiplayer lobby can sync monsters by index; respawns and combat stay random
+  const rnd = Math.random; Math.random = mulberry32(0x5eed2610);
+  try { initHubWorldSeeded(); } finally { Math.random = rnd; }
+}
+function initHubWorldSeeded() {
   const W = CFG.world;
   // enemies
   G.enemies = [];
@@ -382,6 +388,7 @@ function initHubWorld() {
     G.enemies.push(makeEnemy(W.zones[D.zone].enemy, D.zone, { den: di, elite: true }));
   });
   // per-zone buckets: body separation only scans the monsters of the same area (zones never change on respawn)
+  G.enemies.forEach((e, i) => { e.slot = i; e.own = null; }); // slot: the same index in every player's world (lobby sync)
   G.enemiesByZone = W.zones.map(() => []);
   for (const e of G.enemies) { e.zb = true; G.enemiesByZone[e.zone].push(e); }
   // NPCs
@@ -416,7 +423,7 @@ function stepHub(dt) {
   // bots
   for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; hubBotThink(b, dt); stepFighter(b, dt, 'hub'); }
   // enemies
-  for (const e of G.enemies) stepEnemy(e, dt);
+  for (const e of G.enemies) if (e.own) mobRemoteStep(e, dt); else stepEnemy(e, dt); // e.own: another lobby player runs this monster
   // kill streak decay, auto-salvage summary, waypoint discovery
   if (G.streak > 0) { G.streakT -= dt; if (G.streakT <= 0) { if (G.streak >= 5) ev({ t: 'streakEnd', n: G.streak }); G.streak = 0; } }
   if (G.salvageAcc) { G.salvageAcc.t -= dt; if (G.salvageAcc.t <= 0) { const a = G.salvageAcc; G.salvageAcc = null; ev({ t: 'salvaged', n: a.n, gold: a.gold, ess: a.ess }); } }

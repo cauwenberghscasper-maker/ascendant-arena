@@ -3513,6 +3513,7 @@ function dealDamage(t, amount, srcId, o) {
   }
   const hpBefore = Math.max(0, t.hp);
   t.hp -= amt; t.flashT = CFG.combat.hitFlash; t.lastHurt = G.time;
+  if (t.own && t.kind === 'enemy' && src && src.isPlayer) mpMobHit(t, amt); // another player runs this monster: send them the hit
   if (o.slow) t.slowT = Math.max(t.slowT || 0, o.slow);
   if (o.burn) { t.burnT = o.burnT || 3; t.burnDmg = o.burn; t.burnSrc = srcId; if (!(t.burnTick > 0)) t.burnTick = 0.5; }
   // monster poise: knockback is scaled down and lands at most once per knockGap, so bullets cannot stunlock melee
@@ -4605,6 +4606,12 @@ function addHubBots() {
 }
 function removeHubBots() { G.hubFighters = [G.player]; }
 function initHubWorld() {
+  // a fixed seed, so every player's world has the same monster in the same slot (G.enemies index) and the
+  // multiplayer lobby can sync monsters by index; respawns and combat stay random
+  const rnd = Math.random; Math.random = mulberry32(0x5eed2610);
+  try { initHubWorldSeeded(); } finally { Math.random = rnd; }
+}
+function initHubWorldSeeded() {
   const W = CFG.world;
   // enemies
   G.enemies = [];
@@ -4617,6 +4624,7 @@ function initHubWorld() {
     G.enemies.push(makeEnemy(W.zones[D.zone].enemy, D.zone, { den: di, elite: true }));
   });
   // per-zone buckets: body separation only scans the monsters of the same area (zones never change on respawn)
+  G.enemies.forEach((e, i) => { e.slot = i; e.own = null; }); // slot: the same index in every player's world (lobby sync)
   G.enemiesByZone = W.zones.map(() => []);
   for (const e of G.enemies) { e.zb = true; G.enemiesByZone[e.zone].push(e); }
   // NPCs
@@ -4651,7 +4659,7 @@ function stepHub(dt) {
   // bots
   for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; hubBotThink(b, dt); stepFighter(b, dt, 'hub'); }
   // enemies
-  for (const e of G.enemies) stepEnemy(e, dt);
+  for (const e of G.enemies) if (e.own) mobRemoteStep(e, dt); else stepEnemy(e, dt); // e.own: another lobby player runs this monster
   // kill streak decay, auto-salvage summary, waypoint discovery
   if (G.streak > 0) { G.streakT -= dt; if (G.streakT <= 0) { if (G.streak >= 5) ev({ t: 'streakEnd', n: G.streak }); G.streak = 0; } }
   if (G.salvageAcc) { G.salvageAcc.t -= dt; if (G.salvageAcc.t <= 0) { const a = G.salvageAcc; G.salvageAcc = null; ev({ t: 'salvaged', n: a.n, gold: a.gold, ess: a.ess }); } }
@@ -11304,7 +11312,8 @@ async function mpInit() {
 // channel a player belongs to. Partitioning later = return another key (per area band, World Tier, or a numbered
 // shard once a room passes MP_ROOM_CAP); mpUpdate then leaves the old channel and joins the new one on the same
 // socket, and the peers of the old room disappear. Presence says who is in the room (nick, hero, level, mode);
-// broadcast 'st' carries movement about 4 times a second while something changes, plus a beat every 3 s.
+// broadcast 'st' carries movement about 8 times a second while something changes, plus a beat every 3 s; 'mob' and
+// 'hit' share the monsters (see the shared monsters section below).
 const MP_ROOM_CAP = 60;
 function mpRoomKey() { return LOCAL_PREVIEW ? 'dev-lobby' : 'lobby'; }
 const RT = { ws: null, state: 'none', topic: '', key: '', joinRef: '', ref: 0, retry: 0, backoff: 1, hbT: 25, sendT: 0, beatT: 0, last: '', tracked: '', present: 0, sent: 0 };
@@ -11331,10 +11340,10 @@ function rtJoin(key) {
   if (RT.ws && RT.ws.readyState === 1) RT.ws.send(JSON.stringify({ topic: RT.topic, event: 'phx_join', ref: RT.joinRef, join_ref: RT.joinRef,
     payload: { config: { broadcast: { ack: false, self: false }, presence: { enabled: true, key: MP.sid }, private: false } } }));
 }
-if (LOCAL_PREVIEW) window.__mp = { MP, RT, roomKey: () => mpRoomKey() };
+if (LOCAL_PREVIEW) window.__mp = { MP, RT, get MOB() { return MOB; }, roomKey: () => mpRoomKey() };
 function rtLeave() { if (RT.topic) rtSend(RT.topic, 'phx_leave', {}); RT.state = 'off'; if (RT.ws) RT.ws.close(); }
 function rtCount() { mpRebuild(); RT.present = MP.list.filter((e) => e.via === 'rt').length; }
-function rtDropPeers() { for (const [k, e] of MP.peers) if (e.via === 'rt') MP.peers.delete(k); RT.present = 0; mpRebuild(); }
+function rtDropPeers() { for (const [k, e] of MP.peers) if (e.via === 'rt') MP.peers.delete(k); RT.present = 0; mpRebuild(); mobOwnership(); }
 function rtMetas(byKey, add) {
   for (const key in byKey) {
     const metas = byKey[key] && byKey[key].metas; if (!metas || !metas.length || key === MP.sid) continue;
@@ -11354,7 +11363,9 @@ function rtMessage(d) {
       break;
     case 'presence_state': rtMetas(P, true); rtCount(); break;
     case 'presence_diff': rtMetas(P.joins || {}, true); rtMetas(P.leaves || {}, false); rtCount(); break;
-    case 'broadcast': if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
+    case 'broadcast': if (P.event === 'mob' && P.payload && typeof P.payload.sid === 'string') { mobRecv(P.payload.sid.slice(0, 16), P.payload.m); break; }
+      if (P.event === 'hit' && P.payload && P.payload.to === MP.sid) { mobHitRecv(P.payload); break; }
+      if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
     case 'phx_error': case 'phx_close': if (RT.state !== 'off') { RT.topic = ''; rtDropPeers(); RT.state = 'connecting'; RT.retry = RT.backoff; RT.backoff = Math.min(30, RT.backoff * 2); } break;
   }
 }
@@ -11370,11 +11381,105 @@ function rtUpdate(dt) {
   if (RT.ws.readyState === 1 && !RT.topic && (RT.retry -= dt) <= 0) rtJoin(mpRoomKey());
   if (RT.state !== 'on' || !G.started) return;
   if (mpRoomKey() !== RT.key) { rtJoin(mpRoomKey()); return; } // partition change: move to the new room
+  if ((MOB.t -= dt) <= 0) { MOB.t = 0.25; mobOwnership(); mobSend(); }
   RT.sendT -= dt; RT.beatT -= dt;
   if (RT.sendT > 0) return;
-  RT.sendT = 0.25; rtTrack();
+  RT.sendT = 0.12; rtTrack();
   const s = mpState(), key = JSON.stringify(Object.assign({}, s, { t: 0 }));
   if (key !== RT.last || RT.beatT <= 0) { RT.last = key; RT.beatT = 3; s.t = Date.now(); if (rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'st', payload: s })) RT.sent++; }
+}
+// --- shared monsters (lobby) -------------------------------------------------------------------------------------
+// Every world builds the same monster in the same slot (seeded initHubWorld, e.slot). Each monster is run by the lobby
+// player nearest to it: e.own = that player's sid, null = this game runs it. A 3 m margin stops it flipping back and
+// forth, and when two games both claim one the lower sid wins. The owner sends its monsters that are near other
+// players 4 times a second; the others draw them (mobRemoteStep) and send their hits to the owner as a share of max HP,
+// because every player has their own level scaling. Anyone who damaged a monster gets their own kill reward.
+// Monsters still attack only the player who runs them, which is the nearest one.
+const MOB_MARGIN = 3, MOB_NEAR = 75;
+const MOB = { t: 0, on: false, sent: 0, got: 0, hits: 0 };
+const mobSyncable = (e) => e && !(e.rift || e.dungeon || e.temp) && e.slot != null;
+function mobPeers() { return RT.state === 'on' && G.started && G.mode === 'hub' && !inInstance() ? MP.list.filter((e) => e.via === 'rt' && e.md === 'hub' && e.alive) : []; }
+function mobOwnership() {
+  const peers = mobPeers(), pl = G.player;
+  if (!peers.length) { if (MOB.on) { for (const e of G.enemies) if (e.own) mobHandover(e, null); MOB.on = false; } return; }
+  MOB.on = true; const byKey = new Map(peers.map((p) => [p.key, p])), now = G.time;
+  for (const e of G.enemies) {
+    if (!mobSyncable(e)) continue;
+    const cur = e.own ? byKey.get(e.own) : null;
+    if (e.own && !cur) { mobHandover(e, null); continue; } // its owner left the lobby or the open world
+    if (e.ownLock > now) continue;
+    const dMe = pl.alive ? Math.hypot(pl.x - e.x, pl.z - e.z) : 1e9;
+    let best = null, bd = 1e9; for (const p of peers) { const d = Math.hypot(p.x - e.x, p.z - e.z); if (d < bd) { bd = d; best = p; } }
+    let own = e.own, od = cur ? Math.hypot(cur.x - e.x, cur.z - e.z) : dMe;
+    if (best && best.key !== own && bd < od - MOB_MARGIN) { own = best.key; od = bd; }
+    if (own && dMe < od - MOB_MARGIN) own = null;
+    if (own !== e.own) mobHandover(e, own);
+  }
+}
+function mobHandover(e, own) {
+  if (own) { e.sx = e.x; e.sz = e.z; e.sf = e.facing; }
+  else if (!e.alive) e.respawnT = Math.min(e.respawnT || 0, CFG.world.enemyRespawn);
+  e.own = own;
+}
+function mobSend() {
+  const peers = mobPeers(); if (!peers.length) return;
+  const out = [];
+  for (const e of G.enemies) {
+    if (e.own || !mobSyncable(e) || out.length >= 80) continue;
+    if (!peers.some((p) => Math.hypot(p.x - e.x, p.z - e.z) < MOB_NEAR)) continue;
+    out.push([e.slot, Math.round(e.x * 10), Math.round(e.z * 10), e.alive ? Math.max(1, Math.round(e.hp / e.maxHp * 1000)) : 0,
+      Math.round((e.facing || 0) * 100), Math.round((e.moveAmt || 0) * 10), (e.attackAnim || 0) > 0.3 || e.windT > 0 || e.lungeT > 0 ? 1 : 0, e.type]);
+  }
+  if (out.length && rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'mob', payload: { sid: MP.sid, m: out } })) MOB.sent++;
+}
+function mobRecv(sid, list) {
+  if (!Array.isArray(list) || !G.started || G.mode !== 'hub') return;
+  for (const r of list) {
+    if (!Array.isArray(r) || r.length < 8) continue;
+    const e = G.enemies[r[0]]; if (!mobSyncable(e)) continue;
+    if (e.own !== sid) {
+      // both games think they run it: the lower sid keeps it
+      if ((e.own === null ? MP.sid : e.own) < sid) continue;
+      e.own = sid; e.ownLock = G.time + 1.5;
+    }
+    MOB.got++;
+    if (r[7] !== e.type && CFG.enemies[r[7]]) { // a different monster in this slot (should not happen with the seeded world)
+      e.type = r[7]; e.r = CFG.enemies[r[7]].r * (e.elite ? CFG.enemies.elite.r : 1); setEnemyLevel(e, enemyLevelFor(e));
+      const v = views.get(e); if (v) { dynGroup.remove(v.root); v.dispose(); views.delete(e); }
+    }
+    const x = mpNum(r[1], 0) / 10, z = mpNum(r[2], 0) / 10, hp = mpNum(r[3], 0) / 1000;
+    e.sx = x; e.sz = z; e.sf = mpNum(r[4], 0) / 100; e.moveAmt = clamp(mpNum(r[5], 0) / 10, 0, 1); if (r[6]) e.attackAnim = 1;
+    if (hp <= 0) {
+      if (e.alive) { e.x = x; e.z = z; e.hp = 0; if (e.tagged) killEntity(e, null); else { e.alive = false; e.respawnT = 1e9; ev({ t: 'die', x, z, kind: e.type, elite: !!e.elite }); } }
+    } else {
+      if (!e.alive) {
+        if (G.time - (e.myKillT ?? -9) < 2) continue; // we just killed it here; the owner has not heard yet
+        e.alive = true; e.x = x; e.z = z; e.tagged = false; e.burnT = 0; e.slowT = 0; setEnemyLevel(e, enemyLevelFor(e)); ev({ t: 'spawn', x, z, elite: e.elite });
+      }
+      const want = Math.max(1, hp * e.maxHp); if (want < e.hp || G.time - (e.myHitT ?? -9) > 0.8) e.hp = want;
+    }
+  }
+}
+// a monster another player runs: glide to where they say it is
+function mobRemoteStep(e, dt) {
+  e.flashT -= dt; e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
+  if (!e.alive || e.sx == null) return;
+  const k = 1 - Math.exp(-dt * 10), dx = e.sx - e.x, dz = e.sz - e.z;
+  if (dx * dx + dz * dz > 400) { e.x = e.sx; e.z = e.sz; } else { e.x += dx * k; e.z += dz * k; }
+  if (e.sf != null) e.facing += angDiff(e.facing, e.sf) * k;
+}
+// our hit on a monster another player runs (called from dealDamage after the hit landed here)
+function mpMobHit(t, amt) {
+  if (!mobSyncable(t) || !t.own) return;
+  t.myHitT = G.time; if (t.hp <= 0) t.myKillT = G.time;
+  if (rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'hit', payload: { sid: MP.sid, to: t.own, i: t.slot, f: Math.round(Math.min(1, amt / t.maxHp) * 10000) / 10000 } })) MOB.hits++;
+}
+// another player's hit on a monster we run
+function mobHitRecv(P) {
+  const e = G.enemies[mpNum(P.i, -1)]; if (!mobSyncable(e) || e.own || !e.alive) return;
+  e.hp -= clamp(mpNum(P.f, 0), 0, 1) * e.maxHp; e.flashT = CFG.combat.hitFlash; e.lastHurt = G.time;
+  if (e.state === 'idle') e.state = 'chase';
+  if (e.hp <= 0) { e.hp = 0; killEntity(e, null); }
 }
 function mpClear() { MP.peers.clear(); MP.list = []; }
 // one remote session: update (or create) its hero from a presence object
@@ -11390,7 +11495,8 @@ function mpApply(key, s, via, guest) {
     MP.peers.set(key, e);
     if (G.started && s.n) Feed.add(`${gi('m_players')} <b>${escHtml(cleanNick(s.n) || 'A hero')}</b> is in the world`, 'mp', null, 5);
   }
-  e.t = t; e.seenAt = Date.now(); e.via = via;
+  { const pdt = (t - (e.t || t)) / 1000; if (pdt > 0.02 && pdt < 1) { e.vx = clamp((x - e.tx) / pdt, -20, 20); e.vz = clamp((z - e.tz) / pdt, -20, 20); } if (!(mpNum(s.m, 0) > 0)) e.vx = e.vz = 0; }
+  e.t = t; e.seenAt = Date.now(); e.via = via; e.rcv = performance.now();
   e.cls = cls; e.tx = x; e.tz = z; e.tf = mpNum(s.f, 0); e.moveAmt = clamp(mpNum(s.m, 0), 0, 1);
   e.level = clamp(Math.floor(mpNum(s.l, 1)), 1, 100000); e.nick = cleanNick(s.n) || 'Hero'; e.md = s.md === 'hub' ? 'hub' : s.md === 'rift' ? 'rift' : 'away';
   e.alive = s.al !== 0; e.hp = clamp(mpNum(s.h, 1), 0, 1); e.maxHp = 1; e.aim = mpNum(s.a, 0);
@@ -11453,10 +11559,12 @@ function mpState() {
 }
 function mpUpdate(dt) {
   // smooth other players toward where they said they are
-  const k = 1 - Math.exp(-dt * (MP.roomState === 'on' || RT.state === 'on' ? 8 : 4));
+  // dead reckoning: run each player ahead along their last speed (up to 0.3 s) so they glide instead of stepping
+  const k = 1 - Math.exp(-dt * (MP.roomState === 'on' || RT.state === 'on' ? 12 : 4)), now = performance.now();
   for (const e of MP.list) {
-    if (Math.hypot(e.tx - e.x, e.tz - e.z) > 25) { e.x = e.tx; e.z = e.tz; }
-    else { e.x += (e.tx - e.x) * k; e.z += (e.tz - e.z) * k; }
+    const age = e.rcv ? Math.min(0.3, (now - e.rcv) / 1000) : 0, gx = e.tx + (e.vx || 0) * age, gz = e.tz + (e.vz || 0) * age;
+    if (Math.hypot(gx - e.x, gz - e.z) > 25) { e.x = gx; e.z = gz; }
+    else { e.x += (gx - e.x) * k; e.z += (gz - e.z) * k; }
     e.facing += angDiff(e.facing, e.tf) * k; e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
   }
   rtUpdate(dt);
@@ -11502,7 +11610,7 @@ function openPlayers() {
   const st = (x) => ({ on: 'connected', connecting: 'connecting…', off: 'not available here', none: 'starting…', readonly: 'read only' })[x] || x;
   openModal(`<div class="npcHead">${gi('m_players', 'hd')}<h3>Fellow Adventurers</h3><span class="cnt">${mpSummary()}</span></div>
     ${rows ? `<div class="list">${rows}</div>` : `<p class="say">No one else is in the lobby right now. Open the game on a second device or send a friend the link, and they show up here and on your minimap.</p>`}
-    <div class="mpdiag"><b>Connection</b><small>${RT.state !== 'off' ? `Lobby: ${st(RT.state === 'joining' ? 'connecting' : RT.state)}${RT.state === 'on' ? ` · ${RT.present + 1} of ${MP_ROOM_CAP} here · sent ${RT.sent}` : ''}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>` : `Live room: ${st(MP.roomState)}${MP.roomState === 'on' ? ` · ${MP.roomPeers} here` : ''} · Shared world: ${st(MP.dbState)}${MP.dbState !== 'off' ? ` · ${MP.dbPeers} seen` : ''} · sent ${MP.sent + MP.dbSent}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>`}
+    <div class="mpdiag"><b>Connection</b><small>${RT.state !== 'off' ? `Lobby: ${st(RT.state === 'joining' ? 'connecting' : RT.state)}${RT.state === 'on' ? ` · ${RT.present + 1} of ${MP_ROOM_CAP} here · sent ${RT.sent}${MOB.on ? ` · shared monsters: sent ${MOB.sent}, got ${MOB.got}, hits ${MOB.hits}` : ''}` : ''}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>` : `Live room: ${st(MP.roomState)}${MP.roomState === 'on' ? ` · ${MP.roomPeers} here` : ''} · Shared world: ${st(MP.dbState)}${MP.dbState !== 'off' ? ` · ${MP.dbPeers} seen` : ''} · sent ${MP.sent + MP.dbSent}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>`}
     ${RT.state !== 'off' ? `<small>Everyone playing the game online meets in this lobby. Your nickname, hero and level are shared, nothing else.</small>` : `<small>Same account on two devices works. Friends join when you invite them by email from the Share menu; people who open a public link can watch others but may not appear themselves.</small>`}</div>`);
 }
 
