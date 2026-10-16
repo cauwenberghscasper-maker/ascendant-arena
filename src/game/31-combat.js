@@ -198,8 +198,9 @@ function dealDamage(t, amount, srcId, o) {
   }
   const hpBefore = Math.max(0, t.hp);
   t.hp -= amt; t.flashT = CFG.combat.hitFlash; t.lastHurt = G.time;
+  // lobby: send our hit to whoever runs this monster or the world boss (70-multiplayer.js; absent in the node checks)
   if (t.own && t.kind === 'enemy' && src && src.isPlayer) mpMobHit(t, amt);
-  if (t.kind === 'boss' && src && src.isPlayer && bossFollowing()) mpBossHit(t, amt); // the lobby leader runs the boss // another player runs this monster: send them the hit
+  if (t.kind === 'boss' && src && src.isPlayer && typeof bossFollowing === 'function' && bossFollowing()) mpBossHit(t, amt);
   if (o.slow) t.slowT = Math.max(t.slowT || 0, o.slow);
   if (o.burn) { t.burnT = o.burnT || 3; t.burnDmg = o.burn; t.burnSrc = srcId; if (!(t.burnTick > 0)) t.burnTick = 0.5; }
   // monster poise: knockback is scaled down and lands at most once per knockGap, so bullets cannot stunlock melee

@@ -3513,8 +3513,9 @@ function dealDamage(t, amount, srcId, o) {
   }
   const hpBefore = Math.max(0, t.hp);
   t.hp -= amt; t.flashT = CFG.combat.hitFlash; t.lastHurt = G.time;
+  // lobby: send our hit to whoever runs this monster or the world boss (70-multiplayer.js; absent in the node checks)
   if (t.own && t.kind === 'enemy' && src && src.isPlayer) mpMobHit(t, amt);
-  if (t.kind === 'boss' && src && src.isPlayer && bossFollowing()) mpBossHit(t, amt); // the lobby leader runs the boss // another player runs this monster: send them the hit
+  if (t.kind === 'boss' && src && src.isPlayer && typeof bossFollowing === 'function' && bossFollowing()) mpBossHit(t, amt);
   if (o.slow) t.slowT = Math.max(t.slowT || 0, o.slow);
   if (o.burn) { t.burnT = o.burnT || 3; t.burnDmg = o.burn; t.burnSrc = srcId; if (!(t.burnTick > 0)) t.burnTick = 0.5; }
   // monster poise: knockback is scaled down and lands at most once per knockGap, so bullets cannot stunlock melee
@@ -4660,7 +4661,7 @@ function stepHub(dt) {
   // bots
   for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; hubBotThink(b, dt); stepFighter(b, dt, 'hub'); }
   // enemies
-  for (const e of G.enemies) if (e.own) mobRemoteStep(e, dt); else stepEnemy(e, dt); // e.own: another lobby player runs this monster
+  for (const e of G.enemies) if (e.own && typeof mobRemoteStep === 'function') mobRemoteStep(e, dt); else stepEnemy(e, dt); // e.own: another lobby player runs this monster
   // kill streak decay, auto-salvage summary, waypoint discovery
   if (G.streak > 0) { G.streakT -= dt; if (G.streakT <= 0) { if (G.streak >= 5) ev({ t: 'streakEnd', n: G.streak }); G.streak = 0; } }
   if (G.salvageAcc) { G.salvageAcc.t -= dt; if (G.salvageAcc.t <= 0) { const a = G.salvageAcc; G.salvageAcc = null; ev({ t: 'salvaged', n: a.n, gold: a.gold, ess: a.ess }); } }
@@ -4675,7 +4676,7 @@ function stepHub(dt) {
   stepPellets(dt);
   stepShrines(dt);
   // boss
-  if (bossFollowing()) bossRemoteStep(dt); // a lobby player runs the world boss for everyone (70-multiplayer.js)
+  if (typeof bossFollowing === 'function' && bossFollowing()) bossRemoteStep(dt); // a lobby player runs the world boss for everyone (70-multiplayer.js)
   else { if (!G.rift) stepBossTimer(dt); if (G.boss) stepBoss(G.boss, dt); }
   // berries
   for (const b of G.berries) {
@@ -5130,7 +5131,7 @@ function stepBoss(b, dt) {
   let target = null, td = 18;
   if (pl.alive && !(G.menuSafe > 0)) { const d = Math.hypot(pl.x - b.x, pl.z - b.z); if (d < td) { td = d; target = pl; } }
   if (!target) for (let i = 1; i < G.hubFighters.length; i++) { const f = G.hubFighters[i]; const d = Math.hypot(f.x - b.x, f.z - b.z); if (d < td) { td = d; target = f; } }
-  for (const f of bossPeerTargets()) { const d = Math.hypot(f.x - b.x, f.z - b.z); if (d < td) { td = d; target = f; } } // other lobby players
+  for (const f of typeof bossPeerTargets === 'function' ? bossPeerTargets() : []) { const d = Math.hypot(f.x - b.x, f.z - b.z); if (d < td) { td = d; target = f; } } // other lobby players
   if (target) {
     const dx = target.x - b.x, dz = target.z - b.z, d = Math.hypot(dx, dz) || 1;
     b.facing = Math.atan2(dx, dz);
@@ -5166,11 +5167,11 @@ function bossAttack(b, o, remote) {
   } else return;
   b.attackAnim = 1;
   ev(o.k === 'rocks' ? { t: 'bossRocks', x: o.bx, z: o.bz } : { t: 'telegraph' });
-  if (!remote) mpBossAttack(o);
+  if (!remote && typeof mpBossAttack === 'function') mpBossAttack(o);
 }
 function endBoss(killed) {
   const b = G.boss; if (!b) return;
-  mpBossEnd(killed);
+  if (typeof mpBossEnd === 'function') mpBossEnd(killed);
   G.boss = null; G.ents.delete(b.id);
   G.bossTimer = G.profile.settings.fastXp ? P.testBossInterval : CFG.boss.interval; G.bossWarned = false;
   G.pendingAoE = G.pendingAoE.filter((a) => a.owner !== b.id);
