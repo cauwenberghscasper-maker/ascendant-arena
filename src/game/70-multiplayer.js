@@ -82,7 +82,7 @@ function rtJoin(key) {
   if (RT.ws && RT.ws.readyState === 1) RT.ws.send(JSON.stringify({ topic: RT.topic, event: 'phx_join', ref: RT.joinRef, join_ref: RT.joinRef,
     payload: { config: { broadcast: { ack: false, self: false }, presence: { enabled: true, key: MP.sid }, private: false } } }));
 }
-if (LOCAL_PREVIEW) window.__mp = { MP, RT, get MOB() { return MOB; }, roomKey: () => mpRoomKey() };
+if (LOCAL_PREVIEW) window.__mp = { MP, RT, get MOB() { return MOB; }, get BOSS() { return BOSS; }, bossLeader: () => bossLeader(), roomKey: () => mpRoomKey() };
 function rtLeave() { if (RT.topic) rtSend(RT.topic, 'phx_leave', {}); RT.state = 'off'; if (RT.ws) RT.ws.close(); }
 function rtCount() { mpRebuild(); RT.present = MP.list.filter((e) => e.via === 'rt').length; }
 function rtDropPeers() { for (const [k, e] of MP.peers) if (e.via === 'rt') MP.peers.delete(k); RT.present = 0; mpRebuild(); mobOwnership(); }
@@ -107,6 +107,7 @@ function rtMessage(d) {
     case 'presence_diff': rtMetas(P.joins || {}, true); rtMetas(P.leaves || {}, false); rtCount(); break;
     case 'broadcast': if (P.event === 'mob' && P.payload && typeof P.payload.sid === 'string') { mobRecv(P.payload.sid.slice(0, 16), P.payload.m); break; }
       if (P.event === 'hit' && P.payload && P.payload.to === MP.sid) { mobHitRecv(P.payload); break; }
+      if (P.payload && typeof P.payload.sid === 'string' && /^b/.test(P.event)) { bossRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
     case 'phx_error': case 'phx_close': if (RT.state !== 'off') { RT.topic = ''; rtDropPeers(); RT.state = 'connecting'; RT.retry = RT.backoff; RT.backoff = Math.min(30, RT.backoff * 2); } break;
   }
@@ -123,7 +124,7 @@ function rtUpdate(dt) {
   if (RT.ws.readyState === 1 && !RT.topic && (RT.retry -= dt) <= 0) rtJoin(mpRoomKey());
   if (RT.state !== 'on' || !G.started) return;
   if (mpRoomKey() !== RT.key) { rtJoin(mpRoomKey()); return; } // partition change: move to the new room
-  if ((MOB.t -= dt) <= 0) { MOB.t = 0.25; mobOwnership(); mobSend(); }
+  if ((MOB.t -= dt) <= 0) { MOB.t = 0.25; mobOwnership(); mobSend(); bossSend(); }
   RT.sendT -= dt; RT.beatT -= dt;
   if (RT.sendT > 0) return;
   RT.sendT = 0.12; rtTrack();
@@ -222,6 +223,72 @@ function mobHitRecv(P) {
   e.hp -= clamp(mpNum(P.f, 0), 0, 1) * e.maxHp; e.flashT = CFG.combat.hitFlash; e.lastHurt = G.time;
   if (e.state === 'idle') e.state = 'chase';
   if (e.hp <= 0) { e.hp = 0; killEntity(e, null); }
+}
+// --- shared world boss (lobby) -----------------------------------------------------------------------------------
+// One lobby player in the open world runs the boss for everyone: the leader, the lowest sid among the players in the
+// open world (stable, so it never flips while players walk around). The leader runs the timer, picks the lair, spawns
+// the boss, moves it, picks targets among all players and sends each attack ('batk'), which every game runs against
+// its own hero. The others mirror the timer and the boss ('bst' 4 times a second, their own level scaling, HP as a
+// share) and send their hits ('bhit'). When the boss dies ('bend'), each game pays its own loot: share = your damage
+// over the boss's max HP. If the leader leaves, the next lowest sid takes over with the boss as it is.
+const BOSS = { killedAt: -99, sent: 0, got: 0 };
+function bossLeader() {
+  const peers = RT.state === 'on' ? MP.list.filter((e) => e.via === 'rt' && e.md === 'hub') : [];
+  let L = G.mode === 'hub' && !inInstance() ? MP.sid : null;
+  for (const p of peers) if (L === null || p.key < L) L = p.key;
+  return L;
+}
+function bossFollowing() { if (RT.state !== 'on' || !G.started || G.mode !== 'hub' || inInstance()) return false; const L = bossLeader(); return !!L && L !== MP.sid; }
+function bossLeading() { return RT.state === 'on' && G.mode === 'hub' && !inInstance() && bossLeader() === MP.sid && MP.list.some((e) => e.via === 'rt' && e.md === 'hub'); }
+function bossPeerTargets() { return bossLeading() ? MP.list.filter((e) => e.via === 'rt' && e.md === 'hub' && e.alive) : []; }
+function bossMsg(event, payload) { return rtSend(RT.topic, 'broadcast', { type: 'broadcast', event, payload: Object.assign({ sid: MP.sid }, payload) }); }
+function bossSend() {
+  if (!bossLeading()) return;
+  const b = G.boss;
+  const s = { s: b ? 2 : G.bossWarned ? 1 : 0, l: G.bossLair, tm: Math.round(G.bossTimer * 10) / 10 };
+  if (b) Object.assign(s, { x: Math.round(b.x * 10) / 10, z: Math.round(b.z * 10) / 10, h: Math.max(b.hp > 0 ? 1 : 0, Math.round(b.hp / b.maxHp * 1000)), f: Math.round(b.facing * 100) / 100, m: b.moveAmt > 0.5 ? 1 : 0, life: Math.round(b.life), r: b.retreat ? 1 : 0 });
+  if (bossMsg('bst', s)) BOSS.sent++;
+}
+function mpBossAttack(o) { if (bossLeading()) bossMsg('batk', o); }
+function mpBossEnd(killed) { if (bossLeading()) bossMsg('bend', { k: killed ? 1 : 0 }); }
+// our hit on the boss the leader runs; a kill here shares loot by your damage over max HP
+function mpBossHit(b, amt) { b.myHitT = G.time; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); } bossMsg('bhit', { to: bossLeader(), f: Math.round(Math.min(1, amt / b.maxHp) * 10000) / 10000 }); }
+function bossRecv(event, sid, P) {
+  if (!G.started || G.mode !== 'hub' || inInstance()) return;
+  if (event === 'bhit') { // another player's hit on the boss we run
+    const b = G.boss; if (P.to !== MP.sid || !b || !b.alive || !bossLeading()) return;
+    const dmg = clamp(mpNum(P.f, 0), 0, 1) * b.maxHp; b.hp -= dmg; b.total += dmg; b.flashT = CFG.combat.hitFlash; b.lastHurt = G.time;
+    if (b.hp <= 0) { b.hp = 0; killEntity(b, null); }
+    return;
+  }
+  if (sid !== bossLeader()) return; // only the leader speaks for the boss
+  BOSS.got++;
+  if (event === 'batk') { if (G.boss && G.boss.alive) bossAttack(G.boss, P, true); return; }
+  if (event === 'bend') {
+    if (G.boss) { const b = G.boss; if (P.k) b.total = Math.max(b.total, b.maxHp); endBoss(!!P.k && b.total > 0 && (b.dmgBy[G.player.id] || 0) > 0); } // your loot: your damage over max HP
+    else { G.bossTimer = CFG.boss.interval; G.bossWarned = false; }
+    BOSS.killedAt = G.time; return;
+  }
+  if (event !== 'bst') return;
+  if (P.l >= 1 && P.l < CFG.world.lairs.length) G.bossLair = P.l;
+  G.bossTimer = mpNum(P.tm, G.bossTimer);
+  if (P.s === 0) { G.bossWarned = false; return; }
+  if (P.s === 1) { if (!G.bossWarned && !G.boss) { G.bossWarned = true; ev({ t: 'bossWarn', lair: currentLair().name, secs: Math.ceil(G.bossTimer) }); } return; }
+  if (P.s !== 2) return;
+  if (!G.boss) { if (G.time - BOSS.killedAt < 3) return; G.bossWarned = true; spawnBoss(); }
+  const b = G.boss; b.sx = mpNum(P.x, b.x); b.sz = mpNum(P.z, b.z); b.sf = mpNum(P.f, b.facing); b.moveAmt = P.m ? 1 : 0; b.life = mpNum(P.life, b.life);
+  if (P.r && !b.retreat) { b.retreat = 1; b.invulnT = 99; ev({ t: 'bossGone', name: b.name }); }
+  const want = Math.max(1, clamp(mpNum(P.h, 1000), 0, 1000) / 1000 * b.maxHp); if (want < b.hp || G.time - (b.myHitT ?? -9) > 0.8) b.hp = want;
+}
+// the boss as the leader sees it: glide there, no own timer or attacks
+function bossRemoteStep(dt) {
+  const b = G.boss; if (!b) return;
+  b.flashT -= dt; b.slowT -= dt; b.attackAnim = Math.max(0, b.attackAnim - dt * 1.5); trackVel(b, dt);
+  if (HeroSupers.tickStatus(b, dt)) b.moveAmt = 0;
+  if (b.sx == null) return;
+  const k = 1 - Math.exp(-dt * 8), dx = b.sx - b.x, dz = b.sz - b.z;
+  if (dx * dx + dz * dz > 900) { b.x = b.sx; b.z = b.sz; } else { b.x += dx * k; b.z += dz * k; }
+  if (b.sf != null) b.facing += angDiff(b.facing, b.sf) * k;
 }
 function mpClear() { MP.peers.clear(); MP.list = []; }
 // one remote session: update (or create) its hero from a presence object
@@ -352,7 +419,7 @@ function openPlayers() {
   const st = (x) => ({ on: 'connected', connecting: 'connecting…', off: 'not available here', none: 'starting…', readonly: 'read only' })[x] || x;
   openModal(`<div class="npcHead">${gi('m_players', 'hd')}<h3>Fellow Adventurers</h3><span class="cnt">${mpSummary()}</span></div>
     ${rows ? `<div class="list">${rows}</div>` : `<p class="say">No one else is in the lobby right now. Open the game on a second device or send a friend the link, and they show up here and on your minimap.</p>`}
-    <div class="mpdiag"><b>Connection</b><small>${RT.state !== 'off' ? `Lobby: ${st(RT.state === 'joining' ? 'connecting' : RT.state)}${RT.state === 'on' ? ` · ${RT.present + 1} of ${MP_ROOM_CAP} here · sent ${RT.sent}${MOB.on ? ` · shared monsters: sent ${MOB.sent}, got ${MOB.got}, hits ${MOB.hits}` : ''}` : ''}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>` : `Live room: ${st(MP.roomState)}${MP.roomState === 'on' ? ` · ${MP.roomPeers} here` : ''} · Shared world: ${st(MP.dbState)}${MP.dbState !== 'off' ? ` · ${MP.dbPeers} seen` : ''} · sent ${MP.sent + MP.dbSent}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>`}
+    <div class="mpdiag"><b>Connection</b><small>${RT.state !== 'off' ? `Lobby: ${st(RT.state === 'joining' ? 'connecting' : RT.state)}${RT.state === 'on' ? ` · ${RT.present + 1} of ${MP_ROOM_CAP} here · sent ${RT.sent}${MOB.on ? ` · shared monsters: sent ${MOB.sent}, got ${MOB.got}, hits ${MOB.hits} · boss: ${bossLeading() ? 'you run it' : 'mirrored'} (${BOSS.sent}/${BOSS.got})` : ''}` : ''}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>` : `Live room: ${st(MP.roomState)}${MP.roomState === 'on' ? ` · ${MP.roomPeers} here` : ''} · Shared world: ${st(MP.dbState)}${MP.dbState !== 'off' ? ` · ${MP.dbPeers} seen` : ''} · sent ${MP.sent + MP.dbSent}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>`}
     ${RT.state !== 'off' ? `<small>Everyone playing the game online meets in this lobby. Your nickname, hero and level are shared, nothing else.</small>` : `<small>Same account on two devices works. Friends join when you invite them by email from the Share menu; people who open a public link can watch others but may not appear themselves.</small>`}</div>`);
 }
 

@@ -438,8 +438,8 @@ function stepHub(dt) {
   stepPellets(dt);
   stepShrines(dt);
   // boss
-  if (!G.rift) stepBossTimer(dt);
-  if (G.boss) stepBoss(G.boss, dt);
+  if (bossFollowing()) bossRemoteStep(dt); // a lobby player runs the world boss for everyone (70-multiplayer.js)
+  else { if (!G.rift) stepBossTimer(dt); if (G.boss) stepBoss(G.boss, dt); }
   // berries
   for (const b of G.berries) {
     if (!b.active) { b.respawnT -= dt; if (b.respawnT <= 0) { const pt = randomPointInZone(0, true); b.x = pt.x; b.z = pt.z; b.active = true; } continue; }
@@ -893,6 +893,7 @@ function stepBoss(b, dt) {
   let target = null, td = 18;
   if (pl.alive && !(G.menuSafe > 0)) { const d = Math.hypot(pl.x - b.x, pl.z - b.z); if (d < td) { td = d; target = pl; } }
   if (!target) for (let i = 1; i < G.hubFighters.length; i++) { const f = G.hubFighters[i]; const d = Math.hypot(f.x - b.x, f.z - b.z); if (d < td) { td = d; target = f; } }
+  for (const f of bossPeerTargets()) { const d = Math.hypot(f.x - b.x, f.z - b.z); if (d < td) { td = d; target = f; } } // other lobby players
   if (target) {
     const dx = target.x - b.x, dz = target.z - b.z, d = Math.hypot(dx, dz) || 1;
     b.facing = Math.atan2(dx, dz);
@@ -901,32 +902,38 @@ function stepBoss(b, dt) {
     if (b.atkT <= 0) {
       b.atkT = B.attackEvery * rand(0.85, 1.15); b.attackAnim = 1;
       const roll = Math.random(), A = b.facing;
-      if (roll < 0.4) {
-        G.pendingAoE.push({ x: target.x, z: target.z, r: B.slamR, t: B.slamDelay, max: B.slamDelay, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'slam' });
-        ev({ t: 'telegraph' });
-      } else if (roll < 0.6 && markersFree(15)) {
-        // three spike lines fan out toward the target, rippling outward; one hit at most
-        const grp = [];
-        for (let l = -1; l <= 1; l++) for (let i = 0; i < 5; i++) { const a = A + l * 0.5, d = b.r + 1.2 + i * 2.2, t = B.slamDelay + i * 0.12; G.pendingAoE.push({ x: b.x + Math.sin(a) * d, z: b.z + Math.cos(a) * d, r: 1.3, t, max: t, dmg: b.atk * 1.1, team: 'mob', owner: b.id, kind: 'spike', grp }); }
-        ev({ t: 'telegraph' });
-      } else if (roll < 0.78 && markersFree(1) && (target !== pl || distToTown(pl.x, pl.z) > CFG.world.town.r + 4)) {
-        // vortex: drags the hero toward the eye for 1.6 s, the eye erupts 0.6 s after the pull lets go
-        G.clouds.push({ x: target.x, z: target.z, r: 6, t: 1.6, max: 1.6, tick: 0, dmg: 0, pull: 2.4, color: 0xb36bff, team: 'mob', owner: b.id });
-        G.pendingAoE.push({ x: target.x, z: target.z, r: 2.4, t: 2.2, max: 2.2, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'vortex' });
-        ev({ t: 'telegraph' });
-      } else {
-        const off = Math.random() * Math.PI;
-        for (let i = 0; i < B.rocks; i++) {
-          const a = off + (i / B.rocks) * Math.PI * 2;
-          spawnProjectile({ x: b.x, z: b.z, vx: Math.sin(a) * B.rockSpeed, vz: Math.cos(a) * B.rockSpeed, life: 2.2, r: 0.6, dmg: b.atk * 0.6, team: 'mob', owner: b.id, kind: 'rock', color: 0xa38b6d, y: 1.6 });
-        }
-        ev({ t: 'bossRocks', x: b.x, z: b.z });
-      }
+      if (roll < 0.4) bossAttack(b, { k: 'slam', x: target.x, z: target.z });
+      else if (roll < 0.6 && markersFree(15)) bossAttack(b, { k: 'spike', A, bx: b.x, bz: b.z });
+      else if (roll < 0.78 && markersFree(1) && (target !== pl || distToTown(pl.x, pl.z) > CFG.world.town.r + 4)) bossAttack(b, { k: 'vortex', x: target.x, z: target.z });
+      else bossAttack(b, { k: 'rocks', off: Math.random() * Math.PI, bx: b.x, bz: b.z });
     }
   } else b.moveAmt = Math.max(0, b.moveAmt - dt * 3);
 }
+// one boss attack; the lobby leader sends the same call to the other players, who run it against their own hero
+function bossAttack(b, o, remote) {
+  const B = CFG.boss;
+  if (o.k === 'slam') G.pendingAoE.push({ x: o.x, z: o.z, r: B.slamR, t: B.slamDelay, max: B.slamDelay, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'slam' });
+  else if (o.k === 'spike') {
+    // three spike lines fan out toward the target, rippling outward; one hit at most
+    const grp = [];
+    for (let l = -1; l <= 1; l++) for (let i = 0; i < 5; i++) { const a = o.A + l * 0.5, d = b.r + 1.2 + i * 2.2, t = B.slamDelay + i * 0.12; G.pendingAoE.push({ x: o.bx + Math.sin(a) * d, z: o.bz + Math.cos(a) * d, r: 1.3, t, max: t, dmg: b.atk * 1.1, team: 'mob', owner: b.id, kind: 'spike', grp }); }
+  } else if (o.k === 'vortex') {
+    // vortex: drags the hero toward the eye for 1.6 s, the eye erupts 0.6 s after the pull lets go
+    G.clouds.push({ x: o.x, z: o.z, r: 6, t: 1.6, max: 1.6, tick: 0, dmg: 0, pull: 2.4, color: 0xb36bff, team: 'mob', owner: b.id });
+    G.pendingAoE.push({ x: o.x, z: o.z, r: 2.4, t: 2.2, max: 2.2, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'vortex' });
+  } else if (o.k === 'rocks') {
+    for (let i = 0; i < B.rocks; i++) {
+      const a = o.off + (i / B.rocks) * Math.PI * 2;
+      spawnProjectile({ x: o.bx, z: o.bz, vx: Math.sin(a) * B.rockSpeed, vz: Math.cos(a) * B.rockSpeed, life: 2.2, r: 0.6, dmg: b.atk * 0.6, team: 'mob', owner: b.id, kind: 'rock', color: 0xa38b6d, y: 1.6 });
+    }
+  } else return;
+  b.attackAnim = 1;
+  ev(o.k === 'rocks' ? { t: 'bossRocks', x: o.bx, z: o.bz } : { t: 'telegraph' });
+  if (!remote) mpBossAttack(o);
+}
 function endBoss(killed) {
   const b = G.boss; if (!b) return;
+  mpBossEnd(killed);
   G.boss = null; G.ents.delete(b.id);
   G.bossTimer = G.profile.settings.fastXp ? P.testBossInterval : CFG.boss.interval; G.bossWarned = false;
   G.pendingAoE = G.pendingAoE.filter((a) => a.owner !== b.id);

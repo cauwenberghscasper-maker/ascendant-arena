@@ -3513,7 +3513,8 @@ function dealDamage(t, amount, srcId, o) {
   }
   const hpBefore = Math.max(0, t.hp);
   t.hp -= amt; t.flashT = CFG.combat.hitFlash; t.lastHurt = G.time;
-  if (t.own && t.kind === 'enemy' && src && src.isPlayer) mpMobHit(t, amt); // another player runs this monster: send them the hit
+  if (t.own && t.kind === 'enemy' && src && src.isPlayer) mpMobHit(t, amt);
+  if (t.kind === 'boss' && src && src.isPlayer && bossFollowing()) mpBossHit(t, amt); // the lobby leader runs the boss // another player runs this monster: send them the hit
   if (o.slow) t.slowT = Math.max(t.slowT || 0, o.slow);
   if (o.burn) { t.burnT = o.burnT || 3; t.burnDmg = o.burn; t.burnSrc = srcId; if (!(t.burnTick > 0)) t.burnTick = 0.5; }
   // monster poise: knockback is scaled down and lands at most once per knockGap, so bullets cannot stunlock melee
@@ -4674,8 +4675,8 @@ function stepHub(dt) {
   stepPellets(dt);
   stepShrines(dt);
   // boss
-  if (!G.rift) stepBossTimer(dt);
-  if (G.boss) stepBoss(G.boss, dt);
+  if (bossFollowing()) bossRemoteStep(dt); // a lobby player runs the world boss for everyone (70-multiplayer.js)
+  else { if (!G.rift) stepBossTimer(dt); if (G.boss) stepBoss(G.boss, dt); }
   // berries
   for (const b of G.berries) {
     if (!b.active) { b.respawnT -= dt; if (b.respawnT <= 0) { const pt = randomPointInZone(0, true); b.x = pt.x; b.z = pt.z; b.active = true; } continue; }
@@ -5129,6 +5130,7 @@ function stepBoss(b, dt) {
   let target = null, td = 18;
   if (pl.alive && !(G.menuSafe > 0)) { const d = Math.hypot(pl.x - b.x, pl.z - b.z); if (d < td) { td = d; target = pl; } }
   if (!target) for (let i = 1; i < G.hubFighters.length; i++) { const f = G.hubFighters[i]; const d = Math.hypot(f.x - b.x, f.z - b.z); if (d < td) { td = d; target = f; } }
+  for (const f of bossPeerTargets()) { const d = Math.hypot(f.x - b.x, f.z - b.z); if (d < td) { td = d; target = f; } } // other lobby players
   if (target) {
     const dx = target.x - b.x, dz = target.z - b.z, d = Math.hypot(dx, dz) || 1;
     b.facing = Math.atan2(dx, dz);
@@ -5137,32 +5139,38 @@ function stepBoss(b, dt) {
     if (b.atkT <= 0) {
       b.atkT = B.attackEvery * rand(0.85, 1.15); b.attackAnim = 1;
       const roll = Math.random(), A = b.facing;
-      if (roll < 0.4) {
-        G.pendingAoE.push({ x: target.x, z: target.z, r: B.slamR, t: B.slamDelay, max: B.slamDelay, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'slam' });
-        ev({ t: 'telegraph' });
-      } else if (roll < 0.6 && markersFree(15)) {
-        // three spike lines fan out toward the target, rippling outward; one hit at most
-        const grp = [];
-        for (let l = -1; l <= 1; l++) for (let i = 0; i < 5; i++) { const a = A + l * 0.5, d = b.r + 1.2 + i * 2.2, t = B.slamDelay + i * 0.12; G.pendingAoE.push({ x: b.x + Math.sin(a) * d, z: b.z + Math.cos(a) * d, r: 1.3, t, max: t, dmg: b.atk * 1.1, team: 'mob', owner: b.id, kind: 'spike', grp }); }
-        ev({ t: 'telegraph' });
-      } else if (roll < 0.78 && markersFree(1) && (target !== pl || distToTown(pl.x, pl.z) > CFG.world.town.r + 4)) {
-        // vortex: drags the hero toward the eye for 1.6 s, the eye erupts 0.6 s after the pull lets go
-        G.clouds.push({ x: target.x, z: target.z, r: 6, t: 1.6, max: 1.6, tick: 0, dmg: 0, pull: 2.4, color: 0xb36bff, team: 'mob', owner: b.id });
-        G.pendingAoE.push({ x: target.x, z: target.z, r: 2.4, t: 2.2, max: 2.2, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'vortex' });
-        ev({ t: 'telegraph' });
-      } else {
-        const off = Math.random() * Math.PI;
-        for (let i = 0; i < B.rocks; i++) {
-          const a = off + (i / B.rocks) * Math.PI * 2;
-          spawnProjectile({ x: b.x, z: b.z, vx: Math.sin(a) * B.rockSpeed, vz: Math.cos(a) * B.rockSpeed, life: 2.2, r: 0.6, dmg: b.atk * 0.6, team: 'mob', owner: b.id, kind: 'rock', color: 0xa38b6d, y: 1.6 });
-        }
-        ev({ t: 'bossRocks', x: b.x, z: b.z });
-      }
+      if (roll < 0.4) bossAttack(b, { k: 'slam', x: target.x, z: target.z });
+      else if (roll < 0.6 && markersFree(15)) bossAttack(b, { k: 'spike', A, bx: b.x, bz: b.z });
+      else if (roll < 0.78 && markersFree(1) && (target !== pl || distToTown(pl.x, pl.z) > CFG.world.town.r + 4)) bossAttack(b, { k: 'vortex', x: target.x, z: target.z });
+      else bossAttack(b, { k: 'rocks', off: Math.random() * Math.PI, bx: b.x, bz: b.z });
     }
   } else b.moveAmt = Math.max(0, b.moveAmt - dt * 3);
 }
+// one boss attack; the lobby leader sends the same call to the other players, who run it against their own hero
+function bossAttack(b, o, remote) {
+  const B = CFG.boss;
+  if (o.k === 'slam') G.pendingAoE.push({ x: o.x, z: o.z, r: B.slamR, t: B.slamDelay, max: B.slamDelay, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'slam' });
+  else if (o.k === 'spike') {
+    // three spike lines fan out toward the target, rippling outward; one hit at most
+    const grp = [];
+    for (let l = -1; l <= 1; l++) for (let i = 0; i < 5; i++) { const a = o.A + l * 0.5, d = b.r + 1.2 + i * 2.2, t = B.slamDelay + i * 0.12; G.pendingAoE.push({ x: o.bx + Math.sin(a) * d, z: o.bz + Math.cos(a) * d, r: 1.3, t, max: t, dmg: b.atk * 1.1, team: 'mob', owner: b.id, kind: 'spike', grp }); }
+  } else if (o.k === 'vortex') {
+    // vortex: drags the hero toward the eye for 1.6 s, the eye erupts 0.6 s after the pull lets go
+    G.clouds.push({ x: o.x, z: o.z, r: 6, t: 1.6, max: 1.6, tick: 0, dmg: 0, pull: 2.4, color: 0xb36bff, team: 'mob', owner: b.id });
+    G.pendingAoE.push({ x: o.x, z: o.z, r: 2.4, t: 2.2, max: 2.2, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'vortex' });
+  } else if (o.k === 'rocks') {
+    for (let i = 0; i < B.rocks; i++) {
+      const a = o.off + (i / B.rocks) * Math.PI * 2;
+      spawnProjectile({ x: o.bx, z: o.bz, vx: Math.sin(a) * B.rockSpeed, vz: Math.cos(a) * B.rockSpeed, life: 2.2, r: 0.6, dmg: b.atk * 0.6, team: 'mob', owner: b.id, kind: 'rock', color: 0xa38b6d, y: 1.6 });
+    }
+  } else return;
+  b.attackAnim = 1;
+  ev(o.k === 'rocks' ? { t: 'bossRocks', x: o.bx, z: o.bz } : { t: 'telegraph' });
+  if (!remote) mpBossAttack(o);
+}
 function endBoss(killed) {
   const b = G.boss; if (!b) return;
+  mpBossEnd(killed);
   G.boss = null; G.ents.delete(b.id);
   G.bossTimer = G.profile.settings.fastXp ? P.testBossInterval : CFG.boss.interval; G.bossWarned = false;
   G.pendingAoE = G.pendingAoE.filter((a) => a.owner !== b.id);
@@ -11340,7 +11348,7 @@ function rtJoin(key) {
   if (RT.ws && RT.ws.readyState === 1) RT.ws.send(JSON.stringify({ topic: RT.topic, event: 'phx_join', ref: RT.joinRef, join_ref: RT.joinRef,
     payload: { config: { broadcast: { ack: false, self: false }, presence: { enabled: true, key: MP.sid }, private: false } } }));
 }
-if (LOCAL_PREVIEW) window.__mp = { MP, RT, get MOB() { return MOB; }, roomKey: () => mpRoomKey() };
+if (LOCAL_PREVIEW) window.__mp = { MP, RT, get MOB() { return MOB; }, get BOSS() { return BOSS; }, bossLeader: () => bossLeader(), roomKey: () => mpRoomKey() };
 function rtLeave() { if (RT.topic) rtSend(RT.topic, 'phx_leave', {}); RT.state = 'off'; if (RT.ws) RT.ws.close(); }
 function rtCount() { mpRebuild(); RT.present = MP.list.filter((e) => e.via === 'rt').length; }
 function rtDropPeers() { for (const [k, e] of MP.peers) if (e.via === 'rt') MP.peers.delete(k); RT.present = 0; mpRebuild(); mobOwnership(); }
@@ -11365,6 +11373,7 @@ function rtMessage(d) {
     case 'presence_diff': rtMetas(P.joins || {}, true); rtMetas(P.leaves || {}, false); rtCount(); break;
     case 'broadcast': if (P.event === 'mob' && P.payload && typeof P.payload.sid === 'string') { mobRecv(P.payload.sid.slice(0, 16), P.payload.m); break; }
       if (P.event === 'hit' && P.payload && P.payload.to === MP.sid) { mobHitRecv(P.payload); break; }
+      if (P.payload && typeof P.payload.sid === 'string' && /^b/.test(P.event)) { bossRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
     case 'phx_error': case 'phx_close': if (RT.state !== 'off') { RT.topic = ''; rtDropPeers(); RT.state = 'connecting'; RT.retry = RT.backoff; RT.backoff = Math.min(30, RT.backoff * 2); } break;
   }
@@ -11381,7 +11390,7 @@ function rtUpdate(dt) {
   if (RT.ws.readyState === 1 && !RT.topic && (RT.retry -= dt) <= 0) rtJoin(mpRoomKey());
   if (RT.state !== 'on' || !G.started) return;
   if (mpRoomKey() !== RT.key) { rtJoin(mpRoomKey()); return; } // partition change: move to the new room
-  if ((MOB.t -= dt) <= 0) { MOB.t = 0.25; mobOwnership(); mobSend(); }
+  if ((MOB.t -= dt) <= 0) { MOB.t = 0.25; mobOwnership(); mobSend(); bossSend(); }
   RT.sendT -= dt; RT.beatT -= dt;
   if (RT.sendT > 0) return;
   RT.sendT = 0.12; rtTrack();
@@ -11480,6 +11489,72 @@ function mobHitRecv(P) {
   e.hp -= clamp(mpNum(P.f, 0), 0, 1) * e.maxHp; e.flashT = CFG.combat.hitFlash; e.lastHurt = G.time;
   if (e.state === 'idle') e.state = 'chase';
   if (e.hp <= 0) { e.hp = 0; killEntity(e, null); }
+}
+// --- shared world boss (lobby) -----------------------------------------------------------------------------------
+// One lobby player in the open world runs the boss for everyone: the leader, the lowest sid among the players in the
+// open world (stable, so it never flips while players walk around). The leader runs the timer, picks the lair, spawns
+// the boss, moves it, picks targets among all players and sends each attack ('batk'), which every game runs against
+// its own hero. The others mirror the timer and the boss ('bst' 4 times a second, their own level scaling, HP as a
+// share) and send their hits ('bhit'). When the boss dies ('bend'), each game pays its own loot: share = your damage
+// over the boss's max HP. If the leader leaves, the next lowest sid takes over with the boss as it is.
+const BOSS = { killedAt: -99, sent: 0, got: 0 };
+function bossLeader() {
+  const peers = RT.state === 'on' ? MP.list.filter((e) => e.via === 'rt' && e.md === 'hub') : [];
+  let L = G.mode === 'hub' && !inInstance() ? MP.sid : null;
+  for (const p of peers) if (L === null || p.key < L) L = p.key;
+  return L;
+}
+function bossFollowing() { if (RT.state !== 'on' || !G.started || G.mode !== 'hub' || inInstance()) return false; const L = bossLeader(); return !!L && L !== MP.sid; }
+function bossLeading() { return RT.state === 'on' && G.mode === 'hub' && !inInstance() && bossLeader() === MP.sid && MP.list.some((e) => e.via === 'rt' && e.md === 'hub'); }
+function bossPeerTargets() { return bossLeading() ? MP.list.filter((e) => e.via === 'rt' && e.md === 'hub' && e.alive) : []; }
+function bossMsg(event, payload) { return rtSend(RT.topic, 'broadcast', { type: 'broadcast', event, payload: Object.assign({ sid: MP.sid }, payload) }); }
+function bossSend() {
+  if (!bossLeading()) return;
+  const b = G.boss;
+  const s = { s: b ? 2 : G.bossWarned ? 1 : 0, l: G.bossLair, tm: Math.round(G.bossTimer * 10) / 10 };
+  if (b) Object.assign(s, { x: Math.round(b.x * 10) / 10, z: Math.round(b.z * 10) / 10, h: Math.max(b.hp > 0 ? 1 : 0, Math.round(b.hp / b.maxHp * 1000)), f: Math.round(b.facing * 100) / 100, m: b.moveAmt > 0.5 ? 1 : 0, life: Math.round(b.life), r: b.retreat ? 1 : 0 });
+  if (bossMsg('bst', s)) BOSS.sent++;
+}
+function mpBossAttack(o) { if (bossLeading()) bossMsg('batk', o); }
+function mpBossEnd(killed) { if (bossLeading()) bossMsg('bend', { k: killed ? 1 : 0 }); }
+// our hit on the boss the leader runs; a kill here shares loot by your damage over max HP
+function mpBossHit(b, amt) { b.myHitT = G.time; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); } bossMsg('bhit', { to: bossLeader(), f: Math.round(Math.min(1, amt / b.maxHp) * 10000) / 10000 }); }
+function bossRecv(event, sid, P) {
+  if (!G.started || G.mode !== 'hub' || inInstance()) return;
+  if (event === 'bhit') { // another player's hit on the boss we run
+    const b = G.boss; if (P.to !== MP.sid || !b || !b.alive || !bossLeading()) return;
+    const dmg = clamp(mpNum(P.f, 0), 0, 1) * b.maxHp; b.hp -= dmg; b.total += dmg; b.flashT = CFG.combat.hitFlash; b.lastHurt = G.time;
+    if (b.hp <= 0) { b.hp = 0; killEntity(b, null); }
+    return;
+  }
+  if (sid !== bossLeader()) return; // only the leader speaks for the boss
+  BOSS.got++;
+  if (event === 'batk') { if (G.boss && G.boss.alive) bossAttack(G.boss, P, true); return; }
+  if (event === 'bend') {
+    if (G.boss) { const b = G.boss; if (P.k) b.total = Math.max(b.total, b.maxHp); endBoss(!!P.k && b.total > 0 && (b.dmgBy[G.player.id] || 0) > 0); } // your loot: your damage over max HP
+    else { G.bossTimer = CFG.boss.interval; G.bossWarned = false; }
+    BOSS.killedAt = G.time; return;
+  }
+  if (event !== 'bst') return;
+  if (P.l >= 1 && P.l < CFG.world.lairs.length) G.bossLair = P.l;
+  G.bossTimer = mpNum(P.tm, G.bossTimer);
+  if (P.s === 0) { G.bossWarned = false; return; }
+  if (P.s === 1) { if (!G.bossWarned && !G.boss) { G.bossWarned = true; ev({ t: 'bossWarn', lair: currentLair().name, secs: Math.ceil(G.bossTimer) }); } return; }
+  if (P.s !== 2) return;
+  if (!G.boss) { if (G.time - BOSS.killedAt < 3) return; G.bossWarned = true; spawnBoss(); }
+  const b = G.boss; b.sx = mpNum(P.x, b.x); b.sz = mpNum(P.z, b.z); b.sf = mpNum(P.f, b.facing); b.moveAmt = P.m ? 1 : 0; b.life = mpNum(P.life, b.life);
+  if (P.r && !b.retreat) { b.retreat = 1; b.invulnT = 99; ev({ t: 'bossGone', name: b.name }); }
+  const want = Math.max(1, clamp(mpNum(P.h, 1000), 0, 1000) / 1000 * b.maxHp); if (want < b.hp || G.time - (b.myHitT ?? -9) > 0.8) b.hp = want;
+}
+// the boss as the leader sees it: glide there, no own timer or attacks
+function bossRemoteStep(dt) {
+  const b = G.boss; if (!b) return;
+  b.flashT -= dt; b.slowT -= dt; b.attackAnim = Math.max(0, b.attackAnim - dt * 1.5); trackVel(b, dt);
+  if (HeroSupers.tickStatus(b, dt)) b.moveAmt = 0;
+  if (b.sx == null) return;
+  const k = 1 - Math.exp(-dt * 8), dx = b.sx - b.x, dz = b.sz - b.z;
+  if (dx * dx + dz * dz > 900) { b.x = b.sx; b.z = b.sz; } else { b.x += dx * k; b.z += dz * k; }
+  if (b.sf != null) b.facing += angDiff(b.facing, b.sf) * k;
 }
 function mpClear() { MP.peers.clear(); MP.list = []; }
 // one remote session: update (or create) its hero from a presence object
@@ -11610,7 +11685,7 @@ function openPlayers() {
   const st = (x) => ({ on: 'connected', connecting: 'connecting…', off: 'not available here', none: 'starting…', readonly: 'read only' })[x] || x;
   openModal(`<div class="npcHead">${gi('m_players', 'hd')}<h3>Fellow Adventurers</h3><span class="cnt">${mpSummary()}</span></div>
     ${rows ? `<div class="list">${rows}</div>` : `<p class="say">No one else is in the lobby right now. Open the game on a second device or send a friend the link, and they show up here and on your minimap.</p>`}
-    <div class="mpdiag"><b>Connection</b><small>${RT.state !== 'off' ? `Lobby: ${st(RT.state === 'joining' ? 'connecting' : RT.state)}${RT.state === 'on' ? ` · ${RT.present + 1} of ${MP_ROOM_CAP} here · sent ${RT.sent}${MOB.on ? ` · shared monsters: sent ${MOB.sent}, got ${MOB.got}, hits ${MOB.hits}` : ''}` : ''}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>` : `Live room: ${st(MP.roomState)}${MP.roomState === 'on' ? ` · ${MP.roomPeers} here` : ''} · Shared world: ${st(MP.dbState)}${MP.dbState !== 'off' ? ` · ${MP.dbPeers} seen` : ''} · sent ${MP.sent + MP.dbSent}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>`}
+    <div class="mpdiag"><b>Connection</b><small>${RT.state !== 'off' ? `Lobby: ${st(RT.state === 'joining' ? 'connecting' : RT.state)}${RT.state === 'on' ? ` · ${RT.present + 1} of ${MP_ROOM_CAP} here · sent ${RT.sent}${MOB.on ? ` · shared monsters: sent ${MOB.sent}, got ${MOB.got}, hits ${MOB.hits} · boss: ${bossLeading() ? 'you run it' : 'mirrored'} (${BOSS.sent}/${BOSS.got})` : ''}` : ''}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>` : `Live room: ${st(MP.roomState)}${MP.roomState === 'on' ? ` · ${MP.roomPeers} here` : ''} · Shared world: ${st(MP.dbState)}${MP.dbState !== 'off' ? ` · ${MP.dbPeers} seen` : ''} · sent ${MP.sent + MP.dbSent}${MP.err ? ` · last error: ${escHtml(MP.err)}` : ''}</small>`}
     ${RT.state !== 'off' ? `<small>Everyone playing the game online meets in this lobby. Your nickname, hero and level are shared, nothing else.</small>` : `<small>Same account on two devices works. Friends join when you invite them by email from the Share menu; people who open a public link can watch others but may not appear themselves.</small>`}</div>`);
 }
 
