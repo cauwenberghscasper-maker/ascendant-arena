@@ -427,3 +427,4 @@
 .hubTop { display: flex; gap: 8px; align-items: stretch; margin: 0 54px 10px 0; }
 .panel .hubBack { flex: none; min-height: 44px; padding: 0 10px !important; font-size: 13px !important; background: var(--og-slate) !important; }
 .hubTop .tabs.hubSub { flex: 1; margin: 0; }
+#bHero { display: none !important; } /* the Hero hub lives in the menu now */
