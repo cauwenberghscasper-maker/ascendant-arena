@@ -306,15 +306,15 @@
 /* ===== OG arcade buttons (Oct 2026, loaded last) =====
    Bright flat fills, thick black outline with notched pixel corners (box-shadow, so no clip-path cuts the glow),
    a light top lip and a dark bottom lip, Pixelify Sans with a hard drop shadow. Round thumb controls stay round. */
-:root { --og-ink: #0b0b14; --og-yel: #ffcf1f; --og-org: #ff7a1a; --og-red: #f2423a; --og-blu: #2e86ff; --og-cya: #1fc8ff;
-  --og-grn: #46d63f; --og-pur: #b14dff; --og-slate: #39405a; --og-font: 'Pixelify Sans', monospace; }
+:root { --og-ink: #0b0b14; --og-yel: #d9a93a; --og-org: #e0603a; --og-red: #d63a55; --og-blu: #3f5fe0; --og-cya: #1fa6d6;
+  --og-grn: #22b07a; --og-pur: #9a4fe6; --og-slate: #343a55; --og-font: 'Pixelify Sans', monospace; }
 .panel button.primary, .panel button.primary.gold, .panel button.ghost, .panel button.warn, .panel button.disabled, .panel .x,
 #gearPrompt button, .pMoreBtn, .tab, .panel .tabs .tab, .menuSections button, .bagFilter button,
 .hbtn, .hbtn.ic, #hubShortcuts button, #bAct, #playBtn {
   font-family: var(--og-font) !important; font-weight: 700 !important; letter-spacing: .02em !important;
   border: 0 !important; border-image: none !important; border-radius: 0 !important; text-shadow: 2px 2px 0 var(--og-ink) !important; color: #fff !important;
   box-shadow: 0 -3px 0 var(--og-ink), 0 3px 0 var(--og-ink), -3px 0 0 var(--og-ink), 3px 0 0 var(--og-ink),
-    inset 0 3px 0 rgba(255,255,255,.45), inset 0 -4px 0 rgba(0,0,0,.3), 0 6px 0 rgba(0,0,0,.35) !important; }
+    inset 0 3px 0 rgba(255,255,255,.22), inset 0 -4px 0 rgba(0,0,0,.3), 0 6px 0 rgba(0,0,0,.35) !important; }
 .tab.on, .panel .tabs .tab.on, .menuSections button[aria-pressed="true"], .bagFilter button.on { background: var(--og-blu) !important; color: #fff !important; }
 .panel button.primary, .panel button.primary.gold, #gearPrompt button.primary, #bAct, #playBtn { background: var(--og-yel) !important; color: var(--og-ink) !important; text-shadow: 1px 1px 0 rgba(255,255,255,.55) !important; }
 .panel button.primary :is(.mergeCost, span, b) { color: inherit !important; }
@@ -421,7 +421,7 @@
 .panel .hubTile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 140px; padding: 12px 6px;
   border: 0 !important; color: #fff; background: var(--og-blu) !important;
   box-shadow: 0 -3px 0 var(--og-ink), 0 3px 0 var(--og-ink), -3px 0 0 var(--og-ink), 3px 0 0 var(--og-ink), inset 0 3px 0 rgba(255,255,255,.45), inset 0 -5px 0 rgba(0,0,0,.3), 0 7px 0 rgba(0,0,0,.35) !important; }
-.panel .hubTile:nth-child(2) { background: var(--og-org) !important; } .panel .hubTile:nth-child(3) { background: var(--og-grn) !important; } .panel .hubTile:nth-child(4) { background: var(--og-pur) !important; }
+.panel .hubTile:nth-child(2) { background-color: var(--og-org) !important; } .panel .hubTile:nth-child(3) { background-color: var(--og-grn) !important; } .panel .hubTile:nth-child(4) { background-color: var(--og-pur) !important; }
 .hubTile .gi { width: 56px !important; height: 56px !important; } .hubTile b { font-size: 20px; text-shadow: 2px 2px 0 var(--og-ink); } .hubTile small { font-size: 12px; color: #fff; opacity: .9; text-shadow: 1px 1px 0 var(--og-ink); }
 .hubTile .rdot { position: absolute; top: 8px; right: 8px; }
 .hubTop { display: flex; gap: 8px; align-items: stretch; margin: 0 54px 10px 0; }
@@ -456,3 +456,16 @@
 .heroCard .tiles.heq { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .heroCard .tiles.heq .tile { width: auto !important; min-width: 0; min-height: 62px; } .heroCard .tiles.heq .tile .ts { font-size: 10px; }
 .bstats.hsmall { margin-top: 8px; }
+.heroCard ~ .bstats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
+.heroCard ~ .bstats > div { padding: 12px 12px !important; } .heroCard ~ .bstats span { font-size: 13px !important; } .heroCard ~ .bstats b { font-size: 24px !important; }
+/* ===== Deep neon (Oct 2026): every coloured button gets a light-to-dark gradient over its colour and a soft glow in that colour ===== */
+.panel button.primary, .panel button.primary.gold, .panel button.ghost, .panel button.warn, .panel .x, #gearPrompt button, .pMoreBtn,
+.tab.on, .panel .tabs .tab.on, .menuSections button[aria-pressed="true"], .bagFilter button.on, .hbtn, .hbtn.ic, #hubShortcuts button, #bAct, #playBtn,
+.panel .hubTile, .cbtn, #bSuper span {
+  background-image: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,0) 45%, rgba(0,0,0,.3)) !important;
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--gc, var(--og-blu)) 60%, transparent)); }
+.panel button.primary, .panel button.primary.gold, #gearPrompt button.primary, #bAct, #playBtn { --gc: var(--og-yel); }
+.panel button.warn, .panel .x { --gc: var(--og-red); } .panel button.ghost.boost { --gc: var(--og-pur); }
+.panel .hubTile:nth-child(1) { --gc: var(--og-blu); } .panel .hubTile:nth-child(2) { --gc: var(--og-org); } .panel .hubTile:nth-child(3) { --gc: var(--og-grn); } .panel .hubTile:nth-child(4) { --gc: var(--og-pur); }
+#bDash { --gc: var(--og-cya); } #bSkill { --gc: var(--og-grn); } #bSpecial { --gc: var(--og-pur); } #bSuper span { --gc: var(--og-org); }
+.panel .hubBack { filter: none; }
