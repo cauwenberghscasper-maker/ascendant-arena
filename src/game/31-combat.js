@@ -37,6 +37,7 @@ function forEachTarget(fn) {
   fn(G.player);
   for (let i = 0; i < G.enemies.length; i++) if (!G.enemies[i].hidden) fn(G.enemies[i]); // burrowed monsters can't be hit or aimed at
   if (G.boss) fn(G.boss);
+  if (G.mode === 'hub' && typeof pvpTargets === 'function') for (const e of pvpTargets()) fn(e); // opted-in PvP players
 }
 
 function projColor(f) {
@@ -172,6 +173,7 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
 
 function dealDamage(t, amount, srcId, o) {
   if (!t || !t.alive) return 0;
+  if (t.isPeer) return srcId === G.player.id ? pvpHit(t, amount) : 0; // only your own shots, the victim decides
   if (t.invulnT > 0) return 0;
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
@@ -284,7 +286,7 @@ function killEntity(t, src, pet = false) {
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
-    else if (t.isPlayer) { G.respawnT = CFG.player.respawn; toast('You were knocked out. Respawning in town…', 'bad'); }
+    else if (t.isPlayer) { if (typeof pvpOnDeath === 'function') pvpOnDeath(); G.respawnT = CFG.player.respawn; toast('You were knocked out. Respawning in town…', 'bad'); }
   } else if (t.kind === 'enemy') {
     t.respawnT = t.temp ? 1e9 : t.elite ? CFG.world.eliteRespawn : t.den != null ? CFG.world.denRespawn : CFG.world.enemyRespawn;
     ev({ t: 'die', x: t.x, z: t.z, kind: t.type, elite: !!t.elite });

@@ -1970,6 +1970,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .panel .hsRow { height: auto !important; flex: none !important; overflow: visible; } .panel .hsRow .dchips i { display: inline-block !important; width: auto !important; flex: none !important; line-height: 1.4; }
 .panel .hsRow span.dchips { flex-direction: row !important; flex-wrap: wrap; align-items: flex-start; }
 .hsSub { color: #9aa0b8; margin-top: 6px; }
+.tag.peer.pvp .tn { color: #ff6b78 !important; text-shadow: 0 0 6px #ff3344, 1px 1px 0 #000; } .tag.peer.pvp .tb i { background: #ff3344 !important; box-shadow: 0 0 6px #ff3344; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -3673,6 +3674,7 @@ function forEachTarget(fn) {
   fn(G.player);
   for (let i = 0; i < G.enemies.length; i++) if (!G.enemies[i].hidden) fn(G.enemies[i]); // burrowed monsters can't be hit or aimed at
   if (G.boss) fn(G.boss);
+  if (G.mode === 'hub' && typeof pvpTargets === 'function') for (const e of pvpTargets()) fn(e); // opted-in PvP players
 }
 
 function projColor(f) {
@@ -3808,6 +3810,7 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
 
 function dealDamage(t, amount, srcId, o) {
   if (!t || !t.alive) return 0;
+  if (t.isPeer) return srcId === G.player.id ? pvpHit(t, amount) : 0; // only your own shots, the victim decides
   if (t.invulnT > 0) return 0;
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
@@ -3920,7 +3923,7 @@ function killEntity(t, src, pet = false) {
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
-    else if (t.isPlayer) { G.respawnT = CFG.player.respawn; toast('You were knocked out. Respawning in town…', 'bad'); }
+    else if (t.isPlayer) { if (typeof pvpOnDeath === 'function') pvpOnDeath(); G.respawnT = CFG.player.respawn; toast('You were knocked out. Respawning in town…', 'bad'); }
   } else if (t.kind === 'enemy') {
     t.respawnT = t.temp ? 1e9 : t.elite ? CFG.world.eliteRespawn : t.den != null ? CFG.world.denRespawn : CFG.world.enemyRespawn;
     ev({ t: 'die', x: t.x, z: t.z, kind: t.type, elite: !!t.elite });
@@ -8542,20 +8545,20 @@ const views = new Map();
 // everything that changes how your hero looks; the view is rebuilt when this changes
 function playerViewSig(cls) {
   const p = G.profile;
-  return gearSignature(p.gear) + Object.values(p.gear).map(it=>it?it.id+':'+it.up:'-').join('|') + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level));
+  return gearSignature(p.gear) + Object.values(p.gear).map(it=>it?it.id+':'+it.up:'-').join('|') + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level)) + (typeof pvpOn === 'function' && pvpOn() ? '|pvp' : '');
 }
 function viewFor(e) {
   let v = views.get(e);
   if (v) return v;
   if (e.kind === 'fighter') {
     const c = CFG.classes[e.cls];
-    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? 0xffc94a : e.isPeer ? 0x5dd6ff : null);
+    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (typeof pvpOn === 'function' && pvpOn() ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : null);
     const gear = e.isPlayer ? G.profile.gear : null;
     const cape = e.isPlayer ? capeColor(G.profile) : null;
     const BR = CFG.brawlers[e.cls] || {};
     const asc = G.mode === 'arena' ? 0 : ascTier(e.isPlayer ? G.profile.level : (e.level || 1));
     v = AssetSlots.create('character', { cls: e.cls, body: c.body, accent: e.isPlayer ? (badgeTint(G.profile, e.cls) || c.accent) : c.accent, hair: BR.hair, look: BR.look, ring, gear, xray: e.isPlayer, cape, asc, peer: !!e.isPeer });
-    v.cls = e.cls; v.sig = e.isPlayer ? playerViewSig(e.cls) : '';
+    v.cls = e.cls; v.sig = e.isPlayer ? playerViewSig(e.cls) : 'pv' + (e.pvp ? 1 : 0);
   } else if (e.kind === 'enemy') v = AssetSlots.create('enemy', { type: e.type, elite: e.elite });
   else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone });
   else if (e.kind === 'npc') v = AssetSlots.create('npc', { id: e.def.id });
@@ -8579,7 +8582,7 @@ function syncViews(dt, t) {
   const handle = (e) => {
     // rebuild a fighter view if its class changed
     const old = views.get(e);
-    if (old && e.kind === 'fighter' && (old.cls !== e.cls || (e.isPlayer && old.sig !== playerViewSig(e.cls)))) { dynGroup.remove(old.root); old.dispose(); views.delete(e); }
+    if (old && e.kind === 'fighter' && (old.cls !== e.cls || (e.isPlayer ? old.sig !== playerViewSig(e.cls) : e.isPeer && old.sig !== 'pv' + (e.pvp ? 1 : 0)))) { dynGroup.remove(old.root); old.dispose(); views.delete(e); }
     if (Showcase.on && e !== G.player) { const v = views.get(e); if (v) v.root.visible = false; seen.add(e); return; }
     const d = Math.hypot(e.x - cx, e.z - cz);
     if (d > far && !(e.kind === 'boss')) { const v = views.get(e); if (v) v.root.visible = false; if (!(e.kind === 'enemy' && d > far * 2.4)) seen.add(e); return; }
@@ -9505,7 +9508,7 @@ function updateTags() {
     const pl = G.player;
     if (pl.alive) put(pl.x, 2.5 * growthScale(pl), pl.z, '', pl.hp / pl.maxHp, 'me');
     for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; if (near(b, 30)) put(b.x, 2.45 * growthScale(b), b.z, `${b.name} · ${b.level}`, null, 'bot'); }
-    for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.nick} · ${e.level}`, e.hp, 'peer');
+    for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.pvp ? 'PvP · ' : ''}${e.nick} · ${e.level}`, e.hp, e.pvp ? 'peer pvp' : 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
@@ -10387,6 +10390,7 @@ function openSettings() {
     <div class="savebox ${Cloud.state}"><b>${Cloud.state === 'on' ? 'Cloud save on' : 'Local save'}</b><small>${cloud}</small><div class="row"><button class="ghost sm" data-act="saveNow">Save now</button><button class="ghost sm" data-act="saveCode">Backup code</button></div></div>
     <div class="mpbox"><b>Multiplayer</b><small>${MP.state === 'on' ? `Connected. ${mpCount() ? mpCount() + ' other player' + (mpCount() > 1 ? 's' : '') + ' in the world.' : 'No one else is here right now.'} Other players see your nickname, brawler and level.` : MP.state === 'connecting' ? 'Connecting to the world…' : 'Not available in this view. Online world play needs a supported connected session. Showdown uses computer opponents.'}</small>
       <label class="nick"><span>Nickname</span><input id="nickIn" maxlength="14" value="${escHtml(mpNick(G.profile))}" autocomplete="off" spellcheck="false"><button class="ghost sm" data-act="nickSave">Save</button></label></div>
+    ${tg('pvp', 'PvP in the open world', 'Other PvP players can attack you outside town, and you them. You glow red. A PvP death drops 10% of your gold to the killer')}
     ${tg('npcs', 'Town NPCs', 'Show Farmer Ida, Smith Garo, Arena Master Rho and the other townsfolk. Off: the Smith and Showdown are in the Menu, jobs finish by themselves')}
     ${tg('bots', 'Bot players', 'Fill the open world with computer heroes that help against world bosses. Off: only real players, and world bosses have less HP')}
     ${LOCAL_PREVIEW || TEST_MODE ? `${LOCAL_PREVIEW && !TEST_MODE ? tg('fastXp', 'Local fast XP', `×${P.fastXpMult} XP, ×${P.testGoldMult} gold, faster bosses and shrines`) : ''}
@@ -10962,7 +10966,7 @@ function drawMinimap() {
       g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.fillRect(ex(X) - 2.5 * u, ey(Y) - 2.5 * u, 5 * u, 5 * u); };
     for (const D of W.dens) if (D.zone === zi) pin(D.x, D.z, '☠', '#ff5d6c');
     for (const q of W.pois) if (q.kind === 'dungeon' && q.zone === zi) pin(q.x, q.z, '⛫', '#ffb347'); }
-  for (const e of mpVisible()) { g.fillStyle = '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }
+  for (const e of mpVisible()) { g.fillStyle = e.pvp ? '#ff3344' : '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }
   W.waypoints.forEach((w, i) => { const x = mmX(w.x), y = mmY(w.z), k = 4 * u, have = p.waypoints.includes(i); g.fillStyle = have ? '#9fe8ff' : '#6f6a8a'; g.beginPath(); g.moveTo(x, y - k); g.lineTo(x + k * 0.7, y); g.lineTo(x, y + k); g.lineTo(x - k * 0.7, y); g.closePath(); g.fill(); });
   for (const sh of G.shrines) {
     const locked = p.level < W.zones[sh.zone].minLevel;
@@ -11767,7 +11771,8 @@ const MP = {
   get state() { return RT.state === 'on' || this.roomState === 'on' || this.dbState === 'on' || this.dbState === 'readonly' ? 'on' : RT.state === 'connecting' || RT.state === 'joining' || this.roomState === 'connecting' || this.dbState === 'connecting' ? 'connecting' : 'off'; },
 };
 function mpNick(p) { if (!p.nick) { p.nick = 'Hero' + (1000 + Math.floor(Math.random() * 9000)); G.dirty = true; } return p.nick; }
-function cleanNick(s) { return String(s || '').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 14); }
+const NICK_BAN = /(fuck|shit|bitch|cunt|nigg|fag|kanker|hoer|slet|nazi|hitler|porn|sex)/i;
+function cleanNick(s) { const n = String(s || '').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 14); return n.length < 3 || NICK_BAN.test(n.replace(/[^\p{L}]/gu, '')) ? '' : n; }
 const escHtml = (t) => String(t).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
 const mpNum = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
 const MP_STALE = 45000;
@@ -11860,6 +11865,8 @@ function rtMessage(d) {
     case 'presence_diff': rtMetas(P.joins || {}, true); rtMetas(P.leaves || {}, false); rtCount(); break;
     case 'broadcast': if (P.event === 'mob' && P.payload && typeof P.payload.sid === 'string') { mobRecv(P.payload.sid.slice(0, 16), P.payload.m); break; }
       if (P.event === 'hit' && P.payload && P.payload.to === MP.sid) { mobHitRecv(P.payload); break; }
+      if (P.event === 'phit' && P.payload && P.payload.to === MP.sid) { pvpRecv(P.payload); break; }
+      if (P.event === 'pdie' && P.payload && P.payload.to === MP.sid) { pvpDieRecv(P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^b/.test(P.event)) { bossRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
     case 'phx_error': case 'phx_close': if (RT.state !== 'off') { RT.topic = ''; rtDropPeers(); RT.state = 'connecting'; RT.retry = RT.backoff; RT.backoff = Math.min(30, RT.backoff * 2); } break;
@@ -11867,7 +11874,7 @@ function rtMessage(d) {
 }
 // presence holds the slow-changing card (nick, hero, level, mode); it is re-sent only when one of those changes
 function rtTrack() {
-  const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al].join('|'); if (card === RT.tracked) return;
+  const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al, s.pv].join('|'); if (card === RT.tracked) return;
   RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
 }
 function rtUpdate(dt) {
@@ -12066,7 +12073,7 @@ function mpApply(key, s, via, guest) {
   e.t = t; e.seenAt = Date.now(); e.via = via; e.rcv = performance.now();
   e.cls = cls; e.tx = x; e.tz = z; e.tf = mpNum(s.f, 0); e.moveAmt = clamp(mpNum(s.m, 0), 0, 1);
   e.level = clamp(Math.floor(mpNum(s.l, 1)), 1, 100000); e.nick = cleanNick(s.n) || 'Hero'; e.md = s.md === 'hub' ? 'hub' : s.md === 'rift' ? 'rift' : 'away';
-  e.alive = s.al !== 0; e.hp = clamp(mpNum(s.h, 1), 0, 1); e.maxHp = 1; e.aim = mpNum(s.a, 0);
+  e.pvp = s.pv === 1; e.alive = s.al !== 0; e.hp = clamp(mpNum(s.h, 1), 0, 1); e.maxHp = 1; e.aim = mpNum(s.a, 0);
   const sq = mpNum(s.s, 0);
   if (sq !== e.seq) { if (sq > e.seq && sq - e.seq < 6 && e.md === 'hub') mpGhostShot(e); e.seq = sq; }
   return e;
@@ -12122,7 +12129,7 @@ function mpOnShot(f, dx, dz) { if (f.isPlayer && G.mode === 'hub') { MP.seq++; M
 function mpState() {
   const p = G.profile, pl = G.player, r1 = (v) => Math.round(v * 10) / 10;
   return { v: 8, sid: MP.sid, n: mpNick(p), c: p.cls, l: p.level, x: r1(pl.x), z: r1(pl.z), f: Math.round(pl.facing * 100) / 100, m: r1(pl.moveAmt || 0), s: MP.seq, a: Math.round(MP.aim * 100) / 100,
-    h: Math.round(clamp(pl.hp / pl.maxHp, 0, 1) * 100) / 100, al: pl.alive ? 1 : 0, md: G.rift ? 'rift' : G.dungeon ? 'dungeon' : G.mode };
+    h: Math.round(clamp(pl.hp / pl.maxHp, 0, 1) * 100) / 100, al: pl.alive ? 1 : 0, md: G.rift ? 'rift' : G.dungeon ? 'dungeon' : G.mode, pv: typeof pvpOn === 'function' && pvpOn() ? 1 : 0 };
 }
 function mpUpdate(dt) {
   // smooth other players toward where they said they are
@@ -12523,6 +12530,52 @@ function openIdle(tab) {
 function idleAlert() { const p = G.profile, now = Date.now(); return vaultState(now).mins >= 60 || p.exp.some((e) => expDone(e, now)); }
 
 
+// ---------------------------------------------------------------------
+// PvP in the open world (opt-in). Only players who switched PvP on (Settings) can hit each other, outside town.
+// Every client is untrusted, so the VICTIM decides: it checks the attacker is a PvP player nearby within 10 levels,
+// scales and caps the damage, and on death drops 10% of its gold to the killer (zero-sum, so alts can't create gold),
+// once per killer per 10 minutes. Shots from the attacker's own client only send 'phit'; nothing is applied locally.
+// ---------------------------------------------------------------------
+CFG.pvp = { range: 18, levelGap: 10, dmgMul: 0.35, hitCap: 0.15, secCap: 0.4, goldDrop: 0.1, goldFloor: 100, cooldown: 600, lastHitWindow: 5 };
+const PVP = { win: 0, winT: 0, last: null, killedBy: {} };
+const pvpOn = () => !!(G.profile && G.profile.settings.pvp) && typeof MP !== 'undefined' && MP.state === 'on';
+const pvpZoneOk = (x, z) => G.mode === 'hub' && !G.rift && !G.dungeon && distToTown(x, z) > CFG.world.town.r + 4;
+// peers you may hit right now (used by forEachTarget)
+function pvpTargets() { return pvpOn() && pvpZoneOk(G.player.x, G.player.z) ? mpVisible().filter((e) => e.pvp && e.alive && pvpZoneOk(e.x, e.z)) : []; }
+// attacker side: report the hit to the victim, change nothing here
+function pvpHit(t, amount) {
+  if (!pvpOn() || !(amount > 0)) return 0;
+  rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'phit', payload: { sid: MP.sid, to: t.key, a: Math.round(amount), l: G.profile.level } });
+  return amount;
+}
+// victim side: all checks happen here
+function pvpRecv(d) {
+  const pl = G.player, P = CFG.pvp; if (!pvpOn() || !pl.alive || !pvpZoneOk(pl.x, pl.z) || G.menuSafe > 0) return;
+  const sid = String(d.sid || '').slice(0, 16), a = MP.peers.get(sid); if (!a || !a.pvp || !a.alive || a.md !== 'hub') return;
+  if (Math.hypot(a.x - pl.x, a.z - pl.z) > P.range || Math.abs((a.level || 1) - G.profile.level) > P.levelGap) return;
+  if (G.time - PVP.winT > 1) { PVP.winT = G.time; PVP.win = 0; }
+  const room = Math.max(0, pl.maxHp * P.secCap - PVP.win), dmg = Math.min(Math.max(0, +d.a || 0) * P.dmgMul, pl.maxHp * P.hitCap, room);
+  if (!(dmg > 0)) return;
+  PVP.win += dmg; PVP.last = { sid, nick: a.nick, t: G.time };
+  dealDamage(pl, dmg, null);
+}
+// victim died: was it a recent PvP hit? then drop gold to the killer (at most once per killer per 10 minutes)
+function pvpOnDeath() {
+  const L = PVP.last, P = CFG.pvp; PVP.last = null;
+  if (!L || G.time - L.t > P.lastHitWindow) return;
+  const p = G.profile, now = Date.now(); if (now - (PVP.killedBy[L.sid] || 0) < P.cooldown * 1000) return;
+  PVP.killedBy[L.sid] = now;
+  const g = p.gold >= P.goldFloor ? Math.floor(p.gold * P.goldDrop) : 0;
+  if (g > 0) { p.gold -= g; G.dirty = true; }
+  rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'pdie', payload: { sid: MP.sid, to: L.sid, g } });
+  toast(`${L.nick} defeated you${g ? ` and took ${fmtK(g)} gold` : ''}`, 'bad');
+}
+// killer side: the gold the victim dropped
+function pvpDieRecv(d) {
+  const a = MP.peers.get(String(d.sid || '').slice(0, 16)), g = Math.max(0, Math.floor(+d.g || 0)); if (!a) return;
+  if (g) addGold(g, true);
+  toast(`You defeated ${a.nick}${g ? ` · +${fmtK(g)} gold` : ''}`, 'good');
+}
 // ---------------------------------------------------------------------
 // 10. MAIN LOOP — fixed-timestep simulation, render separate
 // ---------------------------------------------------------------------

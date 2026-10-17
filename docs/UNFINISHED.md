@@ -20,7 +20,7 @@ world map (Map button) with 30 area images `assets/ui/areas/<i>.webp`, travel fr
    (dark, shadow, ash, burnt, storm, black crags…): reword and retry.
 2. **Lair boss 3D models + landmark 3D models per area** (landmark = the centre object of each area image) via TRELLIS.2.
    Today lair bosses are the area's monster scaled ×1.8.
-3. **PvP** (task list): per-player switch (default off), red glow on PvP players, `phit` message decided on the victim's
+3. **PvP — built on branch `wip/pvp` (PR), not yet tested with two real devices.** Settings › PvP in the open world. Logic in `src/game/72-pvp.js` (`CFG.pvp`). Still to add: a first-play name prompt. Original plan: per-player switch (default off), red glow on PvP players, `phit` message decided on the victim's
    client (range, level gap ≤10, per-hit/sec caps, not in town/menu), loser drops gold zero-sum to the killer, per-victim
    cooldown; name filter + first-play name prompt (name field already in Settings).
 4. **Secret weapons:** one craft recipe per biome in Forge › Craft from chest ore + Titan Soul (Casper's choice).
