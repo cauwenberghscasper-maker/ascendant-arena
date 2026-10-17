@@ -1921,6 +1921,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .inspName { font-size: 22px; color: #fff; text-shadow: 2px 2px 0 var(--og-ink), 0 0 10px var(--rc); }
 .inspTag { font-size: 12px; padding: 2px 8px; background: var(--og-pur); color: #fff; } .inspStat { color: #e6e8f2; } .inspAff { color: #9fef7a; line-height: 1.5; }
 @keyframes inspPulse { 50% { transform: scale(1.08); opacity: .8; } } @keyframes inspSpin { to { transform: rotate(360deg); } } @keyframes inspFloat { 50% { transform: translateY(-6px); } }
+.marea .meta { display: flex; flex-direction: column; gap: 2px; grid-column: 1 / 3; } .marea .tagged { font-size: 11px; color: #e6e8f2; text-shadow: 1px 1px 0 var(--og-ink); }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -9695,7 +9696,7 @@ function openModal(html, closable, showcase) {
   setShowcase(!!showcase);
   $('modal').classList.toggle('room', !!showcase);
   // every hub screen except the Hero (3D showcase) fills the whole page
-  $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || UI.current === 'worldmap' || !!HUB_OF[UI.current]));
+  $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || UI.current === 'worldmap' || UI.current === 'waypoints' || !!HUB_OF[UI.current]));
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
   const full = hubNav() + html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
@@ -10195,11 +10196,11 @@ function openWaypoints() {
   let lastBiome = -1;
   const rows = CFG.world.waypoints.map((w, i) => {
     const zn = CFG.world.zones[w.zone], have = p.waypoints.includes(i), lvl = p.level >= zn.minLevel;
-    const head = zn.biome !== lastBiome ? `<h4 class="sub">${zn.biomeName}</h4>` : ''; lastBiome = zn.biome;
+    const col = hex6(BIOMES[zn.biome].coreColor), head = zn.biome !== lastBiome ? `<div class="mbiome" style="--bc:${col}">${zn.biomeName}</div>` : ''; lastBiome = zn.biome;
     const btn = i === here ? '<span class="tagged">You are here</span>' : have && lvl ? `<button class="primary" data-act="travel" data-i="${i}">Teleport</button>` : `<span class="tagged">${!lvl ? 'Level ' + zn.minLevel : 'Not attuned yet'}</span>`;
-    return `${head}<div class="item wp"><div class="meta"><div class="slot">${zn.safe ? 'Safe camp · no monsters' : `${zn.name} · monsters Lv ${zn.lvl[0] + ta}–${zn.lvl[1] + ta}`}</div><div class="nm">${w.name}</div></div>${btn}</div>`;
+    return `${head}<div class="marea ${have && lvl ? '' : 'fog'} ${i === here ? 'here' : ''}" style="--bc:${col};--art:url(assets/ui/areas/${w.zone}.webp)"><div class="meta"><b>${w.name}</b><small>${zn.safe ? 'Safe camp' : `${zn.name} · Lv ${zn.lvl[0] + ta}–${zn.lvl[1] + ta}`}</small></div>${btn}</div>`;
   }).join('');
-  openModal(`<div class="npcHead"><span class="dotc" style="background:#9fe8ff"></span><h3>Lodestone Network</h3></div>${tierPicker()}<p class="say">Touch a lodestone once to attune to it. Then teleport between them for free.</p><div class="list">${rows}</div>`);
+  openModal(`<div class="npcHead"><h3>Lodestone Network</h3></div>${tierPicker()}<div class="wmap">${rows}</div>`);
 }
 // World Tier picker: shown at every waypoint
 function tierPicker() {
