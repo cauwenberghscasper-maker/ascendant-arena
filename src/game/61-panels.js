@@ -234,7 +234,7 @@ const MW_ART = { whetstone: 'weapon', plating: 'chest', bracers: 'accessory', tr
 const FORGE_ICONS = ['whetstone', 'plating', 'bracers', 'satchel']; // own pixel icons in assets/ui/forge/ (Z-Image-Turbo + tools/pixelize_items.py)
 const mwArt = (id) => { if (FORGE_ICONS.includes(id)) return `<img src="assets/ui/forge/${id}.png" alt="">`; const a = MW_ART[id] || 'm_smith'; return a.startsWith('m_') ? gi(a) : `<img src="${thumbFor({ id: 'mw-' + id, slot: a, rarity: 'epic', up: 0, ilvl: 1, name: ITEM_NAMES[a][a === 'weapon' ? 0 : 1] })}" alt="">`; };
 function openSmith(tab) {
-  tab = tab || UI.smithTab || 'Upgrade'; if (!['Upgrade', 'Masterwork', 'Craft', 'Forge'].includes(tab)) tab = 'Upgrade'; UI.smithTab = tab;
+  tab = tab || UI.smithTab || 'Upgrade'; if (!['Upgrade', 'Masterwork', 'Craft', 'Forge', 'Enchant'].includes(tab)) tab = 'Upgrade'; UI.smithTab = tab;
   UI.current = 'smith';
   const p = G.profile;
   let body;
@@ -252,6 +252,7 @@ function openSmith(tab) {
     }).join('') + '</div>';
   } else if (tab === 'Craft') body = craftTabHTML(p);
   else if (tab === 'Masterwork') body = masterworkTabHTML(p);
+  else if (tab === 'Enchant') body = enchantTabHTML(p);
   else {
     body = '<div class="ugrid">' + CFG.gear.slots.map((s) => {
       const o = forgeOffer(s), can = p.gold >= o.price;
@@ -260,7 +261,7 @@ function openSmith(tab) {
     }).join('') + '</div>';
   }
   const upAlert = Object.values(slotAlerts()).some((a) => a.canUpgrade);
-  const tabs = ['Upgrade', 'Masterwork', 'Craft', 'Forge'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${tabName(t)}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
+  const tabs = ['Upgrade', 'Masterwork', 'Craft', 'Forge', 'Enchant'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${tabName(t)}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
   openModal(dock(`<div class="npcHead"><h3>Forge</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
     <div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, ''), true, false);
 }
@@ -290,6 +291,19 @@ function craftTabHTML(p) {
     <div class="card secret"><h4>Hidden in ${BIOMES[bi].name} dungeons</h4>
       <p>${hero ? (heroHave ? `<b>${hero.name}</b> fights for you.` : `<b>${hero.name}</b> cannot be recruited any other way. Their oaths drop from this biome’s dungeon chests (Sanctums and Trials more often, higher keys more): <b>${sigilHave(b.hero, p)}/${C.sigil.need}</b>.`) : ''}</p>
       <p>Relic: <b>${b.relic.name}</b> ${rarityChip(b.relic.rarity)} · a rare chest find here (twice as likely in the Sanctum, certain after ${C.relic.pity} chests without one) · found ${relicN}×</p></div>`;
+}
+// Enchant: every worn piece with its affixes; each affix can be rerolled (gold) or boosted toward its cap (gems)
+function enchantTabHTML(p) {
+  const cards = CFG.gear.slots.map((s) => {
+    const it = p.gear[s]; if (!it || !it.aff || !Object.keys(it.aff).length) return '';
+    const keys = Object.keys(it.aff), rc = enchantCost(it), eg = empowerGems(it);
+    const rows = keys.map((k) => { const v = it.aff[k], cap = affCap(k, it), full = v >= cap;
+      return `<div class="arow"><span class="an">+${Math.round(v * 100)}% ${CFG.affixes[k].name}</span><i class="abar"><b style="width:${Math.round(100 * v / cap)}%"></b></i>
+        <button class="${p.gold >= rc ? 'ghost' : 'disabled'}" data-act="enchReroll" data-slot="${s}" data-k="${k}">Reroll ${ICON.coin}${fmtK(rc)}</button>
+        <button class="${full ? 'disabled' : p.essence >= eg ? 'ghost boost' : 'disabled'}" data-act="enchUp" data-slot="${s}" data-k="${k}" ${full ? 'disabled' : ''}>${full ? 'Max' : `Boost ${ICON.ess}${eg}`}</button></div>`; }).join('');
+    return `<div class="ecard ${it.rarity}"><div class="ehead"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><b>${escapeHTML(it.name)}</b>${rarityChip(it.rarity)}</div>${rows}</div>`;
+  }).join('');
+  return cards ? `<div class="elist">${cards}</div>` : '<p class="fine">Uncommon or better gear carries affixes.</p>';
 }
 function masterworkTabHTML(p) {
   const C = CFG.craft;
@@ -688,6 +702,8 @@ function handlePanelClick(e) {
     case 'upgrade': openMerge(b.dataset.slot, false, 'smith'); break;
     case 'forge': if (buyForge(b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; openSmith('Forge'); } break;
     case 'smithTab': openSmith(b.dataset.tab); break;
+    case 'enchReroll': if (rerollAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gold', 'bad'); openSmith('Enchant'); break;
+    case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
     case 'craftPiece': if (craftSetPiece(+b.dataset.b, b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
     case 'buyUpg': if (buyUpgrade(b.dataset.id)) Sfx.play('unlock'); openSmith('Masterwork'); break;
