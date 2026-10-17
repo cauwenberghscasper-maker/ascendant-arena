@@ -135,6 +135,13 @@ function statStrip(pick) {
     const dt = !then || !big ? '' : `<em class="${d > 0 ? 'gain' : 'loss'}">${d > 0 ? '▲' : '▼'}${k === 'Damage' || k === 'Max HP' ? fmtK(Math.abs(d)) : f(Math.abs(d)).replace(/^[+-]/, '')}</em>`;
     return `<div><span>${k}</span><b>${f(then ? b : a)}</b>${dt}</div>`; }).join('')}</div>`;
 }
+// changes to your stats if you wear this piece instead of the worn one, as small green/red chips
+function diffChips(it) {
+  const now = previewStats(null), then = previewStats(it);
+  const out = BUILD_STATS.map(([k, get, f]) => { const a = get(now), d = get(then) - a; if (Math.abs(d) <= Math.max(1e-6, Math.abs(a) * 0.0005)) return '';
+    return `<i class="${d > 0 ? 'gain' : 'loss'}">${d > 0 ? '▲' : '▼'}${k === 'Damage' || k === 'Max HP' ? fmtK(Math.abs(d)) : f(Math.abs(d)).replace(/^[+-]/, '')} ${k}</i>`; }).join('');
+  return out ? `<span class="dchips">${out}</span>` : '<span class="dchips"><i>Same stats</i></span>';
+}
 // --- hero sheet (portrait dressing room): a bottom sheet at 45% that the grip drags up to full height and back ---
 // The sheet's rect is cached here (open, resize, drag) so the camera and paper doll never read layout per frame.
 UI.sheet = { top: 0, left: 0, right: 0, bottom: 0 };
@@ -433,7 +440,7 @@ function heroTab(tab) {
     const getMore = `<div class="hsGet"><small>Get more ${SLOT_LABEL[hs] || ''}</small><div class="row">
       <button class="ghost sm" data-act="mCases">Chests</button><button class="ghost sm${gate('mSmith')}" data-act="hsForge" data-tab="Craft">Craft</button><button class="ghost sm${gate('mSmith')}" data-act="hsForge" data-tab="Upgrade">Upgrade worn</button></div></div>`;
     const sheet = `<div class="hsSheet">${own.length ? own.map((it) => `<button class="hsRow ${it.rarity}${UI.heroPick === it.id ? ' sel' : ''}" data-act="hsPick" data-id="${escapeHTML(it.id)}" style="--rc:${rarCol(it.rarity)}">
-        <img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><span><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b><small>${statLine(it)}</small></span>${isBetter(it, worn) ? '<em class="up">▲</em>' : ''}</button>`).join('')
+        <img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><span><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b><small>${statLine(it)}</small>${diffChips(it)}</span>${isBetter(it, worn) ? '<em class="up">▲</em>' : ''}</button>`).join('')
       : `<p class="fine">No other ${SLOT_LABEL[hs]} in your bag yet.</p>`}${getMore}</div>`;
     const swap = !hs ? '' : `<div class="hswap${UI.hsOpenAnim ? ' opening' : ''}"><div class="hswapHead"><b>${SLOT_LABEL[hs]}</b><span class="row">${UI.hsAll ? '' : `<button class="ghost sm" data-act="hsAll">All ${own.length}</button>`}<button class="ghost sm" data-act="${UI.hsAll ? 'hsAllBack' : 'hsBack'}">Back</button></span></div>
       ${UI.hsAll ? sheet : `<div class="cmp${UI.hsPickAnim ? ' picked' : ''}">${card(worn, 'Worn')}<b class="cmpv">VS</b>${card(pick, 'Pick one')}</div>
