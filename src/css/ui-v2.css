@@ -586,3 +586,4 @@
 .invChests { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 8px; scrollbar-width: none; }
 .invChests::-webkit-scrollbar { display: none; } .invChests .ctile { flex: 0 0 96px; scroll-snap-align: start; }
 .invMats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.panel .tab img.ftab { width: 22px; height: 22px; image-rendering: pixelated; vertical-align: middle; margin-right: 4px; }
