@@ -416,8 +416,14 @@
 .cmpv { align-self: center; font-size: 14px; color: #ffcf1f; text-shadow: 2px 2px 0 var(--og-ink); }
 .igt.sel { outline: 3px solid #ffcf1f; outline-offset: 1px; }
 #doll, #doll *, #doll *::before, #doll *::after { border-radius: 0 !important; }
-/* ---- hub bar: Hero / Forge / Gear / Journal on top of every hub screen ---- */
-.hubBar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 2px 54px 10px 2px; }
-.panel .hubBar button.ghost { min-height: 44px; padding: 0 4px !important; font-size: 14px !important; background: var(--og-slate) !important; }
-.panel .hubBar button.ghost.on { background: var(--og-blu) !important; }
-.tabs.hubSub { margin-bottom: 8px; }
+/* ---- menu: four big hub buttons; inside a hub a Menu back button plus that hub's sub-tabs ---- */
+.hubTiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 46px 4px 6px; }
+.panel .hubTile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 140px; padding: 12px 6px;
+  border: 0 !important; color: #fff; background: var(--og-blu) !important;
+  box-shadow: 0 -3px 0 var(--og-ink), 0 3px 0 var(--og-ink), -3px 0 0 var(--og-ink), 3px 0 0 var(--og-ink), inset 0 3px 0 rgba(255,255,255,.45), inset 0 -5px 0 rgba(0,0,0,.3), 0 7px 0 rgba(0,0,0,.35) !important; }
+.panel .hubTile:nth-child(2) { background: var(--og-org) !important; } .panel .hubTile:nth-child(3) { background: var(--og-grn) !important; } .panel .hubTile:nth-child(4) { background: var(--og-pur) !important; }
+.hubTile .gi { width: 56px !important; height: 56px !important; } .hubTile b { font-size: 20px; text-shadow: 2px 2px 0 var(--og-ink); } .hubTile small { font-size: 12px; color: #fff; opacity: .9; text-shadow: 1px 1px 0 var(--og-ink); }
+.hubTile .rdot { position: absolute; top: 8px; right: 8px; }
+.hubTop { display: flex; gap: 8px; align-items: stretch; margin: 0 54px 10px 0; }
+.panel .hubBack { flex: none; min-height: 44px; padding: 0 10px !important; font-size: 13px !important; background: var(--og-slate) !important; }
+.hubTop .tabs.hubSub { flex: 1; margin: 0; }

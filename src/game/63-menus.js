@@ -161,9 +161,20 @@ function openQuickUpgrade(action) {
   else if (action === 'artifacts') openArtifacts('Equip');
   else if (action === 'cases') openCases();
 }
-function openMenu(section) {
+// The menu starts with four big buttons; each opens its hub, whose sub-tabs hold the rest
+function openMenu() {
+  UI.current = 'hubs';
+  const p = G.profile, A = menuAlerts(), gearDot = Object.values(slotAlerts()).some((a) => a.better);
+  const big = (act, icon, name, sub, dot) => `<button class="hubTile" data-act="${act}">${gi(icon)}<b>${name}</b><small>${sub}</small>${dot ? '<i class="rdot"></i>' : ''}</button>`;
+  openModal(`<div class="hubTiles">
+    ${big('mHero', 'm_hero', 'Hero', `Level ${fmt(p.level)}`, A.skills || A.artifacts || A.brawlers)}
+    ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
+    ${big('mGear', 'm_case', 'Gear', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
+    ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()) || p.cases.length > 0)}
+  </div>`);
+}
+function openJournal() {
   UI.current = 'menu';
-  if (section === 'upgrades' || section === 'adventure') UI.menuSection = section;
   const p = G.profile, A = menuAlerts(), own = ownedBrawlers(p).length;
   const hp = 0, bp = Math.max(0, treeFree(p, p.cls));
   const tile = (act, icon, title, sub, dot) => `<button class="mtile" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${sub}</small></span>${dot ? '<i class="rdot"></i>' : ''}</button>`;

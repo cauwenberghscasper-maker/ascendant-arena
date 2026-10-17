@@ -1805,11 +1805,17 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .cmpv { align-self: center; font-size: 14px; color: #ffcf1f; text-shadow: 2px 2px 0 var(--og-ink); }
 .igt.sel { outline: 3px solid #ffcf1f; outline-offset: 1px; }
 #doll, #doll *, #doll *::before, #doll *::after { border-radius: 0 !important; }
-/* ---- hub bar: Hero / Forge / Gear / Journal on top of every hub screen ---- */
-.hubBar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 2px 54px 10px 2px; }
-.panel .hubBar button.ghost { min-height: 44px; padding: 0 4px !important; font-size: 14px !important; background: var(--og-slate) !important; }
-.panel .hubBar button.ghost.on { background: var(--og-blu) !important; }
-.tabs.hubSub { margin-bottom: 8px; }
+/* ---- menu: four big hub buttons; inside a hub a Menu back button plus that hub's sub-tabs ---- */
+.hubTiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 46px 4px 6px; }
+.panel .hubTile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 140px; padding: 12px 6px;
+  border: 0 !important; color: #fff; background: var(--og-blu) !important;
+  box-shadow: 0 -3px 0 var(--og-ink), 0 3px 0 var(--og-ink), -3px 0 0 var(--og-ink), 3px 0 0 var(--og-ink), inset 0 3px 0 rgba(255,255,255,.45), inset 0 -5px 0 rgba(0,0,0,.3), 0 7px 0 rgba(0,0,0,.35) !important; }
+.panel .hubTile:nth-child(2) { background: var(--og-org) !important; } .panel .hubTile:nth-child(3) { background: var(--og-grn) !important; } .panel .hubTile:nth-child(4) { background: var(--og-pur) !important; }
+.hubTile .gi { width: 56px !important; height: 56px !important; } .hubTile b { font-size: 20px; text-shadow: 2px 2px 0 var(--og-ink); } .hubTile small { font-size: 12px; color: #fff; opacity: .9; text-shadow: 1px 1px 0 var(--og-ink); }
+.hubTile .rdot { position: absolute; top: 8px; right: 8px; }
+.hubTop { display: flex; gap: 8px; align-items: stretch; margin: 0 54px 10px 0; }
+.panel .hubBack { flex: none; min-height: 44px; padding: 0 10px !important; font-size: 13px !important; background: var(--og-slate) !important; }
+.hubTop .tabs.hubSub { flex: 1; margin: 0; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -9468,15 +9474,13 @@ function interact() {
 // Four hubs (Hero, Forge, Gear, Journal): one bar on top of every hub screen, plus the hub's own sub-tabs
 const HUB_OF = { hero: 'hero', skills: 'hero', artifacts: 'hero', brawlers: 'hero', smith: 'forge', merge: 'forge',
   menu: 'journal', progress: 'journal', daily: 'journal', collection: 'journal', prestige: 'journal', idle: 'journal', cases: 'journal', players: 'journal' };
-const HUBS = [['hero', 'Hero', 'mHero'], ['forge', 'Forge', 'mSmith'], ['equip', 'Gear', 'mGear'], ['journal', 'Journal', 'mMenu']];
 const HUB_SUB = { hero: [['hero', 'Stats', 'mHero'], ['skills', 'Talents', 'mSkills'], ['artifacts', 'Relics', 'mArtifacts'], ['brawlers', 'Heroes', 'mBrawlers']],
-  journal: [['menu', 'World', 'mMenu'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily'], ['cases', 'Chests', 'mCases']] };
+  journal: [['menu', 'World', 'mJournal'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily'], ['cases', 'Chests', 'mCases']] };
 function hubNav() {
   let hub = HUB_OF[UI.current]; if (!hub) return '';
   if (UI.current === 'hero' && UI.heroTab === 'Gear') hub = 'equip';
-  const bar = HUBS.map(([k, n, act]) => `<button class="ghost${k === hub ? ' on' : ''}" data-act="${act}" aria-pressed="${k === hub}">${n}</button>`).join('');
   const sub = (HUB_SUB[hub] || []).map(([k, n, act]) => `<button class="tab ${k === UI.current ? 'on' : ''}" data-act="${act}">${n}</button>`).join('');
-  return `<nav class="hubBar">${bar}</nav>${sub ? `<div class="tabs hubSub">${sub}</div>` : ''}`;
+  return `<div class="hubTop"><button class="ghost hubBack" data-act="mMenu" aria-label="Back to the menu">Menu</button>${sub ? `<div class="tabs hubSub">${sub}</div>` : ''}</div>`;
 }
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
@@ -10113,7 +10117,7 @@ function handlePanelClick(e) {
     case 'tZoom': treeZoom(b.dataset.z); break;
     case 'mSmith': openSmith('Upgrade'); break;
     case 'mMenu': openMenu(); break;
-    case 'menuSection': openMenu(b.dataset.section); $('panel').querySelector(`[data-section="${UI.menuSection}"]`).focus({preventScroll:true}); break;
+    case 'mJournal': openJournal(); break;
     case 'mCases': case 'cases': openCases(); break;
     case 'mCollection': openCollection(); break;
     case 'mDaily': openDaily(); break;
@@ -10970,9 +10974,20 @@ function openQuickUpgrade(action) {
   else if (action === 'artifacts') openArtifacts('Equip');
   else if (action === 'cases') openCases();
 }
-function openMenu(section) {
+// The menu starts with four big buttons; each opens its hub, whose sub-tabs hold the rest
+function openMenu() {
+  UI.current = 'hubs';
+  const p = G.profile, A = menuAlerts(), gearDot = Object.values(slotAlerts()).some((a) => a.better);
+  const big = (act, icon, name, sub, dot) => `<button class="hubTile" data-act="${act}">${gi(icon)}<b>${name}</b><small>${sub}</small>${dot ? '<i class="rdot"></i>' : ''}</button>`;
+  openModal(`<div class="hubTiles">
+    ${big('mHero', 'm_hero', 'Hero', `Level ${fmt(p.level)}`, A.skills || A.artifacts || A.brawlers)}
+    ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
+    ${big('mGear', 'm_case', 'Gear', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
+    ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()) || p.cases.length > 0)}
+  </div>`);
+}
+function openJournal() {
   UI.current = 'menu';
-  if (section === 'upgrades' || section === 'adventure') UI.menuSection = section;
   const p = G.profile, A = menuAlerts(), own = ownedBrawlers(p).length;
   const hp = 0, bp = Math.max(0, treeFree(p, p.cls));
   const tile = (act, icon, title, sub, dot) => `<button class="mtile" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${sub}</small></span>${dot ? '<i class="rdot"></i>' : ''}</button>`;

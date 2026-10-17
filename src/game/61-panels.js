@@ -18,15 +18,13 @@ function interact() {
 // Four hubs (Hero, Forge, Gear, Journal): one bar on top of every hub screen, plus the hub's own sub-tabs
 const HUB_OF = { hero: 'hero', skills: 'hero', artifacts: 'hero', brawlers: 'hero', smith: 'forge', merge: 'forge',
   menu: 'journal', progress: 'journal', daily: 'journal', collection: 'journal', prestige: 'journal', idle: 'journal', cases: 'journal', players: 'journal' };
-const HUBS = [['hero', 'Hero', 'mHero'], ['forge', 'Forge', 'mSmith'], ['equip', 'Gear', 'mGear'], ['journal', 'Journal', 'mMenu']];
 const HUB_SUB = { hero: [['hero', 'Stats', 'mHero'], ['skills', 'Talents', 'mSkills'], ['artifacts', 'Relics', 'mArtifacts'], ['brawlers', 'Heroes', 'mBrawlers']],
-  journal: [['menu', 'World', 'mMenu'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily'], ['cases', 'Chests', 'mCases']] };
+  journal: [['menu', 'World', 'mJournal'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily'], ['cases', 'Chests', 'mCases']] };
 function hubNav() {
   let hub = HUB_OF[UI.current]; if (!hub) return '';
   if (UI.current === 'hero' && UI.heroTab === 'Gear') hub = 'equip';
-  const bar = HUBS.map(([k, n, act]) => `<button class="ghost${k === hub ? ' on' : ''}" data-act="${act}" aria-pressed="${k === hub}">${n}</button>`).join('');
   const sub = (HUB_SUB[hub] || []).map(([k, n, act]) => `<button class="tab ${k === UI.current ? 'on' : ''}" data-act="${act}">${n}</button>`).join('');
-  return `<nav class="hubBar">${bar}</nav>${sub ? `<div class="tabs hubSub">${sub}</div>` : ''}`;
+  return `<div class="hubTop"><button class="ghost hubBack" data-act="mMenu" aria-label="Back to the menu">Menu</button>${sub ? `<div class="tabs hubSub">${sub}</div>` : ''}</div>`;
 }
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
@@ -663,7 +661,7 @@ function handlePanelClick(e) {
     case 'tZoom': treeZoom(b.dataset.z); break;
     case 'mSmith': openSmith('Upgrade'); break;
     case 'mMenu': openMenu(); break;
-    case 'menuSection': openMenu(b.dataset.section); $('panel').querySelector(`[data-section="${UI.menuSection}"]`).focus({preventScroll:true}); break;
+    case 'mJournal': openJournal(); break;
     case 'mCases': case 'cases': openCases(); break;
     case 'mCollection': openCollection(); break;
     case 'mDaily': openDaily(); break;
