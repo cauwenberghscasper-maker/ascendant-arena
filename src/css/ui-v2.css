@@ -469,3 +469,10 @@
 .panel .hubTile:nth-child(1) { --gc: var(--og-blu); } .panel .hubTile:nth-child(2) { --gc: var(--og-org); } .panel .hubTile:nth-child(3) { --gc: var(--og-grn); } .panel .hubTile:nth-child(4) { --gc: var(--og-pur); }
 #bDash { --gc: var(--og-cya); } #bSkill { --gc: var(--og-grn); } #bSpecial { --gc: var(--og-pur); } #bSuper span { --gc: var(--og-org); }
 .panel .hubBack { filter: none; }
+/* thumb controls in natural, earthy tones (no neon): steel-teal dash, moss skill, element-tinted special, bronze super */
+.cbtn, #bSuper span { filter: none !important; }
+#bDash { background-color: #46707c !important; } #bSkill { background-color: #5e7f42 !important; }
+#bSpecial { background-color: color-mix(in srgb, var(--el, #b0623a) 55%, #3a3328) !important; }
+#bSuper { background: conic-gradient(#d9a24a calc(var(--sc) * 360deg), #3a2c1c 0) !important; }
+#bSuper span { background-color: #5b3f22 !important; } #bSuper.ready span { background-color: #b9742f !important; }
+.cbtn .cic .gi { width: 26px; height: 26px; }

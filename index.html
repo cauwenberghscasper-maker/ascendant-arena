@@ -1858,6 +1858,13 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .panel .hubTile:nth-child(1) { --gc: var(--og-blu); } .panel .hubTile:nth-child(2) { --gc: var(--og-org); } .panel .hubTile:nth-child(3) { --gc: var(--og-grn); } .panel .hubTile:nth-child(4) { --gc: var(--og-pur); }
 #bDash { --gc: var(--og-cya); } #bSkill { --gc: var(--og-grn); } #bSpecial { --gc: var(--og-pur); } #bSuper span { --gc: var(--og-org); }
 .panel .hubBack { filter: none; }
+/* thumb controls in natural, earthy tones (no neon): steel-teal dash, moss skill, element-tinted special, bronze super */
+.cbtn, #bSuper span { filter: none !important; }
+#bDash { background-color: #46707c !important; } #bSkill { background-color: #5e7f42 !important; }
+#bSpecial { background-color: color-mix(in srgb, var(--el, #b0623a) 55%, #3a3328) !important; }
+#bSuper { background: conic-gradient(#d9a24a calc(var(--sc) * 360deg), #3a2c1c 0) !important; }
+#bSuper span { background-color: #5b3f22 !important; } #bSuper.ready span { background-color: #b9742f !important; }
+.cbtn .cic .gi { width: 26px; height: 26px; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -9429,13 +9436,13 @@ function updateHUD(dt) {
   setStyle('bMelee', '--cd', clamp(f.meleeCd / CFG.combat.melee.cd, 0, 1).toFixed(2));
   setStyle('bSuper', '--sc', f.superCharge.toFixed(2));
   const sReady = f.superCharge >= 1; if (hudCache.sReady !== sReady) { hudCache.sReady = sReady; $('bSuper').classList.toggle('ready', sReady); }
-  setText('bSuperLbl', CFG.supers[CFG.classes[f.cls].super].short); setBtnIcon('bSuper', BTN_ICON[CFG.classes[f.cls].super]); setBtnIcon('bDash', 'k_phase'); setBtnIcon('bMelee', 'a_blast');
+  setText('bSuperLbl', CFG.supers[CFG.classes[f.cls].super].short); setBtnIcon('bSuper', BTN_ICON[CFG.classes[f.cls].super] || 'k_ascend'); setBtnIcon('bDash', 'k_phase'); setBtnIcon('bMelee', 'a_blast');
   const sk = CFG.classes[f.cls].skill;
   const spc = f.perks && f.perks.special;
   setHidden('bSpecial', !spc);
-  if (spc) { const E = CFG.elements[spc]; setText('bSpecialLbl', E.short); setBtnIcon('bSpecial', BTN_ICON[spc]); setStyle('bSpecial', '--cd', clamp(f.specialCd / E.cd, 0, 1).toFixed(2)); setStyle('bSpecial', '--el', '#' + E.color.toString(16).padStart(6, '0')); }
+  if (spc) { const E = CFG.elements[spc]; setText('bSpecialLbl', E.short); setBtnIcon('bSpecial', BTN_ICON[spc] || 'k_storm'); setStyle('bSpecial', '--cd', clamp(f.specialCd / E.cd, 0, 1).toFixed(2)); setStyle('bSpecial', '--el', '#' + E.color.toString(16).padStart(6, '0')); }
   setHidden('bSkill', !sk);
-  if (sk) { setStyle('bSkill', '--cd', clamp(f.skillCd / (CFG.skills[sk].cd * (1 - f.mods.skillCd) * (1 - (f.cdr || 0))), 0, 1).toFixed(2)); setText('bSkillLbl', CFG.skills[sk].short); setBtnIcon('bSkill', BTN_ICON[sk]); }
+  if (sk) { setStyle('bSkill', '--cd', clamp(f.skillCd / (CFG.skills[sk].cd * (1 - f.mods.skillCd) * (1 - (f.cdr || 0))), 0, 1).toFixed(2)); setText('bSkillLbl', CFG.skills[sk].short); setBtnIcon('bSkill', BTN_ICON[sk] || 'k_tempo'); }
   // interact
   const act = !inArena && G.interact && G.started;
   setHidden('bAct', !act);

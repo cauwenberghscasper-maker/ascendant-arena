@@ -200,13 +200,13 @@ function updateHUD(dt) {
   setStyle('bMelee', '--cd', clamp(f.meleeCd / CFG.combat.melee.cd, 0, 1).toFixed(2));
   setStyle('bSuper', '--sc', f.superCharge.toFixed(2));
   const sReady = f.superCharge >= 1; if (hudCache.sReady !== sReady) { hudCache.sReady = sReady; $('bSuper').classList.toggle('ready', sReady); }
-  setText('bSuperLbl', CFG.supers[CFG.classes[f.cls].super].short); setBtnIcon('bSuper', BTN_ICON[CFG.classes[f.cls].super]); setBtnIcon('bDash', 'k_phase'); setBtnIcon('bMelee', 'a_blast');
+  setText('bSuperLbl', CFG.supers[CFG.classes[f.cls].super].short); setBtnIcon('bSuper', BTN_ICON[CFG.classes[f.cls].super] || 'k_ascend'); setBtnIcon('bDash', 'k_phase'); setBtnIcon('bMelee', 'a_blast');
   const sk = CFG.classes[f.cls].skill;
   const spc = f.perks && f.perks.special;
   setHidden('bSpecial', !spc);
-  if (spc) { const E = CFG.elements[spc]; setText('bSpecialLbl', E.short); setBtnIcon('bSpecial', BTN_ICON[spc]); setStyle('bSpecial', '--cd', clamp(f.specialCd / E.cd, 0, 1).toFixed(2)); setStyle('bSpecial', '--el', '#' + E.color.toString(16).padStart(6, '0')); }
+  if (spc) { const E = CFG.elements[spc]; setText('bSpecialLbl', E.short); setBtnIcon('bSpecial', BTN_ICON[spc] || 'k_storm'); setStyle('bSpecial', '--cd', clamp(f.specialCd / E.cd, 0, 1).toFixed(2)); setStyle('bSpecial', '--el', '#' + E.color.toString(16).padStart(6, '0')); }
   setHidden('bSkill', !sk);
-  if (sk) { setStyle('bSkill', '--cd', clamp(f.skillCd / (CFG.skills[sk].cd * (1 - f.mods.skillCd) * (1 - (f.cdr || 0))), 0, 1).toFixed(2)); setText('bSkillLbl', CFG.skills[sk].short); setBtnIcon('bSkill', BTN_ICON[sk]); }
+  if (sk) { setStyle('bSkill', '--cd', clamp(f.skillCd / (CFG.skills[sk].cd * (1 - f.mods.skillCd) * (1 - (f.cdr || 0))), 0, 1).toFixed(2)); setText('bSkillLbl', CFG.skills[sk].short); setBtnIcon('bSkill', BTN_ICON[sk] || 'k_tempo'); }
   // interact
   const act = !inArena && G.interact && G.started;
   setHidden('bAct', !act);
