@@ -476,3 +476,8 @@
 #bSuper { background: conic-gradient(#d9a24a calc(var(--sc) * 360deg), #3a2c1c 0) !important; }
 #bSuper span { background-color: #5b3f22 !important; } #bSuper.ready span { background-color: #b9742f !important; }
 .cbtn .cic .gi { width: 26px; height: 26px; }
+/* hub tiles: dark, not filled, with a glowing neon edge in their colour and a big logo */
+.panel .hubTile, .panel .hubTile:nth-child(n) { --tc: var(--gc, var(--og-blu)); background: color-mix(in srgb, var(--tc) 14%, #14172a) !important; background-image: none !important;
+  box-shadow: 0 0 0 3px var(--og-ink), inset 0 0 0 3px var(--tc), inset 0 0 22px color-mix(in srgb, var(--tc) 35%, transparent) !important; }
+#modal.full .hubTile .gi { width: 128px !important; height: 128px !important; }
+#modal.full .hubTile b { font-size: 28px; color: color-mix(in srgb, var(--tc) 45%, #fff); }
