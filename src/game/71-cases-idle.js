@@ -63,7 +63,7 @@ function caseBonus() {
   }
   if (x < (acc += CASE_BONUS.gold)) { const n = Math.round(vaultRates(p).gold * 60 * 6); addGold(n, true); return { k: 'gold', n }; } // six hours of Bank income
   if (x < (acc += CASE_BONUS.gems)) { const n = 20 + Math.round(p.level / 3); addEssence(n); return { k: 'gems', n }; }
-  if (x < (acc += CASE_BONUS.mats)) { const B = CB[zoneBiome(highestZone(p.level))]; return { k: 'mats', got: addMats([[B.ore, 8 + p.level / 10], [B.part, 3 + p.level / 25]], true) }; }
+  if (typeof CB !== 'undefined' && x < (acc += CASE_BONUS.mats)) { // CB: crafting (absent in the node-only checks) const B = CB[zoneBiome(highestZone(p.level))]; return { k: 'mats', got: addMats([[B.ore, 8 + p.level / 10], [B.part, 3 + p.level / 25]], true) }; }
   return null;
 }
 function bonusHTML(b) {
