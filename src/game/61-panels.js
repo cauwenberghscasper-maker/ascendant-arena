@@ -15,6 +15,19 @@ function interact() {
   if (d.role === 'arena') return openArenaPanel();
   openNpc(d);
 }
+// Four hubs (Hero, Forge, Gear, Journal): one bar on top of every hub screen, plus the hub's own sub-tabs
+const HUB_OF = { hero: 'hero', skills: 'hero', artifacts: 'hero', brawlers: 'hero', smith: 'forge', merge: 'forge',
+  menu: 'journal', progress: 'journal', daily: 'journal', collection: 'journal', prestige: 'journal', idle: 'journal', cases: 'journal', players: 'journal' };
+const HUBS = [['hero', 'Hero', 'mHero'], ['forge', 'Forge', 'mSmith'], ['equip', 'Gear', 'mGear'], ['journal', 'Journal', 'mMenu']];
+const HUB_SUB = { hero: [['hero', 'Stats', 'mHero'], ['skills', 'Talents', 'mSkills'], ['artifacts', 'Relics', 'mArtifacts'], ['brawlers', 'Heroes', 'mBrawlers']],
+  journal: [['menu', 'World', 'mMenu'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily'], ['cases', 'Chests', 'mCases']] };
+function hubNav() {
+  let hub = HUB_OF[UI.current]; if (!hub) return '';
+  if (UI.current === 'hero' && UI.heroTab === 'Gear') hub = 'equip';
+  const bar = HUBS.map(([k, n, act]) => `<button class="ghost${k === hub ? ' on' : ''}" data-act="${act}" aria-pressed="${k === hub}">${n}</button>`).join('');
+  const sub = (HUB_SUB[hub] || []).map(([k, n, act]) => `<button class="tab ${k === UI.current ? 'on' : ''}" data-act="${act}">${n}</button>`).join('');
+  return `<nav class="hubBar">${bar}</nav>${sub ? `<div class="tabs hubSub">${sub}</div>` : ''}`;
+}
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
   const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + (UI.gearAll && UI.heroTab === 'Gear' ? 'all' : UI.gearSlot) : UI.current === 'collection' ? '|' + UI.collectionSlot : UI.current === 'artifacts' ? '|' + UI.artTab + '|' + UI.relicTier : '');
@@ -26,7 +39,7 @@ function openModal(html, closable, showcase) {
   $('modal').classList.toggle('room', !!showcase);
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
-  const full = html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
+  const full = hubNav() + html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
   if (same) { // redraw of the same screen: keep the already-decoded pictures so tiles don't blink on phones
     const old = new Map(); for (const im of $('panel').querySelectorAll('img')) { const k = im.getAttribute('src'); if (k) (old.get(k) || old.set(k, []).get(k)).push(im); }
     const tpl = document.createElement('template'); tpl.innerHTML = full;
@@ -499,7 +512,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div><button class="ghost sm hm" data-act="openMenu" aria-label="Journal">${gi('m_menu')}<span class="hmT"> Journal</span></button></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
 }
 function openWaypoints() {
   UI.current = 'waypoints';

@@ -1805,6 +1805,11 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .cmpv { align-self: center; font-size: 14px; color: #ffcf1f; text-shadow: 2px 2px 0 var(--og-ink); }
 .igt.sel { outline: 3px solid #ffcf1f; outline-offset: 1px; }
 #doll, #doll *, #doll *::before, #doll *::after { border-radius: 0 !important; }
+/* ---- hub bar: Hero / Forge / Gear / Journal on top of every hub screen ---- */
+.hubBar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 2px 54px 10px 2px; }
+.panel .hubBar button.ghost { min-height: 44px; padding: 0 4px !important; font-size: 14px !important; background: var(--og-slate) !important; }
+.panel .hubBar button.ghost.on { background: var(--og-blu) !important; }
+.tabs.hubSub { margin-bottom: 8px; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -9460,6 +9465,19 @@ function interact() {
   if (d.role === 'arena') return openArenaPanel();
   openNpc(d);
 }
+// Four hubs (Hero, Forge, Gear, Journal): one bar on top of every hub screen, plus the hub's own sub-tabs
+const HUB_OF = { hero: 'hero', skills: 'hero', artifacts: 'hero', brawlers: 'hero', smith: 'forge', merge: 'forge',
+  menu: 'journal', progress: 'journal', daily: 'journal', collection: 'journal', prestige: 'journal', idle: 'journal', cases: 'journal', players: 'journal' };
+const HUBS = [['hero', 'Hero', 'mHero'], ['forge', 'Forge', 'mSmith'], ['equip', 'Gear', 'mGear'], ['journal', 'Journal', 'mMenu']];
+const HUB_SUB = { hero: [['hero', 'Stats', 'mHero'], ['skills', 'Talents', 'mSkills'], ['artifacts', 'Relics', 'mArtifacts'], ['brawlers', 'Heroes', 'mBrawlers']],
+  journal: [['menu', 'World', 'mMenu'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily'], ['cases', 'Chests', 'mCases']] };
+function hubNav() {
+  let hub = HUB_OF[UI.current]; if (!hub) return '';
+  if (UI.current === 'hero' && UI.heroTab === 'Gear') hub = 'equip';
+  const bar = HUBS.map(([k, n, act]) => `<button class="ghost${k === hub ? ' on' : ''}" data-act="${act}" aria-pressed="${k === hub}">${n}</button>`).join('');
+  const sub = (HUB_SUB[hub] || []).map(([k, n, act]) => `<button class="tab ${k === UI.current ? 'on' : ''}" data-act="${act}">${n}</button>`).join('');
+  return `<nav class="hubBar">${bar}</nav>${sub ? `<div class="tabs hubSub">${sub}</div>` : ''}`;
+}
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
   const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + (UI.gearAll && UI.heroTab === 'Gear' ? 'all' : UI.gearSlot) : UI.current === 'collection' ? '|' + UI.collectionSlot : UI.current === 'artifacts' ? '|' + UI.artTab + '|' + UI.relicTier : '');
@@ -9471,7 +9489,7 @@ function openModal(html, closable, showcase) {
   $('modal').classList.toggle('room', !!showcase);
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
-  const full = html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
+  const full = hubNav() + html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
   if (same) { // redraw of the same screen: keep the already-decoded pictures so tiles don't blink on phones
     const old = new Map(); for (const im of $('panel').querySelectorAll('img')) { const k = im.getAttribute('src'); if (k) (old.get(k) || old.set(k, []).get(k)).push(im); }
     const tpl = document.createElement('template'); tpl.innerHTML = full;
@@ -9944,7 +9962,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div><button class="ghost sm hm" data-act="openMenu" aria-label="Journal">${gi('m_menu')}<span class="hmT"> Journal</span></button></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
 }
 function openWaypoints() {
   UI.current = 'waypoints';
@@ -10958,28 +10976,14 @@ function openMenu(section) {
   const p = G.profile, A = menuAlerts(), own = ownedBrawlers(p).length;
   const hp = 0, bp = Math.max(0, treeFree(p, p.cls));
   const tile = (act, icon, title, sub, dot) => `<button class="mtile" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${sub}</small></span>${dot ? '<i class="rdot"></i>' : ''}</button>`;
-  const upgrades = [
-    tile('mGear', 'm_hero', 'Equipment', `Gear score ${fmt(Math.round(gearTotals(p.gear).score))}`, A.hero),
-    tile('mSkills', 'm_skills', 'Talents', hp + bp > 0 ? `${fmt(hp + bp)} talent points` : 'All points spent', A.skills),
-    tile('mArtifacts', 'm_artifacts', 'Relics', `${p.artifacts.length}/${artifactSlotsFor(p)} socketed`, A.artifacts),
-    tile('mCases', 'm_case', 'Treasure Chests', p.cases.length ? `${p.cases.length} to open` : 'Won from monsters', p.cases.length > 0),
-    tile('mBrawlers', 'm_brawlers', 'Heroes', `${own}/${CFG.brawlerOrder.length} recruited`, A.brawlers),
-    tile('mSmith', 'm_smith', 'Smithy', 'Reforge & forge', UI.anyAlert),
-  ];
   const adventure = [
-    tile('mDaily', 'm_progress', 'Daily & Coming Up', loginReady(Date.now()) ? 'Reward ready!' : `Day ${loginState().n % 7 + 1} tomorrow`, loginReady(Date.now())),
-    tile('mProgress', 'm_progress', 'Adventure Log', 'Level Road & hiscores', A.progress),
     tile('mCollection', 'm_hero', 'Collection Log', `${Object.keys(p.collection || {}).length}/${COLLECTION_ITEMS.length} logged`, false),
     tile('mPrestige', 'm_asc', 'Pets & prestige', `Prestige ${prestigeCount(p)}`, !prestigeBlocked()),
     tile('mIdle', 'm_idle', 'Bank & Camp', 'Coffers & expeditions', idleAlert()),
     tile('mPlayers', 'm_players', 'Fellow Adventurers', mpSummary()),
     tile('mArena', 'm_arena', 'Showdown', 'Duel 9 rival champions', false),
   ];
-  openModal(`<div class="menuHead"><div><h3>Adventurer’s Journal</h3><small>${CFG.brawlers[p.cls].name} · Combat level ${fmt(p.level)}</small></div></div>
-    <div class="menuSections" role="group" aria-label="Menu sections">
-      <button data-act="menuSection" data-section="upgrades" aria-pressed="${UI.menuSection === 'upgrades'}">Hero${Object.values(A).some(Boolean) || p.cases.length ? '<i class="rdot"></i>' : ''}</button>
-      <button data-act="menuSection" data-section="adventure" aria-pressed="${UI.menuSection === 'adventure'}">World</button>
-    </div><div class="mtiles">${(UI.menuSection === 'adventure' ? adventure : upgrades).join('')}</div>${comingUpHtml(3)}`);
+  openModal(`<div class="mtiles">${adventure.join('')}</div>${comingUpHtml(3)}`);
   $('panel').classList.add('menuPanel');
 }
 function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }

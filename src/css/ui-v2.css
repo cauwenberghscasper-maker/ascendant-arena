@@ -416,3 +416,8 @@
 .cmpv { align-self: center; font-size: 14px; color: #ffcf1f; text-shadow: 2px 2px 0 var(--og-ink); }
 .igt.sel { outline: 3px solid #ffcf1f; outline-offset: 1px; }
 #doll, #doll *, #doll *::before, #doll *::after { border-radius: 0 !important; }
+/* ---- hub bar: Hero / Forge / Gear / Journal on top of every hub screen ---- */
+.hubBar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 2px 54px 10px 2px; }
+.panel .hubBar button.ghost { min-height: 44px; padding: 0 4px !important; font-size: 14px !important; background: var(--og-slate) !important; }
+.panel .hubBar button.ghost.on { background: var(--og-blu) !important; }
+.tabs.hubSub { margin-bottom: 8px; }
