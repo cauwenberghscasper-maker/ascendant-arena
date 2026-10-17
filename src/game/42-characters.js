@@ -130,9 +130,11 @@ const ItemArt = {
 const ITEM_ICONS = [];
 // </items-icons>
 // Generated static menu paintings take precedence; procedural portraits cover future shapes.
+// crafted set art: painted, or the pixelated version when the Pixel art setting is on
+function setArtUrl(bi, slot) { return G.profile && G.profile.settings.pixel ? `assets/ui/sets/px/${bi}-${slot}.png` : `assets/ui/sets/${bi}-${slot}.webp`; }
 function thumbFor(it) {
   if (!it) return '';
-  if (it.set != null && it.set >= 0 && it.set < 6) return `assets/ui/sets/${it.set}-${it.slot}.webp`; // painted art per crafted set piece
+  if (it.set != null && it.set >= 0 && it.set < 6) return setArtUrl(it.set, it.slot);
   const collectible = collectionIcon(it);
   if (collectible) return collectible;
   const generated = equipmentIcon(it.slot, ITEM_NAMES[it.slot]?.[itemStyle(it)]);

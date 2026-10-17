@@ -588,7 +588,7 @@
 .invMats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .panel .tab img.ftab { width: 22px; height: 22px; image-rendering: pixelated; vertical-align: middle; margin-right: 4px; }
 /* crafted set pieces: painted high-detail art with a pulsing rarity glow */
-img[src*="ui/sets/"] { image-rendering: auto !important; object-fit: contain; }
+img[src*="ui/sets/"] { image-rendering: auto !important; object-fit: contain; } img[src*="ui/sets/px/"] { image-rendering: pixelated !important; }
 .craftRow { display: grid !important; grid-template-columns: 84px 1fr auto; align-items: center; gap: 10px; }
 .craftRow .setArt { width: 84px; height: 84px; filter: drop-shadow(0 0 8px var(--rc, #ffd76a)); animation: setGlow 2.6s ease-in-out infinite; }
 @keyframes setGlow { 50% { filter: drop-shadow(0 0 16px var(--rc, #ffd76a)) brightness(1.12); transform: translateY(-3px); } }

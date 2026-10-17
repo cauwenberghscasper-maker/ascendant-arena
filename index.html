@@ -1977,7 +1977,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .invMats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .panel .tab img.ftab { width: 22px; height: 22px; image-rendering: pixelated; vertical-align: middle; margin-right: 4px; }
 /* crafted set pieces: painted high-detail art with a pulsing rarity glow */
-img[src*="ui/sets/"] { image-rendering: auto !important; object-fit: contain; }
+img[src*="ui/sets/"] { image-rendering: auto !important; object-fit: contain; } img[src*="ui/sets/px/"] { image-rendering: pixelated !important; }
 .craftRow { display: grid !important; grid-template-columns: 84px 1fr auto; align-items: center; gap: 10px; }
 .craftRow .setArt { width: 84px; height: 84px; filter: drop-shadow(0 0 8px var(--rc, #ffd76a)); animation: setGlow 2.6s ease-in-out infinite; }
 @keyframes setGlow { 50% { filter: drop-shadow(0 0 16px var(--rc, #ffd76a)) brightness(1.12); transform: translateY(-3px); } }
@@ -7079,9 +7079,11 @@ const ItemArt = {
 const ITEM_ICONS = [];
 // </items-icons>
 // Generated static menu paintings take precedence; procedural portraits cover future shapes.
+// crafted set art: painted, or the pixelated version when the Pixel art setting is on
+function setArtUrl(bi, slot) { return G.profile && G.profile.settings.pixel ? `assets/ui/sets/px/${bi}-${slot}.png` : `assets/ui/sets/${bi}-${slot}.webp`; }
 function thumbFor(it) {
   if (!it) return '';
-  if (it.set != null && it.set >= 0 && it.set < 6) return `assets/ui/sets/${it.set}-${it.slot}.webp`; // painted art per crafted set piece
+  if (it.set != null && it.set >= 0 && it.set < 6) return setArtUrl(it.set, it.slot);
   const collectible = collectionIcon(it);
   if (collectible) return collectible;
   const generated = equipmentIcon(it.slot, ITEM_NAMES[it.slot]?.[itemStyle(it)]);
@@ -10064,7 +10066,7 @@ function craftTabHTML(p) {
   const SB = C.setBonus, k = 1 + SB.perBiome * bi, worn = setBonuses(p.gear).sets[bi] || 0;
   const rows = CFG.gear.slots.map((s) => {
     const cost = setPieceCost(bi, s), can = open && canPay(cost, p), noun = ITEM_NAMES[s][s === 'weapon' ? 0 : 1];
-    return `<div class="item ${C.setRarity[bi]} craftRow"><img class="setArt" src="assets/ui/sets/${bi}-${s}.webp" alt=""><div class="meta"><div class="slot">${SLOT_LABEL[s]} · item level ${Math.max(biomeTop(bi), p.level) + 2}</div><div class="nm">${b.set} ${noun} ${rarityChip(C.setRarity[bi])}</div><div class="st">Random affixes + one perfect bonus affix</div><div class="mats">${costChips(cost, p)}</div></div>
+    return `<div class="item ${C.setRarity[bi]} craftRow"><img class="setArt" src="${setArtUrl(bi, s)}" alt=""><div class="meta"><div class="slot">${SLOT_LABEL[s]} · item level ${Math.max(biomeTop(bi), p.level) + 2}</div><div class="nm">${b.set} ${noun} ${rarityChip(C.setRarity[bi])}</div><div class="st">Random affixes + one perfect bonus affix</div><div class="mats">${costChips(cost, p)}</div></div>
       <button class="${can ? 'primary' : 'disabled'}" data-act="craftPiece" data-b="${bi}" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div>`;
   }).join('');
   const hero = CFG.brawlers[b.hero], heroHave = p.unlocked.attacks.includes(b.hero), relicN = craftState(p).relics[bi] | 0;
