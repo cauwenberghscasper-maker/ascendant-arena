@@ -552,3 +552,16 @@
 .hswap { margin-bottom: 10px; padding: 8px; background: var(--og-stone); box-shadow: 0 0 0 2px var(--og-ink), inset 0 2px 0 #4a4f6e; }
 .hswapHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; } .hswapHead b { font-size: 16px; color: #ffe066; }
 .hswap .row { margin-top: 8px; } .hswap .row .primary { width: 100%; }
+/* swap panel: slides open and closed, the bag is a swipeable carousel with momentum and snap, picks slide in */
+.hswap { overflow: hidden; transform-origin: top; }
+.hswap.opening { animation: hsOpen .28s cubic-bezier(.2,.9,.3,1.15); }
+.hswap.closing { animation: hsShut .22s ease-in forwards; }
+@keyframes hsOpen { from { opacity: 0; transform: translateY(-14px) scaleY(.85); } }
+@keyframes hsShut { to { opacity: 0; transform: translateY(-10px) scaleY(.8); max-height: 0; } }
+.hswap .igrid { display: flex !important; flex-wrap: nowrap !important; gap: 10px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  touch-action: pan-x; padding: 8px 4px 10px; scrollbar-width: none; }
+.hswap .igrid::-webkit-scrollbar { display: none; }
+.hswap .igt { flex: 0 0 76px !important; height: 76px; scroll-snap-align: center; transition: transform .18s cubic-bezier(.2,.9,.3,1.3); }
+.hswap .igt:active { transform: scale(.92); } .hswap .igt.sel { transform: translateY(-4px) scale(1.06); }
+.hswap .cmp.picked .cmpc:last-of-type { animation: hsPick .3s cubic-bezier(.2,.9,.3,1.2); }
+@keyframes hsPick { from { opacity: 0; transform: translateX(24px) scale(.94); } }

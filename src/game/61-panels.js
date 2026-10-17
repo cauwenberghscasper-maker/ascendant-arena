@@ -256,6 +256,15 @@ function upCard(art, name, now, next, foot, btn, cls) {
 const MW_ART = { whetstone: 'weapon', plating: 'chest', bracers: 'accessory', treads: 'boots', satchel: 'm_case', purse: 'm_coin' };
 const FORGE_ICONS = ['whetstone', 'plating', 'bracers', 'satchel']; // own pixel icons in assets/ui/forge/ (Z-Image-Turbo + tools/pixelize_items.py)
 const mwArt = (id) => { if (FORGE_ICONS.includes(id)) return `<img src="assets/ui/forge/${id}.png" alt="">`; const a = MW_ART[id] || 'm_smith'; return a.startsWith('m_') ? gi(a) : `<img src="${thumbFor({ id: 'mw-' + id, slot: a, rarity: 'epic', up: 0, ilvl: 1, name: ITEM_NAMES[a][a === 'weapon' ? 0 : 1] })}" alt="">`; };
+function hsRender(open, picked) {
+  const g = $('panel').querySelector('.hswap .igrid'); if (g) UI.hsScroll = g.scrollLeft;
+  UI.hsOpenAnim = open; UI.hsPickAnim = picked; heroTab('Stats'); UI.hsOpenAnim = UI.hsPickAnim = false;
+  const n = $('panel').querySelector('.hswap .igrid'); if (n) n.scrollLeft = UI.hsScroll || 0;
+}
+function hsClose() {
+  const w = $('panel').querySelector('.hswap'); if (!w) { UI.heroSlot = UI.heroPick = null; heroTab('Stats'); return; }
+  w.classList.add('closing'); setTimeout(() => { UI.heroSlot = UI.heroPick = null; heroTab('Stats'); }, 220);
+}
 function openInspect(id) {
   const p = G.profile, it = p.bag.find((x) => x.id === id) || Object.values(p.gear).find((x) => x && x.id === id); if (!it) return;
   const back = UI.current, ri = rarIdx(it.rarity);
@@ -419,8 +428,8 @@ function heroTab(tab) {
     const hs = UI.heroSlot, worn = hs && p.gear[hs], pick = hs ? p.bag.find((b) => b.id === UI.heroPick && b.slot === hs) || null : null;
     const card = (it, label) => it ? `<div class="cmpc ${it.rarity}"><small>${label}</small><button class="inspect" data-act="inspect" data-id="${escapeHTML(it.id)}"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""></button><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b>${rarityChip(it.rarity)}<span class="st">${statLine(it)}</span>${it.aff && Object.keys(it.aff).length ? `<span class="st aff">${affixText(it).split(' · ').join('<br>')}</span>` : ''}</div>`
       : `<div class="cmpc none"><small>${label}</small><span class="emptySlot">?</span></div>`;
-    const swap = !hs ? '' : `<div class="hswap"><div class="hswapHead"><b>${SLOT_LABEL[hs]}</b><button class="ghost sm" data-act="hsBack">Back</button></div>
-      <div class="cmp">${card(worn, 'Worn')}<b class="cmpv">VS</b>${card(pick, 'Tap a bag item')}</div>
+    const swap = !hs ? '' : `<div class="hswap${UI.hsOpenAnim ? ' opening' : ''}"><div class="hswapHead"><b>${SLOT_LABEL[hs]}</b><button class="ghost sm" data-act="hsBack">Back</button></div>
+      <div class="cmp${UI.hsPickAnim ? ' picked' : ''}">${card(worn, 'Worn')}<b class="cmpv">VS</b>${card(pick, 'Tap a bag item')}</div>
       ${itemGrid(p.bag.filter((b) => b.slot === hs).sort((x, y) => (isBetter(y, x) ? 1 : isBetter(x, y) ? -1 : 0)), { act: 'hsPick', sel: UI.heroPick, mark: (it) => (isBetter(it, worn) ? { cls: 'up', text: '▲', label: 'better than worn' } : null), empty: 'No other pieces for this slot yet.' })}
       ${pick ? `<div class="row"><button class="primary" data-act="hsWear" data-id="${escapeHTML(pick.id)}">${wearWord(hs)}</button></div>` : ''}</div>`;
     body = `<div class="heroStage" style="--art:url(${art})">${sock('helmet', 'l', 0)}${sock('chest', 'l', 1)}${sock('boots', 'l', 2)}${sock('weapon', 'r', 0)}${sock('accessory', 'r', 1)}</div>
@@ -780,10 +789,10 @@ function handlePanelClick(e) {
     case 'pMore': UI.moreOpen = !UI.moreOpen; syncMore(); break;
     case 'unequip': if (unequipItem(b.dataset.slot)) { Showcase.spin = 0; heroTab('Gear'); } break;
     case 'slot': UI.gearSlot = b.dataset.slot; heroTab('Gear'); break;
-    case 'hsSlot': UI.heroSlot = UI.heroSlot === b.dataset.slot ? null : b.dataset.slot; UI.heroPick = null; heroTab('Stats'); break;
-    case 'hsPick': UI.heroPick = UI.heroPick === b.dataset.id ? null : b.dataset.id; heroTab('Stats'); break;
-    case 'hsWear': if (equipItem(b.dataset.id)) Sfx.play('equipped'); UI.heroPick = null; heroTab('Stats'); break;
-    case 'hsBack': UI.heroSlot = UI.heroPick = null; heroTab('Stats'); break;
+    case 'hsSlot': if (UI.heroSlot === b.dataset.slot) { hsClose(); break; } UI.heroSlot = b.dataset.slot; UI.heroPick = null; UI.hsScroll = 0; hsRender(true, false); break;
+    case 'hsPick': UI.heroPick = UI.heroPick === b.dataset.id ? null : b.dataset.id; hsRender(false, true); break;
+    case 'hsWear': if (equipItem(b.dataset.id)) Sfx.play('equipped'); UI.heroPick = null; hsRender(false, false); break;
+    case 'hsBack': hsClose(); break;
     case 'equipAtk': equipAttack(b.dataset.id); openBrawlers(); break;
     case 'toggleArt': toggleArtifact(b.dataset.id); Sfx.play('job'); openArtifacts('Equip'); break;
     case 'upgradeHere': openMerge(b.dataset.slot, false, 'hero'); break;
