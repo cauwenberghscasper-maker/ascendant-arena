@@ -582,3 +582,7 @@
 .panel .hsRow span.dchips { flex-direction: row !important; flex-wrap: wrap; align-items: flex-start; }
 .hsSub { color: #9aa0b8; margin-top: 6px; }
 .tag.peer.pvp .tn { color: #ff6b78 !important; text-shadow: 0 0 6px #ff3344, 1px 1px 0 #000; } .tag.peer.pvp .tb i { background: #ff3344 !important; box-shadow: 0 0 6px #ff3344; }
+/* Inventory: chests sit in a swipe row above the bag, resources as chips */
+.invChests { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 8px; scrollbar-width: none; }
+.invChests::-webkit-scrollbar { display: none; } .invChests .ctile { flex: 0 0 96px; scroll-snap-align: start; }
+.invMats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }

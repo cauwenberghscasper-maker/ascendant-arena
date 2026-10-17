@@ -196,7 +196,7 @@ function statLine(it) {
 }
 function perkLine(it) { const t = perkText(it); return t ? `<div class="perk">${t}</div>` : ''; }
 // RuneScape-style display names for tabs whose keys stay the same in code
-const TAB_NAME = { Mining: 'Mining & Museum', Gear: 'Equipment', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
+const TAB_NAME = { Mining: 'Mining & Museum', Gear: 'Inventory', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
 const tabName = (t) => TAB_NAME[t] || t;
 const wearWord = (slot) => (slot === 'weapon' ? 'Wield' : 'Wear');
 const SLOT_LABEL = { weapon: 'Weapon', helmet: 'Helmet', chest: 'Armor', boots: 'Boots', accessory: 'Accessory' };
@@ -314,6 +314,16 @@ function openSmith(tab) {
   const tabs = ['Upgrade', 'Masterwork', 'Craft', 'Forge', 'Enchant'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}${gate(t)}" data-act="smithTab" data-tab="${t}">${lockLabel(t, tabName(t))}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
   openModal(dock(`<div class="npcHead"><h3>Forge</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
     <div class="tabs">${tabs}</div>`, `<div class="tabBody"><div class="pageArt" style="--art:url(assets/ui/forge/banner-${tab.toLowerCase()}.webp)"></div>${body}</div>`, ''), true, false);
+}
+// Inventory: your chests (tap to open them) and every resource you hold, right above the gear bag
+function invChests(p) {
+  const n = {}; for (const c of p.cases) n[c.k] = (n[c.k] || 0) + 1;
+  const kinds = CFG.caseOrder.filter((k) => n[k]);
+  const chests = kinds.length ? `<div class="invChests">${kinds.map((k) => `<button class="ctile" data-act="caseSel" data-k="${k}" style="--cc:${CFG.cases[k].col}">${caseArt(k)}<b>${CFG.cases[k].name}</b><small>×${n[k]}</small></button>`).join('')}</div>`
+    : '<p class="fine">No chests yet. Monsters, bosses and the Rift drop them.</p>';
+  const mats = Object.keys(MATS).filter((id) => matCount(id, p) > 0).map((id) => matChip(id, null, p)).join('');
+  return `<div class="subRow"><h4 class="sub">Chests · ${p.cases.length}</h4></div>${chests}
+    <div class="subRow"><h4 class="sub">Resources &amp; minerals</h4></div><div class="invMats"><span class="mat gold">${ICON.coin}<b>${fmtK(p.gold)}</b></span><span class="mat gold">${ICON.gem || ''}<b>${fmtK(p.gems || 0)}</b> gems</span>${mats}</div>`;
 }
 // --- crafting tabs (src/game/39-crafting.js)
 const hex6 = (c) => '#' + c.toString(16).padStart(6, '0');
@@ -472,13 +482,11 @@ function heroTab(tab) {
     const wornOf = pick ? p.gear[pick.slot] : cur;
     const cmpCard = (it, label) => it ? `<div class="cmpc ${it.rarity}"><small>${label}</small><button class="inspect" data-act="inspect" data-id="${escapeHTML(it.id)}" aria-label="Inspect"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""></button><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b>${rarityChip(it.rarity)}<span class="st">${statLine(it)}</span>${it.aff && Object.keys(it.aff).length ? `<span class="st aff">${affixText(it).split(' · ').join('<br>')}</span>` : ''}</div>`
       : `<div class="cmpc none"><small>${label}</small><span class="emptySlot">${label === 'Worn' ? '+' : '?'}</span></div>`;
-    body = `<div class="cmp">${cmpCard(wornOf, 'Worn')}<b class="cmpv">VS</b>${cmpCard(pick, 'Tap a bag item')}</div>${statStrip(pick)}<div class="tiles">${tiles}</div>
-      <div class="subRow"><h4 class="sub">Bag · ${pieces.length}</h4>${filt}<small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
-      ${itemGrid(pieces, { act: 'gpick', sel: UI.gearPick, mark, empty: 'Monsters, elites, dens, shrines and world bosses drop gear.' })}
-      <h4 class="sub">Luck</h4><div class="luck">${['rare', 'epic', 'legendary'].concat(HIGH_RAR.filter((h) => highWeights(curTier(), 6)[h] > 0)).map((r) => `<div class="lk ${r}"><span>${CFG.gear.rarity[r].name} in</span><b>${Math.max(1, Pi[r] - L[r])}</b><i style="--v:${Math.round(L[r] / Pi[r] * 100)}%"></i></div>`).join('')}</div>`;
-    // the bar acts on the picked piece; reforging and affixes live in the Forge now
-    bar = pick ? selBar('', `<button class="primary" data-act="gwear" data-id="${escapeHTML(pick.id)}">${wearWord(pick.slot)}</button><button class="ghost" data-act="protectGear" data-id="${escapeHTML(pick.id)}">${pick.locked ? 'Unprotect' : 'Protect'}</button><button class="warn" data-act="salvage" data-id="${escapeHTML(pick.id)}" ${pick.locked ? 'disabled' : ''}>Salvage</button>`)
-      : cur ? selBar('', `<button class="ghost" data-act="unequip" data-slot="${sel}">Unequip</button><button class="ghost" data-act="mSmith">Forge</button>`) : '';
+    // Inventory is only what you have collected: chests, resources, all gear. Comparing and wearing happens on the Hero screen.
+    const bagAll = p.bag.filter((x) => !equippedIds.has(x.id)).sort((x, y) => order.indexOf(x.slot) - order.indexOf(y.slot) || rarIdx(y.rarity) - rarIdx(x.rarity));
+    body = `${invChests(p)}<div class="subRow"><h4 class="sub">Gear · ${bagAll.length}</h4><small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
+      ${itemGrid(bagAll, { act: 'inspect', empty: 'Monsters, elites, dens, shrines and world bosses drop gear.' })}`;
+    bar = '';
   } else if (tab === 'Attacks') {
     const cur = resolvedAttack(p), av = availableAttacks(p), fresh = new Set(p.newUnlocks);
     const sig = CFG.signatures[p.cls || 'novice'].id, nSlots = artifactSlotsFor(p);

@@ -169,7 +169,7 @@ function openMenu() {
   openModal(`<div class="hubTiles">
     ${big('mHero', 'm_hero', 'Hero', `Level ${fmt(p.level)}`, A.skills || A.artifacts || A.brawlers)}
     ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
-    ${big('mGear', 'm_case', 'Gear', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
+    ${big('mGear', 'm_case', 'Inventory', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
     ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()) || p.cases.length > 0)}
   </div>`);
 }
