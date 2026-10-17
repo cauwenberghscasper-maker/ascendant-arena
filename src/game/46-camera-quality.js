@@ -125,8 +125,8 @@ function showcaseFrame() {
   const top = 8, bot = Cam.portrait ? S.top - 28 : h - 30;
   const left = chipR, right = Cam.portrait ? w - chipR : S.left - 8;
   // world span from the podium floor to the hat tip (measured 1.65 x growth); ascended heroes add a crown
-  const lo = Showcase.podium - 0.05, hi = Showcase.podium + 1.72 * gs * (ascTier(G.profile.level) >= 3 ? 1.3 : 1);
-  const px = Math.max(120, (bot - top) * 0.96);
+  const lo = Showcase.podium - 0.05, hi = Showcase.podium + 2.0 * gs * (ascTier(G.profile.level) >= 3 ? 1.3 : 1);
+  const px = Math.max(120, (bot - top) * 0.88); // head room so tall heroes never get cut off
   F.span = hi - lo; F.yc = (hi + lo) / 2;
   F.dist = F.span * h / (2 * Math.tan(THREE.MathUtils.degToRad(40) / 2) * px);
   // the hero's weapon arm reaches further right than its left side, so aim a little left of centre
@@ -308,7 +308,7 @@ const Pixel = {
     this.init();
     const dpr = window.devicePixelRatio || 1, wd = Math.round(w * dpr), hd = Math.round(h * dpr);
     // whole-number scale in device pixels so every art pixel is the same size
-    const target = (Showcase.on ? 540 : Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr); // studio detail never raises combat resolution
+    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr); // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
     this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target));
     this.w = Math.ceil(wd / this.scale); this.h = Math.ceil(hd / this.scale);
     renderer.setPixelRatio(1); renderer.setSize(this.w, this.h, false);

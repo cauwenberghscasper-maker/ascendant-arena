@@ -414,8 +414,8 @@ function heroTab(tab) {
     const eq = CFG.gear.slots.map((s) => { const it = p.gear[s];
       return `<button class="tile ${it ? it.rarity : 'empty'}" data-act="mGear" aria-label="${SLOT_LABEL[s]}">${it ? `<img src="${thumbFor(it)}" alt="">` : '<span class="emptySlot">+</span>'}<span class="ts">${SLOT_LABEL[s]}</span>${it && it.up ? `<span class="tu">+${it.up}</span>` : ''}</button>`; }).join('');
     const box = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
-    body = `<div class="heroCard">${port ? `<img class="hport" src="${port}" alt="">` : ''}<div class="tiles heq">${eq}</div></div>
-      ${statStrip(null)}<div class="bstats hsmall">${box('Level', fmt(p.level))}${box('Gear score', fmt(Math.round(g.score)))}${box('Move', pl.speed.toFixed(1))}${box('Trophies', fmt(p.trophies))}</div>`;
+    // the 3D hero stands above with the worn gear floating around it (the doll), so the sheet shows only the stats
+    body = `${statStrip(null)}<div class="bstats hsmall">${box('Level', fmt(p.level))}${box('Gear score', fmt(Math.round(g.score)))}${box('Move', pl.speed.toFixed(1))}${box('Trophies', fmt(p.trophies))}</div>`;
   } else if (tab === 'Gear') {
     p._bagSeen = true;
     const al = slotAlerts();
@@ -520,7 +520,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, false);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, tab === 'Stats');
 }
 // World map (the Map button): the whole road north, one row per area, top = furthest. Tap an attuned lodestone
 // to travel there from anywhere in the open world; areas you have not reached yet stay hidden.

@@ -307,7 +307,7 @@
    Bright flat fills, thick black outline with notched pixel corners (box-shadow, so no clip-path cuts the glow),
    a light top lip and a dark bottom lip, Pixelify Sans with a hard drop shadow. Round thumb controls stay round. */
 :root { --og-ink: #0b0b14; --og-yel: #d9a93a; --og-org: #e0603a; --og-red: #d63a55; --og-blu: #3f5fe0; --og-cya: #1fa6d6;
-  --og-grn: #22b07a; --og-pur: #9a4fe6; --og-slate: #343a55; --og-font: 'Pixelify Sans', monospace; }
+  --og-grn: #22b07a; --og-pur: #9a4fe6; --og-slate: #343a55; --og-font: 'Arena Numerals', 'Pixelify Sans', monospace; }
 .panel button.primary, .panel button.primary.gold, .panel button.ghost, .panel button.warn, .panel button.disabled, .panel .x,
 #gearPrompt button, .pMoreBtn, .tab, .panel .tabs .tab, .menuSections button, .bagFilter button,
 .hbtn, .hbtn.ic, #hubShortcuts button, #bAct, #playBtn {
@@ -342,7 +342,7 @@
 /* ===== Pixel panels (Oct 2026): no rounded, glossy cards anywhere in menus or the HUD =====
    One font everywhere (Pixelify Sans, also for numbers and titles), square corners, flat dark stone fills with
    a thick black notched outline and a 2px light bevel on top. Round thumb controls and dots stay round. */
-:root { --body: 'Pixelify Sans', monospace; --display: var(--body); --numbers: var(--body); --title: var(--body); --og-stone: #2b2f45; --og-stone2: #1d2033; }
+:root { --body: 'Arena Numerals', 'Pixelify Sans', monospace; --display: var(--body); --numbers: var(--body); --title: var(--body); --og-stone: #2b2f45; --og-stone2: #1d2033; }
 #panel,
 #hudTL,
 #hudTR,
@@ -533,3 +533,6 @@
 .inspTag { font-size: 12px; padding: 2px 8px; background: var(--og-pur); color: #fff; } .inspStat { color: #e6e8f2; } .inspAff { color: #9fef7a; line-height: 1.5; }
 @keyframes inspPulse { 50% { transform: scale(1.08); opacity: .8; } } @keyframes inspSpin { to { transform: rotate(360deg); } } @keyframes inspFloat { 50% { transform: translateY(-6px); } }
 .marea .meta { display: flex; flex-direction: column; gap: 2px; grid-column: 1 / 3; } .marea .tagged { font-size: 11px; color: #e6e8f2; text-shadow: 1px 1px 0 var(--og-ink); }
+.panel button.big5 { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 0; min-width: 96px; }
+.panel button.big5 b { font-size: 24px; line-height: 1; } .panel button.big5 small { font-size: 11px; }
+.heroCard ~ .bstats, .tabBody > .bstats:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }

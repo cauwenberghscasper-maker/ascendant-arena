@@ -199,7 +199,7 @@ function openCases(sel) {
       <div class="odds">${odds.map(([r, x]) => `<div class="od ${r}"><span>${CFG.gear.rarity[r].name}</span><b>${x >= 0.01 ? (x * 100).toFixed(1) : (x * 100).toFixed(2)}%</b></div>`).join('')}</div>
       <div class="odds bonusOdds"><div class="od"><span>Hero</span><b>0.2%</b></div><div class="od"><span>Gold jackpot</span><b>4%</b></div><div class="od"><span>Gems</span><b>3%</b></div><div class="od"><span>Materials</span><b>25%</b></div></div>
       <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
-    bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost" data-act="caseFast" data-k="${sel}">Open ${Math.min(5, groups[sel].length)} at once</button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
+    bar = selBar('', `${p.cases.length > 1 ? `<button class="ghost boost big5" data-act="caseFast" data-k="${sel}"><b>×${Math.min(5, p.cases.length)}</b><small>Open all</small></button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
   openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Open the Collection Log</button></div>`, bar));
   $('panel').classList.add('wide');
@@ -251,7 +251,8 @@ function reelFinish(card) {
 // the last one takes longest. Every reward is granted before the reels start, so closing never loses one.
 function openCasesFast(k) {
   const p = G.profile, out = [];
-  for (const id of p.cases.filter((c) => c.k === k).slice(0, 5).map((c) => c.id)) { const r = openCase(id); if (r) out.push(r); }
+  // the chosen kind first, then any other chests, so Open 5 also works with mixed chests
+  for (const id of p.cases.filter((c) => c.k === k).concat(p.cases.filter((c) => c.k !== k)).slice(0, 5).map((c) => c.id)) { const r = openCase(id); if (r) out.push(r); }
   if (!out.length) return;
   const N = 40, WIN = 32;
   const strips = out.map((res) => { const w = caseTable(res.c), cards = [];
@@ -290,7 +291,7 @@ function reelLand(r, res, WIN) {
 }
 function reelManyFinish(out, k) {
   Reel.done = true; UI.closable = true;
-  const p = G.profile, left = p.cases.filter((c) => c.k === k).length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
+  const p = G.profile, left = p.cases.length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
   if (best >= 4) burst(G.player.x, 1.4, G.player.z, 50 + best * 6, RAR_HEX[RARITIES[best]], 7, 1.1, 0.32, 3, 1.6);
   $('reelOut').innerHTML = `<div class="reelSum">${out.map((r) => `<div class="rcard ${r.item.rarity}"><img src="${thumbFor(r.item)}" alt=""><i></i></div>`).join('')}</div>
     ${out.map((r) => bonusHTML(r.bonus)).join('')}

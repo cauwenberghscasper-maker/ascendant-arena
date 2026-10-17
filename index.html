@@ -1696,7 +1696,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
    Bright flat fills, thick black outline with notched pixel corners (box-shadow, so no clip-path cuts the glow),
    a light top lip and a dark bottom lip, Pixelify Sans with a hard drop shadow. Round thumb controls stay round. */
 :root { --og-ink: #0b0b14; --og-yel: #d9a93a; --og-org: #e0603a; --og-red: #d63a55; --og-blu: #3f5fe0; --og-cya: #1fa6d6;
-  --og-grn: #22b07a; --og-pur: #9a4fe6; --og-slate: #343a55; --og-font: 'Pixelify Sans', monospace; }
+  --og-grn: #22b07a; --og-pur: #9a4fe6; --og-slate: #343a55; --og-font: 'Arena Numerals', 'Pixelify Sans', monospace; }
 .panel button.primary, .panel button.primary.gold, .panel button.ghost, .panel button.warn, .panel button.disabled, .panel .x,
 #gearPrompt button, .pMoreBtn, .tab, .panel .tabs .tab, .menuSections button, .bagFilter button,
 .hbtn, .hbtn.ic, #hubShortcuts button, #bAct, #playBtn {
@@ -1731,7 +1731,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 /* ===== Pixel panels (Oct 2026): no rounded, glossy cards anywhere in menus or the HUD =====
    One font everywhere (Pixelify Sans, also for numbers and titles), square corners, flat dark stone fills with
    a thick black notched outline and a 2px light bevel on top. Round thumb controls and dots stay round. */
-:root { --body: 'Pixelify Sans', monospace; --display: var(--body); --numbers: var(--body); --title: var(--body); --og-stone: #2b2f45; --og-stone2: #1d2033; }
+:root { --body: 'Arena Numerals', 'Pixelify Sans', monospace; --display: var(--body); --numbers: var(--body); --title: var(--body); --og-stone: #2b2f45; --og-stone2: #1d2033; }
 #panel,
 #hudTL,
 #hudTR,
@@ -1922,6 +1922,9 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .inspTag { font-size: 12px; padding: 2px 8px; background: var(--og-pur); color: #fff; } .inspStat { color: #e6e8f2; } .inspAff { color: #9fef7a; line-height: 1.5; }
 @keyframes inspPulse { 50% { transform: scale(1.08); opacity: .8; } } @keyframes inspSpin { to { transform: rotate(360deg); } } @keyframes inspFloat { 50% { transform: translateY(-6px); } }
 .marea .meta { display: flex; flex-direction: column; gap: 2px; grid-column: 1 / 3; } .marea .tagged { font-size: 11px; color: #e6e8f2; text-shadow: 1px 1px 0 var(--og-ink); }
+.panel button.big5 { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 0; min-width: 96px; }
+.panel button.big5 b { font-size: 24px; line-height: 1; } .panel button.big5 small { font-size: 11px; }
+.heroCard ~ .bstats, .tabBody > .bstats:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -8619,8 +8622,8 @@ function showcaseFrame() {
   const top = 8, bot = Cam.portrait ? S.top - 28 : h - 30;
   const left = chipR, right = Cam.portrait ? w - chipR : S.left - 8;
   // world span from the podium floor to the hat tip (measured 1.65 x growth); ascended heroes add a crown
-  const lo = Showcase.podium - 0.05, hi = Showcase.podium + 1.72 * gs * (ascTier(G.profile.level) >= 3 ? 1.3 : 1);
-  const px = Math.max(120, (bot - top) * 0.96);
+  const lo = Showcase.podium - 0.05, hi = Showcase.podium + 2.0 * gs * (ascTier(G.profile.level) >= 3 ? 1.3 : 1);
+  const px = Math.max(120, (bot - top) * 0.88); // head room so tall heroes never get cut off
   F.span = hi - lo; F.yc = (hi + lo) / 2;
   F.dist = F.span * h / (2 * Math.tan(THREE.MathUtils.degToRad(40) / 2) * px);
   // the hero's weapon arm reaches further right than its left side, so aim a little left of centre
@@ -8802,7 +8805,7 @@ const Pixel = {
     this.init();
     const dpr = window.devicePixelRatio || 1, wd = Math.round(w * dpr), hd = Math.round(h * dpr);
     // whole-number scale in device pixels so every art pixel is the same size
-    const target = (Showcase.on ? 540 : Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr); // studio detail never raises combat resolution
+    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr); // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
     this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target));
     this.w = Math.ceil(wd / this.scale); this.h = Math.ceil(hd / this.scale);
     renderer.setPixelRatio(1); renderer.setSize(this.w, this.h, false);
@@ -10064,8 +10067,8 @@ function heroTab(tab) {
     const eq = CFG.gear.slots.map((s) => { const it = p.gear[s];
       return `<button class="tile ${it ? it.rarity : 'empty'}" data-act="mGear" aria-label="${SLOT_LABEL[s]}">${it ? `<img src="${thumbFor(it)}" alt="">` : '<span class="emptySlot">+</span>'}<span class="ts">${SLOT_LABEL[s]}</span>${it && it.up ? `<span class="tu">+${it.up}</span>` : ''}</button>`; }).join('');
     const box = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
-    body = `<div class="heroCard">${port ? `<img class="hport" src="${port}" alt="">` : ''}<div class="tiles heq">${eq}</div></div>
-      ${statStrip(null)}<div class="bstats hsmall">${box('Level', fmt(p.level))}${box('Gear score', fmt(Math.round(g.score)))}${box('Move', pl.speed.toFixed(1))}${box('Trophies', fmt(p.trophies))}</div>`;
+    // the 3D hero stands above with the worn gear floating around it (the doll), so the sheet shows only the stats
+    body = `${statStrip(null)}<div class="bstats hsmall">${box('Level', fmt(p.level))}${box('Gear score', fmt(Math.round(g.score)))}${box('Move', pl.speed.toFixed(1))}${box('Trophies', fmt(p.trophies))}</div>`;
   } else if (tab === 'Gear') {
     p._bagSeen = true;
     const al = slotAlerts();
@@ -10170,7 +10173,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, false);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, tab === 'Stats');
 }
 // World map (the Map button): the whole road north, one row per area, top = furthest. Tap an attuned lodestone
 // to travel there from anywhere in the open world; areas you have not reached yet stay hidden.
@@ -12295,7 +12298,7 @@ function openCases(sel) {
       <div class="odds">${odds.map(([r, x]) => `<div class="od ${r}"><span>${CFG.gear.rarity[r].name}</span><b>${x >= 0.01 ? (x * 100).toFixed(1) : (x * 100).toFixed(2)}%</b></div>`).join('')}</div>
       <div class="odds bonusOdds"><div class="od"><span>Hero</span><b>0.2%</b></div><div class="od"><span>Gold jackpot</span><b>4%</b></div><div class="od"><span>Gems</span><b>3%</b></div><div class="od"><span>Materials</span><b>25%</b></div></div>
       <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
-    bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost" data-act="caseFast" data-k="${sel}">Open ${Math.min(5, groups[sel].length)} at once</button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
+    bar = selBar('', `${p.cases.length > 1 ? `<button class="ghost boost big5" data-act="caseFast" data-k="${sel}"><b>×${Math.min(5, p.cases.length)}</b><small>Open all</small></button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
   openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Open the Collection Log</button></div>`, bar));
   $('panel').classList.add('wide');
@@ -12347,7 +12350,8 @@ function reelFinish(card) {
 // the last one takes longest. Every reward is granted before the reels start, so closing never loses one.
 function openCasesFast(k) {
   const p = G.profile, out = [];
-  for (const id of p.cases.filter((c) => c.k === k).slice(0, 5).map((c) => c.id)) { const r = openCase(id); if (r) out.push(r); }
+  // the chosen kind first, then any other chests, so Open 5 also works with mixed chests
+  for (const id of p.cases.filter((c) => c.k === k).concat(p.cases.filter((c) => c.k !== k)).slice(0, 5).map((c) => c.id)) { const r = openCase(id); if (r) out.push(r); }
   if (!out.length) return;
   const N = 40, WIN = 32;
   const strips = out.map((res) => { const w = caseTable(res.c), cards = [];
@@ -12386,7 +12390,7 @@ function reelLand(r, res, WIN) {
 }
 function reelManyFinish(out, k) {
   Reel.done = true; UI.closable = true;
-  const p = G.profile, left = p.cases.filter((c) => c.k === k).length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
+  const p = G.profile, left = p.cases.length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
   if (best >= 4) burst(G.player.x, 1.4, G.player.z, 50 + best * 6, RAR_HEX[RARITIES[best]], 7, 1.1, 0.32, 3, 1.6);
   $('reelOut').innerHTML = `<div class="reelSum">${out.map((r) => `<div class="rcard ${r.item.rarity}"><img src="${thumbFor(r.item)}" alt=""><i></i></div>`).join('')}</div>
     ${out.map((r) => bonusHTML(r.bonus)).join('')}
