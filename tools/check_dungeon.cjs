@@ -76,12 +76,12 @@ check('entry: full heal, own obstacle grid, halls hold the variant counts plus i
   }
   assert(elites / mobs > 0.12 && elites / mobs < 0.4, 'elite share ' + elites / mobs); assert(sElites / sMobs > 0.45, 'sanctum elite share ' + sElites / sMobs);
 });
-check('difficulty: level max(area max, hero)+4+tier, hp x1.5, damage x1.25; Caves boss hp x12 and damage x1.5 through mobDmg', () => {
+check('difficulty: level area max+4+tier (never the hero level), hp x1.5, damage x1.25; Caves boss hp x12 and damage x1.5 through mobDmg', () => {
   const p = dun.filter((x) => x.id.endsWith(':0'))[5];
   for (const [level, tier] of [[1, 0], [p.lvl + 30, 0], [80, 2]]) {
     reset(level); c.G.profile.worldTier = tier; Object.assign(c.G.player, { x: p.x, z: p.z });
     if (level < c.dungeonReq(p)) { assert(!c.startDungeon(p), 'level requirement = area unlock'); c.G.profile.level = c.dungeonReq(p); }
-    assert(c.startDungeon(p)); const E = c.G.dungeon, want = Math.max(p.lvl, c.G.profile.level) + 4 + c.tierAdd();
+    assert(c.startDungeon(p)); const E = c.G.dungeon, want = p.lvl + 4 + c.tierAdd();
     assert.equal(E.lvl, want); assert.equal(c.dungeonLevel(p), want);
     for (const e of E.rooms[1].mobs) {
       assert.equal(e.lvl, want);
@@ -200,7 +200,7 @@ check('Legendary Trial: sealed until all four runestones of the area are lit; on
   c.G.profile.runes[runes[3].id] = 1; assert(c.trialOpen(zi)); c.G.profile.keys = [{ t: 5, a: [] }]; assert(!c.startDungeon(tp, 0), 'keys do not fit a trial');
   assert(c.startDungeon(tp)); const D = c.G.dungeon;
   assert.equal(D.rooms.length, 1); assert(D.rooms[0].boss); assert.equal(D.doors.length, 0); assert.equal(D.boss.champ.mods.length, 4);
-  assert.equal(D.lvl, Math.max(tp.lvl, 90) + 4 + 6); assert.equal(D.mobs.length, 1);
+  assert.equal(D.lvl, tp.lvl + 4 + 6); assert.equal(D.mobs.length, 1);
   assert(reach(D)(D.boss), 'the champion is reachable from the arrival point');
   clear(D); assert.equal(D.newKey, null); assert.equal(c.G.profile.keys.length, 1);
   const r = c.claimDungeonChest(); assert(!r.full && !r.items.length); assert.equal(r.sigils, 1); assert.equal(c.trialState(zi).n, 1);

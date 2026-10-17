@@ -49,7 +49,7 @@ function addKey(k) { const p = G.profile, ks = p.keys || (p.keys = []); ks.push(
 const keyName = (k) => `Tier ${k.t} Key` + (k.a.length ? ' · ' + k.a.map((a) => CFG.dungeon.keys.affixes[a].name).join(', ') : '');
 const keyHas = (D, a) => !!(D.key && D.key.a.includes(a));
 function dungeonPois() { return (CFG.world.pois || []).filter((p) => p.kind === 'dungeon'); }
-function dungeonLevel(poi, key) { return Math.max(poi.lvl, G.profile.level) + CFG.dungeon.lvlAdd + tierAdd() + (key ? key.t : 0) + (dungeonVariant(poi.id).lvl || 0); }
+function dungeonLevel(poi, key) { return poi.lvl + CFG.dungeon.lvlAdd + tierAdd() + (key ? key.t : 0) + (dungeonVariant(poi.id).lvl || 0); }
 function dungeonReq(poi) { return (CFG.world.zones[poi.zone] || {}).minLevel || 1; }
 function strSeed(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }
 // Deterministic per POI id: rooms walk north/east/west (never south, so the path cannot fold back onto itself).

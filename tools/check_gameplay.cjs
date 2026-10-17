@@ -49,15 +49,15 @@ check('respawn cannot appear next to a hero, burst a wave, or reuse lunges and b
 check('occupied dens defer respawn instead of putting a monster inside the safety radius', () => {
   reset(); const e = c.makeEnemy('slime', 1, { den: 0 }); e.alive = false; c.G.player.x = W.dens[0].x; c.G.player.z = W.dens[0].z; c.respawnEnemy(e); assert.equal(e.alive, false); assert.equal(e.respawnT, 1);
 });
-check('field strength follows progression, practice stays gentle, locked zones and Rift levels stay authored', () => {
+check('field strength is zone-authored (never follows the hero), practice stays gentle, Rift levels stay authored', () => {
   for (const level of [1, 5, 10, 25, 50, 100, 200]) {
-    reset(level); const e = c.makeEnemy('slime', 1, { patrol: 14 }); assert(e.lvl >= Math.max(1, level - W.catchupGap));
+    reset(level); const e = c.makeEnemy('slime', 1, { patrol: 14 }); assert(e.lvl >= W.zones[1].lvl[0] - 1 && e.lvl <= W.zones[1].lvl[1] + 4, 'zone 1 stays zone 1 at hero level ' + level);
     const practice = { zone: 1, x: 0, z: -14, den: null, elite: false }; assert(c.enemyLevelFor(practice) <= 5);
     const rift = { rift: true, riftLvl: 12, elite: true }; assert.equal(c.enemyLevelFor(rift), 14);
     const stored = e.lvl; c.G.profile.level += 10; assert.equal(e.lvl, stored, 'no surprise mid-fight stat changes');
   }
   reset(1); const locked = c.makeEnemy(W.zones.at(-1).enemy, W.zones.length-1, { patrol: 0 }); assert(locked.lvl >= 200 && locked.lvl <= 210);
-  reset(50); c.G.profile.worldTier = 1; const e = c.makeEnemy('slime', 1, { patrol: 14 }); assert(e.lvl >= 46);
+  reset(50); const e0 = c.makeEnemy('slime', 1, { patrol: 14 }).lvl; c.G.profile.worldTier = 1; const e = c.makeEnemy('slime', 1, { patrol: 14 }); assert(e.lvl >= e0 - 2 + c.tierAdd() && c.tierAdd() > 0, 'world tiers still raise the map');
 });
 const balance = [];
 check('stationary unprotected targets can die at early and late levels; armor remains useful', () => {

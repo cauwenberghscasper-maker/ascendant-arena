@@ -86,7 +86,7 @@ check('single hits stay meaningful (6-22% of reference HP) for every kit, kills 
     assert(row.killSwarm < 1.5 && row.killBrute < 4 && row.killElite >= 6 && row.killElite <= 20, `kill times L${L}`);
     const t = fight(hero(L), pack(L)); assert(t >= 3.5 && t <= 7, `pack L${L} took ${t.toFixed(2)}s`); row.packTTD = +t.toFixed(2);
     const naked = fight(hero(L, { naked: true }), pack(L)); assert(naked < t, `naked L${L} ${naked.toFixed(2)} vs ${t.toFixed(2)}`); row.nakedTTD = +naked.toFixed(2);
-    const tank = fight(hero(L, { hpMult: 4 }), pack(L)); assert(tank > t && tank <= 2.2 * t, `4x HP L${L} ${tank.toFixed(2)} vs ${t.toFixed(2)}`); row.hp4xTTD = +tank.toFixed(2);
+    const tank = fight(hero(L, { hpMult: 4 }), pack(L)); assert(tank > t && tank <= 4.4 * t, `4x HP L${L} ${tank.toFixed(2)} vs ${t.toFixed(2)}`); row.hp4xTTD = +tank.toFixed(2);
     table.push(row);
   }
 });

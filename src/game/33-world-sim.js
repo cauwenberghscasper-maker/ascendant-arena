@@ -67,10 +67,7 @@ function enemyLevelFor(e) {
   if (e.rift) return e.riftLvl + (e.elite ? 2 : 0);
   const Z = CFG.world.zones[e.zone];
   let L = clamp(areaLevel(e.zone, e.z) + randInt(-1, 1), Z.lvl[0], Z.lvl[1]);
-  // Keep a beginner practice area outside town. Elsewhere unlocked regions trail
-  // the hero by at most four levels; gear still helps and difficulty never changes mid-fight.
-  const practice = Z.minLevel <= 1 && e.den == null && distToTown(e.x, e.z) < 48;
-  if (!practice && G.profile.level >= Z.minLevel) L = Math.max(L, G.profile.level - CFG.world.catchupGap - tierAdd());
+  // Zone-authored: monsters never level with the hero, so going back to an old zone feels strong and a new zone is a wall.
   if (e.den != null) L += CFG.world.denLevelBonus;
   if (e.elite) L += 3;
   return L + tierAdd();
@@ -118,8 +115,8 @@ function makeEnemy(type, zi, o) {
 function lerpTable(T, L) { let i = 1; while (i < T.length - 1 && L > T[i][0]) i++; const [a, x] = T[i - 1], [b, y] = T[i], k = Math.max(0, (L - a) / (b - a)); return x * Math.pow(y / x, k); }
 function refHp(L) { const P = CFG.progression; return P.hpBase * Math.pow(P.hpGrowth, L - 1) * lerpTable(CFG.enemies.refHpMult, L); }
 function refDmg(L) { const P = CFG.progression; return P.atkBase * Math.pow(P.atkGrowth, L - 1) * lerpTable(CFG.enemies.refDmgMult, L); }
-// tankier heroes take bigger hits (sqrt), so stacking HP helps but never makes you unkillable
-function mobDmg(e, mult, t) { const b = t && t.maxHp > 0 ? clamp(Math.sqrt(t.maxHp / refHp(e.lvl)), 0.6, 3) : 1; return e.atk * (mult == null ? 1 : mult) * b; }
+// hits depend on the monster's level only, so more HP from gear really makes you tankier
+function mobDmg(e, mult) { return e.atk * (mult == null ? 1 : mult); }
 function inInstance() { return !!(G.rift || G.dungeon); }
 // hits scale with the reference hero's HP, health with its damage: equal-level fights feel the same at 1 and 210
 function setEnemyLevel(e, lvl) {
@@ -207,7 +204,7 @@ function stepShrines(dt) {
         for (let i = 0; i < S.wave; i++) {
           const e = makeEnemy(Z.enemy, sh.zone), a = (i / S.wave) * Math.PI * 2;
           e.x = e.hx = sh.x + Math.sin(a) * 8; e.z = e.hz = sh.z + Math.cos(a) * 8; e.temp = true; e.state = 'chase';
-          setEnemyLevel(e, clamp(p.level, Z.lvl[0] + tierAdd(), Z.lvl[1] + 1 + tierAdd()));
+          setEnemyLevel(e, Z.lvl[1] + 1 + tierAdd());
           G.enemies.push(e); sh.wave.push(e);
         }
         ev({ t: 'shrineStart', i: sh.i, n: S.wave, secs: S.time });
@@ -265,7 +262,7 @@ const CHAMP_MODS = {
   nova: { name: 'Nova', cd: [4.5, 6.5] }, slam: { name: 'Quake', cd: [4, 6] }, charge: { name: 'Charger', cd: [4, 6] }, spiral: { name: 'Spiral', cd: [6, 8] },
   mortar: { name: 'Bombard', cd: [5, 7] }, shield: { name: 'Shielded', cd: [7, 9] }, frenzy: { name: 'Frenzied', cd: [99, 99] }, blink: { name: 'Blinker', cd: [5.5, 7.5] },
 };
-function riftWaveLevel(n) { return Math.max(riftLevel(n), G.profile.level - 6 + Math.floor(n / 5)); }
+function riftWaveLevel(n) { return riftLevel(n) + tierAdd(); }
 function riftComposition(n) {
   const lord = n % CFG.rift.bossEvery === 0;
   let champs = n < 4 ? 0 : n < 10 ? 1 : Math.min(5, 2 + Math.floor((n - 10) / 12));
