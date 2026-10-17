@@ -165,6 +165,7 @@ function rewardEnemyKill(e) {
   else if (e.den != null && Math.random() < 0.06 * TM.gems) addEssence(1);
   if (e.den != null && Math.random() < 0.02) dropShards(1);
   if (typeof craftKillDrop === 'function') craftKillDrop(e);
+  if (e.lairBoss != null) lairBossKilled(e);
   checkAchievements();
 }
 
@@ -434,6 +435,7 @@ function stepHub(dt) {
   if (pl.alive) for (const q of W.runes) if (!G.profile.runes[q.id] && Math.abs(pl.z - q.z) < 4 && Math.hypot(pl.x - q.x, pl.z - q.z) < 4) lightRune(q);
   if (!pl.alive) G.chain.n = 0;
   stepNodes(dt);
+  if (typeof stepLairBosses === 'function') stepLairBosses(dt);
   // XP orbs and challenge shrines
   stepPellets(dt);
   stepShrines(dt);

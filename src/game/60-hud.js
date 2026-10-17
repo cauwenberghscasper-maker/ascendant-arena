@@ -81,7 +81,7 @@ function updateTags() {
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
       const diff = e.lvl - G.profile.level, lvlCls = diff >= 5 ? ' red' : diff >= 2 ? ' orange' : diff <= -6 ? ' grey' : '';
-      put(e.x, h, e.z, e.affixed ? `Elite ${CFG.enemies[e.type].name} ${e.lvl} · ${e.champName}` : e.champ ? `${e.guardian ? 'Rift Lord' : 'Champion'} ${e.lvl} · ${e.champName}` : `${e.guardian ? 'Rift Guardian ' : e.elite ? 'Elite ' : ''}${CFG.enemies[e.type].name} ${e.lvl}`, e.hp / e.maxHp, 'mob' + (e.elite ? ' elite' : '') + lvlCls);
+      put(e.x, h, e.z, e.bossName ? `${e.enraged ? 'Enraged ' : ''}${e.bossName} ${e.lvl}` : e.affixed ? `Elite ${CFG.enemies[e.type].name} ${e.lvl} · ${e.champName}` : e.champ ? `${e.guardian ? 'Rift Lord' : 'Champion'} ${e.lvl} · ${e.champName}` : `${e.guardian ? 'Rift Guardian ' : e.elite ? 'Elite ' : ''}${CFG.enemies[e.type].name} ${e.lvl}`, e.hp / e.maxHp, 'mob' + (e.elite ? ' elite' : '') + lvlCls);
     }
     for (const ml of hubParts.mineLabels || []) if (Math.hypot(ml.x - cx, ml.z - cz) < 45) put(ml.x, ml.y, ml.z, `${ml.name} · Lv ${CFG.world.zones[ml.zone].minLevel}`, null, 'den');
     for (const dl of hubParts.denLabels) { const D = CFG.world.dens[dl.den]; if (Math.hypot(dl.x - cx, dl.z - cz) < 55) put(dl.x, dl.y, dl.z, `${D.name} · Lv ${areaLevel(D.zone, D.z) + CFG.world.denLevelBonus + tierAdd()}`, null, 'den'); }
