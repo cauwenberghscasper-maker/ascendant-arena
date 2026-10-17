@@ -519,3 +519,6 @@
 #modal.full .panel > .x { position: fixed !important; top: calc(12px + var(--sat)) !important; right: calc(12px + var(--sar)) !important; z-index: 20; }
 #modal.full .panel .hubTop { position: sticky; top: 0; z-index: 15; padding: 6px 0; background: var(--og-stone2); }
 #modal.full .panel > .npcHead:first-child { position: sticky; top: 0; z-index: 15; background: var(--og-stone2); padding: 6px 0; }
+/* every page gets its own art banner on top */
+.pageArt { height: 120px; margin: 0 0 10px; background: linear-gradient(180deg, rgba(14,16,30,0) 55%, rgba(14,16,30,.85)), var(--art) center / cover no-repeat;
+  box-shadow: 0 0 0 2px var(--og-ink), inset 0 0 0 2px #4a4f6e; image-rendering: pixelated; }

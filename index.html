@@ -1908,6 +1908,9 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 #modal.full .panel > .x { position: fixed !important; top: calc(12px + var(--sat)) !important; right: calc(12px + var(--sar)) !important; z-index: 20; }
 #modal.full .panel .hubTop { position: sticky; top: 0; z-index: 15; padding: 6px 0; background: var(--og-stone2); }
 #modal.full .panel > .npcHead:first-child { position: sticky; top: 0; z-index: 15; background: var(--og-stone2); padding: 6px 0; }
+/* every page gets its own art banner on top */
+.pageArt { height: 120px; margin: 0 0 10px; background: linear-gradient(180deg, rgba(14,16,30,0) 55%, rgba(14,16,30,.85)), var(--art) center / cover no-repeat;
+  box-shadow: 0 0 0 2px var(--og-ink), inset 0 0 0 2px #4a4f6e; image-rendering: pixelated; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -9923,7 +9926,7 @@ function openSmith(tab) {
   const upAlert = Object.values(slotAlerts()).some((a) => a.canUpgrade);
   const tabs = ['Upgrade', 'Masterwork', 'Craft', 'Forge', 'Enchant'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}${gate(t)}" data-act="smithTab" data-tab="${t}">${lockLabel(t, tabName(t))}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
   openModal(dock(`<div class="npcHead"><h3>Forge</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
-    <div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, ''), true, false);
+    <div class="tabs">${tabs}</div>`, `<div class="tabBody"><div class="pageArt" style="--art:url(assets/ui/forge/banner-${tab.toLowerCase()}.webp)"></div>${body}</div>`, ''), true, false);
 }
 // --- crafting tabs (src/game/39-crafting.js)
 const hex6 = (c) => '#' + c.toString(16).padStart(6, '0');
