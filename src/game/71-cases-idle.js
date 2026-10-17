@@ -52,6 +52,28 @@ function rollCase(c) {
   if (w.mythic) L.mythic = rarIdx(r) >= 5 ? 0 : L.mythic + 1;
   return { r, lucky };
 }
+// bonus on top of the item: a very rare hero, a gold or gem jackpot, or crafting materials (shown with the odds)
+const CASE_BONUS = { hero: 0.002, gold: 0.04, gems: 0.03, mats: 0.25 };
+function caseBonus() {
+  const p = G.profile, x = Math.random(); let acc = 0;
+  const locked = CFG.brawlerOrder.filter((id) => id !== STARTER_HERO && !p.unlocked.attacks.includes(id) && !(CFG.attacks[id].unlock && CFG.attacks[id].unlock.sigils != null));
+  if (locked.length && x < (acc += CASE_BONUS.hero)) {
+    const id = pick(locked); p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id);
+    ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: CFG.attacks[id].name }); return { k: 'hero', id, name: CFG.brawlers[id].name };
+  }
+  if (x < (acc += CASE_BONUS.gold)) { const n = Math.round(6 * Math.pow(CFG.enemies.goldGrowth, p.level - 1) * 360); addGold(n, true); return { k: 'gold', n }; } // about six hours of Bank income
+  if (x < (acc += CASE_BONUS.gems)) { const n = 20 + Math.round(p.level / 3); addEssence(n); return { k: 'gems', n }; }
+  // CB (crafting) is absent in the node-only checks
+  if (typeof CB !== 'undefined' && x < (acc += CASE_BONUS.mats)) { const B = CB[zoneBiome(highestZone(p.level))]; return { k: 'mats', got: addMats([[B.ore, 8 + p.level / 10], [B.part, 3 + p.level / 25]], true) }; }
+  return null;
+}
+function bonusHTML(b) {
+  if (!b) return '';
+  if (b.k === 'hero') return `<div class="cbonus hero"><b>HERO!</b> ${escapeHTML(b.name)} joins you</div>`;
+  if (b.k === 'gold') return `<div class="cbonus gold"><b>JACKPOT</b> ${ICON.coin}${fmtK(b.n)}</div>`;
+  if (b.k === 'gems') return `<div class="cbonus gems"><b>GEMS</b> ${ICON.ess}${fmtK(b.n)}</div>`;
+  return `<div class="cbonus mats">${b.got.map(([id, n]) => matChip(id, null, G.profile).replace(/<b>.*?<\/b>/, `<b>+${n}</b>`)).join('')}</div>`;
+}
 // opening grants the item at once (so closing mid-spin never loses it); the reel only shows it
 function openCase(id) {
   const p = G.profile, i = p.cases.findIndex((c) => c.id === id); if (i < 0) return null;
@@ -61,10 +83,10 @@ function openCase(id) {
   p.stats.cases = (p.stats.cases || 0) + 1;
   p.records.bestCase = Math.max(p.records.bestCase || 0, rarIdx(r));
   grantItem(it, 'case');
-  const mineral = c.k === 'geode' ? crackGeode() : null;
+  const mineral = c.k === 'geode' ? crackGeode() : null, bonus = caseBonus();
   G.dirty = true; checkAchievements();
   saveNow(true); // Persist the case removal and exact reward together, before the reel.
-  return { item: it, lucky, c, mineral, kept: p.bag.some((b) => b.id === it.id) };
+  return { item: it, lucky, c, mineral, bonus, kept: p.bag.some((b) => b.id === it.id) };
 }
 
 // --- Vault: fills while you play or are away; collect any time ---------------------------------
@@ -175,8 +197,9 @@ function openCases(sel) {
     const c = groups[sel][0], odds = caseOdds(c), L = p.caseLuck || { legendary: 0, mythic: 0 };
     body = `<div class="caseHero" style="--cc:${CFG.cases[sel].col}">${caseArt(sel, 'big')}<div><b>${CFG.cases[sel].name}</b><small>${CFG.cases[sel].sub} · item level ${c.l}${c.f ? ` · at least ${CFG.gear.rarity[c.f].name}` : ''}</small></div></div>
       <div class="odds">${odds.map(([r, x]) => `<div class="od ${r}"><span>${CFG.gear.rarity[r].name}</span><b>${x >= 0.01 ? (x * 100).toFixed(1) : (x * 100).toFixed(2)}%</b></div>`).join('')}</div>
+      <div class="odds bonusOdds"><div class="od"><span>Hero</span><b>0.2%</b></div><div class="od"><span>Gold jackpot</span><b>4%</b></div><div class="od"><span>Gems</span><b>3%</b></div><div class="od"><span>Materials</span><b>25%</b></div></div>
       <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
-    bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost" data-act="caseFast" data-k="${sel}">Open ${Math.min(10, groups[sel].length)} fast</button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
+    bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost" data-act="caseFast" data-k="${sel}">Open ${Math.min(5, groups[sel].length)} at once</button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
   openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Open the Collection Log</button></div>`, bar));
   $('panel').classList.add('wide');
@@ -220,21 +243,58 @@ function reelFinish(card) {
   Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
   if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
   const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
-  $('reelOut').innerHTML = `${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
+  $('reelOut').innerHTML = `${bonusHTML(res.bonus)}${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
     <div class="row end">${res.kept ? `${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">${wearWord(it.slot)}</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
     ${left.length ? `<button class="primary gold" data-act="caseOpen" data-id="${left[0].id}">Open next (${left.length})</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
+// up to five chests at once: five reels stacked, each stopping a little later than the one above;
+// the last one takes longest. Every reward is granted before the reels start, so closing never loses one.
 function openCasesFast(k) {
-  const p = G.profile, ids = p.cases.filter((c) => c.k === k).slice(0, 10).map((c) => c.id), out = [];
-  for (const id of ids) { const r = openCase(id); if (!r) break; out.push(r); }
+  const p = G.profile, out = [];
+  for (const id of p.cases.filter((c) => c.k === k).slice(0, 5).map((c) => c.id)) { const r = openCase(id); if (r) out.push(r); }
   if (!out.length) return;
-  out.sort((a, b) => rarIdx(b.item.rarity) - rarIdx(a.item.rarity));
-  const best = out[0] ? rarIdx(out[0].item.rarity) : 0; Sfx.play(best >= 4 ? 'win' : 'unlock');
-  UI.current = 'caseFast';
-  const left = p.cases.filter((c) => c.k === k).length;
-  openModal(`<div class="npcHead">${gi('m_caseOpen', 'hd')}<h3>${out.length} chests opened</h3></div><div class="fastGrid">${out.map((r) => `<div class="rcard ${r.item.rarity} ${r === out[0] ? 'win' : ''}"><img src="${thumbFor(r.item)}" alt=""><i></i><small><b>${SLOT_LABEL[r.item.slot]}</b>${CFG.gear.rarity[r.item.rarity].name}</small></div>`).join('')}</div>
-    <p class="fine">All ${out.length} rewards are saved in your bag.${p.bag.length > CFG.gear.bagMax ? ` Your bag is over its limit (${p.bag.length}/${CFG.gear.bagMax}); reforge with older gear so new drops are kept.` : ''} Check your Equipment for upgrades.</p><div class="row end"><button class="ghost" data-act="cases">Back</button>${left ? `<button class="ghost" data-act="caseFast" data-k="${k}">${left > 10 ? `Open next 10 (${left} left)` : `Open ${left} more`}</button>` : ''}<button class="primary" data-act="close">Done</button></div>`);
+  const N = 40, WIN = 32;
+  const strips = out.map((res) => { const w = caseTable(res.c), cards = [];
+    for (let i = 0; i < N; i++) {
+      let r = i === WIN ? res.item.rarity : rollRarity(w);
+      if ((i === WIN + 1 || i === WIN - 1) && Math.random() < 0.4) { const hi = RARITIES.filter((x) => w[x] && rarIdx(x) > rarIdx(res.item.rarity)); if (hi.length) r = hi[hi.length - 1]; } // near misses on both sides
+      cards.push(i === WIN ? res.item : makeItem(pick(CFG.gear.slots), r, res.c.l));
+    } return cards; });
+  UI.current = 'reel'; Reel.done = false; Reel.skip = false;
+  openModal(`<div class="reelHead" style="--cc:${CFG.cases[k].col}">${caseArt(k, 'shake')}<b>${out.length}× ${CFG.cases[k].name}</b></div>
+    <div class="reels">${strips.map((cards, j) => `<div class="reel mini" id="reel${j}"><div class="strip">${cards.map(reelCard).join('')}</div><div class="marker"></div></div>`).join('')}</div>
+    <div id="reelOut" class="reelOut"><button class="ghost sm" data-act="reelSkip">Skip</button></div>`, false);
   $('panel').classList.add('wide');
+  const R = strips.map((_, j) => { const box = $('reel' + j), strip = box.firstChild, win = strip.children[WIN], cw = strip.children[1].offsetLeft - strip.firstChild.offsetLeft, vw = box.clientWidth;
+    return { box, strip, cw, vw, end: win.offsetLeft - strip.firstChild.offsetLeft + win.offsetWidth / 2 - vw / 2 + (Math.random() - 0.5) * (win.offsetWidth - 18),
+      dur: 2600 + j * 700 + (j === strips.length - 1 ? 1400 : 0), last: -1, done: false }; });
+  const t0 = performance.now(); Sfx.play('super');
+  const step = (now) => {
+    if (UI.current !== 'reel') return;
+    let left = 0;
+    R.forEach((r, j) => { if (r.done) return;
+      const k2 = Math.min(1, (now - t0) / r.dur), x = r.end * (Reel.skip ? 1 : 1 - Math.pow(1 - k2, 4));
+      r.strip.style.transform = `translateX(${-x}px)`;
+      const idx = Math.floor((x + r.vw / 2) / r.cw); if (idx !== r.last) { r.last = idx; Sfx.play('tick', { gap: 0.03 }); }
+      if (k2 >= 1 || Reel.skip) { r.done = true; reelLand(r, out[j], WIN); } else left++; });
+    if (!left) { Reel.skip = false; reelManyFinish(out, k); return; }
+    Reel.raf = requestAnimationFrame(step);
+  };
+  cancelAnimationFrame(Reel.raf); Reel.raf = requestAnimationFrame(step);
+}
+// one reel stops: its card lights up, rarer pulls flash the reel and shake the screen
+function reelLand(r, res, WIN) {
+  const ri = rarIdx(res.item.rarity); r.strip.children[WIN].classList.add('win'); r.box.classList.add('landed', res.item.rarity);
+  if (ri >= 3 || (res.bonus && res.bonus.k !== 'mats')) { r.box.classList.add('jackpot'); if (!G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, 0.25 + 0.1 * ri); }
+  Sfx.play(res.bonus && res.bonus.k === 'hero' ? 'radiant' : ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
+}
+function reelManyFinish(out, k) {
+  Reel.done = true; UI.closable = true;
+  const p = G.profile, left = p.cases.filter((c) => c.k === k).length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
+  if (best >= 4) burst(G.player.x, 1.4, G.player.z, 50 + best * 6, RAR_HEX[RARITIES[best]], 7, 1.1, 0.32, 3, 1.6);
+  $('reelOut').innerHTML = `<div class="reelSum">${out.map((r) => `<div class="rcard ${r.item.rarity}"><img src="${thumbFor(r.item)}" alt=""><i></i></div>`).join('')}</div>
+    ${out.map((r) => bonusHTML(r.bonus)).join('')}
+    <div class="row end">${left ? `<button class="primary" data-act="caseFast" data-k="${k}">Open ${Math.min(5, left)} more</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
 function openIdle(tab) {
   tab = tab || UI.idleTab || 'Vault'; UI.idleTab = tab; UI.current = 'idle';

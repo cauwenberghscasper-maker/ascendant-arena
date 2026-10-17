@@ -559,6 +559,12 @@ function buildHub() {
   // berries
   const bim = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.32, 0), new THREE.MeshBasicMaterial({ color: 0xff5fa2 }), CFG.world.berryCount);
   bim.instanceMatrix.setUsage(THREE.DynamicDrawUsage); bim.frustumCulled = false; hubGroup.add(bim); hubParts.berryIM = bim;
+  // soft white glow behind every resource you can collect (ore veins, berries): camera-facing additive sprites
+  { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const g = cv.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(0.35, 'rgba(255,255,255,.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    const gim = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.9, toneMapped: false }),
+      CFG.world.nodes.length + CFG.world.berryCount);
+    gim.instanceMatrix.setUsage(THREE.DynamicDrawUsage); gim.frustumCulled = false; gim.renderOrder = 2; hubGroup.add(gim); hubParts.resGlowIM = gim; }
   G.hubObstacles = grid;
 }
 

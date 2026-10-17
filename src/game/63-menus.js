@@ -161,37 +161,34 @@ function openQuickUpgrade(action) {
   else if (action === 'artifacts') openArtifacts('Equip');
   else if (action === 'cases') openCases();
 }
-function openMenu(section) {
+// The menu starts with four big buttons; each opens its hub, whose sub-tabs hold the rest
+function openMenu() {
+  UI.current = 'hubs';
+  const p = G.profile, A = menuAlerts(), gearDot = Object.values(slotAlerts()).some((a) => a.better);
+  const big = (act, icon, name, sub, dot) => `<button class="hubTile${gate(act)}" data-act="${act}">${gi(icon)}<b>${name}</b><small>${unlockOpen(act) ? sub : `Opens at level ${UNLOCK_AT[act]}`}</small>${dot && unlockOpen(act) ? '<i class="rdot"></i>' : ''}</button>`;
+  openModal(`<div class="hubTiles">
+    ${big('mHero', 'm_hero', 'Hero', `Level ${fmt(p.level)}`, A.skills || A.artifacts || A.brawlers)}
+    ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
+    ${big('mGear', 'm_case', 'Gear', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
+    ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()) || p.cases.length > 0)}
+  </div>`);
+}
+function openJournal() {
   UI.current = 'menu';
-  if (section === 'upgrades' || section === 'adventure') UI.menuSection = section;
   const p = G.profile, A = menuAlerts(), own = ownedBrawlers(p).length;
   const hp = 0, bp = Math.max(0, treeFree(p, p.cls));
-  const tile = (act, icon, title, sub, dot) => `<button class="mtile" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${sub}</small></span>${dot ? '<i class="rdot"></i>' : ''}</button>`;
-  const upgrades = [
-    tile('mGear', 'm_hero', 'Equipment', `Gear score ${fmt(Math.round(gearTotals(p.gear).score))}`, A.hero),
-    tile('mSkills', 'm_skills', 'Talents', hp + bp > 0 ? `${fmt(hp + bp)} talent points` : 'All points spent', A.skills),
-    tile('mArtifacts', 'm_artifacts', 'Relics', `${p.artifacts.length}/${artifactSlotsFor(p)} socketed`, A.artifacts),
-    tile('mCases', 'm_case', 'Treasure Chests', p.cases.length ? `${p.cases.length} to open` : 'Won from monsters', p.cases.length > 0),
-    tile('mBrawlers', 'm_brawlers', 'Heroes', `${own}/${CFG.brawlerOrder.length} recruited`, A.brawlers),
-    tile('mSmith', 'm_smith', 'Smithy', 'Reforge & forge', UI.anyAlert),
-  ];
+  const tile = (act, icon, title, sub, dot) => `<button class="mtile${gate(act)}" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${unlockOpen(act) ? sub : `Opens at level ${UNLOCK_AT[act]}`}</small></span>${dot && unlockOpen(act) ? '<i class="rdot"></i>' : ''}</button>`;
   const adventure = [
-    tile('mDaily', 'm_progress', 'Daily & Coming Up', loginReady(Date.now()) ? 'Reward ready!' : `Day ${loginState().n % 7 + 1} tomorrow`, loginReady(Date.now())),
-    tile('mProgress', 'm_progress', 'Adventure Log', 'Level Road & hiscores', A.progress),
     tile('mCollection', 'm_hero', 'Collection Log', `${Object.keys(p.collection || {}).length}/${COLLECTION_ITEMS.length} logged`, false),
     tile('mPrestige', 'm_asc', 'Pets & prestige', `Prestige ${prestigeCount(p)}`, !prestigeBlocked()),
     tile('mIdle', 'm_idle', 'Bank & Camp', 'Coffers & expeditions', idleAlert()),
     tile('mPlayers', 'm_players', 'Fellow Adventurers', mpSummary()),
     tile('mArena', 'm_arena', 'Showdown', 'Duel 9 rival champions', false),
   ];
-  openModal(`<div class="menuHead"><div><h3>Adventurer’s Journal</h3><small>${CFG.brawlers[p.cls].name} · Combat level ${fmt(p.level)}</small></div></div>
-    <div class="menuSections" role="group" aria-label="Menu sections">
-      <button data-act="menuSection" data-section="upgrades" aria-pressed="${UI.menuSection === 'upgrades'}">Hero${Object.values(A).some(Boolean) || p.cases.length ? '<i class="rdot"></i>' : ''}</button>
-      <button data-act="menuSection" data-section="adventure" aria-pressed="${UI.menuSection === 'adventure'}">World</button>
-    </div><div class="mtiles">${(UI.menuSection === 'adventure' ? adventure : upgrades).join('')}</div>${comingUpHtml(3)}`);
+  openModal(`<div class="mtiles">${adventure.join('')}</div>${comingUpHtml(3)}`);
   $('panel').classList.add('menuPanel');
 }
-function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><b>${x.t ? '⏳' : '✦'}</b><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }
+function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }
 // a model for every calendar day (same order as CFG.daily.days): chests use their chest art, the rest a 3D reward model
 const DAILY_ART = [{ case: 'treasure' }, { model: 'gems', col: '#58b4ff' }, { model: 'geode', col: '#c77dff' }, { model: 'key', col: '#2fffd0' }, { case: 'treasure' }, { model: 'ore', col: '#ffb347' }, { case: 'boss' }];
 // the login calendar: seven days that never reset, the weekly Colossus bonus and the full coming-up list

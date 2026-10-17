@@ -81,9 +81,9 @@ function updateTags() {
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
       const diff = e.lvl - G.profile.level, lvlCls = diff >= 5 ? ' red' : diff >= 2 ? ' orange' : diff <= -6 ? ' grey' : '';
-      put(e.x, h, e.z, e.affixed ? `Elite ${CFG.enemies[e.type].name} ${e.lvl} · ${e.champName}` : e.champ ? `${e.guardian ? 'Rift Lord' : 'Champion'} ${e.lvl} · ${e.champName}` : `${e.guardian ? 'Rift Guardian ' : e.elite ? 'Elite ' : ''}${CFG.enemies[e.type].name} ${e.lvl}`, e.hp / e.maxHp, 'mob' + (e.elite ? ' elite' : '') + lvlCls);
+      put(e.x, h, e.z, e.bossName ? `${e.enraged ? 'Enraged ' : ''}${e.bossName} ${e.lvl}` : e.affixed ? `Elite ${CFG.enemies[e.type].name} ${e.lvl} · ${e.champName}` : e.champ ? `${e.guardian ? 'Rift Lord' : 'Champion'} ${e.lvl} · ${e.champName}` : `${e.guardian ? 'Rift Guardian ' : e.elite ? 'Elite ' : ''}${CFG.enemies[e.type].name} ${e.lvl}`, e.hp / e.maxHp, 'mob' + (e.elite ? ' elite' : '') + lvlCls);
     }
-    for (const ml of hubParts.mineLabels || []) if (Math.hypot(ml.x - cx, ml.z - cz) < 45) put(ml.x, ml.y, ml.z, `⛏ ${ml.name} · Lv ${CFG.world.zones[ml.zone].minLevel}`, null, 'den');
+    for (const ml of hubParts.mineLabels || []) if (Math.hypot(ml.x - cx, ml.z - cz) < 45) put(ml.x, ml.y, ml.z, `${ml.name} · Lv ${CFG.world.zones[ml.zone].minLevel}`, null, 'den');
     for (const dl of hubParts.denLabels) { const D = CFG.world.dens[dl.den]; if (Math.hypot(dl.x - cx, dl.z - cz) < 55) put(dl.x, dl.y, dl.z, `${D.name} · Lv ${areaLevel(D.zone, D.z) + CFG.world.denLevelBonus + tierAdd()}`, null, 'den'); }
     for (const q of CFG.world.pois) if (q.major && !CFG.world.zones[q.zone].safe && Math.hypot(q.x - cx, q.z - cz) < 40) put(q.x, 6.5, q.z, trialOpen(q.zone) ? `${q.name} · Legendary Trial` : `${q.name} · ${runesLit(q.zone)}/${CFG.dungeon.trial.runes} runestones`, null, 'wp');
     for (const q of dungeonPois()) if (Math.hypot(q.x - cx, q.z - cz) < 90) put(q.x, 7.2, q.z, G.profile.level >= dungeonReq(q) ? `${q.name} · Dungeon` : `${q.name} · Level ${dungeonReq(q)}`, null, 'den');
@@ -163,6 +163,7 @@ function updateHUD(dt) {
     UI.caseFlash = Math.max(0, (UI.caseFlash || 0) - dt); $('caseChip').classList.toggle('flash', UI.caseFlash > 0);
     setHidden('autoChip', G.mode !== 'hub' || !!G.rift); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
   } else { setHidden('caseChip', true); setHidden('autoChip', true); }
+  $('bMenu').classList.toggle('newU', G.started && Object.keys(UNLOCK_AT).some(unlockNew)); // the menu button glows while something new is unopened
   { const n = mpCount(), on = G.started && !inArena; setHidden('mpChip', !on || !n); if (on && n) setText('mpChip', String(n + 1)); }
   const stk = G.streak >= 3 && !inArena;
   setHidden('streak', !stk);
@@ -200,13 +201,13 @@ function updateHUD(dt) {
   setStyle('bMelee', '--cd', clamp(f.meleeCd / CFG.combat.melee.cd, 0, 1).toFixed(2));
   setStyle('bSuper', '--sc', f.superCharge.toFixed(2));
   const sReady = f.superCharge >= 1; if (hudCache.sReady !== sReady) { hudCache.sReady = sReady; $('bSuper').classList.toggle('ready', sReady); }
-  setText('bSuperLbl', CFG.supers[CFG.classes[f.cls].super].short); setBtnIcon('bSuper', BTN_ICON[CFG.classes[f.cls].super]); setBtnIcon('bDash', 'k_phase'); setBtnIcon('bMelee', 'a_blast');
+  setText('bSuperLbl', CFG.supers[CFG.classes[f.cls].super].short); setBtnIcon('bSuper', BTN_ICON[CFG.classes[f.cls].super] || 'k_ascend'); setBtnIcon('bDash', 'k_phase'); setBtnIcon('bMelee', 'a_blast');
   const sk = CFG.classes[f.cls].skill;
   const spc = f.perks && f.perks.special;
   setHidden('bSpecial', !spc);
-  if (spc) { const E = CFG.elements[spc]; setText('bSpecialLbl', E.short); setBtnIcon('bSpecial', BTN_ICON[spc]); setStyle('bSpecial', '--cd', clamp(f.specialCd / E.cd, 0, 1).toFixed(2)); setStyle('bSpecial', '--el', '#' + E.color.toString(16).padStart(6, '0')); }
+  if (spc) { const E = CFG.elements[spc]; setText('bSpecialLbl', E.short); setBtnIcon('bSpecial', BTN_ICON[spc] || 'k_storm'); setStyle('bSpecial', '--cd', clamp(f.specialCd / E.cd, 0, 1).toFixed(2)); setStyle('bSpecial', '--el', '#' + E.color.toString(16).padStart(6, '0')); }
   setHidden('bSkill', !sk);
-  if (sk) { setStyle('bSkill', '--cd', clamp(f.skillCd / (CFG.skills[sk].cd * (1 - f.mods.skillCd) * (1 - (f.cdr || 0))), 0, 1).toFixed(2)); setText('bSkillLbl', CFG.skills[sk].short); setBtnIcon('bSkill', BTN_ICON[sk]); }
+  if (sk) { setStyle('bSkill', '--cd', clamp(f.skillCd / (CFG.skills[sk].cd * (1 - f.mods.skillCd) * (1 - (f.cdr || 0))), 0, 1).toFixed(2)); setText('bSkillLbl', CFG.skills[sk].short); setBtnIcon('bSkill', BTN_ICON[sk] || 'k_tempo'); }
   // interact
   const act = !inArena && G.interact && G.started;
   setHidden('bAct', !act);

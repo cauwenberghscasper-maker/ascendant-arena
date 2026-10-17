@@ -15,6 +15,27 @@ function interact() {
   if (d.role === 'arena') return openArenaPanel();
   openNpc(d);
 }
+// Systems open slowly with level: a locked button shows its level; a newly opened one glows until you tap it
+const UNLOCK_AT = { mArtifacts: 2, mDaily: 2, mSmith: 3, mCollection: 4, mSkills: 5, Forge: 6, mIdle: 8, mBrawlers: 9, Masterwork: 10, mArena: 10, Enchant: 12, Craft: 15 };
+const UNLOCK_NAME = { mArtifacts: 'Relics', mDaily: 'Daily rewards', mSmith: 'Forge', mCollection: 'Collection Log', mSkills: 'Talents', Forge: 'Forge › Buy gear', mIdle: 'Bank & Camp',
+  mBrawlers: 'Heroes', Masterwork: 'Forge › Masterwork', mArena: 'Showdown', Enchant: 'Forge › Enchant', Craft: 'Forge › Craft' };
+const unlockOpen = (k) => !G.profile || G.profile.level >= (UNLOCK_AT[k] || 0);
+const unlockNew = (k) => !!UNLOCK_AT[k] && unlockOpen(k) && !(G.profile.uiSeen || {})[k];
+function unlockSeen(k) { if (!unlockNew(k)) return; (G.profile.uiSeen || (G.profile.uiSeen = {}))[k] = true; G.dirty = true; }
+// attributes for a gated button: locked (disabled, shows "Lv N") or freshly opened (glows)
+const gate = (k) => !unlockOpen(k) ? ' locked" aria-disabled="true' : unlockNew(k) ? ' newU' : '';
+const lockLabel = (k, name) => unlockOpen(k) ? name : `${gi('m_lock')} Lv ${UNLOCK_AT[k]}`;
+// Four hubs (Hero, Forge, Gear, Journal): one bar on top of every hub screen, plus the hub's own sub-tabs
+const HUB_OF = { hero: 'hero', skills: 'hero', artifacts: 'hero', brawlers: 'hero', smith: 'forge', merge: 'forge',
+  menu: 'journal', progress: 'journal', daily: 'journal', collection: 'journal', prestige: 'journal', idle: 'journal', cases: 'journal', players: 'journal' };
+const HUB_SUB = { hero: [['hero', 'Stats', 'mHero'], ['skills', 'Talents', 'mSkills'], ['artifacts', 'Relics', 'mArtifacts'], ['brawlers', 'Heroes', 'mBrawlers']],
+  journal: [['menu', 'World', 'mJournal'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily'], ['cases', 'Chests', 'mCases']] };
+function hubNav() {
+  let hub = HUB_OF[UI.current]; if (!hub) return '';
+  if (UI.current === 'hero' && UI.heroTab === 'Gear') hub = 'equip';
+  const sub = (HUB_SUB[hub] || []).map(([k, n, act]) => `<button class="tab ${k === UI.current ? 'on' : ''}${gate(act)}" data-act="${act}">${lockLabel(act, n)}</button>`).join('');
+  return `<div class="hubTop"><button class="ghost hubBack" data-act="mMenu" aria-label="Back to the menu">Menu</button>${sub ? `<div class="tabs hubSub">${sub}</div>` : ''}</div>`;
+}
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
   const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + (UI.gearAll && UI.heroTab === 'Gear' ? 'all' : UI.gearSlot) : UI.current === 'collection' ? '|' + UI.collectionSlot : UI.current === 'artifacts' ? '|' + UI.artTab + '|' + UI.relicTier : '');
@@ -24,9 +45,11 @@ function openModal(html, closable, showcase) {
   $('panel').className = 'panel scroll';
   setShowcase(!!showcase);
   $('modal').classList.toggle('room', !!showcase);
+  // every hub screen except the Hero (3D showcase) fills the whole page
+  $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || UI.current === 'worldmap' || !!HUB_OF[UI.current]));
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
-  const full = html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
+  const full = hubNav() + html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
   if (same) { // redraw of the same screen: keep the already-decoded pictures so tiles don't blink on phones
     const old = new Map(); for (const im of $('panel').querySelectorAll('img')) { const k = im.getAttribute('src'); if (k) (old.get(k) || old.set(k, []).get(k)).push(im); }
     const tpl = document.createElement('template'); tpl.innerHTML = full;
@@ -188,7 +211,7 @@ function openMerge(slot, bulk, back) {
   const note = plan.n ? `Melts <b>${plan.materials.length}</b> piece${plan.materials.length === 1 ? '' : 's'} (marked ✓) · ${costHTML(plan.gold, plan.ess)}`
     : `Next level needs ${need} weaker piece${need > 1 ? 's' : ''} (${available.length} available) · ${costHTML(upgradeCost(it), upgradeEssence(it))}`;
   const btn = `<button class="ghost" data-act="mergeBack">Back</button><button class="${plan.n ? 'primary' : 'disabled'}" data-act="mergeConfirm" ${plan.n ? '' : 'disabled'}>${plan.n ? `Reforge · +${plan.n} level${plan.n > 1 ? 's' : ''}` : it.up >= CFG.gear.maxUp ? 'Maximum level' : 'Need materials or currency'}</button>`;
-  openModal(dock(head, body, selBar('', btn, '', note)), true, true);
+  openModal(dock(head, body, selBar('', btn, '', note)), true, false);
 }
 function mergeReturn(back) { UI.mergePlan = null; if (back === 'smith') openSmith('Upgrade'); else heroTab('Gear'); }
 function itemRow(it, right, extra, opts) {
@@ -226,36 +249,45 @@ function openNpc(def) {
   openModal(`<div class="npcHead"><span class="dotc" style="background:#${def.body.toString(16).padStart(6, '0')}"></span><h3>${def.name}</h3></div>${body}<div class="row end">${btns}</div>`);
   UI.npc = def;
 }
+// one upgrade card: art, name, now → next, cost and the button (Forge tabs use the whole page as a grid of these)
+function upCard(art, name, now, next, foot, btn, cls) {
+  return `<div class="ucard ${cls || ''}"><div class="uart">${art}</div><b class="un">${name}</b><div class="uval">${now}${next ? `<i>→</i><em>${next}</em>` : ''}</div>${foot || ''}${btn}</div>`;
+}
+const MW_ART = { whetstone: 'weapon', plating: 'chest', bracers: 'accessory', treads: 'boots', satchel: 'm_case', purse: 'm_coin' };
+const FORGE_ICONS = ['whetstone', 'plating', 'bracers', 'satchel']; // own pixel icons in assets/ui/forge/ (Z-Image-Turbo + tools/pixelize_items.py)
+const mwArt = (id) => { if (FORGE_ICONS.includes(id)) return `<img src="assets/ui/forge/${id}.png" alt="">`; const a = MW_ART[id] || 'm_smith'; return a.startsWith('m_') ? gi(a) : `<img src="${thumbFor({ id: 'mw-' + id, slot: a, rarity: 'epic', up: 0, ilvl: 1, name: ITEM_NAMES[a][a === 'weapon' ? 0 : 1] })}" alt="">`; };
 function openSmith(tab) {
-  tab = tab || UI.smithTab || 'Upgrade'; UI.smithTab = tab;
+  if (!unlockOpen('mSmith')) { toast(`The Forge opens at level ${UNLOCK_AT.mSmith}`, 'bad'); return; }
+  tab = tab || UI.smithTab || 'Upgrade'; if (!['Upgrade', 'Masterwork', 'Craft', 'Forge', 'Enchant'].includes(tab) || !unlockOpen(tab)) tab = 'Upgrade'; UI.smithTab = tab; unlockSeen(tab);
   UI.current = 'smith';
   const p = G.profile;
   let body;
   if (tab === 'Upgrade') {
-    body = `<p class="say">“Bring me weaker gear of the same slot and I’ll melt it into the piece you wear. Each level adds 12% to its stats. Past +5 I need gems too; every 10 levels earns a star.”</p><div class="list">` + CFG.gear.slots.map((s) => {
+    // show the result first (+level and stats after), the button then opens the list of pieces it melts
+    body = '<div class="ugrid">' + CFG.gear.slots.map((s) => {
       const it = p.gear[s];
-      if (!it) return `<div class="item"><div class="meta"><div class="nm">${SLOT_LABEL[s]} · empty</div><div class="st">Equip a piece to merge upgrades.</div></div><button class="ghost" data-act="slot" data-slot="${s}">Choose gear</button></div>`;
-      const cost = upgradeCost(it), ess = upgradeEssence(it), max = it.up >= CFG.gear.maxUp, can = maxUpgradePlan(it, 1).n > 0;
-      const mp = maxUpgradePlan(it);
-      return itemRow(it, `<div class="col"><button class="${can ? 'primary' : 'ghost'}" data-act="${mp.n > 1 ? 'upgradeMax2' : 'upgrade'}" data-slot="${s}" ${max ? 'disabled' : ''}>${max ? 'Max' : mp.n > 1 ? `Reforge… +${mp.n}` : `Reforge… ${costHTML(cost, ess)}`}</button>${mergeCostHTML(it)}</div>`, null, { upgrade: can });
+      if (!it) return upCard(gi('m_lock'), SLOT_LABEL[s], 'empty', '', '', `<button class="ghost" data-act="slot" data-slot="${s}">Equip</button>`, 'none');
+      const max = it.up >= CFG.gear.maxUp, mp = maxUpgradePlan(it), can = maxUpgradePlan(it, 1).n > 0;
+      const after = Object.assign({}, it, { up: it.up + Math.max(1, mp.n) });
+      const btn = max ? '<button class="disabled" disabled>Max</button>'
+        : `<button class="${can ? 'primary' : 'ghost'}" data-act="${mp.n > 1 ? 'upgradeMax2' : 'upgrade'}" data-slot="${s}">${can ? `Reforge +${Math.max(1, mp.n)}` : 'Pieces'}</button>`;
+      return upCard(`<img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt="">`, `${SLOT_LABEL[s]} <span class="rar ${it.rarity}">+${it.up}</span>`,
+        `<span>${statLine(it)}</span>`, max ? '' : `<span>+${after.up} · ${statLine(after)}</span>`, max ? '' : mergeCostHTML(it), btn, `${it.rarity}${can ? ' alert' : ''}`);
     }).join('') + '</div>';
   } else if (tab === 'Craft') body = craftTabHTML(p);
   else if (tab === 'Masterwork') body = masterworkTabHTML(p);
-  else if (tab === 'Gems') {
-    const pr = gemPrice(p), row = (n) => { let c = 0; for (let i = 0; i < n; i++) c += Math.round(30 * Math.pow(CFG.enemies.goldGrowth, p.level - 1) * Math.pow(1.03, (p.gemBuys || 0) + i)); return `<button class="${p.gold >= c ? 'primary' : 'disabled'}" data-act="gems" data-n="${n}" ${p.gold >= c ? '' : 'aria-disabled="true"'}>${ICON.ess}${n} for ${ICON.coin}${fmtK(c)}</button>`; };
-    body = `<p class="say">“Got more gold than you need? I’ll trade you gems. The price climbs a little with every gem and cools down over time.”</p>
-      <div class="gemx"><div><span>Current price</span><b>${ICON.coin}${fmtK(pr)} <small>per gem</small></b></div><div class="row">${row(10)}${row(50)}${row(200)}</div></div>
-      <p class="fine">Gems also drop from elites, dens, world bosses, shrines, milestone chests and salvaging Rare+ gear.</p>`;
-  } else {
-    body = `<p class="say">“Rare pieces carry a perk that gives you a new way to attack. Your old piece goes to your bag.”</p><div class="list">` + CFG.gear.slots.map((s) => {
+  else if (tab === 'Enchant') body = enchantTabHTML(p);
+  else {
+    body = '<div class="ugrid">' + CFG.gear.slots.map((s) => {
       const o = forgeOffer(s), can = p.gold >= o.price;
-      return itemRow(o.item, `<button class="${can ? 'primary' : 'disabled'}" data-act="forge" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>${ICON.coin}${fmt(o.price)}</button>`, `${s} · item level ${o.item.ilvl}`);
-    }).join('') + '</div><p class="fine">Prices are fixed. Epic pieces only drop from monsters, world bosses and their perks are stronger.</p>';
+      return upCard(`<img class="thumb ${o.item.rarity}" src="${thumbFor(o.item)}" alt="">`, `${SLOT_LABEL[s]} ${rarityChip(o.item.rarity)}`, `<span>${statLine(o.item)}</span>`, '', perkLine(o.item),
+        `<button class="${can ? 'primary' : 'disabled'}" data-act="forge" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>${ICON.coin}${fmt(o.price)}</button>`, o.item.rarity);
+    }).join('') + '</div>';
   }
   const upAlert = Object.values(slotAlerts()).some((a) => a.canUpgrade);
-  const tabs = ['Upgrade', 'Craft', 'Masterwork', 'Gems', 'Forge'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}" data-act="smithTab" data-tab="${t}">${tabName(t)}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
-  openModal(dock(`<div class="npcHead"><span class="dotc" style="background:#8a5a3c"></span><h3>Garo’s Smithy</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
-    <div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, tab === 'Upgrade' ? selBar('', '', '', 'Each Reforge… shows every piece the smith will melt down before you confirm.') : ''), true, true);
+  const tabs = ['Upgrade', 'Masterwork', 'Craft', 'Forge', 'Enchant'].map((t) => `<button class="tab ${tab === t ? 'on' : ''}${gate(t)}" data-act="smithTab" data-tab="${t}">${lockLabel(t, tabName(t))}${t === 'Upgrade' && upAlert ? '<i class="rdot tabdot"></i>' : ''}</button>`).join('');
+  openModal(dock(`<div class="npcHead"><h3>Forge</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
+    <div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, ''), true, false);
 }
 // --- crafting tabs (src/game/39-crafting.js)
 const hex6 = (c) => '#' + c.toString(16).padStart(6, '0');
@@ -273,25 +305,38 @@ function craftTabHTML(p) {
       <button class="${can ? 'primary' : 'disabled'}" data-act="craftPiece" data-b="${bi}" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div>`;
   }).join('');
   const hero = CFG.brawlers[b.hero], heroHave = p.unlocked.attacks.includes(b.hero), relicN = craftState(p).relics[bi] | 0;
-  return `<p class="say">“Bring me what the land gives up: ore from the mines, parts from its monsters and the cores that only its dungeons hold. I’ll make you something no monster drops.”</p>
+  return `
     <div class="bpicks">${picks}</div>
     <div class="card craftSet" style="--mc:${hex6(b.color)}"><h4>${b.set} set · ${BIOMES[bi].name}</h4>
       <p>${open ? `Wear 3 pieces: +${pct(SB[3].dmg * k)} damage, +${pct(SB[3].hp * k)} HP · all 5: another +${pct(SB[5].dmg * k)} damage, +${pct(SB[5].hp * k)} HP <em>(wearing ${worn}/5)</em>` : `Opens at level ${minL}, when you can reach ${BIOMES[bi].name}.`}</p>
       <div class="mats">${matChip(b.ore, null, p)}${matChip(b.part, null, p)}${matChip(b.core, null, p)}${matChip(C.titan.id, null, p)}</div>
-      <p class="fine">${b.oreN}: mine it in this biome’s quarries · ${b.partN}: its monsters (elites always drop some) · ${b.coreN}: its dungeon chests only · Titan Souls: world bosses</p></div>
+    </div>
     <div class="list">${rows}</div>
     <div class="card secret"><h4>Hidden in ${BIOMES[bi].name} dungeons</h4>
       <p>${hero ? (heroHave ? `<b>${hero.name}</b> fights for you.` : `<b>${hero.name}</b> cannot be recruited any other way. Their oaths drop from this biome’s dungeon chests (Sanctums and Trials more often, higher keys more): <b>${sigilHave(b.hero, p)}/${C.sigil.need}</b>.`) : ''}</p>
       <p>Relic: <b>${b.relic.name}</b> ${rarityChip(b.relic.rarity)} · a rare chest find here (twice as likely in the Sanctum, certain after ${C.relic.pity} chests without one) · found ${relicN}×</p></div>`;
 }
-function masterworkTabHTML(p) {
-  const C = CFG.craft, rows = Object.keys(C.upgrades).map((id) => {
-    const U = C.upgrades[id], r = upgRank(id, p), max = r >= U.max, cost = max ? null : upgCost(id, r), can = !max && canPay(cost, p);
-    return `<div class="item craftRow mw"><div class="meta"><div class="slot">Rank ${r}/${U.max}${max ? ' · mastered' : ` · next uses ${BIOMES[cost.biome].name} materials`}</div><div class="nm">${U.name}</div><div class="st">${r ? U.d(U.per * r) : 'Not started'}${max ? '' : ` → <b>${U.d(U.per * (r + 1))}</b>`}</div>${max ? '' : `<div class="mats">${costChips(cost, p)}</div>`}</div>
-      <button class="${can ? 'primary' : 'disabled'}" data-act="buyUpg" data-id="${id}" ${can ? '' : 'aria-disabled="true"'}>${max ? 'Max' : 'Upgrade'}</button></div>`;
+// Enchant: every worn piece with its affixes; each affix can be rerolled (gold) or boosted toward its cap (gems)
+function enchantTabHTML(p) {
+  const cards = CFG.gear.slots.map((s) => {
+    const it = p.gear[s]; if (!it || !it.aff || !Object.keys(it.aff).length) return '';
+    const keys = Object.keys(it.aff), rc = enchantCost(it), eg = empowerGems(it);
+    const rows = keys.map((k) => { const v = it.aff[k], cap = affCap(k, it), full = v >= cap;
+      return `<div class="arow"><span class="an">+${Math.round(v * 100)}% ${CFG.affixes[k].name}</span><i class="abar"><b style="width:${Math.round(100 * v / cap)}%"></b></i>
+        <button class="${p.gold >= rc ? 'ghost' : 'disabled'}" data-act="enchReroll" data-slot="${s}" data-k="${k}">Reroll ${ICON.coin}${fmtK(rc)}</button>
+        <button class="${full ? 'disabled' : p.essence >= eg ? 'ghost boost' : 'disabled'}" data-act="enchUp" data-slot="${s}" data-k="${k}" ${full ? 'disabled' : ''}>${full ? 'Max' : `Boost ${ICON.ess}${eg}`}</button></div>`; }).join('');
+    return `<div class="ecard ${it.rarity}"><div class="ehead"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><b>${escapeHTML(it.name)}</b>${rarityChip(it.rarity)}</div>${rows}</div>`;
   }).join('');
-  return `<p class="say">“Masterwork lasts forever and follows every hero you play. The early ranks take woodland copper; the last ones need every land’s materials and a Titan Soul or two.”</p><div class="list">${rows}</div>
-    <p class="fine">Masterwork and set bonuses apply in the world, dungeons and the Rift; the Arena keeps fights even.</p>`;
+  return cards ? `<div class="elist">${cards}</div>` : '<p class="fine">Uncommon or better gear carries affixes.</p>';
+}
+function masterworkTabHTML(p) {
+  const C = CFG.craft;
+  return '<div class="ugrid">' + Object.keys(C.upgrades).map((id) => {
+    const U = C.upgrades[id], r = upgRank(id, p), max = r >= U.max, cost = max ? null : upgCost(id, r), can = !max && canPay(cost, p);
+    return upCard(mwArt(id), U.name, `<span>${r ? U.d(U.per * r) : '—'}</span>`, max ? '' : `<span>${U.d(U.per * (r + 1))}</span>`,
+      `<div class="urank"><i style="width:${Math.round(100 * r / U.max)}%"></i><small>${r}/${U.max}</small></div>${max ? '' : `<div class="mats">${costChips(cost, p)}</div>`}`,
+      `<button class="${can ? 'primary' : 'disabled'}" data-act="buyUpg" data-id="${id}" ${can ? '' : 'aria-disabled="true"'}>${max ? 'Max' : 'Upgrade'}</button>`, max ? 'legendary' : can ? 'alert' : '');
+  }).join('') + '</div>';
 }
 function openArenaPanel() {
   UI.current = 'arena';
@@ -352,28 +397,13 @@ function heroTab(tab) {
   let body = '', bar = '';
   const pct = (x) => `${Math.round(x * 100)}%`;
   if (tab === 'Stats') {
-    const g = gearTotals(p.gear);
-    // one line per stat: name, value and four benchmark pips (Base to Ascendant); two columns
-    const st = (k, v, sub, earned) => {
-      const colors = ['#9d9686', '#7f9e6e', '#6f9fb0', '#a184b8', '#d4a85a'], rank = earned ? earned.rank : -1;
-      return `<div class="lrow"${earned ? ` style="--statColor:${colors[rank]}" title="${earned.name} benchmark"` : ''}><span>${k}</span><b>${v}${sub ? ` <small>${sub}</small>` : ''}</b>${earned ? `<i class="pips" aria-label="${earned.name} benchmark">${[1, 2, 3, 4].map((n) => `<i class="${rank >= n ? 'on' : ''}"></i>`).join('')}</i>` : ''}</div>`;
-    };
-    const mark = statMilestone;
-    body = `<h4 class="sub first">Combat</h4><div class="ledger">
-      ${st('Damage', fmtK(pl.dmg),null,mark(pl.dmg,[75,250,1000,5000]))}${st('Max HP', fmtK(pl.maxHp),null,mark(pl.maxHp,[500,2000,10000,50000]))}
-      ${st('Crit chance', pct(CFG.combat.critChance + pl.critBonus),null,mark(pl.critBonus,[.05,.15,.3,.5]))}${st('Crit damage', '×' + (CFG.combat.critMult + pl.critDmg).toFixed(2),null,mark(pl.critDmg,[.1,.3,.6,1]))}
-      ${st('Attack speed', '+' + pct(pl.atkSpeed || 0),null,mark(pl.atkSpeed,[.1,.25,.5,1]))}${st('Lifesteal', pct(pl.lifesteal || 0),null,mark(pl.lifesteal,[.03,.08,.15,.3]))}
-      ${st('Damage reduction', pct(Math.min(0.6, pl.armor || 0)),null,mark(Math.min(.6,pl.armor||0),[.05,.15,.3,.5]))}${st('Cooldowns', '-' + pct(pl.cdr || 0),null,mark(pl.cdr,[.05,.15,.3,.5]))}
-      ${st('Move speed', pl.speed.toFixed(2))}${st('Weapon mastery', '+' + pct(pl.masteryDmg || 0), 'damage')}</div>
-      <h4 class="sub">Progress</h4><div class="ledger">
-      ${st('Level', `${p.level}`)}${st('Prestige', `${prestigeCount(p)}`)}${st('Gear score', fmt(Math.round(g.score)))}
-      ${st('Total mastery', fmt(totalMastery(p)))}${st('Gems', fmtK(p.essence))}
-      ${st('Monsters', fmtK(p.stats.kills), `${fmt(p.stats.elites || 0)} elite`)}${st('Best streak', fmt(p.stats.bestStreak || 0))}
-      ${st('Trophies', fmt(p.trophies), `best ${fmt(p.bestTrophies)}`)}${st('Arena power', '×' + playerArenaPower(p).toFixed(2))}</div>
-
-      <p class="fine">The pips show earned benchmarks, from Base to Ascendant. They are not stat caps.</p><button class="ghost" data-act="mPrestige">Prestige ${prestigeCount(p)} · ${prestigeCount(p) ? `${petProgress(p).name} Lv ${petProgress(p).level}` : `Dragon unlocks at level ${PRESTIGE_LEVEL}`}</button>
-      <h4 class="sub">Gear bonuses</h4><p class="fine">${(() => { const a = g.aff; const l = Object.keys(a).filter((k) => a[k] > 0).map((k) => `+${Math.round(a[k] * 100)}% ${CFG.affixes[k].name}`); return l.length ? l.join(' · ') : 'Uncommon and better items roll bonuses like attack speed, crit damage, lifesteal and damage reduction.'; })()}</p>
-      <h4 class="sub">Attack perks and specials</h4>${(() => { const l = CFG.gear.slots.map((s) => perkText(p.gear[s])).filter(Boolean); return l.length ? `<div class="list">${l.map((t) => `<div class="perk solo">${t}</div>`).join('')}</div>` : '<p class="fine">Rare, Epic and Legendary pieces each add a new attack option, and accessories add a Fire, Ice, Storm or Toxic special.</p>'; })()}`;
+    // one clear card: the hero's art, what they wear right now and the eight stats that matter
+    const port = brawlerThumb(p.cls), g = gearTotals(p.gear);
+    const eq = CFG.gear.slots.map((s) => { const it = p.gear[s];
+      return `<button class="tile ${it ? it.rarity : 'empty'}" data-act="mGear" aria-label="${SLOT_LABEL[s]}">${it ? `<img src="${thumbFor(it)}" alt="">` : '<span class="emptySlot">+</span>'}<span class="ts">${SLOT_LABEL[s]}</span>${it && it.up ? `<span class="tu">+${it.up}</span>` : ''}</button>`; }).join('');
+    const box = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
+    body = `<div class="heroCard">${port ? `<img class="hport" src="${port}" alt="">` : ''}<div class="tiles heq">${eq}</div></div>
+      ${statStrip(null)}<div class="bstats hsmall">${box('Level', fmt(p.level))}${box('Gear score', fmt(Math.round(g.score)))}${box('Move', pl.speed.toFixed(1))}${box('Trophies', fmt(p.trophies))}</div>`;
   } else if (tab === 'Gear') {
     p._bagSeen = true;
     const al = slotAlerts();
@@ -393,33 +423,18 @@ function heroTab(tab) {
     const pick = pieces.find((b) => b.id === UI.gearPick) || null; if (!pick) UI.gearPick = null;
     const mark = (it) => isBetter(it, p.gear[it.slot]) ? { cls: 'up', text: '▲', label: 'better than equipped' } : next.has(it.id) ? { cls: 'mat1', text: '+1', label: 'used by the next merge' } : all.has(it.id) ? { cls: 'mat', text: 'max', label: 'used by Merge max' } : null;
     const L = p.luck, Pi = CFG.loot.pity;
-    const reroll = (cur && rarIdx(cur.rarity) >= 1 ? `<button class="ghost sm" data-act="reroll" data-slot="${sel}">Reroll bonuses ${ICON.coin}${fmtK(rerollCost(cur))}</button>` : '')
-      + (cur ? `<button class="ghost sm" data-act="unequip" data-slot="${sel}">Unequip</button>` : '');
     const filt = `<div class="bagFilter" role="group" aria-label="Show"><button class="${all0 ? '' : 'on'}" data-act="gearAll" data-v="0" aria-pressed="${!all0}">${SLOT_LABEL[sel] === 'Accessory' ? 'Accessories' : SLOT_LABEL[sel] + 's'}</button><button class="${all0 ? 'on' : ''}" data-act="gearAll" data-v="1" aria-pressed="${all0}">All gear</button></div>`;
-    body = `${statStrip(pick)}<div class="tiles">${tiles}</div>
+    // compare: what you wear next to the bag piece you tapped, then the eight key stats with ▲/▼
+    const wornOf = pick ? p.gear[pick.slot] : cur;
+    const cmpCard = (it, label) => it ? `<div class="cmpc ${it.rarity}"><small>${label}</small><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b>${rarityChip(it.rarity)}<span class="st">${statLine(it)}</span>${it.aff && Object.keys(it.aff).length ? `<span class="st aff">${affixText(it).split(' · ').join('<br>')}</span>` : ''}</div>`
+      : `<div class="cmpc none"><small>${label}</small><span class="emptySlot">${label === 'Worn' ? '+' : '?'}</span></div>`;
+    body = `<div class="cmp">${cmpCard(wornOf, 'Worn')}<b class="cmpv">VS</b>${cmpCard(pick, 'Tap a bag item')}</div>${statStrip(pick)}<div class="tiles">${tiles}</div>
       <div class="subRow"><h4 class="sub">Bag · ${pieces.length}</h4>${filt}<small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
-      ${itemGrid(pieces, { act: 'gwear', mark, empty: all0 ? 'Your bag is empty. Monsters, elites, dens, shrines and world bosses drop gear.' : `No other ${SLOT_LABEL[sel].toLowerCase()} pieces in your bag yet. Monsters, elites, dens, shrines and world bosses drop gear. Deeper areas roll rarer items.` })}
-      ${pieces.length ? `<div class="ilegend"><span><i class="up">▲</i>better</span><span><i class="m1">+1</i>next reforge</span><span><i class="mm">max</i>reforge max</span><span>${gi('m_lock')} kept</span></div>` : ''}
-      <h4 class="sub">${SLOT_LABEL[sel]} · worn</h4><div class="list">${cur ? itemRow(cur, reroll, null, { upgrade: can }) : '<p class="fine">Nothing equipped. Choose a piece from your bag above.</p>'}</div>
-      <h4 class="sub">Luck</h4><div class="luck">${['rare', 'epic', 'legendary'].concat(HIGH_RAR.filter((h) => highWeights(curTier(), 6)[h] > 0)).map((r) => `<div class="lk ${r}"><span>${CFG.gear.rarity[r].name} guaranteed in</span><b>${Math.max(1, Pi[r] - L[r])} drops</b><i style="--v:${Math.round(L[r] / Pi[r] * 100)}%"></i></div>`).join('')}</div>`;
-    if (!cur) {
-      bar = selBar('', '', '', 'Tap a piece in your bag to wear it.');
-    } else {
-      // what each Reforge eats, shown above its own button: the actual bag pieces, or what is still missing
-      const need = mergeRequired(cur), have = mergeCandidates(cur).length, noun = SLOT_LABEL[sel].toLowerCase();
-      const byId = new Map(p.bag.map((b) => [b.id, b]));
-      const thumbs = (ids, k) => `<span class="rcpT">${ids.slice(0, k).map((id) => { const b = byId.get(id); return b ? `<img src="${thumbFor(b)}" alt="" style="--rc:${rarCol(b.rarity)}">` : ''; }).join('')}${ids.length > k ? `<em>+${ids.length - k}</em>` : ''}</span>`;
-      const lack = (n) => `<span class="rcpMiss">Need ${n} more ${noun}${n > 1 ? 's' : ''} weaker than the one you wear</span>`;
-      const short = (g, e) => p.gold < g ? 'Not enough coins' : p.essence < e ? 'Not enough gems' : '';
-      const col1 = max ? '<span class="rcpL">Max level reached</span>'
-        : have < need ? `<span class="rcpL">+1 uses ${need} ${noun}${need > 1 ? 's' : ''}</span>${lack(need - have)}`
-        : `<span class="rcpL">+1 uses</span>${thumbs(one.materials.length ? one.materials : mergeCandidates(cur).slice(0, need).map((m) => m.id), 4)}${!one.n ? `<span class="rcpMiss">${short(upgradeCost(cur), upgradeEssence(cur))}</span>` : ''}`;
-      const col2 = max ? '' : mp.n > 1 ? `<span class="rcpL">+${mp.n} uses ${mp.materials.length}</span>${thumbs(mp.materials, 4)}`
-        : `<span class="rcpL">Max</span><span class="rcpMiss">${have < need ? 'Nothing to reforge yet' : 'Only +1 possible now'}</span>`;
-      bar = `<div class="rcp"><div>${col1}</div><div>${col2}</div></div><div class="pBtns rcpBtns">`
-        + `<button class="${can && !max ? 'primary' : 'disabled'}" data-act="upgradeHere" data-slot="${sel}" ${can && !max ? '' : 'disabled'}>${max ? 'Max level' : `Reforge +1 <small>${costHTML(upgradeCost(cur), upgradeEssence(cur))}</small>`}</button>`
-        + `<button class="${mp.n > 1 ? 'primary gold' : 'disabled'}" data-act="upgradeMax" data-slot="${sel}" ${mp.n > 1 ? '' : 'disabled'}>Reforge max${mp.n > 1 ? ` +${mp.n} <small>${costHTML(mp.gold, mp.ess)}</small>` : ''}</button></div>`;
-    }
+      ${itemGrid(pieces, { act: 'gpick', sel: UI.gearPick, mark, empty: 'Monsters, elites, dens, shrines and world bosses drop gear.' })}
+      <h4 class="sub">Luck</h4><div class="luck">${['rare', 'epic', 'legendary'].concat(HIGH_RAR.filter((h) => highWeights(curTier(), 6)[h] > 0)).map((r) => `<div class="lk ${r}"><span>${CFG.gear.rarity[r].name} in</span><b>${Math.max(1, Pi[r] - L[r])}</b><i style="--v:${Math.round(L[r] / Pi[r] * 100)}%"></i></div>`).join('')}</div>`;
+    // the bar acts on the picked piece; reforging and affixes live in the Forge now
+    bar = pick ? selBar('', `<button class="primary" data-act="gwear" data-id="${escapeHTML(pick.id)}">${wearWord(pick.slot)}</button><button class="ghost" data-act="protectGear" data-id="${escapeHTML(pick.id)}">${pick.locked ? 'Unprotect' : 'Protect'}</button><button class="warn" data-act="salvage" data-id="${escapeHTML(pick.id)}" ${pick.locked ? 'disabled' : ''}>Salvage</button>`)
+      : cur ? selBar('', `<button class="ghost" data-act="unequip" data-slot="${sel}">Unequip</button><button class="ghost" data-act="mSmith">Forge</button>`) : '';
   } else if (tab === 'Attacks') {
     const cur = resolvedAttack(p), av = availableAttacks(p), fresh = new Set(p.newUnlocks);
     const sig = CFG.signatures[p.cls || 'novice'].id, nSlots = artifactSlotsFor(p);
@@ -493,7 +508,24 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div><button class="ghost sm hm" data-act="openMenu" aria-label="Journal">${gi('m_menu')}<span class="hmT"> Journal</span></button></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, false);
+}
+// World map (the Map button): the whole road north, one row per area, top = furthest. Tap an attuned lodestone
+// to travel there from anywhere in the open world; areas you have not reached yet stay hidden.
+function openWorldMap() {
+  UI.current = 'worldmap';
+  const p = G.profile, here = zoneAt(G.player.z), far = Math.max(p.stats.zone || 0, here), hub = G.mode === 'hub' && !G.rift;
+  const wpOf = {}; CFG.world.waypoints.forEach((w, i) => { wpOf[w.zone] = i; });
+  const Z = CFG.world.zones, html = [];
+  for (let zi = Z.length - 1; zi >= 0; zi--) { // north (furthest) at the top; each biome's name sits above its areas
+    const zn = Z[zi], seen = zi <= far, i = wpOf[zi], have = i != null && p.waypoints.includes(i), lvlOk = p.level >= (zn.minLevel || 1), col = hex6(BIOMES[zn.biome].coreColor);
+    if (zi === Z.length - 1 || Z[zi + 1].biome !== zn.biome) html.push(`<div class="mbiome" style="--bc:${col}">${seen || zi <= far + 3 ? zn.biomeName : '???'}</div>`);
+    const right = zi === here ? '<span class="mtag here">You</span>' : !seen ? '' : have && lvlOk && hub ? `<button class="primary" data-act="travel" data-i="${i}">Go</button>`
+      : `<span class="mtag">${!lvlOk ? 'Lv ' + zn.minLevel : i == null ? '' : 'Find stone'}</span>`;
+    html.push(`<div class="marea ${seen ? '' : 'fog'} ${zi === here ? 'here' : ''}" style="--bc:${col}${seen ? `;--art:url(assets/ui/areas/${zi}.webp)` : ''}"><b>${seen ? zn.name : '???'}</b><small>${seen ? (zn.safe ? 'Safe' : `Lv ${zn.lvl[0]}–${zn.lvl[1]}`) : ''}</small>${right}</div>`);
+  }
+  openModal(`<div class="npcHead"><h3>World map</h3><span class="cnt">${p.waypoints.length}/${CFG.world.waypoints.length} stones</span></div>${hub ? '' : '<p class="fine">Travel works in the open world.</p>'}<div class="wmap">${html.join('')}</div>`);
+  setTimeout(() => { const h = $('panel').querySelector('.marea.here'); if (h) h.scrollIntoView({ block: 'center' }); }, 30);
 }
 function openWaypoints() {
   UI.current = 'waypoints';
@@ -566,7 +598,7 @@ function openDungeonChest() {
   const rows = r.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('');
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
-    ${r.radiant ? `<h2 class="center">✦ RADIANT ✦</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
+    ${r.radiant ? `<h2 class="center">RADIANT</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
     ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}${craftChestHTML(r.craft)}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
@@ -637,6 +669,7 @@ function handlePanelClick(e) {
   UI.tapAnchor = panelAnchor(b);
   if (b.getAttribute('aria-disabled') === 'true') { Sfx.play('click'); return; }
   const act = b.dataset.act; Sfx.play('click');
+  unlockSeen(act);
   if (!LOCAL_PREVIEW && !TEST_MODE && ['tLevel', 't5', 't100', 'tGold', 'tEss', 'tShards', 'tBoss', 'tUnlock', 'tLegend', 'tFocus'].includes(act)) return;
   switch (act) {
     case 'testMode': saveNow(true); location.assign(testModeUrl(location.href, !TEST_MODE)); break;
@@ -644,7 +677,7 @@ function handlePanelClick(e) {
     case 'tZoom': treeZoom(b.dataset.z); break;
     case 'mSmith': openSmith('Upgrade'); break;
     case 'mMenu': openMenu(); break;
-    case 'menuSection': openMenu(b.dataset.section); $('panel').querySelector(`[data-section="${UI.menuSection}"]`).focus({preventScroll:true}); break;
+    case 'mJournal': openJournal(); break;
     case 'mCases': case 'cases': openCases(); break;
     case 'mCollection': openCollection(); break;
     case 'mDaily': openDaily(); break;
@@ -681,6 +714,8 @@ function handlePanelClick(e) {
     case 'upgrade': openMerge(b.dataset.slot, false, 'smith'); break;
     case 'forge': if (buyForge(b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; openSmith('Forge'); } break;
     case 'smithTab': openSmith(b.dataset.tab); break;
+    case 'enchReroll': if (rerollAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gold', 'bad'); openSmith('Enchant'); break;
+    case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
     case 'craftPiece': if (craftSetPiece(+b.dataset.b, b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
     case 'buyUpg': if (buyUpgrade(b.dataset.id)) Sfx.play('unlock'); openSmith('Masterwork'); break;

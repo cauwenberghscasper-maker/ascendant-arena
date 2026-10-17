@@ -170,7 +170,7 @@ function updateParticles(dt) {
 const HeroFX = createHeroFX({ scene: dynGroup, camera, fxPal: (c) => fxPal(c), growth: (e) => growthScale(e), ent: (id) => G.ents.get(id),
   play: (k, pal, x, y, z, size, opts) => SpriteFX.play(k, pal, x, y, z, size, opts),
   particles: { burst, mote, play: (k, pal, x, y, z, size, opts) => SpriteFX.play(k, pal, x, y, z, size, opts), ring: (x, z, r, c, l) => ringFx(x, z, r, c, l), shake: (v) => { if (!G.profile || !G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, v); } },
-  banner: (big, small) => showBanner(big, small, 'gold'), toast: (t) => showToast(t), healNumber: (e) => { if (e.amt >= 1) dmgNumber(e.x, 2.2, e.z, '+' + fmtK(e.amt), 'heal'); } });
+  toast: (t) => showToast(t), healNumber: (e) => { if (e.amt >= 1) dmgNumber(e.x, 2.2, e.z, '+' + fmtK(e.amt), 'heal'); } });
 heroApi.fx = HeroFX; HeroFXRef = HeroFX;
 const LONG_KINDS = { arrow: [1, 1, 1], ice: [1, 1, 1], tracer: [0.55, 0.55, 0.7], rail: [1.1, 1.1, 3.4], missile: [1.7, 1.7, 0.62], spark: [0.8, 0.8, 0.9] };
 let trailTick = 0;

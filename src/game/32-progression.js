@@ -169,6 +169,25 @@ function rerollItem(slot) {
   const c = rerollCost(it); if (p.gold < c) return false;
   p.gold -= c; it.aff = rollAffixes(it.rarity); refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
 }
+// Enchant (Forge tab): work on one affix at a time instead of rerolling the whole piece
+const affScale = (it) => 1 + 0.1 * rarIdx(it.rarity);
+const affCap = (k, it) => Math.round(CFG.affixes[k].max * affScale(it) * 100) / 100;
+const enchantCost = (it) => Math.round(rerollCost(it) * 0.5);
+const empowerGems = (it) => 2 + 2 * rarIdx(it.rarity);
+function rerollAffix(slot, k) {
+  const p = G.profile, it = p.gear[slot]; if (!it || !it.aff || it.aff[k] == null) return false;
+  const c = enchantCost(it); if (p.gold < c) return false;
+  const free = Object.keys(CFG.affixes).filter((x) => x === k || it.aff[x] == null), nk = free[Math.floor(Math.random() * free.length)], A = CFG.affixes[nk];
+  delete it.aff[k]; it.aff[nk] = Math.round(rand(A.min, A.max) * affScale(it) * 100) / 100;
+  p.gold -= c; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
+}
+function empowerAffix(slot, k) {
+  const p = G.profile, it = p.gear[slot]; if (!it || !it.aff || it.aff[k] == null) return false;
+  const cap = affCap(k, it), g = empowerGems(it); if (it.aff[k] >= cap || p.essence < g) return false;
+  const A = CFG.affixes[k], step = Math.max(0.01, (A.max - A.min) * affScale(it) / 4); // four boosts take a low roll to the cap
+  it.aff[k] = Math.min(cap, Math.round((it.aff[k] + step) * 100) / 100);
+  p.essence -= g; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
+}
 function salvageAllWorse() {
   const p = G.profile; let n = 0;
   for (const it of p.bag.slice()) if (!it.locked && !isBetter(it, p.gear[it.slot]) && rarIdx(it.rarity) < 4) { if (salvageItem(it.id) !== false) n++; }
