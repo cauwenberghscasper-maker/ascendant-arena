@@ -315,8 +315,8 @@
   border: 0 !important; border-image: none !important; border-radius: 0 !important; text-shadow: 2px 2px 0 var(--og-ink) !important; color: #fff !important;
   box-shadow: 0 -3px 0 var(--og-ink), 0 3px 0 var(--og-ink), -3px 0 0 var(--og-ink), 3px 0 0 var(--og-ink),
     inset 0 3px 0 rgba(255,255,255,.45), inset 0 -4px 0 rgba(0,0,0,.3), 0 6px 0 rgba(0,0,0,.35) !important; }
-.panel button.primary, .panel button.primary.gold, #gearPrompt button.primary, #bAct, #playBtn, .tab.on, .panel .tabs .tab.on,
-.menuSections button[aria-pressed="true"], .bagFilter button.on { background: var(--og-yel) !important; color: var(--og-ink) !important; text-shadow: 1px 1px 0 rgba(255,255,255,.55) !important; }
+.tab.on, .panel .tabs .tab.on, .menuSections button[aria-pressed="true"], .bagFilter button.on { background: var(--og-blu) !important; color: #fff !important; }
+.panel button.primary, .panel button.primary.gold, #gearPrompt button.primary, #bAct, #playBtn { background: var(--og-yel) !important; color: var(--og-ink) !important; text-shadow: 1px 1px 0 rgba(255,255,255,.55) !important; }
 .panel button.primary :is(.mergeCost, span, b) { color: inherit !important; }
 .panel button.ghost, #gearPrompt button.ghost, .pMoreBtn, .hbtn, .hbtn.ic, #hubShortcuts button { background: var(--og-blu) !important; }
 .tab, .panel .tabs .tab, .menuSections button, .bagFilter button { background: var(--og-slate) !important; }
@@ -333,8 +333,47 @@
 .cbtn span { font-family: var(--og-font) !important; font-weight: 700; text-shadow: 2px 2px 0 var(--og-ink); }
 #bDash { background: var(--og-cya) !important; } #bSkill { background: var(--og-grn) !important; }
 #bSpecial { background: var(--og-pur) !important; }
-#atk { background: radial-gradient(circle, rgba(255,207,31,.25) 0 55%, rgba(255,207,31,.55) 56%) !important; border-color: var(--og-ink) !important; }
-#atkKnob { background: var(--og-yel) !important; border: 4px solid var(--og-ink) !important; }
+#atk { background: rgba(20,22,40,.45) !important; border-color: var(--og-ink) !important; }
+#atkKnob { background: #f4f1e6 !important; border: 4px solid var(--og-ink) !important; }
 #bSuper { background: conic-gradient(var(--og-yel) calc(var(--sc) * 360deg), #3b2a12 0) !important; }
 #bSuper span { background: #5a3a14 !important; }
 #bSuper.ready span { background: var(--og-org) !important; }
+
+/* ===== Pixel panels (Oct 2026): no rounded, glossy cards anywhere in menus or the HUD =====
+   One font everywhere (Pixelify Sans, also for numbers and titles), square corners, flat dark stone fills with
+   a thick black notched outline and a 2px light bevel on top. Round thumb controls and dots stay round. */
+:root { --body: 'Pixelify Sans', monospace; --display: var(--body); --numbers: var(--body); --title: var(--body); --og-stone: #2b2f45; --og-stone2: #1d2033; }
+#panel,
+#hudTL,
+#hudTR,
+#hudTop,
+#mapBox,
+#toasts,
+#banner,
+#gearPrompt,
+#hubShortcuts,
+#feed,
+#panel *, #panel *::before, #panel *::after,
+#hudTL *, #hudTL *::before, #hudTL *::after,
+#hudTR *, #hudTR *::before, #hudTR *::after,
+#hudTop *, #hudTop *::before, #hudTop *::after,
+#mapBox *, #mapBox *::before, #mapBox *::after,
+#toasts *, #toasts *::before, #toasts *::after,
+#banner *, #banner *::before, #banner *::after,
+#gearPrompt *, #gearPrompt *::before, #gearPrompt *::after,
+#hubShortcuts *, #hubShortcuts *::before, #hubShortcuts *::after,
+#feed *, #feed *::before, #feed *::after { border-radius: 0 !important; }
+.panel, .panel *, #hudTL *, #hudTR *, #hudTop *, #toasts *, #banner *, #gearPrompt *, #hubShortcuts *, #feed *, #title * { font-family: var(--body) !important; }
+.panel { background: var(--og-stone2) !important; border: 0 !important; border-image: none !important;
+  box-shadow: 0 -4px 0 var(--og-ink), 0 4px 0 var(--og-ink), -4px 0 0 var(--og-ink), 4px 0 0 var(--og-ink), inset 0 0 0 3px #4a4f6e, 0 10px 0 rgba(0,0,0,.35) !important; }
+.card, .item, .node, .feat, .atk, .art, .key, .tierc, .road, .mrow, .tgl, .savebox, .tools, .bcard, .ctile, .acard, .aslot2, .mtile, .collectionCard,
+.riftCard, .arenaCard, .mpbox, .rcard, .rtier, .statgrid div, .stats3 div, .kit div, .list .row,
+#hudTL, .chip, #mapBox, .toast, #banner span, #gearPrompt, .lvlBadge, #objective, #streak {
+  background: var(--og-stone) !important; border: 0 !important; border-image: none !important; border-radius: 0 !important;
+  box-shadow: 0 -2px 0 var(--og-ink), 0 2px 0 var(--og-ink), -2px 0 0 var(--og-ink), 2px 0 0 var(--og-ink), inset 0 2px 0 #4a4f6e, inset 0 -2px 0 #15172a !important; }
+.panel h2, .panel h3, .menuHead h3, .npcHead h3, .heroHead h3, #banner b, #title .logo, #title .logo span {
+  font-family: var(--body) !important; text-transform: uppercase !important; letter-spacing: .04em !important; color: #ffe066 !important; text-shadow: 2px 2px 0 var(--og-ink) !important; }
+.panel h4, .panel h4.sub { color: #ffe066 !important; text-transform: uppercase; letter-spacing: .04em !important; }
+#modal, #modal .panel, #modal .panel.dock, #sheetGrip { border-radius: 0 !important; }
+.rdot, #heroDot, #menuDot, .dotc, .cbtn, #atk, #atkKnob, #stickBase, #stickKnob { border-radius: 50% !important; }
+#mapBox .lg::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 4px; background: currentColor; }

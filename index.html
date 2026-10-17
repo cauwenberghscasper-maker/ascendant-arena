@@ -1704,8 +1704,8 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
   border: 0 !important; border-image: none !important; border-radius: 0 !important; text-shadow: 2px 2px 0 var(--og-ink) !important; color: #fff !important;
   box-shadow: 0 -3px 0 var(--og-ink), 0 3px 0 var(--og-ink), -3px 0 0 var(--og-ink), 3px 0 0 var(--og-ink),
     inset 0 3px 0 rgba(255,255,255,.45), inset 0 -4px 0 rgba(0,0,0,.3), 0 6px 0 rgba(0,0,0,.35) !important; }
-.panel button.primary, .panel button.primary.gold, #gearPrompt button.primary, #bAct, #playBtn, .tab.on, .panel .tabs .tab.on,
-.menuSections button[aria-pressed="true"], .bagFilter button.on { background: var(--og-yel) !important; color: var(--og-ink) !important; text-shadow: 1px 1px 0 rgba(255,255,255,.55) !important; }
+.tab.on, .panel .tabs .tab.on, .menuSections button[aria-pressed="true"], .bagFilter button.on { background: var(--og-blu) !important; color: #fff !important; }
+.panel button.primary, .panel button.primary.gold, #gearPrompt button.primary, #bAct, #playBtn { background: var(--og-yel) !important; color: var(--og-ink) !important; text-shadow: 1px 1px 0 rgba(255,255,255,.55) !important; }
 .panel button.primary :is(.mergeCost, span, b) { color: inherit !important; }
 .panel button.ghost, #gearPrompt button.ghost, .pMoreBtn, .hbtn, .hbtn.ic, #hubShortcuts button { background: var(--og-blu) !important; }
 .tab, .panel .tabs .tab, .menuSections button, .bagFilter button { background: var(--og-slate) !important; }
@@ -1722,11 +1722,50 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .cbtn span { font-family: var(--og-font) !important; font-weight: 700; text-shadow: 2px 2px 0 var(--og-ink); }
 #bDash { background: var(--og-cya) !important; } #bSkill { background: var(--og-grn) !important; }
 #bSpecial { background: var(--og-pur) !important; }
-#atk { background: radial-gradient(circle, rgba(255,207,31,.25) 0 55%, rgba(255,207,31,.55) 56%) !important; border-color: var(--og-ink) !important; }
-#atkKnob { background: var(--og-yel) !important; border: 4px solid var(--og-ink) !important; }
+#atk { background: rgba(20,22,40,.45) !important; border-color: var(--og-ink) !important; }
+#atkKnob { background: #f4f1e6 !important; border: 4px solid var(--og-ink) !important; }
 #bSuper { background: conic-gradient(var(--og-yel) calc(var(--sc) * 360deg), #3b2a12 0) !important; }
 #bSuper span { background: #5a3a14 !important; }
 #bSuper.ready span { background: var(--og-org) !important; }
+
+/* ===== Pixel panels (Oct 2026): no rounded, glossy cards anywhere in menus or the HUD =====
+   One font everywhere (Pixelify Sans, also for numbers and titles), square corners, flat dark stone fills with
+   a thick black notched outline and a 2px light bevel on top. Round thumb controls and dots stay round. */
+:root { --body: 'Pixelify Sans', monospace; --display: var(--body); --numbers: var(--body); --title: var(--body); --og-stone: #2b2f45; --og-stone2: #1d2033; }
+#panel,
+#hudTL,
+#hudTR,
+#hudTop,
+#mapBox,
+#toasts,
+#banner,
+#gearPrompt,
+#hubShortcuts,
+#feed,
+#panel *, #panel *::before, #panel *::after,
+#hudTL *, #hudTL *::before, #hudTL *::after,
+#hudTR *, #hudTR *::before, #hudTR *::after,
+#hudTop *, #hudTop *::before, #hudTop *::after,
+#mapBox *, #mapBox *::before, #mapBox *::after,
+#toasts *, #toasts *::before, #toasts *::after,
+#banner *, #banner *::before, #banner *::after,
+#gearPrompt *, #gearPrompt *::before, #gearPrompt *::after,
+#hubShortcuts *, #hubShortcuts *::before, #hubShortcuts *::after,
+#feed *, #feed *::before, #feed *::after { border-radius: 0 !important; }
+.panel, .panel *, #hudTL *, #hudTR *, #hudTop *, #toasts *, #banner *, #gearPrompt *, #hubShortcuts *, #feed *, #title * { font-family: var(--body) !important; }
+.panel { background: var(--og-stone2) !important; border: 0 !important; border-image: none !important;
+  box-shadow: 0 -4px 0 var(--og-ink), 0 4px 0 var(--og-ink), -4px 0 0 var(--og-ink), 4px 0 0 var(--og-ink), inset 0 0 0 3px #4a4f6e, 0 10px 0 rgba(0,0,0,.35) !important; }
+.card, .item, .node, .feat, .atk, .art, .key, .tierc, .road, .mrow, .tgl, .savebox, .tools, .bcard, .ctile, .acard, .aslot2, .mtile, .collectionCard,
+.riftCard, .arenaCard, .mpbox, .rcard, .rtier, .statgrid div, .stats3 div, .kit div, .list .row,
+#hudTL, .chip, #mapBox, .toast, #banner span, #gearPrompt, .lvlBadge, #objective, #streak {
+  background: var(--og-stone) !important; border: 0 !important; border-image: none !important; border-radius: 0 !important;
+  box-shadow: 0 -2px 0 var(--og-ink), 0 2px 0 var(--og-ink), -2px 0 0 var(--og-ink), 2px 0 0 var(--og-ink), inset 0 2px 0 #4a4f6e, inset 0 -2px 0 #15172a !important; }
+.panel h2, .panel h3, .menuHead h3, .npcHead h3, .heroHead h3, #banner b, #title .logo, #title .logo span {
+  font-family: var(--body) !important; text-transform: uppercase !important; letter-spacing: .04em !important; color: #ffe066 !important; text-shadow: 2px 2px 0 var(--og-ink) !important; }
+.panel h4, .panel h4.sub { color: #ffe066 !important; text-transform: uppercase; letter-spacing: .04em !important; }
+#modal, #modal .panel, #modal .panel.dock, #sheetGrip { border-radius: 0 !important; }
+.rdot, #heroDot, #menuDot, .dotc, .cbtn, #atk, #atkKnob, #stickBase, #stickKnob { border-radius: 50% !important; }
+#mapBox .lg::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 4px; background: currentColor; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -1865,7 +1904,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
     <div id="streak" hidden><b id="streakN">×3</b><span id="streakB">+4% XP</span><i></i></div>
     <div id="xpDrops"></div>
     <div id="feed" aria-live="polite"></div>
-    <div id="mapBox" hidden><canvas id="mini"></canvas><div class="legend"><span class="lg st">★ Challenge</span><span class="lg bs">● Boss</span><span class="lg me">▲ You</span></div></div>
+    <div id="mapBox" hidden><canvas id="mini"></canvas><div class="legend"><span class="lg st">Challenge</span><span class="lg bs">Boss</span><span class="lg me">You</span></div></div>
     <div id="gearPrompt" hidden></div>
     <div id="bossPtr" hidden><i id="bossArrow"></i><b id="bossPtrD">Boss</b></div>
     <div id="banner"></div>
@@ -9162,7 +9201,7 @@ function updateTags() {
       const diff = e.lvl - G.profile.level, lvlCls = diff >= 5 ? ' red' : diff >= 2 ? ' orange' : diff <= -6 ? ' grey' : '';
       put(e.x, h, e.z, e.affixed ? `Elite ${CFG.enemies[e.type].name} ${e.lvl} · ${e.champName}` : e.champ ? `${e.guardian ? 'Rift Lord' : 'Champion'} ${e.lvl} · ${e.champName}` : `${e.guardian ? 'Rift Guardian ' : e.elite ? 'Elite ' : ''}${CFG.enemies[e.type].name} ${e.lvl}`, e.hp / e.maxHp, 'mob' + (e.elite ? ' elite' : '') + lvlCls);
     }
-    for (const ml of hubParts.mineLabels || []) if (Math.hypot(ml.x - cx, ml.z - cz) < 45) put(ml.x, ml.y, ml.z, `⛏ ${ml.name} · Lv ${CFG.world.zones[ml.zone].minLevel}`, null, 'den');
+    for (const ml of hubParts.mineLabels || []) if (Math.hypot(ml.x - cx, ml.z - cz) < 45) put(ml.x, ml.y, ml.z, `${ml.name} · Lv ${CFG.world.zones[ml.zone].minLevel}`, null, 'den');
     for (const dl of hubParts.denLabels) { const D = CFG.world.dens[dl.den]; if (Math.hypot(dl.x - cx, dl.z - cz) < 55) put(dl.x, dl.y, dl.z, `${D.name} · Lv ${areaLevel(D.zone, D.z) + CFG.world.denLevelBonus + tierAdd()}`, null, 'den'); }
     for (const q of CFG.world.pois) if (q.major && !CFG.world.zones[q.zone].safe && Math.hypot(q.x - cx, q.z - cz) < 40) put(q.x, 6.5, q.z, trialOpen(q.zone) ? `${q.name} · Legendary Trial` : `${q.name} · ${runesLit(q.zone)}/${CFG.dungeon.trial.runes} runestones`, null, 'wp');
     for (const q of dungeonPois()) if (Math.hypot(q.x - cx, q.z - cz) < 90) put(q.x, 7.2, q.z, G.profile.level >= dungeonReq(q) ? `${q.name} · Dungeon` : `${q.name} · Level ${dungeonReq(q)}`, null, 'den');
@@ -9914,7 +9953,7 @@ function openDungeonChest() {
   const rows = r.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('');
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
-    ${r.radiant ? `<h2 class="center">✦ RADIANT ✦</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
+    ${r.radiant ? `<h2 class="center">RADIANT</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
     ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}${craftChestHTML(r.craft)}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
@@ -10248,7 +10287,7 @@ function processEvents() {
         if (e.n >= e.of) { const tp = trialPoi(e.zone); showBanner('Legendary Trial unlocked', `${tp.landmark} hums with power · go there to begin`, 'gold'); }
         else showToast(`A runestone awakens (${e.n}/${e.of}) · more sleep in this area`, 'good'); break;
       case 'radiant': G.slowT = 1.4; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 22); SpriteFX.play('nova', 'gold', e.x, 1, e.z, 14, { delay: 0.2 }); burst(e.x, 1, e.z, 60, 0xfff07a, 9, 1.2, 0.3, 4, 2); Sfx.play('radiant');
-        showBanner('✦ RADIANT ✦', `${escapeHTML(e.name)} · trial ${e.n} · 1 in ${fmt(e.odds)}`, 'gold'); Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> found <b>${escapeHTML(e.name)}</b> after ${e.n} trials!`, 'boss'); break;
+        showBanner('RADIANT', `${escapeHTML(e.name)} · trial ${e.n} · 1 in ${fmt(e.odds)}`, 'gold'); Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> found <b>${escapeHTML(e.name)}</b> after ${e.n} trials!`, 'boss'); break;
       case 'mined': burst(e.x, 1.6, e.z, 14, e.rich ? 0xffd34a : 0xb8c4d0, 4, 0.6, 0.2, 3, 1); Sfx.play('hit');
         showToast(`${e.name}: +${e.ore} ${e.oreName || 'ore'}${e.geodes ? ` · ${e.geodes} Geode${e.geodes > 1 ? 's' : ''}!` : ''}`, e.geodes || e.rich ? 'good' : ''); break;
       case 'mats': { const A = UI.matAcc || (UI.matAcc = {}), now = performance.now(); // pickups of one material stack on one feed line
@@ -10256,11 +10295,11 @@ function processEvents() {
           Feed.add(`<i class="matdot" style="--mc:#${MATS[id].color.toString(16).padStart(6, '0')}"></i> +${a.n} <b>${MATS[id].name}</b> <small>(${fmtK(matCount(id))})</small>`, 'mat', 'mat' + id); } break; }
       case 'crafted': showToast(`Garo crafted ${escapeHTML(e.name)}`, 'rare'); Sfx.play('unlock'); break;
       case 'masterwork': showToast(`${e.name} · rank ${e.rank}`, 'good'); break;
-      case 'relic': G.slowT = 1; Sfx.play('radiant'); showBanner('Relic found!', `${escapeHTML(e.name)} · only these dungeons hold it`, 'gold'); Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> found the relic <b>${escapeHTML(e.name)}</b>!`, 'boss'); break;
+      case 'relic': G.slowT = 1; Sfx.play('radiant'); showBanner('Relic found!', `${escapeHTML(e.name)} · only these dungeons hold it`, 'gold'); Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> found the relic <b>${escapeHTML(e.name)}</b>!`, 'boss'); break;
       case 'mineral': if (e.first) showToast(`New for the Museum: ${e.name} (${e.n} kinds · +${e.n}% XP)`, 'good'); break;
       case 'minePet': G.slowT = 1.4; Sfx.play('radiant'); SpriteFX.play('pillar', 'venom', G.player.x, 0, G.player.z, 18);
         showBanner(e.had ? 'Pet found again!' : 'A pet in the rock!', e.had ? `+${CFG.mining.petGems} gems` : `${PET_DEFS[e.id].name} joins you · 1 in ${fmt(CFG.mining.pet)}`, 'gold');
-        Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
+        Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
       case 'dungeonBoss': Feed.remove('dungeon'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
       case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); if (e.why === 'down') showToast(`${e.name} resets · you fell`, 'bad'); break;
@@ -10507,14 +10546,14 @@ function drawMinimap() {
     if (q.hidden && !p.secrets[q.id]) continue; // undiscovered secrets never show
     if (Math.abs(q.z - pl.z) > winH) continue;
     g.font = `bold ${(q.major || q.kind === 'dungeon' ? 9 : 7) * u}px Rubik, sans-serif`; g.fillStyle = q.kind === 'dungeon' ? '#ffb347' : q.kind === 'secret' ? '#fff07a' : '#e8d5a6';
-    g.fillText(q.kind === 'dungeon' ? '⛫' : q.kind === 'secret' ? '✦' : q.major ? '★' : '•', mmX(q.x), mmY(q.z));
+    { const s = (q.major || q.kind === 'dungeon' ? 3 : 1.8) * u; g.fillRect(mmX(q.x) - s, mmY(q.z) - s, 2 * s, 2 * s); } // pixel squares, no emoji glyphs
   }
-  for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('☠', mmX(D.x), mmY(D.z)); }
+  for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillRect(mmX(D.x) - 3 * u, mmY(D.z) - 3 * u, 6 * u, 6 * u); }
   for (const st of nodeStates()) if (!st.t && Math.abs(st.q.z - pl.z) < winH) { g.fillStyle = st.rich ? '#ffd34a' : isRareVein(st.q) ? '#c77dff' : '#7fe3c4'; g.fillRect(mmX(st.q.x) - 1.6 * u, mmY(st.q.z) - 1.6 * u, 3.2 * u, 3.2 * u); }
   // off-window dens and caves of this area: a pinned icon on the window edge so the flanks are never forgotten
   { const zi = zoneAt(pl.z), m = 6 * u, ex = (x) => clamp(x, ox + m, ox + winW - m), ey = (y) => clamp(y, oy + m, oy + winH - m);
     const pin = (x, z, ch, col) => { const X = mmX(x), Y = mmY(z); if (X > ox && X < ox + winW && Y > oy && Y < oy + winH) return;
-      g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.font = `bold ${8 * u}px Rubik, sans-serif`; g.fillText(ch, ex(X), ey(Y)); };
+      g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.fillRect(ex(X) - 2.5 * u, ey(Y) - 2.5 * u, 5 * u, 5 * u); };
     for (const D of W.dens) if (D.zone === zi) pin(D.x, D.z, '☠', '#ff5d6c');
     for (const q of W.pois) if (q.kind === 'dungeon' && q.zone === zi) pin(q.x, q.z, '⛫', '#ffb347'); }
   for (const e of mpVisible()) { g.fillStyle = '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }
@@ -10877,7 +10916,7 @@ function openMenu(section) {
     </div><div class="mtiles">${(UI.menuSection === 'adventure' ? adventure : upgrades).join('')}</div>${comingUpHtml(3)}`);
   $('panel').classList.add('menuPanel');
 }
-function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><b>${x.t ? '⏳' : '✦'}</b><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }
+function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }
 // a model for every calendar day (same order as CFG.daily.days): chests use their chest art, the rest a 3D reward model
 const DAILY_ART = [{ case: 'treasure' }, { model: 'gems', col: '#58b4ff' }, { model: 'geode', col: '#c77dff' }, { model: 'key', col: '#2fffd0' }, { case: 'treasure' }, { model: 'ore', col: '#ffb347' }, { case: 'boss' }];
 // the login calendar: seven days that never reset, the weekly Colossus bonus and the full coming-up list

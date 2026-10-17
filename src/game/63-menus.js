@@ -191,7 +191,7 @@ function openMenu(section) {
     </div><div class="mtiles">${(UI.menuSection === 'adventure' ? adventure : upgrades).join('')}</div>${comingUpHtml(3)}`);
   $('panel').classList.add('menuPanel');
 }
-function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><b>${x.t ? '⏳' : '✦'}</b><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }
+function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }
 // a model for every calendar day (same order as CFG.daily.days): chests use their chest art, the rest a 3D reward model
 const DAILY_ART = [{ case: 'treasure' }, { model: 'gems', col: '#58b4ff' }, { model: 'geode', col: '#c77dff' }, { model: 'key', col: '#2fffd0' }, { case: 'treasure' }, { model: 'ore', col: '#ffb347' }, { case: 'boss' }];
 // the login calendar: seven days that never reset, the weekly Colossus bonus and the full coming-up list

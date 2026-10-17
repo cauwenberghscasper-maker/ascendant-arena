@@ -126,7 +126,7 @@ function processEvents() {
         if (e.n >= e.of) { const tp = trialPoi(e.zone); showBanner('Legendary Trial unlocked', `${tp.landmark} hums with power · go there to begin`, 'gold'); }
         else showToast(`A runestone awakens (${e.n}/${e.of}) · more sleep in this area`, 'good'); break;
       case 'radiant': G.slowT = 1.4; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 22); SpriteFX.play('nova', 'gold', e.x, 1, e.z, 14, { delay: 0.2 }); burst(e.x, 1, e.z, 60, 0xfff07a, 9, 1.2, 0.3, 4, 2); Sfx.play('radiant');
-        showBanner('✦ RADIANT ✦', `${escapeHTML(e.name)} · trial ${e.n} · 1 in ${fmt(e.odds)}`, 'gold'); Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> found <b>${escapeHTML(e.name)}</b> after ${e.n} trials!`, 'boss'); break;
+        showBanner('RADIANT', `${escapeHTML(e.name)} · trial ${e.n} · 1 in ${fmt(e.odds)}`, 'gold'); Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> found <b>${escapeHTML(e.name)}</b> after ${e.n} trials!`, 'boss'); break;
       case 'mined': burst(e.x, 1.6, e.z, 14, e.rich ? 0xffd34a : 0xb8c4d0, 4, 0.6, 0.2, 3, 1); Sfx.play('hit');
         showToast(`${e.name}: +${e.ore} ${e.oreName || 'ore'}${e.geodes ? ` · ${e.geodes} Geode${e.geodes > 1 ? 's' : ''}!` : ''}`, e.geodes || e.rich ? 'good' : ''); break;
       case 'mats': { const A = UI.matAcc || (UI.matAcc = {}), now = performance.now(); // pickups of one material stack on one feed line
@@ -134,11 +134,11 @@ function processEvents() {
           Feed.add(`<i class="matdot" style="--mc:#${MATS[id].color.toString(16).padStart(6, '0')}"></i> +${a.n} <b>${MATS[id].name}</b> <small>(${fmtK(matCount(id))})</small>`, 'mat', 'mat' + id); } break; }
       case 'crafted': showToast(`Garo crafted ${escapeHTML(e.name)}`, 'rare'); Sfx.play('unlock'); break;
       case 'masterwork': showToast(`${e.name} · rank ${e.rank}`, 'good'); break;
-      case 'relic': G.slowT = 1; Sfx.play('radiant'); showBanner('Relic found!', `${escapeHTML(e.name)} · only these dungeons hold it`, 'gold'); Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> found the relic <b>${escapeHTML(e.name)}</b>!`, 'boss'); break;
+      case 'relic': G.slowT = 1; Sfx.play('radiant'); showBanner('Relic found!', `${escapeHTML(e.name)} · only these dungeons hold it`, 'gold'); Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> found the relic <b>${escapeHTML(e.name)}</b>!`, 'boss'); break;
       case 'mineral': if (e.first) showToast(`New for the Museum: ${e.name} (${e.n} kinds · +${e.n}% XP)`, 'good'); break;
       case 'minePet': G.slowT = 1.4; Sfx.play('radiant'); SpriteFX.play('pillar', 'venom', G.player.x, 0, G.player.z, 18);
         showBanner(e.had ? 'Pet found again!' : 'A pet in the rock!', e.had ? `+${CFG.mining.petGems} gems` : `${PET_DEFS[e.id].name} joins you · 1 in ${fmt(CFG.mining.pet)}`, 'gold');
-        Feed.add(`✦ <b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
+        Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
       case 'dungeonBoss': Feed.remove('dungeon'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
       case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); if (e.why === 'down') showToast(`${e.name} resets · you fell`, 'bad'); break;
@@ -385,14 +385,14 @@ function drawMinimap() {
     if (q.hidden && !p.secrets[q.id]) continue; // undiscovered secrets never show
     if (Math.abs(q.z - pl.z) > winH) continue;
     g.font = `bold ${(q.major || q.kind === 'dungeon' ? 9 : 7) * u}px Rubik, sans-serif`; g.fillStyle = q.kind === 'dungeon' ? '#ffb347' : q.kind === 'secret' ? '#fff07a' : '#e8d5a6';
-    g.fillText(q.kind === 'dungeon' ? '⛫' : q.kind === 'secret' ? '✦' : q.major ? '★' : '•', mmX(q.x), mmY(q.z));
+    { const s = (q.major || q.kind === 'dungeon' ? 3 : 1.8) * u; g.fillRect(mmX(q.x) - s, mmY(q.z) - s, 2 * s, 2 * s); } // pixel squares, no emoji glyphs
   }
-  for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('☠', mmX(D.x), mmY(D.z)); }
+  for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillRect(mmX(D.x) - 3 * u, mmY(D.z) - 3 * u, 6 * u, 6 * u); }
   for (const st of nodeStates()) if (!st.t && Math.abs(st.q.z - pl.z) < winH) { g.fillStyle = st.rich ? '#ffd34a' : isRareVein(st.q) ? '#c77dff' : '#7fe3c4'; g.fillRect(mmX(st.q.x) - 1.6 * u, mmY(st.q.z) - 1.6 * u, 3.2 * u, 3.2 * u); }
   // off-window dens and caves of this area: a pinned icon on the window edge so the flanks are never forgotten
   { const zi = zoneAt(pl.z), m = 6 * u, ex = (x) => clamp(x, ox + m, ox + winW - m), ey = (y) => clamp(y, oy + m, oy + winH - m);
     const pin = (x, z, ch, col) => { const X = mmX(x), Y = mmY(z); if (X > ox && X < ox + winW && Y > oy && Y < oy + winH) return;
-      g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.font = `bold ${8 * u}px Rubik, sans-serif`; g.fillText(ch, ex(X), ey(Y)); };
+      g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.fillRect(ex(X) - 2.5 * u, ey(Y) - 2.5 * u, 5 * u, 5 * u); };
     for (const D of W.dens) if (D.zone === zi) pin(D.x, D.z, '☠', '#ff5d6c');
     for (const q of W.pois) if (q.kind === 'dungeon' && q.zone === zi) pin(q.x, q.z, '⛫', '#ffb347'); }
   for (const e of mpVisible()) { g.fillStyle = '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }

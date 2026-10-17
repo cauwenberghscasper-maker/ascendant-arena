@@ -566,7 +566,7 @@ function openDungeonChest() {
   const rows = r.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('');
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
-    ${r.radiant ? `<h2 class="center">✦ RADIANT ✦</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
+    ${r.radiant ? `<h2 class="center">RADIANT</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
     ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}${craftChestHTML(r.craft)}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
