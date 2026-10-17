@@ -165,7 +165,7 @@ function openQuickUpgrade(action) {
 function openMenu() {
   UI.current = 'hubs';
   const p = G.profile, A = menuAlerts(), gearDot = Object.values(slotAlerts()).some((a) => a.better);
-  const big = (act, icon, name, sub, dot) => `<button class="hubTile" data-act="${act}">${gi(icon)}<b>${name}</b><small>${sub}</small>${dot ? '<i class="rdot"></i>' : ''}</button>`;
+  const big = (act, icon, name, sub, dot) => `<button class="hubTile${gate(act)}" data-act="${act}">${gi(icon)}<b>${name}</b><small>${unlockOpen(act) ? sub : `Opens at level ${UNLOCK_AT[act]}`}</small>${dot && unlockOpen(act) ? '<i class="rdot"></i>' : ''}</button>`;
   openModal(`<div class="hubTiles">
     ${big('mHero', 'm_hero', 'Hero', `Level ${fmt(p.level)}`, A.skills || A.artifacts || A.brawlers)}
     ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
@@ -177,7 +177,7 @@ function openJournal() {
   UI.current = 'menu';
   const p = G.profile, A = menuAlerts(), own = ownedBrawlers(p).length;
   const hp = 0, bp = Math.max(0, treeFree(p, p.cls));
-  const tile = (act, icon, title, sub, dot) => `<button class="mtile" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${sub}</small></span>${dot ? '<i class="rdot"></i>' : ''}</button>`;
+  const tile = (act, icon, title, sub, dot) => `<button class="mtile${gate(act)}" data-act="${act}">${gi(icon)}<span class="menuTileText"><b>${title}</b><small>${unlockOpen(act) ? sub : `Opens at level ${UNLOCK_AT[act]}`}</small></span>${dot && unlockOpen(act) ? '<i class="rdot"></i>' : ''}</button>`;
   const adventure = [
     tile('mCollection', 'm_hero', 'Collection Log', `${Object.keys(p.collection || {}).length}/${COLLECTION_ITEMS.length} logged`, false),
     tile('mPrestige', 'm_asc', 'Pets & prestige', `Prestige ${prestigeCount(p)}`, !prestigeBlocked()),

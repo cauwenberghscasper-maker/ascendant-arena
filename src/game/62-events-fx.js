@@ -154,6 +154,7 @@ function processEvents() {
         break;
       case 'levelPower': {
         const n = e.level - e.from, pts = (() => { let s = 0; for (let L = e.from + 1; L <= e.level; L++) s += 2 + (L % 10 === 0 ? 5 : 0); return s; })();
+        { const opened = Object.keys(UNLOCK_AT).filter((k) => UNLOCK_AT[k] > e.from && UNLOCK_AT[k] <= e.level); if (opened.length) showToast(`New: ${opened.map((k) => UNLOCK_NAME[k]).join(', ')} · open the menu`, 'good'); }
         showBanner(`Level ${e.level}!`, `Power ${fmtK(e.p0)} → ${fmtK(e.p1)} · +${pts} talent points${n > 1 ? ` · ${n} levels` : ''}${e.level % 10 === 0 ? ' · Treasure Chest' : ''}`, 'gold');
         break;
       }

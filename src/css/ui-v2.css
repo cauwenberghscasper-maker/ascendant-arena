@@ -482,3 +482,9 @@
 #modal.full .hubTile .gi { width: 128px !important; height: 128px !important; }
 #modal.full .hubTile b { font-size: 28px; color: color-mix(in srgb, var(--tc) 45%, #fff); }
 .cbtn, #bSuper, #bDash, #bSkill, #bSpecial { border-image: none !important; } .cbtn::before { border-radius: 50% !important; } /* no square pixel-frame corners outside the round thumb buttons */
+/* ---- level unlocks: locked buttons are dimmed and show their level; new ones pulse with a white glow until tapped ---- */
+.panel .locked, .panel .tab.locked { opacity: .45; filter: grayscale(.7) !important; pointer-events: auto; }
+.panel .locked .gi { width: 16px !important; height: 16px !important; vertical-align: -2px; }
+#modal.full .hubTile.locked .gi { width: 128px !important; height: 128px !important; }
+.newU { animation: newU 1.1s steps(2) infinite !important; }
+@keyframes newU { 50% { filter: drop-shadow(0 0 10px #fff) drop-shadow(0 0 4px #fff) brightness(1.25); } }
