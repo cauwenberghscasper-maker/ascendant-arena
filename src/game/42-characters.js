@@ -132,6 +132,7 @@ const ITEM_ICONS = [];
 // Generated static menu paintings take precedence; procedural portraits cover future shapes.
 function thumbFor(it) {
   if (!it) return '';
+  if (it.set != null && it.set >= 0 && it.set < 6) return `assets/ui/sets/${it.set}-${it.slot}.webp`; // painted art per crafted set piece
   const collectible = collectionIcon(it);
   if (collectible) return collectible;
   const generated = equipmentIcon(it.slot, ITEM_NAMES[it.slot]?.[itemStyle(it)]);
