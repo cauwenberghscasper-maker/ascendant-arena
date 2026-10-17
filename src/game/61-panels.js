@@ -35,6 +35,8 @@ function openModal(html, closable, showcase) {
   $('panel').className = 'panel scroll';
   setShowcase(!!showcase);
   $('modal').classList.toggle('room', !!showcase);
+  // every hub screen except the Hero (3D showcase) fills the whole page
+  $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || !!HUB_OF[UI.current]));
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
   const full = hubNav() + html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
@@ -384,28 +386,13 @@ function heroTab(tab) {
   let body = '', bar = '';
   const pct = (x) => `${Math.round(x * 100)}%`;
   if (tab === 'Stats') {
-    const g = gearTotals(p.gear);
-    // one line per stat: name, value and four benchmark pips (Base to Ascendant); two columns
-    const st = (k, v, sub, earned) => {
-      const colors = ['#9d9686', '#7f9e6e', '#6f9fb0', '#a184b8', '#d4a85a'], rank = earned ? earned.rank : -1;
-      return `<div class="lrow"${earned ? ` style="--statColor:${colors[rank]}" title="${earned.name} benchmark"` : ''}><span>${k}</span><b>${v}${sub ? ` <small>${sub}</small>` : ''}</b>${earned ? `<i class="pips" aria-label="${earned.name} benchmark">${[1, 2, 3, 4].map((n) => `<i class="${rank >= n ? 'on' : ''}"></i>`).join('')}</i>` : ''}</div>`;
-    };
-    const mark = statMilestone;
-    body = `<h4 class="sub first">Combat</h4><div class="ledger">
-      ${st('Damage', fmtK(pl.dmg),null,mark(pl.dmg,[75,250,1000,5000]))}${st('Max HP', fmtK(pl.maxHp),null,mark(pl.maxHp,[500,2000,10000,50000]))}
-      ${st('Crit chance', pct(CFG.combat.critChance + pl.critBonus),null,mark(pl.critBonus,[.05,.15,.3,.5]))}${st('Crit damage', '×' + (CFG.combat.critMult + pl.critDmg).toFixed(2),null,mark(pl.critDmg,[.1,.3,.6,1]))}
-      ${st('Attack speed', '+' + pct(pl.atkSpeed || 0),null,mark(pl.atkSpeed,[.1,.25,.5,1]))}${st('Lifesteal', pct(pl.lifesteal || 0),null,mark(pl.lifesteal,[.03,.08,.15,.3]))}
-      ${st('Damage reduction', pct(Math.min(0.6, pl.armor || 0)),null,mark(Math.min(.6,pl.armor||0),[.05,.15,.3,.5]))}${st('Cooldowns', '-' + pct(pl.cdr || 0),null,mark(pl.cdr,[.05,.15,.3,.5]))}
-      ${st('Move speed', pl.speed.toFixed(2))}${st('Weapon mastery', '+' + pct(pl.masteryDmg || 0), 'damage')}</div>
-      <h4 class="sub">Progress</h4><div class="ledger">
-      ${st('Level', `${p.level}`)}${st('Prestige', `${prestigeCount(p)}`)}${st('Gear score', fmt(Math.round(g.score)))}
-      ${st('Total mastery', fmt(totalMastery(p)))}${st('Gems', fmtK(p.essence))}
-      ${st('Monsters', fmtK(p.stats.kills), `${fmt(p.stats.elites || 0)} elite`)}${st('Best streak', fmt(p.stats.bestStreak || 0))}
-      ${st('Trophies', fmt(p.trophies), `best ${fmt(p.bestTrophies)}`)}${st('Arena power', '×' + playerArenaPower(p).toFixed(2))}</div>
-
-      <p class="fine">The pips show earned benchmarks, from Base to Ascendant. They are not stat caps.</p><button class="ghost" data-act="mPrestige">Prestige ${prestigeCount(p)} · ${prestigeCount(p) ? `${petProgress(p).name} Lv ${petProgress(p).level}` : `Dragon unlocks at level ${PRESTIGE_LEVEL}`}</button>
-      <h4 class="sub">Gear bonuses</h4><p class="fine">${(() => { const a = g.aff; const l = Object.keys(a).filter((k) => a[k] > 0).map((k) => `+${Math.round(a[k] * 100)}% ${CFG.affixes[k].name}`); return l.length ? l.join(' · ') : 'Uncommon and better items roll bonuses like attack speed, crit damage, lifesteal and damage reduction.'; })()}</p>
-      <h4 class="sub">Attack perks and specials</h4>${(() => { const l = CFG.gear.slots.map((s) => perkText(p.gear[s])).filter(Boolean); return l.length ? `<div class="list">${l.map((t) => `<div class="perk solo">${t}</div>`).join('')}</div>` : '<p class="fine">Rare, Epic and Legendary pieces each add a new attack option, and accessories add a Fire, Ice, Storm or Toxic special.</p>'; })()}`;
+    // one clear card: the hero's art, what they wear right now and the eight stats that matter
+    const port = brawlerThumb(p.cls), g = gearTotals(p.gear);
+    const eq = CFG.gear.slots.map((s) => { const it = p.gear[s];
+      return `<button class="tile ${it ? it.rarity : 'empty'}" data-act="mGear" aria-label="${SLOT_LABEL[s]}">${it ? `<img src="${thumbFor(it)}" alt="">` : '<span class="emptySlot">+</span>'}<span class="ts">${SLOT_LABEL[s]}</span>${it && it.up ? `<span class="tu">+${it.up}</span>` : ''}</button>`; }).join('');
+    const box = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
+    body = `<div class="heroCard">${port ? `<img class="hport" src="${port}" alt="">` : ''}<div class="tiles heq">${eq}</div></div>
+      ${statStrip(null)}<div class="bstats hsmall">${box('Level', fmt(p.level))}${box('Gear score', fmt(Math.round(g.score)))}${box('Move', pl.speed.toFixed(1))}${box('Trophies', fmt(p.trophies))}</div>`;
   } else if (tab === 'Gear') {
     p._bagSeen = true;
     const al = slotAlerts();
@@ -510,7 +497,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, true);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, false);
 }
 function openWaypoints() {
   UI.current = 'waypoints';

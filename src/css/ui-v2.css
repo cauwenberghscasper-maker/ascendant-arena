@@ -443,3 +443,16 @@
 .cbonus b { color: #ffcf1f; margin-right: 6px; } .cbonus.hero { background: var(--og-pur); animation: reelFlash .5s steps(2) 6; } .cbonus.hero b { color: #fff; }
 .cbonus.mats { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
 .bonusOdds { margin-top: 6px; }
+/* ---- full-page hub screens (all but the Hero showcase) ---- */
+#modal.full { padding: var(--sat) var(--sar) var(--sab) var(--sal); place-items: stretch; background: var(--og-stone2); }
+#modal.full .panel { width: 100% !important; max-width: none !important; height: 100%; max-height: 100% !important; box-shadow: none !important; }
+#modal.full #sheetGrip { display: none; }
+#modal.full .hubTiles { min-height: calc(100% - 20px); grid-template-rows: 1fr 1fr; padding-top: 56px; }
+#modal.full .panel .hubTile { min-height: 0; }
+#modal.full .hubTile .gi { width: 80px !important; height: 80px !important; } #modal.full .hubTile b { font-size: 26px; }
+/* ---- Hero › Stats: portrait, worn gear and eight stats on one card ---- */
+.heroCard { display: grid; grid-template-columns: 132px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+.heroCard .hport { width: 132px; height: 132px; object-fit: cover; image-rendering: pixelated; box-shadow: 0 0 0 3px var(--og-ink), inset 0 0 0 2px #4a4f6e; }
+.heroCard .tiles.heq { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.heroCard .tiles.heq .tile { width: auto !important; min-width: 0; min-height: 62px; } .heroCard .tiles.heq .tile .ts { font-size: 10px; }
+.bstats.hsmall { margin-top: 8px; }
