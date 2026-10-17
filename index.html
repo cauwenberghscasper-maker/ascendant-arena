@@ -1877,6 +1877,20 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 #modal.full .hubTile.locked .gi { width: 128px !important; height: 128px !important; }
 .newU { animation: newU 1.1s steps(2) infinite !important; }
 @keyframes newU { 50% { filter: drop-shadow(0 0 10px #fff) drop-shadow(0 0 4px #fff) brightness(1.25); } }
+/* ---- world map: the road north as stacked area rows, biome colour on the left, fogged areas you haven't reached ---- */
+.wmap { display: flex; flex-direction: column; gap: 4px; }
+.mbiome { margin: 10px 0 2px; padding: 4px 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: #fff;
+  background: color-mix(in srgb, var(--bc) 30%, #14172a); box-shadow: inset 4px 0 0 var(--bc); }
+.marea { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; min-height: 44px; padding: 4px 8px 4px 14px; background: var(--og-stone);
+  box-shadow: inset 6px 0 0 var(--bc), 0 0 0 2px var(--og-ink); }
+.marea b { font-size: 14px; color: #fff; } .marea small { font-size: 11px; color: #9aa0bd; }
+.marea.here { box-shadow: inset 6px 0 0 var(--bc), 0 0 0 2px var(--og-ink), inset 0 0 0 2px #fff; }
+.marea.fog { opacity: .35; } .marea button { min-height: 36px !important; padding: 0 14px !important; }
+.mtag { font-size: 11px; color: #c9cbd6; } .mtag.here { color: #ffcf1f; }
+/* each discovered area shows its own pixel-art scene (assets/ui/areas/<area>.webp) behind its name */
+.marea { min-height: 78px; background: linear-gradient(90deg, rgba(14,16,30,.92) 0%, rgba(14,16,30,.55) 45%, rgba(14,16,30,.1) 100%), var(--art, none) center / cover no-repeat, var(--og-stone) !important; image-rendering: pixelated; }
+.marea b { font-size: 16px; text-shadow: 2px 2px 0 var(--og-ink); } .marea small { color: #e6e8f2; text-shadow: 1px 1px 0 var(--og-ink); }
+.marea.fog { opacity: .5; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -9570,7 +9584,7 @@ function openModal(html, closable, showcase) {
   setShowcase(!!showcase);
   $('modal').classList.toggle('room', !!showcase);
   // every hub screen except the Hero (3D showcase) fills the whole page
-  $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || !!HUB_OF[UI.current]));
+  $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || UI.current === 'worldmap' || !!HUB_OF[UI.current]));
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
   const full = hubNav() + html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
@@ -10033,6 +10047,23 @@ function heroTab(tab) {
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
   openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, false);
+}
+// World map (the Map button): the whole road north, one row per area, top = furthest. Tap an attuned lodestone
+// to travel there from anywhere in the open world; areas you have not reached yet stay hidden.
+function openWorldMap() {
+  UI.current = 'worldmap';
+  const p = G.profile, here = zoneAt(G.player.z), far = Math.max(p.stats.zone || 0, here), hub = G.mode === 'hub' && !G.rift;
+  const wpOf = {}; CFG.world.waypoints.forEach((w, i) => { wpOf[w.zone] = i; });
+  const Z = CFG.world.zones, html = [];
+  for (let zi = Z.length - 1; zi >= 0; zi--) { // north (furthest) at the top; each biome's name sits above its areas
+    const zn = Z[zi], seen = zi <= far, i = wpOf[zi], have = i != null && p.waypoints.includes(i), lvlOk = p.level >= (zn.minLevel || 1), col = hex6(BIOMES[zn.biome].coreColor);
+    if (zi === Z.length - 1 || Z[zi + 1].biome !== zn.biome) html.push(`<div class="mbiome" style="--bc:${col}">${seen || zi <= far + 3 ? zn.biomeName : '???'}</div>`);
+    const right = zi === here ? '<span class="mtag here">You</span>' : !seen ? '' : have && lvlOk && hub ? `<button class="primary" data-act="travel" data-i="${i}">Go</button>`
+      : `<span class="mtag">${!lvlOk ? 'Lv ' + zn.minLevel : i == null ? '' : 'Find stone'}</span>`;
+    html.push(`<div class="marea ${seen ? '' : 'fog'} ${zi === here ? 'here' : ''}" style="--bc:${col}${seen ? `;--art:url(assets/ui/areas/${zi}.webp)` : ''}"><b>${seen ? zn.name : '???'}</b><small>${seen ? (zn.safe ? 'Safe' : `Lv ${zn.lvl[0]}–${zn.lvl[1]}`) : ''}</small>${right}</div>`);
+  }
+  openModal(`<div class="npcHead"><h3>World map</h3><span class="cnt">${p.waypoints.length}/${CFG.world.waypoints.length} stones</span></div>${hub ? '' : '<p class="fine">Travel works in the open world.</p>'}<div class="wmap">${html.join('')}</div>`);
+  setTimeout(() => { const h = $('panel').querySelector('.marea.here'); if (h) h.scrollIntoView({ block: 'center' }); }, 30);
 }
 function openWaypoints() {
   UI.current = 'waypoints';
@@ -12000,7 +12031,7 @@ function caseBonus() {
     const id = pick(locked); p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id);
     ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: CFG.attacks[id].name }); return { k: 'hero', id, name: CFG.brawlers[id].name };
   }
-  if (x < (acc += CASE_BONUS.gold)) { const n = Math.round(vaultRates(p).gold * 60 * 6); addGold(n, true); return { k: 'gold', n }; } // six hours of Bank income
+  if (x < (acc += CASE_BONUS.gold)) { const n = Math.round(6 * Math.pow(CFG.enemies.goldGrowth, p.level - 1) * 360); addGold(n, true); return { k: 'gold', n }; } // about six hours of Bank income
   if (x < (acc += CASE_BONUS.gems)) { const n = 20 + Math.round(p.level / 3); addEssence(n); return { k: 'gems', n }; }
   // CB (crafting) is absent in the node-only checks
   if (typeof CB !== 'undefined' && x < (acc += CASE_BONUS.mats)) { const B = CB[zoneBiome(highestZone(p.level))]; return { k: 'mats', got: addMats([[B.ore, 8 + p.level / 10], [B.part, 3 + p.level / 25]], true) }; }
@@ -12454,7 +12485,7 @@ function boot(hotData) {
   $('caseChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openCases(); } });
   $('autoChip').addEventListener('click', () => { if (G.started && !G.modal) { const s = G.profile.settings; s.autoHunt = !s.autoHunt; G.dirty = true; Sfx.play('click'); showToast(s.autoHunt ? 'Auto hunt on: your hero fights by itself' : 'Auto hunt off'); } });
   $('mpChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openPlayers(); } });
-  $('bMap').addEventListener('click', () => { if (!G.started) return; Sfx.play('click'); setMap($('mapBox').hidden); });
+  $('bMap').addEventListener('click', () => { if (!G.started || G.modal) return; Sfx.play('click'); openWorldMap(); });
   $('mapBox').addEventListener('click', () => { MM.big = !MM.big; $('mapBox').classList.toggle('big', MM.big); MM.t = 0; });
   setMap(G.profile.settings.map !== false);
   $('ammo').innerHTML = '<i></i><i></i><i></i><i></i><i></i>';

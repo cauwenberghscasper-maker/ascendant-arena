@@ -46,7 +46,7 @@ function openModal(html, closable, showcase) {
   setShowcase(!!showcase);
   $('modal').classList.toggle('room', !!showcase);
   // every hub screen except the Hero (3D showcase) fills the whole page
-  $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || !!HUB_OF[UI.current]));
+  $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || UI.current === 'worldmap' || !!HUB_OF[UI.current]));
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
   const full = hubNav() + html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');
@@ -509,6 +509,23 @@ function heroTab(tab) {
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
   openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, false);
+}
+// World map (the Map button): the whole road north, one row per area, top = furthest. Tap an attuned lodestone
+// to travel there from anywhere in the open world; areas you have not reached yet stay hidden.
+function openWorldMap() {
+  UI.current = 'worldmap';
+  const p = G.profile, here = zoneAt(G.player.z), far = Math.max(p.stats.zone || 0, here), hub = G.mode === 'hub' && !G.rift;
+  const wpOf = {}; CFG.world.waypoints.forEach((w, i) => { wpOf[w.zone] = i; });
+  const Z = CFG.world.zones, html = [];
+  for (let zi = Z.length - 1; zi >= 0; zi--) { // north (furthest) at the top; each biome's name sits above its areas
+    const zn = Z[zi], seen = zi <= far, i = wpOf[zi], have = i != null && p.waypoints.includes(i), lvlOk = p.level >= (zn.minLevel || 1), col = hex6(BIOMES[zn.biome].coreColor);
+    if (zi === Z.length - 1 || Z[zi + 1].biome !== zn.biome) html.push(`<div class="mbiome" style="--bc:${col}">${seen || zi <= far + 3 ? zn.biomeName : '???'}</div>`);
+    const right = zi === here ? '<span class="mtag here">You</span>' : !seen ? '' : have && lvlOk && hub ? `<button class="primary" data-act="travel" data-i="${i}">Go</button>`
+      : `<span class="mtag">${!lvlOk ? 'Lv ' + zn.minLevel : i == null ? '' : 'Find stone'}</span>`;
+    html.push(`<div class="marea ${seen ? '' : 'fog'} ${zi === here ? 'here' : ''}" style="--bc:${col}${seen ? `;--art:url(assets/ui/areas/${zi}.webp)` : ''}"><b>${seen ? zn.name : '???'}</b><small>${seen ? (zn.safe ? 'Safe' : `Lv ${zn.lvl[0]}–${zn.lvl[1]}`) : ''}</small>${right}</div>`);
+  }
+  openModal(`<div class="npcHead"><h3>World map</h3><span class="cnt">${p.waypoints.length}/${CFG.world.waypoints.length} stones</span></div>${hub ? '' : '<p class="fine">Travel works in the open world.</p>'}<div class="wmap">${html.join('')}</div>`);
+  setTimeout(() => { const h = $('panel').querySelector('.marea.here'); if (h) h.scrollIntoView({ block: 'center' }); }, 30);
 }
 function openWaypoints() {
   UI.current = 'waypoints';
