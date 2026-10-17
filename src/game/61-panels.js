@@ -321,10 +321,12 @@ function enchantTabHTML(p) {
   const cards = CFG.gear.slots.map((s) => {
     const it = p.gear[s]; if (!it || !it.aff || !Object.keys(it.aff).length) return '';
     const keys = Object.keys(it.aff), rc = enchantCost(it), eg = empowerGems(it);
-    const rows = keys.map((k) => { const v = it.aff[k], cap = affCap(k, it), full = v >= cap;
-      return `<div class="arow"><span class="an">+${Math.round(v * 100)}% ${CFG.affixes[k].name}</span><i class="abar"><b style="width:${Math.round(100 * v / cap)}%"></b></i>
-        <button class="${p.gold >= rc ? 'ghost' : 'disabled'}" data-act="enchReroll" data-slot="${s}" data-k="${k}">Reroll ${ICON.coin}${fmtK(rc)}</button>
-        <button class="${full ? 'disabled' : p.essence >= eg ? 'ghost boost' : 'disabled'}" data-act="enchUp" data-slot="${s}" data-k="${k}" ${full ? 'disabled' : ''}>${full ? 'Max' : `Boost ${ICON.ess}${eg}`}</button></div>`; }).join('');
+    const rows = keys.map((k) => { const v = it.aff[k], cap = affCap(k, it), full = v >= cap, f = Math.min(1, v / cap);
+      const tier = full ? 'max' : f >= 0.75 ? 't3' : f >= 0.5 ? 't2' : 't1'; // the bar glows brighter the closer the affix is to its cap
+      return `<div class="arow ${tier}"><span class="an">+${Math.round(v * 100)}% ${CFG.affixes[k].name}</span><span class="ap">${full ? 'MAX' : Math.round(f * 100) + '%'}</span>
+        <i class="abar"><b style="width:${Math.round(100 * f)}%"></b></i>
+        <button class="${p.gold >= rc ? 'ghost' : 'disabled'}" data-act="enchReroll" data-slot="${s}" data-k="${k}"><span>Reroll</span><small>${ICON.coin}${fmtK(rc)}</small></button>
+        <button class="${full ? 'disabled' : p.essence >= eg ? 'ghost boost' : 'disabled'}" data-act="enchUp" data-slot="${s}" data-k="${k}" ${full ? 'disabled' : ''}><span>${full ? 'Maxed' : 'Boost'}</span>${full ? '' : `<small>${ICON.ess}${eg}</small>`}</button></div>`; }).join('');
     return `<div class="ecard ${it.rarity}"><div class="ehead"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><b>${escapeHTML(it.name)}</b>${rarityChip(it.rarity)}</div>${rows}</div>`;
   }).join('');
   return cards ? `<div class="elist">${cards}</div>` : '<p class="fine">Uncommon or better gear carries affixes.</p>';

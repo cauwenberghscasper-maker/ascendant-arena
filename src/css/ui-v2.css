@@ -400,10 +400,18 @@
   box-shadow: 0 -2px 0 var(--og-ink), 0 2px 0 var(--og-ink), -2px 0 0 var(--og-ink), 2px 0 0 var(--og-ink), inset 0 2px 0 #4a4f6e !important; }
 .ecard .ehead { display: flex; align-items: center; gap: 8px; } .ecard .ehead img { width: 40px; height: 40px; image-rendering: pixelated; }
 .ecard .ehead b { flex: 1; font-size: 14px; color: #fff; }
-.arow { display: grid; grid-template-columns: 1fr 108px 88px; grid-template-rows: auto 8px; gap: 4px 6px; align-items: center; }
-.arow .an { font-size: 13px; color: #9fef7a; } .arow .abar { grid-column: 1; grid-row: 2; height: 8px; background: var(--og-ink); position: relative; }
-.arow .abar b { position: absolute; inset: 0 auto 0 0; background: #b14dff; }
-.arow button { grid-row: 1 / 3; min-height: 44px !important; padding: 0 10px !important; font-size: 13px !important; }
+.arow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px; margin-top: 4px; background: var(--og-stone2); box-shadow: inset 0 0 0 2px #15172a; }
+.arow .an { font-size: 14px; color: #fff; } .arow .ap { justify-self: end; font-size: 13px; color: #c9cbd6; }
+.arow .abar { grid-column: 1 / -1; height: 12px; background: var(--og-ink); position: relative; overflow: hidden; }
+.arow .abar b { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #5b4bd8, #b14dff); }
+.arow button { min-height: 48px !important; padding: 4px 6px !important; display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 14px !important; }
+.arow button small { font-size: 12px; display: inline-flex; align-items: center; gap: 3px; }
+/* rewarding: the bar and the row glow stronger per tier, and a maxed affix pulses gold */
+.arow.t2 .abar b { box-shadow: 0 0 8px #b14dff; } .arow.t2 .an { color: #e6ccff; }
+.arow.t3 .abar b { background: linear-gradient(90deg, #b14dff, #ff7ae0); box-shadow: 0 0 12px #ff7ae0; } .arow.t3 { box-shadow: inset 0 0 0 2px #7a3fb0, 0 0 10px rgba(177,77,255,.35); } .arow.t3 .an { color: #ffd6f5; }
+.arow.max .abar b { background: linear-gradient(90deg, #e9b84a, #fff1a8, #e9b84a); box-shadow: 0 0 14px #ffd76a; animation: maxShine 1.6s steps(4) infinite; }
+.arow.max { box-shadow: inset 0 0 0 2px #e9b84a, 0 0 14px rgba(255,215,106,.45); } .arow.max .an, .arow.max .ap { color: #ffe9a0; text-shadow: 0 0 6px #ffd76a; }
+@keyframes maxShine { 50% { filter: brightness(1.35); } }
 .panel button.ghost.boost { background: var(--og-pur) !important; }
 .panel .tabs .tab { font-size: 12px !important; padding: 0 4px !important; min-width: 0; white-space: nowrap; }
 /* ---- Equipment: worn vs picked, side by side ---- */
@@ -507,3 +515,7 @@
   background-image: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,0) 45%, rgba(0,0,0,.3));
   box-shadow: 0 -2px 0 var(--og-ink), 0 2px 0 var(--og-ink), -2px 0 0 var(--og-ink), 2px 0 0 var(--og-ink); text-shadow: 2px 2px 0 var(--og-ink); }
 #mapBox.big #mapTravel { display: block; }
+/* full-page screens: the close button (and the Menu/back row) stay on screen while you scroll */
+#modal.full .panel > .x { position: fixed !important; top: calc(12px + var(--sat)) !important; right: calc(12px + var(--sar)) !important; z-index: 20; }
+#modal.full .panel .hubTop { position: sticky; top: 0; z-index: 15; padding: 6px 0; background: var(--og-stone2); }
+#modal.full .panel > .npcHead:first-child { position: sticky; top: 0; z-index: 15; background: var(--og-stone2); padding: 6px 0; }
