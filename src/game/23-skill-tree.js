@@ -42,6 +42,20 @@ function spendNode(p, which, id, times) {
   if (n) { refreshPlayerStats(false); checkAchievements(); G.dirty = true; ev({ t: 'node', which, id }); }
   return n;
 }
+// Auto: spend every free point on random open nodes, nodes that open the next ring first, so a new hero is set up in one tap
+function autoSpend(p, which) {
+  if (!CFG.brawlerTrees[which]) return 0;
+  if (!p.brawlers[which]) p.brawlers[which] = newBrawlerState();
+  const T = treeOf(p, which), set = T.st.sets[T.st.active]; let n = 0;
+  for (let guard = 0; guard < 5000; guard++) {
+    const L = treeLayer(T.nodes, set), open = Object.keys(T.nodes).filter((id) => canSpend(p, which, id)); if (!open.length) break;
+    const gate = open.filter((id) => T.nodes[id].depth === L && (set[id] || 0) < layerNeed(T.nodes[id]));
+    const fin = open.filter((id) => nodeMax(T.nodes[id]) !== Infinity);
+    const id = pick(gate.length ? gate : fin.length ? fin : open); set[id] = (set[id] || 0) + 1; n++;
+  }
+  if (n) { refreshPlayerStats(false); checkAchievements(); G.dirty = true; ev({ t: 'node', which }); }
+  return n;
+}
 const treeResetCost = (p) => Math.round(CFG.trees2.resetBase * Math.pow(CFG.enemies.goldGrowth, p.level - 1));
 function resetTree(p, which) {
   const T = treeOf(p, which), set = T.st.sets[T.st.active]; if (!Object.keys(set).length) return false;

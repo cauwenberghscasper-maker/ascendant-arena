@@ -463,7 +463,7 @@ function openSkills(which) {
       <div class="tsw"><span class="tab on">${gi('m_brawlers')} Hero${ownedBrawlers(p).some((id) => id !== which && treeFree(p, id) > 0) ? '<i class="rdot tabdot"></i>' : ''}</span>
         <select data-sel2="tBrawler" aria-label="Choose a hero">${bopts}</select></div>
       <div class="tinfo"><b>${title}</b><span class="tpts ${free > 0 ? 'hot' : ''}">${free} point${free === 1 ? '' : 's'} to spend</span><small>${src}</small></div>
-      <div class="tact"><span class="pres">Build ${presets}</span><button class="ghost sm" data-act="tReset">Reset ${ICON.coin}${fmtK(treeResetCost(p))}</button></div>
+      <div class="tact"><span class="pres">Build ${presets}</span>${free > 0 ? `<button class="primary sm" data-act="tAuto">Auto</button>` : ''}<button class="ghost sm" data-act="tReset">Reset ${ICON.coin}${fmtK(treeResetCost(p))}</button></div>
     </div>
     <div class="treeWrap"><canvas id="treeCv"></canvas><div class="tzoom"><button data-act="tZoom" data-z="in" aria-label="Zoom in">+</button><button data-act="tZoom" data-z="out" aria-label="Zoom out">−</button><button data-act="tZoom" data-z="fit" aria-label="Show the whole tree">Fit</button></div><div id="nodeCard" hidden></div><div class="thint">${ringTxt}</div></div>`, true);
   $('panel').classList.add('treePanel'); $('panel').classList.remove('scroll');

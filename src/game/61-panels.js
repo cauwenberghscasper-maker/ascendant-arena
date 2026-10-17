@@ -787,6 +787,7 @@ function handlePanelClick(e) {
     case 'progTab': openProgress(b.dataset.tab); break;
     case 'tWhich': openSkills(b.dataset.w); break;
     case 'tPreset': setPreset(G.profile, TreeView.which, +b.dataset.i); TreeView.keep = true; openSkills(TreeView.which); break;
+    case 'tAuto': { const n = autoSpend(G.profile, TreeView.which); if (n) { Sfx.play('level'); toast(`Spent ${n} point${n === 1 ? '' : 's'}`); TreeView.keep = true; openSkills(TreeView.which); } else toast('No node to put points in', 'bad'); break; }
     case 'tReset': if (resetTree(G.profile, TreeView.which)) { Sfx.play('coin'); TreeView.keep = true; openSkills(TreeView.which); } else toast(`Need ${fmtK(treeResetCost(G.profile))} gold, or the tree is already empty`, 'bad'); break;
     case 'tSpend': { const n = +b.dataset.n || 1, mx = nodeMax(treeOf(G.profile, TreeView.which).nodes[TreeView.sel]); if (spendNode(G.profile, TreeView.which, TreeView.sel, n >= 5 && mx !== Infinity ? 99 : n)) { Sfx.play('pickup'); TreeView.keep = true; openSkills(TreeView.which); } break; }
     case 'credits': creditsPanel(); break;
