@@ -481,3 +481,4 @@
   box-shadow: 0 0 0 3px var(--og-ink), inset 0 0 0 3px var(--tc), inset 0 0 22px color-mix(in srgb, var(--tc) 35%, transparent) !important; }
 #modal.full .hubTile .gi { width: 128px !important; height: 128px !important; }
 #modal.full .hubTile b { font-size: 28px; color: color-mix(in srgb, var(--tc) 45%, #fff); }
+.cbtn, #bSuper, #bDash, #bSkill, #bSpecial { border-image: none !important; } .cbtn::before { border-radius: 50% !important; } /* no square pixel-frame corners outside the round thumb buttons */
