@@ -4012,6 +4012,7 @@ function autoTarget(f, range) {
     if (t.id === f.lockId && G.time - f.lockT < 2.5) sc -= 4;
     if (t.hp < t.maxHp * 0.3) sc -= 1.5;
     if (t.kind === 'boss' || t.elite) sc -= 1;
+    if (t.isPeer) sc -= 4; // PvP: an enemy player nearby comes before monsters
     if (losBlocked(f.x, f.z, t.x, t.z)) sc += 7;
     if (sc < bs) { bs = sc; best = t; }
   });
@@ -8589,14 +8590,14 @@ const views = new Map();
 // everything that changes how your hero looks; the view is rebuilt when this changes
 function playerViewSig(cls) {
   const p = G.profile;
-  return gearSignature(p.gear) + Object.values(p.gear).map(it=>it?it.id+':'+it.up:'-').join('|') + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level)) + (typeof pvpOn === 'function' && pvpOn() ? '|pvp' : '');
+  return gearSignature(p.gear) + Object.values(p.gear).map(it=>it?it.id+':'+it.up:'-').join('|') + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level)) + (!!G.profile.settings.pvp ? '|pvp' : '');
 }
 function viewFor(e) {
   let v = views.get(e);
   if (v) return v;
   if (e.kind === 'fighter') {
     const c = CFG.classes[e.cls];
-    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (typeof pvpOn === 'function' && pvpOn() ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : null);
+    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (!!(G.profile && G.profile.settings.pvp) ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : null);
     const gear = e.isPlayer ? G.profile.gear : null;
     const cape = e.isPlayer ? capeColor(G.profile) : null;
     const BR = CFG.brawlers[e.cls] || {};
@@ -12195,6 +12196,7 @@ function mpUpdate(dt) {
     e.facing += angDiff(e.facing, e.tf) * k; e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
   }
   rtUpdate(dt);
+  if (typeof pvpFlush === 'function') pvpFlush(dt);
   if (!G.started) return;
   MP.sendT -= dt; MP.dbT -= dt; MP.dbBeat -= dt;
   // room: ~8 times a second, only when something changed
@@ -12589,23 +12591,35 @@ function idleAlert() { const p = G.profile, now = Date.now(); return vaultState(
 // scales and caps the damage, and on death drops 10% of its gold to the killer (zero-sum, so alts can't create gold),
 // once per killer per 10 minutes. Shots from the attacker's own client only send 'phit'; nothing is applied locally.
 // ---------------------------------------------------------------------
-CFG.pvp = { range: 18, levelGap: 10, dmgMul: 0.35, hitCap: 0.15, secCap: 0.4, goldDrop: 0.1, goldFloor: 100, cooldown: 600, lastHitWindow: 5 };
-const PVP = { win: 0, winT: 0, last: null, killedBy: {} };
+CFG.pvp = { range: 24, flush: 0.2, dmgMul: 0.35, hitCap: 0.15, secCap: 0.4, goldDrop: 0.1, goldFloor: 100, cooldown: 600, lastHitWindow: 5 };
+const PVP = { win: 0, winT: 0, last: null, killedBy: {}, tT: -1, tList: [], out: new Map(), outT: 0 };
 const pvpOn = () => !!(G.profile && G.profile.settings.pvp) && typeof MP !== 'undefined' && MP.state === 'on';
 const pvpZoneOk = (x, z) => G.mode === 'hub' && !G.rift && !G.dungeon && distToTown(x, z) > CFG.world.town.r + 4;
 // peers you may hit right now (used by forEachTarget)
-function pvpTargets() { return pvpOn() && pvpZoneOk(G.player.x, G.player.z) ? mpVisible().filter((e) => e.pvp && e.alive && pvpZoneOk(e.x, e.z)) : []; }
+// cached once per sim step: forEachTarget runs for every bullet every frame, so no new arrays per call
+function pvpTargets() {
+  if (PVP.tT === G.time) return PVP.tList;
+  PVP.tT = G.time; PVP.tList = pvpOn() && pvpZoneOk(G.player.x, G.player.z) ? mpVisible().filter((e) => e.pvp && e.alive && pvpZoneOk(e.x, e.z)) : [];
+  return PVP.tList;
+}
 // attacker side: report the hit to the victim, change nothing here
+// hits are summed per victim and sent 5x a second, so a shotgun or minigun doesn't flood the lobby
 function pvpHit(t, amount) {
   if (!pvpOn() || !(amount > 0)) return 0;
-  rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'phit', payload: { sid: MP.sid, to: t.key, a: Math.round(amount), l: G.profile.level } });
+  PVP.out.set(t.key, (PVP.out.get(t.key) || 0) + amount);
+  ev({ t: 'hit', x: t.x, z: t.z, y: 2.1, amt: Math.round(amount * CFG.pvp.dmgMul), crit: false, byPlayer: true });
   return amount;
+}
+function pvpFlush(dt) {
+  if (!PVP.out.size || (PVP.outT -= dt) > 0) return; PVP.outT = CFG.pvp.flush;
+  for (const [to, a] of PVP.out) rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'phit', payload: { sid: MP.sid, to, a: Math.round(a), l: G.profile.level } });
+  PVP.out.clear();
 }
 // victim side: all checks happen here
 function pvpRecv(d) {
   const pl = G.player, P = CFG.pvp; if (!pvpOn() || !pl.alive || !pvpZoneOk(pl.x, pl.z) || G.menuSafe > 0) return;
   const sid = String(d.sid || '').slice(0, 16), a = MP.peers.get(sid); if (!a || !a.pvp || !a.alive || a.md !== 'hub') return;
-  if (Math.hypot(a.x - pl.x, a.z - pl.z) > P.range || Math.abs((a.level || 1) - G.profile.level) > P.levelGap) return;
+  if (Math.hypot(a.x - pl.x, a.z - pl.z) > P.range) return; // no level gap: the per-hit and per-second caps keep low levels from being one-shot
   if (G.time - PVP.winT > 1) { PVP.winT = G.time; PVP.win = 0; }
   const room = Math.max(0, pl.maxHp * P.secCap - PVP.win), dmg = Math.min(Math.max(0, +d.a || 0) * P.dmgMul, pl.maxHp * P.hitCap, room);
   if (!(dmg > 0)) return;
@@ -12832,7 +12846,7 @@ function boot(hotData) {
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
-  if (LOCAL_PREVIEW) window.__dbg = { THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
+  if (LOCAL_PREVIEW) window.__dbg = { MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
   const btn = $('playBtn'), label = btn.textContent;

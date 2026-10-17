@@ -3,14 +3,14 @@ const views = new Map();
 // everything that changes how your hero looks; the view is rebuilt when this changes
 function playerViewSig(cls) {
   const p = G.profile;
-  return gearSignature(p.gear) + Object.values(p.gear).map(it=>it?it.id+':'+it.up:'-').join('|') + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level)) + (typeof pvpOn === 'function' && pvpOn() ? '|pvp' : '');
+  return gearSignature(p.gear) + Object.values(p.gear).map(it=>it?it.id+':'+it.up:'-').join('|') + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level)) + (!!G.profile.settings.pvp ? '|pvp' : '');
 }
 function viewFor(e) {
   let v = views.get(e);
   if (v) return v;
   if (e.kind === 'fighter') {
     const c = CFG.classes[e.cls];
-    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (typeof pvpOn === 'function' && pvpOn() ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : null);
+    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (!!(G.profile && G.profile.settings.pvp) ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : null);
     const gear = e.isPlayer ? G.profile.gear : null;
     const cape = e.isPlayer ? capeColor(G.profile) : null;
     const BR = CFG.brawlers[e.cls] || {};

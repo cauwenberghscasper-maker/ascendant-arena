@@ -4,23 +4,35 @@
 // scales and caps the damage, and on death drops 10% of its gold to the killer (zero-sum, so alts can't create gold),
 // once per killer per 10 minutes. Shots from the attacker's own client only send 'phit'; nothing is applied locally.
 // ---------------------------------------------------------------------
-CFG.pvp = { range: 18, levelGap: 10, dmgMul: 0.35, hitCap: 0.15, secCap: 0.4, goldDrop: 0.1, goldFloor: 100, cooldown: 600, lastHitWindow: 5 };
-const PVP = { win: 0, winT: 0, last: null, killedBy: {} };
+CFG.pvp = { range: 24, flush: 0.2, dmgMul: 0.35, hitCap: 0.15, secCap: 0.4, goldDrop: 0.1, goldFloor: 100, cooldown: 600, lastHitWindow: 5 };
+const PVP = { win: 0, winT: 0, last: null, killedBy: {}, tT: -1, tList: [], out: new Map(), outT: 0 };
 const pvpOn = () => !!(G.profile && G.profile.settings.pvp) && typeof MP !== 'undefined' && MP.state === 'on';
 const pvpZoneOk = (x, z) => G.mode === 'hub' && !G.rift && !G.dungeon && distToTown(x, z) > CFG.world.town.r + 4;
 // peers you may hit right now (used by forEachTarget)
-function pvpTargets() { return pvpOn() && pvpZoneOk(G.player.x, G.player.z) ? mpVisible().filter((e) => e.pvp && e.alive && pvpZoneOk(e.x, e.z)) : []; }
+// cached once per sim step: forEachTarget runs for every bullet every frame, so no new arrays per call
+function pvpTargets() {
+  if (PVP.tT === G.time) return PVP.tList;
+  PVP.tT = G.time; PVP.tList = pvpOn() && pvpZoneOk(G.player.x, G.player.z) ? mpVisible().filter((e) => e.pvp && e.alive && pvpZoneOk(e.x, e.z)) : [];
+  return PVP.tList;
+}
 // attacker side: report the hit to the victim, change nothing here
+// hits are summed per victim and sent 5x a second, so a shotgun or minigun doesn't flood the lobby
 function pvpHit(t, amount) {
   if (!pvpOn() || !(amount > 0)) return 0;
-  rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'phit', payload: { sid: MP.sid, to: t.key, a: Math.round(amount), l: G.profile.level } });
+  PVP.out.set(t.key, (PVP.out.get(t.key) || 0) + amount);
+  ev({ t: 'hit', x: t.x, z: t.z, y: 2.1, amt: Math.round(amount * CFG.pvp.dmgMul), crit: false, byPlayer: true });
   return amount;
+}
+function pvpFlush(dt) {
+  if (!PVP.out.size || (PVP.outT -= dt) > 0) return; PVP.outT = CFG.pvp.flush;
+  for (const [to, a] of PVP.out) rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'phit', payload: { sid: MP.sid, to, a: Math.round(a), l: G.profile.level } });
+  PVP.out.clear();
 }
 // victim side: all checks happen here
 function pvpRecv(d) {
   const pl = G.player, P = CFG.pvp; if (!pvpOn() || !pl.alive || !pvpZoneOk(pl.x, pl.z) || G.menuSafe > 0) return;
   const sid = String(d.sid || '').slice(0, 16), a = MP.peers.get(sid); if (!a || !a.pvp || !a.alive || a.md !== 'hub') return;
-  if (Math.hypot(a.x - pl.x, a.z - pl.z) > P.range || Math.abs((a.level || 1) - G.profile.level) > P.levelGap) return;
+  if (Math.hypot(a.x - pl.x, a.z - pl.z) > P.range) return; // no level gap: the per-hit and per-second caps keep low levels from being one-shot
   if (G.time - PVP.winT > 1) { PVP.winT = G.time; PVP.win = 0; }
   const room = Math.max(0, pl.maxHp * P.secCap - PVP.win), dmg = Math.min(Math.max(0, +d.a || 0) * P.dmgMul, pl.maxHp * P.hitCap, room);
   if (!(dmg > 0)) return;

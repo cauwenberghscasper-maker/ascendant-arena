@@ -334,6 +334,7 @@ function autoTarget(f, range) {
     if (t.id === f.lockId && G.time - f.lockT < 2.5) sc -= 4;
     if (t.hp < t.maxHp * 0.3) sc -= 1.5;
     if (t.kind === 'boss' || t.elite) sc -= 1;
+    if (t.isPeer) sc -= 4; // PvP: an enemy player nearby comes before monsters
     if (losBlocked(f.x, f.z, t.x, t.z)) sc += 7;
     if (sc < bs) { bs = sc; best = t; }
   });

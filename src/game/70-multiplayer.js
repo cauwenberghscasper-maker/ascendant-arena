@@ -385,6 +385,7 @@ function mpUpdate(dt) {
     e.facing += angDiff(e.facing, e.tf) * k; e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
   }
   rtUpdate(dt);
+  if (typeof pvpFlush === 'function') pvpFlush(dt);
   if (!G.started) return;
   MP.sendT -= dt; MP.dbT -= dt; MP.dbBeat -= dt;
   // room: ~8 times a second, only when something changed
