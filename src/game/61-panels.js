@@ -531,10 +531,10 @@ function openWorldMap() {
   const Z = CFG.world.zones, html = [];
   for (let zi = Z.length - 1; zi >= 0; zi--) { // north (furthest) at the top; each biome's name sits above its areas
     const zn = Z[zi], seen = zi <= far, i = wpOf[zi], have = i != null && p.waypoints.includes(i), lvlOk = p.level >= (zn.minLevel || 1), col = hex6(BIOMES[zn.biome].coreColor);
-    if (zi === Z.length - 1 || Z[zi + 1].biome !== zn.biome) html.push(`<div class="mbiome" style="--bc:${col}">${seen || zi <= far + 3 ? zn.biomeName : '???'}</div>`);
+    if (zi === Z.length - 1 || Z[zi + 1].biome !== zn.biome) html.push(`<div class="mbiome" style="--bc:${col}">${zn.biomeName}</div>`);
     const right = zi === here ? '<span class="mtag here">You</span>' : !seen ? '' : have && lvlOk && hub ? `<button class="primary" data-act="travel" data-i="${i}">Go</button>`
       : `<span class="mtag">${!lvlOk ? 'Lv ' + zn.minLevel : i == null ? '' : 'Find stone'}</span>`;
-    html.push(`<div class="marea ${seen ? '' : 'fog'} ${zi === here ? 'here' : ''}" style="--bc:${col}${seen ? `;--art:url(assets/ui/areas/${zi}.webp)` : ''}"><b>${seen ? zn.name : '???'}</b><small>${seen ? (zn.safe ? 'Safe' : `Lv ${zn.lvl[0]}–${zn.lvl[1]}`) : ''}</small>${right}</div>`);
+    html.push(`<div class="marea ${seen ? '' : 'fog'} ${zi === here ? 'here' : ''}" style="--bc:${col};--art:url(assets/ui/areas/${zi}.webp)"><b>${zn.name}</b><small>${zn.safe ? 'Safe' : `Lv ${zn.lvl[0]}–${zn.lvl[1]}`}</small>${right}</div>`);
   }
   openModal(`<div class="npcHead"><h3>World map</h3><span class="cnt">${p.waypoints.length}/${CFG.world.waypoints.length} stones</span></div>${hub ? '' : '<p class="fine">Travel works in the open world.</p>'}<div class="wmap">${html.join('')}</div>`);
   setTimeout(() => { const h = $('panel').querySelector('.marea.here'); if (h) h.scrollIntoView({ block: 'center' }); }, 30);

@@ -1896,9 +1896,9 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .marea.fog { opacity: .35; } .marea button { min-height: 36px !important; padding: 0 14px !important; }
 .mtag { font-size: 11px; color: #c9cbd6; } .mtag.here { color: #ffcf1f; }
 /* each discovered area shows its own pixel-art scene (assets/ui/areas/<area>.webp) behind its name */
-.marea { min-height: 78px; background: linear-gradient(90deg, rgba(14,16,30,.92) 0%, rgba(14,16,30,.55) 45%, rgba(14,16,30,.1) 100%), var(--art, none) center / cover no-repeat, var(--og-stone) !important; image-rendering: pixelated; }
+.marea { min-height: 78px; background: linear-gradient(90deg, rgba(14,16,30,.78) 0%, rgba(14,16,30,.35) 45%, rgba(14,16,30,0) 100%), var(--art, none) center / cover no-repeat, var(--og-stone) !important; image-rendering: pixelated; }
 .marea b { font-size: 16px; text-shadow: 2px 2px 0 var(--og-ink); } .marea small { color: #e6e8f2; text-shadow: 1px 1px 0 var(--og-ink); }
-.marea.fog { opacity: .5; }
+.marea.fog { filter: saturate(.75) brightness(.92); }
 /* Travel button on the enlarged minimap (tap the minimap to enlarge it) */
 #mapTravel { display: none; width: 100%; min-height: 44px; margin-top: 6px; font: 700 15px/1 var(--og-font); color: #fff; border: 0; background: var(--og-blu);
   background-image: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,0) 45%, rgba(0,0,0,.3));
@@ -10180,10 +10180,10 @@ function openWorldMap() {
   const Z = CFG.world.zones, html = [];
   for (let zi = Z.length - 1; zi >= 0; zi--) { // north (furthest) at the top; each biome's name sits above its areas
     const zn = Z[zi], seen = zi <= far, i = wpOf[zi], have = i != null && p.waypoints.includes(i), lvlOk = p.level >= (zn.minLevel || 1), col = hex6(BIOMES[zn.biome].coreColor);
-    if (zi === Z.length - 1 || Z[zi + 1].biome !== zn.biome) html.push(`<div class="mbiome" style="--bc:${col}">${seen || zi <= far + 3 ? zn.biomeName : '???'}</div>`);
+    if (zi === Z.length - 1 || Z[zi + 1].biome !== zn.biome) html.push(`<div class="mbiome" style="--bc:${col}">${zn.biomeName}</div>`);
     const right = zi === here ? '<span class="mtag here">You</span>' : !seen ? '' : have && lvlOk && hub ? `<button class="primary" data-act="travel" data-i="${i}">Go</button>`
       : `<span class="mtag">${!lvlOk ? 'Lv ' + zn.minLevel : i == null ? '' : 'Find stone'}</span>`;
-    html.push(`<div class="marea ${seen ? '' : 'fog'} ${zi === here ? 'here' : ''}" style="--bc:${col}${seen ? `;--art:url(assets/ui/areas/${zi}.webp)` : ''}"><b>${seen ? zn.name : '???'}</b><small>${seen ? (zn.safe ? 'Safe' : `Lv ${zn.lvl[0]}–${zn.lvl[1]}`) : ''}</small>${right}</div>`);
+    html.push(`<div class="marea ${seen ? '' : 'fog'} ${zi === here ? 'here' : ''}" style="--bc:${col};--art:url(assets/ui/areas/${zi}.webp)"><b>${zn.name}</b><small>${zn.safe ? 'Safe' : `Lv ${zn.lvl[0]}–${zn.lvl[1]}`}</small>${right}</div>`);
   }
   openModal(`<div class="npcHead"><h3>World map</h3><span class="cnt">${p.waypoints.length}/${CFG.world.waypoints.length} stones</span></div>${hub ? '' : '<p class="fine">Travel works in the open world.</p>'}<div class="wmap">${html.join('')}</div>`);
   setTimeout(() => { const h = $('panel').querySelector('.marea.here'); if (h) h.scrollIntoView({ block: 'center' }); }, 30);
