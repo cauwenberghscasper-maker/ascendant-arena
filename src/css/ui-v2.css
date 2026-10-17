@@ -428,3 +428,18 @@
 .panel .hubBack { flex: none; min-height: 44px; padding: 0 10px !important; font-size: 13px !important; background: var(--og-slate) !important; }
 .hubTop .tabs.hubSub { flex: 1; margin: 0; }
 #bHero { display: none !important; } /* the Hero hub lives in the menu now */
+/* ---- chests: five reels stacked; landed reels light up in their rarity, rare pulls flash ---- */
+.reels { display: flex; flex-direction: column; gap: 8px; }
+.reel, .reel.mini { border-radius: 0 !important; box-shadow: 0 -2px 0 var(--og-ink), 0 2px 0 var(--og-ink), -2px 0 0 var(--og-ink), 2px 0 0 var(--og-ink), inset 0 0 24px #000 !important; transition: box-shadow .25s; }
+.reel.mini { padding: 6px 0; } .reel.mini .rcard { width: 60px; height: 64px; } .reel.mini .rcard img { width: 48px; height: 48px; }
+.reel.mini .marker::before, .reel.mini .marker::after { border-width: 6px; }
+.reel.landed { box-shadow: 0 -2px 0 var(--og-ink), 0 2px 0 var(--og-ink), -2px 0 0 var(--og-ink), 2px 0 0 var(--og-ink), inset 0 0 0 3px var(--rc, #cfd6e0), inset 0 0 26px var(--rc, #cfd6e0) !important; }
+.reel.landed.uncommon { --rc: #8ee06a; } .reel.landed.rare { --rc: #58b4ff; } .reel.landed.epic { --rc: #c77dff; } .reel.landed.legendary { --rc: #ffb347; }
+.reel.landed.mythic { --rc: #ff4d6d; } .reel.landed.ancient { --rc: #2fffd0; } .reel.landed.divine { --rc: #fff3a0; }
+.reel.jackpot { animation: reelFlash .5s steps(2) 3; }
+@keyframes reelFlash { 50% { filter: brightness(1.8) saturate(1.4); } }
+.reelSum { display: flex; justify-content: center; gap: 6px; margin: 8px 0; } .reelSum .rcard { width: 56px; height: 60px; } .reelSum .rcard img { width: 44px; height: 44px; }
+.cbonus { margin: 6px auto; padding: 6px 10px; text-align: center; font-size: 14px; background: var(--og-stone); box-shadow: 0 0 0 2px var(--og-ink); }
+.cbonus b { color: #ffcf1f; margin-right: 6px; } .cbonus.hero { background: var(--og-pur); animation: reelFlash .5s steps(2) 6; } .cbonus.hero b { color: #fff; }
+.cbonus.mats { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.bonusOdds { margin-top: 6px; }
