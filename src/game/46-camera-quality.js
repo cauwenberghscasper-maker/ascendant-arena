@@ -79,6 +79,8 @@ const _cp = new THREE.Vector3(), _cl = new THREE.Vector3();
 // the studio: a backdrop, floor and podium shown only in the dressing room
 const studioGroup = new THREE.Group(); studioGroup.visible = false; scene.add(studioGroup);
 const studioFill = new THREE.DirectionalLight(0xafd6ed,1.1); studioFill.visible=false; scene.add(studioFill,studioFill.target);
+// studio key (warm, front) and rim (cool, behind) so the hero reads like a lit character render
+const studioKey = new THREE.DirectionalLight(0xffe2b8, 1.5), studioRim = new THREE.DirectionalLight(0x9fd0ff, 2.2); studioKey.visible = studioRim.visible = false; scene.add(studioKey, studioKey.target, studioRim, studioRim.target);
 (function buildStudio() {
   const g = new THREE.CylinderGeometry(14, 14, 16, 40, 6, true);
   const pos = g.attributes.position, col = new Float32Array(pos.count * 3);
@@ -102,10 +104,10 @@ function setShowcase(on) {
   if (on === Showcase.on) return;
   const pl = G.player;
   Showcase.on = on; if (pl) pl.showcase = on; // the hero stands in its relaxed gear-tab pose
-  studioFill.visible=on; Doll.alertAt=0;
+  studioFill.visible=on; studioKey.visible = studioRim.visible = on; Doll.alertAt=0;
   if (on) {
     Showcase.x = pl.x; Showcase.z = pl.z; Showcase.spin = 0; Showcase.podium = 0.3;
-    Showcase.baseYaw = Math.atan2(1, 0.3) - 0.6; Showcase.yaw = pl.facing;
+    Showcase.baseYaw = Math.atan2(1, 0.3) - 0.25; // three-quarter front view Showcase.yaw = pl.facing;
     studioGroup.position.set(pl.x, 0, pl.z); studioGroup.visible = true; hubGroup.visible = false; riftGroup.visible = false;
   } else {
     studioGroup.visible = false; hubGroup.visible = G.mode === 'hub' && !G.rift; riftGroup.visible = !!G.rift; Showcase.podium = 0;
@@ -155,7 +157,7 @@ function updateCamera(dt) {
     const F = showcaseFrame();
     const dx = 1, dz = 0.3, dl = Math.hypot(dx, dz);
     const sx = Showcase.x, sz = Showcase.z;
-    _cp.lerp(_v3.set(sx + dx / dl * F.dist, F.yc + F.span * 0.12, sz + dz / dl * F.dist), sb);
+    _cp.lerp(_v3.set(sx + dx / dl * F.dist, F.yc + F.span * 0.03, sz + dz / dl * F.dist), sb); // near eye level, not looking down
     _cl.lerp(_s3.set(sx, F.yc, sz), sb);
   }
   if (!G.started) {
@@ -179,7 +181,9 @@ function updateCamera(dt) {
   // sun + shadow box follow the hero; High graphics toggles shadows, outlines and glow
   sun.position.copy(Cam.look).add(SUN_OFF); sun.target.position.copy(Cam.look); sun.target.updateMatrixWorld();
   sun.intensity=Showcase.on?2.0:2.7;
-  if(Showcase.on){studioFill.position.set(Showcase.x-4,4,Showcase.z+3);studioFill.target.position.set(Showcase.x,1.2,Showcase.z);studioFill.target.updateMatrixWorld();}
+  if(Showcase.on){studioFill.position.set(Showcase.x-4,4,Showcase.z+3);studioFill.target.position.set(Showcase.x,1.2,Showcase.z);studioFill.target.updateMatrixWorld();
+    studioKey.position.set(Showcase.x+5,3.5,Showcase.z+2.5); studioKey.target.position.set(Showcase.x,1.1,Showcase.z); studioKey.target.updateMatrixWorld();
+    studioRim.position.set(Showcase.x-3,3,Showcase.z-5); studioRim.target.position.set(Showcase.x,1.3,Showcase.z); studioRim.target.updateMatrixWorld();}
   const hq = hqOn();
   if (hq !== Cam.hq) { Cam.hq = hq; sun.castShadow = hq; matOutline.visible = matOutlineElite.visible = matOutlineBoss.visible = hq; }
   updateZoneMood(dt);

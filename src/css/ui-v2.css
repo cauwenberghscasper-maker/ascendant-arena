@@ -536,3 +536,15 @@
 .panel button.big5 { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 0; min-width: 96px; }
 .panel button.big5 b { font-size: 24px; line-height: 1; } .panel button.big5 small { font-size: 11px; }
 .heroCard ~ .bstats, .tabBody > .bstats:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+/* Hero › Stats: the painted splash fills the stage, worn gear floats on both sides with its rarity glow */
+.heroStage { position: relative; height: 340px; margin-bottom: 10px; background: radial-gradient(ellipse at 50% 60%, rgba(255,215,106,.18), transparent 65%), var(--art) center 20% / cover no-repeat;
+  box-shadow: 0 0 0 3px var(--og-ink), inset 0 0 40px rgba(0,0,0,.6); }
+.heroStage::after { content: ''; position: absolute; inset: auto 0 0 0; height: 70px; background: linear-gradient(transparent, var(--og-stone2)); pointer-events: none; }
+.hsock { position: absolute; z-index: 1; width: 64px; height: 64px; display: grid; place-items: center; padding: 0; border: 0 !important; background: rgba(14,16,30,.72) !important;
+  box-shadow: 0 0 0 2px var(--og-ink), inset 0 0 0 2px var(--rc), 0 0 14px var(--rc) !important; animation: hsFloat 3.2s ease-in-out infinite; animation-delay: calc(var(--i) * -1s); }
+.hsock.l { left: 10px; top: calc(14px + var(--i) * 84px); } .hsock.r { right: 10px; top: calc(56px + var(--i) * 96px); }
+.hsock img { width: 52px; height: 52px; image-rendering: pixelated; } .hsock em { position: absolute; right: 3px; bottom: 1px; font-style: normal; font-size: 12px; color: #fff; text-shadow: 1px 1px 0 #000; }
+.hsock.empty { box-shadow: 0 0 0 2px var(--og-ink), inset 0 0 0 2px #4a4f6e !important; } .hsock .emptySlot { font-size: 26px; color: #6b6f80; }
+@keyframes hsFloat { 50% { transform: translateY(-6px); } }
+.heroStage ~ .bstats:not(.hsmall) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
+.heroStage ~ .bstats:not(.hsmall) > div { padding: 12px !important; } .heroStage ~ .bstats:not(.hsmall) b { font-size: 24px !important; }
