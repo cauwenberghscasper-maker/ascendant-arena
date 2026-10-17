@@ -37,7 +37,7 @@ function pvpRecv(d) {
   const room = Math.max(0, pl.maxHp * P.secCap - PVP.win), dmg = Math.min(Math.max(0, +d.a || 0) * P.dmgMul, pl.maxHp * P.hitCap, room);
   if (!(dmg > 0)) return;
   PVP.win += dmg; PVP.last = { sid, nick: a.nick, t: G.time };
-  dealDamage(pl, dmg, null);
+  dealDamage(pl, dmg, null, {});
 }
 // victim died: was it a recent PvP hit? then drop gold to the killer (at most once per killer per 10 minutes)
 function pvpOnDeath() {
