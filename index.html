@@ -5447,7 +5447,7 @@ function stepBossTimer(dt) {
 }
 function spawnBoss() {
   const B = CFG.boss, L = currentLair(), zi = G.bossLair, Z = CFG.world.zones[zi];
-  const ta = tierAdd(), lvl = clamp(G.profile.level + 1, Z.lvl[0] + 2 + ta, Z.lvl[1] + 3 + ta);
+  const ta = tierAdd(), lvl = Z.lvl[1] + 3 + ta;
   const b = { id: nextId++, kind: 'boss', team: 'mob', x: L.x, z: L.z, hx: L.x, hz: L.z, r: B.r, lvl, zone: zi, name: Z.boss,
     maxHp: Math.round(B.hp * egrow(B.hpGrowth, lvl)), hp: 0, atk: B.atk * egrow(CFG.enemies.atkGrowth, lvl),
     alive: true, atkT: 2.5, life: B.duration, dmgBy: {}, total: 0, facing: 0, moveAmt: 0, flashT: 0, slowT: 0, invulnT: 0, armorT: 0, attackAnim: 0, lastHurt: -99 };
