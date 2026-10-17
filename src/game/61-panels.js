@@ -413,7 +413,7 @@ function heroTab(tab) {
     // a big painted splash of the hero (high quality, not the 3D model) with the worn gear floating around it
     const def = ASSET_MANIFEST['hero.' + p.cls] || {}, art = def.splash || brawlerThumb(p.cls), g = gearTotals(p.gear);
     const sock = (s, side, i) => { const it = p.gear[s];
-      return `<button class="hsock ${side} ${it ? it.rarity : 'empty'}" style="--i:${i};--rc:${it ? rarCol(it.rarity) : '#4a4f6e'}" data-act="mGear" aria-label="${SLOT_LABEL[s]}">${it ? `<img src="${thumbFor(it)}" alt="">` : '<span class="emptySlot">+</span>'}${it && it.up ? `<em>+${it.up}</em>` : ''}</button>`; };
+      return `<button class="hsock ${side} ${it ? it.rarity : 'empty'}" style="--i:${i};--rc:${it ? rarCol(it.rarity) : '#4a4f6e'}" data-act="slot" data-slot="${s}" aria-label="${SLOT_LABEL[s]}">${it ? `<img src="${thumbFor(it)}" alt="">` : '<span class="emptySlot">+</span>'}${it && it.up ? `<em>+${it.up}</em>` : ''}</button>`; };
     const box = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
     body = `<div class="heroStage" style="--art:url(${art})">${sock('helmet', 'l', 0)}${sock('chest', 'l', 1)}${sock('boots', 'l', 2)}${sock('weapon', 'r', 0)}${sock('accessory', 'r', 1)}</div>
       ${statStrip(null)}<div class="bstats hsmall">${box('Level', fmt(p.level))}${box('Gear score', fmt(Math.round(g.score)))}${box('Move', pl.speed.toFixed(1))}${box('Trophies', fmt(p.trophies))}</div>`;
