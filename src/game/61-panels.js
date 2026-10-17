@@ -337,7 +337,7 @@ function craftTabHTML(p) {
   const SB = C.setBonus, k = 1 + SB.perBiome * bi, worn = setBonuses(p.gear).sets[bi] || 0;
   const rows = CFG.gear.slots.map((s) => {
     const cost = setPieceCost(bi, s), can = open && canPay(cost, p), noun = ITEM_NAMES[s][s === 'weapon' ? 0 : 1];
-    return `<div class="item ${C.setRarity[bi]} craftRow"><img class="setArt" src="${setArtUrl(bi, s)}" alt=""><div class="meta"><div class="slot">${SLOT_LABEL[s]} · item level ${Math.max(biomeTop(bi), p.level) + 2}</div><div class="nm">${b.set} ${noun} ${rarityChip(C.setRarity[bi])}</div><div class="st">Random affixes + one perfect bonus affix</div><div class="mats">${costChips(cost, p)}</div></div>
+    return `<div class="item ${C.setRarity[bi]} craftRow"><span class="setWrap" style="--sc:${hex6(b.color)}"><i class="rays"></i><i class="rays r2"></i><img class="setArt" src="${setArtUrl(bi, s)}" alt=""></span><div class="meta"><div class="slot">${SLOT_LABEL[s]} · item level ${Math.max(biomeTop(bi), p.level) + 2}</div><div class="nm">${b.set} ${noun} ${rarityChip(C.setRarity[bi])}</div><div class="st">Random affixes + one perfect bonus affix</div><div class="mats">${costChips(cost, p)}</div></div>
       <button class="${can ? 'primary' : 'disabled'}" data-act="craftPiece" data-b="${bi}" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div>`;
   }).join('');
   const hero = CFG.brawlers[b.hero], heroHave = p.unlocked.attacks.includes(b.hero), relicN = craftState(p).relics[bi] | 0;

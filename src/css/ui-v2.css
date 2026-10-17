@@ -592,3 +592,20 @@ img[src*="ui/sets/"] { image-rendering: auto !important; object-fit: contain; } 
 .craftRow { display: grid !important; grid-template-columns: 84px 1fr auto; align-items: center; gap: 10px; }
 .craftRow .setArt { width: 84px; height: 84px; filter: drop-shadow(0 0 8px var(--rc, #ffd76a)); animation: setGlow 2.6s ease-in-out infinite; }
 @keyframes setGlow { 50% { filter: drop-shadow(0 0 16px var(--rc, #ffd76a)) brightness(1.12); transform: translateY(-3px); } }
+/* super epic set glow: per-set two-colour aura on every set icon, spinning light rays behind craft art */
+img[src*="sets/0-"], img[src*="sets/px/0-"] { --sc: #7fc65a; --sc2: #e6ff6a; }
+img[src*="sets/1-"], img[src*="sets/px/1-"] { --sc: #9fd8ff; --sc2: #ffffff; }
+img[src*="sets/2-"], img[src*="sets/px/2-"] { --sc: #ff7a3a; --sc2: #ffd23a; }
+img[src*="sets/3-"], img[src*="sets/px/3-"] { --sc: #c08aff; --sc2: #ff6ad5; }
+img[src*="sets/4-"], img[src*="sets/px/4-"] { --sc: #3fe0d0; --sc2: #6ab8ff; }
+img[src*="sets/5-"], img[src*="sets/px/5-"] { --sc: #fff07a; --sc2: #ff9a3a; }
+img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var(--sc)) drop-shadow(0 0 14px var(--sc2)); animation: setPulse 2.2s ease-in-out infinite; }
+@keyframes setPulse { 50% { filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 12px var(--sc)) drop-shadow(0 0 24px var(--sc2)) brightness(1.15); } }
+.setWrap { position: relative; width: 84px; height: 84px; display: grid; place-items: center; }
+.setWrap .rays { position: absolute; inset: -14px; border-radius: 50%; pointer-events: none; mix-blend-mode: screen;
+  background: repeating-conic-gradient(from 0deg, var(--sc) 0 6deg, transparent 6deg 30deg); -webkit-mask: radial-gradient(circle, #000 20%, transparent 70%); mask: radial-gradient(circle, #000 20%, transparent 70%);
+  opacity: .55; animation: setSpin 9s linear infinite; }
+.setWrap .rays.r2 { background: repeating-conic-gradient(from 15deg, #fff 0 3deg, transparent 3deg 45deg); opacity: .35; animation-duration: 14s; animation-direction: reverse; }
+.setWrap::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: radial-gradient(circle, var(--sc) 0%, transparent 70%); opacity: .55; animation: setBreath 2.2s ease-in-out infinite; }
+.setWrap .setArt { position: relative; z-index: 1; animation: setFloat 2.6s ease-in-out infinite, setPulse 2.2s ease-in-out infinite !important; filter: none; }
+@keyframes setSpin { to { transform: rotate(360deg); } } @keyframes setBreath { 50% { opacity: .9; transform: scale(1.15); } } @keyframes setFloat { 50% { transform: translateY(-4px) scale(1.04); } }
