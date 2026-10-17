@@ -413,10 +413,18 @@ function heroTab(tab) {
     // a big painted splash of the hero (high quality, not the 3D model) with the worn gear floating around it
     const def = ASSET_MANIFEST['hero.' + p.cls] || {}, art = def.splash || brawlerThumb(p.cls), g = gearTotals(p.gear);
     const sock = (s, side, i) => { const it = p.gear[s];
-      return `<button class="hsock ${side} ${it ? it.rarity : 'empty'}" style="--i:${i};--rc:${it ? rarCol(it.rarity) : '#4a4f6e'}" data-act="slot" data-slot="${s}" aria-label="${SLOT_LABEL[s]}">${it ? `<img src="${thumbFor(it)}" alt="">` : '<span class="emptySlot">+</span>'}${it && it.up ? `<em>+${it.up}</em>` : ''}</button>`; };
+      return `<button class="hsock ${side} ${it ? it.rarity : 'empty'}${UI.heroSlot === s ? ' sel' : ''}" style="--i:${i};--rc:${it ? rarCol(it.rarity) : '#4a4f6e'}" data-act="hsSlot" data-slot="${s}" aria-label="${SLOT_LABEL[s]}">${it ? `<img src="${thumbFor(it)}" alt="">` : '<span class="emptySlot">+</span>'}${it && it.up ? `<em>+${it.up}</em>` : ''}</button>`; };
     const box = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
+    // tapping a floating piece opens a swap panel right here: worn vs picked, the bag for that slot, Wield; Back closes it
+    const hs = UI.heroSlot, worn = hs && p.gear[hs], pick = hs ? p.bag.find((b) => b.id === UI.heroPick && b.slot === hs) || null : null;
+    const card = (it, label) => it ? `<div class="cmpc ${it.rarity}"><small>${label}</small><button class="inspect" data-act="inspect" data-id="${escapeHTML(it.id)}"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""></button><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b>${rarityChip(it.rarity)}<span class="st">${statLine(it)}</span>${it.aff && Object.keys(it.aff).length ? `<span class="st aff">${affixText(it).split(' · ').join('<br>')}</span>` : ''}</div>`
+      : `<div class="cmpc none"><small>${label}</small><span class="emptySlot">?</span></div>`;
+    const swap = !hs ? '' : `<div class="hswap"><div class="hswapHead"><b>${SLOT_LABEL[hs]}</b><button class="ghost sm" data-act="hsBack">Back</button></div>
+      <div class="cmp">${card(worn, 'Worn')}<b class="cmpv">VS</b>${card(pick, 'Tap a bag item')}</div>
+      ${itemGrid(p.bag.filter((b) => b.slot === hs).sort((x, y) => (isBetter(y, x) ? 1 : isBetter(x, y) ? -1 : 0)), { act: 'hsPick', sel: UI.heroPick, mark: (it) => (isBetter(it, worn) ? { cls: 'up', text: '▲', label: 'better than worn' } : null), empty: 'No other pieces for this slot yet.' })}
+      ${pick ? `<div class="row"><button class="primary" data-act="hsWear" data-id="${escapeHTML(pick.id)}">${wearWord(hs)}</button></div>` : ''}</div>`;
     body = `<div class="heroStage" style="--art:url(${art})">${sock('helmet', 'l', 0)}${sock('chest', 'l', 1)}${sock('boots', 'l', 2)}${sock('weapon', 'r', 0)}${sock('accessory', 'r', 1)}</div>
-      ${statStrip(null)}<div class="bstats hsmall">${box('Level', fmt(p.level))}${box('Gear score', fmt(Math.round(g.score)))}${box('Move', pl.speed.toFixed(1))}${box('Trophies', fmt(p.trophies))}</div>`;
+      ${swap}${statStrip(pick)}<div class="bstats hsmall">${box('Level', fmt(p.level))}${box('Gear score', fmt(Math.round(g.score)))}${box('Move', pl.speed.toFixed(1))}${box('Trophies', fmt(p.trophies))}</div>`;
   } else if (tab === 'Gear') {
     p._bagSeen = true;
     const al = slotAlerts();
@@ -728,7 +736,7 @@ function handlePanelClick(e) {
     case 'forge': if (buyForge(b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; openSmith('Forge'); } break;
     case 'smithTab': openSmith(b.dataset.tab); break;
     case 'inspect': openInspect(b.dataset.id); break;
-    case 'inspectClose': heroTab('Gear'); break;
+    case 'inspectClose': heroTab(UI.heroSlot ? 'Stats' : 'Gear'); break;
     case 'enchReroll': if (rerollAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gold', 'bad'); openSmith('Enchant'); break;
     case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
@@ -772,6 +780,10 @@ function handlePanelClick(e) {
     case 'pMore': UI.moreOpen = !UI.moreOpen; syncMore(); break;
     case 'unequip': if (unequipItem(b.dataset.slot)) { Showcase.spin = 0; heroTab('Gear'); } break;
     case 'slot': UI.gearSlot = b.dataset.slot; heroTab('Gear'); break;
+    case 'hsSlot': UI.heroSlot = UI.heroSlot === b.dataset.slot ? null : b.dataset.slot; UI.heroPick = null; heroTab('Stats'); break;
+    case 'hsPick': UI.heroPick = UI.heroPick === b.dataset.id ? null : b.dataset.id; heroTab('Stats'); break;
+    case 'hsWear': if (equipItem(b.dataset.id)) Sfx.play('equipped'); UI.heroPick = null; heroTab('Stats'); break;
+    case 'hsBack': UI.heroSlot = UI.heroPick = null; heroTab('Stats'); break;
     case 'equipAtk': equipAttack(b.dataset.id); openBrawlers(); break;
     case 'toggleArt': toggleArtifact(b.dataset.id); Sfx.play('job'); openArtifacts('Equip'); break;
     case 'upgradeHere': openMerge(b.dataset.slot, false, 'hero'); break;

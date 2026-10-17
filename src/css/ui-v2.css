@@ -548,3 +548,7 @@
 @keyframes hsFloat { 50% { transform: translateY(-6px); } }
 .heroStage ~ .bstats:not(.hsmall) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
 .heroStage ~ .bstats:not(.hsmall) > div { padding: 12px !important; } .heroStage ~ .bstats:not(.hsmall) b { font-size: 24px !important; }
+.hsock.sel { outline: 3px solid #fff; outline-offset: 2px; }
+.hswap { margin-bottom: 10px; padding: 8px; background: var(--og-stone); box-shadow: 0 0 0 2px var(--og-ink), inset 0 2px 0 #4a4f6e; }
+.hswapHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; } .hswapHead b { font-size: 16px; color: #ffe066; }
+.hswap .row { margin-top: 8px; } .hswap .row .primary { width: 100%; }
