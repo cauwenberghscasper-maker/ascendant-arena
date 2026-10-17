@@ -402,7 +402,7 @@ function drawMinimap() {
       g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.fillRect(ex(X) - 2.5 * u, ey(Y) - 2.5 * u, 5 * u, 5 * u); };
     for (const D of W.dens) if (D.zone === zi) pin(D.x, D.z, '☠', '#ff5d6c');
     for (const q of W.pois) if (q.kind === 'dungeon' && q.zone === zi) pin(q.x, q.z, '⛫', '#ffb347'); }
-  for (const e of mpVisible()) { g.fillStyle = '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }
+  for (const e of mpVisible()) { g.fillStyle = e.pvp ? '#ff3344' : '#5dd6ff'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(mmX(e.x), mmY(e.z), 3.4 * u, 0, Math.PI * 2); g.fill(); g.stroke(); }
   W.waypoints.forEach((w, i) => { const x = mmX(w.x), y = mmY(w.z), k = 4 * u, have = p.waypoints.includes(i); g.fillStyle = have ? '#9fe8ff' : '#6f6a8a'; g.beginPath(); g.moveTo(x, y - k); g.lineTo(x + k * 0.7, y); g.lineTo(x, y + k); g.lineTo(x - k * 0.7, y); g.closePath(); g.fill(); });
   for (const sh of G.shrines) {
     const locked = p.level < W.zones[sh.zone].minLevel;

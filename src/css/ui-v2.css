@@ -581,3 +581,4 @@
 .panel .hsRow { height: auto !important; flex: none !important; overflow: visible; } .panel .hsRow .dchips i { display: inline-block !important; width: auto !important; flex: none !important; line-height: 1.4; }
 .panel .hsRow span.dchips { flex-direction: row !important; flex-wrap: wrap; align-items: flex-start; }
 .hsSub { color: #9aa0b8; margin-top: 6px; }
+.tag.peer.pvp .tn { color: #ff6b78 !important; text-shadow: 0 0 6px #ff3344, 1px 1px 0 #000; } .tag.peer.pvp .tb i { background: #ff3344 !important; box-shadow: 0 0 6px #ff3344; }

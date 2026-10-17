@@ -3,20 +3,20 @@ const views = new Map();
 // everything that changes how your hero looks; the view is rebuilt when this changes
 function playerViewSig(cls) {
   const p = G.profile;
-  return gearSignature(p.gear) + Object.values(p.gear).map(it=>it?it.id+':'+it.up:'-').join('|') + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level));
+  return gearSignature(p.gear) + Object.values(p.gear).map(it=>it?it.id+':'+it.up:'-').join('|') + (capeColor(p) || '') + badgeCount(p, cls) + '|a' + (G.mode === 'arena' ? 0 : ascTier(p.level)) + (typeof pvpOn === 'function' && pvpOn() ? '|pvp' : '');
 }
 function viewFor(e) {
   let v = views.get(e);
   if (v) return v;
   if (e.kind === 'fighter') {
     const c = CFG.classes[e.cls];
-    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? 0xffc94a : e.isPeer ? 0x5dd6ff : null);
+    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (typeof pvpOn === 'function' && pvpOn() ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : null);
     const gear = e.isPlayer ? G.profile.gear : null;
     const cape = e.isPlayer ? capeColor(G.profile) : null;
     const BR = CFG.brawlers[e.cls] || {};
     const asc = G.mode === 'arena' ? 0 : ascTier(e.isPlayer ? G.profile.level : (e.level || 1));
     v = AssetSlots.create('character', { cls: e.cls, body: c.body, accent: e.isPlayer ? (badgeTint(G.profile, e.cls) || c.accent) : c.accent, hair: BR.hair, look: BR.look, ring, gear, xray: e.isPlayer, cape, asc, peer: !!e.isPeer });
-    v.cls = e.cls; v.sig = e.isPlayer ? playerViewSig(e.cls) : '';
+    v.cls = e.cls; v.sig = e.isPlayer ? playerViewSig(e.cls) : 'pv' + (e.pvp ? 1 : 0);
   } else if (e.kind === 'enemy') v = AssetSlots.create('enemy', { type: e.type, elite: e.elite });
   else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone });
   else if (e.kind === 'npc') v = AssetSlots.create('npc', { id: e.def.id });
@@ -40,7 +40,7 @@ function syncViews(dt, t) {
   const handle = (e) => {
     // rebuild a fighter view if its class changed
     const old = views.get(e);
-    if (old && e.kind === 'fighter' && (old.cls !== e.cls || (e.isPlayer && old.sig !== playerViewSig(e.cls)))) { dynGroup.remove(old.root); old.dispose(); views.delete(e); }
+    if (old && e.kind === 'fighter' && (old.cls !== e.cls || (e.isPlayer ? old.sig !== playerViewSig(e.cls) : e.isPeer && old.sig !== 'pv' + (e.pvp ? 1 : 0)))) { dynGroup.remove(old.root); old.dispose(); views.delete(e); }
     if (Showcase.on && e !== G.player) { const v = views.get(e); if (v) v.root.visible = false; seen.add(e); return; }
     const d = Math.hypot(e.x - cx, e.z - cz);
     if (d > far && !(e.kind === 'boss')) { const v = views.get(e); if (v) v.root.visible = false; if (!(e.kind === 'enemy' && d > far * 2.4)) seen.add(e); return; }
