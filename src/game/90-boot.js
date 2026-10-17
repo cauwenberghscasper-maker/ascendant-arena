@@ -48,7 +48,9 @@ function boot(hotData) {
   $('caseChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openCases(); } });
   $('autoChip').addEventListener('click', () => { if (G.started && !G.modal) { const s = G.profile.settings; s.autoHunt = !s.autoHunt; G.dirty = true; Sfx.play('click'); showToast(s.autoHunt ? 'Auto hunt on: your hero fights by itself' : 'Auto hunt off'); } });
   $('mpChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openPlayers(); } });
-  $('bMap').addEventListener('click', () => { if (!G.started || G.modal) return; Sfx.play('click'); openWorldMap(); });
+  $('bMap').addEventListener('click', () => { if (!G.started) return; Sfx.play('click'); setMap($('mapBox').hidden); });
+  // the enlarged minimap carries a Travel button that opens the world map with every area
+  $('mapTravel').addEventListener('click', (ev) => { ev.stopPropagation(); if (!G.started || G.modal) return; Sfx.play('click'); openWorldMap(); });
   $('mapBox').addEventListener('click', () => { MM.big = !MM.big; $('mapBox').classList.toggle('big', MM.big); MM.t = 0; });
   setMap(G.profile.settings.map !== false);
   $('ammo').innerHTML = '<i></i><i></i><i></i><i></i><i></i>';

@@ -1891,6 +1891,11 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .marea { min-height: 78px; background: linear-gradient(90deg, rgba(14,16,30,.92) 0%, rgba(14,16,30,.55) 45%, rgba(14,16,30,.1) 100%), var(--art, none) center / cover no-repeat, var(--og-stone) !important; image-rendering: pixelated; }
 .marea b { font-size: 16px; text-shadow: 2px 2px 0 var(--og-ink); } .marea small { color: #e6e8f2; text-shadow: 1px 1px 0 var(--og-ink); }
 .marea.fog { opacity: .5; }
+/* Travel button on the enlarged minimap (tap the minimap to enlarge it) */
+#mapTravel { display: none; width: 100%; min-height: 44px; margin-top: 6px; font: 700 15px/1 var(--og-font); color: #fff; border: 0; background: var(--og-blu);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,0) 45%, rgba(0,0,0,.3));
+  box-shadow: 0 -2px 0 var(--og-ink), 0 2px 0 var(--og-ink), -2px 0 0 var(--og-ink), 2px 0 0 var(--og-ink); text-shadow: 2px 2px 0 var(--og-ink); }
+#mapBox.big #mapTravel { display: block; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -2029,7 +2034,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
     <div id="streak" hidden><b id="streakN">×3</b><span id="streakB">+4% XP</span><i></i></div>
     <div id="xpDrops"></div>
     <div id="feed" aria-live="polite"></div>
-    <div id="mapBox" hidden><canvas id="mini"></canvas><div class="legend"><span class="lg st">Challenge</span><span class="lg bs">Boss</span><span class="lg me">You</span></div></div>
+    <div id="mapBox" hidden><canvas id="mini"></canvas><div class="legend"><span class="lg st">Challenge</span><span class="lg bs">Boss</span><span class="lg me">You</span></div><button id="mapTravel" type="button">Travel</button></div>
     <div id="gearPrompt" hidden></div>
     <div id="bossPtr" hidden><i id="bossArrow"></i><b id="bossPtrD">Boss</b></div>
     <div id="banner"></div>
@@ -12566,7 +12571,9 @@ function boot(hotData) {
   $('caseChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openCases(); } });
   $('autoChip').addEventListener('click', () => { if (G.started && !G.modal) { const s = G.profile.settings; s.autoHunt = !s.autoHunt; G.dirty = true; Sfx.play('click'); showToast(s.autoHunt ? 'Auto hunt on: your hero fights by itself' : 'Auto hunt off'); } });
   $('mpChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openPlayers(); } });
-  $('bMap').addEventListener('click', () => { if (!G.started || G.modal) return; Sfx.play('click'); openWorldMap(); });
+  $('bMap').addEventListener('click', () => { if (!G.started) return; Sfx.play('click'); setMap($('mapBox').hidden); });
+  // the enlarged minimap carries a Travel button that opens the world map with every area
+  $('mapTravel').addEventListener('click', (ev) => { ev.stopPropagation(); if (!G.started || G.modal) return; Sfx.play('click'); openWorldMap(); });
   $('mapBox').addEventListener('click', () => { MM.big = !MM.big; $('mapBox').classList.toggle('big', MM.big); MM.t = 0; });
   setMap(G.profile.settings.map !== false);
   $('ammo').innerHTML = '<i></i><i></i><i></i><i></i><i></i>';
