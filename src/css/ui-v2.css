@@ -295,3 +295,7 @@
 .craftRow .meta { min-width: 0; }
 .craftRow > button { flex: none; min-width: 84px; }
 .fl.mat small { opacity: .65; }
+
+/* Clean HUD (Oct 2026): no XP-drop feed on the right, combo counter at half size. */
+#xpDrops { display: none !important; }
+#streak { zoom: .5; }
