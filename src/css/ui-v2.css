@@ -580,3 +580,4 @@
 .hsRow .dchips i.gain { color: #4fe08a; box-shadow: inset 0 0 0 1px rgba(79,224,138,.35); } .hsRow .dchips i.loss { color: #ff6b7a; box-shadow: inset 0 0 0 1px rgba(255,107,122,.35); }
 .panel .hsRow { height: auto !important; flex: none !important; overflow: visible; } .panel .hsRow .dchips i { display: inline-block !important; width: auto !important; flex: none !important; line-height: 1.4; }
 .panel .hsRow span.dchips { flex-direction: row !important; flex-wrap: wrap; align-items: flex-start; }
+.hsSub { color: #9aa0b8; margin-top: 6px; }
