@@ -1,3 +1,30 @@
+# Unfinished work (state at 17 Oct 2026, 17:20) — branch `wip/menus-v3`
+
+## Menus & UI update (17 Oct, on `wip/menus-v3`, PR to main)
+Done: HUD clean-up (no XP feed, no super/tutorial text, combo half size); pixel panels, one Pixelify font, no emoji glyphs;
+deep-neon buttons (gradient + glow), natural-tone thumb controls with icons for every super/skill/special; menu = 4 big
+dark neon-edged tiles (Hero / Forge / Gear / Journal), every hub full page with a Menu back button + sub-tabs; Hero › Stats
+is one card (portrait, worn gear, 8 stats); Forge = upgrade-card grid (Reforge shows result first, Masterwork cards with
+icons in `assets/ui/forge/`, Craft, Forge, Enchant: reroll one affix for gold / boost toward cap for gems), Gem trade removed;
+Equipment = compare worn vs picked + Wield/Protect/Salvage; level unlocks (`UNLOCK_AT` in 61-panels.js, white pulse until
+tapped); chests: Open 5 on stacked reels + bonus drops (hero 0.2%, gold 4%, gems 3%, mats 25%); resource glow in the world;
+world map (Map button) with 30 area images `assets/ui/areas/<i>.webp`, travel from anywhere; area colours from the art
+(`tools/area_palette.py`); lair bosses per area with unique items (`src/game/39b-lair-bosses.js`).
+
+## Still to do (next session)
+1. **Unique item icons (29):** Casper finds the 48 px pixelize too low-res and not high end. Generate higher detail
+   (e.g. 96–128 px, painted, less quantised) and hook `thumbFor` on `it.unique` → `assets/ui/uniques/<area>.png`.
+   Prompts per area are the item names in `AREA_UNIQUE` (39b-lair-bosses.js). Z-Image's safety filter rejects some words
+   (dark, shadow, ash, burnt, storm, black crags…): reword and retry.
+2. **Lair boss 3D models + landmark 3D models per area** (landmark = the centre object of each area image) via TRELLIS.2.
+   Today lair bosses are the area's monster scaled ×1.8.
+3. **PvP** (task list): per-player switch (default off), red glow on PvP players, `phit` message decided on the victim's
+   client (range, level gap ≤10, per-hit/sec caps, not in town/menu), loser drops gold zero-sum to the killer, per-victim
+   cooldown; name filter + first-play name prompt (name field already in Settings).
+4. **Secret weapons:** one craft recipe per biome in Forge › Craft from chest ore + Titan Soul (Casper's choice).
+5. Hero preview regeneration (3–5 trial heroes) — lower priority now the Hero tab uses the portrait.
+6. Treads/Purse Masterwork icons + Forge tab icons (a scheduled reminder fires 22:50).
+
 # Unfinished work: world art (state at 14 Oct 2026, 22:50)
 
 ## Done and pushed
