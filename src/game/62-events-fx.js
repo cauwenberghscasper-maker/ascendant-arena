@@ -295,6 +295,12 @@ function updateHubProps(t) {
     bim.setMatrixAt(i, _m4);
   });
   bim.instanceMatrix.needsUpdate = true;
+  // resource glow: one soft sprite per ready vein and active berry, facing the camera and breathing slowly
+  { const gim = hubParts.resGlowIM; if (gim) { let n = 0; const pl = G.player, k = 1 + Math.sin(t * 2.2) * 0.12;
+    const put = (x, y, z, sz) => { _m4.compose(_v3.set(x, y, z), camera.quaternion, _s3.set(sz * k, sz * k, 1)); gim.setMatrixAt(n++, _m4); };
+    for (const st of nodeStates()) if (!st.t && Math.abs(st.q.z - pl.z) < 90) put(st.q.x, 1.1, st.q.z, st.rich ? 5.2 : 4.2);
+    for (const b of G.berries) if (b.active && Math.abs(b.z - pl.z) < 90) put(b.x, 0.55, b.z, 2.4);
+    gim.count = n; gim.instanceMatrix.needsUpdate = true; } }
   const wim = hubParts.wpIM;
   CFG.world.waypoints.forEach((w, i) => {
     const have = p.waypoints.includes(i);
