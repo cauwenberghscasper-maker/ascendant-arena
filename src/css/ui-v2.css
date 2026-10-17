@@ -565,3 +565,14 @@
 .hswap .igt:active { transform: scale(.92); } .hswap .igt.sel { transform: translateY(-4px) scale(1.06); }
 .hswap .cmp.picked .cmpc:last-of-type { animation: hsPick .3s cubic-bezier(.2,.9,.3,1.2); }
 @keyframes hsPick { from { opacity: 0; transform: translateX(24px) scale(.94); } }
+/* "Pick one" card opens the all-options sheet: owned pieces as rows (better ones marked) + where to get more */
+.hswapHead .row { display: flex; gap: 6px; margin: 0; }
+.panel .cmpc.pickAll { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border: 2px dashed #5a6080 !important; background: rgba(255,255,255,.03) !important; }
+.cmpc.pickAll .emptySlot { font-size: 36px; color: #ffe066; animation: hsFloat 2.4s ease-in-out infinite; } .cmpc.pickAll .st { color: #c9cde0; }
+.hsSheet { display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow-y: auto; overscroll-behavior: contain; animation: hsPick .25s cubic-bezier(.2,.9,.3,1.2); }
+.panel .hsRow { display: grid !important; grid-template-columns: 52px 1fr auto; align-items: center; gap: 10px; text-align: left; padding: 6px 10px !important; min-height: 64px;
+  background: rgba(14,16,30,.6) !important; box-shadow: 0 0 0 2px var(--og-ink), inset 3px 0 0 var(--rc) !important; transition: transform .15s; }
+.panel .hsRow:active { transform: scale(.97); } .panel .hsRow.sel { box-shadow: 0 0 0 2px #fff, inset 3px 0 0 var(--rc) !important; }
+.hsRow img { width: 52px; height: 52px; } .hsRow span { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .hsRow b { color: var(--rc); font-size: 14px; } .hsRow small { color: #c9cde0; font-size: 12px; }
+.hsRow em.up { font-style: normal; color: #4fe08a; font-size: 18px; }
+.hsGet { margin-top: 6px; padding-top: 8px; border-top: 2px solid var(--og-ink); } .hsGet small { color: #9aa0b8; } .hsGet .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
