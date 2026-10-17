@@ -231,7 +231,8 @@ function upCard(art, name, now, next, foot, btn, cls) {
   return `<div class="ucard ${cls || ''}"><div class="uart">${art}</div><b class="un">${name}</b><div class="uval">${now}${next ? `<i>→</i><em>${next}</em>` : ''}</div>${foot || ''}${btn}</div>`;
 }
 const MW_ART = { whetstone: 'weapon', plating: 'chest', bracers: 'accessory', treads: 'boots', satchel: 'm_case', purse: 'm_coin' };
-const mwArt = (id) => { const a = MW_ART[id] || 'm_smith'; return a.startsWith('m_') ? gi(a) : `<img src="${thumbFor({ id: 'mw-' + id, slot: a, rarity: 'epic', up: 0, ilvl: 1, name: ITEM_NAMES[a][a === 'weapon' ? 0 : 1] })}" alt="">`; };
+const FORGE_ICONS = ['whetstone', 'plating', 'bracers', 'satchel']; // own pixel icons in assets/ui/forge/ (Z-Image-Turbo + tools/pixelize_items.py)
+const mwArt = (id) => { if (FORGE_ICONS.includes(id)) return `<img src="assets/ui/forge/${id}.png" alt="">`; const a = MW_ART[id] || 'm_smith'; return a.startsWith('m_') ? gi(a) : `<img src="${thumbFor({ id: 'mw-' + id, slot: a, rarity: 'epic', up: 0, ilvl: 1, name: ITEM_NAMES[a][a === 'weapon' ? 0 : 1] })}" alt="">`; };
 function openSmith(tab) {
   tab = tab || UI.smithTab || 'Upgrade'; if (!['Upgrade', 'Masterwork', 'Craft', 'Forge'].includes(tab)) tab = 'Upgrade'; UI.smithTab = tab;
   UI.current = 'smith';
