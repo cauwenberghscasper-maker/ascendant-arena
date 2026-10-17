@@ -1691,6 +1691,42 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 /* No tutorial text: the coach bar is gone, the objective keeps only its direction arrow. */
 #coach { display: none !important; }
 #objText { display: none !important; }
+
+/* ===== OG arcade buttons (Oct 2026, loaded last) =====
+   Bright flat fills, thick black outline with notched pixel corners (box-shadow, so no clip-path cuts the glow),
+   a light top lip and a dark bottom lip, Pixelify Sans with a hard drop shadow. Round thumb controls stay round. */
+:root { --og-ink: #0b0b14; --og-yel: #ffcf1f; --og-org: #ff7a1a; --og-red: #f2423a; --og-blu: #2e86ff; --og-cya: #1fc8ff;
+  --og-grn: #46d63f; --og-pur: #b14dff; --og-slate: #39405a; --og-font: 'Pixelify Sans', monospace; }
+.panel button.primary, .panel button.primary.gold, .panel button.ghost, .panel button.warn, .panel button.disabled, .panel .x,
+#gearPrompt button, .pMoreBtn, .tab, .panel .tabs .tab, .menuSections button, .bagFilter button,
+.hbtn, .hbtn.ic, #hubShortcuts button, #bAct, #playBtn {
+  font-family: var(--og-font) !important; font-weight: 700 !important; letter-spacing: .02em !important;
+  border: 0 !important; border-image: none !important; border-radius: 0 !important; text-shadow: 2px 2px 0 var(--og-ink) !important; color: #fff !important;
+  box-shadow: 0 -3px 0 var(--og-ink), 0 3px 0 var(--og-ink), -3px 0 0 var(--og-ink), 3px 0 0 var(--og-ink),
+    inset 0 3px 0 rgba(255,255,255,.45), inset 0 -4px 0 rgba(0,0,0,.3), 0 6px 0 rgba(0,0,0,.35) !important; }
+.panel button.primary, .panel button.primary.gold, #gearPrompt button.primary, #bAct, #playBtn, .tab.on, .panel .tabs .tab.on,
+.menuSections button[aria-pressed="true"], .bagFilter button.on { background: var(--og-yel) !important; color: var(--og-ink) !important; text-shadow: 1px 1px 0 rgba(255,255,255,.55) !important; }
+.panel button.primary :is(.mergeCost, span, b) { color: inherit !important; }
+.panel button.ghost, #gearPrompt button.ghost, .pMoreBtn, .hbtn, .hbtn.ic, #hubShortcuts button { background: var(--og-blu) !important; }
+.tab, .panel .tabs .tab, .menuSections button, .bagFilter button { background: var(--og-slate) !important; }
+.panel button.warn, .panel .x { background: var(--og-red) !important; }
+.panel button.disabled, .panel button:disabled { background: #6b6f80 !important; color: #c9cbd6 !important; filter: none !important; }
+#hubShortcuts button span:not(.quickIcon) { color: #fff !important; font-family: var(--og-font) !important; text-shadow: 2px 2px 0 var(--og-ink) !important; }
+:is(.panel button, .hbtn, #hubShortcuts button):active { transform: translateY(3px); box-shadow: 0 -3px 0 var(--og-ink), 0 3px 0 var(--og-ink), -3px 0 0 var(--og-ink), 3px 0 0 var(--og-ink), inset 0 4px 0 rgba(0,0,0,.25) !important; }
+#bAct::before, #bAct::after { display: none; }
+#bAct { animation: actIn .2s ease-out, ogBlink 1.6s steps(2) .2s infinite; }
+@keyframes ogBlink { 50% { filter: brightness(1.18); } }
+/* thumb controls: chunky round arcade buttons, one bright colour each */
+.cbtn, #atk { border: 4px solid var(--og-ink) !important; border-radius: 50% !important; image-rendering: auto !important;
+  box-shadow: inset 0 4px 0 rgba(255,255,255,.4), inset 0 -5px 0 rgba(0,0,0,.3), 0 4px 0 rgba(0,0,0,.45) !important; }
+.cbtn span { font-family: var(--og-font) !important; font-weight: 700; text-shadow: 2px 2px 0 var(--og-ink); }
+#bDash { background: var(--og-cya) !important; } #bSkill { background: var(--og-grn) !important; }
+#bSpecial { background: var(--og-pur) !important; }
+#atk { background: radial-gradient(circle, rgba(255,207,31,.25) 0 55%, rgba(255,207,31,.55) 56%) !important; border-color: var(--og-ink) !important; }
+#atkKnob { background: var(--og-yel) !important; border: 4px solid var(--og-ink) !important; }
+#bSuper { background: conic-gradient(var(--og-yel) calc(var(--sc) * 360deg), #3b2a12 0) !important; }
+#bSuper span { background: #5a3a14 !important; }
+#bSuper.ready span { background: var(--og-org) !important; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
