@@ -256,6 +256,16 @@ function upCard(art, name, now, next, foot, btn, cls) {
 const MW_ART = { whetstone: 'weapon', plating: 'chest', bracers: 'accessory', treads: 'boots', satchel: 'm_case', purse: 'm_coin' };
 const FORGE_ICONS = ['whetstone', 'plating', 'bracers', 'satchel']; // own pixel icons in assets/ui/forge/ (Z-Image-Turbo + tools/pixelize_items.py)
 const mwArt = (id) => { if (FORGE_ICONS.includes(id)) return `<img src="assets/ui/forge/${id}.png" alt="">`; const a = MW_ART[id] || 'm_smith'; return a.startsWith('m_') ? gi(a) : `<img src="${thumbFor({ id: 'mw-' + id, slot: a, rarity: 'epic', up: 0, ilvl: 1, name: ITEM_NAMES[a][a === 'weapon' ? 0 : 1] })}" alt="">`; };
+function openInspect(id) {
+  const p = G.profile, it = p.bag.find((x) => x.id === id) || Object.values(p.gear).find((x) => x && x.id === id); if (!it) return;
+  const back = UI.current, ri = rarIdx(it.rarity);
+  UI.inspectBack = back;
+  openModal(`<div class="insp ${it.rarity} ${ri >= 3 ? 'rays' : ''}" style="--rc:${rarCol(it.rarity)}"><div class="inspArt"><img src="${thumbFor(it)}" alt=""></div>
+    <b class="inspName">${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b>${rarityChip(it.rarity)}${it.unique != null ? '<span class="inspTag">Unique</span>' : ''}
+    <p class="inspStat">${statLine(it)}</p>${it.aff && Object.keys(it.aff).length ? `<p class="inspAff">${affixText(it).split(' · ').join('<br>')}</p>` : ''}${perkLine(it)}
+    <div class="row end"><button class="primary" data-act="inspectClose">Back</button></div></div>`);
+  if (ri >= 4) Sfx.play('unlock');
+}
 function openSmith(tab) {
   if (!unlockOpen('mSmith')) { toast(`The Forge opens at level ${UNLOCK_AT.mSmith}`, 'bad'); return; }
   tab = tab || UI.smithTab || 'Upgrade'; if (!['Upgrade', 'Masterwork', 'Craft', 'Forge', 'Enchant'].includes(tab) || !unlockOpen(tab)) tab = 'Upgrade'; UI.smithTab = tab; unlockSeen(tab);
@@ -428,7 +438,7 @@ function heroTab(tab) {
     const filt = `<div class="bagFilter" role="group" aria-label="Show"><button class="${all0 ? '' : 'on'}" data-act="gearAll" data-v="0" aria-pressed="${!all0}">${SLOT_LABEL[sel] === 'Accessory' ? 'Accessories' : SLOT_LABEL[sel] + 's'}</button><button class="${all0 ? 'on' : ''}" data-act="gearAll" data-v="1" aria-pressed="${all0}">All gear</button></div>`;
     // compare: what you wear next to the bag piece you tapped, then the eight key stats with ▲/▼
     const wornOf = pick ? p.gear[pick.slot] : cur;
-    const cmpCard = (it, label) => it ? `<div class="cmpc ${it.rarity}"><small>${label}</small><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b>${rarityChip(it.rarity)}<span class="st">${statLine(it)}</span>${it.aff && Object.keys(it.aff).length ? `<span class="st aff">${affixText(it).split(' · ').join('<br>')}</span>` : ''}</div>`
+    const cmpCard = (it, label) => it ? `<div class="cmpc ${it.rarity}"><small>${label}</small><button class="inspect" data-act="inspect" data-id="${escapeHTML(it.id)}" aria-label="Inspect"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""></button><b>${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b>${rarityChip(it.rarity)}<span class="st">${statLine(it)}</span>${it.aff && Object.keys(it.aff).length ? `<span class="st aff">${affixText(it).split(' · ').join('<br>')}</span>` : ''}</div>`
       : `<div class="cmpc none"><small>${label}</small><span class="emptySlot">${label === 'Worn' ? '+' : '?'}</span></div>`;
     body = `<div class="cmp">${cmpCard(wornOf, 'Worn')}<b class="cmpv">VS</b>${cmpCard(pick, 'Tap a bag item')}</div>${statStrip(pick)}<div class="tiles">${tiles}</div>
       <div class="subRow"><h4 class="sub">Bag · ${pieces.length}</h4>${filt}<small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
@@ -716,6 +726,8 @@ function handlePanelClick(e) {
     case 'upgrade': openMerge(b.dataset.slot, false, 'smith'); break;
     case 'forge': if (buyForge(b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; openSmith('Forge'); } break;
     case 'smithTab': openSmith(b.dataset.tab); break;
+    case 'inspect': openInspect(b.dataset.id); break;
+    case 'inspectClose': heroTab('Gear'); break;
     case 'enchReroll': if (rerollAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gold', 'bad'); openSmith('Enchant'); break;
     case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;

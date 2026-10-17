@@ -12,6 +12,7 @@ world map (Map button) with 30 area images `assets/ui/areas/<i>.webp`, travel fr
 (`tools/area_palette.py`); lair bosses per area with unique items (`src/game/39b-lair-bosses.js`).
 
 ## Still to do (next session)
+0. **Ingredient art:** every craft material (biome ore, monster part, dungeon core per biome, Titan Soul) gets its own high-detail icon instead of the coloured square in `matChip` (61-panels.js). Also art banners for the other hub pages (Hero, Gear, Journal tabs), like the Forge tabs have (`.pageArt`, `assets/ui/forge/banner-*.webp`).
 1. **Unique item icons (29):** Casper finds the 48 px pixelize too low-res and not high end. Generate higher detail
    (e.g. 96–128 px, painted, less quantised) and hook `thumbFor` on `it.unique` → `assets/ui/uniques/<area>.png`.
    Prompts per area are the item names in `AREA_UNIQUE` (39b-lair-bosses.js). Z-Image's safety filter rejects some words
