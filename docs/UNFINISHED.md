@@ -36,6 +36,14 @@ a CoC + Balloons TD mix. Agreed: only camp resources, ~20 s break with a pause, 
   follows builder mode every frame and only covers the build area (couldn't reproduce it staying on; tell me if it does).
   Visible level-ups until the models exist: `siegeLookProps` (second banner L3, torch L5, trade prop L7, crystal L9,
   sapphire brazier L11, statue + gold banners L13) and a "new look!" burst.
+- **Round 3 (same branch):** heroes bump into small circles along a wall line (`siegeGrid`), no longer a 1 m circle per
+  cell, so you can walk right up to and along a wall; stone and iron wall pieces are drawn thicker. Castle roads
+  (`siegeRoads`, `S.road`): 2 cells wide from each gate to the courtyard, gates and traps only, a little cheaper to walk.
+  Defence spots (`S.spots`, `fortSpotAt`, `siegeStats(b, spot)`): rune slabs every 10 cells beside each road, +25% range
+  and +15% damage, dim outside the build area, towers snap onto them in the builder. Art from our own ground tiles
+  (`tools/fort_road_art.py`). Entering the fort pushes waiting town downloads behind the fort's own models.
+  HF: the credits did not reach the ZeroGPU Spaces (both connectors are Casper565 and still report the daily quota
+  used), so no new art or models came from HF this round.
 - **Open:** the 56 TRELLIS models in `tools/bastion_tiers.json` (6 looks × 9 kinds + base mill and iron mine) are not
   made yet: Casper's ZeroGPU quota was used up today. Until then mills use the hut model and iron mines the mine model
   (tinted), and the shop pictures `mill.webp`/`iron.webp` are tinted copies. Once made: pack, `v10_boxes.cjs`, rerun

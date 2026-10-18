@@ -7182,6 +7182,10 @@ CFG.siege = {
   // where you may build: a square round the Keep, base cells to each side at first, step cells more per plot bought
   // (deeds[k] Land Deeds and Keep level keep[k] for plot k + 1). The field monsters cross still grows with your level.
   area: { base: 8, step: 3, deeds: [3, 6, 10, 15, 22, 30, 40, 52], keep: [1, 2, 3, 4, 6, 7, 8, 10] },
+  // castle roads: a 2-cell road from every side's gate to the courtyard (from cell road.from), kept free (gates and
+  // traps only); monsters like to walk them. Defence spots: rune slabs beside the roads every spots.gap cells from
+  // spots.first, spots.off m to either side; a tower on one gets range and damage
+  road: { from: 10, cost: 0.85, ok: { gate: 1, spike: 1, bomb: 1, tar: 1 } }, spots: { first: 14, gap: 10, off: 6, range: 1.25, dmg: 1.15 },
   // The Keep has levels like a Town Hall: each one allows more buildings (towers[t].lim) and higher building levels (lvl)
   keep: { max: 10, lvl: [3, 4, 5, 7, 8, 9, 11, 12, 13, 15], hp: 0.15,
     cost: (k) => ({ wood: Math.round(30 * Math.pow(k, 1.9)), stones: Math.round(24 * Math.pow(k, 1.9)), iron: k >= 5 ? Math.round(8 * Math.pow(k - 3, 1.8)) : 0 }),
@@ -7296,12 +7300,15 @@ function siegeUnit(b) {
   const T = CFG.siege.towers[b.t], s = FORT_TYPES[b.t], cs = CFG.siege.cell;
   return { b, id: nextId++, kind: 'fortB', size: s, x: SC.x + (b.x + s / 2) * cs, z: SC.z + (b.z + s / 2) * cs, r: s === 1 ? 1.05 : 1.6, cd: rand(0, 1), alive: true, hp: 1, maxHp: 0, flashT: 0, hurtT: 0, name: T.name };
 }
-function siegeUnitHp(u) { const T = CFG.siege.towers[u.b.t], k = u.maxHp ? u.hp / u.maxHp : 1; u.maxHp = Math.round(refHp(G.siege.lvl) * (T.bhp || T.hp) * siegeLvlMul(Math.max(1, fortLvl(u.b)))); u.hp = u.alive ? Math.max(1, Math.round(k * u.maxHp)) : 0; u.st = siegeStats(u.b); if (G.siege.src) G.siege.src.set(u.id, u.st); }
+function siegeUnitHp(u) { const T = CFG.siege.towers[u.b.t], k = u.maxHp ? u.hp / u.maxHp : 1; u.maxHp = Math.round(refHp(G.siege.lvl) * (T.bhp || T.hp) * siegeLvlMul(Math.max(1, fortLvl(u.b)))); u.hp = u.alive ? Math.max(1, Math.round(k * u.maxHp)) : 0; u.st = siegeStats(u.b, u.spot); if (G.siege.src) G.siege.src.set(u.id, u.st); }
 // a defender's numbers with its path on top (range, cd, dmg and aoe multiply; the rest adds or replaces)
-function siegeStats(b) {
-  const T = CFG.siege.towers[b.t], P = fortPath(b); if (!P) return T;
-  const o = Object.assign({}, T, { path: P });
-  for (const k of ['range', 'cd', 'dmg', 'aoe']) if (P[k] && T[k]) o[k] = T[k] * P[k];
+function siegeStats(b, spot) {
+  const T = CFG.siege.towers[b.t], P = fortPath(b), Q = CFG.siege.spots, on = spot && SIEGE_SHOOTERS[b.t];
+  if (!P && !on) return T;
+  const o = Object.assign({}, T, { path: P, spot: on });
+  if (on) { o.range = T.range * Q.range; o.dmg = T.dmg * Q.dmg; } // a defence spot beside the road
+  if (!P) return o;
+  for (const k of ['range', 'cd', 'dmg', 'aoe']) if (P[k] && T[k]) o[k] = o[k] * P[k];
   if (P.heavy) o.light = false; if (P.pierce) o.pierce = P.pierce; if (P.hp) o.hp = T.hp * P.hp;
   for (const k of ['multi', 'burn', 'slow', 'chain', 'airMul']) if (P[k]) o[k] = P[k];
   return o;
@@ -7314,13 +7321,14 @@ function siegeLayout() {
   const disc = (x, z, r, v) => { for (let i = cellAt(x - r); i <= cellAt(x + r); i++) for (let j = cellAt(z - r); j <= cellAt(z + r); j++) { const k = siegeIdx(i, j); if (k >= 0 && Math.hypot((i + 0.5) * cs - x, (j + 0.5) * cs - z) < r + cs * 0.35) occ[k] = v; } };
   for (const q of [CFG.siege.spawn, CFG.siege.exit]) disc(q.x, q.z, 1.6, -2);
   for (const d of CFG.siege.objs) disc(d.x, d.z, d.r, -1);
+  siegeRoads();
   S.units = [];
   for (const b of F.b) {
     const s = FORT_TYPES[b.t], ks = [];
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) ks.push(siegeIdx(b.x + i, b.z + j));
     if (ks.some((k) => k < 0 || occ[k] !== 0)) continue; // outside the land or on the Keep (a shrunk or edited world): not built here
     let u = old.get(b); if (u && (u.bx !== b.x || u.bz !== b.z)) u = null; // moved: a new unit where it stands now
-    if (!u) { u = siegeUnit(b); u.bx = b.x; u.bz = b.z; } u.k = S.units.length; S.units.push(u); ks.forEach((k) => { occ[k] = u.k + 1; });
+    if (!u) { u = siegeUnit(b); u.bx = b.x; u.bz = b.z; u.spot = !!fortSpotAt(b.x, b.z); } u.k = S.units.length; S.units.push(u); ks.forEach((k) => { occ[k] = u.k + 1; });
     if (!u.maxHp) siegeUnitHp(u); else S.src.set(u.id, u.st);
   }
   // the monster gate on each side (a gatehouse, 47c-siege-view.js): kept clear of new buildings
@@ -7330,18 +7338,45 @@ function siegeLayout() {
   for (const q of S.soldiers) S.src.set(q.id, q.u.st);
   siegeGrid(); S.flowDirty = true;
 }
+// the castle roads (S.road: 1 on a road cell) and the defence spots beside them (S.spots: lowest cells of 2x2 slabs)
+function siegeRoads() {
+  const S = G.siege, C = CFG.siege, n = S.n, h = S.h, end = h - 3; S.road = new Uint8Array(n * n); S.spots = [];
+  for (const d of C.sides) {
+    const lx = d.z, lz = d.x; // across the road
+    for (let t = C.road.from; t < end; t++) for (const a of [-1, 0]) { const k = siegeIdx(d.x ? (d.x > 0 ? t : -t - 1) : a, d.z ? (d.z > 0 ? t : -t - 1) : a); if (k >= 0) S.road[k] = 1; }
+    for (let t = C.spots.first; t < end - 3; t += C.spots.gap) for (const side of [-1, 1]) {
+      const cx = d.x * t * C.cell + lx * side * C.spots.off, cz = d.z * t * C.cell + lz * side * C.spots.off, x = Math.round(cx / C.cell) - 1, z = Math.round(cz / C.cell) - 1;
+      let ok = true; for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) { const k = siegeIdx(x + i, z + j); if (k < 0 || S.occ[k] !== 0 || S.road[k]) ok = false; }
+      if (ok) S.spots.push({ x, z, side: C.sides.indexOf(d) });
+    }
+  }
+}
+const fortSpotAt = (x, z) => (G.siege && G.siege.spots ? G.siege.spots.find((q) => q.x === x && q.z === z) : null);
+const fortOnRoad = (x, z, s) => { const S = G.siege; if (!S || !S.road) return false; for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) { const k = siegeIdx(x + i, z + j); if (k >= 0 && S.road[k]) return true; } return false; };
 // keep, wagons and living buildings are solid; gates only for monsters (rebuilt as a whole: the Grid has no remove)
 function siegeGrid() {
   const S = G.siege, a = new Grid(6), m = new Grid(6);
   for (const o of S.objs) if (o.alive) { const c = { x: o.x, z: o.z, r: o.r }; a.add(c); m.add(c); }
-  for (const u of S.units) if (u.alive && !CFG.siege.towers[u.b.t].trap) { const c = { x: u.x, z: u.z, r: u.r }; m.add(c); if (u.b.t !== 'gate') a.add(c); }
+  const cs = CFG.siege.cell, isWall = (i, j) => { const k = siegeIdx(i, j), o = k >= 0 ? S.occ[k] : 0, q = o > 0 ? S.units[o - 1] : null; return !!q && q.alive && q.b.t === 'wall'; };
+  for (const u of S.units) if (u.alive && !CFG.siege.towers[u.b.t].trap) {
+    m.add({ x: u.x, z: u.z, r: u.r }); if (u.b.t === 'gate') continue;
+    if (u.b.t !== 'wall') { a.add({ x: u.x, z: u.z, r: u.r }); continue; }
+    // heroes bump into the wall itself, not its whole cell: small circles along the line (a gap they cannot squeeze through)
+    a.add({ x: u.x, z: u.z, r: 0.5 });
+    if (isWall(u.b.x + 1, u.b.z)) a.add({ x: u.x + cs / 2, z: u.z, r: 0.5 });
+    if (isWall(u.b.x, u.b.z + 1)) a.add({ x: u.x, z: u.z + cs / 2, r: 0.5 });
+  }
   S.mobGrid = m; G.siegeObstacles = a; G.obstacles = a; return a;
 }
 // the monsters' map: walking cost from every cell to the nearest living objective. A building costs its path value to
 // cross (monsters break it), so they walk around walls while that is cheaper and break the cheapest one when it is not.
 // Crossing a building costs far more than any walk round it, so monsters always take the fastest open way; only when
 // they are closed in do they break through, at the weakest wall piece (lowest level), or else another building
-function siegeCellCost(k) { const S = G.siege, o = S.occ[k]; if (o === -1) return Infinity; if (o <= 0) return 1; const u = S.units[o - 1]; if (!u.alive) return 1; const T = CFG.siege.towers[u.b.t]; return T.trap ? 1 : T.path ? T.path + 20 * fortLvl(u.b) : 900; }
+function siegeCellCost(k) {
+  const S = G.siege, o = S.occ[k]; if (o === -1) return Infinity;
+  const free = S.road && S.road[k] ? CFG.siege.road.cost : 1; if (o <= 0) return free;
+  const u = S.units[o - 1]; if (!u.alive) return free; const T = CFG.siege.towers[u.b.t]; return T.trap ? free : T.path ? T.path + 20 * fortLvl(u.b) : 900;
+}
 // recomputed only when a monster needs it after a change (drawing a long wall costs one pass, not one per piece)
 function siegeFlow() {
   G.siege.flowDirty = false;
@@ -7367,7 +7402,7 @@ function siegeFlow() {
     for (let q = 0; q < 8; q++) {
       const di = SIEGE_DI[q], dj = SIEGE_DJ[q], i2 = i + di, j2 = j + dj; if (i2 < 0 || j2 < 0 || i2 >= n || j2 >= n) continue;
       const k2 = i2 + j2 * n, c = cost[k2]; if (c === Infinity) continue;
-      if (q > 3 && (cost[i2 + j * n] !== 1 || cost[i + j2 * n] !== 1)) continue; // no cutting a corner past a building
+      if (q > 3 && (cost[i2 + j * n] > 1 || cost[i + j2 * n] > 1)) continue; // no cutting a corner past a building
       const nd = d0 + (q > 3 ? c * 1.414 : c); if (nd < dist[k2]) { dist[k2] = nd; push(nd, k2); }
     }
   }
@@ -7381,7 +7416,7 @@ function siegeFlowStep(e) {
   let best = S.dist[k], bk = -1;
   for (const [di, dj] of SIEGE_DIRS) {
     const k2 = siegeIdx(i + di, j + dj); if (k2 < 0 || S.dist[k2] >= best) continue;
-    if (di && dj && (siegeCellCost(siegeIdx(i + di, j)) !== 1 || siegeCellCost(siegeIdx(i, j + dj)) !== 1)) continue;
+    if (di && dj && (siegeCellCost(siegeIdx(i + di, j)) > 1 || siegeCellCost(siegeIdx(i, j + dj)) > 1)) continue;
     best = S.dist[k2]; bk = k2;
   }
   if (bk < 0) return null; // next to an objective
@@ -7430,6 +7465,7 @@ function fortCheck(op, F = fortState()) {
     const s = FORT_TYPES[op.t];
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) { const k = siegeIdx(op.x + i, op.z + j); if (k < 0) return 'Outside your land'; if (S.occ[k] !== 0) return 'Something is in the way'; }
     if (!fortInArea(op.x, op.z, s, F)) return 'Buy more land to build there';
+    if (!C.road.ok[op.t] && fortOnRoad(op.x, op.z, s)) return 'Keep the castle road free (gates and traps only)';
     for (const e of S.mobs) if (e.alive && !e.flying && Math.abs(e.x - SC.x - (op.x + s / 2) * C.cell) < s + 0.5 && Math.abs(e.z - SC.z - (op.z + s / 2) * C.cell) < s + 0.5) return 'A monster is in the way';
     return '';
   }
@@ -7438,6 +7474,7 @@ function fortCheck(op, F = fortState()) {
     const s = FORT_TYPES[b.t], u = S.units.find((q) => q.b === b), own = u ? u.k + 1 : -9;
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) { const k = siegeIdx(op.x + i, op.z + j); if (k < 0) return 'Outside your land'; if (S.occ[k] !== 0 && S.occ[k] !== own) return 'Something is in the way'; }
     if (!fortInArea(op.x, op.z, s, F)) return 'Buy more land to build there';
+    if (!C.road.ok[b.t] && fortOnRoad(op.x, op.z, s)) return 'Keep the castle road free (gates and traps only)';
     return '';
   }
   if (op.o === 'up') {
@@ -11345,26 +11382,20 @@ function siegeMeadow(H) {
   g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.setAttribute('aTh', new THREE.BufferAttribute(th, 1)); g.setAttribute('aGc', new THREE.BufferAttribute(gl, 3)); g.deleteAttribute('uv');
   const m = new THREE.Mesh(g, matGround); m.position.set(SC.x, 0, SC.z); m.receiveShadow = true; siegeGroup.add(m);
 }
-// a soft-edged dirt texture for the paths (a decal on the meadow)
-let siegePathTex = null;
-function siegeDirtTex() {
-  if (siegePathTex) return siegePathTex;
-  const cv = document.createElement('canvas'); cv.width = 32; cv.height = 64; const x = cv.getContext('2d'), r = mulberry32(77);
-  for (let i = 0; i < 32; i++) for (let j = 0; j < 64; j++) { const e = Math.min(i, 31 - i) / 8, a = clamp(e - 0.25 + r() * 0.35, 0, 1), v = 96 + r() * 40; x.fillStyle = `rgba(${v + 30},${v + 10},${v - 25},${a.toFixed(2)})`; x.fillRect(i, j, 1, 1); }
-  siegePathTex = new THREE.CanvasTexture(cv); siegePathTex.wrapT = THREE.RepeatWrapping; siegePathTex.magFilter = THREE.NearestFilter; siegePathTex.colorSpace = THREE.SRGBColorSpace;
-  return siegePathTex;
-}
 // what is around the fort: a forest beyond the land's edge (in chunks, so only the part on screen is drawn), a monster
 // gate on each side where the waves come in, dirt paths from the gates to the Keep, and flowers and tufts on the meadow
 function siegeLandscape(H, rng) {
   const C = CFG.siege;
-  // paths: one per side, from its gate to the courtyard
+  // castle roads: painted cobbles with kerbs (assets/world/_ground/fort_road.webp, tools/fort_road_art.py) from each
+  // side's gate to the courtyard, on the cells kept free (36c-siege.js siegeRoads); the defence spots beside them
+  const from = C.road.from * C.cell, RL = H - 6 - from, tex = siegeArtTex('fort_road');
   for (const d of C.sides) {
-    const L = H - 16, tex = new THREE.CanvasTexture(siegeDirtTex().image), mat = new THREE.MeshLambertMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
-    tex.wrapT = THREE.RepeatWrapping; tex.magFilter = THREE.NearestFilter; tex.colorSpace = THREE.SRGBColorSpace; tex.repeat.set(1, L / 6);
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(4.2, L).rotateX(-Math.PI / 2), mat);
-    m.rotation.y = Math.atan2(d.x, d.z); m.position.set(SC.x + d.x * (16 + L / 2), 0.02, SC.z + d.z * (16 + L / 2)); siegeGroup.add(m);
+    tex.repeat.set(1, RL / 8.8); // every road is as long as the others: one shared texture
+    const mat = new THREE.MeshLambertMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(4.4, RL).rotateX(-Math.PI / 2), mat); m.receiveShadow = true;
+    m.rotation.y = Math.atan2(d.x, d.z); m.position.set(SC.x + d.x * (from + RL / 2), 0.025, SC.z + d.z * (from + RL / 2)); siegeGroup.add(m);
   }
+  siegeSpotDecals();
   // monster gates: a gatehouse at each side's entry; the ground before it glows red when that side is coming
   siegeParts.gates = C.sides.map((d) => ({ x: SC.x + d.x * (H - 3), z: SC.z + d.z * (H - 3), ry: Math.atan2(d.x, d.z), d }));
   siegeParts.sets.push(WorldModels.place(siegeGroup, 'gatehouse', siegeParts.gates.map((q) => ({ x: q.x, z: q.z, ry: Math.atan2(-q.d.x, -q.d.z), s: 7.4 }))));
@@ -11392,6 +11423,24 @@ function siegeLandscape(H, rng) {
     const pts = new THREE.Points(g, new THREE.PointsMaterial({ size: 0.32, map: new THREE.CanvasTexture(cv), color: 0xfff0b0, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
     pts.frustumCulled = false; siegeGroup.add(pts); siegeParts.motes = { pts, seed }; }
   siegeParts.deco = Object.entries(deco).map(([n, items]) => { const h = WorldModels.place(siegeGroup, n, items); siegeParts.sets.push(h); return { h, items }; });
+}
+// the painted art for roads and defence spots (shared, loaded once)
+const siegeArt = {};
+function siegeArtTex(name) {
+  if (siegeArt[name]) return siegeArt[name];
+  const t = siegeArt[name] = new THREE.TextureLoader().load('assets/world/_ground/' + name + '.webp');
+  t.wrapS = THREE.ClampToEdgeWrapping; t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+}
+// defence spots: rune slabs beside the roads (a tower on one gets range and damage); dim outside your build area, and
+// under a tower its own stone tile is left out so the slab shows
+function siegeSpotDecals() {
+  const S = G.siege, cs = CFG.siege.cell; if (siegeParts.spots) { siegeParts.spots.geometry.dispose(); siegeParts.spots.material.dispose(); siegeParts.spots.removeFromParent(); siegeParts.spots = null; }
+  if (!S.spots || !S.spots.length) return;
+  const mat = new THREE.MeshLambertMaterial({ map: siegeArtTex('fort_spot'), transparent: true, polygonOffset: true, polygonOffsetFactor: -3 });
+  const im = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), mat, S.spots.length), A = fortArea();
+  S.spots.forEach((q, i) => { _siegeM4.makeScale(2 * cs - 0.1, 1, 2 * cs - 0.1).setPosition(SC.x + (q.x + 1) * cs, 0.045, SC.z + (q.z + 1) * cs); im.setMatrixAt(i, _siegeM4);
+    const open = q.x >= -A && q.z >= -A && q.x + 2 <= A && q.z + 2 <= A; im.setColorAt(i, _col.set(open ? 0xffffff : 0x5a5650)); });
+  im.receiveShadow = true; siegeGroup.add(im); siegeParts.spots = im; siegeParts.spotA = A;
 }
 // flowers and tufts never poke through a building
 function siegeDecorHide() {
@@ -11507,9 +11556,11 @@ function buildSiegeBuildings() {
     if (b.t === 'wall') {
       const name = b.l > 10 ? 'siege_wall_iron' : b.l > 5 ? 'siege_wall_stone' : 'siege_wall_wood', h = name === 'siege_wall_wood' ? 1.8 : 1.4, len = (WORLD_MODEL_BOX[name] || [2])[0] * h;
       const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([di, dj]) => wallAt(b.x + di, b.z + dj));
-      const sh = h * 0.85, sl = len * 0.85; // a little lower than before, same length per cell
-      if (!dirs.length) add(name, { x, z, ry: 0, s: sh, sx: cs / sl });
-      for (const [di, dj] of dirs) add(name, { x: x + di * cs / 4, z: z + dj * cs / 4, ry: di ? 0 : Math.PI / 2, s: sh, sx: (cs / 2 + 0.15) / sl });
+      // a little lower than before, same length per cell; stone and iron pieces are thickened so the wall reads as solid
+      // as what blocks you (heroes bump into a 1 m band along the line, 36c-siege.js siegeGrid)
+      const sh = h * 0.85, sl = len * 0.85, sz = name === 'siege_wall_wood' ? 1.3 : 2.2;
+      if (!dirs.length) add(name, { x, z, ry: 0, s: sh, sx: cs / sl, sz });
+      for (const [di, dj] of dirs) add(name, { x: x + di * cs / 4, z: z + dj * cs / 4, ry: di ? 0 : Math.PI / 2, s: sh, sx: (cs / 2 + 0.15) / sl, sz });
       continue;
     }
     const h = SIEGE_MODEL[b.t][1], name = siegeModelName(b.t, b.l), tint = siegeModelTint(b.t, b.l, name);
@@ -11524,7 +11575,7 @@ function buildSiegeBuildings() {
     siegeLookProps(b, u, x, z, add, now);
   }
   // the tiles under the buildings: one instanced slab and one instanced rim (tinted per building) for the whole fort
-  const tiles = S.units.filter((u) => u.alive && !CFG.siege.towers[u.b.t].wall && !CFG.siege.towers[u.b.t].trap);
+  const tiles = S.units.filter((u) => u.alive && !CFG.siege.towers[u.b.t].wall && !CFG.siege.towers[u.b.t].trap && !u.spot);
   if (tiles.length) {
     const T = siegeTileTextures(), geo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), m4 = new THREE.Matrix4();
     const slab = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ map: T.slab, polygonOffset: true, polygonOffsetFactor: -3 }), tiles.length);
@@ -11648,7 +11699,7 @@ function siegePreview(list) {
 }
 function disposeSiegeView() {
   for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h); siegeParts.idle = [];
-  if (siegeParts.areaBan) WorldModels.dispose(siegeParts.areaBan); siegeParts.areaBan = siegeParts.areaLine = null; siegeParts.areaA = null;
+  if (siegeParts.areaBan) WorldModels.dispose(siegeParts.areaBan); siegeParts.areaBan = siegeParts.areaLine = siegeParts.spots = null; siegeParts.areaA = siegeParts.spotA = null;
   if (siegeParts.preview) { WorldModels.dispose(siegeParts.preview.h); siegeParts.preview = null; }
   siegeParts.grid = null;
   const geos = new Set(), mats = new Set();
@@ -11659,6 +11710,9 @@ function disposeSiegeView() {
 function enterSiegeView(on) {
   hubGroup.visible = !on; riftGroup.visible = false; siegeGroup.visible = on;
   if (on) {
+    // town models still waiting to download go to the back of the queue: the fort's own come first (they bump back up
+    // when the fort's sets ask for them by distance)
+    for (const [id, e] of AssetLibrary.entries) if (e.state === 'queued' && id.startsWith('world.')) e.prio = Math.max(e.prio, 5000);
     buildSiegeView();
     scene.fog.color.set(0x8a6f58); scene.fog.near = 55; scene.fog.far = 140; paintSky(new THREE.Color(0x3a4a78), new THREE.Color(0xf0a868)); // late afternoon over the fort
   } else { disposeSiegeView(); scene.fog.near = 50; scene.fog.far = Q.lowTier ? 95 : 140; }
@@ -11683,6 +11737,8 @@ function updateSiegeView(dt) {
   const A = fortArea() * CFG.siege.cell;
   if (!!siegeParts.grid !== !!G.builder || (siegeParts.grid && siegeParts.gridA !== A)) siegeGridOverlay(!!G.builder);
   if (siegeParts.areaA !== A) siegeAreaLine(A);
+  if (siegeParts.spots && siegeParts.spotA !== A) siegeSpotDecals();
+  if (siegeParts.spots) siegeParts.spots.material.emissive.setRGB(0.12 + Math.sin(t * 2.2) * 0.06, 0.09 + Math.sin(t * 2.2) * 0.04, 0.02); // the runes breathe
   // a fallen objective disappears in smoke
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });
   if (siegeParts.flame) siegeParts.flame.material.opacity = 0.75 + Math.sin(t * 13) * 0.08 + Math.sin(t * 7.3) * 0.08;
@@ -13245,7 +13301,7 @@ function openSiegePanel() {
     <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="siegeGo">Defend your fort</button></div>`);
 }
 function fortStat(t, l, b) {
-  const T = b && b.p && CFG.siege.paths[t] && l >= CFG.siege.pathAt ? siegeStats(Object.assign({}, b, { l, d: 0 })) : CFG.siege.towers[t];
+  const sp = !!(b && fortSpotAt(b.x, b.z)), T = b && ((b.p && CFG.siege.paths[t] && l >= CFG.siege.pathAt) || sp) ? siegeStats(Object.assign({}, b, { l, d: 0 }), sp) : CFG.siege.towers[t];
   if (t === 'warrior') return `${siegeMen(l, b && l >= CFG.siege.pathAt ? b : null)} warriors · ${fmtK(siegeDefDmg(T, l))} dmg${T.light ? '' : ' · cuts armour'}`;
   if (T.make) return `${T.rate * l} ${CFG.siege.resName[T.make].toLowerCase()} an hour, holds ${T.cap * l}`;
   if (t === 'hut') return 'One more upgrade at a time';
@@ -13253,7 +13309,7 @@ function fortStat(t, l, b) {
   if (t === 'spike') return `${fmtK(siegeDefDmg(T, l))} dmg to every monster on it · resets in ${T.cd}s`;
   if (t === 'bomb') return `${fmtK(siegeDefDmg(T, l))} dmg to all within ${T.aoe} m · once per wave`;
   if (t === 'tar') return `Half speed · ${fmtK(refDmg(G.profile.level) * T.dps * siegeLvlMul(l))} dmg a second`;
-  return `${fmtK(siegeDefDmg(T, l))} dmg · range ${Math.round(T.range)}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}${T.multi ? ` · ${T.multi} targets` : ''}${T.chain ? ` · chains ${T.chain}` : ''}${T.slow ? ' · slows' : ''}${T.burn ? ' · burns' : ''}${T.air ? ' · hits flyers' : ''}${T.light ? '' : ' · cracks armour'}`;
+  return `${b && T.spot ? 'On a defence spot · ' : ''}${fmtK(siegeDefDmg(T, l))} dmg · range ${Math.round(T.range)}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}${T.multi ? ` · ${T.multi} targets` : ''}${T.chain ? ` · chains ${T.chain}` : ''}${T.slow ? ' · slows' : ''}${T.burn ? ' · burns' : ''}${T.air ? ' · hits flyers' : ''}${T.light ? '' : ' · cracks armour'}`;
 }
 // one building: upgrade (takes a builder and some time from level 2; at level 5 a tower picks a path), collect a mill or
 // mine, move it (builder mode), tear it down for half of what it cost
@@ -16290,7 +16346,7 @@ function builderHud() {
   $('bdInfo').innerHTML = `Keep ${F.keep || 1} · ${fortJobs(F)}/${fortBuilders(F)} builders · ${fortHave(M)}`;
   $('bdHint').innerHTML = L ? `${L.cells.length} ${T.short.toLowerCase()}${L.cells.length === 1 ? '' : 's'} · ${fortResHTML(L.cost, M)} · let go to build`
     : B.move ? `Moving the ${T.short}: tap or drag where it goes` : !T ? 'Drag something up from the shop, or tap a building'
-    : T.wall ? `Drag a straight line of ${T.short.toLowerCase()}s` : `Drag the ${T.short} where it goes, then Place`;
+    : T.wall ? `Drag a straight line of ${T.short.toLowerCase()}s` : B.cell && SIEGE_SHOOTERS[B.sel] && fortSpotAt(B.cell[0], B.cell[1]) ? `Defence spot: +${Math.round((CFG.siege.spots.range - 1) * 100)}% range, +${Math.round((CFG.siege.spots.dmg - 1) * 100)}% damage` : `Drag the ${T.short} where it goes, then Place`;
   $('bdPlace').hidden = !(B.sel && B.cell && !(T && T.wall && !B.move));
   // waves: the first one waits for Start; after that they come by themselves unless paused
   $('bdWave').textContent = !F.go ? `Start wave ${S.wave}` : 'Start now'; $('bdWave').hidden = S.phase !== 'build';
@@ -16308,7 +16364,12 @@ function builderGround(x, y) {
   const r = renderer.domElement.getBoundingClientRect(); _bdV.set((x - r.left) / r.width * 2 - 1, -(y - r.top) / r.height * 2 + 1);
   _bdRay.setFromCamera(_bdV, camera); return _bdRay.ray.intersectPlane(_bdPlane, _bdHit) ? { x: _bdHit.x, z: _bdHit.z } : null;
 }
-function builderCell(x, y, t) { const g = builderGround(x, y); if (!g) return null; const s = FORT_TYPES[t] || 1, cs = CFG.siege.cell; return [Math.round((g.x - SC.x) / cs - s / 2), Math.round((g.z - SC.z) / cs - s / 2)]; }
+function builderCell(x, y, t) {
+  const g = builderGround(x, y); if (!g) return null; const s = FORT_TYPES[t] || 1, cs = CFG.siege.cell, c = [Math.round((g.x - SC.x) / cs - s / 2), Math.round((g.z - SC.z) / cs - s / 2)];
+  // a tower dragged close to a defence spot snaps onto it
+  if (SIEGE_SHOOTERS[t] && G.siege.spots) { const q = G.siege.spots.find((p) => Math.abs(p.x - c[0]) <= 1 && Math.abs(p.z - c[1]) <= 1); if (q) return [q.x, q.z]; }
+  return c;
+}
 function builderConfirm() {
   const B = G.builder, g = fortGhosts(); if (!g || !g.length) return;
   const why = g[0].ok ? fortDo(g[0].op) : fortCheck(g[0].op) || fortShortWhy(g[0].op);

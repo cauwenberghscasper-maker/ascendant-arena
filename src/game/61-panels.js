@@ -677,7 +677,7 @@ function openSiegePanel() {
     <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="siegeGo">Defend your fort</button></div>`);
 }
 function fortStat(t, l, b) {
-  const T = b && b.p && CFG.siege.paths[t] && l >= CFG.siege.pathAt ? siegeStats(Object.assign({}, b, { l, d: 0 })) : CFG.siege.towers[t];
+  const sp = !!(b && fortSpotAt(b.x, b.z)), T = b && ((b.p && CFG.siege.paths[t] && l >= CFG.siege.pathAt) || sp) ? siegeStats(Object.assign({}, b, { l, d: 0 }), sp) : CFG.siege.towers[t];
   if (t === 'warrior') return `${siegeMen(l, b && l >= CFG.siege.pathAt ? b : null)} warriors · ${fmtK(siegeDefDmg(T, l))} dmg${T.light ? '' : ' · cuts armour'}`;
   if (T.make) return `${T.rate * l} ${CFG.siege.resName[T.make].toLowerCase()} an hour, holds ${T.cap * l}`;
   if (t === 'hut') return 'One more upgrade at a time';
@@ -685,7 +685,7 @@ function fortStat(t, l, b) {
   if (t === 'spike') return `${fmtK(siegeDefDmg(T, l))} dmg to every monster on it · resets in ${T.cd}s`;
   if (t === 'bomb') return `${fmtK(siegeDefDmg(T, l))} dmg to all within ${T.aoe} m · once per wave`;
   if (t === 'tar') return `Half speed · ${fmtK(refDmg(G.profile.level) * T.dps * siegeLvlMul(l))} dmg a second`;
-  return `${fmtK(siegeDefDmg(T, l))} dmg · range ${Math.round(T.range)}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}${T.multi ? ` · ${T.multi} targets` : ''}${T.chain ? ` · chains ${T.chain}` : ''}${T.slow ? ' · slows' : ''}${T.burn ? ' · burns' : ''}${T.air ? ' · hits flyers' : ''}${T.light ? '' : ' · cracks armour'}`;
+  return `${b && T.spot ? 'On a defence spot · ' : ''}${fmtK(siegeDefDmg(T, l))} dmg · range ${Math.round(T.range)}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}${T.multi ? ` · ${T.multi} targets` : ''}${T.chain ? ` · chains ${T.chain}` : ''}${T.slow ? ' · slows' : ''}${T.burn ? ' · burns' : ''}${T.air ? ' · hits flyers' : ''}${T.light ? '' : ' · cracks armour'}`;
 }
 // one building: upgrade (takes a builder and some time from level 2; at level 5 a tower picks a path), collect a mill or
 // mine, move it (builder mode), tear it down for half of what it cost

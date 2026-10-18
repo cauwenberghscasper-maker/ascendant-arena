@@ -44,7 +44,7 @@ function builderHud() {
   $('bdInfo').innerHTML = `Keep ${F.keep || 1} · ${fortJobs(F)}/${fortBuilders(F)} builders · ${fortHave(M)}`;
   $('bdHint').innerHTML = L ? `${L.cells.length} ${T.short.toLowerCase()}${L.cells.length === 1 ? '' : 's'} · ${fortResHTML(L.cost, M)} · let go to build`
     : B.move ? `Moving the ${T.short}: tap or drag where it goes` : !T ? 'Drag something up from the shop, or tap a building'
-    : T.wall ? `Drag a straight line of ${T.short.toLowerCase()}s` : `Drag the ${T.short} where it goes, then Place`;
+    : T.wall ? `Drag a straight line of ${T.short.toLowerCase()}s` : B.cell && SIEGE_SHOOTERS[B.sel] && fortSpotAt(B.cell[0], B.cell[1]) ? `Defence spot: +${Math.round((CFG.siege.spots.range - 1) * 100)}% range, +${Math.round((CFG.siege.spots.dmg - 1) * 100)}% damage` : `Drag the ${T.short} where it goes, then Place`;
   $('bdPlace').hidden = !(B.sel && B.cell && !(T && T.wall && !B.move));
   // waves: the first one waits for Start; after that they come by themselves unless paused
   $('bdWave').textContent = !F.go ? `Start wave ${S.wave}` : 'Start now'; $('bdWave').hidden = S.phase !== 'build';
@@ -62,7 +62,12 @@ function builderGround(x, y) {
   const r = renderer.domElement.getBoundingClientRect(); _bdV.set((x - r.left) / r.width * 2 - 1, -(y - r.top) / r.height * 2 + 1);
   _bdRay.setFromCamera(_bdV, camera); return _bdRay.ray.intersectPlane(_bdPlane, _bdHit) ? { x: _bdHit.x, z: _bdHit.z } : null;
 }
-function builderCell(x, y, t) { const g = builderGround(x, y); if (!g) return null; const s = FORT_TYPES[t] || 1, cs = CFG.siege.cell; return [Math.round((g.x - SC.x) / cs - s / 2), Math.round((g.z - SC.z) / cs - s / 2)]; }
+function builderCell(x, y, t) {
+  const g = builderGround(x, y); if (!g) return null; const s = FORT_TYPES[t] || 1, cs = CFG.siege.cell, c = [Math.round((g.x - SC.x) / cs - s / 2), Math.round((g.z - SC.z) / cs - s / 2)];
+  // a tower dragged close to a defence spot snaps onto it
+  if (SIEGE_SHOOTERS[t] && G.siege.spots) { const q = G.siege.spots.find((p) => Math.abs(p.x - c[0]) <= 1 && Math.abs(p.z - c[1]) <= 1); if (q) return [q.x, q.z]; }
+  return c;
+}
 function builderConfirm() {
   const B = G.builder, g = fortGhosts(); if (!g || !g.length) return;
   const why = g[0].ok ? fortDo(g[0].op) : fortCheck(g[0].op) || fortShortWhy(g[0].op);
