@@ -8987,7 +8987,9 @@ const matGround = new THREE.MeshStandardMaterial({ vertexColors: true, roughness
 // Each zone gets its own floor pattern on top of the zone colours: grass clumps and dirt patches,
 // snow drifts, glowing lava cracks, broken flagstones, wet pebbles, marble terraces, and cobblestones
 // in the town plaza and along the road (all world-space, so it tiles forever without a texture file).
-matGround.userData.u = { uTown: { value: new THREE.Vector3() }, uRoad: { value: new THREE.Vector2() } };
+matGround.userData.u = { uTown: { value: new THREE.Vector3() }, uRoad: { value: new THREE.Vector2() },
+  // painted ground tiles (assets/world/_ground, loadGroundTiles): one texture array, on once loaded; uTime drives the animation
+  uGTex: { value: null }, uGOn: { value: 0 }, uTime: { value: 0 }, uGMean: { value: Array.from({ length: 7 }, () => new THREE.Vector3(0.3, 0.3, 0.3)) } };
 matGround.onBeforeCompile = (sh) => {
   Object.assign(sh.uniforms, matGround.userData.u);
   sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGW; attribute float aTh; attribute vec3 aGc; varying float vTh; varying vec3 vGc;')
@@ -8995,6 +8997,12 @@ matGround.onBeforeCompile = (sh) => {
   sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
 varying vec3 vGW;
 uniform vec3 uTown; uniform vec2 uRoad; varying float vTh; varying vec3 vGc;
+uniform mediump sampler2DArray uGTex; uniform float uGOn, uTime; uniform vec3 uGMean[7];
+// a painted tile at two scales and angles, so its repeat never shows; divided by the tile's mean colour it becomes
+// pure detail that the zone's own palette is multiplied with
+// tile size per layer: grass and dirt 4 m, snow and seabed 6 m, basalt 8 m, flagstone 7 m, cobblestone 4 m
+vec3 gtile(float l, vec2 w) { float k = l > 5.5 ? 0.25 : l > 4.5 ? 0.17 : l > 3.5 ? 0.14 : l > 2.5 ? 0.125 : l > 1.5 ? 0.17 : 0.25;
+  vec3 a = texture(uGTex, vec3(w * k, l)).rgb, b = texture(uGTex, vec3(mat2(0.8, -0.6, 0.6, 0.8) * w * k * 0.41 + 0.37, l)).rgb; return mix(a, b, 0.38); }
 float gh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 vec2 gh2(vec2 p) { return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453); }
 float gn(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -9004,7 +9012,7 @@ vec2 vor(vec2 p) { vec2 i = floor(p), f = fract(p); float d1 = 8.0, d2 = 8.0; ve
   for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) { vec2 g = vec2(float(x), float(y)); vec2 o = g + gh2(i + g) * 0.85 - f; float d = dot(o, o);
     if (d < d1) { d2 = d1; d1 = d; id = i + g; } else if (d < d2) d2 = d; }
   return vec2(sqrt(d2) - sqrt(d1), gh(id)); }
-float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
+float gGlow = 0.0; vec3 gGlowC = vec3(0.0); float gDirt = 0.0;`)
     .replace('#include <color_fragment>', `#include <color_fragment>
 {
   vec2 w = vGW.xz; vec2 px = w;   // smooth world-space detail; the pixel pass adds the crisp edge
@@ -9019,12 +9027,12 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     float blade = smoothstep(0.72, 0.93, gn(w * vec2(3.0, 6.0) + 3.0)) * smoothstep(0.35, 0.65, gn(px * 0.8));
     c = mix(c, c * vec3(1.3, 1.42, 1.12) + 0.015, blade * 0.32);
     float dirt = smoothstep(0.66, 0.72, big + gn(px * 0.4) * 0.12);
-    c = mix(c, vec3(0.16, 0.11, 0.06) * (0.85 + fine * 0.3), dirt * 0.85);
+    c = mix(c, vec3(0.16, 0.11, 0.06) * (0.85 + fine * 0.3), dirt * 0.85); gDirt = dirt;
     c = mix(c, c * 0.55, step(0.985, gh(floor(w * 3.0) + 41.0)) * (0.4 + dirt));
   } else if (zone < 2.5) {                            // frost: drifts with blue shade and sparkles
     float drift = gn(px * 0.25);
     c *= mix(vec3(0.78, 0.86, 1.0), vec3(1.08), smoothstep(0.3, 0.7, drift));
-    c += step(0.993, gh(floor(w * 4.0) + 9.0)) * 0.35;
+    c += step(0.993, gh(floor(w * 4.0) + 9.0)) * 0.35 * (0.45 + 0.55 * sin(uTime * 3.0 + gh(floor(w * 4.0)) * 40.0)); // twinkling frost
   } else if (zone < 3.5) {                            // ember: cracked basalt, some cracks glow
     vec2 v = vor(px * 0.45);
     c *= 0.8 + v.y * 0.35;
@@ -9048,6 +9056,17 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     c = mix(c, c * 0.5, 1.0 - smoothstep(0.04, 0.1, v.x));
     gGlow = step(0.992, gh(floor(w * 4.0) + 21.0)); gGlowC = zgc;
   }
+  // painted tiles on top: grass and dirt, snow, basalt (its seams glow and pulse), flagstone, seabed
+  if (uGOn > 0.5) {
+    float L = zone < 1.5 ? 0.0 : zone < 2.5 ? 2.0 : zone < 3.5 ? 3.0 : (zone < 4.5 || zone > 5.5) ? 4.0 : 5.0;
+    int li = int(L);
+    vec3 tA = gtile(L, w), tn = tA / uGMean[li];
+    if (zone < 1.5) { vec3 tD = gtile(1.0, w); tn = mix(tn, tD / uGMean[1], gDirt); tA = mix(tA, tD, gDirt); }
+    tn = clamp(mix(vec3(dot(tn, vec3(0.299, 0.587, 0.114))), tn, 0.45), 0.3, 2.0); // mostly light and shade, some of the tile's hue: the area keeps its palette
+    vec3 cb = diffuseColor.rgb * (0.88 + big * 0.24); if (zone < 1.5) cb = mix(cb, vec3(0.2, 0.14, 0.08), gDirt * 0.8);
+    c = mix(c * tn, cb * tn, 0.6); // the painted tile takes over most of the procedural pattern
+    if (zone > 2.5 && zone < 3.5) { vec3 tL = texture(uGTex, vec3(w * 0.125, 3.0)).rgb; float lava = clamp((tL.r - tL.b * 2.2 - 0.12) * 3.0, 0.0, 1.0); gGlow = lava * (0.6 + 0.4 * sin(uTime * 1.7 + gn(w * 0.2) * 6.0)) * (0.5 + gn(px * 0.12 + 3.0)); gGlowC = zgc; } // the painted lava seams glow and breathe
+  }
   // town plaza and the road: cobblestones like an old dungeon floor
   float plaza = 1.0 - smoothstep(uTown.z - 3.0, uTown.z - 1.0, length(w - uTown.xy));
   float road = (1.0 - smoothstep(uRoad.x - 0.6, uRoad.x + 0.4, abs(w.x))) * step(uTown.y, w.y) * step(w.y, uRoad.y);
@@ -9057,13 +9076,39 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0);`)
     vec3 st = diffuseColor.rgb * (0.84 + v.y * 0.28) * (0.94 + gn(px * 3.0) * 0.12);
     st = mix(st, diffuseColor.rgb * 0.45, 1.0 - smoothstep(0.03, 0.08, v.x));
     st = mix(st, st * 1.12, smoothstep(0.12, 0.3, v.x) * 0.5); // rounded stone tops catch the light
+    if (uGOn > 0.5) st = mix(st, diffuseColor.rgb * clamp(gtile(6.0, w) / uGMean[6], 0.0, 2.6), 0.85);
     c = mix(c, st, cob);
   }
+  // life: cloud shadows drift over every area, a wind sheen runs through the grass, light ripples over the seabed
+  { float cl = smoothstep(0.55, 0.8, gn(w * 0.017 + uTime * vec2(0.021, 0.013)) * 0.75 + gn(w * 0.06 - uTime * 0.02) * 0.25);
+    c *= 1.0 - cl * 0.14;
+    if (zone < 1.5) { float wave = sin(w.x * 0.09 + w.y * 0.06 - uTime * 1.3 + gn(w * 0.04) * 5.0); c *= 1.0 + smoothstep(0.55, 1.0, wave) * 0.07 * (1.0 - gDirt) * (1.0 - cob); }
+    if (zone > 4.5 && zone < 5.5) { float ca = pow(1.0 - abs(sin(gn(w * 0.55 + uTime * 0.12) * 9.0)), 6.0); c += vec3(0.04, 0.1, 0.1) * ca; } }
   diffuseColor.rgb = c;
 }`)
     .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += gGlowC * gGlow * 1.4;');
 };
-matGround.customProgramCacheKey = () => 'ground4';
+matGround.customProgramCacheKey = () => 'ground5';
+// the painted ground tiles: seven 512 px webp files packed into one texture array (grass, dirt, snow, basalt,
+// flagstone, seabed, cobblestone); the ground keeps its procedural look until they arrive
+const GROUND_TILES = ['grass', 'dirt', 'snow', 'basalt', 'flagstone', 'seabed', 'cobble'];
+function loadGroundTiles() {
+  const N = 512, data = new Uint8Array(N * N * 4 * GROUND_TILES.length), means = [];
+  const cv = document.createElement('canvas'); cv.width = cv.height = N; const g = cv.getContext('2d', { willReadFrequently: true });
+  Promise.all(GROUND_TILES.map((n) => new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = 'assets/world/_ground/' + n + '.webp'; })))
+    .then((ims) => {
+      ims.forEach((im, i) => {
+        g.drawImage(im, 0, 0, N, N); const px = g.getImageData(0, 0, N, N).data; data.set(px, i * N * N * 4);
+        let r = 0, gg = 0, b = 0; for (let k = 0; k < px.length; k += 64) { r += px[k]; gg += px[k + 1]; b += px[k + 2]; }
+        const n = px.length / 64, lin = (v) => Math.pow(v / n / 255, 2.2); means.push(new THREE.Vector3(lin(r), lin(gg), lin(b))); // the shader works in linear colour
+      });
+      const t = new THREE.DataArrayTexture(data, N, N, GROUND_TILES.length);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true;
+      t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; t.needsUpdate = true;
+      const u = matGround.userData.u; u.uGTex.value = t; u.uGMean.value = means; u.uGOn.value = 1;
+    }).catch(() => { /* stays procedural */ });
+}
+loadGroundTiles();
 const worldArt = createWorldArt({THREE, GEO, part, mergeParts, hasModel: (n) => hasWorldModel(n) });
 const hasWM = (n) => hasWorldModel(n); // a generated world model exists (src/game/48-world-models.js)
 const zoneGround = (zi) => { const g = CFG.world.zones[zi].ground; return typeof g === 'string' ? PALETTE[g] : g; };
@@ -10504,6 +10549,7 @@ const Pixel = {
   },
   render() {
     renderer.info.autoReset = false; renderer.info.reset(); // count both world and pixel post passes
+    matGround.userData.u.uTime.value = performance.now() / 1000 % 3600; // the ground's clouds, wind and lava (44-world-view.js)
     if (!this.active) { if (Post.on()) Post.render(); else renderer.render(scene, camera); return; }
     this.mat.uniforms.near.value = camera.near; this.mat.uniforms.far.value = camera.far;
     renderer.setRenderTarget(this.rt); renderer.render(scene, camera);
@@ -15676,7 +15722,7 @@ function boot(hotData) {
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
   if (LOCAL_PREVIEW) window.__delve = { startDelve, delveLayout, delveGate, delveReq, diffDef, playerPower, refPower, claimDelveChest, openDelvePanel, PARTY, partyMembers, get D() { return G.dungeon; } };
-  if (LOCAL_PREVIEW) window.__dbg = { bossAttack, bossPlan, bossPlanMech, bossKit, bossDamageMod, BOSS_KITS, BOSS_TEAM, bossPartySize, MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, pvpRecv, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
+  if (LOCAL_PREVIEW) window.__dbg = { matGround, bossAttack, bossPlan, bossPlanMech, bossKit, bossDamageMod, BOSS_KITS, BOSS_TEAM, bossPartySize, MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, pvpRecv, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
   const btn = $('playBtn'), label = btn.textContent;
