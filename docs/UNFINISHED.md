@@ -1,3 +1,31 @@
+# New monster bodies, monster strikes, dungeon dressing, new barracks (18 Oct 2026, branch `claude/hf-models-a`, PR to main)
+Casper: a Hugging Face session for attack animations, new mobs and props for dungeons and the world, more unique Bastion art.
+Made with the HF MCP tools (Z-Image Turbo concept → TRELLIS.2 1024, seed 7), relayed to `asset-drop` (`drop/mobs-a`,
+`drop/props-a`); intermediates in `tools/.gen/mobs-a`, `tools/.gen/props-a`.
+- **10 new monster bodies** (`assets/enemy/`, ~9k tris, 1024 textures, 530-880 KB; hornet 512): toad, bat, hornet,
+  scorpion, viper, myconid, crab, jelly, wyvern, glassbull. Now on their own body: Fume-Toad, Echo-Bat, Sun-Drunk Hornet,
+  Scoria-Scorpion, Bark-Scale Viper, Myconid Spore-Tosser, Boil-Crab, Nebula-Jellyfish, Flame-Wyrm, Glass-Minotaur (a
+  crystal bull); retinted: Lightning-Wyvern, Spore-Urchin (myconid), Pitfall-Wurm (viper), Crag-Goat (glassbull).
+  `tintK` per species (low = keeps its painted colours). Each new body has its own idle/walk motion in `43-enemies-view.js`.
+- **Monster strikes** (`43-enemies-view.js`, all 24 bodies): after the wind-up pose the body now strikes when the move
+  goes off (and on every plain attack): slams drop and squash with a dust burst, pounces/bites lunge, sweeps/cleaves swing
+  through, shots and breath kick back or thrust, novas pulse, burrowers burst up (`STRIKE_OF`). The old lean-back on
+  attack is gone. Heroes already play the KayKit attack clips; their attacks were not changed.
+- **Dungeon dressing** (`DUNGEON_THEME_PROP` in `47-dungeon-view.js`): every hall but the first and the boss's gets its
+  dungeon's prop along the walls (2, or 4 in big party halls): root-split sarcophagus (Crypt), glacier coffin
+  (Frostvault), slag cart (Cinder), bookshelf (Archive), coral shrine (Grotto), fallen star (Starfall). 6-9k tris each.
+  Same per biome for the old world dungeons.
+- **Bastion:** new barracks model (whole roof, no streaks; 9.9k tris) and its menu picture.
+- **Learned:** the permissive simplify (`PERM=1`) and `v12_simplify_packed` below ~9k smear TRELLIS textures on
+  buildings (the old streaky barracks); keep buildings near 9-10k. The PRO ZeroGPU quota ran out after 17 models
+  (about 30 s GPU each) and the error said it comes back in ~19.5 h, so it is not a fixed 22:45 reset.
+- **Queued (no GPU left):** cut-out concepts on `asset-drop` `drop/queue-b-concepts/` (feed the raw.githubusercontent
+  URL to `generate_3d`): new builder hut, Siege Lord (armoured ogre with a battering ram) and Siege Captain (goblin on a
+  war boar) as unique siege boss bodies (set the body in `spawnSiegeMob`, `36c-siege.js`), a supply cart and a fort
+  banner for the fort dressing, and three world props (mountain totem, arcane lectern, celestial sun lantern).
+- **Open:** look at the new bodies on a phone (sizes in `ASSET_MANIFEST` `size`); Kelpie, Dust-Harpy, Shaft-Vulture,
+  Pressure-Squid and Grotto-Angler still borrow bodies (next batch: horse, harpy, vulture, squid, angler).
+
 # Dungeon makeover phase 1: bigger halls, longer runs (18 Oct 2026, branch `claude/dungeon-makeover`, PR to main)
 Casper: the halls were too small for four heroes and runs too short (goal about 5 minutes). Plan agreed in chat, six
 phases (1 sizes + run length, 2 lever/plate puzzles, 3 enrage + smart patterns, 4 three new monsters per dungeon,
