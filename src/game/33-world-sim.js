@@ -543,7 +543,7 @@ function stepEnemy(e, dt) {
   if (!e.alive) { if (e.rift || e.dungeon) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
   if (HeroSupers.tickStatus(e, dt)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); e.moveAmt = 0; return; } // stunned / banished by a hero super
   if (e.flee && fleeStep(e, dt)) return; // a party dungeon's gold goblin runs instead of fighting
-  const d = CFG.enemies[e.type], pl = G.player, Z = CFG.world.zones[e.zone];
+  const d = CFG.enemies[e.type], pl = e.delve ? delveTarget(e) : G.player, Z = CFG.world.zones[e.zone]; // party dungeons: you or a bot
   if (e.rift && e.state !== 'chase') e.state = 'chase';
   const dp = Math.hypot(pl.x - e.x, pl.z - e.z);
   // far-away monsters sleep (keeps big maps cheap on phones)

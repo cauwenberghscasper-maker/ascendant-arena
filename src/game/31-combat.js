@@ -34,7 +34,7 @@ let HeroFXRef = null;
 
 // team 'mob' (monster and boss attacks) in the open world can only hurt your own hero: skip the scan over every monster
 function forEachTarget(fn, team) {
-  if (team === 'mob' && G.mode !== 'arena') { fn(G.player); return; }
+  if (team === 'mob' && G.mode !== 'arena') { fn(G.player); if (G.dungeon && G.dungeon.delve) for (const b of G.dungeon.delve.bots) fn(b); return; }
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
   fn(G.player);
   for (let i = 0; i < G.enemies.length; i++) if (!G.enemies[i].hidden) fn(G.enemies[i]); // burrowed monsters can't be hit or aimed at
@@ -184,7 +184,7 @@ function dealDamage(t, amount, srcId, o) {
   if (t.invulnT > 0) return 0;
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
-  if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot) return 0; // hub bots are bystanders
+  if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot && !t.delveBot) return 0; // hub bots are bystanders (dungeon bots fight)
   const src = G.ents.get(srcId);
   let amt = amount * (1 + (Math.random() * 2 - 1) * CFG.combat.variance);
   let crit = false;
@@ -224,7 +224,7 @@ function dealDamage(t, amount, srcId, o) {
     src.superCharge = Math.min(1, src.superCharge + CFG.combat.superPerHit * o.charge * (1 + src.mods.superGain + src.gearSuper));
   }
   if (t.kind === 'boss') { t.dmgBy[srcId] = (t.dmgBy[srcId] || 0) + amt; t.total += amt; }
-  if (t.kind === 'enemy' && src && src.isPlayer) t.tagged = true;
+  if (t.kind === 'enemy' && src && (src.isPlayer || src.delveBot)) t.tagged = true; // your dungeon bots' hits count as yours
   ev({ t: 'hit', x: t.x, z: t.z, y: t.kind === 'boss' ? 5.5 : 2.1, amt, crit, pet:!!o.pet, toPlayer: !!t.isPlayer, byPlayer: !!(src && src.isPlayer), pk: o.pk, pc: o.pc, slow: !!o.slow, burnFx: !!o.burnFx, proc: !!o.proc }); // pk/pc/burnFx/proc: cosmetic only
   if (t.isPlayer || (src && src.isPlayer)) markCombat();
   if (sf && sf.isPlayer && amt > (G.profile.records.maxHit || 0)) G.profile.records.maxHit = amt;
@@ -295,6 +295,7 @@ function killEntity(t, src, pet = false) {
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
+    else if (t.delveBot) toast(`${t.nick} is down · stand by them to revive`, 'bad');
     else if (t.isPlayer && delveOn()) { G.respawnT = 1e9; toast(delveParty().length > 1 ? 'You are down! A teammate can pull you back up' : 'You fell…', 'bad'); }
     else if (t.isPlayer) { if (typeof pvpOnDeath === 'function') pvpOnDeath(); G.respawnT = CFG.player.respawn; toast(G.siege ? 'You were knocked out. Back at the Keep in a moment…' : 'You were knocked out. Respawning in town…', 'bad'); }
   } else if (t.kind === 'enemy') {
@@ -635,7 +636,7 @@ function stepFighter(f, dt, ctx) {
 
 function boundFighter(f, ctx) {
   if (G.rift && f.isPlayer) { riftClamp(f, f.r); return; }
-  if (G.dungeon && f.isPlayer) { dungeonClamp(f, f.r); return; }
+  if (G.dungeon && (f.isPlayer || f.delveBot)) { dungeonClamp(f, f.r); return; }
   if (G.siege && f.isPlayer) { siegeClamp(f, f.r); return; }
   if (ctx === 'arena') {
     const h = CFG.arena.half - f.r;
