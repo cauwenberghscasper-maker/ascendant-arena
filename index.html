@@ -3343,7 +3343,7 @@ function defaultProfile() {
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
     essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
-    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0 },
+    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, hz120: false },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
   if (TEST_MODE) prof.playtest = TEST_PROFILE_TAG;
@@ -3805,7 +3805,7 @@ function spawnProjectile(o) {
   for (let n = 0; n < PROJ_MAX; n++) {
     const p = projectiles[projCursor]; projCursor = (projCursor + 1) % PROJ_MAX;
     if (!p.active) {
-      p.active = true; p.x = o.x; p.z = o.z; p.vx = o.vx; p.vz = o.vz; p.life = o.life; p.total = o.life; p.r = o.r; p.dmg = o.dmg;
+      p.active = true; p.iStep = -1; p.x = o.x; p.z = o.z; p.vx = o.vx; p.vz = o.vz; p.life = o.life; p.total = o.life; p.r = o.r; p.dmg = o.dmg;
       p.team = o.team; p.owner = o.owner; p.pet = !!o.pet; p.kind = o.kind; p.aoe = o.aoe || 0; p.aoeMult = o.aoeMult || 0;
       p.slow = o.slow || 0; p.charge = o.charge || 0; p.color = o.color; p.y = o.y || 1.0; p.burn = o.burn || 0; p.burnT = o.burnT || 0;
       p.homing = o.homing || 0; p.pierce = o.pierce || 0; p.hits.length = 0; p.bounce = o.bounce || 0; p.split = o.split || null;
@@ -3828,7 +3828,9 @@ const heroApi = { G, forEachTarget, dealDamage, spawnProjectile, ev, nearestFoe:
 const HeroSupers = createHeroSupers(heroApi);
 let HeroFXRef = null;
 
-function forEachTarget(fn) {
+// team 'mob' (monster and boss attacks) in the open world can only hurt your own hero: skip the scan over every monster
+function forEachTarget(fn, team) {
+  if (team === 'mob' && G.mode !== 'arena') { fn(G.player); return; }
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
   fn(G.player);
   for (let i = 0; i < G.enemies.length; i++) if (!G.enemies[i].hidden) fn(G.enemies[i]); // burrowed monsters can't be hit or aimed at
@@ -3903,7 +3905,7 @@ function stepProjectiles(dt) {
       if (t.kind === 'fighter' && t.invulnT > 0) return; // dodged!
       const dx = t.x - p.x, dz = t.z - p.z, rr = t.r + p.r;
       if (dx * dx + dz * dz < rr * rr) hitT = t;
-    });
+    }, p.team);
     if (hitT) {
       const amt = dealDamage(hitT, p.dmg, p.owner, { pet:p.pet, proc:p.pet, vamp: p.vamp, charge: p.charge, canCrit: !p.pet, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: p.knock || 1.5, stun: p.stun, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
       if (p.hx) { HeroSupers.onBulletHit(p, hitT, amt || 0); if (!p.aoe) ev({ t: 'heroImpact', hid: p.hx, x: hitT.x, z: hitT.z, r: 0.9, hv: p.hv }); }
@@ -3964,12 +3966,17 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
     if (dx * dx + dz * dz <= (r + t.r) * (r + t.r)) {
       dealDamage(t, dmg, owner, { charge: o.charge || 0, canCrit: false, slow: o.slow || 0, knockX: dx, knockZ: dz, knock: o.knock || 0, burn: o.burn || 0, burnT: o.burnT || 0, proc: !!o.proc });
     }
-  });
+  }, team);
 }
 
 function dealDamage(t, amount, srcId, o) {
   if (!t || !t.alive) return 0;
-  if (t.isPeer) return srcId === G.player.id ? pvpHit(t, amount) : 0; // only your own shots, the victim decides
+  if (t.isPeer) { // only your own shots, the victim decides; your hits on players still fill your super
+    if (srcId !== G.player.id) return 0;
+    const dealt = pvpHit(t, amount), s = G.player;
+    if (dealt > 0 && o && o.charge) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
+    return dealt;
+  }
   if (t.invulnT > 0) return 0;
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
@@ -5781,7 +5788,7 @@ function stepPendingAoE(dt) {
       else forEachTarget((t) => {
         if (!t.alive || t.team === a.team || (t.kind === 'fighter' && t.invulnT > 0) || !aoeHits(a, t)) return;
         dealDamage(t, a.dmg, a.owner, { charge: 0, canCrit: false, slow: a.slow || 0, knockX: t.x - a.x, knockZ: t.z - a.z, knock: 6, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
-      });
+      }, a.team);
       if (a.kind === 'zap') ev({ t: 'bolt', x: a.x, z: a.z });
       const C = a.cone, bx = C ? a.x + Math.sin(C.a) * a.r * 0.55 : a.x, bz = C ? a.z + Math.cos(C.a) * a.r * 0.55 : a.z;
       ev({ t: 'boom', x: bx, z: bz, r: C ? a.r * 0.45 : a.r, color: a.kind === 'meteor' || a.kind === 'breath' ? 0xff7b2e : a.kind === 'comet' || a.kind === 'zap' || a.kind === 'trap' ? 0x9fb8ff : a.kind === 'vortex' ? 0xb36bff : 0xc9a16b, big: a.kind !== 'comet' && a.kind !== 'spike' && a.kind !== 'zap' });
@@ -8159,7 +8166,7 @@ AssetSlots.register('enemy', (o) => {
       if (e.windK && e.windT > 0) {
         const wp = clamp(1 - e.windT / (e.windMax || 1), 0, 1), ez = wp * wp * (3 - 2 * wp), P = MOVE_POSE[e.windK] || MOVE_POSE.slam;
         pivot.rotation.x += P[0] * ez; pivot.position.y += P[1] * ez; pivot.rotation.y += P[2] * ez; pivot.scale.y *= 1 + P[3] * ez; pivot.scale.x *= 1 - P[3] * 0.5 * ez; pivot.scale.z *= 1 - P[3] * 0.5 * ez;
-        if (Math.random() < 0.25 * wp) burst(e.x + (Math.random() - 0.5) * e.r * 2, 0.15, e.z + (Math.random() - 0.5) * e.r * 2, 1, BIOME_TINT[areaBiome(e.zone)] || 0xffffff, 1.2, 0.35, 0.2, -0.4, 1.4);
+        if (Math.random() < 0.25 * wp * fxK) burst(e.x + (Math.random() - 0.5) * e.r * 2, 0.15, e.z + (Math.random() - 0.5) * e.r * 2, 1, BIOME_TINT[areaBiome(e.zone)] || 0xffffff, 1.2, 0.35, 0.2, -0.4, 1.4);
       }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
@@ -8171,7 +8178,7 @@ AssetSlots.register('enemy', (o) => {
       const pop = popT > 0 && popT < 1 ? 0.6 + 0.4 * (1 - Math.pow(1 - popT, 3)) : 1;
       if (!e.alive) { deadT += dt; const k = Math.max(0, 1 - deadT * 3); root.scale.setScalar(s * k); root.visible = k > 0; }
       else { deadT = 0; root.scale.setScalar(s * pop); root.visible = !e.hidden; } // hidden: burrowed (a burrow move's marker shows where it is)
-      if (e.hidden && Math.random() < 0.3) burst(e.x + (Math.random() - 0.5), 0.2, e.z + (Math.random() - 0.5), 1, 0x9a8a6a, 1.2, 0.4, 0.25, 6, 2);
+      if (e.hidden && Math.random() < 0.3 * fxK) burst(e.x + (Math.random() - 0.5), 0.2, e.z + (Math.random() - 0.5), 1, 0x9a8a6a, 1.2, 0.4, 0.25, 6, 2);
     },
     dispose() { AssetLibrary.disposeInstance(model); mat.dispose(); if (aura) aura.material.dispose(); },
   };
@@ -9183,11 +9190,11 @@ const HeroFX = createHeroFX({ scene: dynGroup, camera, fxPal: (c) => fxPal(c), g
   toast: (t) => showToast(t), healNumber: (e) => { if (e.amt >= 1) dmgNumber(e.x, 2.2, e.z, '+' + fmtK(e.amt), 'heal'); } });
 heroApi.fx = HeroFX; HeroFXRef = HeroFX;
 const LONG_KINDS = { arrow: [1, 1, 1], ice: [1, 1, 1], tracer: [0.55, 0.55, 0.7], rail: [1.1, 1.1, 3.4], missile: [1.7, 1.7, 0.62], spark: [0.8, 0.8, 0.9] };
-let trailTick = 0;
-function updateProjectileMeshes() {
+let trailAcc = 0, fxK = 1; // fxK: share of a 60 Hz frame this frame covers, so per-frame sparks stay as dense at 120 Hz
+function updateProjectileMeshes(dt) {
   let no = 0, na = 0, nd = 0, ng = 0;
   HeroFX.ammoBegin();
-  trailTick = (trailTick + 1) % 2;
+  trailAcc += dt; const trailOn = trailAcc >= 1 / 30 - 1e-4; if (trailOn) trailAcc = Math.min(trailAcc - 1 / 30, 1 / 30); // trail puffs 30 times a second
   const glowOn = hqOn();
   for (let i = 0; i < PROJ_MAX; i++) {
     const p = projectiles[i]; if (!p.active) continue;
@@ -9211,8 +9218,8 @@ function updateProjectileMeshes() {
       if (p.kind === 'wave') _s3.set(2.4 * 2.2, 0.6, 0.35); else { const k = LONG_KINDS[p.kind]; _s3.set(k[0], k[1], k[2]); }
       _m4.compose(_v3.set(p.x, p.y, p.z), _q, _s3);
       arrowIM.setMatrixAt(na, _m4); arrowIM.setColorAt(na, _col.set(p.color)); na++;
-      if (p.kind === 'rail' && trailTick === 0) burst(p.x, p.y, p.z, 1, 0xe8fbff, 0.4, 0.3, 0.22, 0, 0.1);
-      if (p.kind === 'missile' && Math.random() < 0.7) burst(p.x - p.vx * 0.03, p.y, p.z - p.vz * 0.03, 1, Math.random() < 0.5 ? 0xbfbfbf : 0xffb347, 0.6, 0.45, 0.28, -1.5, 0.4);
+      if (p.kind === 'rail' && trailOn) burst(p.x, p.y, p.z, 1, 0xe8fbff, 0.4, 0.3, 0.22, 0, 0.1);
+      if (p.kind === 'missile' && Math.random() < 0.7 * fxK) burst(p.x - p.vx * 0.03, p.y, p.z - p.vz * 0.03, 1, Math.random() < 0.5 ? 0xbfbfbf : 0xffb347, 0.6, 0.45, 0.28, -1.5, 0.4);
     } else if (p.kind === 'disc' || p.kind === 'chakram') {
       if (nd >= 120) continue;
       _e.set(0, G.time * (p.kind === 'chakram' ? 22 : 14) + i, 0); _q.setFromEuler(_e);
@@ -9224,7 +9231,7 @@ function updateProjectileMeshes() {
       _e.set(G.time * 6 + i, G.time * 4, 0); _q.setFromEuler(_e);
       _m4.compose(_v3.set(p.x, p.y, p.z), _q, _s3.set(s, s, s));
       orbIM.setMatrixAt(no, _m4); orbIM.setColorAt(no, _col.set(p.color)); no++;
-      if ((p.kind === 'lob' || p.kind === 'shell') && trailTick === 0) burst(p.x, p.y, p.z, 1, p.color, 0.3, 0.35, 0.2, 0, 0.1);
+      if ((p.kind === 'lob' || p.kind === 'shell') && trailOn) burst(p.x, p.y, p.z, 1, p.color, 0.3, 0.35, 0.2, 0, 0.1);
     }
   }
   orbIM.count = no; arrowIM.count = na; discIM.count = nd; glowIM.count = ng; HeroFX.ammoEnd();
@@ -9276,7 +9283,7 @@ function updateRings(dt) {
     s.ring.visible = s.disc.visible = true;
     s.ring.position.set(W.pl[i][0], 0.1, W.pl[i][1]); s.ring.scale.setScalar(W.r); s.ring.material.opacity = 0.9; s.ring.material.color.setHex(on ? 0xffffff : W.col);
     s.disc.position.set(W.pl[i][0], 0.09, W.pl[i][1]); s.disc.scale.setScalar(W.r * (0.35 + 0.65 * prog)); s.disc.material.opacity = 0.25 + 0.3 * pulse; s.disc.material.color.setHex(on ? 0xfff2b0 : W.col);
-    if (Math.random() < 0.5) burst(W.pl[i][0] + (Math.random() - 0.5) * W.r, 0.2, W.pl[i][1] + (Math.random() - 0.5) * W.r, 1, W.col, 0.6, 0.8, 0.25, -1.2, 2.2);
+    if (Math.random() < 0.5 * fxK) burst(W.pl[i][0] + (Math.random() - 0.5) * W.r, 0.2, W.pl[i][1] + (Math.random() - 0.5) * W.r, 1, W.col, 0.6, 0.8, 0.25, -1.2, 2.2);
   }
   for (const c of G.clouds) {
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
@@ -9285,8 +9292,8 @@ function updateRings(dt) {
     s.ring.position.set(c.x, 0.08, c.z); s.ring.scale.setScalar(c.r); s.ring.material.opacity = 0.7 * fade; s.ring.material.color.setHex(c.team === 'mob' ? TELE_MOB : 0x8dff6a);
     s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * (c.pull ? 14 : 6)) * 0.05) * fade; s.disc.material.color.setHex(tint);
     // a vortex sheds sparks from its rim; other clouds bubble anywhere
-    if (c.pull) { if (Math.random() < 0.7) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
-    else if (Math.random() < 0.5) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
+    if (c.pull) { if (Math.random() < 0.7 * fxK) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
+    else if (Math.random() < 0.5 * fxK) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
   }
   for (let i = 0; i < RING_MAX - used; i++) {
     const s = rings[i];
@@ -9967,9 +9974,9 @@ function updateDungeonView(dt) {
   for (const L of dungeonParts.lights) L.intensity = 16 + Math.sin(t * 11 + L.position.x) * 2.5;
   dungeonParts.portals.forEach((g, i) => { g.visible = i === 0 || D.bossDead; g.rotation.y = t * (i ? -0.8 : 0.8); });
 }
-// --- party-dungeon view: event-room props on top of the hall builder (47-dungeon-view.js). Code-built stand-ins
-// until the generated set pieces land: a cursed altar, a moonwell, pressure plates, the lonely chest, echo pillars,
-// cache chests that appear when an event pays out, and pillars in the big halls. Dark halls pull the fog in.
+// --- party-dungeon view: event-room set pieces on top of the hall builder (47-dungeon-view.js). Generated models
+// (delve_altar, delve_moonwell, delve_echo, delve_hoard, delve_throne) plus existing ones (chest, pillar); code geometry
+// here is only VFX: rune rings, glows, the moonwell shimmer and the pressure-plate floor sigils. Dark halls pull the fog in.
 const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [] };
 function buildDelveProps(D) {
   const X = D.delve, add = (o) => { dungeonGroup.add(o); return o; }, tint = BIOMES[X.def.biome].coreColor;
@@ -9998,7 +10005,8 @@ function buildDelveProps(D) {
       g.add(water); delveParts.well = { g, water };
     }
     if (m.event === 'plates') for (const q of m.plates.slice(0, clamp(X.n, 1, 4))) {
-      const p = add(new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.3, 0.14, 20), new THREE.MeshBasicMaterial({ color: 0x8a6a2a }))); p.position.set(q.x, 0.07, q.z);
+      // a glowing floor sigil (a decal, not a prop): dim gold until someone stands on it
+      const p = add(new THREE.Mesh(new THREE.CircleGeometry(1.25, 6).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x8a6a2a, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }))); p.position.set(q.x, 0.03, q.z);
       const r = add(new THREE.Mesh(new THREE.RingGeometry(1.3, 1.55, 32).rotateX(-Math.PI / 2), glow(0xffcf1f, 0.5))); r.position.set(q.x, 0.05, q.z);
       delveParts.plates.push({ room: m.i, p, r });
     }
@@ -11430,6 +11438,7 @@ function openSettings() {
       <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
     ${tg('fx', 'Cinematic effects', 'Bloom on crystals, lava, torches and magic, soft shadows and colour grading (with High graphics)')}
+    ${tg('hz120', '120 Hz', 'Smoother motion on 120 Hz screens. Uses more battery. No change on 60 Hz screens')}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
@@ -11646,7 +11655,9 @@ function dieFx(e) {
 }
 
 // --- event consumer: sim events -> sound, particles, UI ---
+let fxBudget = 6;
 function processEvents() {
+  fxBudget = 6;
   const evs = G.events;
   for (let i = 0; i < evs.length; i++) {
     const e = evs[i];
@@ -11811,7 +11822,7 @@ function processEvents() {
       case 'telegraph': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w || 1.4, 0xff4d4d, 0.6); break;
       case 'moveTele': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w, TELE_MOB, e.life); else ringFx(e.x, e.z, e.r, e.color || TELE_MOB, e.life, !e.color); break; // monster moves: red lane or filling ring
       case 'windFx': if (near(e, 28)) windupFx(e); break;
-      case 'aoeFx': if (near(e, 32)) aoeImpactFx(e); break;
+      case 'aoeFx': if (near(e, 32) && fxBudget-- > 0) aoeImpactFx(e); break; // at most a few big impacts a frame: a 16-spike cross no longer spawns 16 sprites
       case 'bossCall': bossCallFx(e); break;
       case 'bossPhase': bossPhaseFx(e); break;
       case 'wardBreak': wardBreakFx(e, true); break;
@@ -11930,7 +11941,7 @@ function updateHubProps(t) {
   for (const b of hubParts.barriers) { const locked = p.level < CFG.world.zones[b.zone].minLevel; b.mesh.visible = locked; b.mesh.material.opacity = 0.16 + Math.sin(t * 2) * 0.06; }
   if (hubParts.riftDisc) { hubParts.riftDisc.rotation.z = -t * 1.1; hubParts.riftRing.rotation.z = t * 0.5; hubParts.riftRing.scale.setScalar(1 + Math.sin(t * 3) * 0.04); }
   // ascended (level 200): a golden trail while you move
-  if (HERO_OVERLAYS && ascTier(p.level) >= 3 && G.player.alive && (G.player.moveAmt || 0) > 0.3 && Math.random() < 0.5) burst(G.player.x, 0.5 + Math.random(), G.player.z, 1, Math.random() < 0.5 ? 0xffd36b : 0xfff3c4, 0.6, 0.9, 0.2, -0.5, 1);
+  if (HERO_OVERLAYS && ascTier(p.level) >= 3 && G.player.alive && (G.player.moveAmt || 0) > 0.3 && Math.random() < 0.5 * fxK) burst(G.player.x, 0.5 + Math.random(), G.player.z, 1, Math.random() < 0.5 ? 0xffd36b : 0xfff3c4, 0.6, 0.9, 0.2, -0.5, 1);
   hubParts.portalDisc.rotation.z = t * 0.6; hubParts.portalDisc.material.opacity = 0.6 + Math.sin(t * 3) * 0.15; hubParts.portalRing.rotation.z = -t * 0.4;
   const bim = hubParts.berryIM;
   G.berries.forEach((b, i) => {
@@ -12988,7 +12999,8 @@ function rtMessage(d) {
 // presence holds the slow-changing card (nick, hero, level, mode); it is re-sent only when one of those changes
 function rtTrack() {
   const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al, s.pv, s.pc, s.rd, s.dg, s.df, s.dr, s.pw, s.qk].join('|'); if (card === RT.tracked) return;
-  RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
+  const now = performance.now(); if (now - (RT.trackAt || 0) < 1000) return; // the server limits presence updates per client
+  RT.trackAt = now; RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
 }
 function rtUpdate(dt) {
   if (RT.state === 'off' || RT.state === 'none') return;
@@ -12998,6 +13010,7 @@ function rtUpdate(dt) {
   if (RT.state !== 'on' || !G.started) return;
   if (mpRoomKey() !== RT.key) { rtJoin(mpRoomKey()); return; } // partition change: move to the new room
   if ((MOB.t -= dt) <= 0) { MOB.t = 0.25; mobOwnership(); mobSend(); bossSend(); }
+  if ((HITQ.t -= dt) <= 0) hitFlush();
   RT.sendT -= dt; RT.beatT -= dt;
   if (RT.sendT > 0) return;
   RT.sendT = 0.12; rtTrack();
@@ -13039,7 +13052,7 @@ function mobOwnership() {
   }
 }
 function mobHandover(e, own) {
-  if (own) { e.sx = e.x; e.sz = e.z; e.sf = e.facing; }
+  if (own) { e.sx = e.x; e.sz = e.z; e.sf = e.facing; if (e.mv && (e.mv.k || e.hidden || e.windT > 0)) moveEnd(e); e.hidden = false; }
   else if (!e.alive) e.respawnT = Math.min(e.respawnT || 0, CFG.world.enemyRespawn);
   e.own = own;
 }
@@ -13092,10 +13105,19 @@ function mobRemoteStep(e, dt) {
   if (e.sf != null) e.facing += angDiff(e.facing, e.sf) * k;
 }
 // our hit on a monster another player runs (called from dealDamage after the hit landed here)
+const HITQ = { mob: new Map(), boss: 0, bossTo: null, t: 0 };
 function mpMobHit(t, amt) {
   if (!mobSyncable(t) || !t.own) return;
   t.myHitT = G.time; if (t.hp <= 0) t.myKillT = G.time;
-  if (rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'hit', payload: { sid: MP.sid, to: t.own, i: t.slot, f: Math.round(Math.min(1, amt / t.maxHp) * 10000) / 10000 } })) MOB.hits++;
+  const k = t.own + '|' + t.slot; HITQ.mob.set(k, (HITQ.mob.get(k) || 0) + amt / t.maxHp);
+  if (t.hp <= 0) hitFlush(); // a kill goes out at once
+}
+// sends what was hit since the last flush (same 'hit' / 'bhit' messages as before, so older games still read them)
+function hitFlush() {
+  for (const [k, f] of HITQ.mob) { const j = k.lastIndexOf('|'); if (rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'hit', payload: { sid: MP.sid, to: k.slice(0, j), i: +k.slice(j + 1), f: Math.round(Math.min(1, f) * 10000) / 10000 } })) MOB.hits++; }
+  HITQ.mob.clear();
+  if (HITQ.boss > 0 && HITQ.bossTo) bossMsg('bhit', { to: HITQ.bossTo, f: Math.round(Math.min(1, HITQ.boss) * 10000) / 10000 });
+  HITQ.boss = 0; HITQ.t = 0.2;
 }
 // another player's hit on a monster we run
 function mobHitRecv(P) {
@@ -13134,7 +13156,7 @@ function bossSend() {
 function mpBossAttack(o) { if (bossLeading()) bossMsg('batk', o); }
 function mpBossEnd(killed) { const b = G.boss; if (b && b.uid) BOSS.ended.add(b.uid); if (bossLeading()) { if (b && !b.uid) b.uid = MP.sid + '-' + b.id; bossMsg('bend', { k: killed ? 1 : 0, u: b ? b.uid : '' }); } }
 // our hit on the boss the leader runs; a kill here shares loot by your damage over max HP
-function mpBossHit(b, amt) { b.myHitT = G.time; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); if (b.uid) BOSS.ended.add(b.uid); } bossMsg('bhit', { to: bossLeader(), f: Math.round(Math.min(1, amt / b.maxHp) * 10000) / 10000 }); }
+function mpBossHit(b, amt) { b.myHitT = G.time; const to = bossLeader(); if (HITQ.bossTo !== to) { hitFlush(); HITQ.bossTo = to; } HITQ.boss += amt / b.maxHp; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); if (b.uid) BOSS.ended.add(b.uid); hitFlush(); } }
 function bossRecv(event, sid, P) {
   if (!G.started || G.mode !== 'hub' || inInstance()) return;
   if (event === 'bhit') { // another player's hit on the boss we run
@@ -13943,23 +13965,25 @@ function delveHud() {
 // ---------------------------------------------------------------------
 // 10. MAIN LOOP — fixed-timestep simulation, render separate
 // ---------------------------------------------------------------------
-const FRAME_MS = 1000 / 60;
+const FRAME_MS = 1000 / 60, FRAME_MS_120 = 1000 / 120;
 let lastFrame = performance.now(), nextFrameAt = lastFrame, simAcc = 0, saveT = 0, achT = 0;
 function frame(now) {
   requestAnimationFrame(frame);
-  // Keep a 60 Hz cadence even on 90/120/144 Hz screens. Accumulate elapsed time
-  // between processed frames so simulation stays at its existing fixed timestep.
+  // Keep a 60 Hz cadence even on 90/120/144 Hz screens (up to 120 with the 120 Hz option). Accumulate elapsed
+  // time between processed frames so simulation stays at its existing fixed timestep.
+  const hz120 = !!(G.profile && G.profile.settings.hz120), ms = hz120 ? FRAME_MS_120 : FRAME_MS;
   if (now < nextFrameAt - 0.5) return;
-  nextFrameAt = now + FRAME_MS - (Math.max(0, now - nextFrameAt) % FRAME_MS);
+  nextFrameAt = now + ms - (Math.max(0, now - nextFrameAt) % ms);
   let dt = (now - lastFrame) / 1000; lastFrame = now;
   if (dt > 0.1) dt = 0.1;
+  fxK = hz120 ? Math.min(1, dt * 60) : 1;
   if (G.paused) return;
   buildPlayerIntent();
   // the open world keeps running behind menus (you are safe while one is open); Showdown pauses
   if (!G.modal || (G.mode === 'hub' && G.started)) {
     simAcc += G.slowT > 0 ? dt * 0.3 : dt; G.slowT -= dt; // a Radiant drop slows the world for a moment
     let n = 0;
-    while (simAcc >= CFG.sim.step && n < CFG.sim.maxSteps) { simStep(CFG.sim.step); simAcc -= CFG.sim.step; n++; }
+    while (simAcc >= CFG.sim.step && n < CFG.sim.maxSteps) { if (hz120) Interp.snap(); simStep(CFG.sim.step); simAcc -= CFG.sim.step; n++; }
     if (n === CFG.sim.maxSteps) simAcc = 0;
   }
   processEvents();
@@ -13972,20 +13996,48 @@ function frame(now) {
     else if (G.mode === 'hub' && G.riftResult) { const rr = G.riftResult; G.riftResult = null; openRiftResult(rr); }
   }
   const t = now / 1000;
-  syncViews(dt, t);
   mpUpdate(dt);
-  updateGearAura(dt); updateProjectileMeshes(); HeroFX.update(dt, HeroSupers.marked); updateParticles(dt); updateRings(dt); updateAim(dt);
+  if (hz120) Interp.apply(simAcc / CFG.sim.step);
+  syncViews(dt, t);
+  updateGearAura(dt); updateProjectileMeshes(dt); HeroFX.update(dt, HeroSupers.marked); updateParticles(dt); updateRings(dt); updateAim(dt);
   if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
   updateCamera(dt);
   updateCompanion(dt,t);
   Pixel.render();
-  updateTags(); updateDmgNumbers(dt); updateHUD(dt);
+  updateTags(); updateDmgNumbers(dt);
+  Interp.restore();
+  updateHUD(dt);
   updateDoll();
   qualityTick(dt);
   achT += dt; if (achT > 1) { achT = 0; if (G.started) checkAchievements(); }
   saveT += dt; if (saveT > 4 && G.dirty) { saveT = 0; G.dirty = false; saveNow(false); }
 }
 
+
+// --- 120 Hz: draw between simulation steps -------------------------------------------------------
+// The simulation always steps at 60 Hz. Drawn at 120 Hz, every other frame would show the same positions
+// while the camera keeps gliding, which reads as jitter. So each frame draws the movers part way from their
+// previous step to their latest one, then puts the real positions back before anything else reads them.
+const Interp = {
+  steps: 0, saved: [],
+  bodies(fn) {
+    if (G.mode === 'arena' && G.arena) { for (const f of G.arena.fighters) fn(f); }
+    else { for (const f of G.hubFighters) fn(f); for (const e of G.enemies) fn(e); if (G.boss) fn(G.boss); }
+    for (let i = 0; i < PROJ_MAX; i++) { const p = projectiles[i]; if (p && p.active) fn(p); }
+  },
+  snap() { const s = ++this.steps; this.bodies((b) => { b.ix = b.x; b.iy = b.y; b.iz = b.z; b.iStep = s; }); },
+  apply(k) {
+    k = clamp(k, 0, 1); const s = this.steps, out = this.saved;
+    this.bodies((b) => {
+      // only bodies that existed before the latest step and moved a walkable distance (respawns and teleports snap)
+      if (b.iStep !== s || Math.abs(b.x - b.ix) + Math.abs(b.z - b.iz) > 3) return;
+      out.push(b, b.x, b.y, b.z);
+      b.x = b.ix + (b.x - b.ix) * k; b.z = b.iz + (b.z - b.iz) * k;
+      if (typeof b.y === 'number' && typeof b.iy === 'number') b.y = b.iy + (b.y - b.iy) * k;
+    });
+  },
+  restore() { const o = this.saved; for (let i = 0; i < o.length; i += 4) { const b = o[i]; b.x = o[i + 1]; if (o[i + 2] !== undefined) b.y = o[i + 2]; b.z = o[i + 3]; } o.length = 0; },
+};
 // --- cloud save: a private copy of your progress in this artifact's database ---
 // Lives under data/users/<your id>/save (only you can read it). Local storage stays as a fast cache.
 const Cloud = { doc: null, state: 'connecting', lastPush: 0, pushing: false, pending: false, kind: '' };

@@ -43,7 +43,9 @@ function dieFx(e) {
 }
 
 // --- event consumer: sim events -> sound, particles, UI ---
+let fxBudget = 6;
 function processEvents() {
+  fxBudget = 6;
   const evs = G.events;
   for (let i = 0; i < evs.length; i++) {
     const e = evs[i];
@@ -208,7 +210,7 @@ function processEvents() {
       case 'telegraph': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w || 1.4, 0xff4d4d, 0.6); break;
       case 'moveTele': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w, TELE_MOB, e.life); else ringFx(e.x, e.z, e.r, e.color || TELE_MOB, e.life, !e.color); break; // monster moves: red lane or filling ring
       case 'windFx': if (near(e, 28)) windupFx(e); break;
-      case 'aoeFx': if (near(e, 32)) aoeImpactFx(e); break;
+      case 'aoeFx': if (near(e, 32) && fxBudget-- > 0) aoeImpactFx(e); break; // at most a few big impacts a frame: a 16-spike cross no longer spawns 16 sprites
       case 'bossCall': bossCallFx(e); break;
       case 'bossPhase': bossPhaseFx(e); break;
       case 'wardBreak': wardBreakFx(e, true); break;
@@ -327,7 +329,7 @@ function updateHubProps(t) {
   for (const b of hubParts.barriers) { const locked = p.level < CFG.world.zones[b.zone].minLevel; b.mesh.visible = locked; b.mesh.material.opacity = 0.16 + Math.sin(t * 2) * 0.06; }
   if (hubParts.riftDisc) { hubParts.riftDisc.rotation.z = -t * 1.1; hubParts.riftRing.rotation.z = t * 0.5; hubParts.riftRing.scale.setScalar(1 + Math.sin(t * 3) * 0.04); }
   // ascended (level 200): a golden trail while you move
-  if (HERO_OVERLAYS && ascTier(p.level) >= 3 && G.player.alive && (G.player.moveAmt || 0) > 0.3 && Math.random() < 0.5) burst(G.player.x, 0.5 + Math.random(), G.player.z, 1, Math.random() < 0.5 ? 0xffd36b : 0xfff3c4, 0.6, 0.9, 0.2, -0.5, 1);
+  if (HERO_OVERLAYS && ascTier(p.level) >= 3 && G.player.alive && (G.player.moveAmt || 0) > 0.3 && Math.random() < 0.5 * fxK) burst(G.player.x, 0.5 + Math.random(), G.player.z, 1, Math.random() < 0.5 ? 0xffd36b : 0xfff3c4, 0.6, 0.9, 0.2, -0.5, 1);
   hubParts.portalDisc.rotation.z = t * 0.6; hubParts.portalDisc.material.opacity = 0.6 + Math.sin(t * 3) * 0.15; hubParts.portalRing.rotation.z = -t * 0.4;
   const bim = hubParts.berryIM;
   G.berries.forEach((b, i) => {

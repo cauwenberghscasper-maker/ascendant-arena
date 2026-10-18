@@ -9,7 +9,7 @@ function spawnProjectile(o) {
   for (let n = 0; n < PROJ_MAX; n++) {
     const p = projectiles[projCursor]; projCursor = (projCursor + 1) % PROJ_MAX;
     if (!p.active) {
-      p.active = true; p.x = o.x; p.z = o.z; p.vx = o.vx; p.vz = o.vz; p.life = o.life; p.total = o.life; p.r = o.r; p.dmg = o.dmg;
+      p.active = true; p.iStep = -1; p.x = o.x; p.z = o.z; p.vx = o.vx; p.vz = o.vz; p.life = o.life; p.total = o.life; p.r = o.r; p.dmg = o.dmg;
       p.team = o.team; p.owner = o.owner; p.pet = !!o.pet; p.kind = o.kind; p.aoe = o.aoe || 0; p.aoeMult = o.aoeMult || 0;
       p.slow = o.slow || 0; p.charge = o.charge || 0; p.color = o.color; p.y = o.y || 1.0; p.burn = o.burn || 0; p.burnT = o.burnT || 0;
       p.homing = o.homing || 0; p.pierce = o.pierce || 0; p.hits.length = 0; p.bounce = o.bounce || 0; p.split = o.split || null;
@@ -32,7 +32,9 @@ const heroApi = { G, forEachTarget, dealDamage, spawnProjectile, ev, nearestFoe:
 const HeroSupers = createHeroSupers(heroApi);
 let HeroFXRef = null;
 
-function forEachTarget(fn) {
+// team 'mob' (monster and boss attacks) in the open world can only hurt your own hero: skip the scan over every monster
+function forEachTarget(fn, team) {
+  if (team === 'mob' && G.mode !== 'arena') { fn(G.player); return; }
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
   fn(G.player);
   for (let i = 0; i < G.enemies.length; i++) if (!G.enemies[i].hidden) fn(G.enemies[i]); // burrowed monsters can't be hit or aimed at
@@ -107,7 +109,7 @@ function stepProjectiles(dt) {
       if (t.kind === 'fighter' && t.invulnT > 0) return; // dodged!
       const dx = t.x - p.x, dz = t.z - p.z, rr = t.r + p.r;
       if (dx * dx + dz * dz < rr * rr) hitT = t;
-    });
+    }, p.team);
     if (hitT) {
       const amt = dealDamage(hitT, p.dmg, p.owner, { pet:p.pet, proc:p.pet, vamp: p.vamp, charge: p.charge, canCrit: !p.pet, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: p.knock || 1.5, stun: p.stun, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
       if (p.hx) { HeroSupers.onBulletHit(p, hitT, amt || 0); if (!p.aoe) ev({ t: 'heroImpact', hid: p.hx, x: hitT.x, z: hitT.z, r: 0.9, hv: p.hv }); }
@@ -168,12 +170,17 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
     if (dx * dx + dz * dz <= (r + t.r) * (r + t.r)) {
       dealDamage(t, dmg, owner, { charge: o.charge || 0, canCrit: false, slow: o.slow || 0, knockX: dx, knockZ: dz, knock: o.knock || 0, burn: o.burn || 0, burnT: o.burnT || 0, proc: !!o.proc });
     }
-  });
+  }, team);
 }
 
 function dealDamage(t, amount, srcId, o) {
   if (!t || !t.alive) return 0;
-  if (t.isPeer) return srcId === G.player.id ? pvpHit(t, amount) : 0; // only your own shots, the victim decides
+  if (t.isPeer) { // only your own shots, the victim decides; your hits on players still fill your super
+    if (srcId !== G.player.id) return 0;
+    const dealt = pvpHit(t, amount), s = G.player;
+    if (dealt > 0 && o && o.charge) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
+    return dealt;
+  }
   if (t.invulnT > 0) return 0;
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)

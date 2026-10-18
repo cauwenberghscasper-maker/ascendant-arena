@@ -173,11 +173,11 @@ const HeroFX = createHeroFX({ scene: dynGroup, camera, fxPal: (c) => fxPal(c), g
   toast: (t) => showToast(t), healNumber: (e) => { if (e.amt >= 1) dmgNumber(e.x, 2.2, e.z, '+' + fmtK(e.amt), 'heal'); } });
 heroApi.fx = HeroFX; HeroFXRef = HeroFX;
 const LONG_KINDS = { arrow: [1, 1, 1], ice: [1, 1, 1], tracer: [0.55, 0.55, 0.7], rail: [1.1, 1.1, 3.4], missile: [1.7, 1.7, 0.62], spark: [0.8, 0.8, 0.9] };
-let trailTick = 0;
-function updateProjectileMeshes() {
+let trailAcc = 0, fxK = 1; // fxK: share of a 60 Hz frame this frame covers, so per-frame sparks stay as dense at 120 Hz
+function updateProjectileMeshes(dt) {
   let no = 0, na = 0, nd = 0, ng = 0;
   HeroFX.ammoBegin();
-  trailTick = (trailTick + 1) % 2;
+  trailAcc += dt; const trailOn = trailAcc >= 1 / 30 - 1e-4; if (trailOn) trailAcc = Math.min(trailAcc - 1 / 30, 1 / 30); // trail puffs 30 times a second
   const glowOn = hqOn();
   for (let i = 0; i < PROJ_MAX; i++) {
     const p = projectiles[i]; if (!p.active) continue;
@@ -201,8 +201,8 @@ function updateProjectileMeshes() {
       if (p.kind === 'wave') _s3.set(2.4 * 2.2, 0.6, 0.35); else { const k = LONG_KINDS[p.kind]; _s3.set(k[0], k[1], k[2]); }
       _m4.compose(_v3.set(p.x, p.y, p.z), _q, _s3);
       arrowIM.setMatrixAt(na, _m4); arrowIM.setColorAt(na, _col.set(p.color)); na++;
-      if (p.kind === 'rail' && trailTick === 0) burst(p.x, p.y, p.z, 1, 0xe8fbff, 0.4, 0.3, 0.22, 0, 0.1);
-      if (p.kind === 'missile' && Math.random() < 0.7) burst(p.x - p.vx * 0.03, p.y, p.z - p.vz * 0.03, 1, Math.random() < 0.5 ? 0xbfbfbf : 0xffb347, 0.6, 0.45, 0.28, -1.5, 0.4);
+      if (p.kind === 'rail' && trailOn) burst(p.x, p.y, p.z, 1, 0xe8fbff, 0.4, 0.3, 0.22, 0, 0.1);
+      if (p.kind === 'missile' && Math.random() < 0.7 * fxK) burst(p.x - p.vx * 0.03, p.y, p.z - p.vz * 0.03, 1, Math.random() < 0.5 ? 0xbfbfbf : 0xffb347, 0.6, 0.45, 0.28, -1.5, 0.4);
     } else if (p.kind === 'disc' || p.kind === 'chakram') {
       if (nd >= 120) continue;
       _e.set(0, G.time * (p.kind === 'chakram' ? 22 : 14) + i, 0); _q.setFromEuler(_e);
@@ -214,7 +214,7 @@ function updateProjectileMeshes() {
       _e.set(G.time * 6 + i, G.time * 4, 0); _q.setFromEuler(_e);
       _m4.compose(_v3.set(p.x, p.y, p.z), _q, _s3.set(s, s, s));
       orbIM.setMatrixAt(no, _m4); orbIM.setColorAt(no, _col.set(p.color)); no++;
-      if ((p.kind === 'lob' || p.kind === 'shell') && trailTick === 0) burst(p.x, p.y, p.z, 1, p.color, 0.3, 0.35, 0.2, 0, 0.1);
+      if ((p.kind === 'lob' || p.kind === 'shell') && trailOn) burst(p.x, p.y, p.z, 1, p.color, 0.3, 0.35, 0.2, 0, 0.1);
     }
   }
   orbIM.count = no; arrowIM.count = na; discIM.count = nd; glowIM.count = ng; HeroFX.ammoEnd();
@@ -266,7 +266,7 @@ function updateRings(dt) {
     s.ring.visible = s.disc.visible = true;
     s.ring.position.set(W.pl[i][0], 0.1, W.pl[i][1]); s.ring.scale.setScalar(W.r); s.ring.material.opacity = 0.9; s.ring.material.color.setHex(on ? 0xffffff : W.col);
     s.disc.position.set(W.pl[i][0], 0.09, W.pl[i][1]); s.disc.scale.setScalar(W.r * (0.35 + 0.65 * prog)); s.disc.material.opacity = 0.25 + 0.3 * pulse; s.disc.material.color.setHex(on ? 0xfff2b0 : W.col);
-    if (Math.random() < 0.5) burst(W.pl[i][0] + (Math.random() - 0.5) * W.r, 0.2, W.pl[i][1] + (Math.random() - 0.5) * W.r, 1, W.col, 0.6, 0.8, 0.25, -1.2, 2.2);
+    if (Math.random() < 0.5 * fxK) burst(W.pl[i][0] + (Math.random() - 0.5) * W.r, 0.2, W.pl[i][1] + (Math.random() - 0.5) * W.r, 1, W.col, 0.6, 0.8, 0.25, -1.2, 2.2);
   }
   for (const c of G.clouds) {
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
@@ -275,8 +275,8 @@ function updateRings(dt) {
     s.ring.position.set(c.x, 0.08, c.z); s.ring.scale.setScalar(c.r); s.ring.material.opacity = 0.7 * fade; s.ring.material.color.setHex(c.team === 'mob' ? TELE_MOB : 0x8dff6a);
     s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * (c.pull ? 14 : 6)) * 0.05) * fade; s.disc.material.color.setHex(tint);
     // a vortex sheds sparks from its rim; other clouds bubble anywhere
-    if (c.pull) { if (Math.random() < 0.7) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
-    else if (Math.random() < 0.5) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
+    if (c.pull) { if (Math.random() < 0.7 * fxK) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
+    else if (Math.random() < 0.5 * fxK) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
   }
   for (let i = 0; i < RING_MAX - used; i++) {
     const s = rings[i];

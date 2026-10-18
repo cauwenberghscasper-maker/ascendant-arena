@@ -120,7 +120,8 @@ function rtMessage(d) {
 // presence holds the slow-changing card (nick, hero, level, mode); it is re-sent only when one of those changes
 function rtTrack() {
   const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al, s.pv, s.pc, s.rd, s.dg, s.df, s.dr, s.pw, s.qk].join('|'); if (card === RT.tracked) return;
-  RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
+  const now = performance.now(); if (now - (RT.trackAt || 0) < 1000) return; // the server limits presence updates per client
+  RT.trackAt = now; RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
 }
 function rtUpdate(dt) {
   if (RT.state === 'off' || RT.state === 'none') return;
@@ -130,6 +131,7 @@ function rtUpdate(dt) {
   if (RT.state !== 'on' || !G.started) return;
   if (mpRoomKey() !== RT.key) { rtJoin(mpRoomKey()); return; } // partition change: move to the new room
   if ((MOB.t -= dt) <= 0) { MOB.t = 0.25; mobOwnership(); mobSend(); bossSend(); }
+  if ((HITQ.t -= dt) <= 0) hitFlush();
   RT.sendT -= dt; RT.beatT -= dt;
   if (RT.sendT > 0) return;
   RT.sendT = 0.12; rtTrack();
@@ -171,7 +173,7 @@ function mobOwnership() {
   }
 }
 function mobHandover(e, own) {
-  if (own) { e.sx = e.x; e.sz = e.z; e.sf = e.facing; }
+  if (own) { e.sx = e.x; e.sz = e.z; e.sf = e.facing; if (e.mv && (e.mv.k || e.hidden || e.windT > 0)) moveEnd(e); e.hidden = false; }
   else if (!e.alive) e.respawnT = Math.min(e.respawnT || 0, CFG.world.enemyRespawn);
   e.own = own;
 }
@@ -224,10 +226,19 @@ function mobRemoteStep(e, dt) {
   if (e.sf != null) e.facing += angDiff(e.facing, e.sf) * k;
 }
 // our hit on a monster another player runs (called from dealDamage after the hit landed here)
+const HITQ = { mob: new Map(), boss: 0, bossTo: null, t: 0 };
 function mpMobHit(t, amt) {
   if (!mobSyncable(t) || !t.own) return;
   t.myHitT = G.time; if (t.hp <= 0) t.myKillT = G.time;
-  if (rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'hit', payload: { sid: MP.sid, to: t.own, i: t.slot, f: Math.round(Math.min(1, amt / t.maxHp) * 10000) / 10000 } })) MOB.hits++;
+  const k = t.own + '|' + t.slot; HITQ.mob.set(k, (HITQ.mob.get(k) || 0) + amt / t.maxHp);
+  if (t.hp <= 0) hitFlush(); // a kill goes out at once
+}
+// sends what was hit since the last flush (same 'hit' / 'bhit' messages as before, so older games still read them)
+function hitFlush() {
+  for (const [k, f] of HITQ.mob) { const j = k.lastIndexOf('|'); if (rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'hit', payload: { sid: MP.sid, to: k.slice(0, j), i: +k.slice(j + 1), f: Math.round(Math.min(1, f) * 10000) / 10000 } })) MOB.hits++; }
+  HITQ.mob.clear();
+  if (HITQ.boss > 0 && HITQ.bossTo) bossMsg('bhit', { to: HITQ.bossTo, f: Math.round(Math.min(1, HITQ.boss) * 10000) / 10000 });
+  HITQ.boss = 0; HITQ.t = 0.2;
 }
 // another player's hit on a monster we run
 function mobHitRecv(P) {
@@ -266,7 +277,7 @@ function bossSend() {
 function mpBossAttack(o) { if (bossLeading()) bossMsg('batk', o); }
 function mpBossEnd(killed) { const b = G.boss; if (b && b.uid) BOSS.ended.add(b.uid); if (bossLeading()) { if (b && !b.uid) b.uid = MP.sid + '-' + b.id; bossMsg('bend', { k: killed ? 1 : 0, u: b ? b.uid : '' }); } }
 // our hit on the boss the leader runs; a kill here shares loot by your damage over max HP
-function mpBossHit(b, amt) { b.myHitT = G.time; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); if (b.uid) BOSS.ended.add(b.uid); } bossMsg('bhit', { to: bossLeader(), f: Math.round(Math.min(1, amt / b.maxHp) * 10000) / 10000 }); }
+function mpBossHit(b, amt) { b.myHitT = G.time; const to = bossLeader(); if (HITQ.bossTo !== to) { hitFlush(); HITQ.bossTo = to; } HITQ.boss += amt / b.maxHp; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); if (b.uid) BOSS.ended.add(b.uid); hitFlush(); } }
 function bossRecv(event, sid, P) {
   if (!G.started || G.mode !== 'hub' || inInstance()) return;
   if (event === 'bhit') { // another player's hit on the boss we run

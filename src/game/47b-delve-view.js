@@ -1,6 +1,6 @@
-// --- party-dungeon view: event-room props on top of the hall builder (47-dungeon-view.js). Code-built stand-ins
-// until the generated set pieces land: a cursed altar, a moonwell, pressure plates, the lonely chest, echo pillars,
-// cache chests that appear when an event pays out, and pillars in the big halls. Dark halls pull the fog in.
+// --- party-dungeon view: event-room set pieces on top of the hall builder (47-dungeon-view.js). Generated models
+// (delve_altar, delve_moonwell, delve_echo, delve_hoard, delve_throne) plus existing ones (chest, pillar); code geometry
+// here is only VFX: rune rings, glows, the moonwell shimmer and the pressure-plate floor sigils. Dark halls pull the fog in.
 const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [] };
 function buildDelveProps(D) {
   const X = D.delve, add = (o) => { dungeonGroup.add(o); return o; }, tint = BIOMES[X.def.biome].coreColor;
@@ -29,7 +29,8 @@ function buildDelveProps(D) {
       g.add(water); delveParts.well = { g, water };
     }
     if (m.event === 'plates') for (const q of m.plates.slice(0, clamp(X.n, 1, 4))) {
-      const p = add(new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.3, 0.14, 20), new THREE.MeshBasicMaterial({ color: 0x8a6a2a }))); p.position.set(q.x, 0.07, q.z);
+      // a glowing floor sigil (a decal, not a prop): dim gold until someone stands on it
+      const p = add(new THREE.Mesh(new THREE.CircleGeometry(1.25, 6).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x8a6a2a, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }))); p.position.set(q.x, 0.03, q.z);
       const r = add(new THREE.Mesh(new THREE.RingGeometry(1.3, 1.55, 32).rotateX(-Math.PI / 2), glow(0xffcf1f, 0.5))); r.position.set(q.x, 0.05, q.z);
       delveParts.plates.push({ room: m.i, p, r });
     }
