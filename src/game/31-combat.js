@@ -198,6 +198,7 @@ function dealDamage(t, amount, srcId, o) {
   if (t.kind === 'fighter' && t.keys && t.keys.undying && t.ks.undyCd <= 0 && t.hp - amt <= 0) {
     amt = Math.max(0, Math.round(t.hp - 1)); t.ks.undyCd = 60; t.invulnT = 1.5; ev({ t: 'undying', x: t.x, z: t.z, isPlayer: t.isPlayer });
   }
+  if (t.kind === 'boss' && typeof bossDamageMod === 'function') amt *= bossDamageMod(t); // warded: nearly immune until the team holds every ward; exposed after
   const hpBefore = Math.max(0, t.hp);
   t.hp -= amt; t.flashT = CFG.combat.hitFlash; t.lastHurt = G.time;
   // lobby: send our hit to whoever runs this monster or the world boss (70-multiplayer.js; absent in the node checks)

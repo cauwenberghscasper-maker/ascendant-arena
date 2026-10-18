@@ -190,12 +190,20 @@ function processEvents() {
       case 'pickup': burst(e.x, 0.6, e.z, 10, 0xff5fa2, 4, 0.5, 0.2, 8); SpriteFX.play('crit', 'arcane', e.x, 0.9, e.z, 1.8); Sfx.play('pickup'); break;
       case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.z)]; const prevB = Feed.lastBiome; Feed.lastBiome = zn.biome;
         Feed.add(zn.safe ? `${gi('m_progress')} Back at <b>${e.name}</b> · safe` : prevB != null && prevB !== zn.biome ? `${gi('m_progress')} <b>${zn.biomeName}</b> › ${e.name} · Lv ${zn.lvl[0]}–${zn.lvl[1]}` : `${gi('m_progress')} Entered <b>${e.name}</b> · Lv ${zn.lvl[0]}–${zn.lvl[1]}`, 'zone'); break; }
-      case 'bossWarn': Sfx.play('horn'); break;
+      case 'bossWarn': { Sfx.play('horn'); const Zb = CFG.world.zones[G.bossLair], locked = G.bossLair > highestZone(G.profile.level);
+        showBanner('BOSS INCOMING', `${Zb ? Zb.boss : 'A world boss'} rises in ${e.lair} in ${e.secs}s${locked ? ' · area not unlocked for you yet' : ' · unlocked area'}`, 'red'); break; }
       case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); SpriteFX.play('dust', 'dust', e.x, 0, e.z, 6); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 10); break;
       case 'bossDown': Feed.remove('boss'); Feed.add(`${gi('m_feats')} World boss defeated!`, 'boss'); Sfx.play('win'); break;
       case 'bossGone': Feed.remove('boss'); Feed.add(`${gi('k_titan')} ${e.name} sank back into the ground`, 'boss'); break;
       case 'telegraph': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w || 1.4, 0xff4d4d, 0.6); break;
       case 'moveTele': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w, TELE_MOB, e.life); else ringFx(e.x, e.z, e.r, e.color || TELE_MOB, e.life, !e.color); break; // monster moves: red lane or filling ring
+      case 'windFx': if (near(e, 28)) windupFx(e); break;
+      case 'aoeFx': if (near(e, 32)) aoeImpactFx(e); break;
+      case 'bossCall': bossCallFx(e); break;
+      case 'bossPhase': bossPhaseFx(e); break;
+      case 'wardBreak': wardBreakFx(e, true); break;
+      case 'wardFail': wardBreakFx(e, false); break;
+      case 'soakOk': Sfx.play('win'); burst(e.x, 0.5, e.z, 26, 0xffd34a, 7, 0.8, 0.35, 2, 3); SpriteFX.play('ring', e.pal || 'gold', e.x, 0, e.z, 9); break;
       case 'bossRocks': if (near(e, 25)) Sfx.play('boom', { gap: 0.1 }); break;
       case 'respawn': showToast('Back in town. Watch your health!'); break;
       case 'spawn': break;
@@ -241,6 +249,27 @@ const XPDrops = {
     this.acc.clear();
   },
 };
+// a monster charging a move: motes drawn into it in its area's colour, a pulse ring on the ground, smoke for the vanishing moves
+function windupFx(e) {
+  const col = BIOME_TINT.includes(e.color) ? e.color : (e.color != null ? e.color : 0xffffff), pal = e.pal || 'dust', R = Math.max(1.6, e.r * 2.6), life = Math.max(0.4, e.life), n = Math.min(14, 5 + Math.round(e.r * 4));
+  for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, d = R * (0.8 + Math.random() * 0.7); mote(e.x + Math.sin(a) * d, 0.3 + Math.random() * 1.6, e.z + Math.cos(a) * d, -Math.sin(a) * d / life, 0.4 + Math.random() * 0.6, -Math.cos(a) * d / life, life * 0.9, 0.22, -0.3, col); }
+  SpriteFX.play('ring', pal, e.x, 0, e.z, R * 2.2, { speed: 0.46 / Math.max(0.35, life) });
+  if (e.k === 'ambush' || e.k === 'burrow') SpriteFX.play('poof', pal, e.x, 0.5, e.z, Math.max(2, e.r * 2.6));
+}
+// a monster move landing, in the look of its area: shock rings, shards, falling shells, beams along the lane, scythe arcs
+function aoeImpactFx(e) {
+  const pal = e.pal || 'dust', col = e.col != null ? e.col : BIOME_TINT[BIOME_FX.indexOf(pal)] || 0xc9a16b;
+  switch (e.kind) {
+    case 'ripple': SpriteFX.play('ring', pal, e.x, 0, e.z, e.r * 2.1, { speed: 1.4 }); burst(e.x, 0.3, e.z, 8, col, 5, 0.45, 0.22, 8, 0.2); break;
+    case 'spike': SpriteFX.play('impact', pal, e.x, 0.6, e.z, 1.7); burst(e.x, 0.3, e.z, 5, col, 4, 0.35, 0.2, 10, 0.8); break;
+    case 'meteor': SpriteFX.play('explosion', pal, e.x, 0, e.z, Math.max(2.6, e.r * 1.9), { speed: 1.3 }); burst(e.x, 0.4, e.z, 9, col, 6, 0.5, 0.22, 8, 0.6); if (near(e, 12)) Cam.shake = Math.max(Cam.shake, 0.22); break;
+    case 'beam': for (let i = 0; i < 16; i++) { const d = Math.random() * e.r, a = e.ca + (Math.random() - 0.5) * 0.1; burst(e.x + Math.sin(a) * d, 0.4 + Math.random() * 1.2, e.z + Math.cos(a) * d, 1, col, 1.5, 0.45, 0.28, 0, 0.1); } SpriteFX.play('pillar', pal, e.x + Math.sin(e.ca) * e.r * 0.5, 0, e.z + Math.cos(e.ca) * e.r * 0.5, 4.5); if (near(e, 16)) Cam.shake = Math.max(Cam.shake, 0.35); break;
+    case 'sweep': { const a = e.ca; for (let i = 0; i < 8; i++) { const d = e.r * (0.25 + Math.random() * 0.75), aa = a + (Math.random() - 0.5) * 0.6; burst(e.x + Math.sin(aa) * d, 0.7, e.z + Math.cos(aa) * d, 1, col, 3, 0.3, 0.22, 4, 0.3); } SpriteFX.play('slash', 'white', e.x + Math.sin(a) * e.r * 0.55, 1.1, e.z + Math.cos(a) * e.r * 0.55, 3.2, { rot: -a }); break; }
+    case 'flurry': SpriteFX.play('slash', 'white', e.x, 1.1, e.z, 2.6, { rot: Math.random() * 6.28 }); burst(e.x, 0.8, e.z, 6, col, 5, 0.3, 0.2, 6, 0.4); break;
+    case 'fan': break;
+    default: SpriteFX.play('impact', pal, e.x, 0.8, e.z, Math.max(1.6, e.r * 0.9)); burst(e.x, 0.4, e.z, 7, col, 5, 0.4, 0.22, 7, 0.5); if (e.r >= 3.5 && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.3);
+  }
+}
 function near(e, r) { const f = G.mode === 'arena' && G.arena ? G.arena.fighters[0] : G.player; return Math.hypot(e.x - f.x, e.z - f.z) < (r || 20); }
 function dmgNumberPlayer(text, cls) { const f = G.player; dmgNumber(f.x, 2.8, f.z, text, cls); }
 
@@ -438,11 +467,15 @@ function setMap(open) { G.profile.settings.map = open; G.dirty = true; $('mapBox
 function updateBossTracker() {
   const inHub = G.mode === 'hub' && G.started && !Showcase.on;
   const b = inHub ? G.boss : null;
-  setHidden('bossBar', !b || Math.hypot(b.x - G.player.x, b.z - G.player.z) > 45);
+  const fighting = !!b && (b.dmgBy[G.player.id] || 0) > 0 && zoneAt(G.player.z) === b.zone; // only people who attack it, in its zone, get the health bar
+  setHidden('bossBar', !fighting);
   if (b) {
     setText('bossName', `${b.name} · Lv ${b.lvl}`);
     setText('bossTime', b.life > 0 ? `${Math.ceil(b.life)}s left` : 'Enraged');
     setStyle('bossHp', 'width', (clamp(b.hp / b.maxHp, 0, 1) * 100).toFixed(1) + '%');
+    const w = b.ward; setHidden('bossWard', !w);
+    if (w) setText('bossWard', `${w.nm}: ${w.held || 0}/${w.pl.length} held${w.prog > 0 ? ' · ' + Math.round(w.prog / w.hold * 100) + '%' : ''} · ${Math.ceil(w.t)}s`);
+    $('bossBar').classList.toggle('warded', !!w); $('bossBar').classList.toggle('exposed', b.vuln > 0);
   }
   let tx = null, tz = null, warn = false;
   if (b) { tx = b.x; tz = b.z; }
@@ -570,3 +603,28 @@ function attackGlyph(a) {
 }
 
 
+
+// ---- boss callouts and set-pieces: every cast is named, every phase and ward break gets its own moment ----
+let bossCallTimer = 0;
+function bossCallFx(e) {
+  const hex = '#' + (e.col || 0xffffff).toString(16).padStart(6, '0');
+  setText('bossCallNm', e.nm || ''); setText('bossCallSay', e.say || ''); const el = $('bossCall');
+  el.style.setProperty('--bc', hex); el.classList.toggle('mech', !!e.mech); setHidden('bossCall', false);
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  clearTimeout(bossCallTimer); bossCallTimer = setTimeout(() => setHidden('bossCall', true), e.mech ? 3600 : 1700);
+  if (near(e, 40)) { Sfx.play(e.mech ? 'horn' : 'boom', { gap: 0.2 }); Cam.shake = Math.max(Cam.shake, e.mech ? 0.5 : 0.25); }
+  SpriteFX.play('ring', e.pal || 'fire', e.x, 0, e.z, e.mech ? 14 : 9);
+  for (let i = 0; i < (e.mech ? 28 : 12); i++) { const a = Math.random() * 6.283; burst(e.x + Math.sin(a) * 2.5, 0.4, e.z + Math.cos(a) * 2.5, 1, e.col || 0xffffff, 3, 0.7, 0.3, -1, 2.5); }
+}
+function bossPhaseFx(e) {
+  Sfx.play('horn'); Cam.shake = Math.max(Cam.shake, 0.9);
+  showBanner(e.n === 3 ? 'ENRAGED' : 'PHASE ' + e.n, (e.name || 'The boss') + (e.n === 3 ? ' fights with everything' : ' calls on its power'), e.n === 3 ? 'red' : 'gold');
+  SpriteFX.play('ring', e.pal || 'fire', e.x, 0, e.z, 22); SpriteFX.play('dust', e.pal || 'fire', e.x, 0, e.z, 12);
+  for (let i = 0; i < 60; i++) { const a = Math.random() * 6.283; burst(e.x, 1 + Math.random() * 2, e.z, 1, e.col || 0xffffff, 9, 1.1, 0.5, 1, 2); }
+}
+function wardBreakFx(e, ok) {
+  Sfx.play(ok ? 'win' : 'boom'); Cam.shake = Math.max(Cam.shake, ok ? 0.8 : 1);
+  showBanner(ok ? 'WARDS BROKEN' : 'WARDS HELD', ok ? 'The boss is exposed: hit it hard!' : 'The boss lashes out', ok ? 'gold' : 'red');
+  SpriteFX.play('ring', e.pal || 'gold', e.x, 0, e.z, ok ? 20 : 16);
+  for (let i = 0; i < 50; i++) burst(e.x, 1.5, e.z, 1, ok ? 0xfff2b0 : (e.col || 0xff4d4d), 10, 1, 0.4, 1.5, 2);
+}

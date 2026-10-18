@@ -557,6 +557,19 @@ button.inl { margin-left: 8px; vertical-align: middle; }
 #bossBar .bn { display: flex; justify-content: space-between; gap: 8px; font: 14px/1.2 var(--display); color: #ffd7a8; margin-bottom: 4px; }
 #bossBar .bn span:last-child { font: 600 11px/1.6 var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
 #bossBar .bb { height: 9px; border-radius: 5px; background: rgba(0,0,0,.45); overflow: hidden; }
+#bossBar .bb { position: relative; }
+#bossBar .bb u { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.7); text-decoration: none; }
+#bossBar .bb u#bossP1 { left: 66%; } #bossBar .bb u#bossP2 { left: 33%; }
+#bossBar.warded { border-color: #9fe8ff; box-shadow: 0 0 14px rgba(159,232,255,.7); } #bossBar.warded .bb i { background: linear-gradient(90deg, #6fa8c8, #cfefff); }
+#bossBar.exposed { border-color: #ffe27a; box-shadow: 0 0 14px rgba(255,226,122,.8); }
+#bossWard { margin-top: 5px; font: 700 11px/1.3 var(--body); color: #bff1ff; text-align: center; letter-spacing: .04em; text-transform: uppercase; }
+#bossCall { position: fixed; left: 50%; top: 27%; transform: translateX(-50%); z-index: 12; text-align: center; pointer-events: none; display: flex; flex-direction: column; gap: 2px; }
+#bossCall[hidden] { display: none; }
+#bossCall b { font: 26px/1.1 var(--display); color: #fff; text-shadow: 0 0 14px var(--bc, #fff), 0 2px 0 rgba(0,0,0,.6); letter-spacing: .03em; text-transform: uppercase; }
+#bossCall small { font: 800 13px/1.2 var(--body); color: var(--bc, #fff); letter-spacing: .08em; text-shadow: 0 1px 0 rgba(0,0,0,.7); }
+#bossCall.mech b { font-size: 32px; }
+#bossCall.pop { animation: bossCallPop .35s cubic-bezier(.2,1.6,.4,1); }
+@keyframes bossCallPop { from { transform: translateX(-50%) scale(1.7); opacity: 0; } to { transform: translateX(-50%) scale(1); opacity: 1; } }
 #bossBar .bb i { display: block; height: 100%; background: linear-gradient(90deg, #ff4d5a, #ffb02e); transition: width .2s; }
 #bossPtr { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 4px; background: rgba(217,40,58,.85); color: #fff; padding: 4px 8px 4px 6px; border-radius: 999px; font: 11px/1 var(--display); box-shadow: 0 3px 0 rgba(0,0,0,.35); animation: ptr 1s ease-in-out infinite; white-space: nowrap; }
 #bossPtr.warn { background: #e2771c; }

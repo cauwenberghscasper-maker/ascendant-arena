@@ -897,6 +897,7 @@ function handleSettingChange(e) {
   if (e.target.dataset.sel) { G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; if (e.target.dataset.sel === 'uiSize') { applyUiSize(); measureSheet(); } return; }
   const k = e.target.dataset.set; if (!k) return;
   if (k === 'fastXp' && !LOCAL_PREVIEW) return;
+  if (k === 'pvp' && !e.target.checked && pvpOffWait() > 0) { e.target.checked = true; showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
   G.profile.settings[k] = e.target.checked; G.dirty = true;
   if (k === 'mute') Sfx.setMute(e.target.checked);
   if (k === 'bots') { if (e.target.checked) addHubBots(); else removeHubBots(); }
