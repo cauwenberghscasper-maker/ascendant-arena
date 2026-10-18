@@ -44,7 +44,7 @@ function applyProfile(prof, note) {
   if (!TEST_MODE && isTestProfile(prof)) return;
   G.profile = prof;
   refreshPlayerStats(true);
-  Sfx.setMute(!!prof.settings.mute);
+  Sfx.applyVolumes();
   applyUiSize();
   setMap(prof.settings.map !== false);
   G.zoneIdx = zoneAt(G.player.z);

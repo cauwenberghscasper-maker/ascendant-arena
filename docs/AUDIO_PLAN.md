@@ -11,7 +11,10 @@ Calls come from `62-events-fx.js` (combat events), `61-panels.js` / `63-menus.js
   boss sounds, impacts, UI. Beeps can't sell a yeti roar or a boss theme.
 - Same API: `Sfx.play('wolf.attack', { x, z })` — the name decides synth or sample, so call sites barely change.
 
-## Phase 1 — engine (no new content yet)
+## Phase 1 — engine (no new content yet) — DONE 18 Oct 2026
+
+Built as described below. Dev hook on localhost: `window.__audio` (`Sfx`, `Music`, `AUDIO_MANIFEST`).
+Adding a sound is now: drop `<name>.webm` + `<name>.m4a` in `assets/audio/…`, add one line to `AUDIO_MANIFEST`.
 
 `50-audio.js`
 - Buses: `master → music | ambience | sfx | ui`, each its own GainNode. Music bus gets a compressor so boss tracks don't clip.

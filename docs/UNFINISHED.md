@@ -4,6 +4,17 @@ Migration `hzVersion` 2: a player who had turned 120 Hz off after it became the 
 Fixed with it: new profiles start with `hzVersion` (brand-new saves skip `sanitizeProfile`, so the old marker never
 saved and the switch reset on every reload). The Safari 60 Hz hint now sits under 60 FPS (`fps60Hint`).
 
+# Audio (18 Oct 2026, branch `feat/audio`, PR #22 to main)
+Done (phase 1 of `docs/AUDIO_PLAN.md`): sound engine. Buses music / ambience / effects / menu, each with a volume
+slider in Settings › Sound (saved as `volMaster`, `volMusic`, `volSfx`, `volUi`, clamped in `sanitizeProfile`).
+Sample files from `AUDIO_MANIFEST` (`49-audio-data.js`) load lazily as .webm (Opus) with .m4a fallback; until a file
+exists the old synth sound of the same name plays. Distance falloff + stereo pan, voice caps (6 mobs, 24 total),
+`Music.set(key)` crossfade (old track plays until the new one is decoded), `Music.stinger`, `Sfx.duck`. Audio starts
+on the first tap anywhere. Fixed: no sound after unmuting if the app was backgrounded while muted.
+Next: phase 2 menu sounds — needs sound files first. Kenney "Interface Sounds", "UI Audio", "RPG Audio",
+"Impact Sounds" (CC0) are the best fit; kenney.nl is blocked from cloud sessions, so Casper downloads them and attaches
+the zips. Then phase 3 music (needs tracks with a commercial licence). No sound files are in the repo yet.
+
 # Safari 60 Hz hint (18 Oct 2026, on `main`)
 iPhone Safari limits web pages to 60 Hz (feature flag "Prefer Page Rendering Updates near 60fps"); a page can't lift it.
 Options › 120 Hz now says how to turn that flag off when 120 Hz is on but the browser refreshes the page at 60 (`hz120Hint`).
