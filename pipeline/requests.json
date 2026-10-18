@@ -1,33 +1,10 @@
-{
-"batch": "props-a",
-"files": [
-{
-"name": "delve_sarcophagus.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/12c0dba1859751eec5ccbd92407e76d3aac85430e4659a8bbcd64bbe783e67bb/trellis_output_2026-10-18T222258.glb"
-},
-{
-"name": "delve_icecoffin.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/52ac4e1cfe4a4bb9a798b775e8ef2e3f8d37ee15e89f00fc95c7693d261082f0/trellis_output_2026-10-18T222330.glb"
-},
-{
-"name": "delve_slagcart.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/6f84c4f6a498263c7b09632c852a92e3caa69b93164c779807a29a23f5ec0a39/trellis_output_2026-10-18T222406.glb"
-},
-{
-"name": "delve_bookshelf.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/2b60a46936b46e59d01f8a976034a7693c45f0a53a8996d6ee0b49c5b0af0641/trellis_output_2026-10-18T222445.glb"
-},
-{
-"name": "delve_coralshrine.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/8c7711792ca1d06255090a73f6fe997d5589c3a21cfbaa4ade0e20ecf6bf9cfc/trellis_output_2026-10-18T222507.glb"
-},
-{
-"name": "delve_meteor.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/47175cd12c81986e7ca31919f17e856b1b92501bfcd5b1da81b3cd4da6b4257b/trellis_output_2026-10-18T222537.glb"
-},
-{
-"name": "siege_barracks2.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/7ce41aafdb81dcc2d93c5c801d3cdc8dcfcc747f8e4ebd619d2cecb7a1c11077/trellis_output_2026-10-18T222624.glb"
-}
-]
-}
+{"batch": "queue-b-concepts", "files": [
+{"name":"siege_hut2.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/0b1a7ca099a840f1e5d9c0b59ca6ab18efc7e694b6295f93334331044eb059d2/image.png"},
+{"name":"siege_lord.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/c52e2acc74818efa48bc24e7c61030006a5f0782a94bd01553c3d3be6a801c5f/image.png"},
+{"name":"siege_captain.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/23fff85fe4029c6bb605d77e8c4064072630044dcdc2ec8251c0fad14750eb5b/image.png"},
+{"name":"siege_supplycart.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/c67773d7f38561de4b3a4d8162aebfa2ae10b0486f53ce28d5cc2a4215c424ae/image.png"},
+{"name":"world_totem.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/ed7c29dfcfa9d0715d838c99063de0463a650741a0c8545df4abb9d1614a051c/image.png"},
+{"name":"world_lectern.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/1edd71049b377eabfe2c33264e90eab83e58251dfcf7d32fc022d7b1fc2721b6/image.png"},
+{"name":"world_sunlantern.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/28ec1dcf5e799e998d549b4ee18f2fecafea840cccc7006b15370a6b31aaa984/image.png"},
+{"name":"siege_banner.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/24bb98f98a7a69027c5a30b79bae87aa24d72a0b247628ae3cba2715f2068e42/image.png"}
+]}
