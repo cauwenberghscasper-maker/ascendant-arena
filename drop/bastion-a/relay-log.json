@@ -1,0 +1,33 @@
+{
+ "batch": "bastion-a",
+ "files": [
+  {
+   "name": "siege_archer.glb",
+   "ok": true,
+   "bytes": 4212252,
+   "sha256": "0f6f0f732f0ad77552968c312c1bbfb9688847bc9aa026046ee63d9d3d52ad05",
+   "error": null
+  },
+  {
+   "name": "siege_cannon.glb",
+   "ok": true,
+   "bytes": 4479124,
+   "sha256": "508dfa1003abd794eb535b134a5db6833ce6619e03fb330e20dd4dd2215c9d1c",
+   "error": null
+  },
+  {
+   "name": "siege_ballista.glb",
+   "ok": true,
+   "bytes": 4893928,
+   "sha256": "f9b645a5d2134e5d78503e6f1a7bcc8f7b320c97b2342129f7f01b5c474a9b53",
+   "error": null
+  },
+  {
+   "name": "siege_mage.glb",
+   "ok": true,
+   "bytes": 5095072,
+   "sha256": "695290b3b2e9e429850c1d321740c74db5d080615315f3b0d90359ef719f982b",
+   "error": null
+  }
+ ]
+}
