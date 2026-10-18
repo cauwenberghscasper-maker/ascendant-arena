@@ -55,7 +55,7 @@ function updateDelvePuzzles(D, t) {
   for (const q of delveParts.seals) {
     const m = D.rooms[q.room], S = D.delve.pz[q.room], awake = !!S && delvePzLit(m, S, q.j), red = S && S.flash > 0 && Math.sin(t * 30) > 0;
     // the echo shows its order: one seal after the other flashes white while nothing is awake yet
-    const K = m.pz.sw.length, sh = DV.puzzle.kinds.memory.show, ph = S ? S.show % (K * sh + 2.5) : 0, showing = m.pz.kind === 'memory' && S && !S.done && !S.step && S.cd <= 0 && ph < K * sh && m.pz.order[Math.floor(ph / sh)] === q.j && ph % sh < sh * 0.7;
+    const showing = delvePzShow(m, S) === q.j;
     // the race: dark seals pulse faster while the clock runs
     const racing = m.pz.kind === 'timed' && S && S.bits && !S.done;
     const hold = S && S.hold[q.j] > 0 ? S.hold[q.j] / DV.puzzle.hold : 0;

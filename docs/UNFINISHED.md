@@ -1,3 +1,19 @@
+# Dungeons: echo puzzle and stuck gate fixed, harder runs (19 Oct 2026, branch `claude/dungeon-puzzle-fixes`)
+Casper: the memorise puzzle was bugged; when solved it said the gate opened but it didn't; more enemies, more puzzles.
+- **Gate that never opened:** a wrong seal's pack used slots `50 + fails*5`, which ran past 99 into the next hall's
+  slots after ~10 mistakes, so the puzzle hall waited on a monster behind its own closed gate. Packs now use slots
+  50-85 of their own hall (reused when down), crumble when the puzzle is solved (`pzPack`), and the banner says
+  "Defeat the guards" instead of "The gate opens" while guards still stand.
+- **Echo (memory) puzzle:** its show clock kept running through the red flash after a mistake, so the replay started
+  at the 3rd seal (a wrong order). Now the clock only runs while the show can play, it starts with a 1 s lead-in,
+  flashes are slower (1.1 s) and the seals ignore everyone while it plays (`delvePzShow`, used by sim and view).
+- **Harder:** one monster per 135 m² (4-12 a hall, was 170 / 3-10); more halls on Hard+ (Heroic 8-9, Mythic 9,
+  Ascendant 9-10); 3 puzzle halls from Heroic; seals 4/4/5/5/6 by difficulty (the mural stays at most 5); puzzle
+  halls get 2-4 guards from Hard; wrong-seal packs grow with difficulty (3 → 6).
+- Checks: `tools/check_delve.cjs` (no pack outside its hall after 20 mistakes, packs crumble, the gate opens, the echo
+  replays from seal 1 and ignores steps while playing). Browser: echo hall, no errors.
+- **Open:** playtest the difficulty on a phone (runs are longer now, maybe ~6-7 min on Mythic).
+
 # Chests: Open 5 per kind, resources in every chest, rarity by chest and level (18 Oct 2026, branch `claude/chest-rewards`)
 Casper: Open 5 opened every kind of chest; chests should give resources and gear (and heroes); better chests more
 special items, low-level chests lower rarity.
