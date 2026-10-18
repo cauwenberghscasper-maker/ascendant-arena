@@ -2139,14 +2139,35 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 #bdWave { margin-left: auto; background: linear-gradient(#d0a040, #8a5a14) !important; color: #2a1800 !important; }
 #bdInfo { order: 3; flex: 1 1 100%; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 12px/1.3 var(--body); color: #ece3cc; text-shadow: 0 1px 0 #000; background: rgba(20,14,10,.6); padding: 6px 8px; border-radius: 6px; }
 #bdHint { position: absolute; left: 50%; transform: translateX(-50%); top: calc(var(--sat, 0px) + 178px); max-width: 90%; text-align: center; font: 13px/1.3 var(--body); color: #fff4d6; background: rgba(20,14,10,.7); padding: 6px 10px; border-radius: 6px; pointer-events: none; }
-#bdPlace { position: absolute; right: calc(var(--sar, 0px) + 8px); bottom: calc(var(--sab, 0px) + 140px); display: flex; gap: 8px; }
+#bdPlace { position: absolute; right: calc(var(--sar, 0px) + 8px); bottom: calc(var(--sab, 0px) + 192px); display: flex; gap: 8px; }
 #bdOk { background: linear-gradient(#58c070, #1f6a32) !important; }
-#bdShop { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px calc(var(--sar, 0px) + 8px) calc(var(--sab, 0px) + 8px) calc(var(--sal, 0px) + 8px); display: flex; gap: 6px; overflow-x: auto; background: linear-gradient(rgba(30,22,16,.75), rgba(18,12,8,.95)); border-top: 2px solid var(--og-ink, #120a03); scrollbar-width: none; }
+#bdShop { position: absolute; left: 0; right: 0; bottom: 0; padding: 6px calc(var(--sar, 0px) + 8px) calc(var(--sab, 0px) + 8px) calc(var(--sal, 0px) + 8px); display: flex; flex-direction: column; gap: 6px; background: linear-gradient(rgba(30,22,16,.75), rgba(18,12,8,.95)); border-top: 2px solid var(--og-ink, #120a03); }
+#bdList { touch-action: none; overscroll-behavior: contain; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; } #bdList::-webkit-scrollbar { display: none; }
+#bdTabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.bdTab { min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 2px; font: 12px/1.1 var(--body); color: #c9bfa8; background: linear-gradient(#3a2e24, #221a12); border: 2px solid var(--og-ink, #120a03); border-radius: 7px; }
+.bdTab b { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; } .bdTab small { font-size: 10px; opacity: .8; }
+@media (max-height: 430px) { .bdItem { min-height: 92px; } .bdItem .fortPic { width: 40px; height: 40px; } #bdPlace { bottom: calc(var(--sab, 0px) + 170px); } }
+.bdTab.on { color: #2a1800; background: linear-gradient(#ffe08a, #c99a3a); box-shadow: 0 0 8px rgba(255,224,138,.45); }
 .bdItem { flex: none; width: 78px; min-height: 112px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; font: 11px/1.2 var(--body); color: #ece3cc; background: linear-gradient(#4a3c30, #2a2018); border: 2px solid var(--og-ink, #120a03); border-radius: 8px; }
-.bdItem .fortPic { width: 56px; height: 56px; margin: 0; }
+.bdItem .fortPic { width: 52px; height: 52px; margin: 0; pointer-events: none; }
 .bdItem b { font-size: 12px; } .bdItem small { opacity: .85; white-space: nowrap; }
 .bdItem.on { border-color: #ffe08a; box-shadow: 0 0 0 2px #ffe08a, 0 0 12px rgba(255,224,138,.5); }
 .bdItem.off { opacity: .5; }
+.bdItem { touch-action: none; position: relative; } .bdItem .bdCnt { position: absolute; top: 3px; right: 4px; font-size: 10px; color: #fff4d6; background: rgba(20,14,10,.75); padding: 1px 4px; border-radius: 4px; }
+.bdItem .fres { gap: 1px; } .bdItem .fres .ic { width: 11px; height: 11px; } .bdItem small:last-child { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 3px; white-space: normal; line-height: 1.1; }
+#bdWaveInfo { font: 13px/1.2 var(--body); color: #fff4d6; text-shadow: 0 1px 0 #000; background: rgba(20,14,10,.6); padding: 6px 8px; border-radius: 6px; }
+#bdHold { margin-left: auto; } #bdHold.on { background: linear-gradient(#5aa070, #22553a) !important; } #bdHold:not([hidden]) + #bdWave { margin-left: 0; }
+#bdHint .fres .ic { width: 12px; height: 12px; }
+/* camp resources: wood, stone and iron chips; red when you lack it */
+.fres { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; } .fres .ic { width: 14px; height: 14px; } .fres.miss b { color: #ff8a8a; }
+.fortPaths { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .fortPaths .fortPath { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-height: 64px; text-align: left; padding: 8px; }
+.fortPath small { font-size: 11px; line-height: 1.25; color: inherit; opacity: .85; white-space: normal; } .fortPath.primary small { color: #2a1800; }
+@media (max-width: 360px) { .fortPaths { grid-template-columns: 1fr; } }
+.fortLimits .row { justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.tag.fortRes .tn { font: 12px/1 var(--body); color: #fff4d6; background: rgba(20,14,10,.8); border: 2px solid var(--og-ink, #120a03); padding: 3px 6px; border-radius: 6px; animation: fortBob 1.2s ease-in-out infinite alternate; }
+.tag.fortRes.wood .tn { color: #f0c890; } .tag.fortRes.iron .tn { color: #cfe0f4; } .tag.fortRes.full .tn { border-color: #ffe08a; }
+@keyframes fortBob { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+#fortChip { color: #c9cbe8; letter-spacing: .06em; } #fortChip.on { color: #1b1300; background: linear-gradient(180deg,#9fe0a0,#4aa860); }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -2244,7 +2265,7 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
         <div class="chips"><span class="chip"><span id="hGoldIc"></span><span id="hGold">0</span></span><span class="chip"><span id="hEssIc"></span><span id="hEss">0</span></span><span class="chip"><span id="hTrophIc"></span><span id="hTroph">0</span></span></div>
         <div id="zoneChip" hidden></div>
         <div id="prestigeHud" class="prestigeBadge" hidden></div>
-        <div class="chipRow"><div id="mpChip" hidden></div><div id="caseChip" class="hchip" hidden></div><div id="autoChip" class="hchip" hidden></div><div id="pvpChip" class="hchip" hidden></div></div>
+        <div class="chipRow"><div id="mpChip" hidden></div><div id="caseChip" class="hchip" hidden></div><div id="autoChip" class="hchip" hidden></div><div id="pvpChip" class="hchip" hidden></div><div id="fortChip" class="hchip" hidden></div></div>
       </div>
     </div>
     <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -2296,10 +2317,10 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
     <div id="countdown" hidden></div>
     <div id="coach" hidden><span id="coachText"></span><button id="coachX" aria-label="Hide tips">×</button></div>
     <div id="builder" hidden>
-      <div id="bdTop"><button id="bdDone">Done</button><span id="bdInfo"></span><button id="bdWave">Start wave</button></div>
+      <div id="bdTop"><button id="bdDone">Done</button><span id="bdWaveInfo"></span><button id="bdHold" hidden>Pause waves</button><button id="bdWave">Start wave</button><span id="bdInfo"></span></div>
       <div id="bdHint"></div>
       <div id="bdPlace" hidden><button id="bdCancel">Cancel</button><button id="bdOk">Place</button></div>
-      <div id="bdShop"></div>
+      <div id="bdShop"><div id="bdTabs"></div><div id="bdList"></div></div>
     </div>
     <div id="stickBase"><div id="stickKnob"></div></div>
     <div id="controls">
@@ -3509,11 +3530,12 @@ function sanitizeProfile(p) {
   if (TEST_MODE) { out.playtest = TEST_PROFILE_TAG; out.settings.fastXp = false; }
   return out;
 }
-// Bastion fort: { wave, land, b: buildings }, plus what only this player owns (stones, code of their world, recent worlds).
-// A building is { t, x, z, l } on 2 m cells (x, z = its lowest corner around the Keep); d = when an upgrade finishes (ms),
-// c = when a mine was last emptied. Old saves had eight fixed pads: each defender moves to the cell under its pad.
+// Bastion fort: { wave, land, b: buildings, keep, kd, go, hold }, plus what only this player owns (wood, stones, iron, code
+// of their world, recent worlds). keep: the Keep's level (kd = when its upgrade finishes), go: the waves run by themselves,
+// hold: paused. A building is { t, x, z, l } on 2 m cells (x, z = its lowest corner around the Keep); d = when an upgrade
+// finishes (ms), c = when a mill or mine was last emptied, p = the path a tower took at level 5 (1 or 2). Old saves had eight fixed pads: each defender moves to the cell under its pad.
 // (CFG.siege loads later; the lists here match it.) Shared worlds from the server go through here too (mine = false).
-const FORT_TYPES = { archer: 2, cannon: 2, ballista: 2, warrior: 2, mage: 2, mine: 2, hut: 2, wall: 1, gate: 1, spike: 1, bomb: 1, tar: 1 };
+const FORT_TYPES = { archer: 2, cannon: 2, ballista: 2, warrior: 2, mage: 2, mine: 2, hut: 2, wall: 1, gate: 1, spike: 1, bomb: 1, tar: 1, mill: 2, iron: 2 };
 const FORT_OLD_PADS = [[-5, 13], [5, 13], [-13, 6], [13, 6], [-13, -5], [13, -5], [-5, -8], [5, -8]];
 function sanitizeFort(f, mine) {
   f = f && typeof f === 'object' && !Array.isArray(f) ? f : {};
@@ -3530,16 +3552,30 @@ function sanitizeFort(f, mine) {
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) cells.push((n.x + i) * 1000 + n.z + j);
     if (cells.some((c) => used.has(c))) continue; // two buildings on one cell: the first one stays
     cells.forEach((c) => used.add(c));
-    if (+q.d > 0) n.d = Math.floor(+q.d); if (q.t === 'mine') n.c = Math.max(0, Math.floor(+q.c || 0));
+    if (+q.d > 0) n.d = Math.floor(+q.d); if (q.t === 'mine' || q.t === 'mill' || q.t === 'iron') n.c = Math.max(0, Math.floor(+q.c || 0));
+    if (q.p === 1 || q.p === 2) n.p = q.p; // the path a tower took at level 5
     out.push(n);
   }
   const r = { wave: int(f.wave, 1, 1e6), land: int(f.land, 0, 250), b: out };
+  // the Keep's level: forts from before Keep levels get the lowest one that fits what they already built (nothing is lost)
+  r.keep = f.keep != null ? int(f.keep, 1, 10) : fortKeepFor(out);
+  if (+f.kd > 0) r.kd = Math.floor(+f.kd);
+  if (f.go || r.wave > 1) r.go = 1; if (f.hold) r.hold = 1; // go: waves come by themselves; hold: paused by the player
   if (mine) {
     r.stones = int(f.stones, 0, 1e12);
+    // wood and iron came with the camp's own resources; older forts start with a stock of wood (building used to cost gold)
+    r.wood = f.wood != null ? int(f.wood, 0, 1e12) : 60 + out.reduce((n, q) => n + q.l * 4, 0); r.iron = int(f.iron, 0, 1e12);
     if (typeof f.code === 'string' && /^[A-Z0-9-]{4,12}$/.test(f.code)) r.code = f.code;
     r.recent = (Array.isArray(f.recent) ? f.recent : []).filter((c) => typeof c === 'string' && /^[A-Z0-9-]{4,12}$/.test(c)).slice(0, 5);
   }
   return r;
+}
+// the lowest Keep level whose limits hold every building of a fort (old forts, before the Keep had levels)
+function fortKeepFor(b) {
+  const T = typeof CFG !== 'undefined' && CFG.siege && CFG.siege.towers; if (!T) return 1;
+  const n = {}; let top = 1; for (const q of b) { n[q.t] = (n[q.t] || 0) + 1; if (q.t !== 'hut') top = Math.max(top, q.l); }
+  for (let k = 1; k <= 10; k++) if (CFG.siege.keep.lvl[k - 1] >= top && Object.keys(n).every((t) => !T[t] || !T[t].lim || T[t].lim[k - 1] >= n[t])) return k;
+  return 10;
 }
 // --- end Bastion fort save
 const Store = {
@@ -4078,6 +4114,7 @@ function dealDamage(t, amount, srcId, o) {
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
   if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot && !t.delveBot) return 0; // hub bots are bystanders (dungeon bots fight)
+  if (G.siege && (t.siegeArmor || t.flying)) { const k = siegeDmgMul(t, srcId); if (!k) return 0; amount *= k; } // fort armour and flyers (36c-siege.js)
   const src = G.ents.get(srcId);
   let amt = amount * (1 + (Math.random() * 2 - 1) * CFG.combat.variance);
   let crit = false;
@@ -7112,7 +7149,8 @@ CFG.siege = {
   unlock: 20, gate: { x: -21.4, z: -56 }, house: { x: -25.2, z: -56 }, interactR: 3.2, bossBlock: 30,
   // land: half-size in m, 30 at level 20 growing to 250 (500 x 500 m) at level 200; cell: the build grid in m
   cell: 2, land: [30, 250, 20, 200], zoom: 1.3, march: 1.8,
-  firstBuild: 25, build: 30, clear: 2.5, spawnGap: 0.55, bossEvery: 10, miniFrom: 3, miniChance: 0.35, lvlBase: 18, lvlPer: 1.5, maxLvl: 15,
+  // build: the break between waves once the fort has been started (go); hold pauses it. Waves run on while you build
+  firstBuild: 20, build: 20, clear: 2.5, spawnGap: 0.55, bossEvery: 10, miniFrom: 3, miniChance: 0.35, lvlBase: 18, lvlPer: 1.5, maxLvl: 15,
   // objectives: HP = reference hero HP at the wave level × mult (kept as a fraction between waves); the Keep ends the run.
   // Named as the camera sees them: +x is the left of the screen
   objs: [
@@ -7126,60 +7164,109 @@ CFG.siege = {
   sides: [{ name: 'North', x: 0, z: 1 }, { name: 'East', x: -1, z: 0 }, { name: 'South', x: 0, z: -1 }, { name: 'West', x: 1, z: 0 }],
   // seconds an upgrade to level l takes (one builder each): 6 s for level 2, about 70 minutes for level 15
   buildTime: (l) => (l <= 1 ? 0 : Math.round(6 * Math.pow(l - 1, 2.5))),
+  // the camp pays for itself (Clash of Clans): wood from lumber mills, stone from stone mines, iron from iron mines (Keep 4).
+  // Waves pay hero gold and items as before, plus some of each resource. Iron is asked from building level 6 on.
+  res: ['wood', 'stones', 'iron'], resName: { wood: 'Wood', stones: 'Stone', iron: 'Iron' }, ironFrom: 6,
+  pay: (n, boss, mini) => ({ wood: 6 + n + (boss ? 16 : 0) + (mini ? 6 : 0), stones: 3 + Math.floor(n / 2) + (boss ? 8 : 0) + (mini ? 4 : 0), iron: n >= 8 ? Math.floor((n - 5) / 3) + (boss ? 4 : 0) : 0 }),
+  // The Keep has levels like a Town Hall: each one allows more buildings (towers[t].lim) and higher building levels (lvl)
+  keep: { max: 10, lvl: [3, 4, 5, 7, 8, 9, 11, 12, 13, 15], hp: 0.15,
+    cost: (k) => ({ wood: Math.round(30 * Math.pow(k, 1.9)), stones: Math.round(24 * Math.pow(k, 1.9)), iron: k >= 5 ? Math.round(8 * Math.pow(k - 3, 1.8)) : 0 }),
+    time: (k) => Math.round(45 * Math.pow(k - 1, 2.2)) }, // Keep 2 in 45 s, Keep 10 in about 2 hours
+  // Balloons TD side: from level 5 a tower picks one of two paths (b.p 1 or 2). Monsters with armour barely feel light shots
+  // (archers, mage orbs, warriors); flyers cross walls and only towers with air can hit them
+  pathAt: 5, armor: 0.2, armorFrom: 6, flyFrom: 8,
+  flyers: ['hornet', 'echobat', 'dustharpy', 'flamewyrm'],
   // dmg × the reference hero's hit at your level, +30% per level; hp × reference hero HP at the wave level; path: how many
-  // cells a monster walks around rather than break it. cost: gold in wave payouts at your level, stones for level 1.
+  // cells a monster walks around rather than break it. c: [wood, stone, iron] for level 1; lim: how many at Keep level 1..10.
+  // make/rate/cap: what a producer digs per hour per level and holds per level
   towers: {
-    archer: { name: 'Archer Tower', short: 'Archer', icon: 'b_arrow', range: 16, cd: 0.8, dmg: 0.55, speed: 30, color: 0xffe08a, cost: 2, stones: 4, hp: 8,
-      blurb: 'Fast arrows at one target. Cheap and steady.' },
-    cannon: { name: 'Cannon', short: 'Cannon', icon: 'a_bigshot', range: 13, cd: 2.4, dmg: 1.2, aoe: 2.8, fly: 0.9, color: 0x3a3a44, cost: 3, stones: 6, hp: 10,
-      blurb: 'Slow shells that blast a whole group.' },
-    ballista: { name: 'Ballista', short: 'Ballista', icon: 'n_pierce', range: 22, cd: 2.8, dmg: 2.4, pierce: 3, speed: 40, color: 0xbfe9ff, cost: 3, stones: 6, hp: 8,
-      blurb: 'Huge bolts from far away that pierce through a line of monsters.' },
-    mage: { name: 'Mage Tower', short: 'Mage', icon: 'b_orb', range: 18, cd: 1.7, dmg: 0.9, aoe: 1.8, speed: 20, color: 0xb98cff, cost: 3.5, stones: 8, hp: 7,
-      blurb: 'Arcane orbs that burst on a small group.' },
-    warrior: { name: 'Barracks', short: 'Warriors', icon: 'b_wave', range: 6, cd: 1.0, dmg: 0.7, hp: 0.9, men: 2, respawn: 8, cost: 2.5, stones: 5, bhp: 10,
-      blurb: 'Warriors that block the path and fight monsters near their post.' },
-    mine: { name: 'Stone Mine', short: 'Mine', icon: 'n_gems', rate: 2, cap: 8, max: 3, cost: 2, stones: 4, hp: 8,
-      blurb: 'Digs up Bastion Stones, even while you are away. Walk up and empty it.' },
-    hut: { name: "Builder's Hut", short: 'Builder', icon: 'm_smith', max: 5, maxLvl: 1, each: true, cost: 3, stones: 8, hp: 8,
-      blurb: 'One builder each. More huts, more upgrades at the same time.' },
-    wall: { name: 'Wall', short: 'Wall', icon: 'n_armor', cost: 0.1, stones: 0.4, hp: 5, path: 6, wall: true,
-      blurb: 'Draw walls as you walk. Wood, stone from level 6, iron from level 11.' },
-    gate: { name: 'Gate', short: 'Gate', icon: 'm_portal', cost: 0.3, stones: 1, hp: 5, path: 6, wall: true,
-      blurb: 'A wall heroes walk through and monsters have to break.' },
-    // traps: monsters walk over them (they never block a path); r: reach from the trap's centre
-    spike: { name: 'Spike Trap', short: 'Spikes', icon: 'a_reaper', trap: true, r: 1.5, cd: 2.2, dmg: 1.4, cost: 0.4, stones: 1.5, hp: 1,
-      blurb: 'Spikes shoot up under every monster on it, then reset after a moment.' },
-    bomb: { name: 'Powder Keg', short: 'Keg', icon: 'b_cluster', trap: true, r: 1.2, aoe: 3.6, dmg: 5, cost: 0.6, stones: 2, hp: 1,
-      blurb: 'Blows up a whole group once per wave. A new keg is in place for the next wave.' },
-    tar: { name: 'Tar Pit', short: 'Tar', icon: 'k_grasp', trap: true, r: 1.7, slow: 0.4, dps: 0.25, cost: 0.4, stones: 1.5, hp: 1,
-      blurb: 'Sticky tar: monsters crossing it move at half speed and slowly burn. Combine it with towers.' },
+    archer: { name: 'Archer Tower', short: 'Archer', icon: 'b_arrow', range: 16, cd: 0.8, dmg: 0.55, speed: 30, color: 0xffe08a, c: [8, 4], hp: 8, light: true, air: true,
+      lim: [2, 3, 3, 4, 4, 5, 5, 6, 6, 7], blurb: 'Fast arrows at one target, even flyers. Light: armour shrugs them off.' },
+    cannon: { name: 'Cannon', short: 'Cannon', icon: 'a_bigshot', range: 13, cd: 2.4, dmg: 1.2, aoe: 2.8, fly: 0.9, color: 0x3a3a44, c: [6, 9], hp: 10,
+      lim: [1, 2, 2, 3, 3, 4, 4, 5, 5, 6], blurb: 'Slow shells that blast a whole group and crack armour. Cannot hit flyers.' },
+    ballista: { name: 'Ballista', short: 'Ballista', icon: 'n_pierce', range: 22, cd: 2.8, dmg: 2.4, pierce: 3, speed: 40, color: 0xbfe9ff, c: [11, 6], hp: 8, air: true,
+      lim: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5], blurb: 'Huge bolts from far away that pierce a line of monsters, armour and flyers too.' },
+    mage: { name: 'Mage Tower', short: 'Mage', icon: 'b_orb', range: 18, cd: 1.7, dmg: 0.9, aoe: 1.8, speed: 20, color: 0xb98cff, c: [8, 11], hp: 7, light: true, air: true,
+      lim: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4], blurb: 'Arcane orbs that burst on a small group, flyers too. Light: weak on armour.' },
+    warrior: { name: 'Barracks', short: 'Warriors', icon: 'b_wave', range: 6, cd: 1.0, dmg: 0.7, hp: 0.9, men: 2, respawn: 8, c: [10, 5], bhp: 10, light: true,
+      lim: [1, 1, 2, 2, 2, 3, 3, 3, 4, 4], blurb: 'Warriors that block the path and fight monsters near their post. They cannot reach flyers.' },
+    mill: { name: 'Lumber Mill', short: 'Mill', icon: 'm_smith', make: 'wood', rate: 14, cap: 56, c: [3, 6], hp: 8,
+      lim: [1, 1, 2, 2, 2, 3, 3, 3, 3, 3], blurb: 'Saws wood, even while you are away. Tap it to collect.' },
+    mine: { name: 'Stone Mine', short: 'Stone', icon: 'n_gems', make: 'stones', rate: 8, cap: 32, c: [8, 2], hp: 8,
+      lim: [1, 1, 2, 2, 2, 3, 3, 3, 3, 3], blurb: 'Digs up stone, even while you are away. Tap it to collect.' },
+    iron: { name: 'Iron Mine', short: 'Iron', icon: 'n_armor', make: 'iron', rate: 3, cap: 12, c: [12, 12], hp: 9,
+      lim: [0, 0, 0, 1, 1, 2, 2, 2, 3, 3], blurb: 'Digs iron for level 6 and higher, even while you are away. Tap it to collect.' },
+    hut: { name: "Builder's Hut", short: 'Builder', icon: 'm_smith', maxLvl: 1, each: true, c: [12, 8], hp: 8,
+      lim: [2, 2, 3, 3, 3, 4, 4, 5, 5, 5], blurb: 'One builder each. More huts, more upgrades at the same time.' },
+    wall: { name: 'Wall', short: 'Wall', icon: 'n_armor', c: [1, 0], hp: 5, path: 6, wall: true,
+      lim: [30, 50, 75, 100, 130, 160, 200, 250, 300, 400], blurb: 'Drag a straight line of walls. Wood, stone from level 6, iron from level 11.' },
+    gate: { name: 'Gate', short: 'Gate', icon: 'm_portal', c: [3, 1], hp: 5, path: 6, wall: true,
+      lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'A wall heroes walk through and monsters have to break.' },
+    // traps: monsters walk over them (they never block a path, flyers pass over); r: reach from the trap's centre
+    spike: { name: 'Spike Trap', short: 'Spikes', icon: 'a_reaper', trap: true, r: 1.5, cd: 2.2, dmg: 1.4, c: [2, 2], hp: 1,
+      lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'Spikes shoot up under every monster on it, then reset after a moment.' },
+    bomb: { name: 'Powder Keg', short: 'Keg', icon: 'b_cluster', trap: true, r: 1.2, aoe: 3.6, dmg: 5, c: [3, 2], hp: 1,
+      lim: [0, 1, 2, 2, 3, 3, 4, 4, 5, 6], blurb: 'Blows up a whole group once per wave. A new keg is in place for the next wave.' },
+    tar: { name: 'Tar Pit', short: 'Tar', icon: 'k_grasp', trap: true, r: 1.7, slow: 0.4, dps: 0.25, c: [3, 1], hp: 1,
+      lim: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5], blurb: 'Sticky tar: monsters crossing it move at half speed and slowly burn. Combine it with towers.' },
+  },
+  // the two paths per tower (from level pathAt): multipliers on range, cd, dmg, aoe; multi: targets per shot; plus extras
+  paths: {
+    archer: [{ name: 'Volley Tower', blurb: 'Three arrows at three monsters at once.', multi: 3, dmg: 0.75 },
+      { name: 'Longbow Nest', blurb: 'Far, heavy arrows that punch through armour.', range: 1.45, dmg: 1.9, cd: 1.35, heavy: true }],
+    cannon: [{ name: 'Mortar', blurb: 'Lobs shells much further, with a wider blast.', range: 1.7, aoe: 1.35, cd: 1.2, dmg: 1.1 },
+      { name: 'Fire Cannon', blurb: 'Shells set the whole group on fire.', burn: 0.35, dmg: 0.9 }],
+    ballista: [{ name: 'Repeater', blurb: 'Fires light bolts very fast.', cd: 0.4, dmg: 0.55, pierce: 1 },
+      { name: 'Sky Piercer', blurb: 'Huge bolts through eight monsters; double damage to flyers.', dmg: 1.5, pierce: 8, range: 1.2, airMul: 2 }],
+    mage: [{ name: 'Frost Spire', blurb: 'Orbs freeze a group to half speed.', slow: 1.6, dmg: 0.9 },
+      { name: 'Storm Spire', blurb: 'Lightning jumps to three more monsters, armour or not.', chain: 3, dmg: 1.05, heavy: true }],
+    warrior: [{ name: 'Shield Wall', blurb: 'One more warrior, all much tougher.', men: 1, hp: 1.9 },
+      { name: 'Berserkers', blurb: 'Warriors hit far harder and faster, and cut through armour.', dmg: 1.8, cd: 0.7, heavy: true }],
   },
 };
-const SIEGE_TYPES = ['archer', 'cannon', 'ballista', 'mage', 'warrior', 'mine', 'hut', 'wall', 'gate', 'spike', 'bomb', 'tar'];
+const SIEGE_TYPES = ['archer', 'cannon', 'ballista', 'mage', 'warrior', 'mill', 'mine', 'iron', 'hut', 'wall', 'gate', 'spike', 'bomb', 'tar'];
 const SIEGE_SHOOTERS = { archer: 1, cannon: 1, ballista: 1, mage: 1 };
 // where shots leave each defender (f: metres ahead of its centre toward the target, y: height) and how long it winds up first
-const SIEGE_MUZZLE = { archer: { f: 0.9, y: 4.4, wind: 0.25 }, cannon: { f: 1.9, y: 1.3, wind: 0.5 }, ballista: { f: 1.5, y: 1.9, wind: 0.6 }, mage: { f: 0.4, y: 6.2, wind: 0.7 } };
+const SIEGE_MUZZLE = { archer: { f: 0.7, y: 3.3, wind: 0.25 }, cannon: { f: 1.4, y: 1.0, wind: 0.5 }, ballista: { f: 1.1, y: 1.45, wind: 0.6 }, mage: { f: 0.3, y: 4.65, wind: 0.7 } }; // the buildings stand at 0.75 (SIEGE_SCALE)
 const siegeLvlMul = (l) => 1 + 0.3 * (l - 1);
-const siegeMen = (l) => Math.min(4, CFG.siege.towers.warrior.men + Math.floor(l / 5));
-// one wave's gold at hero level L: the price unit for building
-const siegeGoldUnit = (L) => Math.round((20 + 6 * L) * Math.pow(CFG.enemies.goldGrowth, L - 1));
+const siegeMen = (l, b) => Math.min(5, CFG.siege.towers.warrior.men + Math.floor(l / 5) + (b && fortPath(b) ? fortPath(b).men || 0 : 0));
 const fortNow = () => Date.now();
-// the fort on screen: a shared world while you are in one, else your own (stones are always your own)
+// the fort on screen: a shared world while you are in one, else your own (wood, stone and iron are always your own)
 function myFort() { const p = G.profile; if (!p.fort || !Array.isArray(p.fort.b)) p.fort = sanitizeFort(p.fort, true); return p.fort; }
 function fortState() { return G.siegeWorld ? G.siegeWorld.fort : myFort(); }
 const fortLvl = (b) => (b.d > fortNow() ? b.l - 1 : b.l); // an upgrade under way works at the old level
-const fortMaxLvl = (t) => CFG.siege.towers[t].maxLvl || CFG.siege.maxLvl;
+// the Keep's level (an upgrade under way counts from when it is done)
+const fortKeep = (F = fortState()) => Math.max(1, (F.keep || 1) - (F.kd > fortNow() ? 1 : 0));
+const fortMaxLvl = (t, F = fortState()) => Math.min(CFG.siege.towers[t].maxLvl || CFG.siege.maxLvl, CFG.siege.keep.lvl[fortKeep(F) - 1]);
+// how many of type t the Keep allows, and the first Keep level that allows one more than have
+const fortLimit = (t, F = fortState()) => { const L = CFG.siege.towers[t].lim; return L ? L[fortKeep(F) - 1] : Infinity; };
+const fortLimitAt = (t, have) => { const L = CFG.siege.towers[t].lim; const k = L ? L.findIndex((n) => n > have) : 0; return k < 0 ? 0 : k + 1; };
+const fortCount = (t, F = fortState()) => F.b.reduce((n, b) => n + (b.t === t), 0);
+// the path a tower took (from level pathAt, once that upgrade is done), or null
+const fortPath = (b) => (b.p && CFG.siege.paths[b.t] && fortLvl(b) >= CFG.siege.pathAt ? CFG.siege.paths[b.t][b.p - 1] : null);
+const fortNeedsPath = (b) => !!CFG.siege.paths[b.t] && !b.p && b.l + 1 >= CFG.siege.pathAt;
 const landFor = (L) => { const [a, b, l0, l1] = CFG.siege.land; return Math.round(lerp(a, b, clamp((L - l0) / (l1 - l0), 0, 1))); };
-// price of level l of type t; huts get dearer with every hut you have
+// price of level l of type t in wood, stone and iron; huts get dearer with every hut you have
 function fortCost(t, l, F = fortState()) {
-  const T = CFG.siege.towers[t], k = T.each ? 1 + F.b.filter((b) => b.t === t).length : 1;
-  return { lvl: l, gold: Math.round(siegeGoldUnit(G.profile.level) * T.cost * (1 + (l - 1) * 0.8) * k), stones: Math.round(T.stones * Math.pow(l, 1.35) * k), time: CFG.siege.buildTime(l) };
+  const T = CFG.siege.towers[t], k = T.each ? 1 + fortCount(t, F) : 1, m = Math.pow(l, 1.35) * k, c = T.c;
+  const iron = Math.round((c[2] || 0) * m + (l >= CFG.siege.ironFrom ? (c[0] + c[1]) * 0.25 * Math.pow(l - CFG.siege.ironFrom + 1, 1.35) * k : 0));
+  return { lvl: l, wood: Math.round(c[0] * m), stones: Math.round(c[1] * m), iron, time: CFG.siege.buildTime(l) };
 }
-function fortStonesSpent(b) { let n = 0; for (let k = 1; k <= b.l; k++) n += Math.round(CFG.siege.towers[b.t].stones * Math.pow(k, 1.35)); return n; }
-const fortBuilders = (F = fortState()) => F.b.filter((b) => b.t === 'hut').length;
-const fortJobs = (F = fortState()) => { const now = fortNow(); return F.b.filter((b) => b.d > now).length; };
-function fortMineStones(b) { const T = CFG.siege.towers.mine; return Math.min(T.cap * b.l, Math.floor((fortNow() - (b.c || fortNow())) / 3600e3 * T.rate * b.l)); }
+// everything a building cost to get where it is (half comes back when it is torn down)
+function fortSpent(b) { const r = { wood: 0, stones: 0, iron: 0 }; for (let k = 1; k <= b.l; k++) { const c = fortCost(b.t, k, { b: [] }); for (const q of CFG.siege.res) r[q] += c[q]; } return r; }
+const fortBuilders = (F = fortState()) => fortCount('hut', F);
+const fortJobs = (F = fortState()) => { const now = fortNow(); return F.b.filter((b) => b.d > now).length + (F.kd > now ? 1 : 0); };
+// what a mill or mine holds now (it fills from b.c, the last time it was emptied)
+function fortMade(b) { const T = CFG.siege.towers[b.t]; if (!T.make) return 0; return Math.min(T.cap * b.l, Math.floor((fortNow() - (b.c || fortNow())) / 3600e3 * T.rate * b.l)); }
+const fortHas = (pr, M = myFort()) => CFG.siege.res.every((q) => (pr[q] || 0) <= (M[q] || 0));
+const fortShort = (pr, M = myFort()) => CFG.siege.res.find((q) => (pr[q] || 0) > (M[q] || 0));
+// armour and flyers (Balloons TD): what a defender's hit does to this monster (1 = all of it, 0 = it cannot reach it)
+function siegeDmgMul(t, srcId) {
+  const S = G.siege; if (!S || !S.src || !(t.siegeArmor || t.flying)) return 1;
+  const q = S.src.get(srcId); if (!q) return 1;
+  if (t.flying && !q.air) return 0;
+  return (t.flying && q.airMul ? q.airMul : 1) * (t.siegeArmor && q.light ? CFG.siege.armor : 1);
+}
 const siegeLevel = (n) => Math.max(G.profile.level - 2, CFG.siege.lvlBase + Math.round(CFG.siege.lvlPer * n)) + tierAdd();
 const siegeDefDmg = (T, l) => refDmg(G.profile.level) * T.dmg * siegeLvlMul(l);
 function siegeClamp(f, r) { if (!G.siege) return; const h = G.siege.half - 0.8 - r; f.x = clamp(f.x, SC.x - h, SC.x + h); f.z = clamp(f.z, SC.z - h, SC.z + h); }
@@ -7191,11 +7278,21 @@ function siegeUnit(b) {
   const T = CFG.siege.towers[b.t], s = FORT_TYPES[b.t], cs = CFG.siege.cell;
   return { b, id: nextId++, kind: 'fortB', size: s, x: SC.x + (b.x + s / 2) * cs, z: SC.z + (b.z + s / 2) * cs, r: s === 1 ? 1.05 : 1.6, cd: rand(0, 1), alive: true, hp: 1, maxHp: 0, flashT: 0, hurtT: 0, name: T.name };
 }
-function siegeUnitHp(u) { const T = CFG.siege.towers[u.b.t], k = u.maxHp ? u.hp / u.maxHp : 1; u.maxHp = Math.round(refHp(G.siege.lvl) * (T.bhp || T.hp) * siegeLvlMul(Math.max(1, fortLvl(u.b)))); u.hp = u.alive ? Math.max(1, Math.round(k * u.maxHp)) : 0; }
+function siegeUnitHp(u) { const T = CFG.siege.towers[u.b.t], k = u.maxHp ? u.hp / u.maxHp : 1; u.maxHp = Math.round(refHp(G.siege.lvl) * (T.bhp || T.hp) * siegeLvlMul(Math.max(1, fortLvl(u.b)))); u.hp = u.alive ? Math.max(1, Math.round(k * u.maxHp)) : 0; u.st = siegeStats(u.b); if (G.siege.src) G.siege.src.set(u.id, u.st); }
+// a defender's numbers with its path on top (range, cd, dmg and aoe multiply; the rest adds or replaces)
+function siegeStats(b) {
+  const T = CFG.siege.towers[b.t], P = fortPath(b); if (!P) return T;
+  const o = Object.assign({}, T, { path: P });
+  for (const k of ['range', 'cd', 'dmg', 'aoe']) if (P[k] && T[k]) o[k] = T[k] * P[k];
+  if (P.heavy) o.light = false; if (P.pierce) o.pierce = P.pierce; if (P.hp) o.hp = T.hp * P.hp;
+  for (const k of ['multi', 'burn', 'slow', 'chain', 'airMul']) if (P[k]) o[k] = P[k];
+  return o;
+}
 // rebuilt whenever the fort changes or a building falls: cells, units (their state kept), solid circles and the monsters' paths
 function siegeLayout() {
   const S = G.siege, F = fortState(), cs = CFG.siege.cell, h = S.h = Math.ceil(S.half / cs), n = S.n = h * 2;
   const occ = S.occ = new Int32Array(n * n), old = new Map(S.units.map((u) => [u.b, u]));
+  S.src = new Map(); // who hit a monster: a defender's stats by its id (siegeDmgMul)
   const disc = (x, z, r, v) => { for (let i = cellAt(x - r); i <= cellAt(x + r); i++) for (let j = cellAt(z - r); j <= cellAt(z + r); j++) { const k = siegeIdx(i, j); if (k >= 0 && Math.hypot((i + 0.5) * cs - x, (j + 0.5) * cs - z) < r + cs * 0.35) occ[k] = v; } };
   for (const q of [CFG.siege.spawn, CFG.siege.exit]) disc(q.x, q.z, 1.6, -2);
   for (const d of CFG.siege.objs) disc(d.x, d.z, d.r, -1);
@@ -7206,12 +7303,13 @@ function siegeLayout() {
     if (ks.some((k) => k < 0 || occ[k] !== 0)) continue; // outside the land or on the Keep (a shrunk or edited world): not built here
     let u = old.get(b); if (u && (u.bx !== b.x || u.bz !== b.z)) u = null; // moved: a new unit where it stands now
     if (!u) { u = siegeUnit(b); u.bx = b.x; u.bz = b.z; } u.k = S.units.length; S.units.push(u); ks.forEach((k) => { occ[k] = u.k + 1; });
-    if (!u.maxHp) siegeUnitHp(u);
+    if (!u.maxHp) siegeUnitHp(u); else S.src.set(u.id, u.st);
   }
   // the monster gate on each side (a gatehouse, 47c-siege-view.js): kept clear of new buildings
   for (const d of CFG.siege.sides) { const gx = d.x * (S.half - 3), gz = d.z * (S.half - 3); for (let i = cellAt(gx - 4.5); i <= cellAt(gx + 4.5); i++) for (let j = cellAt(gz - 4.5); j <= cellAt(gz + 4.5); j++) { const k = siegeIdx(i, j); if (k >= 0 && occ[k] === 0) occ[k] = -2; } }
   S.soldiers = S.soldiers.filter((s) => old.get(s.u.b) === s.u && S.units.includes(s.u));
   for (const u of S.units) if (u.b.t === 'warrior' && !S.soldiers.some((s) => s.u === u)) siegeMuster(u);
+  for (const q of S.soldiers) S.src.set(q.id, q.u.st);
   siegeGrid(); S.flowDirty = true;
 }
 // keep, wagons and living buildings are solid; gates only for monsters (rebuilt as a whole: the Grid has no remove)
@@ -7273,16 +7371,23 @@ function siegeFlowStep(e) {
 }
 
 // --- building: the same checks and changes for your own fort and for a shared world's host (op from fortDo or a guest)
-// op: { o: 'add', t, x, z } | { o: 'up', k } | { o: 'del', k } | { o: 'col', k } | { o: 'move', k, x, z } (k = index in the fort's building list)
+// op: { o: 'add', t, x, z } | { o: 'up', k, p } | { o: 'del', k } | { o: 'col', k } | { o: 'move', k, x, z } | { o: 'keep' } | { o: 'hold', v }
+// (k = index in the fort's building list; p = the path picked on the upgrade to level pathAt)
 function fortCheck(op, F = fortState()) {
   const S = G.siege; if (!S || !S.occ) return 'Only inside the fort';
   const C = CFG.siege, now = fortNow();
+  if (op.o === 'hold') return '';
+  if (op.o === 'keep') {
+    if ((F.keep || 1) >= C.keep.max) return 'Max level'; if (F.kd > now) return 'Already upgrading';
+    if (fortJobs(F) >= fortBuilders(F)) return 'All builders are busy'; return '';
+  }
   if (op.o === 'add') {
     const T = C.towers[op.t]; if (!T) return 'Unknown building';
-    if (T.max && F.b.filter((b) => b.t === op.t).length >= T.max) return `${T.max} ${T.short}s at most`;
+    const have = fortCount(op.t, F), lim = fortLimit(op.t, F);
+    if (have >= lim) { const k = fortLimitAt(op.t, have); return k ? `Keep level ${k} allows ${lim ? 'more' : 'this'}` : `${lim} ${T.short}s at most`; }
     const s = FORT_TYPES[op.t];
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) { const k = siegeIdx(op.x + i, op.z + j); if (k < 0) return 'Outside your land'; if (S.occ[k] !== 0) return 'Something is in the way'; }
-    for (const e of S.mobs) if (e.alive && Math.abs(e.x - SC.x - (op.x + s / 2) * C.cell) < s + 0.5 && Math.abs(e.z - SC.z - (op.z + s / 2) * C.cell) < s + 0.5) return 'A monster is in the way';
+    for (const e of S.mobs) if (e.alive && !e.flying && Math.abs(e.x - SC.x - (op.x + s / 2) * C.cell) < s + 0.5 && Math.abs(e.z - SC.z - (op.z + s / 2) * C.cell) < s + 0.5) return 'A monster is in the way';
     return '';
   }
   const b = F.b[op.k]; if (!b) return 'Gone';
@@ -7291,28 +7396,42 @@ function fortCheck(op, F = fortState()) {
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) { const k = siegeIdx(op.x + i, op.z + j); if (k < 0) return 'Outside your land'; if (S.occ[k] !== 0 && S.occ[k] !== own) return 'Something is in the way'; }
     return '';
   }
-  if (op.o === 'up') { if (b.l >= fortMaxLvl(b.t)) return 'Max level'; if (b.d > now) return 'Already upgrading'; if (C.buildTime(b.l + 1) > 0 && fortJobs(F) >= fortBuilders(F)) return 'All builders are busy'; }
+  if (op.o === 'up') {
+    if (b.l >= (C.towers[b.t].maxLvl || C.maxLvl)) return 'Max level';
+    if (b.l >= fortMaxLvl(b.t, F)) return `Upgrade the Keep first (level ${b.l + 1} needs Keep ${C.keep.lvl.findIndex((m) => m > b.l) + 1})`;
+    if (b.d > now) return 'Already upgrading';
+    if (fortNeedsPath(b) && op.p !== 1 && op.p !== 2) return 'Pick a path';
+    if (C.buildTime(b.l + 1) > 0 && fortJobs(F) >= fortBuilders(F)) return 'All builders are busy';
+  }
   if (op.o === 'del' && b.t === 'hut' && fortBuilders(F) <= 1) return 'Your last builder stays';
-  if (op.o === 'col' && b.t !== 'mine') return 'Not a mine';
+  if (op.o === 'col' && !C.towers[b.t].make) return 'Nothing to collect';
   return '';
 }
-// what op costs or pays this player (gold, stones; negative = paid back)
+// what op costs this player in wood, stone and iron (negative = paid back or collected)
 function fortPrice(op, F = fortState()) {
-  if (op.o === 'add') { const c = fortCost(op.t, 1, F); return { gold: c.gold, stones: c.stones }; }
+  const none = { wood: 0, stones: 0, iron: 0 }, neg = (r) => ({ wood: -r.wood, stones: -r.stones, iron: -r.iron });
+  if (op.o === 'add') return fortCost(op.t, 1, F);
+  if (op.o === 'keep') return CFG.siege.keep.cost((F.keep || 1) + 1);
+  if (op.o === 'hold') return none;
   const b = F.b[op.k];
-  if (op.o === 'up') { const c = fortCost(b.t, b.l + 1, F); return { gold: c.gold, stones: c.stones }; }
-  if (op.o === 'del') return { gold: 0, stones: -Math.floor(fortStonesSpent(b) / 2) };
-  if (op.o === 'move') return { gold: 0, stones: 0 };
-  return { gold: 0, stones: -fortMineStones(b) };
+  if (op.o === 'up') return fortCost(b.t, b.l + 1, F);
+  if (op.o === 'del') { const r = fortSpent(b); for (const q in r) r[q] = Math.floor(r[q] / 2); return neg(r); }
+  if (op.o === 'move') return none;
+  const r = Object.assign({}, none); r[CFG.siege.towers[b.t].make] = fortMade(b); return neg(r);
 }
-function fortPay(pr, sign = 1) { const p = G.profile, M = myFort(); p.gold -= sign * pr.gold; M.stones = Math.max(0, M.stones - sign * pr.stones); G.dirty = true; }
+function fortPay(pr, sign = 1) { const M = myFort(); for (const q of CFG.siege.res) M[q] = Math.max(0, (M[q] || 0) - sign * (pr[q] || 0)); G.dirty = true; }
 // change the fort (no payment here); returns '' or why not
 function fortApply(op, F = fortState()) {
   const why = fortCheck(op, F); if (why) return why;
   const C = CFG.siege, now = fortNow();
+  if (op.o === 'hold') { F.hold = op.v ? 1 : 0; fortChanged(F); return ''; }
+  if (op.o === 'keep') {
+    F.keep = (F.keep || 1) + 1; F.kd = now + C.keep.time(F.keep) * 1000;
+    const o = G.siege.objs[0]; ev({ t: 'fortBuilt', type: 'keep', l: F.keep, x: o.x, z: o.z }); fortChanged(F); return '';
+  }
   let b;
-  if (op.o === 'add') { b = { t: op.t, x: op.x, z: op.z, l: 1 }; if (op.t === 'mine') b.c = now; F.b.push(b); }
-  else if (op.o === 'up') { b = F.b[op.k]; b.l++; const t = C.buildTime(b.l); if (t > 0) b.d = now + t * 1000; }
+  if (op.o === 'add') { b = { t: op.t, x: op.x, z: op.z, l: 1 }; if (C.towers[op.t].make) b.c = now; F.b.push(b); }
+  else if (op.o === 'up') { b = F.b[op.k]; b.l++; if (op.p && !b.p && C.paths[b.t]) b.p = op.p; const t = C.buildTime(b.l); if (t > 0) b.d = now + t * 1000; }
   else if (op.o === 'del') { b = F.b.splice(op.k, 1)[0]; }
   else if (op.o === 'move') { b = F.b[op.k]; b.x = op.x; b.z = op.z; }
   else { b = F.b[op.k]; b.c = now; }
@@ -7327,31 +7446,35 @@ function fortChanged(F) { if (F === myFort()) G.dirty = true; if (typeof siegeMp
 // a player's own action: check, pay, then apply here or ask the host of a shared world
 function fortDo(op) {
   const F = fortState(), why = fortCheck(op, F); if (why) return why;
-  const pr = fortPrice(op, F), p = G.profile;
-  if (pr.gold > p.gold) return 'Not enough gold'; if (pr.stones > myFort().stones) return 'Not enough Bastion Stones';
+  const pr = fortPrice(op, F), short = fortShort(pr);
+  if (short) return `Not enough ${CFG.siege.resName[short].toLowerCase()}`;
   if (typeof siegeFollowing === 'function' && siegeFollowing()) { fortPay(pr); siegeMpAsk(op, pr); return ''; }
   const r = fortApply(op, F); if (!r) fortPay(pr); return r;
 }
-// the ghost while building: the cell picked in builder mode (75-siege-builder.js), checked as it would be placed or moved
-function fortGhost() {
-  const B = G.builder, S = G.siege; if (!B || !S || !B.sel || !B.cell) return null;
+// the ghosts while building (75-siege-builder.js): the picked cell, or every piece of a wall line being dragged, each
+// checked as it would be placed or moved
+function fortGhosts() {
+  const B = G.builder, S = G.siege; if (!B || !S || !B.sel) return null;
+  if (B.line) return B.line.plan;
+  if (!B.cell) return null;
   const F = fortState(), op = B.move ? { o: 'move', k: F.b.indexOf(B.move), x: B.cell[0], z: B.cell[1] } : { o: 'add', t: B.sel, x: B.cell[0], z: B.cell[1] };
-  return { t: B.sel, x: op.x, z: op.z, ok: !fortCheck(op, F), op };
+  return [{ t: B.sel, x: op.x, z: op.z, ok: !fortCheck(op, F) && fortHas(fortPrice(op, F)), op }];
 }
 // --- runtime
 // warriors of a barracks: spawned around their post, back after a while when they fall
 function siegeMuster(u) {
-  const S = G.siege, T = CFG.siege.towers.warrior, l = Math.max(1, fortLvl(u.b));
+  const S = G.siege, T = u.st || CFG.siege.towers.warrior, l = Math.max(1, fortLvl(u.b));
   S.soldiers = S.soldiers.filter((s) => s.u !== u);
-  for (let k = 0, n = siegeMen(l); k < n; k++) {
+  for (let k = 0, n = siegeMen(l, u.b); k < n; k++) {
     const a = (k / n) * Math.PI * 2, hx = u.x + Math.sin(a) * 2.6, hz = u.z + Math.cos(a) * 2.6;
     const s = { id: nextId++, kind: 'soldier', u, team: 'ally', x: hx, z: hz, hx, hz, r: 0.55, facing: 0, moveAmt: 0, attackAnim: 0, flashT: 0, alive: true, atkCd: rand(0, T.cd), respawnT: 0 };
     s.maxHp = s.hp = Math.round(refHp(G.profile.level) * T.hp * siegeLvlMul(l));
-    S.soldiers.push(s);
+    S.soldiers.push(s); if (S.src) S.src.set(s.id, T);
   }
 }
 function siegeScaleObjs(lvl) {
-  for (const o of G.siege.objs) { const k = o.maxHp ? o.hp / o.maxHp : 1; o.maxHp = Math.round(refHp(lvl) * o.def.mult); o.hp = o.alive ? Math.max(1, Math.round(k * o.maxHp)) : 0; }
+  const kp = 1 + CFG.siege.keep.hp * (fortKeep() - 1); // every Keep level makes the Keep and the wagons sturdier
+  for (const o of G.siege.objs) { const k = o.maxHp ? o.hp / o.maxHp : 1; o.maxHp = Math.round(refHp(lvl) * o.def.mult * kp); o.hp = o.alive ? Math.max(1, Math.round(k * o.maxHp)) : 0; }
   for (const u of G.siege.units) siegeUnitHp(u);
 }
 // world: a shared world { code, fort } (74-siege-mp.js) or null for your own fort on this device
@@ -7362,7 +7485,7 @@ function startSiege(world) {
   G.siegeWorld = world || null;
   const F = fortState(), own = !world || world.fort === myFort();
   if (own) F.land = Math.max(F.land || 0, landFor(p.level)); // your land grows with you; guests walk the owner's land
-  const S = G.siege = { wave: F.wave || 1, phase: 'build', t: C.firstBuild, tMax: C.firstBuild, queue: [], spawnT: 0, mobs: [], soldiers: [], units: [], lvl: 0, code: world ? world.code : null,
+  const S = G.siege = { wave: F.wave || 1, phase: 'build', t: C.firstBuild, tMax: C.firstBuild, queue: [], wood: 0, iron: 0, spawnT: 0, mobs: [], soldiers: [], units: [], lvl: 0, code: world ? world.code : null,
     half: Math.max(C.land[0], F.land || 0), sides: [], sideI: 0, gold: 0, stones: 0, items: 0, cleared: 0, startWave: F.wave || 1, kills: 0, enterPos: { x: pl.x, z: pl.z },
     objs: C.objs.map((d) => ({ def: d, kind: 'objective', name: d.name, x: SC.x + d.x, z: SC.z + d.z, r: d.r, alive: true, hp: 1, maxHp: 0, flashT: 0, hurtT: 0 })) };
   S.lvl = siegeLevel(S.wave); siegeLayout(); siegeScaleObjs(S.lvl); S.sides = siegeSides(S.wave);
@@ -7372,8 +7495,11 @@ function startSiege(world) {
   ev({ t: 'siegeStart', x: pl.x, z: pl.z, best: p.records.bestSiege || 0, wave: S.wave }); return true;
 }
 function siegeComposition(n) {
-  const boss = n % CFG.siege.bossEvery === 0, count = Math.min(40, 5 + Math.round(n * 1.6)), elites = Math.min(8, Math.floor(n / 3));
-  return { boss, count: boss ? Math.ceil(count * 0.6) : count, elites };
+  const C = CFG.siege, boss = n % C.bossEvery === 0, count = Math.min(40, 5 + Math.round(n * 1.6)), elites = Math.min(8, Math.floor(n / 3));
+  // armoured monsters from wave armorFrom, flyers from flyFrom: a share that grows to 30% each
+  const armored = n >= C.armorFrom ? Math.round(count * Math.min(0.3, 0.1 + (n - C.armorFrom) * 0.01)) : 0, flyers = n >= C.flyFrom ? Math.round(count * Math.min(0.3, 0.1 + (n - C.flyFrom) * 0.01)) : 0;
+  const k = boss ? 0.6 : 1;
+  return { boss, count: Math.ceil(count * k), elites, armored: Math.round(armored * k), flyers: Math.round(flyers * k) };
 }
 // which sides the next wave comes from: one at first, up to all four later
 function siegeSides(n) {
@@ -7388,14 +7514,18 @@ function startSiegeWave() {
   const n = S.wave, Zs = CFG.world.zones, zi = 1 + (n - 1) % (Zs.length - 1), Z = Zs[zi], C = siegeComposition(n);
   S.lvl = siegeLevel(n); siegeScaleObjs(S.lvl);
   S.queue = [];
-  for (let k = 0; k < C.count; k++) S.queue.push({ type: Math.random() < 0.5 ? Z.enemy : (Z.alt || Z.enemy), zi, elite: k < C.elites });
+  const FL = CFG.siege.flyers, fly = FL[Math.floor((n - 1) / 10) % FL.length];
+  for (let k = 0; k < C.count; k++) {
+    const f = k >= C.count - C.flyers, a = !f && k >= C.count - C.flyers - C.armored;
+    S.queue.push({ type: f ? fly : Math.random() < 0.5 ? Z.enemy : (Z.alt || Z.enemy), zi, elite: k < C.elites, armor: a, fly: f });
+  }
   S.queue.sort(() => Math.random() - 0.5);
   S.mini = !C.boss && n >= CFG.siege.miniFrom && Math.random() < CFG.siege.miniChance;
   if (S.mini) S.queue.splice(Math.floor(S.queue.length / 2), 0, { type: Z.alt || Z.enemy, zi, mini: true });
   if (C.boss) S.queue.push({ type: Z.enemy, zi, boss: true });
   S.phase = 'fight'; S.spawnT = 0.4; S.sideI = 0;
-  if (G.builder && typeof closeBuilder === 'function') closeBuilder(); // the wave is coming: back to the hero
-  ev({ t: 'siegeWave', wave: n, lvl: S.lvl, boss: C.boss, mini: S.mini, count: S.queue.length, theme: Z.name, sides: siegeSideNames(S.sides) });
+  const F = fortState(); if (!F.go) { F.go = 1; fortChanged(F); } // from now on the next waves come by themselves
+  ev({ t: 'siegeWave', wave: n, lvl: S.lvl, boss: C.boss, mini: S.mini, count: S.queue.length, theme: Z.name, sides: siegeSideNames(S.sides), armored: C.armored, flyers: C.flyers });
   return true;
 }
 function siegeSpawnPoint() {
@@ -7413,6 +7543,8 @@ function spawnSiegeMob(q) {
   else if (q.mini) { e = makeChampion(q.type, q.zi, S.lvl + 1, 1, false); e.bossName = 'Siege Captain'; e.miniBoss = true; }
   else e = makeEnemy(q.type, q.zi, { elite: q.elite });
   delete e.rift; delete e.riftLvl;
+  if (q.armor) { e.siegeArmor = true; e.maxHp = e.hp = Math.round(e.maxHp * 1.3); }
+  if (q.fly) e.flying = true;
   e.siege = true; e.temp = true; e.state = 'chase'; e.tgt = null; e.tgtT = 0;
   setEnemyLevel(e, q.boss ? S.lvl + 2 : q.mini ? S.lvl + 1 : S.lvl);
   e.x = e.hx = e.wx = x; e.z = e.hz = e.wz = z; e.facing = at.a;
@@ -7430,14 +7562,14 @@ function clearSiegeMobs() {
 function siegeReward(n, lvl, wagons, mini) {
   const p = G.profile, C = CFG.siege, S = G.siege, boss = n % C.bossEvery === 0;
   const gold = Math.round((20 + 6 * lvl) * Math.pow(CFG.enemies.goldGrowth, lvl - 1) * tierMul(curTier()).gold * (1 + C.wagonBonus * wagons)); addGold(gold, true); S.gold += gold;
-  const stones = 3 + Math.floor(n / 2) + (boss ? 8 : 0) + (mini ? 4 : 0); myFort().stones += stones; S.stones += stones;
+  const pay = C.pay(n, boss, mini), M = myFort(); for (const q of C.res) { M[q] = (M[q] || 0) + pay[q]; S[q] = (S[q] || 0) + pay[q]; }
   if (p.level < P.cap) addXp(Math.round(xpToNext(p.level) * Math.min(0.2, 0.05 * (1 + n / 10))), 'dungeon');
   let item = null;
   if (boss) { item = makeItem(pick(CFG.gear.slots), riftRarity(n), lvl); grantItem(item, 'shrine'); S.items++; addEssence(2 + Math.floor(n / 5)); }
   if (n > (p.records.bestSiege || 0)) p.records.bestSiege = n;
   S.cleared = Math.max(S.cleared, n); S.held = (S.held || 0) + 1; addMastery('w:' + G.player.attackId, 15 + n * 3);
   checkAchievements(); G.dirty = true;
-  ev({ t: 'siegeClear', wave: n, gold, stones, item: !!item, wagons });
+  ev({ t: 'siegeClear', wave: n, gold, wood: pay.wood, stones: pay.stones, iron: pay.iron, item: !!item, wagons });
 }
 function siegeWaveClear() {
   const S = G.siege, n = S.wave, C = CFG.siege, F = fortState(), wagons = S.objs.filter((o) => !o.def.main && o.alive).length;
@@ -7458,22 +7590,25 @@ function stepSiege(dt) {
   // upgrades finishing: the building's stats and the monsters' paths follow
   const now = fortNow(); let done = false;
   for (const u of S.units) if (u.b.d && u.b.d <= now) { delete u.b.d; siegeUnitHp(u); if (u.b.t === 'warrior') siegeMuster(u); done = true; ev({ t: 'fortBuilt', type: u.b.t, l: u.b.l, x: u.x, z: u.z, done: true }); }
-  if (done) { S.flowDirty = true; fortChanged(fortState()); }
+  const F = fortState();
+  if (F.kd && F.kd <= now) { delete F.kd; done = true; siegeScaleObjs(S.lvl); ev({ t: 'fortBuilt', type: 'keep', l: F.keep, x: S.objs[0].x, z: S.objs[0].z, done: true }); }
+  if (done) { S.flowDirty = true; fortChanged(F); }
   if (typeof siegeMpStep === 'function' && siegeMpStep(dt)) return; // a guest mirrors the host's fort
-  if ((G.modal || G.builder) && siegeAlone()) return; // the fort holds still in a menu or builder mode while nobody else is in it
+  if (G.modal && siegeAlone()) return; // the fort holds still in a menu while nobody else is in it (builder mode runs on)
   for (const o of S.objs) { o.flashT -= dt; o.hurtT -= dt; }
   stepSiegeDefenders(dt);
-  if (S.phase === 'build') { S.t -= dt; if (S.t <= 0) startSiegeWave(); }
+  // the break: counts down once the fort has been started (until then, and while on hold, it waits for Start)
+  if (S.phase === 'build') { if (F.go && !F.hold) { S.t -= dt; if (S.t <= 0) startSiegeWave(); } }
   else if (S.phase === 'fight') {
     if (S.queue.length && (S.spawnT -= dt) <= 0) { S.spawnT = C.spawnGap; spawnSiegeMob(S.queue.shift()); }
     if (!S.queue.length && !S.mobs.some((e) => e.alive)) { siegeWaveClear(); S.phase = 'clear'; S.t = S.tMax = C.clear; }
   } else if (S.phase === 'clear' && (S.t -= dt) <= 0) { clearSiegeMobs(); S.wave++; S.phase = 'build'; S.t = S.tMax = C.build; S.sides = siegeSides(S.wave); }
 }
-// --- defenders: towers pick the nearest monster in range; warriors hold a ring around their post
+// --- defenders: towers pick the nearest monster in range (flyers only for towers with air); warriors hold a ring around their post
 // ghost: a guest's towers only draw their shots (the host's game deals the damage)
-function siegeNearestMob(x, z, range) {
+function siegeNearestMob(x, z, range, air, skip) {
   let best = null, bd = range;
-  for (const e of G.siege.mobs) if (e.alive && !e.hidden) { const d = Math.hypot(e.x - x, e.z - z); if (d < bd) { bd = d; best = e; } }
+  for (const e of G.siege.mobs) if (e.alive && !e.hidden && (air || !e.flying) && (!skip || !skip.includes(e))) { const d = Math.hypot(e.x - x, e.z - z); if (d < bd) { bd = d; best = e; } }
   return best;
 }
 function stepSiegeDefenders(dt, ghost) {
@@ -7481,28 +7616,34 @@ function stepSiegeDefenders(dt, ghost) {
   for (const u of S.units) {
     u.flashT -= dt; u.hurtT -= dt;
     const t = u.b.t, l = fortLvl(u.b); if (!u.alive || !SIEGE_SHOOTERS[t] || l < 1) continue;
-    const T = CFG.siege.towers[t]; if ((u.cd -= dt) > 0) continue;
-    const e = siegeNearestMob(u.x, u.z, T.range); if (!e) { u.cd = 0.15; continue; }
+    const T = u.st || CFG.siege.towers[t]; if ((u.cd -= dt) > 0) continue;
+    const e = siegeNearestMob(u.x, u.z, T.range, T.air); if (!e) { u.cd = 0.15; continue; }
     u.cd = T.cd; u.aim = Math.atan2(e.x - u.x, e.z - u.z); u.fireT = G.time;
     // shots leave from the model: the archers' platform, the cannon's muzzle, the ballista's rail, the mage tower's orb
     const M = SIEGE_MUZZLE[t], dmg = ghost ? 0 : siegeDefDmg(T, l), sx = Math.sin(u.aim), sz = Math.cos(u.aim), ox = u.x + sx * M.f, oz = u.z + sz * M.f, team = ghost ? 'ghost' : 'ally';
     if (t === 'cannon') {
-      // a lobbed shell lands where the target will be
-      const tx = e.x + (e.vx || 0) * T.fly, tz = e.z + (e.vz || 0) * T.fly;
-      spawnProjectile({ x: ox, z: oz, vx: (tx - ox) / T.fly, vz: (tz - oz) / T.fly, life: T.fly, r: 0.45, dmg, team, owner: u.id, kind: 'shell', color: T.color, y: M.y, lob: true, lobH: 2.4, aoe: T.aoe, aoeMult: 1, knock: 4, ghost });
+      // a lobbed shell lands where the target will be (a fire cannon's shell sets the group burning)
+      const tx = e.x + (e.vx || 0) * T.fly, tz = e.z + (e.vz || 0) * T.fly, fly = T.fly * (T.range > 14 ? 1.3 : 1);
+      spawnProjectile({ x: ox, z: oz, vx: (tx - ox) / fly, vz: (tz - oz) / fly, life: fly, r: 0.45, dmg, team, owner: u.id, kind: 'shell', color: T.burn ? 0xff7a2a : T.color, y: M.y, lob: true, lobH: T.range > 14 ? 4 : 2.4, aoe: T.aoe, aoeMult: 1, knock: 4, ghost,
+        burn: T.burn ? dmg * T.burn : 0, burnT: T.burn ? 3 : 0 });
     } else {
-      const tt = Math.hypot(e.x - ox, e.z - oz) / T.speed, a = Math.atan2(e.x + (e.vx || 0) * tt - ox, e.z + (e.vz || 0) * tt - oz);
-      spawnProjectile({ x: ox, z: oz, vx: Math.sin(a) * T.speed, vz: Math.cos(a) * T.speed, life: (T.range + 3) / T.speed, r: t === 'archer' ? 0.3 : 0.5, dmg, team, owner: u.id,
-        kind: t === 'ballista' ? 'rail' : t === 'mage' ? 'orb' : 'arrow', color: T.color, y: M.y, pierce: T.pierce || 0, aoe: T.aoe || 0, aoeMult: T.aoe ? 0.6 : 0, knock: t === 'ballista' ? 5 : 1.5, ghost });
+      // a volley tower shoots at several monsters at once
+      const tg = [e]; for (let n = 1; n < (T.multi || 1); n++) { const q = siegeNearestMob(u.x, u.z, T.range, T.air, tg); if (q) tg.push(q); else break; }
+      for (const q of tg) {
+        const tt = Math.hypot(q.x - ox, q.z - oz) / T.speed, a = Math.atan2(q.x + (q.vx || 0) * tt - ox, q.z + (q.vz || 0) * tt - oz);
+        spawnProjectile({ x: ox, z: oz, vx: Math.sin(a) * T.speed, vz: Math.cos(a) * T.speed, life: (T.range + 3) / T.speed, r: t === 'archer' ? 0.3 : 0.5, dmg, team, owner: u.id,
+          kind: t === 'ballista' ? 'rail' : t === 'mage' ? 'orb' : 'arrow', color: T.slow ? 0x9fe8ff : T.chain ? 0xfff27a : T.color, y: q.flying ? 2.6 : M.y, pierce: T.pierce || 0, aoe: T.aoe || 0, aoeMult: T.aoe ? 0.6 : 0,
+          knock: t === 'ballista' ? 5 : 1.5, ghost, slow: T.slow || 0, chain: T.chain || 0 });
+      }
     }
-    ev({ t: 'fortShot', type: t, x: ox, z: oz, y: M.y, a: u.aim });
+    ev({ t: 'fortShot', type: t, x: ox, z: oz, y: M.y, a: u.aim, path: u.b.p && T.path ? u.b.p : 0 });
   }
   stepSiegeTraps(dt, ghost);
-  const W = CFG.siege.towers.warrior;
   for (const s of S.soldiers) {
+    const W = s.u.st || CFG.siege.towers.warrior;
     s.flashT -= dt; s.attackAnim = Math.max(0, s.attackAnim - dt * 3);
     if (!s.alive) { if ((s.respawnT -= dt) <= 0 && s.u.alive) { s.alive = true; s.hp = s.maxHp; s.x = s.hx; s.z = s.hz; } continue; }
-    const e = siegeNearestMob(s.hx, s.hz, W.range);
+    const e = siegeNearestMob(s.hx, s.hz, W.range, false);
     let tx = s.hx, tz = s.hz, sp = 0;
     if (e) { tx = e.x; tz = e.z; s.atkCd -= dt; }
     const dx = tx - s.x, dz = tz - s.z, d = Math.hypot(dx, dz), reach = e ? s.r + e.r + 0.3 : 0.3;
@@ -7522,15 +7663,15 @@ function stepSiegeTraps(dt, ghost) {
     const T = CFG.siege.towers[u.b.t]; if (!T.trap || !u.alive || u.spent) continue;
     if (u.b.t === 'tar') { // slows everything in it; burns a little every half second, more with each level
       const tick = (u.cd -= dt) <= 0; if (tick) u.cd = 0.5;
-      for (const e of S.mobs) if (e.alive && Math.hypot(e.x - u.x, e.z - u.z) < T.r + e.r * 0.5) { e.slowT = Math.max(e.slowT || 0, T.slow); u.busy = G.time; if (tick && !ghost) dealDamage(e, refDmg(G.profile.level) * T.dps * 0.5 * siegeLvlMul(Math.max(1, fortLvl(u.b))), u.id, { knock: 0 }); }
+      for (const e of S.mobs) if (e.alive && !e.flying && Math.hypot(e.x - u.x, e.z - u.z) < T.r + e.r * 0.5) { e.slowT = Math.max(e.slowT || 0, T.slow); u.busy = G.time; if (tick && !ghost) dealDamage(e, refDmg(G.profile.level) * T.dps * 0.5 * siegeLvlMul(Math.max(1, fortLvl(u.b))), u.id, { knock: 0 }); }
       continue; }
     if ((u.cd -= dt) > 0) continue;
-    const on = S.mobs.filter((e) => e.alive && Math.hypot(e.x - u.x, e.z - u.z) < T.r + e.r * 0.5); if (!on.length) { u.cd = 0.1; continue; }
+    const on = S.mobs.filter((e) => e.alive && !e.flying && Math.hypot(e.x - u.x, e.z - u.z) < T.r + e.r * 0.5); if (!on.length) { u.cd = 0.1; continue; }
     const l = Math.max(1, fortLvl(u.b)), dmg = ghost ? 0 : refDmg(G.profile.level) * T.dmg * siegeLvlMul(l);
     u.fireT = G.time;
     if (u.b.t === 'bomb') {
       u.spent = true;
-      if (!ghost) for (const e of S.mobs) if (e.alive && Math.hypot(e.x - u.x, e.z - u.z) < T.aoe) dealDamage(e, dmg * (1 - 0.4 * Math.hypot(e.x - u.x, e.z - u.z) / T.aoe), u.id, { knockX: e.x - u.x, knockZ: e.z - u.z, knock: 7 });
+      if (!ghost) for (const e of S.mobs) if (e.alive && !e.flying && Math.hypot(e.x - u.x, e.z - u.z) < T.aoe) dealDamage(e, dmg * (1 - 0.4 * Math.hypot(e.x - u.x, e.z - u.z) / T.aoe), u.id, { knockX: e.x - u.x, knockZ: e.z - u.z, knock: 7 });
       ev({ t: 'fortTrap', type: 'bomb', x: u.x, z: u.z, r: T.aoe });
     } else {
       u.cd = T.cd;
@@ -7566,7 +7707,7 @@ function siegeHitObjective(o, amt) {
 // --- siege monsters: follow the map to the fort; warriors in the way, a hero close by and a nearby objective draw them off
 function siegeTarget(e) {
   const S = G.siege, pl = G.player;
-  let best = null, bd = 5;
+  let best = null, bd = e.flying ? 0 : 5; // flyers pass over the warriors
   for (const s of S.soldiers) if (s.alive) { const d = Math.hypot(s.x - e.x, s.z - e.z); if (d < bd) { bd = d; best = s; } }
   if (best) return best;
   const near = e.lastHurt > G.time - 2 ? 9 : 6;
@@ -7588,6 +7729,7 @@ function stepSiegeEnemy(e, dt) {
   tickBurn(e, dt); if (!e.alive) return;
   if ((e.tgtT -= dt) <= 0 || !e.tgt || !e.tgt.alive) { e.tgt = siegeTarget(e); e.tgtT = 0.5; }
   let t = e.tgt, way = null;
+  if (!t && e.flying) { let bd = Infinity; for (const o of S.objs) if (o.alive) { const q = Math.hypot(o.x - e.x, o.z - e.z) - o.r; if (q < bd) { bd = q; t = o; } } } // flyers cross walls straight to the fort
   if (!t) {
     const f = siegeFlowStep(e);
     if (f && f.kind === 'fortB') t = f; else if (f) way = f;
@@ -7638,17 +7780,18 @@ function stepSiegeEnemy(e, dt) {
   e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
   trackVel(e, dt);
   if (pl.alive) separate(e, pl);
-  for (const o of S.mobs) if (o !== e && o.alive) separate(e, o);
-  siegeCollide(e); siegeClamp(e, e.r);
+  for (const o of S.mobs) if (o !== e && o.alive && !!o.flying === !!e.flying) separate(e, o);
+  if (!e.flying) siegeCollide(e); siegeClamp(e, e.r);
 }
 function siegeInteract(pl) {
   const S = G.siege, C = CFG.siege, near = (q, r) => Math.hypot(pl.x - SC.x - q.x, pl.z - SC.z - q.z) < r;
   if (near(C.exit, C.interactR)) return { kind: 'siegeLeave', label: 'Leave Fort' };
+  const kp = C.objs[0]; if (near(kp, kp.r + 1.6)) return { kind: 'fortKeep', label: `The Keep · Lv ${fortState().keep || 1}` };
   let best = 1.4, hit = null;
   for (const u of S.units) { const d = Math.hypot(pl.x - u.x, pl.z - u.z) - u.r; if (d < best) { best = d; hit = u; } }
-  if (hit) { const b = hit.b, T = C.towers[b.t], m = b.t === 'mine' ? fortMineStones(b) : 0;
-    return { kind: 'fortB', k: S.units.indexOf(hit), label: m > 0 ? `Mine · take ${m}` : `${T.short}${T.maxLvl === 1 ? '' : ' Lv ' + b.l}${b.d > fortNow() ? ' · building' : ''}` }; }
-  return { kind: 'fortBuild', label: S.phase === 'build' ? `Build · Wave ${S.wave}` : 'Build' };
+  if (hit) { const b = hit.b, T = C.towers[b.t], m = fortMade(b);
+    return { kind: 'fortB', k: S.units.indexOf(hit), label: m > 0 ? `${T.short} · take ${m} ${C.resName[T.make].toLowerCase()}` : `${T.short}${T.maxLvl === 1 ? '' : ' Lv ' + b.l}${b.d > fortNow() ? ' · building' : ''}` }; }
+  return { kind: 'fortBuild', label: 'Build' };
 }
 function siegeLeft() { const S = G.siege; return S ? S.queue.length + S.mobs.filter((e) => e.alive).length : 0; }
 function endSiege(why) {
@@ -11205,7 +11348,7 @@ function siegeDecorHide() {
   const S = G.siege; if (!siegeParts.deco || !S.occ) return;
   for (const d of siegeParts.deco) { let ch = false; for (const it of d.items) { const k = siegeIdx(cellAt(it.x - SC.x), cellAt(it.z - SC.z)), hide = k >= 0 && S.occ[k] > 0; if (!!it.hidden !== hide) { it.hidden = hide; ch = true; } } if (ch) for (const x of d.h.multi || [d.h]) x.dirty = true; }
 }
-const SIEGE_PAD_COL = { archer: 0x58e08a, cannon: 0xff7a4a, ballista: 0x5dd6ff, mage: 0xb98cff, warrior: 0xffc94a, mine: 0x9fe8ff, hut: 0xd8b07a, wall: 0xcfc6b8, gate: 0xcfc6b8, spike: 0xc8ccd4, bomb: 0xff9a3d, tar: 0x5a4a3a };
+const SIEGE_PAD_COL = { archer: 0x58e08a, cannon: 0xff7a4a, ballista: 0x5dd6ff, mage: 0xb98cff, warrior: 0xffc94a, mine: 0x9fe8ff, mill: 0xe8b070, iron: 0x8fa8c8, hut: 0xd8b07a, wall: 0xcfc6b8, gate: 0xcfc6b8, spike: 0xc8ccd4, bomb: 0xff9a3d, tar: 0x5a4a3a };
 // a flat ground plane (terrain); vertex colours feed the flagstone shader
 function siegeGround(w, d, color, mat, y) {
   const g = new THREE.PlaneGeometry(w, d, 1, 1).rotateX(-Math.PI / 2), n = g.attributes.position.count, col = new Float32Array(n * 3);
@@ -11241,9 +11384,9 @@ function buildSiegeView() {
   { const e = at(C.exit), g = new THREE.Group(), ring = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.4, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
     const disc = new THREE.Mesh(new THREE.CircleGeometry(1.1, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: swirlTex(), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
     ring.position.y = 0.05; disc.position.y = 0.04; g.add(ring, disc); g.position.set(e.x, 0, e.z); siegeGroup.add(g); siegeParts.portal = g; }
-  // the placing ghost: a square on the ground, green where it fits and red where it does not
-  siegeParts.ghost = new THREE.Mesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x58e08a, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false }));
-  siegeParts.ghost.visible = false; siegeGroup.add(siegeParts.ghost);
+  // the placing ghosts: a square on the ground per piece (a wall line has many), green where it fits and red where not
+  siegeParts.ghost = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false }), 64);
+  siegeParts.ghost.count = 0; siegeParts.ghost.frustumCulled = false; siegeGroup.add(siegeParts.ghost);
   siegeParts.bGroup = new THREE.Group(); siegeGroup.add(siegeParts.bGroup); siegeParts.sig = '';
   buildSiegeBuildings();
   siegeLandscape(H, rng); // after the Keep and the buildings, so those are built first
@@ -11251,9 +11394,28 @@ function buildSiegeView() {
 // buildings: TRELLIS.2 models made for the fort (siege_*), each on its cell; cannons, ballistas and mage towers turn to
 // their target. A banner in the building's colour grows with its level. Walls: wood to level 5, stone to 10, iron
 // after; each cell draws a half piece toward every wall or gate next to it, so lines, corners and crossings join up.
+// [model, height in m, fallback model while it has none of its own, tint of that fallback]
 const SIEGE_MODEL = { archer: ['siege_archer', 7.4], cannon: ['siege_cannon', 3.0], ballista: ['siege_ballista', 3.3], mage: ['siege_mage', 7.6],
   warrior: ['siege_barracks', 3.3], mine: ['siege_mine', 3.9], hut: ['siege_hut', 3.6], gate: ['siege_gate', 2.1],
+  mill: ['siege_mill', 3.8, 'siege_hut', 0xe8c89a], iron: ['siege_iron', 3.9, 'siege_mine', 0x9fb4cc],
   spike: ['siege_trap_spike', 0.34], bomb: ['siege_trap_bomb', 1.3], tar: ['siege_trap_tar', 0.36] };
+// buildings stand smaller than before, so the camp reads like a Clash of Clans base (walls and traps keep their cell size)
+const SIEGE_SCALE = 0.75;
+// seven looks per building as it levels: wood, reinforced wood, stone, stone with banners, iron, arcane-lit, gold and
+// crystal (models siege_<kind>_t2..t7). A look that has no model yet uses the best lower one, tinted toward that look.
+const SIEGE_TIERS = [1, 3, 5, 7, 9, 11, 13], SIEGE_TIER_TINT = [null, 0xf4e4c8, 0xdcdcd8, 0xffe0d0, 0xd0dcff, 0xe4d0ff, 0xfff0b0];
+const siegeTier = (l) => { let k = 0; for (let i = 0; i < SIEGE_TIERS.length; i++) if (l >= SIEGE_TIERS[i]) k = i; return k; }; // 0..6
+function siegeModelName(t, l) {
+  const M = SIEGE_MODEL[t], base = M[0], k = siegeTier(l);
+  for (let i = k; i >= 1; i--) if (WORLD_MODEL_BOX[`${base}_t${i + 1}`]) return `${base}_t${i + 1}`;
+  return WORLD_MODEL_BOX[base] || !M[2] ? base : M[2];
+}
+// the tint an item gets: none when its own look's model exists, else the look's colour (and a fallback's own tint)
+function siegeModelTint(t, l, name) {
+  const M = SIEGE_MODEL[t], k = siegeTier(l); if (name === `${M[0]}_t${k + 1}`) return null;
+  const a = name === M[2] ? M[3] : null, b = SIEGE_TIER_TINT[k]; if (a == null) return b; if (b == null) return a;
+  return _col.set(a).multiply(new THREE.Color(b)).getHex();
+}
 // every building stands on a stone tile with a rim in its colour (decals), Clash of Clans style, so it reads from far
 let siegeTileTex = null;
 function siegeTileTextures() {
@@ -11266,14 +11428,15 @@ function siegeTileTextures() {
   return siegeTileTex;
 }
 const SIEGE_TURN = { cannon: 1, ballista: 1, mage: 1 };
+const _siegeM4 = new THREE.Matrix4();
 // how a defender fires (Clash of Clans style): it winds up before the shot (cannon leans back, ballista draws, the mage
 // orb swells) and kicks when it fires (recoil back along the aim, a squash and bounce); see animateSiegeDefenders
 function buildSiegeBuildings() {
   const g = siegeParts.bGroup, S = G.siege, cs = CFG.siege.cell, now = fortNow();
   for (const h of siegeParts.bSets) WorldModels.dispose(h);
   g.traverse((o) => { if (o.isInstancedMesh && !o.userData.items) { o.geometry.dispose(); o.material.dispose(); } }); // the tiles (models are disposed above)
-  g.clear(); siegeParts.bSets = []; siegeParts.aims = [];
-  const L = {}, add = (name, it) => (L[name] || (L[name] = [])).push(it), aims = [];
+  g.clear(); siegeParts.bSets = []; siegeParts.aims = []; siegeParts.idle = [];
+  const L = {}, add = (name, it) => (L[name] || (L[name] = [])).push(it), aims = [], idle = [];
   const wallAt = (i, j) => { const k = siegeIdx(i, j), o = k >= 0 ? S.occ[k] : 0, u = o > 0 ? S.units[o - 1] : null; return !!u && u.alive && CFG.siege.towers[u.b.t].wall; };
   for (const u of S.units) {
     if (!u.alive) continue;
@@ -11281,18 +11444,20 @@ function buildSiegeBuildings() {
     if (b.t === 'wall') {
       const name = b.l > 10 ? 'siege_wall_iron' : b.l > 5 ? 'siege_wall_stone' : 'siege_wall_wood', h = name === 'siege_wall_wood' ? 1.8 : 1.4, len = (WORLD_MODEL_BOX[name] || [2])[0] * h;
       const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([di, dj]) => wallAt(b.x + di, b.z + dj));
-      if (!dirs.length) add(name, { x, z, ry: 0, s: h, sx: cs / len });
-      for (const [di, dj] of dirs) add(name, { x: x + di * cs / 4, z: z + dj * cs / 4, ry: di ? 0 : Math.PI / 2, s: h, sx: (cs / 2 + 0.15) / len });
+      const sh = h * 0.85, sl = len * 0.85; // a little lower than before, same length per cell
+      if (!dirs.length) add(name, { x, z, ry: 0, s: sh, sx: cs / sl });
+      for (const [di, dj] of dirs) add(name, { x: x + di * cs / 4, z: z + dj * cs / 4, ry: di ? 0 : Math.PI / 2, s: sh, sx: (cs / 2 + 0.15) / sl });
       continue;
     }
-    const [name, h] = SIEGE_MODEL[b.t];
-    if (b.t === 'gate') { add(name, { x, z, ry: wallAt(b.x + 1, b.z) || wallAt(b.x - 1, b.z) ? 0 : Math.PI / 2, s: h }); continue; }
+    const h = SIEGE_MODEL[b.t][1], name = siegeModelName(b.t, b.l), tint = siegeModelTint(b.t, b.l, name);
+    if (b.t === 'gate') { add(name, { x, z, ry: wallAt(b.x + 1, b.z) || wallAt(b.x - 1, b.z) ? 0 : Math.PI / 2, s: h, color: tint }); continue; }
     if (CFG.siege.towers[b.t].trap) { // traps lie flat on their cell; a spent keg is gone until the next wave
       if (u.spent) continue;
-      const it = { x, z, ry: 0, s: h }; add(name, it); if (b.t === 'spike') aims.push({ it, u, name, bx: x, bz: z }); continue; }
-    const it = { x, z, ry, s: h * k }; add(name, it);
+      const it = { x, z, ry: 0, s: h }; add(name, it); if (b.t === 'spike') aims.push({ it, u, name, bx: x, bz: z }); else idle.push({ it, u, name, bx: x, bz: z, ry0: 0 }); continue; }
+    const it = { x, z, ry, s: h * k * SIEGE_SCALE, color: tint }; add(name, it);
     if (SIEGE_SHOOTERS[b.t]) aims.push({ it, u, name, bx: x, bz: z });
-    add('banner_pole', { x: x - u.size * cs / 2 + 0.3, z: z - u.size * cs / 2 + 0.3, ry: 0, s: 2.4 + Math.min(15, b.l) * 0.14, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] });
+    const ban = { x: x - u.size * cs / 2 + 0.3, z: z - u.size * cs / 2 + 0.3, ry: 0, s: (2.4 + Math.min(15, b.l) * 0.14) * 0.85, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] };
+    add('banner_pole', ban); idle.push({ it, u, name, bx: x, bz: z, ry0: ry, ban, ph: (x * 7.3 + z * 3.1) % 6.28 });
   }
   // the tiles under the buildings: one instanced slab and one instanced rim (tinted per building) for the whole fort
   const tiles = S.units.filter((u) => u.alive && !CFG.siege.towers[u.b.t].wall && !CFG.siege.towers[u.b.t].trap);
@@ -11307,6 +11472,7 @@ function buildSiegeBuildings() {
   for (const name in L) { const h = WorldModels.place(g, name, L[name], Object.assign({ bright: 1.3 }, name === 'siege_mage' ? { glow: 0xb98cff, glowK: 0.12 } : {})); siegeParts.bSets.push(h); hs[name] = h; }
   siegeDecorHide();
   siegeParts.aims = aims.map((a) => Object.assign(a, { h: hs[a.name] }));
+  siegeParts.idle = idle.map((a) => Object.assign(a, { h: hs[a.name], hb: hs.banner_pole, fxT: Math.random() * 2 }));
 }
 function animateSiegeDefenders(dt) {
   for (const a of siegeParts.aims) {
@@ -11327,6 +11493,48 @@ function animateSiegeDefenders(dt) {
     it.x = a.bx - ax * back; it.z = a.bz - az * back; it.sy = sy; it.sx = it.sz = sw; a.h.dirty = true;
   }
 }
+// every building has its own idle life (Clash of Clans style): banners flutter; mills puff sawdust and thump with each saw
+// stroke; mines throw dust (stone) or sparks (iron); mage towers glow and shed motes; idle cannons breathe smoke and scan
+// with ballistas; huts hammer while a builder works; anything being upgraded rocks under scaffold dust. Only buildings
+// near the camera make particles.
+function animateSiegeIdle(dt) {
+  const t = siegeParts.t, now = fortNow(), cx = Cam.look.x, cz = Cam.look.z, jobs = fortJobs(fortState()) > 0;
+  let banners = false;
+  for (const a of siegeParts.idle) {
+    const u = a.u, b = u.b, it = a.it, kind = b.t; if (!a.h || !u.alive) continue;
+    if (a.ban) { a.ban.ry = Math.sin(t * 1.8 + a.ph) * 0.14; banners = true; }
+    const near = Math.abs(u.x - cx) < 40 && Math.abs(u.z - cz) < 40, top = SIEGE_MODEL[kind][1] * SIEGE_SCALE;
+    const fx = near && (a.fxT -= dt) <= 0;
+    let sy = 1, ry = a.ry0;
+    if (b.d > now) { // being upgraded: a little rock and builders' dust
+      sy = 0.97 + Math.abs(Math.sin(t * 6 + a.ph)) * 0.03;
+      if (fx) { a.fxT = 0.5; burst(u.x + rand(-1, 1), 0.4, u.z + rand(-1, 1), 4, 0xd8c8a8, 2.5, 0.6, 0.25, 2, 0.8); if (Math.random() < 0.5) burst(u.x, top * 0.7, u.z, 3, 0xffd36b, 3, 0.25, 0.12, 4, 0.4); }
+    } else if (kind === 'mill') { // the saw: a stroke every 0.9 s with a puff of sawdust
+      const k = (t / 0.9 + a.ph) % 1; sy = 1 - Math.max(0, Math.sin(k * Math.PI * 2)) * 0.035;
+      if (fx) { a.fxT = 0.9; burst(u.x + rand(-0.6, 0.6), 0.9, u.z + rand(-0.6, 0.6), 5, 0xe8c08a, 2.4, 0.5, 0.18, 3, 0.7); }
+    } else if (kind === 'mine' || kind === 'iron') { // picks at work: dust, or orange sparks from the iron
+      sy = 1 + Math.sin(t * 2.4 + a.ph) * 0.01;
+      if (fx) { a.fxT = 0.7 + Math.random() * 0.6; if (kind === 'iron') burst(u.x + rand(-0.8, 0.8), 0.8, u.z + rand(-0.8, 0.8), 5, 0xffa040, 4, 0.35, 0.12, 5, 0.5); else burst(u.x + rand(-0.8, 0.8), 0.5, u.z + rand(-0.8, 0.8), 5, 0xb8b0a0, 2, 0.7, 0.3, 1.5, 0.9); }
+    } else if (kind === 'hut') { // a builder at work hammers; an idle hut smokes from its chimney
+      if (jobs) { sy = 1 - Math.max(0, Math.sin(t * 7 + a.ph)) * 0.02; if (fx) { a.fxT = 0.45; burst(u.x + 0.6, 1, u.z + 0.6, 3, 0xffd36b, 3, 0.25, 0.12, 4, 0.4); } }
+      else if (fx) { a.fxT = 1.2; burst(u.x - 0.5, top * 0.95, u.z - 0.4, 3, 0x9a948c, 0.8, 1.4, 0.35, -1.5, 1.2); }
+    } else if (kind === 'mage') { // the tower breathes light and sheds arcane motes
+      sy = 1 + Math.sin(t * 2 + a.ph) * 0.012;
+      if (fx) { a.fxT = 0.35; burst(u.x + rand(-0.4, 0.4), top * 0.85, u.z + rand(-0.4, 0.4), 2, b.p === 1 ? 0x9fe8ff : b.p === 2 ? 0xfff27a : 0xc58cff, 1.2, 0.9, 0.16, -2, 0.9); }
+    } else if (kind === 'warrior') { // the barracks' door: a little breathing; its warriors drill outside
+      sy = 1 + Math.sin(t * 1.5 + a.ph) * 0.01;
+    } else if (kind === 'archer') { // lookouts on the platform: the tower sways a hair in the wind
+      sy = 1 + Math.sin(t * 1.1 + a.ph) * 0.008;
+    } else if (kind === 'bomb') { if (fx) { a.fxT = 0.25; burst(u.x + 0.2, 0.9, u.z, 1, 0xffc040, 1.5, 0.2, 0.1, 2, 0.3); } continue; } // the fuse fizzles
+    else if (kind === 'tar') continue;
+    // idle cannons and ballistas scan the field; a cannon breathes a wisp of smoke
+    const aim = siegeParts.aims.find((q) => q.u === u);
+    if (aim && (kind === 'cannon' || kind === 'ballista') && G.time - (u.fireT ?? -9) > 3) { aim.it.ry += (Math.sin(t * 0.5 + a.ph) * 0.9 + a.ry0 - aim.it.ry) * (1 - Math.exp(-dt * 1.5)); u.aim = aim.it.ry; aim.h.dirty = true; if (fx && kind === 'cannon') { a.fxT = 2.4; burst(u.x + Math.sin(aim.it.ry) * 1.2, 1.1, u.z + Math.cos(aim.it.ry) * 1.2, 2, 0xcfcac2, 0.6, 1.2, 0.3, -1, 1); } continue; }
+    if (aim) continue; // a defender that is firing has its own animation
+    if (it.sy !== sy || it.ry !== ry) { it.sy = sy; it.ry = ry; a.h.dirty = true; }
+  }
+  if (banners && siegeParts.idle[0] && siegeParts.idle[0].hb) siegeParts.idle[0].hb.dirty = true;
+}
 // builder mode: the field's grid over the land, Clash of Clans style (a checkered tint, thin lines, a stronger line every 5 cells)
 function siegeGridOverlay(on) {
   const S = G.siege;
@@ -11342,24 +11550,30 @@ function siegeGridOverlay(on) {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(H * 2, H * 2).rotateX(-Math.PI / 2), mat); m.position.set(SC.x, 0.06, SC.z); m.renderOrder = 1;
   siegeGroup.add(m); siegeParts.grid = m;
 }
-function siegePreview(q) {
+// the see-through preview: a copy of the building (or of every piece of a wall line) where it would stand
+function siegePreview(list) {
   const P = siegeParts.preview, cs = CFG.siege.cell;
-  if (!q) { if (P) { WorldModels.dispose(P.h); siegeParts.preview = null; } return; }
-  const wall = CFG.siege.towers[q.t].wall && q.t === 'wall', name = wall ? 'siege_wall_wood' : SIEGE_MODEL[q.t][0];
-  const s = FORT_TYPES[q.t], x = SC.x + (q.x + s / 2) * cs, z = SC.z + (q.z + s / 2) * cs;
+  if (!list || !list.length) { if (P) { WorldModels.dispose(P.h); siegeParts.preview = null; } return; }
+  const t = list[0].t, wall = t === 'wall', name = wall ? 'siege_wall_wood' : siegeModelName(t, 1), n = Math.min(64, list.length);
   let pv = P;
-  if (!pv || pv.name !== name) { // placed where it stands (the streamer loads a set by its distance to the camera)
+  if (!pv || pv.name !== name || pv.items.length !== n) { // placed where it stands (the streamer loads a set by its distance to the camera)
     if (P) WorldModels.dispose(P.h);
-    const it = { x, z, ry: 0, s: 1 }; pv = siegeParts.preview = { name, it, h: WorldModels.place(siegeGroup, name, [it], { ghost: true, far: 999 }) };
+    const s0 = FORT_TYPES[t], items = list.slice(0, n).map((q) => ({ x: SC.x + (q.x + s0 / 2) * cs, z: SC.z + (q.z + s0 / 2) * cs, ry: 0, s: 1 })); // where they stand: the set streams in by its distance to the camera
+    pv = siegeParts.preview = { name, items, h: WorldModels.place(siegeGroup, name, items, { ghost: true, far: 999 }) };
   }
-  const it = pv.it;
-  it.x = x; it.z = z; it.ry = CFG.siege.towers[q.t].trap || q.t === 'gate' || wall ? 0 : Math.atan2(SC.x - x, SC.z - z);
-  if (wall) { it.s = 1.8; it.sx = cs / ((WORLD_MODEL_BOX[name] || [2])[0] * 1.8); } else it.s = SIEGE_MODEL[q.t][1];
+  const s = FORT_TYPES[t], T = CFG.siege.towers[t];
+  list.slice(0, n).forEach((q, i) => {
+    const it = pv.items[i], x = SC.x + (q.x + s / 2) * cs, z = SC.z + (q.z + s / 2) * cs;
+    it.x = x; it.z = z; it.ry = T.trap || T.wall ? 0 : Math.atan2(SC.x - x, SC.z - z);
+    if (wall) { const L = list.length > 1 ? list : null, along = L && L[1].x === L[0].x; it.ry = along ? Math.PI / 2 : 0; it.s = 1.8 * SIEGE_SCALE; it.sx = cs / ((WORLD_MODEL_BOX[name] || [2])[0] * 1.8 * SIEGE_SCALE); } else it.s = SIEGE_MODEL[t][1] * SIEGE_SCALE;
+    it.hidden = !q.ok && list.length > 1; // in a line, pieces that will not be built only show their red square
+  });
   pv.h.dirty = true;
-  for (const m of pv.h.mats) { m.emissive.setHex(q.ok ? 0x58e08a : 0xff5d6c); m.opacity = 0.45 + Math.sin(siegeParts.t * 5) * 0.08; }
+  const ok = list.every((q) => q.ok) || list.length > 1;
+  for (const m of pv.h.mats) { m.emissive.setHex(ok ? 0x58e08a : 0xff5d6c); m.opacity = 0.45 + Math.sin(siegeParts.t * 5) * 0.08; }
 }
 function disposeSiegeView() {
-  for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h);
+  for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h); siegeParts.idle = [];
   if (siegeParts.preview) { WorldModels.dispose(siegeParts.preview.h); siegeParts.preview = null; }
   siegeParts.grid = null;
   const geos = new Set(), mats = new Set();
@@ -11380,11 +11594,16 @@ function updateSiegeView(dt) {
   const t = (siegeParts.t += dt), now = fortNow();
   const sig = S.units.map((u) => `${u.b.t}${u.b.x},${u.b.z},${u.b.l}${u.b.d > now ? 'u' : ''}${u.alive ? '' : 'x'}${u.spent ? 's' : ''}`).join('|');
   if (sig !== siegeParts.sig) { if (siegeParts.sig) buildSiegeBuildings(); siegeParts.sig = sig; }
-  animateSiegeDefenders(dt);
+  animateSiegeDefenders(dt); animateSiegeIdle(dt);
   // the placing ghost: the footprint square plus a see-through copy of the building, green where it fits, red where not
-  const gh = siegeParts.ghost, q = fortGhost();
-  siegePreview(q);
-  if (gh) { gh.visible = !!q; if (q) { const s = FORT_TYPES[q.t], cs = CFG.siege.cell; gh.scale.set(s * cs * 0.96, 1, s * cs * 0.96); gh.position.set(SC.x + (q.x + s / 2) * cs, 0.07, SC.z + (q.z + s / 2) * cs); gh.material.color.set(q.ok ? 0x58e08a : 0xff5d6c); gh.material.opacity = 0.35 + Math.sin(t * 6) * 0.12; } }
+  const gh = siegeParts.ghost, qs = fortGhosts();
+  siegePreview(qs);
+  if (gh) {
+    const n = qs ? Math.min(64, qs.length) : 0, cs = CFG.siege.cell;
+    for (let i = 0; i < n; i++) { const q = qs[i], s = FORT_TYPES[q.t]; _siegeM4.makeScale(s * cs * 0.96, 1, s * cs * 0.96).setPosition(SC.x + (q.x + s / 2) * cs, 0.07, SC.z + (q.z + s / 2) * cs); gh.setMatrixAt(i, _siegeM4); gh.setColorAt(i, _col.set(q.ok ? 0x58e08a : 0xff5d6c)); }
+    gh.count = n; if (n) { gh.instanceMatrix.needsUpdate = true; gh.instanceColor.needsUpdate = true; } gh.material.opacity = 0.35 + Math.sin(t * 6) * 0.12;
+  }
+  if (G.builder && typeof builderTick === 'function') builderTick();
   // a fallen objective disappears in smoke
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });
   if (siegeParts.flame) siegeParts.flame.material.opacity = 0.75 + Math.sin(t * 13) * 0.08 + Math.sin(t * 7.3) * 0.08;
@@ -11981,6 +12200,10 @@ const ICON = {
   trophy: '<svg viewBox="0 0 20 20" class="ic"><path d="M5 3h10v4a5 5 0 0 1-10 0z" fill="#ffd34a" stroke="#a8781a" stroke-width="1.5"/><path d="M5 5H2.5a2.5 2.5 0 0 0 3 3.5M15 5h2.5a2.5 2.5 0 0 1-3 3.5" fill="none" stroke="#a8781a" stroke-width="1.5"/><rect x="8.5" y="11" width="3" height="4" fill="#a8781a"/><rect x="6" y="15" width="8" height="2.5" rx="1" fill="#a8781a"/></svg>',
 };
 ICON.ess = '<svg viewBox="0 0 20 20" class="ic"><path d="M10 1.5l6 7-6 10-6-10z" fill="#c77dff" stroke="#6b2fa8" stroke-width="1.5"/><path d="M10 1.5v17M4 8.5h12" stroke="#f0d9ff" stroke-width="1" opacity=".7"/></svg>';
+// Bastion camp resources: pixel icons (crisp squares, ink outline) for wood, stone and iron
+ICON.wood = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="2" y="6" width="16" height="9" fill="#2a1608"/><rect x="3" y="7" width="14" height="7" fill="#9a6232"/><rect x="3" y="7" width="14" height="2" fill="#c8884a"/><rect x="13" y="7" width="4" height="7" fill="#e8c08a"/><rect x="14" y="9" width="2" height="3" fill="#b07a42"/></svg>';
+ICON.stone = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="3" y="5" width="14" height="11" fill="#1e1a16"/><rect x="4" y="6" width="12" height="9" fill="#9a958c"/><rect x="4" y="6" width="12" height="3" fill="#cfcac0"/><rect x="5" y="12" width="5" height="2" fill="#6e6a62"/><rect x="11" y="10" width="4" height="2" fill="#6e6a62"/></svg>';
+ICON.iron = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="2" y="7" width="16" height="8" fill="#12161c"/><rect x="3" y="8" width="14" height="6" fill="#5e6e80"/><rect x="5" y="8" width="10" height="2" fill="#b8c8da"/><rect x="3" y="12" width="14" height="2" fill="#3a4654"/></svg>';
 const UI = { closable: true, current: null, menuSection: 'upgrades', hud: {} };
 function costHTML(gold, ess) { return `${ICON.coin}${fmtK(gold)}${ess ? ` <span class="essc">${ICON.ess}${fmtK(ess)}</span>` : ''}`; }
 
@@ -12059,7 +12282,9 @@ function updateTags() {
       // fort objectives: always shown, big bars that flash while under attack
       for (const o of G.siege.objs) put(o.x, o.def.h, o.z, o.alive ? `${o.name} · ${Math.ceil(clamp(o.hp / o.maxHp, 0, 1) * 100)}%` : `${o.name} · destroyed`, o.alive ? o.hp / o.maxHp : 0, `obj${o.def.main ? ' main' : ''}${o.hurtT > 0 ? ' hurt' : ''}${o.alive ? '' : ' down'}`);
       for (const s of G.siege.soldiers) if (s.alive && s.hp < s.maxHp && near(s, 26)) put(s.x, 2.4, s.z, '', s.hp / s.maxHp, 'ally');
-      for (const u of G.siege.units) if (u.alive && u.hp < u.maxHp && near(u, 26)) put(u.x, u.size === 1 ? 2.2 : 4.6, u.z, '', u.hp / u.maxHp, 'ally');
+      for (const u of G.siege.units) if (u.alive && u.hp < u.maxHp && near(u, 26)) put(u.x, u.size === 1 ? 2.2 : 3.6, u.z, '', u.hp / u.maxHp, 'ally');
+      // a full-enough mill or mine shows what it holds (tap it in builder mode, or walk up, to collect)
+      for (const u of G.siege.units) { const T = CFG.siege.towers[u.b.t]; if (T.make && u.alive) { const n = fortMade(u.b); if (n >= Math.max(1, T.rate * u.b.l * 0.25)) put(u.x, 4.4, u.z, `+${fmtK(n)} ${CFG.siege.resName[T.make]}`, null, `fortRes ${T.make}${n >= T.cap * u.b.l ? ' full' : ''}`); } }
     }
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
@@ -12149,8 +12374,9 @@ function updateHUD(dt) {
     const nc = G.profile.cases.length; setHidden('caseChip', !nc); if (nc) setText('caseChip', String(nc));
     UI.caseFlash = Math.max(0, (UI.caseFlash || 0) - dt); $('caseChip').classList.toggle('flash', UI.caseFlash > 0);
     setHidden('autoChip', G.mode !== 'hub' || !!G.rift || !!G.siege); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
+    { const F = G.siege && fortState(); setHidden('fortChip', !F || !F.go); if (F && F.go) { setText('fortChip', F.hold ? 'WAVES PAUSED' : 'AUTO WAVES'); $('fortChip').classList.toggle('on', !F.hold); } }
     setHidden('pvpChip', G.mode !== 'hub' || inInstance()); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
-  } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); }
+  } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); setHidden('fortChip', true); }
   $('bMenu').classList.toggle('newU', G.started && Object.keys(UNLOCK_AT).some(unlockNew)); // the menu button glows while something new is unopened
   { const n = mpCount(), on = G.started && !inArena; setHidden('mpChip', !on || !n); if (on && n) setText('mpChip', String(n + 1)); }
   const stk = G.streak >= 3 && !inArena;
@@ -12232,7 +12458,8 @@ function updateObjective() {
   const shr = activeShrine();
   if (G.rift) { const r = G.rift; text = r.phase === 'intro' ? `Rift floor ${r.floor} · get ready` : r.phase === 'clear' ? `Floor ${r.floor} cleared! Next floor…` : `Rift floor ${r.floor} · ${riftLeft()} left · ${Math.ceil(r.t)}s`; }
   else if (G.siege) { const S = G.siege, k = S.objs[0];
-    text = S.phase === 'build' ? `Wave ${S.wave} in ${Math.ceil(S.t)}s · from ${siegeSideNames(S.sides)}` : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }
+    const F = fortState();
+    text = S.phase === 'build' ? (!F.go ? `Wave ${S.wave} · press Start when ready` : F.hold ? `Paused · wave ${S.wave} from ${siegeSideNames(S.sides)}` : `Wave ${S.wave} in ${Math.ceil(S.t)}s · from ${siegeSideNames(S.sides)}`) : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }
   else if (shr) { text = `Shrine challenge: ${shr.wave.filter((e) => e.alive).length} left · ${Math.ceil(shr.t)}s`; tx = shr.x; tz = shr.z; }
   else if (p.job) {
     const j = p.job, npc = NPC_DEFS.find((n) => n.id === j.npc);
@@ -12276,6 +12503,7 @@ function interact() {
   if (n.kind === 'siegeLeave') return endSiege('leave');
   if (n.kind === 'fortBuild') return openBuilder();
   if (n.kind === 'fortB') return openFortBPanel(n.k);
+  if (n.kind === 'fortKeep') return openFortKeepPanel();
   const d = n.def;
   if (d.role === 'smith') return openSmith();
   if (d.role === 'arena') return openArenaPanel();
@@ -12912,7 +13140,11 @@ function openRiftPanel() {
 }
 // Bastion Siege: the house in town opens your fort (and other players' forts by their code); inside, you build with the
 // Build button, and walk up to a building to upgrade, empty or tear it down
-const fortStones = (n) => `<b class="stones">${fmt(n)}</b> Bastion Stones`;
+// wood, stone and iron as icon chips; with M, what you lack shows red
+function fortResHTML(pr, M) {
+  return CFG.siege.res.filter((q) => (pr[q] || 0) > 0).map((q) => `<span class="fres${M && (M[q] || 0) < pr[q] ? ' miss' : ''}">${ICON[q === 'stones' ? 'stone' : q]}<b>${fmtK(pr[q])}</b></span>`).join(' ') || 'free';
+}
+const fortHave = (M) => CFG.siege.res.map((q) => `<span class="fres">${ICON[q === 'stones' ? 'stone' : q]}<b>${fmtK(M[q] || 0)}</b></span>`).join(' ');
 // the building's picture, rendered from its 3D model (tools/fort_icons.mjs)
 const fortPic = (t, cls) => `<img class="fortPic${cls ? ' ' + cls : ''}" src="assets/ui/fort/${t}.webp" alt="" draggable="false">`;
 const fortDur = (s) => (s < 60 ? `${Math.ceil(s)}s` : s < 3600 ? `${Math.ceil(s / 60)} min` : `${Math.floor(s / 3600)} h ${Math.ceil((s % 3600) / 60)} min`);
@@ -12923,45 +13155,67 @@ function openSiegePanel() {
   const n = (t) => M.b.filter((b) => b.t === t).length, shared = fortOnline() || LOCAL_PREVIEW || TEST_MODE;
   const recent = (M.recent || []).map((c) => `<button class="ghost" data-act="siegeJoin" data-c="${c}">${c}</button>`).join('');
   openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Bastion Siege</h3><span class="cnt">Wave ${M.wave || 1}</span></div>
-    <div class="riftCard"><p>Monsters come for <b>The Keep</b> and the two <b>supply wagons</b> from one to four sides of your land. Build anywhere: <b>walls</b> and <b>gates</b> you draw as you walk, <b>archers</b>, <b>cannons</b>, <b>ballistas</b>, <b>mage towers</b>, <b>barracks</b>, <b>mines</b> and <b>builder huts</b>. Monsters walk around walls and break through when every way is closed.</p>
-    <p>If the Keep falls you start again at the wave you fell on, never lower. Every ${C.bossEvery}th wave a <b>Siege Lord</b> drops an item. Your land grows with your level, up to 500 by 500 metres.</p>
-    <p class="fine">Your fort: ${M.b.length} building${M.b.length === 1 ? "" : "s"} · ${n('wall') + n('gate')} wall pieces · ${n('hut')} builder${n('hut') === 1 ? '' : 's'} · best wave ${best}. You have ${fortStones(M.stones)} and ${ICON.coin}${fmtK(p.gold)} gold.</p></div>
+    <div class="riftCard"><p>Monsters come for <b>The Keep</b> and the two <b>supply wagons</b> from one to four sides of your land. Build anywhere: <b>walls</b> and <b>gates</b> you drag in straight lines, <b>towers</b>, <b>barracks</b>, <b>traps</b> and <b>builder huts</b>. Monsters walk around walls and break through when every way is closed.</p>
+    <p>Your camp pays for itself: <b>lumber mills</b>, <b>stone mines</b> and <b>iron mines</b> fill up even while you are away, and every wave held pays some too. The <b>Keep's level</b> decides how many of each building you may have. Once started, waves keep coming with a ${C.build} s break; pause them any time.</p>
+    <p>From level ${C.pathAt} a tower picks one of two paths. Later waves bring <b>armoured</b> monsters (light arrows and orbs barely scratch them) and <b>flyers</b> that cross your walls. If the Keep falls you start again at the wave you fell on, never lower.</p>
+    <p class="fine">Your fort: Keep level ${M.keep || 1} · ${M.b.length} building${M.b.length === 1 ? '' : 's'} · ${n('wall') + n('gate')} wall pieces · ${n('hut')} builder${n('hut') === 1 ? '' : 's'} · best wave ${best}. You have ${fortHave(M)}.</p></div>
     ${shared ? `<h4>Play together</h4><p class="fine">${M.code ? `Your fort code is <b class="fortCode">${M.code}</b>. Friends type it below to join, even when you are away. Anyone with the code can build in your fort.` : 'Your fort gets a code the first time you defend it. Friends use it to join you.'}</p>
     <div class="row dlvJoin"><input id="fortCode" maxlength="12" placeholder="FORT CODE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="ghost" data-act="siegeJoin">Join</button>${M.code ? `<button class="ghost" data-act="siegeCopy">Copy my code</button>` : ''}</div>
     ${recent ? `<div class="row fortRecent"><small>Recent forts</small>${recent}</div>` : ''}` : ''}
     <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="siegeGo">Defend your fort</button></div>`);
 }
-function fortStat(t, l) {
-  const T = CFG.siege.towers[t];
-  if (t === 'warrior') return `${siegeMen(l)} warriors · ${fmtK(siegeDefDmg(T, l))} dmg`;
-  if (t === 'mine') return `${T.rate * l} stones an hour, holds ${T.cap * l}`;
+function fortStat(t, l, b) {
+  const T = b && b.p && CFG.siege.paths[t] && l >= CFG.siege.pathAt ? siegeStats(Object.assign({}, b, { l, d: 0 })) : CFG.siege.towers[t];
+  if (t === 'warrior') return `${siegeMen(l, b && l >= CFG.siege.pathAt ? b : null)} warriors · ${fmtK(siegeDefDmg(T, l))} dmg${T.light ? '' : ' · cuts armour'}`;
+  if (T.make) return `${T.rate * l} ${CFG.siege.resName[T.make].toLowerCase()} an hour, holds ${T.cap * l}`;
   if (t === 'hut') return 'One more upgrade at a time';
   if (T.wall) return `Monsters walk up to ${T.path + l} cells around it before breaking it`;
   if (t === 'spike') return `${fmtK(siegeDefDmg(T, l))} dmg to every monster on it · resets in ${T.cd}s`;
   if (t === 'bomb') return `${fmtK(siegeDefDmg(T, l))} dmg to all within ${T.aoe} m · once per wave`;
   if (t === 'tar') return `Half speed · ${fmtK(refDmg(G.profile.level) * T.dps * siegeLvlMul(l))} dmg a second`;
-  return `${fmtK(siegeDefDmg(T, l))} dmg · range ${T.range}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}`;
+  return `${fmtK(siegeDefDmg(T, l))} dmg · range ${Math.round(T.range)}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}${T.multi ? ` · ${T.multi} targets` : ''}${T.chain ? ` · chains ${T.chain}` : ''}${T.slow ? ' · slows' : ''}${T.burn ? ' · burns' : ''}${T.air ? ' · hits flyers' : ''}${T.light ? '' : ' · cracks armour'}`;
 }
-// one building: upgrade (takes a builder and some time from level 2), empty a mine, tear it down for half its stones
+// one building: upgrade (takes a builder and some time from level 2; at level 5 a tower picks a path), collect a mill or
+// mine, move it (builder mode), tear it down for half of what it cost
 function openFortBPanel(k) {
   const S = G.siege, u = S && S.units[k]; if (!u) return UI.close();
   UI.current = 'fortB'; UI.fortK = k;
-  const p = G.profile, F = fortState(), M = myFort(), b = u.b, T = CFG.siege.towers[b.t], fi = F.b.indexOf(b), max = b.l >= fortMaxLvl(b.t), now = fortNow();
-  const c = max ? null : fortCost(b.t, b.l + 1), busy = b.d > now, why = max ? '' : fortCheck({ o: 'up', k: fi }), ok = !why && p.gold >= c.gold && M.stones >= c.stones;
-  const mine = b.t === 'mine' ? fortMineStones(b) : 0;
-  openModal(`<div class="npcHead">${fortPic(b.t, 'big')}<h3>${T.name}</h3><span class="cnt">${T.maxLvl === 1 ? '' : 'Lv ' + b.l}</span></div>
-    <p>${T.blurb}</p><p class="fine">${fortStat(b.t, Math.max(1, fortLvl(b)))}${busy ? ` · upgrading to level ${b.l}, ${fortDur((b.d - now) / 1000)} left` : ''}</p>
-    ${b.t === 'mine' ? `<div class="row"><button class="${mine > 0 ? 'primary' : 'ghost'}" data-act="fortCol" data-k="${fi}"${mine > 0 ? '' : ' aria-disabled="true"'}>Take ${fortStones(mine)}</button></div>` : ''}
-    ${max ? '<p class="fine">Max level.</p>' : `<p class="fine">Level ${b.l + 1}: ${fortStat(b.t, b.l + 1)}<br>${ICON.coin}${fmtK(c.gold)} · ${fortStones(c.stones)}${c.time ? ` · ${fortDur(c.time)} with a builder` : ''}${why ? ` · ${why}` : ''}</p>`}
-    <div class="row end">${G.builder ? `<button class="ghost" data-act="fortMove" data-k="${fi}">Move</button>` : ''}<button class="warn" data-act="fortDel" data-k="${fi}">Tear down (+${fmt(Math.floor(fortStonesSpent(b) / 2))} stones)</button><button class="ghost" data-act="close">Back</button>${max ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortUp" data-k="${fi}"${ok ? '' : ' aria-disabled="true"'}>Upgrade</button>`}</div>`);
+  const C = CFG.siege, F = fortState(), M = myFort(), b = u.b, T = C.towers[b.t], fi = F.b.indexOf(b), top = b.l >= (T.maxLvl || C.maxLvl), now = fortNow();
+  const c = top ? null : fortCost(b.t, b.l + 1), busy = b.d > now, fork = !top && fortNeedsPath(b), P = C.paths[b.t];
+  const why = top ? '' : fortCheck({ o: 'up', k: fi, p: fork ? 1 : 0 }), ok = !why && fortHas(c, M), made = fortMade(b), path = b.p && P ? P[b.p - 1] : null;
+  const back = fortSpent(b); for (const q in back) back[q] = Math.floor(back[q] / 2);
+  const upBtns = top ? '' : fork
+    ? P.map((q, i) => `<button class="${ok ? 'primary' : 'ghost'} fortPath" data-act="fortUp" data-k="${fi}" data-p="${i + 1}"${ok ? '' : ' aria-disabled="true"'}><b>${q.name}</b><small>${q.blurb}</small></button>`).join('')
+    : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortUp" data-k="${fi}"${ok ? '' : ' aria-disabled="true"'}>Upgrade</button>`;
+  openModal(`<div class="npcHead">${fortPic(b.t, 'big')}<h3>${path ? path.name : T.name}</h3><span class="cnt">${T.maxLvl === 1 ? '' : 'Lv ' + b.l}</span></div>
+    <p>${path ? path.blurb : T.blurb}</p><p class="fine">${fortStat(b.t, Math.max(1, fortLvl(b)), b)}${busy ? ` · upgrading to level ${b.l}, ${fortDur((b.d - now) / 1000)} left` : ''}</p>
+    ${T.make ? `<div class="row"><button class="${made > 0 ? 'primary' : 'ghost'}" data-act="fortCol" data-k="${fi}"${made > 0 ? '' : ' aria-disabled="true"'}>Collect ${fortResHTML({ [T.make]: Math.max(made, 0) }).replace('free', '0')}</button></div>` : ''}
+    ${top ? '<p class="fine">Max level.</p>' : `<p class="fine">${fork ? `Level ${b.l + 1}: pick a path (it stays)` : `Level ${b.l + 1}: ${fortStat(b.t, b.l + 1, b)}`}<br>${fortResHTML(c, M)}${c.time ? ` · ${fortDur(c.time)} with a builder` : ''}${why && why !== 'Pick a path' ? ` · ${why}` : ''}</p>`}
+    ${fork ? `<div class="row fortPaths">${upBtns}</div>` : ''}
+    <div class="row end">${G.builder ? `<button class="ghost" data-act="fortMove" data-k="${fi}">Move</button>` : ''}<button class="warn" data-act="fortDel" data-k="${fi}">Tear down (+${fortResHTML(back)})</button><button class="ghost" data-act="close">Back</button>${fork ? '' : upBtns}</div>`);
+}
+// the Keep: its level sets how many of each building you may have and how high they go
+function openFortKeepPanel() {
+  const S = G.siege; if (!S) return UI.close();
+  UI.current = 'fortKeep';
+  const C = CFG.siege, F = fortState(), M = myFort(), k = F.keep || 1, eff = fortKeep(F), now = fortNow(), top = k >= C.keep.max;
+  const c = top ? null : C.keep.cost(k + 1), why = top ? '' : fortCheck({ o: 'keep' }), ok = !why && fortHas(c, M);
+  const rows = SIEGE_TYPES.filter((t) => C.towers[t].lim).map((t) => { const L = C.towers[t].lim, n = fortCount(t, F), now1 = L[eff - 1], nx = top ? null : L[k];
+    return `<div class="row"><b>${C.towers[t].short}</b><small>${n}/${now1}${nx != null && nx > now1 ? ` → ${nx}` : ''}</small></div>`; }).join('');
+  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>The Keep</h3><span class="cnt">Level ${k}</span></div>
+    <p>The Keep's level decides how many of each building your camp may have, and how high they can be upgraded (now level ${C.keep.lvl[eff - 1]}). Every level also makes the Keep and the wagons sturdier.</p>
+    ${F.kd > now ? `<p class="fine">Upgrading to level ${k}, ${fortDur((F.kd - now) / 1000)} left (one builder).</p>` : ''}
+    <div class="list fortLimits">${rows}</div>
+    ${top ? '<p class="fine">Max level.</p>' : `<p class="fine">Level ${k + 1}: buildings up to level ${C.keep.lvl[k]}<br>${fortResHTML(c, M)} · ${fortDur(C.keep.time(k + 1))} with a builder${why ? ` · ${why}` : ''}</p>`}
+    <div class="row end"><button class="ghost" data-act="close">Back</button>${top ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortKeep"${ok ? '' : ' aria-disabled="true"'}>Upgrade the Keep</button>`}</div>`);
 }
 function openSiegeResult(r) {
   UI.current = 'siegeResult';
   const why = r.why === 'keep' ? 'The Keep has fallen' : 'You left the fort';
   openModal(`<div class="center"><div class="eyebrow">${why}</div><h2>Bastion Siege · ${r.held ? `${r.held} wave${r.held > 1 ? 's' : ''} held` : 'no wave held'}</h2></div>
-    <div class="stats3"><div><b>${r.held}</b><span>Waves held</span></div><div><b>${ICON.coin}${fmtK(r.gold)}</b><span>Gold</span></div><div><b class="stones">${fmt(r.stones)}</b><span>Bastion Stones</span></div></div>
+    <div class="stats3"><div><b>${r.held}</b><span>Waves held</span></div><div><b>${ICON.coin}${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${fortResHTML(r)}</b><span>Camp resources</span></div></div>
     <div class="stats3"><div><b>${r.items}</b><span>Siege Lord items</span></div><div><b>${r.best}</b><span>Best wave</span></div><div><b>${r.next}</b><span>Next start</span></div></div>
-    <p class="fine center">Next time the fort starts at wave ${r.next}. Spend your stones and gold on new buildings and upgrades, then hold out longer.</p>
+    <p class="fine center">Next time the fort starts at wave ${r.next}. Collect your mills and mines, build and upgrade, then hold out longer.</p>
     <div class="row end"><button class="ghost" data-act="close">Later</button><button class="primary big" data-act="fortBack">Back to the Bastion</button></div>`);
 }
 // Dungeons: a sealed instance per POI. Pick a plain run or one of your Dungeon Keys (it is used up on entry).
@@ -13217,7 +13471,8 @@ function handlePanelClick(e) {
     case 'siegeCopy': { const c = myFort().code; try { navigator.clipboard.writeText(c).then(() => toast(`Copied ${c}`, 'good'), () => toast(c)); } catch (e) { toast(c); } break; }
     case 'fortWave': UI.close(); startSiegeWave(); break;
     case 'fortMove': { const fb = fortState().b[+b.dataset.k]; UI.close(); if (fb) builderMove(fb); break; }
-    case 'fortUp': case 'fortDel': case 'fortCol': { const why = fortDo({ o: act === 'fortUp' ? 'up' : act === 'fortDel' ? 'del' : 'col', k: +b.dataset.k });
+    case 'fortKeep': { const why = fortDo({ o: 'keep' }); if (why) toast(why, 'bad'); else Sfx.play('unlock'); openFortKeepPanel(); break; }
+    case 'fortUp': case 'fortDel': case 'fortCol': { const why = fortDo({ o: act === 'fortUp' ? 'up' : act === 'fortDel' ? 'del' : 'col', k: +b.dataset.k, p: +b.dataset.p || 0 });
       if (why) toast(why, 'bad'); else Sfx.play('unlock');
       if (act === 'fortDel' || why) UI.close(); else openFortBPanel(UI.fortK); break; }
     case 'fortBack': if (G.siege) UI.close(); else openSiegePanel(); break;
@@ -13418,13 +13673,14 @@ function processEvents() {
       case 'dungeonBoss': Feed.remove('dungeon'); Feed.remove('dlvEvent'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
       case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); Feed.remove('dlvEvent'); if (e.why === 'down') showToast(e.delve ? `Your party fell in ${e.name}` : `${e.name} resets · you fell`, 'bad'); if (e.delve && typeof openDelvePanel === 'function' && e.why !== 'away') setTimeout(() => { if (!G.modal && G.mode === 'hub' && !inInstance()) openDelvePanel(); }, 900); break;
       case 'siegeStart': enterSiegeView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`Bastion Siege · Wave ${e.wave}`, 'Protect the Keep and the wagons · tap Build to place defenders', 'gold'); break;
-      case 'siegeWave': if (e.boss) { showBanner(`Wave ${e.wave} · Siege Lord!`, `${e.count} monsters from ${e.sides} · Lv ${e.lvl}`, 'red'); Sfx.play('horn'); } else { showBanner(`Wave ${e.wave}${e.mini ? ' · Siege Captain' : ''}`, `${e.count} monsters from ${e.sides} · Lv ${e.lvl}`, 'red'); Sfx.play(e.mini ? 'horn' : 'tick'); } break;
-      case 'siegeClear': Feed.add(`${gi('m_hero')} Wave <b>${e.wave}</b> held · +${fmtK(e.gold)} gold · +${e.stones} Bastion Stones${e.item ? ' · Siege Lord item!' : ''}`, 'rift'); Sfx.play('job'); burst(G.player.x, 1, G.player.z, 24, 0xffc94a, 6, 0.8, 0.25, 3, 1.3); break;
+      case 'siegeWave': { const extra = `${e.armored ? ` · ${e.armored} armoured` : ''}${e.flyers ? ` · ${e.flyers} flyers` : ''}`;
+        if (e.boss) { showBanner(`Wave ${e.wave} · Siege Lord!`, `${e.count} monsters from ${e.sides}${extra} · Lv ${e.lvl}`, 'red'); Sfx.play('horn'); } else { showBanner(`Wave ${e.wave}${e.mini ? ' · Siege Captain' : ''}`, `${e.count} monsters from ${e.sides}${extra} · Lv ${e.lvl}`, 'red'); Sfx.play(e.mini ? 'horn' : 'tick'); } break; }
+      case 'siegeClear': Feed.add(`${gi('m_hero')} Wave <b>${e.wave}</b> held · +${fmtK(e.gold)} gold · ${fortResHTML(e)}${e.item ? ' · Siege Lord item!' : ''}`, 'rift'); Sfx.play('job'); burst(G.player.x, 1, G.player.z, 24, 0xffc94a, 6, 0.8, 0.25, 3, 1.3); break;
       case 'objectiveHit': if (e.main) { showToast(`${e.name} is under attack!`, 'bad'); Sfx.play('hurt', { gap: 0.5 }); } ringFx(e.x, e.z, 3, 0xff3b3b, 0.5); break;
       case 'objectiveDown': burst(e.x, 2, e.z, 50, 0xff7a3d, 9, 1.2, 0.4, 4, 2); SpriteFX.play('explosion', 'fire', e.x, 0, e.z, 8); Cam.shake = Math.max(Cam.shake, 0.8); Sfx.play('boom');
         if (!e.main) showBanner(`${e.name} destroyed`, 'Less gold per wave · keep the Keep standing', 'red'); break;
       case 'siegeEnd': enterSiegeView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); if (e.why === 'keep') { Sfx.play('lose'); showToast('The Keep has fallen', 'bad'); } break;
-      case 'fortBuilt': if (e.type === 'wall' || e.type === 'gate') burst(e.x, 0.6, e.z, 8, 0xd8b07a, 3, 0.5, 0.25, 2, 0.8); else { SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); } if (e.done) showToast(`${CFG.siege.towers[e.type].name} reached level ${e.l}`, 'good'); break;
+      case 'fortBuilt': if (e.type === 'wall' || e.type === 'gate') burst(e.x, 0.6, e.z, 8, 0xd8b07a, 3, 0.5, 0.25, 2, 0.8); else { SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); } if (e.done) showToast(`${e.type === 'keep' ? 'The Keep' : CFG.siege.towers[e.type].name} reached level ${e.l}`, 'good'); break;
       case 'fortTrap': if (e.type === 'bomb') { SpriteFX.play('explosion', 'fire', e.x, 0, e.z, e.r * 1.4); SpriteFX.play('ring', 'fire', e.x, 0, e.z, e.r * 2.4, { speed: 1.2 }); SpriteFX.play('dust', 'dust', e.x, 0, e.z, e.r, { delay: 0.1 }); if (near(e, 30)) { Sfx.play('boom'); Cam.shake = Math.max(Cam.shake, 0.5); } }
         else { SpriteFX.play('slash', 'white', e.x, 0.6, e.z, 2.2); burst(e.x, 0.3, e.z, 10, 0xc8ccd4, 4, 0.4, 0.2, 3, 1.4); if (near(e, 22)) Sfx.play('melee', { gap: 0.1 }); }
         break;
@@ -13433,7 +13689,7 @@ function processEvents() {
       case 'fortShot': { const y = e.y || 1.6, hear = near(e, 26);
         if (e.type === 'cannon') { SpriteFX.play('explosion', 'fire', e.x, y, e.z, 1.5); burst(e.x, y, e.z, 12, 0xcfcac2, 3, 0.7, 0.35, -0.6, 0.8); if (hear) { Sfx.play('boom', { gap: 0.2 }); if (near(e, 12)) Cam.shake = Math.max(Cam.shake, 0.15); } }
         else if (e.type === 'ballista') { burst(e.x, y, e.z, 8, 0xd8b07a, 4, 0.35, 0.22, 2, 0.4); if (hear) Sfx.play('bounce', { gap: 0.15 }); }
-        else if (e.type === 'mage') { SpriteFX.play('nova', 'arcane', e.x, y, e.z, 1.4); burst(e.x, y, e.z, 10, 0xc58cff, 4, 0.45, 0.25, 0, 0.5); if (hear) Sfx.play('zap', { gap: 0.15 }); }
+        else if (e.type === 'mage') { SpriteFX.play('nova', e.path === 1 ? 'frost' : e.path === 2 ? 'storm' : 'arcane', e.x, y, e.z, 1.4); burst(e.x, y, e.z, 10, 0xc58cff, 4, 0.45, 0.25, 0, 0.5); if (hear) Sfx.play('zap', { gap: 0.15 }); }
         else { burst(e.x, y, e.z, 5, 0xffe08a, 3, 0.3, 0.18, 1, 0.3); if (hear) Sfx.play('pellet', { gap: 0.1 }); }
         break; }
       case 'riftEnd': enterRiftView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); break;
@@ -15721,7 +15977,7 @@ function delveHud() {
 const FW = { ft: 0, host: null, wasHost: true, dirty: false, wT: 0, sendT: 0, saveT: -1, saving: false, ask: new Map(), rid: 0, hits: new Map(), hitT: 0, mm: new Map(), sig: '' };
 const fortOnline = () => !LOCAL_PREVIEW && !TEST_MODE && Cloud.kind === 'supa' && Cloud.state === 'on';
 const fortCodeOk = (c) => typeof c === 'string' && /^[A-Z0-9-]{4,12}$/.test(c);
-const worldPart = (F) => ({ wave: F.wave, land: F.land, b: F.b });
+const worldPart = (F) => ({ wave: F.wave, land: F.land, b: F.b, keep: F.keep || 1, kd: F.kd || 0, go: F.go || 0, hold: F.hold || 0 });
 const FortApi = {
   all() { try { return JSON.parse(localStorage.getItem('aa-fort-worlds') || '{}') || {}; } catch (e) { return {}; } },
   put(all) { try { localStorage.setItem('aa-fort-worlds', JSON.stringify(all)); } catch (e) { /* private mode: the world lives this session */ } },
@@ -15746,7 +16002,7 @@ async function siegeEnterOwn() {
     if (!M.code) { const code = await FortApi.create(M); if (code) { M.code = code; G.dirty = true; } }
     else {
       const w = await FortApi.load(M.code);
-      if (w && w.fort) { const s = sanitizeFort(w.fort, false); M.b = s.b; M.land = Math.max(M.land || 0, s.land); M.wave = Math.max(M.wave || 1, (w.wave | 0) || s.wave); } // the server's wave, not the one inside the fort data
+      if (w && w.fort) { const s = sanitizeFort(w.fort, false); M.b = s.b; M.land = Math.max(M.land || 0, s.land); M.keep = Math.max(M.keep || 1, s.keep); if (s.kd) M.kd = s.kd; if (s.go) M.go = 1; M.hold = s.hold; M.wave = Math.max(M.wave || 1, (w.wave | 0) || s.wave); } // the server's wave, not the one inside the fort data
     }
   } catch (e) { toast('Your fort is offline this time: friends can not join', 'bad'); }
   return startSiege(M.code ? { code: M.code, fort: M } : null);
@@ -15780,7 +16036,7 @@ function siegeMpGo() { fortSend('fgo', { to: siegeHostSid() }); }
 function siegeMpAsk(op, pr) {
   const b = op.k != null ? fortState().b[op.k] : null, rid = ++FW.rid;
   FW.ask.set(rid, { pr, at: G.time });
-  fortSend('fbq', { to: siegeHostSid(), rid, op: b ? { o: op.o, t: b.t, x: b.x, z: b.z, nx: op.x, nz: op.z } : op }); // nx, nz: where a moved building goes
+  fortSend('fbq', { to: siegeHostSid(), rid, op: b ? { o: op.o, t: b.t, x: b.x, z: b.z, nx: op.x, nz: op.z, p: op.p } : op }); // nx, nz: where a moved building goes; p: a path
 }
 // a shared fort was entered: the clock decides who runs it (the earliest in)
 function siegeMpStart() { Object.assign(FW, { ft: Date.now(), host: null, wasHost: true, dirty: false, wT: 0, sendT: 0, saveT: -1, sig: '' }); FW.ask.clear(); FW.hits.clear(); FW.mm.clear(); }
@@ -15795,7 +16051,7 @@ function siegeMpMobHit(t, amt) { FW.hits.set(t.hid, (FW.hits.get(t.hid) || 0) + 
 function siegeMpPeerNear(e, near) { if (siegeFollowing()) return null; let best = null, bd = near; for (const q of siegeMpPeers()) if (q.alive) { const d = Math.hypot(q.x - e.x, q.z - e.z); if (d < bd) { bd = d; best = q; } } return best; }
 function siegeMpHitPeer(q, amt) { fortSend('fpd', { to: q.key, f: Math.round(amt / refHp(G.siege.lvl) * 10000) / 10000 }); }
 const FW_TYPES = Object.keys(FORT_TYPES);
-const fwPack = (F) => F.b.map((b) => [FW_TYPES.indexOf(b.t), b.x, b.z, b.l, b.d || 0, b.c || 0]);
+const fwPack = (F) => F.b.map((b) => [FW_TYPES.indexOf(b.t), b.x, b.z, b.l, b.d || 0, b.c || 0, b.p || 0]);
 // called every step of the fort; true = this game is a guest and the host's state was mirrored instead of simulated
 function siegeMpStep(dt) {
   const S = G.siege; if (!S.code) return false;
@@ -15804,7 +16060,7 @@ function siegeMpStep(dt) {
   if (host !== FW.wasHost) { FW.wasHost = host; if (host) siegeMpPromote(); else siegeMpDemote(); }
   if (host) {
     if ((FW.sendT -= dt) <= 0) { FW.sendT = 0.25; siegeMpSendState(); }
-    if (FW.dirty || (FW.wT -= dt) <= 0) { FW.dirty = false; FW.wT = 8; const F = fortState(); fortSend('fw', { b: fwPack(F), w: F.wave, ld: F.land }); }
+    if (FW.dirty || (FW.wT -= dt) <= 0) { FW.dirty = false; FW.wT = 8; const F = fortState(); fortSend('fw', { b: fwPack(F), w: F.wave, ld: F.land, kp: F.keep || 1, kd: F.kd || 0, go: F.go || 0, hd: F.hold || 0 }); }
     if (FW.saveT >= 0 && (FW.saveT -= dt) <= 0) siegeMpSave();
     return false;
   }
@@ -15819,7 +16075,7 @@ function siegeMpStep(dt) {
 function siegeMpSendState() {
   const S = G.siege, ph = S.phase === 'build' ? 0 : S.phase === 'fight' ? 1 : 2;
   const m = S.mobs.slice(0, 90).map((e) => [e.id, e.type, e.zi | 0, Math.round(e.x * 10), Math.round(e.z * 10), e.alive ? Math.max(1, Math.round(e.hp / e.maxHp * 1000)) : 0,
-    Math.round((e.facing || 0) * 100), Math.round((e.moveAmt || 0) * 10), (e.attackAnim || 0) > 0.3 ? 1 : 0, (e.elite ? 1 : 0) | (e.bossName === 'Siege Lord' ? 2 : 0) | (e.miniBoss ? 4 : 0)]);
+    Math.round((e.facing || 0) * 100), Math.round((e.moveAmt || 0) * 10), (e.attackAnim || 0) > 0.3 ? 1 : 0, (e.elite ? 1 : 0) | (e.bossName === 'Siege Lord' ? 2 : 0) | (e.miniBoss ? 4 : 0) | (e.siegeArmor ? 8 : 0) | (e.flying ? 16 : 0)]);
   fortSend('fst', { w: S.wave, ph, t: Math.round(S.t * 10) / 10, tm: S.tMax, lvl: S.lvl, sd: S.sides, mn: S.mini ? 1 : 0,
     o: S.objs.map((o) => (o.alive ? Math.max(1, Math.round(o.hp / o.maxHp * 1000)) : 0)), dn: S.units.map((u, i) => (u.alive ? -1 : i)).filter((i) => i >= 0), m });
 }
@@ -15841,8 +16097,8 @@ function siegeMpRecv(event, sid, P) {
     if (event === 'fgo') startSiegeWave();
     else if (event === 'fhit' && Array.isArray(P.h)) for (const [i, f] of P.h) { const e = S.mobs.find((q) => q.id === i); if (e && e.alive) { e.hp -= clamp(mpNum(f, 0), 0, 1) * e.maxHp; e.flashT = CFG.combat.hitFlash; e.lastHurt = G.time; if (e.hp <= 0) { e.hp = 0; killEntity(e, null); } } }
     else if (event === 'fbq' && P.op && typeof P.op === 'object') {
-      const op = { o: String(P.op.o), t: String(P.op.t), x: P.op.x | 0, z: P.op.z | 0 };
-      if (op.o !== 'add') op.k = fortState().b.findIndex((b) => b.t === op.t && b.x === op.x && b.z === op.z);
+      const op = { o: String(P.op.o), t: String(P.op.t), x: P.op.x | 0, z: P.op.z | 0, p: P.op.p | 0, v: P.op.v ? 1 : 0 };
+      if (op.o !== 'add' && op.o !== 'keep' && op.o !== 'hold') op.k = fortState().b.findIndex((b) => b.t === op.t && b.x === op.x && b.z === op.z);
       if (op.o === 'move') { op.x = P.op.nx | 0; op.z = P.op.nz | 0; }
       const why = op.o === 'add' && !FORT_TYPES[op.t] ? 'Unknown building' : op.k < 0 ? 'Gone' : fortApply(op);
       fortSend('fbr', { to: sid, rid: P.rid, ok: !why, why });
@@ -15852,10 +16108,10 @@ function siegeMpRecv(event, sid, P) {
   // a guest listens to the host only
   FW.host = siegeHostSid(); if (sid !== FW.host) return;
   if (event === 'fw' && Array.isArray(P.b)) {
-    const F = fortState(), sig = JSON.stringify(P.b); F.wave = Math.max(F.wave || 1, mpNum(P.w, 1) | 0);
+    const F = fortState(), sig = JSON.stringify(P.b) + [P.kp, P.kd, P.go, P.hd]; F.wave = Math.max(F.wave || 1, mpNum(P.w, 1) | 0);
     if (sig === FW.sig) return; FW.sig = sig;
-    const list = sanitizeFort({ b: P.b.map((r) => ({ t: FW_TYPES[r[0]], x: r[1], z: r[2], l: r[3], d: r[4], c: r[5] })) }, false).b;
-    F.b = list; siegeLayout(); siegeScaleObjs(S.lvl);
+    const s = sanitizeFort({ b: P.b.map((r) => ({ t: FW_TYPES[r[0]], x: r[1], z: r[2], l: r[3], d: r[4], c: r[5], p: r[6] })), keep: P.kp, kd: P.kd, go: P.go, hold: P.hd, wave: F.wave }, false);
+    F.b = s.b; F.keep = s.keep; F.kd = s.kd; F.go = s.go; F.hold = s.hold; siegeLayout(); siegeScaleObjs(S.lvl);
   } else if (event === 'fst') siegeMpMirror(P);
   else if (event === 'fclr') { const n = mpNum(P.w, 0) | 0; if (n > S.cleared) { siegeReward(n, mpNum(P.lvl, S.lvl) | 0, clamp(mpNum(P.wg, 0) | 0, 0, 2), !!P.mn); const F = fortState(); F.wave = Math.max(F.wave || 1, n + 1); } }
   else if (event === 'fend') endSiege('keep');
@@ -15883,6 +16139,7 @@ function siegeMpMirror(P) {
       const zi = clamp(r[2] | 0, 0, CFG.world.zones.length - 1);
       e = r[9] & 6 ? makeChampion(r[1], zi, lvl + 1, r[9] & 2 ? 2 : 1, !!(r[9] & 2)) : makeEnemy(r[1], zi, { elite: !!(r[9] & 1) });
       delete e.rift; delete e.riftLvl; if (r[9] & 2) e.bossName = 'Siege Lord'; else if (r[9] & 4) { e.bossName = 'Siege Captain'; e.miniBoss = true; }
+      if (r[9] & 8) e.siegeArmor = true; if (r[9] & 16) e.flying = true;
       e.siege = true; e.temp = true; e.mirror = true; e.hid = id; setEnemyLevel(e, r[9] & 2 ? lvl + 2 : r[9] & 4 ? lvl + 1 : lvl);
       e.x = e.sx = x; e.z = e.sz = z; G.enemies.push(e); S.mobs.push(e); FW.mm.set(id, e);
     }
@@ -15893,40 +16150,57 @@ function siegeMpMirror(P) {
   for (const [id, e] of FW.mm) if (!seen.has(id)) { FW.mm.delete(id); G.enemies = G.enemies.filter((q) => q !== e); S.mobs = S.mobs.filter((q) => q !== e); G.ents.delete(e.id); }
 }
 // --- Bastion builder mode (Clash of Clans style): the Build button turns the fort into a field seen from above with
-// its grid. One finger pans, two fingers zoom, the strip at the bottom is the shop. Pick something, tap a cell (the
-// see-through preview stands there, green or red) and tap it again or press Place. Walls and gates are drawn by dragging.
-// With nothing picked, tapping a building opens its panel (upgrade, move, tear down). Your own fort holds still while
-// you build (a shared one runs on); a starting wave closes the mode. The rules live in 36c-siege.js (fortGhost, fortDo).
-const BD = { ptrs: new Map(), down: null, pinch: null, draw: false, last: '', warned: 0 };
+// its grid. One finger pans, two fingers zoom, the strip at the bottom is the shop: swipe it sideways to scroll, drag a
+// building up out of it onto the field (its see-through preview follows the finger, green where it fits, red where not)
+// and let go to place it. A tap on a shop item picks it instead: tap a cell, drag the preview around, then Place.
+// Walls and gates are dragged in straight lines (the line locks to the row or column you pull along) and built when you
+// let go. With nothing picked, tapping a building opens its panel (upgrade, path, collect, move, tear down); a full mill
+// or mine is collected straight away. Waves run on while you build. The rules live in 36c-siege.js (fortGhosts, fortDo).
+// the shop's tabs: [id, name, buildings]
+const BD_CATS = [['def', 'Defences', ['archer', 'cannon', 'ballista', 'mage', 'warrior']], ['res', 'Resources', ['mill', 'mine', 'iron', 'hut']],
+  ['wall', 'Walls', ['wall', 'gate']], ['trap', 'Traps', ['spike', 'bomb', 'tar']]];
+const bdCatOf = (t) => (BD_CATS.find((c) => c[2].includes(t)) || BD_CATS[0])[0];
+const BD = { ptrs: new Map(), down: null, pinch: null, line: null, ghost: false, shop: null, warned: 0 };
 function openBuilder() {
   const S = G.siege; if (!S) return;
-  if (S.phase !== 'build') { toast('Build between waves', 'bad'); return; }
   const k = CFG.siege.objs[0];
-  G.builder = G.builder || { cx: SC.x + k.x, cz: SC.z + k.z + 2, zoom: 1.7, sel: null, cell: null, move: null };
+  G.builder = G.builder || { cx: SC.x + k.x, cz: SC.z + k.z + 2, zoom: 1.7, sel: null, cell: null, move: null, line: null };
   $('builder').hidden = false; document.body.classList.add('builderOn');
   siegeGridOverlay(true); builderShop(); builderHud();
 }
 function closeBuilder() {
-  G.builder = null; BD.ptrs.clear(); BD.down = BD.pinch = null; BD.draw = false;
+  G.builder = null; BD.ptrs.clear(); BD.down = BD.pinch = BD.line = BD.shop = null; BD.ghost = false;
   $('builder').hidden = true; document.body.classList.remove('builderOn'); siegeGridOverlay(false);
 }
-function builderSelect(t) { const B = G.builder; if (!B) return; B.move = null; B.sel = B.sel === t ? null : t; B.cell = null; builderShop(); builderHud(); }
+function builderSelect(t) { const B = G.builder; if (!B) return; B.move = null; B.line = null; B.sel = B.sel === t ? null : t; B.cell = null; builderShop(); builderHud(); }
 // from a building's panel: pick it up and put it somewhere else (free)
-function builderMove(b) { if (!G.builder) openBuilder(); const B = G.builder; if (!B) return; B.move = b; B.sel = b.t; B.cell = [b.x, b.z]; builderShop(); builderHud(); }
+function builderMove(b) { if (!G.builder) openBuilder(); const B = G.builder; if (!B) return; B.move = b; B.sel = b.t; B.cat = bdCatOf(b.t); B.cell = [b.x, b.z]; B.line = null; builderShop(); builderHud(); }
+// the shop: what each costs, how many the Keep allows (3/5), and which Keep level unlocks one you cannot have yet
 function builderShop() {
-  const B = G.builder, F = fortState(), M = myFort(), p = G.profile;
-  $('bdShop').innerHTML = SIEGE_TYPES.map((t) => {
-    const T = CFG.siege.towers[t], c = fortCost(t, 1), have = F.b.filter((b) => b.t === t).length, full = T.max && have >= T.max, poor = p.gold < c.gold || M.stones < c.stones;
-    return `<button class="bdItem${B.sel === t && !B.move ? ' on' : ''}${full || poor ? ' off' : ''}" data-bd="${t}">${fortPic(t)}<b>${T.short}</b><small>${full ? `${have}/${T.max}` : `${ICON.coin}${fmtK(c.gold)}${c.stones ? ` · ${fmt(c.stones)}` : ''}`}</small></button>`;
+  const B = G.builder, F = fortState(), M = myFort(), sl = $('bdList').scrollLeft;
+  if (!B.cat) B.cat = BD_CATS[0][0];
+  // tabs by kind of building (Clash of Clans: Defences, Resources, Walls, Traps), each with how many you have of what the Keep allows
+  $('bdTabs').innerHTML = BD_CATS.map(([id, name, ts]) => { const have = ts.reduce((n, t) => n + fortCount(t, F), 0), lim = ts.reduce((n, t) => n + fortLimit(t, F), 0);
+    return `<button class="bdTab${B.cat === id ? ' on' : ''}" data-cat="${id}"><b>${name}</b><small>${have}/${lim}</small></button>`; }).join('');
+  $('bdList').innerHTML = BD_CATS.find((c) => c[0] === B.cat)[2].map((t) => {
+    const T = CFG.siege.towers[t], c = fortCost(t, 1), have = fortCount(t, F), lim = fortLimit(t, F), full = have >= lim, at = full ? fortLimitAt(t, have) : 0, poor = !fortHas(c, M);
+    const tag = full ? (at && !lim ? `Keep ${at}` : `${have}/${lim}`) : `${have}/${lim}`;
+    return `<button class="bdItem${B.sel === t && !B.move ? ' on' : ''}${full || poor ? ' off' : ''}" data-bd="${t}">${fortPic(t)}<b>${T.short}</b><small class="bdCnt">${tag}</small><small>${full ? '' : fortResHTML(c, M)}</small></button>`;
   }).join('');
+  $('bdList').scrollLeft = sl;
 }
 function builderHud() {
   const B = G.builder, S = G.siege; if (!B || !S) return;
-  const F = fortState(), T = B.sel ? CFG.siege.towers[B.sel] : null;
-  $('bdInfo').innerHTML = `Wave ${S.wave} · ${fortJobs(F)}/${fortBuilders(F)} builders · <b class="stones">${fmt(myFort().stones)}</b> stones`;
-  $('bdHint').textContent = B.move ? `Moving the ${T.short}: tap where it goes` : !T ? 'Pick something below, or tap a building' : T.wall ? `Drag your finger to draw ${T.short.toLowerCase()}s` : `Tap where the ${T.short} goes, then tap again or Place`;
+  const F = fortState(), M = myFort(), T = B.sel ? CFG.siege.towers[B.sel] : null, L = B.line;
+  $('bdInfo').innerHTML = `Keep ${F.keep || 1} · ${fortJobs(F)}/${fortBuilders(F)} builders · ${fortHave(M)}`;
+  $('bdHint').innerHTML = L ? `${L.cells.length} ${T.short.toLowerCase()}${L.cells.length === 1 ? '' : 's'} · ${fortResHTML(L.cost, M)} · let go to build`
+    : B.move ? `Moving the ${T.short}: tap or drag where it goes` : !T ? 'Drag something up from the shop, or tap a building'
+    : T.wall ? `Drag a straight line of ${T.short.toLowerCase()}s` : `Drag the ${T.short} where it goes, then Place`;
   $('bdPlace').hidden = !(B.sel && B.cell && !(T && T.wall && !B.move));
-  $('bdWave').textContent = `Start wave ${S.wave}`; $('bdWave').hidden = S.phase !== 'build';
+  // waves: the first one waits for Start; after that they come by themselves unless paused
+  $('bdWave').textContent = !F.go ? `Start wave ${S.wave}` : 'Start now'; $('bdWave').hidden = S.phase !== 'build';
+  $('bdHold').hidden = !F.go; $('bdHold').textContent = F.hold ? 'Resume waves' : 'Pause waves'; $('bdHold').classList.toggle('on', !!F.hold);
+  $('bdWaveInfo').textContent = S.phase === 'build' ? (!F.go ? `Wave ${S.wave} waits for you` : F.hold ? `Paused before wave ${S.wave}` : `Wave ${S.wave} in ${Math.ceil(S.t)}s`) : S.phase === 'fight' ? `Wave ${S.wave} · ${siegeLeft()} left` : `Wave ${S.wave} held!`;
 }
 // the screen point on the ground (y = 0), and the cell a building of type t would take there
 const _bdRay = new THREE.Raycaster(), _bdV = new THREE.Vector2(), _bdPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), _bdHit = new THREE.Vector3();
@@ -15936,21 +16210,50 @@ function builderGround(x, y) {
 }
 function builderCell(x, y, t) { const g = builderGround(x, y); if (!g) return null; const s = FORT_TYPES[t] || 1, cs = CFG.siege.cell; return [Math.round((g.x - SC.x) / cs - s / 2), Math.round((g.z - SC.z) / cs - s / 2)]; }
 function builderConfirm() {
-  const B = G.builder, g = fortGhost(); if (!g) return;
-  const why = g.ok ? fortDo(g.op) : fortCheck(g.op);
+  const B = G.builder, g = fortGhosts(); if (!g || !g.length) return;
+  const why = g[0].ok ? fortDo(g[0].op) : fortCheck(g[0].op) || fortShortWhy(g[0].op);
   if (why) { toast(why, 'bad'); return; }
   Sfx.play('unlock');
   if (B.move) { B.move = null; B.sel = null; } // a moved building is set down; a new one keeps the pick, for building several
   B.cell = null; builderShop(); builderHud();
 }
-// drawing walls: a piece on every new cell under the finger (cells that are taken are skipped)
-function builderDraw(x, y) {
-  const B = G.builder, c = builderCell(x, y, B.sel); if (!c) return;
-  const key = c.join(','); if (key === BD.last) return; BD.last = key;
-  const op = { o: 'add', t: B.sel, x: c[0], z: c[1] }; B.cell = c;
-  if (fortCheck(op)) return;
-  const why = fortDo(op); if (why) { if (G.time - BD.warned > 2) { BD.warned = G.time; toast(why, 'bad'); } } else builderShop();
+const fortShortWhy = (op) => { const q = fortShort(fortPrice(op)); return q ? `Not enough ${CFG.siege.resName[q].toLowerCase()}` : ''; };
+// a straight line of walls or gates from cell a toward cell b, locked to the row or column pulled along the most
+function builderLine(a, b) {
+  const di = b[0] - a[0], dj = b[1] - a[1], n = Math.min(60, Math.max(Math.abs(di), Math.abs(dj))), cells = [];
+  for (let k = 0; k <= n; k++) cells.push(Math.abs(di) >= Math.abs(dj) ? [a[0] + Math.sign(di) * k, a[1]] : [a[0], a[1] + Math.sign(dj) * k]);
+  return cells;
 }
+// the line as it would be built: pieces that do not fit are skipped; the Keep's limit and your resources cut it short
+function builderLinePlan(t, cells) {
+  const F = fortState(), M = myFort(), left = Math.max(0, fortLimit(t, F) - fortCount(t, F)), c1 = fortCost(t, 1), cost = { wood: 0, stones: 0, iron: 0 }, plan = [];
+  let n = 0;
+  for (const c of cells) {
+    const op = { o: 'add', t, x: c[0], z: c[1] };
+    let ok = n < left && !fortCheck(op, F);
+    if (ok) { const nx = {}; for (const q of CFG.siege.res) nx[q] = cost[q] + (c1[q] || 0); if (!fortHas(nx, M)) ok = false; else Object.assign(cost, nx); n++; }
+    plan.push({ t, x: c[0], z: c[1], ok, op });
+  }
+  return { cells, plan, cost };
+}
+function builderLineMove(x, y) {
+  const B = G.builder, L = BD.line, c = builderCell(x, y, B.sel); if (!c || !L) return;
+  const key = c.join(','); if (key === L.key) return; L.key = key;
+  B.line = Object.assign(builderLinePlan(B.sel, builderLine(L.a, c)), { a: L.a }); builderHud();
+}
+function builderLineDone() {
+  const B = G.builder, L = B && B.line; BD.line = null; if (!L) return;
+  B.line = null;
+  let n = 0, why = '';
+  for (const q of L.plan) { if (!q.ok) continue; const r = fortDo(q.op); if (r) { why = r; break; } n++; }
+  if (n) Sfx.play('unlock');
+  const skipped = L.plan.length - n;
+  if (!n) toast(why || fortLinePlanWhy(L) || 'Nothing fits there', 'bad');
+  else if (skipped) toast(`Built ${n} ${CFG.siege.towers[B.sel].short.toLowerCase()}${n === 1 ? '' : 's'} · ${skipped} did not fit${why ? ` (${why})` : ''}`);
+  builderShop(); builderHud();
+}
+function fortLinePlanWhy(L) { const q = L.plan.find((p) => !p.ok); return q ? fortCheck(q.op) || fortShortWhy(q.op) : ''; }
+// tap on the field: pick a cell for the picked building, or open (or collect) the building under the finger
 function builderTap(x, y) {
   const B = G.builder, S = G.siege;
   if (B.sel) {
@@ -15959,27 +16262,72 @@ function builderTap(x, y) {
     return;
   }
   const g = builderGround(x, y); if (!g) return;
-  const u = S.units.find((q) => Math.abs(q.x - g.x) < q.size + 0.2 && Math.abs(q.z - g.z) < q.size + 0.2);
-  if (u) openFortBPanel(S.units.indexOf(u));
+  const k = CFG.siege.objs[0]; if (Math.hypot(g.x - SC.x - k.x, g.z - SC.z - k.z) < k.r) { openFortKeepPanel(); return; }
+  const u = S.units.find((q) => Math.abs(q.x - g.x) < q.size + 0.2 && Math.abs(q.z - g.z) < q.size + 0.2); if (!u) return;
+  const T = CFG.siege.towers[u.b.t];
+  if (T.make && fortMade(u.b) >= 1) { // Clash of Clans: a tap on a mill or mine with something in it collects it
+    const n = fortMade(u.b), why = fortDo({ o: 'col', k: fortState().b.indexOf(u.b) });
+    if (why) toast(why, 'bad'); else { Sfx.play('coin'); toast(`+${fmtK(n)} ${CFG.siege.resName[T.make].toLowerCase()}`, 'good'); burst(u.x, 2, u.z, 14, T.make === 'wood' ? 0xc8884a : T.make === 'iron' ? 0xb8c8da : 0xcfcac0, 4, 0.6, 0.25, 4, 1); builderHud(); builderShop(); }
+    return;
+  }
+  openFortBPanel(S.units.indexOf(u));
+}
+// the shop strip (the open tab): a sideways swipe scrolls it, a drag up out of it carries the building onto the field
+function builderShopDown(e) {
+  const it = e.target.closest('[data-bd]'), el = $('bdList'); if (!it || !G.builder) return;
+  e.preventDefault(); el.setPointerCapture(e.pointerId);
+  BD.shop = { id: e.pointerId, t: it.dataset.bd, x0: e.clientX, y0: e.clientY, sl: el.scrollLeft, mode: null, vx: 0, lx: e.clientX, lt: performance.now() };
+}
+function builderShopMove(e) {
+  const P = BD.shop, B = G.builder; if (!P || P.id !== e.pointerId || !B) return;
+  const dx = e.clientX - P.x0, dy = e.clientY - P.y0, el = $('bdList');
+  if (!P.mode) {
+    if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) P.mode = 'scroll';
+    else if (dy < -14 && -dy > Math.abs(dx)) { P.mode = 'drag'; B.move = null; B.line = null; B.sel = P.t; B.cell = null; builderShop(); }
+  }
+  if (P.mode === 'scroll') { const now = performance.now(); P.vx = (e.clientX - P.lx) / Math.max(1, now - P.lt); P.lx = e.clientX; P.lt = now; el.scrollLeft = P.sl - dx; }
+  else if (P.mode === 'drag') {
+    // the preview stands a little above the finger, so the finger never hides it
+    const r = el.getBoundingClientRect(), y = e.clientY - 46;
+    if (e.clientY < r.top) { const c = builderCell(e.clientX, y, B.sel); if (c && (!B.cell || c[0] !== B.cell[0] || c[1] !== B.cell[1])) { B.cell = c; builderHud(); } }
+    else if (B.cell) { B.cell = null; builderHud(); }
+  }
+}
+function builderShopUp(e) {
+  const P = BD.shop, B = G.builder; if (!P || P.id !== e.pointerId) return;
+  BD.shop = null; if (!B) return;
+  if (!P.mode && e.type === 'pointerup') { Sfx.play('click'); builderSelect(P.t); return; }
+  if (P.mode === 'scroll') { // a short glide after a quick swipe
+    const el = $('bdList'); let v = P.vx * 16; const glide = () => { if (Math.abs(v) < 0.5 || BD.shop) return; el.scrollLeft -= v; v *= 0.92; requestAnimationFrame(glide); }; glide(); return;
+  }
+  if (P.mode === 'drag' && B.cell && e.type === 'pointerup') {
+    const T = CFG.siege.towers[B.sel], g = fortGhosts();
+    if (T.wall || (g && g.length && g[0].ok)) builderConfirm(); // dropped where it fits: built (a wall piece too; drag more lines on the field)
+    else { const w = g && g.length ? fortCheck(g[0].op) || fortShortWhy(g[0].op) : ''; if (w) toast(w, 'bad'); builderHud(); } // the red preview stays to be moved
+  }
 }
 function builderInit() {
   const el = $('builder'), ui = (e) => e.target.closest('#bdTop, #bdShop, #bdPlace');
   el.addEventListener('pointerdown', (e) => {
     if (!G.builder || G.modal || ui(e)) return;
     e.preventDefault(); el.setPointerCapture(e.pointerId); BD.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (BD.ptrs.size === 2) { const [a, b] = [...BD.ptrs.values()]; BD.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: G.builder.zoom }; BD.down = null; BD.draw = false; return; }
-    BD.down = { x: e.clientX, y: e.clientY, moved: false }; BD.last = '';
-    const T = G.builder.sel && CFG.siege.towers[G.builder.sel];
-    BD.draw = !!(T && T.wall && !G.builder.move); if (BD.draw) builderDraw(e.clientX, e.clientY);
+    if (BD.ptrs.size === 2) { const [a, b] = [...BD.ptrs.values()]; BD.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: G.builder.zoom }; BD.down = null; BD.line = null; G.builder.line = null; BD.ghost = false; return; }
+    BD.down = { x: e.clientX, y: e.clientY, moved: false };
+    const B = G.builder, T = B.sel && CFG.siege.towers[B.sel];
+    if (T && T.wall && !B.move) { const c = builderCell(e.clientX, e.clientY, B.sel); if (c) { BD.line = { a: c, key: '' }; builderLineMove(e.clientX, e.clientY); } return; }
+    // a press on the preview (or anywhere near it) drags the preview instead of the camera
+    BD.ghost = false;
+    if (T && B.cell) { const c = builderCell(e.clientX, e.clientY, B.sel), s = FORT_TYPES[B.sel]; if (c && Math.abs(c[0] - B.cell[0]) <= s && Math.abs(c[1] - B.cell[1]) <= s) BD.ghost = true; }
   });
   el.addEventListener('pointermove', (e) => {
     const P = BD.ptrs.get(e.pointerId), B = G.builder; if (!P || !B) return;
     const px = P.x, py = P.y; P.x = e.clientX; P.y = e.clientY;
     if (BD.pinch && BD.ptrs.size === 2) { const [a, b] = [...BD.ptrs.values()]; B.zoom = clamp(BD.pinch.z * BD.pinch.d / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y)), 0.9, 3.4); return; }
     if (!BD.down) return;
-    if (BD.draw) { builderDraw(e.clientX, e.clientY); return; }
+    if (BD.line) { builderLineMove(e.clientX, e.clientY); return; }
     if (!BD.down.moved && Math.hypot(e.clientX - BD.down.x, e.clientY - BD.down.y) < 9) return;
     BD.down.moved = true;
+    if (BD.ghost) { const c = builderCell(e.clientX, e.clientY, B.sel); if (c && (c[0] !== B.cell[0] || c[1] !== B.cell[1])) { B.cell = c; builderHud(); } return; }
     const g0 = builderGround(px, py), g1 = builderGround(e.clientX, e.clientY); if (!g0 || !g1) return;
     const h = G.siege.half; B.cx = clamp(B.cx - (g1.x - g0.x), SC.x - h, SC.x + h); B.cz = clamp(B.cz - (g1.z - g0.z), SC.z - h, SC.z + h);
   });
@@ -15987,15 +16335,35 @@ function builderInit() {
     if (!BD.ptrs.has(e.pointerId)) return;
     BD.ptrs.delete(e.pointerId);
     if (BD.ptrs.size < 2) BD.pinch = null;
-    if (BD.down && !BD.down.moved && !BD.draw && G.builder && e.type === 'pointerup') builderTap(e.clientX, e.clientY);
-    if (!BD.ptrs.size) { BD.down = null; BD.draw = false; }
+    if (BD.line && G.builder) { if (e.type === 'pointerup') builderLineDone(); else { BD.line = null; G.builder.line = null; builderHud(); } }
+    else if (BD.down && !BD.down.moved && G.builder && e.type === 'pointerup') builderTap(e.clientX, e.clientY);
+    if (!BD.ptrs.size) { BD.down = null; BD.ghost = false; }
   };
   el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
-  $('bdShop').addEventListener('click', (e) => { const b = e.target.closest('[data-bd]'); if (b) { Sfx.play('click'); builderSelect(b.dataset.bd); } });
+  const shop = $('bdList');
+  $('bdTabs').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'), B = G.builder; if (!b || !B) return; Sfx.play('click'); B.cat = b.dataset.cat; shop.scrollLeft = 0; builderShop(); });
+  shop.addEventListener('pointerdown', builderShopDown); shop.addEventListener('pointermove', builderShopMove);
+  shop.addEventListener('pointerup', builderShopUp); shop.addEventListener('pointercancel', builderShopUp);
+  shop.addEventListener('wheel', (e) => { shop.scrollLeft += e.deltaY + e.deltaX; e.preventDefault(); }, { passive: false });
   $('bdDone').addEventListener('click', () => { Sfx.play('click'); closeBuilder(); });
-  $('bdWave').addEventListener('click', () => { Sfx.play('click'); closeBuilder(); startSiegeWave(); });
+  $('bdWave').addEventListener('click', () => { Sfx.play('click'); startSiegeWave(); builderHud(); });
+  $('bdHold').addEventListener('click', () => { Sfx.play('click'); siegeToggleHold(); builderHud(); });
+  $('fortChip').addEventListener('click', () => { if (G.siege && !G.modal) { Sfx.play('click'); siegeToggleHold(); } });
   $('bdOk').addEventListener('click', () => builderConfirm());
-  $('bdCancel').addEventListener('click', () => { const B = G.builder; if (!B) return; B.cell = null; B.move = null; B.sel = null; builderShop(); builderHud(); });
+  $('bdCancel').addEventListener('click', () => { const B = G.builder; if (!B) return; B.cell = null; B.move = null; B.sel = null; B.line = null; builderShop(); builderHud(); });
+}
+// pause or resume the waves that come by themselves (in a shared world the host keeps the setting)
+function siegeToggleHold() {
+  const F = fortState(), why = fortDo({ o: 'hold', v: F.hold ? 0 : 1 }); if (why) { toast(why, 'bad'); return; }
+  if (typeof siegeFollowing === 'function' && siegeFollowing()) showToast('Asked the host');
+  else showToast(F.hold ? 'Waves paused: press Resume or Start when ready' : 'Waves resume');
+}
+// called every frame from the fort view: the wave timer and, when something changed, the shop's prices and counts
+function builderTick() {
+  const B = G.builder; if (!B) return;
+  if ((BD.hudT = (BD.hudT || 0) - 1 / 60) <= 0) { BD.hudT = 0.25; if (!B.line) builderHud(); }
+  const F = fortState(), M = myFort(), sig = [M.wood, M.stones, M.iron, F.b.length, F.keep, F.kd > fortNow()].join();
+  if (sig !== BD.sig && !BD.shop) { BD.sig = sig; builderShop(); }
 }
 builderInit();
 // ---------------------------------------------------------------------
@@ -16238,7 +16606,7 @@ function boot(hotData) {
     try { window.claude.hot.snapshot(() => ({ profile: G.profile })); } catch (e) { /* optional */ }
   }
   window.addEventListener('pagehide', () => saveNow(true));
-  if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, startSiege, endSiege, startSiegeWave, fortDo, siegeEnterOwn, siegeJoin, fortCheck, siegeLayout, siegeFlow, siegeGrid, fortState, SC, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, startDelve, delveParty, delveBotThink, stepDungeon, openDelvePanel, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
+  if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, startSiege, endSiege, startSiegeWave, fortDo, siegeEnterOwn, myFort, openBuilder, closeBuilder, openFortBPanel, openFortKeepPanel, siegeJoin, fortCheck, siegeLayout, siegeFlow, siegeGrid, fortState, SC, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, startDelve, delveParty, delveBotThink, stepDungeon, openDelvePanel, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
   if (LOCAL_PREVIEW) window.__audio = { Sfx, Music, AUDIO_MANIFEST, sanitizeProfile, defaultProfile, openSettings, G, Cam };
   window.__gameBooted = true;
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact

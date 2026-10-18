@@ -10,7 +10,7 @@
 const FW = { ft: 0, host: null, wasHost: true, dirty: false, wT: 0, sendT: 0, saveT: -1, saving: false, ask: new Map(), rid: 0, hits: new Map(), hitT: 0, mm: new Map(), sig: '' };
 const fortOnline = () => !LOCAL_PREVIEW && !TEST_MODE && Cloud.kind === 'supa' && Cloud.state === 'on';
 const fortCodeOk = (c) => typeof c === 'string' && /^[A-Z0-9-]{4,12}$/.test(c);
-const worldPart = (F) => ({ wave: F.wave, land: F.land, b: F.b });
+const worldPart = (F) => ({ wave: F.wave, land: F.land, b: F.b, keep: F.keep || 1, kd: F.kd || 0, go: F.go || 0, hold: F.hold || 0 });
 const FortApi = {
   all() { try { return JSON.parse(localStorage.getItem('aa-fort-worlds') || '{}') || {}; } catch (e) { return {}; } },
   put(all) { try { localStorage.setItem('aa-fort-worlds', JSON.stringify(all)); } catch (e) { /* private mode: the world lives this session */ } },
@@ -35,7 +35,7 @@ async function siegeEnterOwn() {
     if (!M.code) { const code = await FortApi.create(M); if (code) { M.code = code; G.dirty = true; } }
     else {
       const w = await FortApi.load(M.code);
-      if (w && w.fort) { const s = sanitizeFort(w.fort, false); M.b = s.b; M.land = Math.max(M.land || 0, s.land); M.wave = Math.max(M.wave || 1, (w.wave | 0) || s.wave); } // the server's wave, not the one inside the fort data
+      if (w && w.fort) { const s = sanitizeFort(w.fort, false); M.b = s.b; M.land = Math.max(M.land || 0, s.land); M.keep = Math.max(M.keep || 1, s.keep); if (s.kd) M.kd = s.kd; if (s.go) M.go = 1; M.hold = s.hold; M.wave = Math.max(M.wave || 1, (w.wave | 0) || s.wave); } // the server's wave, not the one inside the fort data
     }
   } catch (e) { toast('Your fort is offline this time: friends can not join', 'bad'); }
   return startSiege(M.code ? { code: M.code, fort: M } : null);
@@ -69,7 +69,7 @@ function siegeMpGo() { fortSend('fgo', { to: siegeHostSid() }); }
 function siegeMpAsk(op, pr) {
   const b = op.k != null ? fortState().b[op.k] : null, rid = ++FW.rid;
   FW.ask.set(rid, { pr, at: G.time });
-  fortSend('fbq', { to: siegeHostSid(), rid, op: b ? { o: op.o, t: b.t, x: b.x, z: b.z, nx: op.x, nz: op.z } : op }); // nx, nz: where a moved building goes
+  fortSend('fbq', { to: siegeHostSid(), rid, op: b ? { o: op.o, t: b.t, x: b.x, z: b.z, nx: op.x, nz: op.z, p: op.p } : op }); // nx, nz: where a moved building goes; p: a path
 }
 // a shared fort was entered: the clock decides who runs it (the earliest in)
 function siegeMpStart() { Object.assign(FW, { ft: Date.now(), host: null, wasHost: true, dirty: false, wT: 0, sendT: 0, saveT: -1, sig: '' }); FW.ask.clear(); FW.hits.clear(); FW.mm.clear(); }
@@ -84,7 +84,7 @@ function siegeMpMobHit(t, amt) { FW.hits.set(t.hid, (FW.hits.get(t.hid) || 0) + 
 function siegeMpPeerNear(e, near) { if (siegeFollowing()) return null; let best = null, bd = near; for (const q of siegeMpPeers()) if (q.alive) { const d = Math.hypot(q.x - e.x, q.z - e.z); if (d < bd) { bd = d; best = q; } } return best; }
 function siegeMpHitPeer(q, amt) { fortSend('fpd', { to: q.key, f: Math.round(amt / refHp(G.siege.lvl) * 10000) / 10000 }); }
 const FW_TYPES = Object.keys(FORT_TYPES);
-const fwPack = (F) => F.b.map((b) => [FW_TYPES.indexOf(b.t), b.x, b.z, b.l, b.d || 0, b.c || 0]);
+const fwPack = (F) => F.b.map((b) => [FW_TYPES.indexOf(b.t), b.x, b.z, b.l, b.d || 0, b.c || 0, b.p || 0]);
 // called every step of the fort; true = this game is a guest and the host's state was mirrored instead of simulated
 function siegeMpStep(dt) {
   const S = G.siege; if (!S.code) return false;
@@ -93,7 +93,7 @@ function siegeMpStep(dt) {
   if (host !== FW.wasHost) { FW.wasHost = host; if (host) siegeMpPromote(); else siegeMpDemote(); }
   if (host) {
     if ((FW.sendT -= dt) <= 0) { FW.sendT = 0.25; siegeMpSendState(); }
-    if (FW.dirty || (FW.wT -= dt) <= 0) { FW.dirty = false; FW.wT = 8; const F = fortState(); fortSend('fw', { b: fwPack(F), w: F.wave, ld: F.land }); }
+    if (FW.dirty || (FW.wT -= dt) <= 0) { FW.dirty = false; FW.wT = 8; const F = fortState(); fortSend('fw', { b: fwPack(F), w: F.wave, ld: F.land, kp: F.keep || 1, kd: F.kd || 0, go: F.go || 0, hd: F.hold || 0 }); }
     if (FW.saveT >= 0 && (FW.saveT -= dt) <= 0) siegeMpSave();
     return false;
   }
@@ -108,7 +108,7 @@ function siegeMpStep(dt) {
 function siegeMpSendState() {
   const S = G.siege, ph = S.phase === 'build' ? 0 : S.phase === 'fight' ? 1 : 2;
   const m = S.mobs.slice(0, 90).map((e) => [e.id, e.type, e.zi | 0, Math.round(e.x * 10), Math.round(e.z * 10), e.alive ? Math.max(1, Math.round(e.hp / e.maxHp * 1000)) : 0,
-    Math.round((e.facing || 0) * 100), Math.round((e.moveAmt || 0) * 10), (e.attackAnim || 0) > 0.3 ? 1 : 0, (e.elite ? 1 : 0) | (e.bossName === 'Siege Lord' ? 2 : 0) | (e.miniBoss ? 4 : 0)]);
+    Math.round((e.facing || 0) * 100), Math.round((e.moveAmt || 0) * 10), (e.attackAnim || 0) > 0.3 ? 1 : 0, (e.elite ? 1 : 0) | (e.bossName === 'Siege Lord' ? 2 : 0) | (e.miniBoss ? 4 : 0) | (e.siegeArmor ? 8 : 0) | (e.flying ? 16 : 0)]);
   fortSend('fst', { w: S.wave, ph, t: Math.round(S.t * 10) / 10, tm: S.tMax, lvl: S.lvl, sd: S.sides, mn: S.mini ? 1 : 0,
     o: S.objs.map((o) => (o.alive ? Math.max(1, Math.round(o.hp / o.maxHp * 1000)) : 0)), dn: S.units.map((u, i) => (u.alive ? -1 : i)).filter((i) => i >= 0), m });
 }
@@ -130,8 +130,8 @@ function siegeMpRecv(event, sid, P) {
     if (event === 'fgo') startSiegeWave();
     else if (event === 'fhit' && Array.isArray(P.h)) for (const [i, f] of P.h) { const e = S.mobs.find((q) => q.id === i); if (e && e.alive) { e.hp -= clamp(mpNum(f, 0), 0, 1) * e.maxHp; e.flashT = CFG.combat.hitFlash; e.lastHurt = G.time; if (e.hp <= 0) { e.hp = 0; killEntity(e, null); } } }
     else if (event === 'fbq' && P.op && typeof P.op === 'object') {
-      const op = { o: String(P.op.o), t: String(P.op.t), x: P.op.x | 0, z: P.op.z | 0 };
-      if (op.o !== 'add') op.k = fortState().b.findIndex((b) => b.t === op.t && b.x === op.x && b.z === op.z);
+      const op = { o: String(P.op.o), t: String(P.op.t), x: P.op.x | 0, z: P.op.z | 0, p: P.op.p | 0, v: P.op.v ? 1 : 0 };
+      if (op.o !== 'add' && op.o !== 'keep' && op.o !== 'hold') op.k = fortState().b.findIndex((b) => b.t === op.t && b.x === op.x && b.z === op.z);
       if (op.o === 'move') { op.x = P.op.nx | 0; op.z = P.op.nz | 0; }
       const why = op.o === 'add' && !FORT_TYPES[op.t] ? 'Unknown building' : op.k < 0 ? 'Gone' : fortApply(op);
       fortSend('fbr', { to: sid, rid: P.rid, ok: !why, why });
@@ -141,10 +141,10 @@ function siegeMpRecv(event, sid, P) {
   // a guest listens to the host only
   FW.host = siegeHostSid(); if (sid !== FW.host) return;
   if (event === 'fw' && Array.isArray(P.b)) {
-    const F = fortState(), sig = JSON.stringify(P.b); F.wave = Math.max(F.wave || 1, mpNum(P.w, 1) | 0);
+    const F = fortState(), sig = JSON.stringify(P.b) + [P.kp, P.kd, P.go, P.hd]; F.wave = Math.max(F.wave || 1, mpNum(P.w, 1) | 0);
     if (sig === FW.sig) return; FW.sig = sig;
-    const list = sanitizeFort({ b: P.b.map((r) => ({ t: FW_TYPES[r[0]], x: r[1], z: r[2], l: r[3], d: r[4], c: r[5] })) }, false).b;
-    F.b = list; siegeLayout(); siegeScaleObjs(S.lvl);
+    const s = sanitizeFort({ b: P.b.map((r) => ({ t: FW_TYPES[r[0]], x: r[1], z: r[2], l: r[3], d: r[4], c: r[5], p: r[6] })), keep: P.kp, kd: P.kd, go: P.go, hold: P.hd, wave: F.wave }, false);
+    F.b = s.b; F.keep = s.keep; F.kd = s.kd; F.go = s.go; F.hold = s.hold; siegeLayout(); siegeScaleObjs(S.lvl);
   } else if (event === 'fst') siegeMpMirror(P);
   else if (event === 'fclr') { const n = mpNum(P.w, 0) | 0; if (n > S.cleared) { siegeReward(n, mpNum(P.lvl, S.lvl) | 0, clamp(mpNum(P.wg, 0) | 0, 0, 2), !!P.mn); const F = fortState(); F.wave = Math.max(F.wave || 1, n + 1); } }
   else if (event === 'fend') endSiege('keep');
@@ -172,6 +172,7 @@ function siegeMpMirror(P) {
       const zi = clamp(r[2] | 0, 0, CFG.world.zones.length - 1);
       e = r[9] & 6 ? makeChampion(r[1], zi, lvl + 1, r[9] & 2 ? 2 : 1, !!(r[9] & 2)) : makeEnemy(r[1], zi, { elite: !!(r[9] & 1) });
       delete e.rift; delete e.riftLvl; if (r[9] & 2) e.bossName = 'Siege Lord'; else if (r[9] & 4) { e.bossName = 'Siege Captain'; e.miniBoss = true; }
+      if (r[9] & 8) e.siegeArmor = true; if (r[9] & 16) e.flying = true;
       e.siege = true; e.temp = true; e.mirror = true; e.hid = id; setEnemyLevel(e, r[9] & 2 ? lvl + 2 : r[9] & 4 ? lvl + 1 : lvl);
       e.x = e.sx = x; e.z = e.sz = z; G.enemies.push(e); S.mobs.push(e); FW.mm.set(id, e);
     }
