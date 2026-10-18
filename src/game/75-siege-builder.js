@@ -5,6 +5,10 @@
 // Walls and gates are dragged in straight lines (the line locks to the row or column you pull along) and built when you
 // let go. With nothing picked, tapping a building opens its panel (upgrade, path, collect, move, tear down); a full mill
 // or mine is collected straight away. Waves run on while you build. The rules live in 36c-siege.js (fortGhosts, fortDo).
+// the shop's tabs: [id, name, buildings]
+const BD_CATS = [['def', 'Defences', ['archer', 'cannon', 'ballista', 'mage', 'warrior']], ['res', 'Resources', ['mill', 'mine', 'iron', 'hut']],
+  ['wall', 'Walls', ['wall', 'gate']], ['trap', 'Traps', ['spike', 'bomb', 'tar']]];
+const bdCatOf = (t) => (BD_CATS.find((c) => c[2].includes(t)) || BD_CATS[0])[0];
 const BD = { ptrs: new Map(), down: null, pinch: null, line: null, ghost: false, shop: null, warned: 0 };
 function openBuilder() {
   const S = G.siege; if (!S) return;
@@ -19,16 +23,20 @@ function closeBuilder() {
 }
 function builderSelect(t) { const B = G.builder; if (!B) return; B.move = null; B.line = null; B.sel = B.sel === t ? null : t; B.cell = null; builderShop(); builderHud(); }
 // from a building's panel: pick it up and put it somewhere else (free)
-function builderMove(b) { if (!G.builder) openBuilder(); const B = G.builder; if (!B) return; B.move = b; B.sel = b.t; B.cell = [b.x, b.z]; B.line = null; builderShop(); builderHud(); }
+function builderMove(b) { if (!G.builder) openBuilder(); const B = G.builder; if (!B) return; B.move = b; B.sel = b.t; B.cat = bdCatOf(b.t); B.cell = [b.x, b.z]; B.line = null; builderShop(); builderHud(); }
 // the shop: what each costs, how many the Keep allows (3/5), and which Keep level unlocks one you cannot have yet
 function builderShop() {
-  const B = G.builder, F = fortState(), M = myFort(), sl = $('bdShop').scrollLeft;
-  $('bdShop').innerHTML = SIEGE_TYPES.map((t) => {
+  const B = G.builder, F = fortState(), M = myFort(), sl = $('bdList').scrollLeft;
+  if (!B.cat) B.cat = BD_CATS[0][0];
+  // tabs by kind of building (Clash of Clans: Defences, Resources, Walls, Traps), each with how many you have of what the Keep allows
+  $('bdTabs').innerHTML = BD_CATS.map(([id, name, ts]) => { const have = ts.reduce((n, t) => n + fortCount(t, F), 0), lim = ts.reduce((n, t) => n + fortLimit(t, F), 0);
+    return `<button class="bdTab${B.cat === id ? ' on' : ''}" data-cat="${id}"><b>${name}</b><small>${have}/${lim}</small></button>`; }).join('');
+  $('bdList').innerHTML = BD_CATS.find((c) => c[0] === B.cat)[2].map((t) => {
     const T = CFG.siege.towers[t], c = fortCost(t, 1), have = fortCount(t, F), lim = fortLimit(t, F), full = have >= lim, at = full ? fortLimitAt(t, have) : 0, poor = !fortHas(c, M);
     const tag = full ? (at && !lim ? `Keep ${at}` : `${have}/${lim}`) : `${have}/${lim}`;
     return `<button class="bdItem${B.sel === t && !B.move ? ' on' : ''}${full || poor ? ' off' : ''}" data-bd="${t}">${fortPic(t)}<b>${T.short}</b><small class="bdCnt">${tag}</small><small>${full ? '' : fortResHTML(c, M)}</small></button>`;
   }).join('');
-  $('bdShop').scrollLeft = sl;
+  $('bdList').scrollLeft = sl;
 }
 function builderHud() {
   const B = G.builder, S = G.siege; if (!B || !S) return;
@@ -113,15 +121,15 @@ function builderTap(x, y) {
   }
   openFortBPanel(S.units.indexOf(u));
 }
-// the shop strip: a sideways swipe scrolls it, a drag up out of it carries the building onto the field
+// the shop strip (the open tab): a sideways swipe scrolls it, a drag up out of it carries the building onto the field
 function builderShopDown(e) {
-  const it = e.target.closest('[data-bd]'), el = $('bdShop'); if (!it || !G.builder) return;
+  const it = e.target.closest('[data-bd]'), el = $('bdList'); if (!it || !G.builder) return;
   e.preventDefault(); el.setPointerCapture(e.pointerId);
   BD.shop = { id: e.pointerId, t: it.dataset.bd, x0: e.clientX, y0: e.clientY, sl: el.scrollLeft, mode: null, vx: 0, lx: e.clientX, lt: performance.now() };
 }
 function builderShopMove(e) {
   const P = BD.shop, B = G.builder; if (!P || P.id !== e.pointerId || !B) return;
-  const dx = e.clientX - P.x0, dy = e.clientY - P.y0, el = $('bdShop');
+  const dx = e.clientX - P.x0, dy = e.clientY - P.y0, el = $('bdList');
   if (!P.mode) {
     if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) P.mode = 'scroll';
     else if (dy < -14 && -dy > Math.abs(dx)) { P.mode = 'drag'; B.move = null; B.line = null; B.sel = P.t; B.cell = null; builderShop(); }
@@ -139,7 +147,7 @@ function builderShopUp(e) {
   BD.shop = null; if (!B) return;
   if (!P.mode && e.type === 'pointerup') { Sfx.play('click'); builderSelect(P.t); return; }
   if (P.mode === 'scroll') { // a short glide after a quick swipe
-    const el = $('bdShop'); let v = P.vx * 16; const glide = () => { if (Math.abs(v) < 0.5 || BD.shop) return; el.scrollLeft -= v; v *= 0.92; requestAnimationFrame(glide); }; glide(); return;
+    const el = $('bdList'); let v = P.vx * 16; const glide = () => { if (Math.abs(v) < 0.5 || BD.shop) return; el.scrollLeft -= v; v *= 0.92; requestAnimationFrame(glide); }; glide(); return;
   }
   if (P.mode === 'drag' && B.cell && e.type === 'pointerup') {
     const T = CFG.siege.towers[B.sel], g = fortGhosts();
@@ -181,7 +189,8 @@ function builderInit() {
     if (!BD.ptrs.size) { BD.down = null; BD.ghost = false; }
   };
   el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
-  const shop = $('bdShop');
+  const shop = $('bdList');
+  $('bdTabs').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'), B = G.builder; if (!b || !B) return; Sfx.play('click'); B.cat = b.dataset.cat; shop.scrollLeft = 0; builderShop(); });
   shop.addEventListener('pointerdown', builderShopDown); shop.addEventListener('pointermove', builderShopMove);
   shop.addEventListener('pointerup', builderShopUp); shop.addEventListener('pointercancel', builderShopUp);
   shop.addEventListener('wheel', (e) => { shop.scrollLeft += e.deltaY + e.deltaX; e.preventDefault(); }, { passive: false });

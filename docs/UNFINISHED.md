@@ -2,7 +2,8 @@
 Casper: shop didn't scroll, drag should show the building on the board, limits per tower kind, camp resources, straight
 wall lines, auto waves after the first start with time to upgrade, smaller models with looks per level and animations,
 a CoC + Balloons TD mix. Agreed: only camp resources, ~20 s break with a pause, 7 looks, plus Balloons TD paths/monsters.
-- **Builder (`75-siege-builder.js`):** the shop is scrolled by hand (the builder layer has `touch-action: none`, which
+- **Builder (`75-siege-builder.js`):** the shop has tabs by kind (`BD_CATS`: Defences, Resources, Walls, Traps, each with
+  built/allowed); its strip (`#bdList`) is scrolled by hand (the builder layer has `touch-action: none`, which
   killed native scrolling), with a glide. Drag an item up out of the strip: the preview stands just above the finger
   and is built on release where it fits (red stays to be dragged; Place). A press on the preview drags it. Walls/gates:
   drag a line, it locks to a row or column, shows count and price, builds on release (`builderLinePlan`). Tapping a

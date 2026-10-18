@@ -240,7 +240,7 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
 - **Showdown arena:** 10 fighters vs bots, closing gas, power cubes, trophies. **The Rift.**
 - **Bastion Siege** (level 20, the Bastion house west of the plaza): endless waves from 1-4 random sides attack The
   Keep and two wagons, Clash of Clans meets Balloons TD. Build in builder mode (the Build button: the field from above
-  with its grid, pan and pinch-zoom, a shop strip you swipe sideways; drag a building up out of it and its see-through
+  with its grid, pan and pinch-zoom, a shop with tabs (Defences, Resources, Walls, Traps) whose strip you swipe sideways; drag a building up out of it and its see-through
   preview follows your finger, drag walls and gates in straight lines, move buildings): walls and gates (wood, stone,
   iron), archers, cannons, ballistas, mage towers, barracks, builder huts (one upgrade at a time per hut), traps (spike
   plates, powder kegs, tar pits) and the camp's producers. **The camp pays for itself:** wood (lumber mill), stone
