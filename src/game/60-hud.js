@@ -76,6 +76,7 @@ function updateTags() {
     const pl = G.player;
     if (pl.alive) put(pl.x, 2.5 * growthScale(pl), pl.z, '', pl.hp / pl.maxHp, 'me');
     for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; if (near(b, 30)) put(b.x, 2.45 * growthScale(b), b.z, `${b.name} · ${b.level}`, null, 'bot'); }
+    if (delveOn()) for (const e of mpVisible()) if (e.alive === false) put(e.x, 1.6, e.z, `${e.nick} is down · stand close to revive`, null, 'peer down');
     for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.pvp ? 'PvP · ' : ''}${e.nick} · ${e.level}`, e.hp, e.pvp ? 'peer pvp' : 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');
     if (G.siege) {
@@ -244,7 +245,8 @@ function updateHUD(dt) {
   // vignette
   const vg = $('vignette'); const vo = Math.max(0, parseFloat(vg.dataset.o || '0') - dt * 1.8); vg.dataset.o = vo; setStyle('vignette', 'opacity', vo.toFixed(2));
   setHidden('respawn', !(G.mode === 'hub' && !G.player.alive));
-  if (G.mode === 'hub' && !G.player.alive) setText('respawn', `Knocked out · back in ${Math.ceil(G.respawnT)}`);
+  if (G.mode === 'hub' && !G.player.alive) setText('respawn', !delveOn() ? `Knocked out · back in ${Math.ceil(G.respawnT)}`
+    : delveParty().some((f) => f !== G.player && f.alive !== false) ? 'You are down · wait for a teammate to revive you' : 'Your party has fallen…');
 }
 function updateObjective() {
   const p = G.profile, pl = G.player;

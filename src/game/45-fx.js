@@ -268,6 +268,15 @@ function updateRings(dt) {
     s.disc.position.set(W.pl[i][0], 0.09, W.pl[i][1]); s.disc.scale.setScalar(W.r * (0.35 + 0.65 * prog)); s.disc.material.opacity = 0.25 + 0.3 * pulse; s.disc.material.color.setHex(on ? 0xfff2b0 : W.col);
     if (Math.random() < 0.5 * fxK) burst(W.pl[i][0] + (Math.random() - 0.5) * W.r, 0.2, W.pl[i][1] + (Math.random() - 0.5) * W.r, 1, W.col, 0.6, 0.8, 0.25, -1.2, 2.2);
   }
+  // a fallen teammate in a party dungeon: a pulsing green ring of the revive range that fills while you stand in it
+  if (delveOn()) for (const f of delveParty()) {
+    if (f === G.player || f.alive !== false) continue;
+    const s = rings[RING_MAX - 1 - used]; if (!s) break; used++; s.tele = true;
+    const X = G.dungeon.delve, prog = X.revive && X.revive.key === f.key ? clamp(X.revive.t / DV.reviveT, 0, 1) : 0, pulse = 0.5 + 0.5 * Math.sin(G.time * 5);
+    s.ring.visible = s.disc.visible = true;
+    s.ring.position.set(f.x, 0.1, f.z); s.ring.scale.setScalar(DV.reviveR); s.ring.material.opacity = 0.55 + 0.4 * pulse; s.ring.material.color.setHex(0x6cff8a);
+    s.disc.position.set(f.x, 0.09, f.z); s.disc.scale.setScalar(DV.reviveR * Math.max(0.08, prog)); s.disc.material.opacity = 0.2 + 0.25 * prog; s.disc.material.color.setHex(0x6cff8a);
+  }
   for (const c of G.clouds) {
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
     s.tele = true; const fade = Math.min(1, c.t / 0.5), tint = c.color || 0x5fd84a;

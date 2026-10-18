@@ -1984,6 +1984,7 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .panel .hsRow { height: auto !important; flex: none !important; overflow: visible; } .panel .hsRow .dchips i { display: inline-block !important; width: auto !important; flex: none !important; line-height: 1.4; }
 .panel .hsRow span.dchips { flex-direction: row !important; flex-wrap: wrap; align-items: flex-start; }
 .hsSub { color: #9aa0b8; margin-top: 6px; }
+.tag.peer.down .tn { color: #8dffa6 !important; text-shadow: 0 0 6px #2bd65a, 1px 1px 0 #000; } /* a fallen teammate in a party dungeon */
 .tag.peer.pvp .tn { color: #ff6b78 !important; text-shadow: 0 0 6px #ff3344, 1px 1px 0 #000; } .tag.peer.pvp .tb i { background: #ff3344 !important; box-shadow: 0 0 6px #ff3344; }
 /* Inventory: chests sit in a swipe row above the bag, resources as chips */
 .invChests { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 8px; scrollbar-width: none; }
@@ -8425,9 +8426,10 @@ AssetSlots.register('character', (o) => {
     }
     ring.position.y = 0.3; ring.renderOrder = 0; root.add(ring); // sits above the bumpiest ground; the offset keeps it under the hero
   }
-  let phase = Math.random() * 6, deadT = 0;
+  let phase = Math.random() * 6, deadT = 0, downed = false;
   return {
     root, ring,
+    get downed() { return downed; },
     update(e, dt, t) {
       root.position.set(e.x, 0, e.z);
       root.rotation.y += angDiff(root.rotation.y, e.facing) * (1 - Math.exp(-dt * 18));
@@ -8448,8 +8450,11 @@ AssetSlots.register('character', (o) => {
       else if (o.xray && e.invulnT > 0 && e.dashT <= 0) { const k = 0.25 + Math.sin(t * 20) * 0.15; tint.setRGB(k + f, k + f, k * 0.8 + f); }
       else tint.setRGB(f, f, f);
       if (hero) AssetLibrary.flash(hero, tint.r * 0.6, tint.g * 0.6, tint.b * 0.6);
-      if (e.alive === false) { deadT += dt; const s = Math.max(0, 1 - Math.max(0, deadT - (clipMotion ? .8 : 0)) * 2.5); root.scale.setScalar(s); root.visible = s > 0; }
-      else { deadT = 0; root.scale.setScalar(1); root.visible = true; }
+      // a fallen hero in a party dungeon stays on the floor (death pose) so teammates can find and revive them
+      downed = e.alive === false && delveOn() && (e.isPlayer || e.isPeer);
+      if (downed) { deadT += dt; root.visible = true; if (!clipMotion) pivot.rotation.x = -Math.min(1.45, deadT * 6); }
+      else if (e.alive === false) { deadT += dt; const s = Math.max(0, 1 - Math.max(0, deadT - (clipMotion ? .8 : 0)) * 2.5); root.scale.setScalar(s); root.visible = s > 0; }
+      else { if (deadT > 0 && !clipMotion) pivot.rotation.x = 0; deadT = 0; root.scale.setScalar(1); root.visible = true; }
       if (ring) { if (o.xray) { ring.rotation.y = -root.rotation.y + e.facing; ring.material.opacity = 0.42 + Math.sin(t * 4) * 0.1; if (ring.userData.tm) ring.userData.tm.opacity = ring.material.opacity; } else ring.rotation.y += dt * 0.6; }
       if (asc) asc.update(t, amt);
     },
@@ -9659,6 +9664,15 @@ function updateRings(dt) {
     s.disc.position.set(W.pl[i][0], 0.09, W.pl[i][1]); s.disc.scale.setScalar(W.r * (0.35 + 0.65 * prog)); s.disc.material.opacity = 0.25 + 0.3 * pulse; s.disc.material.color.setHex(on ? 0xfff2b0 : W.col);
     if (Math.random() < 0.5 * fxK) burst(W.pl[i][0] + (Math.random() - 0.5) * W.r, 0.2, W.pl[i][1] + (Math.random() - 0.5) * W.r, 1, W.col, 0.6, 0.8, 0.25, -1.2, 2.2);
   }
+  // a fallen teammate in a party dungeon: a pulsing green ring of the revive range that fills while you stand in it
+  if (delveOn()) for (const f of delveParty()) {
+    if (f === G.player || f.alive !== false) continue;
+    const s = rings[RING_MAX - 1 - used]; if (!s) break; used++; s.tele = true;
+    const X = G.dungeon.delve, prog = X.revive && X.revive.key === f.key ? clamp(X.revive.t / DV.reviveT, 0, 1) : 0, pulse = 0.5 + 0.5 * Math.sin(G.time * 5);
+    s.ring.visible = s.disc.visible = true;
+    s.ring.position.set(f.x, 0.1, f.z); s.ring.scale.setScalar(DV.reviveR); s.ring.material.opacity = 0.55 + 0.4 * pulse; s.ring.material.color.setHex(0x6cff8a);
+    s.disc.position.set(f.x, 0.09, f.z); s.disc.scale.setScalar(DV.reviveR * Math.max(0.08, prog)); s.disc.material.opacity = 0.2 + 0.25 * prog; s.disc.material.color.setHex(0x6cff8a);
+  }
   for (const c of G.clouds) {
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
     s.tele = true; const fade = Math.min(1, c.t / 0.5), tint = c.color || 0x5fd84a;
@@ -9890,7 +9904,7 @@ function syncViews(dt, t) {
     const v = viewFor(e); v.update(e, dt, t); seen.add(e);
     if (e.heroAirY) v.root.position.y += e.heroAirY; // carried into the air by a hero super
     if (e.lostT > 0) { v.root.visible = false; v.lostHid = true; } else if (v.lostHid) { v.root.visible = true; v.lostHid = false; }
-    if (e.kind === 'fighter' && e.alive) v.root.scale.setScalar(growthScale(e));
+    if (e.kind === 'fighter' && (e.alive || v.downed)) v.root.scale.setScalar(growthScale(e));
     if (Showcase.on && e === G.player) {
       Showcase.yaw += angDiff(Showcase.yaw, Showcase.baseYaw + Showcase.spin) * (1 - Math.exp(-dt * 10));
       v.root.rotation.y = Showcase.yaw; v.root.position.y = Showcase.podium;
@@ -11170,6 +11184,7 @@ function updateTags() {
     const pl = G.player;
     if (pl.alive) put(pl.x, 2.5 * growthScale(pl), pl.z, '', pl.hp / pl.maxHp, 'me');
     for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; if (near(b, 30)) put(b.x, 2.45 * growthScale(b), b.z, `${b.name} · ${b.level}`, null, 'bot'); }
+    if (delveOn()) for (const e of mpVisible()) if (e.alive === false) put(e.x, 1.6, e.z, `${e.nick} is down · stand close to revive`, null, 'peer down');
     for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.pvp ? 'PvP · ' : ''}${e.nick} · ${e.level}`, e.hp, e.pvp ? 'peer pvp' : 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');
     if (G.siege) {
@@ -11338,7 +11353,8 @@ function updateHUD(dt) {
   // vignette
   const vg = $('vignette'); const vo = Math.max(0, parseFloat(vg.dataset.o || '0') - dt * 1.8); vg.dataset.o = vo; setStyle('vignette', 'opacity', vo.toFixed(2));
   setHidden('respawn', !(G.mode === 'hub' && !G.player.alive));
-  if (G.mode === 'hub' && !G.player.alive) setText('respawn', `Knocked out · back in ${Math.ceil(G.respawnT)}`);
+  if (G.mode === 'hub' && !G.player.alive) setText('respawn', !delveOn() ? `Knocked out · back in ${Math.ceil(G.respawnT)}`
+    : delveParty().some((f) => f !== G.player && f.alive !== false) ? 'You are down · wait for a teammate to revive you' : 'Your party has fallen…');
 }
 function updateObjective() {
   const p = G.profile, pl = G.player;

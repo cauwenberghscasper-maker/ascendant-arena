@@ -48,7 +48,7 @@ function syncViews(dt, t) {
     const v = viewFor(e); v.update(e, dt, t); seen.add(e);
     if (e.heroAirY) v.root.position.y += e.heroAirY; // carried into the air by a hero super
     if (e.lostT > 0) { v.root.visible = false; v.lostHid = true; } else if (v.lostHid) { v.root.visible = true; v.lostHid = false; }
-    if (e.kind === 'fighter' && e.alive) v.root.scale.setScalar(growthScale(e));
+    if (e.kind === 'fighter' && (e.alive || v.downed)) v.root.scale.setScalar(growthScale(e));
     if (Showcase.on && e === G.player) {
       Showcase.yaw += angDiff(Showcase.yaw, Showcase.baseYaw + Showcase.spin) * (1 - Math.exp(-dt * 10));
       v.root.rotation.y = Showcase.yaw; v.root.position.y = Showcase.podium;
