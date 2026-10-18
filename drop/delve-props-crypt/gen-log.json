@@ -1,0 +1,78 @@
+{
+ "batch": "delve-props-crypt",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "crypt_sarcophagus_concept",
+   "ok": true,
+   "file": "crypt_sarcophagus_concept.webp",
+   "sec": 6.8
+  },
+  {
+   "name": "crypt_tombslab_concept",
+   "ok": true,
+   "file": "crypt_tombslab_concept.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "crypt_rootpillar_concept",
+   "ok": true,
+   "file": "crypt_rootpillar_concept.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "crypt_warden_statue_concept",
+   "ok": true,
+   "file": "crypt_warden_statue_concept.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "crypt_ossuary_concept",
+   "ok": true,
+   "file": "crypt_ossuary_concept.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "crypt_bonepile_concept",
+   "ok": true,
+   "file": "crypt_bonepile_concept.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "crypt_mushrooms_concept",
+   "ok": true,
+   "file": "crypt_mushrooms_concept.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "crypt_reliquary_concept",
+   "ok": true,
+   "file": "crypt_reliquary_concept.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "crypt_urns_concept",
+   "ok": true,
+   "file": "crypt_urns_concept.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "crypt_runestone_concept",
+   "ok": true,
+   "file": "crypt_runestone_concept.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "crypt_rootarch_concept",
+   "ok": true,
+   "file": "crypt_rootarch_concept.webp",
+   "sec": 6.2
+  },
+  {
+   "name": "crypt_brazier_concept",
+   "ok": true,
+   "file": "crypt_brazier_concept.webp",
+   "sec": 5.8
+  }
+ ]
+}
