@@ -2018,6 +2018,19 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .sellBtn .sp { display: inline-flex; align-items: center; gap: 3px; } .sellBtn .sp svg { width: 16px; height: 16px; }
 .sellBtn.armed { background: linear-gradient(#ff8a8a, #d23a3a); color: #fff; }
 .sellLine small { color: #9aa0b8; }
+/* Enchant: worn pieces side by side, the picked one opens its page below */
+.etiles { display: flex; gap: 8px; margin: 4px 0 10px; } .etiles .igt { flex: 1 1 0; min-width: 0; max-width: 84px; aspect-ratio: 1; }
+.etiles .eslot { position: absolute; left: 0; right: 0; top: 100%; margin-top: 2px; text-align: center; font: 600 10px/1.1 var(--body); color: #c9cde0; }
+.etiles { margin-bottom: 24px; }
+/* Enchant: rarity colours the tiles, the page and the item name; the Rune Shard bar says what each action costs */
+.etiles .igt { box-shadow: inset 0 0 0 2px var(--rc), 0 0 10px color-mix(in srgb, var(--rc) 55%, transparent) !important; }
+.etiles .igt.sel { outline: 2px solid #fff !important; outline-offset: 2px; }
+.etiles .igt .eslot { color: var(--rc); font-weight: 700; }
+.ecard { border: 2px solid var(--rc) !important; box-shadow: 0 0 16px color-mix(in srgb, var(--rc) 45%, transparent), inset 0 0 0 1px #000 !important; }
+.ecard .ehead { background: linear-gradient(90deg, color-mix(in srgb, var(--rc) 30%, transparent), transparent); } .ecard .ehead b { color: var(--rc); text-shadow: 0 1px 0 #000; }
+.enchNeed { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 6px 8px; border: 1px solid #000; background: rgba(176,107,255,.16); color: #e9dcff; font: 600 12px/1.25 var(--body); }
+.enchNeed img { width: 26px; height: 26px; image-rendering: pixelated; flex: none; } .enchNeed b { color: #fff; } .enchNeed.short { background: rgba(255,93,108,.16); color: #ffc9c9; }
+.arow button small img.mi { width: 14px; height: 14px; vertical-align: -2px; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -2452,7 +2465,9 @@ const CFG = {
       { x: -40, z: 770 }, { x: 42, z: 880 }, { x: -36, z: 935 }, { x: 40, z: 1040 }],
     r: 3.5, wave: 6, time: 45, cooldownWin: 120, cooldownFail: 30, leash: 26, xpFrac: 0.5, goldBase: 40, goldPerLevel: 10,
   },
-  forge: { base: 120, perLevel: 30, growth: 1.045, weaponMult: 1.2 },
+  forge: { base: 120, perLevel: 30, growth: 1.045, weaponMult: 1.2,
+    // the shop's rarity grows with your level (first row whose level you have reached, from the top); price scales with the rarity's stat multiplier
+    rarityAt: [[300, 'divine'], [180, 'ancient'], [120, 'mythic'], [70, 'legendary'], [30, 'epic'], [1, 'rare']] },
   // Main attacks (the Attack slot). Damage = hero damage x mult per bullet. Brawl Stars style variety.
   attacks: {
     smg: { name: 'Rapid Fire', role: 'SMG', desc: 'Each shot sprays 6 fast bullets', kind: 'tracer', count: 1, burst: 6, burstGap: 0.05, jitter: 0.11, speed: 30, range: 11, radius: 0.2, mult: 0.2, ammo: 3, reload: 1.0, cd: 0.42, color: 0xffe066, unlock: { level: 2 } },
@@ -3140,11 +3155,12 @@ function gearPerks(gear) {
   return out;
 }
 const FORGE_AFF = { weapon: { dmg: 0.06 }, helmet: { hp: 0.07 }, chest: { hp: 0.07 }, boots: { move: 0.04 }, accessory: { atkSpeed: 0.06 } };
+const forgeRarity = (level) => (CFG.forge.rarityAt.find(([L]) => level >= L) || [1, 'rare'])[1];
 function forgeOffer(slot) {
   const p = G.profile, cur = p.gear[slot];
   const style = (itemStyle(cur) + 1) % 3;
-  const price = Math.round(CFG.forge.base * Math.pow(CFG.forge.growth, p.level - 1) * (slot === 'weapon' ? CFG.forge.weaponMult : 1));
-  const item = { slot, rarity: 'rare', ilvl: p.level, up: 0, aff: FORGE_AFF[slot], noun: ITEM_NAMES[slot][style] };
+  const price = Math.round(CFG.forge.base * Math.pow(CFG.forge.growth, p.level - 1) * (slot === 'weapon' ? CFG.forge.weaponMult : 1) * (CFG.gear.rarity[forgeRarity(p.level)].mult / CFG.gear.rarity.rare.mult));
+  const item = { slot, rarity: forgeRarity(p.level), ilvl: p.level, up: 0, aff: FORGE_AFF[slot], noun: ITEM_NAMES[slot][style] };
   if (slot === 'accessory') {
     const ce = itemElement(cur);
     item.elem = ELEMENTS[(ce ? ELEMENTS.indexOf(ce) + 1 : 0) % ELEMENTS.length];
@@ -4537,19 +4553,21 @@ const affScale = (it) => 1 + 0.1 * rarIdx(it.rarity);
 const affCap = (k, it) => Math.round(CFG.affixes[k].max * affScale(it) * 100) / 100;
 const enchantCost = (it) => Math.round(rerollCost(it) * 0.5);
 const empowerGems = (it) => 2 + 2 * rarIdx(it.rarity);
+const enchantRunes = (it) => 1 + Math.floor(rarIdx(it.rarity) / 2); // Rune Shards per reroll or boost: 1 common/uncommon, 2 rare/epic, 3 legendary/mythic, 4 ancient/divine
+const runeId = () => CFG.craft.rune.id;
 function rerollAffix(slot, k) {
   const p = G.profile, it = p.gear[slot]; if (!it || !it.aff || it.aff[k] == null) return false;
-  const c = enchantCost(it); if (p.gold < c) return false;
+  const c = enchantCost(it), rn = enchantRunes(it); if (p.gold < c || matCount(runeId(), p) < rn) return false;
   const free = Object.keys(CFG.affixes).filter((x) => x === k || it.aff[x] == null), nk = free[Math.floor(Math.random() * free.length)], A = CFG.affixes[nk];
   delete it.aff[k]; it.aff[nk] = Math.round(rand(A.min, A.max) * affScale(it) * 100) / 100;
-  p.gold -= c; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
+  p.gold -= c; craftState(p).mats[runeId()] -= rn; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
 }
 function empowerAffix(slot, k) {
   const p = G.profile, it = p.gear[slot]; if (!it || !it.aff || it.aff[k] == null) return false;
-  const cap = affCap(k, it), g = empowerGems(it); if (it.aff[k] >= cap || p.essence < g) return false;
+  const cap = affCap(k, it), g = empowerGems(it), rn = enchantRunes(it); if (it.aff[k] >= cap || p.essence < g || matCount(runeId(), p) < rn) return false;
   const A = CFG.affixes[k], step = Math.max(0.01, (A.max - A.min) * affScale(it) / 4); // four boosts take a low roll to the cap
   it.aff[k] = Math.min(cap, Math.round((it.aff[k] + step) * 100) / 100);
-  p.essence -= g; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
+  p.essence -= g; craftState(p).mats[runeId()] -= rn; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
 }
 function salvageAllWorse() {
   const p = G.profile; let n = 0;
@@ -4561,7 +4579,7 @@ function buyForge(slot) {
   if (p.gold < o.price) return false;
   if (p.gear[slot] && p.bag.length >= CFG.gear.bagMax) { toast('Make room in your bag before forging. Your equipped gear will be kept.', 'bad'); return false; }
   p.gold -= o.price;
-  const it = makeItem(slot, 'rare', o.item.ilvl, o.item.name, { aff: Object.assign({}, o.item.aff), elem: o.item.elem, noun: o.item.noun });
+  const it = makeItem(slot, o.item.rarity, o.item.ilvl, o.item.name, { aff: Object.assign({}, o.item.aff), elem: o.item.elem, noun: o.item.noun });
   const old = p.gear[slot]; p.gear[slot] = it;
   if (old) { if (p.bag.length < CFG.gear.bagMax) p.bag.push(old); else { addGold(salvageValue(old)); addEssence(salvageEssence(old)); } }
   refreshPlayerStats(false); checkAchievements(); G.dirty = true;
@@ -6305,6 +6323,8 @@ CFG.craft = {
       hero: 'aurvan', relic: { name: 'Halo of the First Dawn', slot: 'accessory', rarity: 'ancient', aff: { crit: 0.12, critDmg: 0.45, dmg: 0.16 } } },
   ],
   titan: { id: 'titansoul', name: 'Titan Soul', color: 0xff5d8f },
+  // Rune Shards: the semi-rare resource every Enchant reroll and boost costs. Chance per normal kill / den kill / elite kill, per world boss, plus dungeon chests by variant.
+  rune: { id: 'runeshard', name: 'Rune Shard', color: 0xb06bff, kill: 0.025, den: 0.05, elite: 0.4, boss: [3, 5], chest: [1, 1, 2, 3] },
   // monster parts: chance per normal kill, guaranteed range for elites (guardians double), per world-boss kill
   part: { chance: 0.07, den: 0.1, elite: [1, 3], boss: [6, 10] },
   // dungeon chests: cores by variant (Caves, Warrens, Sanctum, Trial) + 1 per 4 key tiers; first clear +2
@@ -6329,7 +6349,8 @@ CFG.craft = {
 const CB = CFG.craft.biomes;
 // every material by id -> { name, biome, kind, color }
 const MATS = (() => { const o = {}; CB.forEach((b, i) => { o[b.ore] = { name: b.oreN, biome: i, kind: 'ore', color: b.color }; o[b.part] = { name: b.partN, biome: i, kind: 'part', color: b.color }; o[b.core] = { name: b.coreN, biome: i, kind: 'core', color: b.color }; });
-  o[CFG.craft.titan.id] = { name: CFG.craft.titan.name, biome: -1, kind: 'soul', color: CFG.craft.titan.color }; return o; })();
+  o[CFG.craft.titan.id] = { name: CFG.craft.titan.name, biome: -1, kind: 'soul', color: CFG.craft.titan.color };
+  o[CFG.craft.rune.id] = { name: CFG.craft.rune.name, biome: -1, kind: 'rune', color: CFG.craft.rune.color }; return o; })();
 // dungeon-only heroes: their Level Road unlock is replaced by sigils from that biome's dungeons
 CB.forEach((b, i) => { if (CFG.attacks[b.hero]) CFG.attacks[b.hero].unlock = { sigils: i }; });
 function craftState(p) {
@@ -6354,6 +6375,7 @@ const findMul = () => 1 + craftBonuses(G.profile).find;
 // kills: the area's monster part (normal kills sometimes, elites always)
 function craftKillDrop(e) {
   if (!e || e.zone == null || e.rift) return;
+  { const R = CFG.craft.rune; if (Math.random() < (e.elite ? R.elite : e.den != null ? R.den : R.kill) * findMul()) addMats([[R.id, 1]]); }
   const P2 = CFG.craft.part, b = CB[zoneBiome(e.zone)]; if (!b) return;
   let n = 0;
   if (e.elite) n = randInt(P2.elite[0], P2.elite[1]) * (e.guardian ? 2 : 1);
@@ -6363,7 +6385,7 @@ function craftKillDrop(e) {
 // world boss: parts and a core of its biome, ore, and a Titan Soul
 function craftBossDrop(zone) {
   const b = CB[zoneBiome(zone)], P2 = CFG.craft.part; if (!b) return [];
-  return addMats([[b.part, randInt(P2.boss[0], P2.boss[1]) * findMul()], [b.core, 1], [b.ore, 10 * findMul()], [CFG.craft.titan.id, 1]]);
+  return addMats([[b.part, randInt(P2.boss[0], P2.boss[1]) * findMul()], [b.core, 1], [b.ore, 10 * findMul()], [CFG.craft.titan.id, 1], [CFG.craft.rune.id, randInt(CFG.craft.rune.boss[0], CFG.craft.rune.boss[1])]]);
 }
 // mining: the vein's ore as a crafting material (alongside the pickaxe ore counter)
 function craftMineDrop(q, ore) { const b = CB[zoneBiome(q.zone)]; if (b) addMats([[b.ore, ore * findMul()]], true); }
@@ -6372,7 +6394,7 @@ function craftDungeonLoot(D, first) {
   const C = CFG.craft, b = CB[zoneBiome(D.zone)], c = craftState(), p = G.profile; if (!b) return {};
   const vi = Math.max(0, CFG.dungeon.variants.indexOf(D.variant)), t = D.key ? D.key.t : 0;
   const cores = (C.core.variant[vi] || 1) + Math.floor(t / C.core.perTiers) + (first ? C.core.first : 0);
-  const out = { biome: zoneBiome(D.zone), mats: addMats([[b.core, cores], [b.part, randInt(C.core.parts[0], C.core.parts[1]) * findMul()]], true) };
+  const out = { biome: zoneBiome(D.zone), mats: addMats([[b.core, cores], [b.part, randInt(C.core.parts[0], C.core.parts[1]) * findMul()], [C.rune.id, (C.rune.chest[vi] || 1) + (first ? 1 : 0)]], true) };
   // hero sigil (until the hero is yours)
   const hid = b.hero, owned = p.unlocked.attacks.includes(hid) || hid === STARTER_HERO;
   if (CFG.brawlers[hid] && !owned && (c.sig[hid] | 0) < C.sigil.need && Math.random() < (C.sigil.chance[vi] || 0.14) + C.sigil.perTier * t) {
@@ -6565,6 +6587,10 @@ const MAT_ART = (() => {
       detail: (g) => { gloss(g); for (let x = 4; x <= 11; x++) { put(g, x, 6 + (x % 4 < 2 ? 0 : 1), 'a', true); put(g, x, 9 + (x % 4 < 2 ? 1 : 0), 'a', true); } } },
     solar: { b: '#ffb93a', a: '#ffffff', c: '#fffbe0', p: '#6d6a78', body: orb,
       detail: (g) => { gloss(g); ell(g, 8, 7, 1.9, 1.9, 'c'); on(g, [[8, 3], [8, 11], [4, 7], [12, 7], [5, 4], [11, 4], [5, 10], [11, 10]], 'a'); } },
+    // ---- Rune Shard: a violet crystal slab with a glowing rune ----
+    runeshard: { b: '#8a4fe0', a: '#f0dcff', c: '#ffffff',
+      body: (g) => poly(g, [[8, 1], [12, 4], [12, 11], [8, 14], [4, 11], [4, 4]]),
+      detail: (g) => { line(g, 8, 4, 8, 11, 'a'); line(g, 6, 6, 8, 8, 'a'); line(g, 10, 6, 8, 8, 'a'); on(g, [[8, 4]], 'c'); free(g, [[2, 3], [14, 10], [13, 2]], 'a'); } },
     // ---- Titan Soul: a pink wisp with a hollow face ----
     titansoul: { b: '#ff5d8f', a: '#ffffff', c: '#ffd1e0', p: '#ffd1e0',
       body: (g) => { poly(g, [[8, 1], [11, 5], [13, 9], [11, 13], [8, 14], [5, 13], [3, 9], [5, 5]]); ell(g, 8, 10, 2.8, 3.2, 'p'); },
@@ -10195,7 +10221,7 @@ function openSmith(tab) {
     body = '<div class="ugrid">' + CFG.gear.slots.map((s) => {
       const o = forgeOffer(s), can = p.gold >= o.price;
       return upCard(`<img class="thumb ${o.item.rarity}" src="${thumbFor(o.item)}" alt="">`, `${SLOT_LABEL[s]} ${rarityChip(o.item.rarity)}`, `<span>${statLine(o.item)}</span>`, '', perkLine(o.item),
-        `<button class="${can ? 'primary' : 'disabled'}" data-act="forge" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>${ICON.coin}${fmt(o.price)}</button>`, o.item.rarity);
+        `<button class="${can ? 'primary' : 'disabled'}" data-act="forge" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>${ICON.coin}${fmtK(o.price)}</button>`, o.item.rarity);
     }).join('') + '</div>';
   }
   const upAlert = Object.values(slotAlerts()).some((a) => a.canUpgrade);
@@ -10218,15 +10244,15 @@ function invChestsHTML(p) {
     <p class="fine">Tap a chest to open it. Chests are earned in play and cannot be sold. Every chest shows its odds before you open it.</p>`;
 }
 // where each kind of material comes from, shown on its card
-const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses' };
+const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses', rune: 'Elites, bosses, dungeons' };
 function invResourcesHTML(p) {
   const tile = (img, name, n, col, src) => `<div class="rtile${n ? '' : ' none'}" style="--rc:${col}" title="${name}${src ? ' · ' + src : ''}"><img src="${img}" alt=""><b class="rn">${fmtK(n)}</b><small>${name}</small></div>`;
   const mat = (id) => { const M = MATS[id]; return tile(matIcon(id), M.name, matCount(id, p), hex6(M.color), MAT_SRC[M.kind]); };
   const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(svg.includes('xmlns') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
-  const money = `<div class="igrid rgrid">${tile(svgUrl(ICON.coin), 'Gold', p.gold, '#ffd23a')}${tile(svgUrl(ICON.ess), 'Gems', p.essence || 0, '#7fe3ff')}${mat(CFG.craft.titan.id)}</div>`;
+  const money = `<div class="igrid rgrid">${tile(svgUrl(ICON.coin), 'Gold', p.gold, '#ffd23a')}${tile(svgUrl(ICON.ess), 'Gems', p.essence || 0, '#7fe3ff')}${mat(CFG.craft.titan.id)}${mat(CFG.craft.rune.id)}</div>`;
   const groups = CB.map((b, i) => biomeReached(i, p) ? `<h4 class="sub">${BIOMES[i].name}</h4><div class="igrid rgrid">${[b.ore, b.part, b.core].map(mat).join('')}</div>` : '').join('');
-  return `<h4 class="sub first">Gold, gems &amp; Titan Souls</h4>${money}${groups}
-    <p class="fine">Ore comes from Mining, parts from monsters, cores from dungeon chests, Titan Souls from world bosses. Spend them in the Forge. Biomes you have not reached stay hidden.</p>`;
+  return `<h4 class="sub first">Gold, gems, Titan Souls &amp; Rune Shards</h4>${money}${groups}
+    <p class="fine">Ore comes from Mining, parts from monsters, cores from dungeon chests, Titan Souls from world bosses, Rune Shards (for Enchanting) from elites, bosses, dungeon chests and now and then any monster. Spend them in the Forge. Biomes you have not reached stay hidden.</p>`;
 }
 // --- crafting tabs (src/game/39-crafting.js)
 const hex6 = (c) => '#' + c.toString(16).padStart(6, '0');
@@ -10257,18 +10283,20 @@ function craftTabHTML(p) {
 }
 // Enchant: every worn piece with its affixes; each affix can be rerolled (gold) or boosted toward its cap (gems)
 function enchantTabHTML(p) {
-  const cards = CFG.gear.slots.map((s) => {
-    const it = p.gear[s]; if (!it || !it.aff || !Object.keys(it.aff).length) return '';
-    const keys = Object.keys(it.aff), rc = enchantCost(it), eg = empowerGems(it);
-    const rows = keys.map((k) => { const v = it.aff[k], cap = affCap(k, it), full = v >= cap, f = Math.min(1, v / cap);
-      const tier = full ? 'max' : f >= 0.75 ? 't3' : f >= 0.5 ? 't2' : 't1'; // the bar glows brighter the closer the affix is to its cap
-      return `<div class="arow ${tier}"><span class="an">+${Math.round(v * 100)}% ${CFG.affixes[k].name}</span><span class="ap">${full ? 'MAX' : Math.round(f * 100) + '%'}</span>
-        <i class="abar"><b style="width:${Math.round(100 * f)}%"></b></i>
-        <button class="${p.gold >= rc ? 'ghost' : 'disabled'}" data-act="enchReroll" data-slot="${s}" data-k="${k}"><span>Reroll</span><small>${ICON.coin}${fmtK(rc)}</small></button>
-        <button class="${full ? 'disabled' : p.essence >= eg ? 'ghost boost' : 'disabled'}" data-act="enchUp" data-slot="${s}" data-k="${k}" ${full ? 'disabled' : ''}><span>${full ? 'Maxed' : 'Boost'}</span>${full ? '' : `<small>${ICON.ess}${eg}</small>`}</button></div>`; }).join('');
-    return `<div class="ecard ${it.rarity}"><div class="ehead"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><b>${escapeHTML(it.name)}</b>${rarityChip(it.rarity)}</div>${rows}</div>`;
-  }).join('');
-  return cards ? `<div class="elist">${cards}</div>` : '<p class="fine">Uncommon or better gear carries affixes.</p>';
+  // worn pieces with affixes sit side by side as tiles; the tapped one opens its own enchant page below
+  const slots = CFG.gear.slots.filter((s) => { const it = p.gear[s]; return it && it.aff && Object.keys(it.aff).length; });
+  if (!slots.length) return '<p class="fine">Uncommon or better gear carries affixes.</p>';
+  const s = slots.includes(UI.enchSlot) ? UI.enchSlot : slots[0]; UI.enchSlot = s;
+  const tiles = `<div class="etiles">${slots.map((x) => { const it = p.gear[x];
+    return `<button class="igt ${it.rarity} ${x === s ? 'sel' : ''}" data-act="enchPick" data-slot="${x}" style="--rc:${rarCol(it.rarity)}" aria-pressed="${x === s}" aria-label="${SLOT_LABEL[x]}: ${escapeHTML(it.name)}"><img src="${thumbFor(it)}" alt="">${it.up ? `<span class="iu">+${it.up}</span>` : ''}<small class="eslot">${SLOT_LABEL[x]}</small></button>`; }).join('')}</div>`;
+  const it = p.gear[s], keys = Object.keys(it.aff), rc = enchantCost(it), eg = empowerGems(it), rn = enchantRunes(it), haveR = matCount(runeId(), p), okR = haveR >= rn, ri = `<img class="mi" src="${matIcon(runeId())}" alt="">`;
+  const rows = keys.map((k) => { const v = it.aff[k], cap = affCap(k, it), full = v >= cap, f = Math.min(1, v / cap);
+    const tier = full ? 'max' : f >= 0.75 ? 't3' : f >= 0.5 ? 't2' : 't1'; // the bar glows brighter the closer the affix is to its cap
+    return `<div class="arow ${tier}"><span class="an">+${Math.round(v * 100)}% ${CFG.affixes[k].name}</span><span class="ap">${full ? 'MAX' : Math.round(f * 100) + '%'}</span>
+      <i class="abar"><b style="width:${Math.round(100 * f)}%"></b></i>
+      <button class="${p.gold >= rc && okR ? 'ghost' : 'disabled'}" data-act="enchReroll" data-slot="${s}" data-k="${k}"><span>Reroll</span><small>${ICON.coin}${fmtK(rc)} ${ri}${rn}</small></button>
+      <button class="${full ? 'disabled' : p.essence >= eg && okR ? 'ghost boost' : 'disabled'}" data-act="enchUp" data-slot="${s}" data-k="${k}" ${full ? 'disabled' : ''}><span>${full ? 'Maxed' : 'Boost'}</span>${full ? '' : `<small>${ICON.ess}${eg} ${ri}${rn}</small>`}</button></div>`; }).join('');
+  return `${tiles}<div class="enchNeed${okR ? '' : ' short'}">${ri}<span>Rune Shards <b>${fmtK(haveR)}</b> · each Reroll or Boost on this piece costs <b>${rn}</b></span></div><div class="elist"><div class="ecard ${it.rarity}" style="--rc:${rarCol(it.rarity)}"><div class="ehead"><img class="thumb ${it.rarity}" src="${thumbFor(it)}" alt=""><b>${escapeHTML(it.name)}</b>${rarityChip(it.rarity)}</div>${rows}</div></div>`;
 }
 function masterworkTabHTML(p) {
   const C = CFG.craft;
@@ -10680,8 +10708,9 @@ function handlePanelClick(e) {
       UI.sellArm = null; const v = sellItem(it.id);
       if (v) { Sfx.play('coin'); toast(`Sold ${it.name} for ${fmtK(v)} gold`, 'good'); heroTab(UI.heroSlot ? 'Stats' : 'Gear'); } break; }
     case 'invTab': UI.invTab = b.dataset.tab; heroTab('Gear'); break;
-    case 'enchReroll': if (rerollAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gold', 'bad'); openSmith('Enchant'); break;
-    case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gems', 'bad'); openSmith('Enchant'); break;
+    case 'enchPick': UI.enchSlot = b.dataset.slot; openSmith('Enchant'); break;
+    case 'enchReroll': if (rerollAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast(matCount(runeId()) < enchantRunes(G.profile.gear[b.dataset.slot] || { rarity: 'common' }) ? 'Not enough Rune Shards' : 'Not enough gold', 'bad'); openSmith('Enchant'); break;
+    case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast(matCount(runeId()) < enchantRunes(G.profile.gear[b.dataset.slot] || { rarity: 'common' }) ? 'Not enough Rune Shards' : 'Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
     case 'craftPiece': if (craftSetPiece(+b.dataset.b, b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
     case 'buyUpg': if (buyUpgrade(b.dataset.id)) Sfx.play('unlock'); openSmith('Masterwork'); break;
@@ -11003,6 +11032,7 @@ function dungeonHud() {
 const FMT_U = ['', 'k', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
 const fmtK = (n) => {
   n = Math.round(n); const a = Math.abs(n); if (a < 1e4) return fmt(n);
+  if (a >= 1e36) { const x = Math.floor(Math.log10(a)); return (n / Math.pow(10, x)).toFixed(2).replace(/\.?0+$/, '') + 'e' + x; } // past Dc: scientific
   const e = Math.min(FMT_U.length - 1, Math.floor(Math.log10(a) / 3)), v = n / Math.pow(1000, e), av = Math.abs(v);
   return (av >= 100 ? v.toFixed(0) : av >= 10 ? v.toFixed(1) : v.toFixed(2)).replace(/\.0+$/, '') + FMT_U[e];
 };

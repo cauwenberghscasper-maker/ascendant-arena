@@ -155,11 +155,12 @@ function gearPerks(gear) {
   return out;
 }
 const FORGE_AFF = { weapon: { dmg: 0.06 }, helmet: { hp: 0.07 }, chest: { hp: 0.07 }, boots: { move: 0.04 }, accessory: { atkSpeed: 0.06 } };
+const forgeRarity = (level) => (CFG.forge.rarityAt.find(([L]) => level >= L) || [1, 'rare'])[1];
 function forgeOffer(slot) {
   const p = G.profile, cur = p.gear[slot];
   const style = (itemStyle(cur) + 1) % 3;
-  const price = Math.round(CFG.forge.base * Math.pow(CFG.forge.growth, p.level - 1) * (slot === 'weapon' ? CFG.forge.weaponMult : 1));
-  const item = { slot, rarity: 'rare', ilvl: p.level, up: 0, aff: FORGE_AFF[slot], noun: ITEM_NAMES[slot][style] };
+  const price = Math.round(CFG.forge.base * Math.pow(CFG.forge.growth, p.level - 1) * (slot === 'weapon' ? CFG.forge.weaponMult : 1) * (CFG.gear.rarity[forgeRarity(p.level)].mult / CFG.gear.rarity.rare.mult));
+  const item = { slot, rarity: forgeRarity(p.level), ilvl: p.level, up: 0, aff: FORGE_AFF[slot], noun: ITEM_NAMES[slot][style] };
   if (slot === 'accessory') {
     const ce = itemElement(cur);
     item.elem = ELEMENTS[(ce ? ELEMENTS.indexOf(ce) + 1 : 0) % ELEMENTS.length];

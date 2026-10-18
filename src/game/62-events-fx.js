@@ -221,6 +221,7 @@ function dungeonHud() {
 const FMT_U = ['', 'k', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
 const fmtK = (n) => {
   n = Math.round(n); const a = Math.abs(n); if (a < 1e4) return fmt(n);
+  if (a >= 1e36) { const x = Math.floor(Math.log10(a)); return (n / Math.pow(10, x)).toFixed(2).replace(/\.?0+$/, '') + 'e' + x; } // past Dc: scientific
   const e = Math.min(FMT_U.length - 1, Math.floor(Math.log10(a) / 3)), v = n / Math.pow(1000, e), av = Math.abs(v);
   return (av >= 100 ? v.toFixed(0) : av >= 10 ? v.toFixed(1) : v.toFixed(2)).replace(/\.0+$/, '') + FMT_U[e];
 };
