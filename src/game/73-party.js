@@ -6,7 +6,7 @@
 // earliest player there forms a party of 4, or of whoever came after 40 s, and sends 'mmgo'. While in a party the open
 // world shows only your party. Test mode and the Claude artifact play alone (no Realtime there).
 // ---------------------------------------------------------------------
-const PARTY = { code: '', jt: 0, ready: false, dg: CFG.delve.dungeons[0].id, df: 0, q: '', qT: 0, joinT: 0, uiT: 0, lastErr: '' };
+const PARTY = { code: '', jt: 0, ready: false, ask: null, autoGo: false, dg: CFG.delve.dungeons[0].id, df: 0, q: '', qT: 0, joinT: 0, uiT: 0, lastErr: '' };
 const PARTY_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', PARTY_WAIT = 40;
 const partyOnline = () => !TEST_MODE && (RT.state === 'on' || RT.state === 'joining' || RT.state === 'connecting');
 function partyRoomKey() { return PARTY.q ? 'dq-' + PARTY.q : PARTY.code ? 'party-' + PARTY.code : ''; }
@@ -51,11 +51,22 @@ function partyRecv(event, sid, P) {
   if (!G.started) return;
   if (event === 'drev') { const by = cleanNick(P.by) || 'A teammate'; if (P.to === MP.sid) delveReviveMe(by); else delveBotRevive(delveBots().find((b) => b.key === P.to), by); return; }
   if (event === 'dbot') { delveBotsRecv(sid, P); return; }
+  if (event === 'dask') { // the leader asks to play (again): only my party's leader, and only while I'm not already in
+    const L = partyLeader(); if (!PARTY.code || !L || L.me || L.key !== sid || delveOn()) return;
+    PARTY.dg = delveDef(P.dg).id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999); PARTY.ready = false;
+    PARTY.ask = { sid, by: cleanNick(P.by) || 'Your leader', t: G.time }; return;
+  }
+  if (event === 'dans') { // a member's answer to my ask
+    if (P.to !== MP.sid || !iLead()) return; const by = cleanNick(P.by) || 'A teammate';
+    if (P.ok) toast(`${by} is in!`, 'good'); else { PARTY.autoGo = false; toast(`${by} doesn't want to play again`, 'bad'); }
+    if (UI.current === 'delve') openDelvePanel(); return;
+  }
   if (event === 'dgo') {
     // only the leader of my party starts runs, and only for the members it names
     const L = partyLeader(); if (!PARTY.code || !L || L.key !== sid || !Array.isArray(P.m) || !P.m.includes(MP.sid)) return;
     const def = delveDef(P.dg); PARTY.dg = def.id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999);
     if (G.modal) UI.close();
+    PARTY.ready = false; PARTY.ask = null; // going in uses up your yes: the next run asks again
     if (!startDelve(def.id, PARTY.df, mpNum(P.seed, 1) >>> 0, Math.min(P.m.length, CFG.delve.maxParty), false)) toast('Your party went in, but you could not follow (finish what you are doing)', 'bad');
     return;
   }
@@ -65,11 +76,42 @@ function partyRecv(event, sid, P) {
     PARTY.q = ''; PARTY.code = P.code.slice(0, 5); PARTY.jt = mpNum(P.jt, Date.now()) + i; PARTY.ready = true; PARTY.dg = def.id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999);
     if (G.modal) UI.close();
     toast(`Matched with ${P.m.length - 1} hero${P.m.length > 2 ? 'es' : ''}!`, 'good');
-    startDelve(def.id, PARTY.df, mpNum(P.seed, 1) >>> 0, Math.min(P.m.length, CFG.delve.maxParty), P.m[0] === MP.sid); // the one who formed the match runs the bots
+    const lead = P.m[0] === MP.sid; if (!lead) PARTY.ready = false; // the one who formed the match leads (and runs the bots); the others are asked next time
+    startDelve(def.id, PARTY.df, mpNum(P.seed, 1) >>> 0, Math.min(P.m.length, CFG.delve.maxParty), lead);
   }
+}
+// --- play again: after a run nobody is pulled back in without saying yes. The leader asks ('dask'), each member
+// accepts or declines ('dans'); accepting is the same as Ready, and when everyone has accepted the run starts by itself
+function partyAsk() {
+  if (!PARTY.code || !iLead()) return;
+  const def = delveDef(PARTY.dg), g = partyGateNow();
+  if (!delveOpen(def) || !g.ok) { partyStart(false); return; } // the same refusals as Enter
+  partySend('dask', { dg: PARTY.dg, df: PARTY.df, by: mpNick(G.profile) }); PARTY.autoGo = true;
+  toast('Your party is asked to play. The run starts when everyone accepts', 'good');
+}
+function partyAnswer(ok) {
+  const a = PARTY.ask; PARTY.ask = null; if (!a) return;
+  PARTY.ready = !!ok; partySend('dans', { to: a.sid, ok: ok ? 1 : 0, by: mpNick(G.profile) });
+  if (UI.current === 'dlvAsk') UI.close();
+}
+function openPartyAsk() {
+  const a = PARTY.ask, def = delveDef(PARTY.dg); UI.current = 'dlvAsk';
+  openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>Play again?</h3></div>
+    <p class="say"><b>${escapeHTML(a.by)}</b> wants to play <b>${escapeHTML(def.name)}</b> · ${escapeHTML(diffDef(PARTY.df).name)} again.</p>
+    <div class="row end"><button class="ghost big" data-act="dlvDecline">Decline</button><button class="primary big" data-act="dlvAccept">Accept</button></div>`);
 }
 function partyUpdate(dt) {
   if (!G.started) return;
+  if (PARTY.ask) {
+    if (!PARTY.code || G.time - PARTY.ask.t > 60) { PARTY.ask = null; if (UI.current === 'dlvAsk') UI.close(); }
+    else if (!PARTY.ask.shown && !G.modal && !delveOn() && G.mode === 'hub') { PARTY.ask.shown = true; openPartyAsk(); } // once, after the chest or right away; closed unanswered, Ready still says yes
+  }
+  // everyone said yes: the leader's game starts the run
+  if (PARTY.autoGo && PARTY.code && iLead() && !delveOn() && G.mode === 'hub') {
+    const M = partyMembers();
+    if (M.length < 2) PARTY.autoGo = false;
+    else if (M.every((m) => m.me || (m.rd && m.md === 'hub' && m.alive))) { PARTY.autoGo = false; partyStart(false); }
+  }
   if (PARTY.code && RT.state === 'on' && RT.key === mpRoomKey()) {
     const M = partyMembers(), L = M[0];
     if (!M.some((m) => m.me)) { leaveParty('That party is full (4 heroes)'); return; }
@@ -115,7 +157,7 @@ function openDelvePanel() {
   if (q) buttons = `<div class="dlvQueue"><div class="spin"></div><b>Looking for heroes · ${qn}/${CFG.delve.maxParty}</b><small>${Math.floor(PARTY.qT)}s · a party forms at 4, or after ${PARTY_WAIT}s with 2 or more</small></div>
     <div class="row end"><button class="ghost" data-act="dlvCancelQ">Cancel</button><button class="primary" data-act="dlvSolo">Go alone now</button></div>`;
   else if (PARTY.code) buttons = `<div class="dlvCode">Party code <b>${PARTY.code}</b><small>Friends type it in Dungeons › Join</small></div>
-    <div class="row end"><button class="ghost" data-act="dlvLeave">Leave party</button>${lead ? `<button class="${g.ok ? 'primary' : 'disabled'} big" data-act="dlvStart">Enter ${escapeHTML(def.name)}</button>` : `<button class="${PARTY.ready ? 'ghost' : 'primary'} big" data-act="dlvReady">${PARTY.ready ? 'Not ready' : 'Ready'}</button>`}</div>`;
+    <div class="row end"><button class="ghost" data-act="dlvLeave">Leave party</button>${lead ? (M.length > 1 && M.some((m) => !m.me && !m.rd) ? (PARTY.autoGo ? `<button class="disabled big" data-act="dlvAsk">Waiting for everyone to accept…</button>` : `<button class="${g.ok ? 'primary' : 'disabled'} big" data-act="dlvAsk">Ask the party to play</button>`) : `<button class="${g.ok ? 'primary' : 'disabled'} big" data-act="dlvStart">Enter ${escapeHTML(def.name)}</button>`) : `<button class="${PARTY.ready ? 'ghost' : 'primary'} big" data-act="dlvReady">${PARTY.ready ? 'Not ready' : 'Ready'}</button>`}</div>`;
   else buttons = `<div class="row dlvJoin"><input id="dlvCode" maxlength="5" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" ${online ? '' : 'disabled'}><button class="ghost" data-act="dlvJoin" ${online ? '' : 'aria-disabled="true"'}>Join</button><button class="ghost" data-act="dlvCreate" ${online ? '' : 'aria-disabled="true"'}>Create party</button></div>
     <div class="row end"><button class="ghost" data-act="dlvQueue" ${online ? '' : 'aria-disabled="true"'}>Random match</button><button class="${g.ok ? 'primary' : 'disabled'} big" data-act="dlvSolo">Enter alone</button></div>
     ${online ? '' : `<p class="fine">${TEST_MODE ? 'Test mode plays alone.' : 'Parties and random match work on the public site and in the app.'}</p>`}`;
@@ -138,6 +180,9 @@ function partyAction(act, b) {
     case 'dlvJoin': joinParty(($('dlvCode') || {}).value); break;
     case 'dlvLeave': leaveParty(); break;
     case 'dlvReady': PARTY.ready = !PARTY.ready; break;
+    case 'dlvAsk': if (!PARTY.autoGo) partyAsk(); break;
+    case 'dlvAccept': partyAnswer(true); return;
+    case 'dlvDecline': partyAnswer(false); return;
     case 'dlvQueue': startQueue(); break;
     case 'dlvCancelQ': cancelQueue(); break;
     case 'dlvStart': partyStart(false); return;

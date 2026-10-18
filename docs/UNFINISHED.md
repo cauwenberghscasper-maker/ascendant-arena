@@ -1,3 +1,12 @@
+# Dungeons: play again needs a yes (18 Oct 2026, branch `claude/dungeon-again`, PR to main)
+Casper: after a run the leader could pull the party straight back in. Now going into a run uses up a member's Ready
+(`dgo`/`mmgo` set `PARTY.ready = false`). When someone hasn't said yes, the leader's button is "Ask the party to play"
+(`partyAsk` → 'dask'); each member gets a "Play again?" popup once (`openPartyAsk`, shown after the chest or right away)
+with Accept/Decline (`partyAnswer` → 'dans', Accept = Ready); a decline tells the leader. When everyone has accepted the
+leader's game starts the run by itself (`PARTY.autoGo` in `partyUpdate`). Both messages are in the party filter in
+`70-multiplayer.js`. Tested in the browser with simulated peers (member popup + accept, leader ask → auto start with
+2 heroes + 2 bots). Open: try it on two phones.
+
 # Dungeon bots (18 Oct 2026, branch `claude/dungeon-bots`, PR to main)
 Casper: make the Dungeon mode playable without 4 friends. `36d-delve-bots.js`: a run with fewer than 4 heroes gets bots
 up to 4 (`CFG.delve.bots`; the party size, and so monster HP and the plate count, is always 4 with bots on). The game that
