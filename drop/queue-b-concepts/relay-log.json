@@ -1,0 +1,61 @@
+{
+ "batch": "queue-b-concepts",
+ "files": [
+  {
+   "name": "siege_hut2.png",
+   "ok": true,
+   "bytes": 526216,
+   "sha256": "d6495a805122a2bd5d4838ba0ca64508917c629327b36823b4446f0b435639a1",
+   "error": null
+  },
+  {
+   "name": "siege_lord.png",
+   "ok": true,
+   "bytes": 489880,
+   "sha256": "b8dc4969799f498951cff32d2f76cfb1b1a5cf0563f8f53902cd2d660147a46d",
+   "error": null
+  },
+  {
+   "name": "siege_captain.png",
+   "ok": true,
+   "bytes": 462344,
+   "sha256": "8d403c8c54bfe38f71382a059649eb70cc5a490c163e03f0273b9d89879227f0",
+   "error": null
+  },
+  {
+   "name": "siege_supplycart.png",
+   "ok": true,
+   "bytes": 462172,
+   "sha256": "af67e85e6db50a588aad1957774f2950c2e0aa57d230839f4343ef7cc1e9d871",
+   "error": null
+  },
+  {
+   "name": "world_totem.png",
+   "ok": true,
+   "bytes": 339224,
+   "sha256": "9c47606a3d790d2599742d4e3ca3ec091fa1fcde0ffe59406b4ebbe984ad5206",
+   "error": null
+  },
+  {
+   "name": "world_lectern.png",
+   "ok": true,
+   "bytes": 391684,
+   "sha256": "2e8472cdfe37a8cc3cd2ab9db665b5c4bfc26c3ff58dd1b7f56271b865977010",
+   "error": null
+  },
+  {
+   "name": "world_sunlantern.png",
+   "ok": true,
+   "bytes": 206002,
+   "sha256": "19c52d6f380fa1725209196ab0999d78b2e5cb55521a63d123a026658d912455",
+   "error": null
+  },
+  {
+   "name": "siege_banner.png",
+   "ok": true,
+   "bytes": 244338,
+   "sha256": "839ccc8c06e27d6d85420beefda18a1198aafb96517bb233f4d37a6c438a29cc",
+   "error": null
+  }
+ ]
+}
