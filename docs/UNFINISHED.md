@@ -16,6 +16,9 @@ looks in `47b-delve-view.js` `buildDelvePuzzles`):
   backwards), so the seals and punishments match on all phones.
 - Checks: `tools/check_delve.cjs` (order, wrong seal resets with spikes then a pack, no repeat while standing, gate
   waits, 'dpz' sync). Browser: frost puzzle solved with bots, no errors.
+- **Dungeons menu scroll fixed:** the panel redrew itself every second, which stopped a swipe on phones and threw the
+  difficulty strip back to the start. Now it only redraws when something on it changed, never within 1.5 s of a touch or
+  scroll, and keeps the strip's position (`openDelvePanel`, `partyUpdate` in `73-party.js`).
 - **Open:** try on a phone (are the runes readable at phone size? the mural is ~1.7 m tiles); a dungeon-specific seal
   look (today one rune set tinted by biome); maybe make bots wait longer on harder difficulties. Next: phase 3 (enrage
   over time + smarter attack patterns).
