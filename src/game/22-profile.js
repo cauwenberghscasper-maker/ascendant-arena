@@ -123,7 +123,7 @@ function sanitizeProfile(p) {
 // A building is { t, x, z, l } on 2 m cells (x, z = its lowest corner around the Keep); d = when an upgrade finishes (ms),
 // c = when a mine was last emptied. Old saves had eight fixed pads: each defender moves to the cell under its pad.
 // (CFG.siege loads later; the lists here match it.) Shared worlds from the server go through here too (mine = false).
-const FORT_TYPES = { archer: 2, cannon: 2, ballista: 2, warrior: 2, mage: 2, mine: 2, hut: 2, wall: 1, gate: 1 };
+const FORT_TYPES = { archer: 2, cannon: 2, ballista: 2, warrior: 2, mage: 2, mine: 2, hut: 2, wall: 1, gate: 1, spike: 1, bomb: 1, tar: 1 };
 const FORT_OLD_PADS = [[-5, 13], [5, 13], [-13, 6], [13, 6], [-13, -5], [13, -5], [-5, -8], [5, -8]];
 function sanitizeFort(f, mine) {
   f = f && typeof f === 'object' && !Array.isArray(f) ? f : {};
