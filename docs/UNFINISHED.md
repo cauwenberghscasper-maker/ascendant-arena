@@ -1,3 +1,7 @@
+# Safari 60 Hz hint (18 Oct 2026, on `main`)
+iPhone Safari limits web pages to 60 Hz (feature flag "Prefer Page Rendering Updates near 60fps"); a page can't lift it.
+Options › 120 Hz now says how to turn that flag off when 120 Hz is on but the browser refreshes the page at 60 (`hz120Hint`).
+
 # 120 Hz by default, frame-rate work (18 Oct 2026, on `main`)
 Done: 120 Hz is on by default (old saves switched on once via `hzVersion`, still a switch in Options). Shader error checks only
 run on localhost (`renderer.debug.checkShaderErrors`): reading the compile log stalled the frame whenever a new model or effect
