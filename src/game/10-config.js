@@ -127,7 +127,7 @@ const CFG = {
     speedMult: 1.0, // world monster move speed (v10 plan 1.15 to match the faster hero; held at 1 until check_hardcore pack timings are retuned)
   },
   boss: {
-    name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 25, duration: 120,
+    name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 60, duration: 120,
     hp: 3600, hpGrowth: 1.105, atk: 22, r: 2.4, speed: 2.2, leash: 8, attackEvery: 3.2,
     slamR: 5.5, slamDelay: 1.1, rocks: 12, rockSpeed: 11, joinRange: 34, botFireEvery: 1.2,
     loot: { minContrib: 0.02, goldBase: 60, goldPerLevel: 12, rareBase: 0.25, rareScale: 1.6, rareMax: 0.95,

@@ -190,7 +190,8 @@ function processEvents() {
       case 'pickup': burst(e.x, 0.6, e.z, 10, 0xff5fa2, 4, 0.5, 0.2, 8); SpriteFX.play('crit', 'arcane', e.x, 0.9, e.z, 1.8); Sfx.play('pickup'); break;
       case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.z)]; const prevB = Feed.lastBiome; Feed.lastBiome = zn.biome;
         Feed.add(zn.safe ? `${gi('m_progress')} Back at <b>${e.name}</b> · safe` : prevB != null && prevB !== zn.biome ? `${gi('m_progress')} <b>${zn.biomeName}</b> › ${e.name} · Lv ${zn.lvl[0]}–${zn.lvl[1]}` : `${gi('m_progress')} Entered <b>${e.name}</b> · Lv ${zn.lvl[0]}–${zn.lvl[1]}`, 'zone'); break; }
-      case 'bossWarn': Sfx.play('horn'); break;
+      case 'bossWarn': { Sfx.play('horn'); const Zb = CFG.world.zones[G.bossLair], locked = G.bossLair > highestZone(G.profile.level);
+        showBanner('BOSS INCOMING', `${Zb ? Zb.boss : 'A world boss'} rises in ${e.lair} in ${e.secs}s${locked ? ' · area not unlocked for you yet' : ' · unlocked area'}`, 'red'); break; }
       case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); SpriteFX.play('dust', 'dust', e.x, 0, e.z, 6); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 10); break;
       case 'bossDown': Feed.remove('boss'); Feed.add(`${gi('m_feats')} World boss defeated!`, 'boss'); Sfx.play('win'); break;
       case 'bossGone': Feed.remove('boss'); Feed.add(`${gi('k_titan')} ${e.name} sank back into the ground`, 'boss'); break;
@@ -466,7 +467,8 @@ function setMap(open) { G.profile.settings.map = open; G.dirty = true; $('mapBox
 function updateBossTracker() {
   const inHub = G.mode === 'hub' && G.started && !Showcase.on;
   const b = inHub ? G.boss : null;
-  setHidden('bossBar', !b || Math.hypot(b.x - G.player.x, b.z - G.player.z) > 45);
+  const fighting = !!b && (b.dmgBy[G.player.id] || 0) > 0 && zoneAt(G.player.z) === b.zone; // only people who attack it, in its zone, get the health bar
+  setHidden('bossBar', !fighting);
   if (b) {
     setText('bossName', `${b.name} · Lv ${b.lvl}`);
     setText('bossTime', b.life > 0 ? `${Math.ceil(b.life)}s left` : 'Enraged');

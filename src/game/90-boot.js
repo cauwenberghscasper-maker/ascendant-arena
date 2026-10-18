@@ -50,7 +50,9 @@ function boot(hotData) {
   // Fight / Normal: the same switch as Settings > PvP, one tap from the HUD
   $('pvpChip').addEventListener('click', () => {
     if (!G.started || G.modal) return;
-    const s = G.profile.settings; s.pvp = !s.pvp; G.dirty = true; Sfx.play('click');
+    const s = G.profile.settings;
+    if (s.pvp && pvpOffWait() > 0) { Sfx.play('click'); showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
+    s.pvp = !s.pvp; G.dirty = true; Sfx.play('click');
     const live = typeof MP !== 'undefined' && MP.state === 'on';
     showToast(s.pvp ? (live ? 'Fight mode: other fighters can hit you outside town. You glow red' : 'Fight mode on. It starts once you are online with other players') : 'Normal mode: no PvP');
   });

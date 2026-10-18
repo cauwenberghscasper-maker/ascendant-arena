@@ -2391,7 +2391,7 @@ const CFG = {
     speedMult: 1.0, // world monster move speed (v10 plan 1.15 to match the faster hero; held at 1 until check_hardcore pack timings are retuned)
   },
   boss: {
-    name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 25, duration: 120,
+    name: 'Ancient Golem', firstSpawn: 45, interval: 150, warn: 60, duration: 120,
     hp: 3600, hpGrowth: 1.105, atk: 22, r: 2.4, speed: 2.2, leash: 8, attackEvery: 3.2,
     slamR: 5.5, slamDelay: 1.1, rocks: 12, rockSpeed: 11, joinRange: 34, botFireEvery: 1.2,
     loot: { minContrib: 0.02, goldBase: 60, goldPerLevel: 12, rareBase: 0.25, rareScale: 1.6, rareMax: 0.95,
@@ -10060,6 +10060,8 @@ const Coach = {
 const hudCache = {};
 function setText(id, v) { if (hudCache[id] !== v) { hudCache[id] = v; $(id).textContent = v; } }
 function setStyle(id, prop, v) { const k = id + prop; if (hudCache[k] !== v) { hudCache[k] = v; $(id).style.setProperty(prop, v); } }
+// Normal (friendly) mode can only be switched on after 60 s without taking damage
+const pvpOffWait = () => Math.ceil(Math.max(0, 60 - (G.time - (G.player.lastHurt ?? -99))));
 function setHidden(id, h) { const k = id + 'hid'; if (hudCache[k] !== h) { hudCache[k] = h; $(id).hidden = h; } }
 function updateHUD(dt) {
   const p = G.profile, inArena = G.mode === 'arena' && G.arena;
@@ -10090,7 +10092,7 @@ function updateHUD(dt) {
     const nc = G.profile.cases.length; setHidden('caseChip', !nc); if (nc) setText('caseChip', String(nc));
     UI.caseFlash = Math.max(0, (UI.caseFlash || 0) - dt); $('caseChip').classList.toggle('flash', UI.caseFlash > 0);
     setHidden('autoChip', G.mode !== 'hub' || !!G.rift); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
-    setHidden('pvpChip', G.mode !== 'hub' || !!G.rift || !!G.dungeon); setText('pvpChip', G.profile.settings.pvp ? 'FIGHT' : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
+    setHidden('pvpChip', G.mode !== 'hub' || !!G.rift || !!G.dungeon); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
   } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); }
   $('bMenu').classList.toggle('newU', G.started && Object.keys(UNLOCK_AT).some(unlockNew)); // the menu button glows while something new is unopened
   { const n = mpCount(), on = G.started && !inArena; setHidden('mpChip', !on || !n); if (on && n) setText('mpChip', String(n + 1)); }
@@ -11096,6 +11098,7 @@ function handleSettingChange(e) {
   if (e.target.dataset.sel) { G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; if (e.target.dataset.sel === 'uiSize') { applyUiSize(); measureSheet(); } return; }
   const k = e.target.dataset.set; if (!k) return;
   if (k === 'fastXp' && !LOCAL_PREVIEW) return;
+  if (k === 'pvp' && !e.target.checked && pvpOffWait() > 0) { e.target.checked = true; showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
   G.profile.settings[k] = e.target.checked; G.dirty = true;
   if (k === 'mute') Sfx.setMute(e.target.checked);
   if (k === 'bots') { if (e.target.checked) addHubBots(); else removeHubBots(); }
@@ -11296,7 +11299,8 @@ function processEvents() {
       case 'pickup': burst(e.x, 0.6, e.z, 10, 0xff5fa2, 4, 0.5, 0.2, 8); SpriteFX.play('crit', 'arcane', e.x, 0.9, e.z, 1.8); Sfx.play('pickup'); break;
       case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.z)]; const prevB = Feed.lastBiome; Feed.lastBiome = zn.biome;
         Feed.add(zn.safe ? `${gi('m_progress')} Back at <b>${e.name}</b> · safe` : prevB != null && prevB !== zn.biome ? `${gi('m_progress')} <b>${zn.biomeName}</b> › ${e.name} · Lv ${zn.lvl[0]}–${zn.lvl[1]}` : `${gi('m_progress')} Entered <b>${e.name}</b> · Lv ${zn.lvl[0]}–${zn.lvl[1]}`, 'zone'); break; }
-      case 'bossWarn': Sfx.play('horn'); break;
+      case 'bossWarn': { Sfx.play('horn'); const Zb = CFG.world.zones[G.bossLair], locked = G.bossLair > highestZone(G.profile.level);
+        showBanner('BOSS INCOMING', `${Zb ? Zb.boss : 'A world boss'} rises in ${e.lair} in ${e.secs}s${locked ? ' · area not unlocked for you yet' : ' · unlocked area'}`, 'red'); break; }
       case 'bossSpawn': Sfx.play('horn'); burst(e.x, 0.5, e.z, 50, 0x8d8a83, 10, 1.2, 0.5, 14, 1.2); SpriteFX.play('dust', 'dust', e.x, 0, e.z, 6); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 10); break;
       case 'bossDown': Feed.remove('boss'); Feed.add(`${gi('m_feats')} World boss defeated!`, 'boss'); Sfx.play('win'); break;
       case 'bossGone': Feed.remove('boss'); Feed.add(`${gi('k_titan')} ${e.name} sank back into the ground`, 'boss'); break;
@@ -11572,7 +11576,8 @@ function setMap(open) { G.profile.settings.map = open; G.dirty = true; $('mapBox
 function updateBossTracker() {
   const inHub = G.mode === 'hub' && G.started && !Showcase.on;
   const b = inHub ? G.boss : null;
-  setHidden('bossBar', !b || Math.hypot(b.x - G.player.x, b.z - G.player.z) > 45);
+  const fighting = !!b && (b.dmgBy[G.player.id] || 0) > 0 && zoneAt(G.player.z) === b.zone; // only people who attack it, in its zone, get the health bar
+  setHidden('bossBar', !fighting);
   if (b) {
     setText('bossName', `${b.name} · Lv ${b.lvl}`);
     setText('bossTime', b.life > 0 ? `${Math.ceil(b.life)}s left` : 'Enraged');
@@ -13386,7 +13391,9 @@ function boot(hotData) {
   // Fight / Normal: the same switch as Settings > PvP, one tap from the HUD
   $('pvpChip').addEventListener('click', () => {
     if (!G.started || G.modal) return;
-    const s = G.profile.settings; s.pvp = !s.pvp; G.dirty = true; Sfx.play('click');
+    const s = G.profile.settings;
+    if (s.pvp && pvpOffWait() > 0) { Sfx.play('click'); showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
+    s.pvp = !s.pvp; G.dirty = true; Sfx.play('click');
     const live = typeof MP !== 'undefined' && MP.state === 'on';
     showToast(s.pvp ? (live ? 'Fight mode: other fighters can hit you outside town. You glow red' : 'Fight mode on. It starts once you are online with other players') : 'Normal mode: no PvP');
   });
