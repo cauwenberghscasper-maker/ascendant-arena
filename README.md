@@ -238,6 +238,9 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
 - **Forge (Garo):** Reforge, Masterwork ranks, Craft (biome ore + monster parts + dungeon cores + Titan Souls;
   5-piece sets with glowing set auras), Forge shop, Enchant.
 - **Showdown arena:** 10 fighters vs bots, closing gas, power cubes, trophies. **The Rift.**
+- **Bastion Siege** (level 20, the Bastion house west of the plaza): endless waves attack The Keep and two wagons;
+  fight and build archers, cannons, ballistas and warriors on 8 pads, upgraded with gold and Bastion Stones. The fort is
+  saved and returns every run.
 - **Dungeons** with Dungeon Keys (tier + affixes, par time) and **Legendary Trials** (sigils, Radiant 1/500 drops).
 - **Mining:** ore, pickaxe, geodes for the Museum, a 1/10,000 pet.
 - **Daily:** 7-day calendar that never resets, weekly Colossus chest.
@@ -389,6 +392,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Combat, projectiles, damage | `src/game/31-combat.js` |
 | Arena (Showdown), Rift | `src/game/34-arena.js`, `33-world-sim.js` |
 | Dungeon mode (party dungeons): dungeons, difficulties, power gate, rooms, events, loot, set bonuses | `src/game/36b-delve.js` (`CFG.delve`); event-room props: `47b-delve-view.js`; parties, random match, the Dungeons panel and HUD: `73-party.js`; banners `assets/ui/delve/`, set pieces `assets/world/delve_*` |
+| Bastion Siege (tower defense from the Bastion house in town): fort, waves, objectives with health bars, defenders on 8 pads (archer, cannon, ballista, warriors), the permanent fort save | `src/game/36c-siege.js` (`CFG.siege`); looks: `47c-siege-view.js`; save: `profile.fort` in `22-profile.js`; checks: `tools/check_siege.cjs` |
 | Multiplayer lobby (Supabase Realtime), future partitioning (`mpRoomKey`) | `src/game/70-multiplayer.js`; notes in `docs/UNFINISHED.md` |
 | HUD | `src/game/60-hud.js` |
 | Panels, settings, button actions (`data-act`) | `src/game/61-panels.js` (`handlePanelClick`) |

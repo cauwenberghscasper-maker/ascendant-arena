@@ -103,6 +103,10 @@ function sanitizeProfile(p) {
   // Dungeon Keys (CFG.dungeon loads later; the cap of 12 matches CFG.dungeon.keys.max)
   out.keys = (Array.isArray(out.keys) ? out.keys : []).filter((k) => k && k.t >= 1 && Array.isArray(k.a)).slice(0, 12)
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));
+  // Bastion Siege fort: eight pads, each empty or { t: type, l: 1-15 } (CFG.siege loads later; the lists match it)
+  { const f = out.fort && typeof out.fort === 'object' && !Array.isArray(out.fort) ? out.fort : {}, T = ['archer', 'cannon', 'ballista', 'warrior'];
+    out.fort = { stones: Math.max(0, Math.floor(+f.stones || 0)), pads: Array.from({ length: 8 }, (_, i) => { const q = Array.isArray(f.pads) ? f.pads[i] : null;
+      return q && T.includes(q.t) && q.l >= 1 ? { t: q.t, l: Math.min(15, q.l | 0) } : null; }) }; }
   if (CFG.world && CFG.world.waypoints) out.waypoints = out.waypoints.filter((i) => Number.isInteger(i) && i >= 0 && i < CFG.world.waypoints.length);
   { const m = out.mine && typeof out.mine === 'object' ? out.mine : {}; out.mine = { ore: Math.max(0, +m.ore || 0), pick: Math.max(0, Math.min(20, m.pick | 0)), mined: Math.max(0, m.mined | 0), museum: m.museum && typeof m.museum === 'object' && !Array.isArray(m.museum) ? m.museum : {} }; }
   { const c = out.craft && typeof out.craft === 'object' && !Array.isArray(out.craft) ? out.craft : {}, obj = (o) => (o && typeof o === 'object' && !Array.isArray(o) ? o : {}), num = (o) => { const r = {}; for (const k in obj(o)) { const v = +o[k]; if (v > 0 && isFinite(v)) r[k] = Math.floor(v); } return r; };

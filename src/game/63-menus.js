@@ -210,7 +210,7 @@ function openDaily() {
 
 // --- Prestige: reviewed reset, permanent companion and bounded world bonuses ---------------------------
 function prestigeBlocked() {
-  return prestigeBlock(G.profile,{mode:G.mode,rift:!!G.rift,shrine:!!activeShrine(),alive:G.player.alive,inCombat:G.time-G.lastCombat<8,inTown:inTown()});
+  return prestigeBlock(G.profile,{mode:G.mode,rift:!!(G.rift||G.siege),shrine:!!activeShrine(),alive:G.player.alive,inCombat:G.time-G.lastCombat<8,inTown:inTown()});
 }
 const petPercent = n => (n*100).toFixed(2).replace(/\.00$/,'')+'%';
 function prestigeBadge(p) { return `<span class="prestigeBadge">Prestige ${prestigeCount(p)}</span>`; }
@@ -419,6 +419,7 @@ function openProgress(tab) {
       const ai = P.ascendAt.indexOf(L); if (ai >= 0) r.push(`<span class="rw asc">${gi('m_asc')} Ascended: ${['golden aura', 'wings + super power', 'crown + trail'][ai]}</span>`);
       for (let t = 1; t <= maxTier(L) + 1; t++) if (tierDef(t).req === L) r.push(`<span class="rw tier">${gi('m_tier')} World Tier ${tierDef(t).name}</span>`);
       if (L === CFG.rift.unlock) r.push(`<span class="rw zone">${gi('m_rift')} The Rift opens</span>`);
+      if (L === CFG.siege.unlock) r.push(`<span class="rw zone">${gi('m_hero')} Bastion Siege opens</span>`);
       for (const id of CFG.brawlerOrder) { const a = CFG.attacks[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw atk">${gi('b_' + id)} ${CFG.brawlers[id].name}</span>`); }
       for (const id in CFG.artifacts) { const a = CFG.artifacts[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw art">${gi('a_' + id)} ${a.name}</span>`); }
       r.push(`<span class="rw key">+${2 + (L % 10 === 0 ? 5 : 0)} talent points</span>`);

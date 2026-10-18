@@ -31,6 +31,7 @@ function frame(now) {
     else if (G.mode === 'hub' && G.lootQueue.length) openLoot(G.lootQueue.shift());
     else if (G.mode === 'hub' && G.started && !UI.dailyShown && G.profile.tut >= 3 && loginReady(Date.now())) { UI.dailyShown = true; openDaily(); }
     else if (G.mode === 'hub' && G.riftResult) { const rr = G.riftResult; G.riftResult = null; openRiftResult(rr); }
+    else if (G.mode === 'hub' && G.siegeResult) { const sr = G.siegeResult; G.siegeResult = null; openSiegeResult(sr); }
   }
   const t = now / 1000;
   mpUpdate(dt);

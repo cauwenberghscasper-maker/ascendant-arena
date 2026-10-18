@@ -703,3 +703,22 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .sndbox input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 24px; margin-top: -8px; border-radius: 0; background: #ece6d6; box-shadow: 0 0 0 3px var(--og-ink), inset 0 -4px 0 rgba(0,0,0,.25); }
 .sndbox input[type=range]::-moz-range-thumb { width: 20px; height: 24px; border: 0; border-radius: 0; background: #ece6d6; box-shadow: 0 0 0 3px var(--og-ink), inset 0 -4px 0 rgba(0,0,0,.25); }
 .sndbox input[type=range]:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+/* Bastion Siege: big objective bars (flash red under attack), warrior bars, the fort panels */
+.tag.obj .tn { font: 13px/1 var(--body); color: #fff; letter-spacing: .02em; }
+.tag.obj .tb { width: 96px; height: 10px; border: 2px solid rgba(0,0,0,.7); } .tag.obj .tb i { background: var(--hp); transition: width .15s; }
+.tag.obj.main .tn { font-size: 16px; color: #ffe08a; } .tag.obj.main .tb { width: 150px; height: 13px; } .tag.obj.main .tb i { background: #e9b949; }
+.tag.obj.hurt .tb { animation: objHurt .5s ease-in-out infinite alternate; } .tag.obj.hurt .tn { color: #ff8a8a; }
+.tag.obj.down .tn { color: #a9adc8; text-decoration: line-through; opacity: .8; }
+@keyframes objHurt { from { box-shadow: 0 0 0 rgba(255,59,59,0); } to { box-shadow: 0 0 10px 3px rgba(255,59,59,.85); } }
+.tag.ally .tb { width: 34px; height: 5px; } .tag.ally .tb i { background: #5dd6ff; }
+b.stones { color: #e8d9b5; }
+.fortPads { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
+.fortPadBtn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px !important; min-width: 0; font-size: 12px; }
+.fortPadBtn .gi { width: 22px; height: 22px; } .fortPadBtn small { font-size: 11px; opacity: .85; }
+.fortPadBtn.archer { border-color: #58e08a !important; } .fortPadBtn.cannon { border-color: #ff7a4a !important; } .fortPadBtn.ballista { border-color: #5dd6ff !important; } .fortPadBtn.warrior { border-color: #ffc94a !important; }
+.fortCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 8px 0; }
+.fortCard { background: rgba(255,255,255,.05); border: 2px solid var(--line); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.fortCard.mine { border-color: var(--gold); background: rgba(255,201,74,.08); }
+.fortCard p { margin: 0; font-size: 12px; line-height: 1.35; } .fortCard button { margin-top: auto; }
+.fcHead { display: flex; align-items: center; gap: 6px; } .fcHead .gi { width: 22px; height: 22px; flex: none; } .fcHead .cnt { margin-left: auto; }
+@media (max-width: 420px) { .fortCards { grid-template-columns: 1fr; } .fortPads { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

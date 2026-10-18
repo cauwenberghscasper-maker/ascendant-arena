@@ -1,3 +1,13 @@
+# Bastion Siege (18 Oct 2026, branch `bastion-siege`, PR #23 to main)
+- **Now:** a tower-defense instance like the Rift, entered from the Bastion house west of the town plaza (level 20,
+  `CFG.siege` in `src/game/36c-siege.js`, looks in `47c-siege-view.js`). Endless waves come through three gates and attack
+  The Keep (run ends when it falls) and two supply wagons, each with a big health bar. Eight stone pads take an archer tower,
+  cannon, ballista or barracks (warriors), upgraded to level 15 with gold and Bastion Stones from waves; the fort is saved in
+  `profile.fort` (sanitized) and returns every run. Every 5th wave a Siege Lord drops an item. Checks: `tools/check_siege.cjs`.
+- **Open:** real models for the cannon and ballista (today the iron `kettle` stands in as a mortar and the purple
+  `arena_tower` as the ballista turret); a 32x32 pixel icon for Bastion Stones (shown as text now); a "New" pulse for the
+  Bastion house at level 20; balance over many waves is not playtested (`CFG.siege`: tower `dmg`/`cost`/`stones`,
+  `lvlBase`/`lvlPer`, objective `mult`); warriors use the Smith Garo townsfolk model until a soldier model exists.
 # Dungeon revive: fallen heroes stay visible (18 Oct 2026, on `main`)
 A downed hero in a party dungeon used to shrink away (teammates couldn't find them) and the HUD showed "back in 1000000000"
 (the run sets `G.respawnT = 1e9`). Now the body stays in its death pose (`downed` in `42-characters.js`), teammates see a

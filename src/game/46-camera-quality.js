@@ -20,6 +20,7 @@ function viewFor(e) {
   } else if (e.kind === 'enemy') v = AssetSlots.create('enemy', { type: e.type, elite: e.elite });
   else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone });
   else if (e.kind === 'npc') v = AssetSlots.create('npc', { id: e.def.id });
+  else if (e.kind === 'soldier') v = AssetSlots.create('character', { model: 'npc.garo' }); // Bastion Siege warriors
   dynGroup.add(v.root); views.set(e, v);
   return v;
 }
@@ -60,6 +61,7 @@ function syncViews(dt, t) {
     for (const e of G.enemies) handle(e);
     for (const e of mpVisible()) handle(e);
     for (const n of shownNpcs()) handle(n);
+    if (G.siege) for (const s of G.siege.soldiers) handle(s);
     if (G.boss) handle(G.boss);
   }
   for (const [e, v] of views) if (!seen.has(e)) { dynGroup.remove(v.root); v.dispose(); views.delete(e); }

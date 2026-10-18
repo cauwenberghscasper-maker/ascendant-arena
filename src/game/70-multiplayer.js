@@ -392,12 +392,12 @@ function mpGhostShot(e) {
 }
 // visible peers: in the open world, while you are too
 // in a party dungeon: the party members in this run
-function mpVisible() { if (G.mode !== 'hub' || G.rift) return []; if (delveOn()) { const seed = G.dungeon.delve.seed; return MP.list.filter((e) => e.md === 'delve' && e.dr === seed); } return MP.list.filter((e) => e.md === 'hub'); }
+function mpVisible() { if (G.mode !== 'hub' || G.rift || G.siege) return []; if (delveOn()) { const seed = G.dungeon.delve.seed; return MP.list.filter((e) => e.md === 'delve' && e.dr === seed); } return MP.list.filter((e) => e.md === 'hub'); }
 function mpOnShot(f, dx, dz) { if (f.isPlayer && G.mode === 'hub') { MP.seq++; MP.aim = Math.atan2(dx, dz); } }
 function mpState() {
   const p = G.profile, pl = G.player, r1 = (v) => Math.round(v * 10) / 10;
   return { v: 8, sid: MP.sid, n: mpNick(p), c: p.cls, l: p.level, x: r1(pl.x), z: r1(pl.z), f: Math.round(pl.facing * 100) / 100, m: r1(pl.moveAmt || 0), s: MP.seq, a: Math.round(MP.aim * 100) / 100,
-    h: Math.round(clamp(pl.hp / pl.maxHp, 0, 1) * 100) / 100, al: pl.alive ? 1 : 0, md: G.rift ? 'rift' : delveOn() ? 'delve' : G.dungeon ? 'dungeon' : G.mode, pv: typeof pvpOn === 'function' && pvpOn() ? 1 : 0,
+    h: Math.round(clamp(pl.hp / pl.maxHp, 0, 1) * 100) / 100, al: pl.alive ? 1 : 0, md: G.rift ? 'rift' : delveOn() ? 'delve' : G.dungeon ? 'dungeon' : G.siege ? 'siege' : G.mode, pv: typeof pvpOn === 'function' && pvpOn() ? 1 : 0,
     ...(typeof partyCard === 'function' ? partyCard() : {}) };
 }
 function mpUpdate(dt) {

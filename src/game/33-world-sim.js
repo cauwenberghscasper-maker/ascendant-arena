@@ -34,6 +34,7 @@ function enemySpawnClear(e, x, z, respawning) {
 const PATROL_LANES = [-0.8, -0.5, -0.17, 0.17, 0.5, 0.8]; // × maxX
 function enemySpot(e, respawning = false) {
   const W = CFG.world;
+  if (e.siege) return { x: SC.x, z: SC.z }; // placed at a gate by spawnSiegeMob
   if (e.rift) {
     const pl = G.player;
     for (let i = 0; i < 30; i++) { const a = rand(0, Math.PI * 2), r = rand(7, CFG.rift.r - 2.5), x = RC.x + Math.sin(a) * r, z = RC.z + Math.cos(a) * r; if (!pointBlocked(x, z, 1.2) && Math.hypot(x - pl.x, z - pl.z) > 8) return { x, z }; }
@@ -117,7 +118,7 @@ function refHp(L) { const P = CFG.progression; return P.hpBase * Math.pow(P.hpGr
 function refDmg(L) { const P = CFG.progression; return P.atkBase * Math.pow(P.atkGrowth, L - 1) * lerpTable(CFG.enemies.refDmgMult, L); }
 // hits depend on the monster's level only, so more HP from gear really makes you tankier
 function mobDmg(e, mult) { return e.atk * (mult == null ? 1 : mult); }
-function inInstance() { return !!(G.rift || G.dungeon); }
+function inInstance() { return !!(G.rift || G.dungeon || G.siege); }
 // hits scale with the reference hero's HP, health with its damage: equal-level fights feel the same at 1 and 210
 function setEnemyLevel(e, lvl) {
   const d = CFG.enemies[e.type], E = CFG.enemies;
@@ -416,6 +417,7 @@ function stepHub(dt) {
   // zone change
   if (G.rift) stepRift(dt);
   if (G.dungeon) stepDungeon(dt);
+  if (G.siege) stepSiege(dt);
   const zi = inInstance() ? G.zoneIdx : zoneAt(pl.z);
   if (zi !== G.zoneIdx) { G.zoneIdx = zi; ev({ t: 'zone', name: W.zones[zi].name, town: false }); if (zi > G.profile.stats.zone) { G.profile.stats.zone = zi; checkAchievements(); } }
   // bots
@@ -453,9 +455,11 @@ function stepHub(dt) {
   G.interact = null;
   if (G.rift) { if (pl.alive) G.interact = { kind: 'riftLeave' }; }
   else if (G.dungeon) { if (pl.alive) G.interact = dungeonInteract(pl); }
+  else if (G.siege) { if (pl.alive) G.interact = siegeInteract(pl); }
   else if (pl.alive) {
     let best = 3.6;
     { const RG = CFG.rift.gate, d = Math.hypot(pl.x - RG.x, pl.z - RG.z); if (d < best) { best = d; G.interact = { kind: 'rift' }; } }
+    { const SG = CFG.siege.gate, d = Math.hypot(pl.x - SG.x, pl.z - SG.z); if (d < best) { best = d; G.interact = { kind: 'siege', label: 'Bastion Siege' }; } }
     for (const po of dungeonPois()) { const d = Math.hypot(pl.x - po.x, pl.z - po.z); if (d < best) { best = d; G.interact = { kind: 'dungeon', poi: po, label: 'Enter ' + po.name }; } }
     for (const n of shownNpcs()) { const d = Math.hypot(pl.x - n.x, pl.z - n.z); if (d < best) { best = d; G.interact = n; } }
     CFG.world.waypoints.forEach((w, i) => { const d = Math.hypot(pl.x - w.x, pl.z - w.z); if (d < best) { best = d; G.interact = { kind: 'waypoint', i, def: w }; } });
@@ -534,6 +538,7 @@ function separate(a, b) {
 }
 const bodyMass = (e) => { const M = CFG.enemies.mass; return e.kind === 'enemy' ? (M[(CFG.enemies[e.type] || {}).kit || 'legacy'] || 1) * (e.elite ? M.elite : 1) : M.player; };
 function stepEnemy(e, dt) {
+  if (e.siege) { stepSiegeEnemy(e, dt); return; } // Bastion Siege monsters go for the fort (36b-siege.js)
   if ((e.mirror || e.hidden) && moveUpkeep(e, dt)) return;
   if (!e.alive) { if (e.rift || e.dungeon) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
   if (HeroSupers.tickStatus(e, dt)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); e.moveAmt = 0; return; } // stunned / banished by a hero super
