@@ -1,3 +1,9 @@
+# Bastion plan (18 Oct 2026, on `main`, plan only)
+Casper's next Bastion update is written down in `docs/BASTION_PLAN.md`: never below your wave, building anywhere on a grid,
+walls placed and upgraded by the player, builder huts, land that grows to 500x500 m, random wave sides, shared worlds others
+join with a code (saved on the server, open while the owner is offline), new building models. Nothing is built yet;
+Phase 1 (wave record) is next. Three questions are still open (see the end of the plan).
+
 # Bastion Siege (18 Oct 2026, branch `bastion-siege`, PR #23 to main)
 - **Now:** a tower-defense instance like the Rift, entered from the Bastion house west of the town plaza (level 20,
   `CFG.siege` in `src/game/36c-siege.js`, looks in `47c-siege-view.js`). Endless waves come through three gates and attack
