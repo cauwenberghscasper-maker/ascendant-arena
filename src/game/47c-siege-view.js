@@ -152,6 +152,19 @@ function siegeTileTextures() {
   };
   return siegeTileTex;
 }
+// what a building gains round it at each look (until every look has its own model, and on top of it after): a second
+// banner (level 3), a torch (5), its trade's prop (7: weapon rack, log pile, ore, cart, workbench, rune stone), a glowing
+// crystal (9), a sapphire brazier instead of the torch (11), and a statue with gold banners (13)
+const SIEGE_TRADE = { archer: ['weapon_rack', 1.0], cannon: ['barrel_1', 0.8], ballista: ['weapon_rack', 1.0], warrior: ['weapon_rack', 1.0], mage: ['rune_obelisk', 1.5],
+  mill: ['log', 0.55], mine: ['ore_pile', 0.7], iron: ['mine_cart', 0.85], hut: ['workbench', 0.85] };
+function siegeLookProps(b, u, x, z, add, now) {
+  const k = siegeTier(b.l), e = u.size * CFG.siege.cell / 2 - 0.35, col = b.d > now ? 0xffe9a8 : k >= 6 ? 0xffd700 : SIEGE_PAD_COL[b.t];
+  if (k >= 1) add('banner_pole', { x: x + e, z: z + e, ry: 0, s: 2.2, color: col });
+  if (k >= 2) add(k >= 5 ? 'sapphire_brazier' : 'torch', { x: x + e, z: z - e, ry: 0, s: k >= 5 ? 1.1 : 1.3 });
+  if (k >= 3 && SIEGE_TRADE[b.t]) { const [n, h] = SIEGE_TRADE[b.t]; add(n, { x: x - e, z: z + e * 0.9, ry: 0.6, s: h }); }
+  if (k >= 4) add('crystal', { x: x, z: z + e + 0.1, ry: 0.4, s: 0.9 });
+  if (k >= 6) add('statue', { x: x - e - 0.1, z: z, ry: Math.PI / 2, s: 1.6 });
+}
 const SIEGE_TURN = { cannon: 1, ballista: 1, mage: 1 };
 const _siegeM4 = new THREE.Matrix4();
 // how a defender fires (Clash of Clans style): it winds up before the shot (cannon leans back, ballista draws, the mage
@@ -181,8 +194,9 @@ function buildSiegeBuildings() {
       const it = { x, z, ry: 0, s: h }; add(name, it); if (b.t === 'spike') aims.push({ it, u, name, bx: x, bz: z }); else idle.push({ it, u, name, bx: x, bz: z, ry0: 0 }); continue; }
     const it = { x, z, ry, s: h * k * SIEGE_SCALE, color: tint }; add(name, it);
     if (SIEGE_SHOOTERS[b.t]) aims.push({ it, u, name, bx: x, bz: z });
-    const ban = { x: x - u.size * cs / 2 + 0.3, z: z - u.size * cs / 2 + 0.3, ry: 0, s: (2.4 + Math.min(15, b.l) * 0.14) * 0.85, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] };
+    const ban = { x: x - u.size * cs / 2 + 0.3, z: z - u.size * cs / 2 + 0.3, ry: 0, s: (2.4 + Math.min(15, b.l) * 0.14) * 0.85, color: b.d > now ? 0xffe9a8 : siegeTier(b.l) >= 6 ? 0xffd700 : SIEGE_PAD_COL[b.t] };
     add('banner_pole', ban); idle.push({ it, u, name, bx: x, bz: z, ry0: ry, ban, ph: (x * 7.3 + z * 3.1) % 6.28 });
+    siegeLookProps(b, u, x, z, add, now);
   }
   // the tiles under the buildings: one instanced slab and one instanced rim (tinted per building) for the whole fort
   const tiles = S.units.filter((u) => u.alive && !CFG.siege.towers[u.b.t].wall && !CFG.siege.towers[u.b.t].trap);
@@ -260,12 +274,22 @@ function animateSiegeIdle(dt) {
   }
   if (banners && siegeParts.idle[0] && siegeParts.idle[0].hb) siegeParts.idle[0].hb.dirty = true;
 }
+// the edge of the build area: a gold band on the ground (VFX) with a banner at each corner
+function siegeAreaLine(A) {
+  if (siegeParts.areaLine) { siegeParts.areaLine.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); siegeParts.areaLine.removeFromParent(); }
+  if (siegeParts.areaBan) WorldModels.dispose(siegeParts.areaBan);
+  siegeParts.areaA = A; const g = siegeParts.areaLine = new THREE.Group(), mat = new THREE.MeshBasicMaterial({ color: 0xffd36b, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false });
+  for (const [w, d, x, z] of [[A * 2, 0.4, 0, A], [A * 2, 0.4, 0, -A], [0.4, A * 2, A, 0], [0.4, A * 2, -A, 0]]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2), mat); m.position.set(SC.x + x, 0.05, SC.z + z); g.add(m); }
+  siegeGroup.add(g);
+  siegeParts.areaBan = WorldModels.place(siegeGroup, 'banner_pole', [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => ({ x: SC.x + a * A, z: SC.z + b * A, ry: 0, s: 3.6, color: 0xffd36b })));
+}
 // builder mode: the field's grid over the land, Clash of Clans style (a checkered tint, thin lines, a stronger line every 5 cells)
 function siegeGridOverlay(on) {
   const S = G.siege;
   if (siegeParts.grid) { siegeParts.grid.geometry.dispose(); siegeParts.grid.material.dispose(); siegeParts.grid.removeFromParent(); siegeParts.grid = null; }
   if (!on || !S || !siegeGroup.visible) return;
-  const H = S.half, mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uC: { value: new THREE.Vector2(SC.x, SC.z) }, uCs: { value: CFG.siege.cell } },
+  const H = fortArea() * CFG.siege.cell; siegeParts.gridA = H; // only where you may build
+  const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uC: { value: new THREE.Vector2(SC.x, SC.z) }, uCs: { value: CFG.siege.cell } },
     vertexShader: 'varying vec2 vW; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xz; gl_Position = projectionMatrix * viewMatrix * w; }',
     fragmentShader: `varying vec2 vW; uniform vec2 uC; uniform float uCs;
       void main() { vec2 c = (vW - uC) / uCs, f = fract(c), d = min(f, 1.0 - f); float line = 1.0 - smoothstep(0.0, 0.05, min(d.x, d.y));
@@ -299,6 +323,7 @@ function siegePreview(list) {
 }
 function disposeSiegeView() {
   for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h); siegeParts.idle = [];
+  if (siegeParts.areaBan) WorldModels.dispose(siegeParts.areaBan); siegeParts.areaBan = siegeParts.areaLine = null; siegeParts.areaA = null;
   if (siegeParts.preview) { WorldModels.dispose(siegeParts.preview.h); siegeParts.preview = null; }
   siegeParts.grid = null;
   const geos = new Set(), mats = new Set();
@@ -329,6 +354,10 @@ function updateSiegeView(dt) {
     gh.count = n; if (n) { gh.instanceMatrix.needsUpdate = true; gh.instanceColor.needsUpdate = true; } gh.material.opacity = 0.35 + Math.sin(t * 6) * 0.12;
   }
   if (G.builder && typeof builderTick === 'function') builderTick();
+  // the grid shows only in builder mode, sized to the build area; the gold line marks the build area at all times
+  const A = fortArea() * CFG.siege.cell;
+  if (!!siegeParts.grid !== !!G.builder || (siegeParts.grid && siegeParts.gridA !== A)) siegeGridOverlay(!!G.builder);
+  if (siegeParts.areaA !== A) siegeAreaLine(A);
   // a fallen objective disappears in smoke
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });
   if (siegeParts.flame) siegeParts.flame.material.opacity = 0.75 + Math.sin(t * 13) * 0.08 + Math.sin(t * 7.3) * 0.08;

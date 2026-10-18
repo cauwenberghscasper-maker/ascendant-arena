@@ -26,6 +26,16 @@ a CoC + Balloons TD mix. Agreed: only camp resources, ~20 s break with a pause, 
   (`siegeModelName`): uses `siege_<kind>_t2..t7` when that model exists, else the best lower one tinted toward the
   look. Idle life per kind (`animateSiegeIdle`): banners flutter, saw strokes + sawdust, mine dust / iron sparks, mage
   motes, huts hammer while a builder works, idle cannons/ballistas scan and smoke, scaffold dust while upgrading.
+- **Round 2 (same branch):** monsters collide with wall cells (`siegeTileCollide`, knock-backs undone), crossing a
+  building costs far more than any detour so they always take the fastest open way (closed in: the weakest wall), and
+  they only chase heroes/warriors they can reach in a straight line (`siegeLineFree`). Flyers now hover 2.6 m up in the
+  view (they looked like walkers going through walls). Build area (`CFG.siege.area`, `F.area`, op `{ o: 'land' }`):
+  16 cells round the Keep at first, +3 cells per plot (8 plots), paid with Land Deeds (`deeds`, only from waves) and a
+  Keep level; old forts get the plots their buildings need (`fortAreaNeed`). Land card at the end of the Resources tab,
+  panel `openFortLandPanel`, gold border + corner banners. Walls 25 → 150 (was 30 → 400), gates 2 → 8. The grid now
+  follows builder mode every frame and only covers the build area (couldn't reproduce it staying on; tell me if it does).
+  Visible level-ups until the models exist: `siegeLookProps` (second banner L3, torch L5, trade prop L7, crystal L9,
+  sapphire brazier L11, statue + gold banners L13) and a "new look!" burst.
 - **Open:** the 56 TRELLIS models in `tools/bastion_tiers.json` (6 looks × 9 kinds + base mill and iron mine) are not
   made yet: Casper's ZeroGPU quota was used up today. Until then mills use the hut model and iron mines the mine model
   (tinted), and the shop pictures `mill.webp`/`iron.webp` are tinted copies. Once made: pack, `v10_boxes.cjs`, rerun

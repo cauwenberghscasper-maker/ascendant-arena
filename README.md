@@ -249,9 +249,10 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
   higher building levels (`CFG.siege.keep`, `towers[t].lim`). After the first start, waves come by themselves with a
   20 s break (Pause/Resume in the builder and on the HUD chip). From level 5 a tower picks one of two paths
   (`CFG.siege.paths`); later waves bring armoured monsters (light shots barely scratch them) and flyers that cross
-  walls (only towers with air hit them). Buildings get a new look every two levels (7 looks, `SIEGE_TIERS`) and
-  their own idle animations. Monsters walk around walls and break the cheapest piece when closed in. The land grows
-  with your level to 500×500 m. A fallen Keep restarts the wave it fell on, never lower. Your fort is a shared world:
+  walls (only towers with air hit them). Buildings get a new look every two levels (7 looks, `SIEGE_TIERS`: extra pieces round them now,
+  their own models once made) and their own idle animations. Monsters walk around walls and break the cheapest piece when closed in. You build inside a gold line round the Keep (32×32 m at first) and push it out with
+  plots bought with **Land Deeds**, which only waves pay (`CFG.siege.area`); the field monsters cross grows with your
+  level to 500×500 m. Monsters always take the fastest open way and collide with wall cells (no slipping through). A fallen Keep restarts the wave it fell on, never lower. Your fort is a shared world:
   friends join with its code, even while you are offline (saved on the server; the player in it longest runs the waves).
 - **Dungeon mode** (party dungeons, level 12, 1-4 heroes, bots fill the empty places): six dungeons, one per biome,
   each with its own boss, mini-boss and 5-piece set. A run is 6-8 halls of mixed sizes (20 m cells to 56 m arenas, a

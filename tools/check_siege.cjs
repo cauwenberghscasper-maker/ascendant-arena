@@ -23,12 +23,12 @@ for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions', 'hero
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') + 'const P = CFG.progression;' + section('const AC =', 'const G = {') +
   section('class Grid {', '// --- entities') + section('function patrolCountFor(', 'function rewardEnemyKill(') + section('const PELLET_COLORS', '// --- hub step') +
   section('function separate(', '// --- world boss') + section('function boundFighter(', '// --- progression') +
-  section('// Bastion fort: { wave, land', '// --- end Bastion fort save') + section('// --- Bastion Siege:', '// --- end siege') + '\nthis.CFG = CFG; this.Grid = Grid; this.SC = SC; this.SIEGE_TYPES = SIEGE_TYPES; this.siegeLevel = siegeLevel; this.siegeMen = siegeMen; this.siegeDefDmg = siegeDefDmg; this.FORT_TYPES = FORT_TYPES; this.landFor = landFor; this.siegeSides = siegeSides; this.fortLvl = fortLvl; this.stepSiegeTraps = stepSiegeTraps; this.fortKeep = fortKeep; this.fortCount = fortCount;', c);
+  section('// Bastion fort: { wave, land', '// --- end Bastion fort save') + section('// --- Bastion Siege:', '// --- end siege') + '\nthis.CFG = CFG; this.Grid = Grid; this.SC = SC; this.SIEGE_TYPES = SIEGE_TYPES; this.siegeLevel = siegeLevel; this.siegeMen = siegeMen; this.siegeDefDmg = siegeDefDmg; this.FORT_TYPES = FORT_TYPES; this.landFor = landFor; this.siegeSides = siegeSides; this.fortLvl = fortLvl; this.stepSiegeTraps = stepSiegeTraps; this.fortKeep = fortKeep; this.fortCount = fortCount; this.fortArea = fortArea; this.fortAreaFor = fortAreaFor;', c);
 const S0 = c.CFG.siege, T0 = S0.towers;
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }
-function reset(level = 40, gold = 1e12, stones = 0, keep = 10) {
+function reset(level = 40, gold = 1e12, stones = 0, keep = 10, area = 8) {
   const hub = new c.Grid(6); hub.add({ x: 500, z: 500, r: 1 });
-  Object.assign(c.G, { mode: 'hub', started: true, modal: false, profile: { level, gold, worldTier: 0, records: {}, fort: c.sanitizeFort({ pads: [], stones, wood: stones, iron: stones, keep }, true) }, chain: { type: null, zone: -1, n: 0 }, enemies: [], ents: new Map(), time: 0, menuSafe: 0,
+  Object.assign(c.G, { mode: 'hub', started: true, modal: false, profile: { level, gold, worldTier: 0, records: {}, fort: c.sanitizeFort({ pads: [], stones, wood: stones, iron: stones, deeds: stones, keep, area }, true) }, chain: { type: null, zone: -1, n: 0 }, enemies: [], ents: new Map(), time: 0, menuSafe: 0,
     rift: null, dungeon: null, siege: null, shrines: [], hubObstacles: hub, obstacles: hub, bossTimer: 100, respawnAt: null, pendingAoE: [], siegeResult: null });
   c.G.player = { id: 0, alive: true, x: S0.gate.x, z: S0.gate.z, r: 0.55, hp: 100, maxHp: 100, ammo: 0, ammoMax: 3, speed: 6.4, intent: {}, isPlayer: true, facing: 0, invulnT: 0, attackId: 'bolt' };
   events.length = 0; shots.length = 0; grants.items = []; grants.gems = grants.xp = grants.gold = 0;
@@ -121,6 +121,9 @@ check('walls: monsters walk around an open wall, and break the cheapest piece of
   assert(at(0, 12) < 30, 'the gap: a short walk'); const e = { x: c.SC.x + 9, z: c.SC.z - 30, r: 0.5 };
   // close the gap: now the cheapest way is through a wall
   c.fortDo({ o: 'add', t: 'wall', x: -1, z: 5 }); c.fortDo({ o: 'add', t: 'wall', x: 0, z: 5 });
+  // with the wagons still open outside the ring, the fastest way is to them, round the walls
+  { const g = { x: c.SC.x + 1, z: c.SC.z + 13, r: 0.5 }; let s3 = null; for (let n = 0; n < 60; n++) { s3 = c.siegeFlowStep(g); if (!s3 || s3.kind === 'fortB') break; g.x = s3.x; g.z = s3.z; } assert(!s3, 'walks round the ring to a wagon instead of breaking a wall'); }
+  S.objs[1].alive = S.objs[2].alive = false; S.flowDirty = true;
   const step = c.siegeFlowStep({ x: c.SC.x + 1, z: c.SC.z + 12.9, r: 0.5 }); assert(step); void e;
   let f = { x: c.SC.x + 1, z: c.SC.z + 13, r: 0.5 }, hit = null;
   for (let n = 0; n < 40 && !hit; n++) { const s2 = c.siegeFlowStep(f); if (s2 && s2.kind === 'fortB') hit = s2; else if (s2) { f.x = s2.x; f.z = s2.z; } else break; }
@@ -237,6 +240,35 @@ check('armour and flyers: light shots barely scratch armour, flyers cross walls 
   for (let j = -5; j <= 4; j++) for (const i of [-6, 5]) c.fortDo({ o: 'add', t: 'wall', x: i, z: j });
   bird.x = c.SC.x; bird.z = c.SC.z + 30; c.G.player.alive = false; for (let n = 0; n < 300 && bird.alive && Math.hypot(bird.x - S.objs[0].x, bird.z - S.objs[0].z) > S.objs[0].r + 2; n++) { c.G.time += 1 / 30; c.stepEnemy(bird, 1 / 30); }
   assert(Math.hypot(bird.x - S.objs[0].x, bird.z - S.objs[0].z) <= S.objs[0].r + 2, 'the flyer reached the Keep over the walls');
+  c.endSiege('leave');
+});
+check('the build area starts small and grows with plots bought with Land Deeds, which only waves pay', () => {
+  reset(120, 1e12, 1e6, 1, 0); assert(c.startSiege()); const F = c.fortState(), M = c.myFort(), C = c.CFG.siege, A = C.area;
+  assert.equal(F.area, 0); assert.equal(c.fortArea(F), A.base);
+  assert.equal(c.fortDo({ o: 'add', t: 'archer', x: A.base - 2, z: 0 }), '', 'inside the area');
+  assert.equal(c.fortDo({ o: 'add', t: 'cannon', x: A.base, z: 0 }), 'Buy more land to build there');
+  M.deeds = 0; assert.equal(c.fortDo({ o: 'land' }), 'Not enough land deeds'); M.deeds = 100;
+  assert.equal(c.fortDo({ o: 'land' }), ''); assert.equal(F.area, 1); assert.equal(M.deeds, 100 - A.deeds[0]); assert.equal(c.fortArea(F), A.base + A.step);
+  assert.equal(c.fortDo({ o: 'add', t: 'cannon', x: A.base, z: 0 }), '', 'the new plot is buildable');
+  assert.equal(c.fortDo({ o: 'land' }), 'Needs Keep level 2'); F.keep = 2; assert.equal(c.fortDo({ o: 'land' }), '');
+  assert(C.pay(3).deeds >= 1 && C.pay(10, true).deeds > C.pay(3).deeds, 'waves pay deeds, a Siege Lord more');
+  assert(!Object.values(C.towers).some((T) => T.make === 'deeds'), 'nothing mines deeds');
+  c.endSiege('leave');
+  reset(20, 1e12, 1e6, 10, 0); M.deeds = 1e6; assert(c.startSiege()); for (let i = 0; i < 8; i++) c.fortDo({ o: 'land' });
+  assert(c.fortArea() * C.cell <= c.G.siege.half - 6, 'never past a small land'); assert.equal(c.fortDo({ o: 'land' }), 'Your land grows with your hero level'); c.endSiege('leave');
+  const old = c.sanitizeFort({ b: [{ t: 'archer', x: 14, z: 0, l: 1 }] }, true); assert(c.fortAreaFor(old.area) >= 16, 'an old fort keeps room for what it built');
+  assert.equal(c.CFG.siege.towers.wall.lim[9], 150, 'walls: 150 at most');
+});
+check('monsters take the fastest open way through a gap and never stand inside a wall', () => {
+  reset(40, 1e12, 1e6); assert(c.startSiege()); const S = c.G.siege; c.G.player.alive = false;
+  // a ring round the Keep and both wagons (cells -10..9), open at one spot on the north side
+  for (let i = -10; i <= 9; i++) for (const j of [-10, 9]) if (!(j === 9 && i === 4)) c.fortDo({ o: 'add', t: 'wall', x: i, z: j });
+  for (let j = -9; j <= 8; j++) for (const i of [-10, 9]) c.fortDo({ o: 'add', t: 'wall', x: i, z: j });
+  S.sides = [0]; c.startSiegeWave(); let inside = 0, through = 0;
+  for (let t = 0; t < 40 && c.G.siege; t += 1 / 30) { c.G.time += 1 / 30; c.stepSiege(1 / 30); for (const e of c.G.enemies.slice()) { c.stepEnemy(e, 1 / 30);
+    if (e.alive && !e.flying && c.siegeSolidAt(e.x, e.z)) inside++; if (e.alive && Math.abs(e.x - c.SC.x) < 18 && Math.abs(e.z - c.SC.z) < 18) through++; } }
+  assert.equal(inside, 0, 'no monster ever inside a wall cell');
+  assert(through > 0, 'they came in through the gap'); assert(!events.some((e) => e.t === 'fortBroken'), 'with a way open, no wall was broken');
   c.endSiege('leave');
 });
 console.log(`${passed} siege checks passed.`);

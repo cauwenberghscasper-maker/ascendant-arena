@@ -706,6 +706,18 @@ function openFortBPanel(k) {
     ${fork ? `<div class="row fortPaths">${upBtns}</div>` : ''}
     <div class="row end">${G.builder ? `<button class="ghost" data-act="fortMove" data-k="${fi}">Move</button>` : ''}<button class="warn" data-act="fortDel" data-k="${fi}">Tear down (+${fortResHTML(back)})</button><button class="ghost" data-act="close">Back</button>${fork ? '' : upBtns}</div>`);
 }
+// buy land: the build area grows by one plot all round (Land Deeds, which only waves pay, and a Keep level)
+function openFortLandPanel() {
+  const S = G.siege; if (!S) return UI.close();
+  UI.current = 'fortLand';
+  const C = CFG.siege, A = C.area, F = fortState(), M = myFort(), n = F.area || 0, top = n >= A.deeds.length, m = (k) => fortAreaFor(k) * 2 * C.cell;
+  const why = top ? '' : fortCheck({ o: 'land' }), cost = top ? null : { deeds: A.deeds[n] }, ok = !why && fortHas(cost, M);
+  openModal(`<div class="npcHead">${ICON.deeds.replace('class="ic"', 'class="ic big"')}<h3>Buy land</h3><span class="cnt">${n}/${A.deeds.length} plots</span></div>
+    <p>You build inside the gold line round the Keep. Each plot pushes it out ${A.step * C.cell} m on every side. Land Deeds come only from holding waves (a Siege Lord pays more); your whole field, where monsters walk in, still grows with your level.</p>
+    <p class="fine">Now ${fortArea(F) * 2 * C.cell} × ${fortArea(F) * 2 * C.cell} m. You have ${fortResHTML({ deeds: Math.max(1, M.deeds || 0) }).replace('<b>1</b>', '<b>' + fmtK(M.deeds || 0) + '</b>')}.</p>
+    ${top ? '<p class="fine">All land bought.</p>' : `<p class="fine">Plot ${n + 1}: ${m(n + 1)} × ${m(n + 1)} m · ${fortResHTML(cost, M)} · Keep level ${A.keep[n]}${why ? ` · ${why}` : ''}</p>`}
+    <div class="row end"><button class="ghost" data-act="close">Back</button>${top ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortLand"${ok ? '' : ' aria-disabled="true"'}>Buy the plot</button>`}</div>`);
+}
 // the Keep: its level sets how many of each building you may have and how high they go
 function openFortKeepPanel() {
   const S = G.siege; if (!S) return UI.close();
@@ -717,7 +729,7 @@ function openFortKeepPanel() {
   openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>The Keep</h3><span class="cnt">Level ${k}</span></div>
     <p>The Keep's level decides how many of each building your camp may have, and how high they can be upgraded (now level ${C.keep.lvl[eff - 1]}). Every level also makes the Keep and the wagons sturdier.</p>
     ${F.kd > now ? `<p class="fine">Upgrading to level ${k}, ${fortDur((F.kd - now) / 1000)} left (one builder).</p>` : ''}
-    <div class="list fortLimits">${rows}</div>
+    <div class="list fortLimits">${rows}<div class="row"><b>Land</b><small>${fortArea(F) * 2 * CFG.siege.cell} × ${fortArea(F) * 2 * CFG.siege.cell} m · <a data-act="fortLandOpen">buy more</a></small></div></div>
     ${top ? '<p class="fine">Max level.</p>' : `<p class="fine">Level ${k + 1}: buildings up to level ${C.keep.lvl[k]}<br>${fortResHTML(c, M)} · ${fortDur(C.keep.time(k + 1))} with a builder${why ? ` · ${why}` : ''}</p>`}
     <div class="row end"><button class="ghost" data-act="close">Back</button>${top ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortKeep"${ok ? '' : ' aria-disabled="true"'}>Upgrade the Keep</button>`}</div>`);
 }
@@ -983,6 +995,8 @@ function handlePanelClick(e) {
     case 'siegeCopy': { const c = myFort().code; try { navigator.clipboard.writeText(c).then(() => toast(`Copied ${c}`, 'good'), () => toast(c)); } catch (e) { toast(c); } break; }
     case 'fortWave': UI.close(); startSiegeWave(); break;
     case 'fortMove': { const fb = fortState().b[+b.dataset.k]; UI.close(); if (fb) builderMove(fb); break; }
+    case 'fortLandOpen': openFortLandPanel(); break;
+    case 'fortLand': { const why = fortDo({ o: 'land' }); if (why) { toast(why, 'bad'); openFortLandPanel(); } else { Sfx.play('unlock'); UI.close(); } break; }
     case 'fortKeep': { const why = fortDo({ o: 'keep' }); if (why) toast(why, 'bad'); else Sfx.play('unlock'); openFortKeepPanel(); break; }
     case 'fortUp': case 'fortDel': case 'fortCol': { const why = fortDo({ o: act === 'fortUp' ? 'up' : act === 'fortDel' ? 'del' : 'col', k: +b.dataset.k, p: +b.dataset.p || 0 });
       if (why) toast(why, 'bad'); else Sfx.play('unlock');

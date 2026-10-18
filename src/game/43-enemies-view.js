@@ -47,7 +47,8 @@ AssetSlots.register('enemy', (o) => {
   return {
     root,
     update(e, dt, t) {
-      root.position.set(e.x, 0, e.z);
+      // Bastion flyers fly over the walls, their shadow stays on the ground
+      const lift = e.flying ? 2.6 + Math.sin(t * 2.6 + phase) * 0.25 : 0; root.position.set(e.x, lift, e.z); shadow.position.y = 0.03 - lift;
       if (!model) swapModel();
       if (popT > 0 && popT < 1) popT = Math.min(1, popT + dt * 5);
       root.rotation.y += angDiff(root.rotation.y, e.facing) * (1 - Math.exp(-dt * 10));

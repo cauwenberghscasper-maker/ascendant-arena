@@ -744,6 +744,7 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .bdTab { min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 2px; font: 12px/1.1 var(--body); color: #c9bfa8; background: linear-gradient(#3a2e24, #221a12); border: 2px solid var(--og-ink, #120a03); border-radius: 7px; }
 .bdTab b { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; } .bdTab small { font-size: 10px; opacity: .8; }
 @media (max-height: 430px) { .bdItem { min-height: 92px; } .bdItem .fortPic { width: 40px; height: 40px; } #bdPlace { bottom: calc(var(--sab, 0px) + 170px); } }
+.bdLand .ic.fortPic { width: 44px; height: 44px; margin: 4px 0; } .npcHead .ic.big { width: 40px; height: 40px; }
 .bdTab.on { color: #2a1800; background: linear-gradient(#ffe08a, #c99a3a); box-shadow: 0 0 8px rgba(255,224,138,.45); }
 .bdItem { flex: none; width: 78px; min-height: 112px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; font: 11px/1.2 var(--body); color: #ece3cc; background: linear-gradient(#4a3c30, #2a2018); border: 2px solid var(--og-ink, #120a03); border-radius: 8px; }
 .bdItem .fortPic { width: 52px; height: 52px; margin: 0; pointer-events: none; }

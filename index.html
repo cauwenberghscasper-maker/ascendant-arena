@@ -2147,6 +2147,7 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .bdTab { min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 2px; font: 12px/1.1 var(--body); color: #c9bfa8; background: linear-gradient(#3a2e24, #221a12); border: 2px solid var(--og-ink, #120a03); border-radius: 7px; }
 .bdTab b { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; } .bdTab small { font-size: 10px; opacity: .8; }
 @media (max-height: 430px) { .bdItem { min-height: 92px; } .bdItem .fortPic { width: 40px; height: 40px; } #bdPlace { bottom: calc(var(--sab, 0px) + 170px); } }
+.bdLand .ic.fortPic { width: 44px; height: 44px; margin: 4px 0; } .npcHead .ic.big { width: 40px; height: 40px; }
 .bdTab.on { color: #2a1800; background: linear-gradient(#ffe08a, #c99a3a); box-shadow: 0 0 8px rgba(255,224,138,.45); }
 .bdItem { flex: none; width: 78px; min-height: 112px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; font: 11px/1.2 var(--body); color: #ece3cc; background: linear-gradient(#4a3c30, #2a2018); border: 2px solid var(--og-ink, #120a03); border-radius: 8px; }
 .bdItem .fortPic { width: 52px; height: 52px; margin: 0; pointer-events: none; }
@@ -3532,7 +3533,7 @@ function sanitizeProfile(p) {
 }
 // Bastion fort: { wave, land, b: buildings, keep, kd, go, hold }, plus what only this player owns (wood, stones, iron, code
 // of their world, recent worlds). keep: the Keep's level (kd = when its upgrade finishes), go: the waves run by themselves,
-// hold: paused. A building is { t, x, z, l } on 2 m cells (x, z = its lowest corner around the Keep); d = when an upgrade
+// hold: paused, area: plots of land bought. A building is { t, x, z, l } on 2 m cells (x, z = its lowest corner around the Keep); d = when an upgrade
 // finishes (ms), c = when a mill or mine was last emptied, p = the path a tower took at level 5 (1 or 2). Old saves had eight fixed pads: each defender moves to the cell under its pad.
 // (CFG.siege loads later; the lists here match it.) Shared worlds from the server go through here too (mine = false).
 const FORT_TYPES = { archer: 2, cannon: 2, ballista: 2, warrior: 2, mage: 2, mine: 2, hut: 2, wall: 1, gate: 1, spike: 1, bomb: 1, tar: 1, mill: 2, iron: 2 };
@@ -3560,15 +3561,23 @@ function sanitizeFort(f, mine) {
   // the Keep's level: forts from before Keep levels get the lowest one that fits what they already built (nothing is lost)
   r.keep = f.keep != null ? int(f.keep, 1, 10) : fortKeepFor(out);
   if (+f.kd > 0) r.kd = Math.floor(+f.kd);
-  if (f.go || r.wave > 1) r.go = 1; if (f.hold) r.hold = 1; // go: waves come by themselves; hold: paused by the player
+  if (f.go || r.wave > 1) r.go = 1; if (f.hold) r.hold = 1;
+  // plots of land bought (Land Deeds); forts from before plots get the smallest area that holds what they built
+  r.area = f.area != null ? int(f.area, 0, 8) : fortAreaNeed(out); // go: waves come by themselves; hold: paused by the player
   if (mine) {
-    r.stones = int(f.stones, 0, 1e12);
+    r.stones = int(f.stones, 0, 1e12); r.deeds = int(f.deeds, 0, 1e9);
     // wood and iron came with the camp's own resources; older forts start with a stock of wood (building used to cost gold)
     r.wood = f.wood != null ? int(f.wood, 0, 1e12) : 60 + out.reduce((n, q) => n + q.l * 4, 0); r.iron = int(f.iron, 0, 1e12);
     if (typeof f.code === 'string' && /^[A-Z0-9-]{4,12}$/.test(f.code)) r.code = f.code;
     r.recent = (Array.isArray(f.recent) ? f.recent : []).filter((c) => typeof c === 'string' && /^[A-Z0-9-]{4,12}$/.test(c)).slice(0, 5);
   }
   return r;
+}
+// how many plots a fort needs so that every building stands inside its build area
+function fortAreaNeed(b) {
+  const A = typeof CFG !== 'undefined' && CFG.siege && CFG.siege.area; if (!A) return 0;
+  let ext = 0; for (const q of b) { const s = FORT_TYPES[q.t]; ext = Math.max(ext, -q.x, -q.z, q.x + s, q.z + s); }
+  return Math.max(0, Math.min(A.deeds.length, Math.ceil((ext - A.base) / A.step)));
 }
 // the lowest Keep level whose limits hold every building of a fort (old forts, before the Keep had levels)
 function fortKeepFor(b) {
@@ -7166,8 +7175,13 @@ CFG.siege = {
   buildTime: (l) => (l <= 1 ? 0 : Math.round(6 * Math.pow(l - 1, 2.5))),
   // the camp pays for itself (Clash of Clans): wood from lumber mills, stone from stone mines, iron from iron mines (Keep 4).
   // Waves pay hero gold and items as before, plus some of each resource. Iron is asked from building level 6 on.
-  res: ['wood', 'stones', 'iron'], resName: { wood: 'Wood', stones: 'Stone', iron: 'Iron' }, ironFrom: 6,
-  pay: (n, boss, mini) => ({ wood: 6 + n + (boss ? 16 : 0) + (mini ? 6 : 0), stones: 3 + Math.floor(n / 2) + (boss ? 8 : 0) + (mini ? 4 : 0), iron: n >= 8 ? Math.floor((n - 5) / 3) + (boss ? 4 : 0) : 0 }),
+  // Land Deeds: only waves pay them (never mined); they buy more land to build on
+  res: ['wood', 'stones', 'iron', 'deeds'], resName: { wood: 'Wood', stones: 'Stone', iron: 'Iron', deeds: 'Land Deeds' }, ironFrom: 6,
+  pay: (n, boss, mini) => ({ wood: 6 + n + (boss ? 16 : 0) + (mini ? 6 : 0), stones: 3 + Math.floor(n / 2) + (boss ? 8 : 0) + (mini ? 4 : 0), iron: n >= 8 ? Math.floor((n - 5) / 3) + (boss ? 4 : 0) : 0,
+    deeds: 1 + (boss ? 3 : 0) + (mini ? 1 : 0) }),
+  // where you may build: a square round the Keep, base cells to each side at first, step cells more per plot bought
+  // (deeds[k] Land Deeds and Keep level keep[k] for plot k + 1). The field monsters cross still grows with your level.
+  area: { base: 8, step: 3, deeds: [3, 6, 10, 15, 22, 30, 40, 52], keep: [1, 2, 3, 4, 6, 7, 8, 10] },
   // The Keep has levels like a Town Hall: each one allows more buildings (towers[t].lim) and higher building levels (lvl)
   keep: { max: 10, lvl: [3, 4, 5, 7, 8, 9, 11, 12, 13, 15], hp: 0.15,
     cost: (k) => ({ wood: Math.round(30 * Math.pow(k, 1.9)), stones: Math.round(24 * Math.pow(k, 1.9)), iron: k >= 5 ? Math.round(8 * Math.pow(k - 3, 1.8)) : 0 }),
@@ -7199,9 +7213,9 @@ CFG.siege = {
     hut: { name: "Builder's Hut", short: 'Builder', icon: 'm_smith', maxLvl: 1, each: true, c: [12, 8], hp: 8,
       lim: [2, 2, 3, 3, 3, 4, 4, 5, 5, 5], blurb: 'One builder each. More huts, more upgrades at the same time.' },
     wall: { name: 'Wall', short: 'Wall', icon: 'n_armor', c: [1, 0], hp: 5, path: 6, wall: true,
-      lim: [30, 50, 75, 100, 130, 160, 200, 250, 300, 400], blurb: 'Drag a straight line of walls. Wood, stone from level 6, iron from level 11.' },
+      lim: [25, 35, 45, 60, 75, 90, 105, 120, 135, 150], blurb: 'Drag a straight line of walls. Wood, stone from level 6, iron from level 11.' },
     gate: { name: 'Gate', short: 'Gate', icon: 'm_portal', c: [3, 1], hp: 5, path: 6, wall: true,
-      lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'A wall heroes walk through and monsters have to break.' },
+      lim: [2, 2, 3, 3, 4, 4, 5, 6, 7, 8], blurb: 'A wall heroes walk through and monsters have to break.' },
     // traps: monsters walk over them (they never block a path, flyers pass over); r: reach from the trap's centre
     spike: { name: 'Spike Trap', short: 'Spikes', icon: 'a_reaper', trap: true, r: 1.5, cd: 2.2, dmg: 1.4, c: [2, 2], hp: 1,
       lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'Spikes shoot up under every monster on it, then reset after a moment.' },
@@ -7245,6 +7259,10 @@ const fortCount = (t, F = fortState()) => F.b.reduce((n, b) => n + (b.t === t), 
 // the path a tower took (from level pathAt, once that upgrade is done), or null
 const fortPath = (b) => (b.p && CFG.siege.paths[b.t] && fortLvl(b) >= CFG.siege.pathAt ? CFG.siege.paths[b.t][b.p - 1] : null);
 const fortNeedsPath = (b) => !!CFG.siege.paths[b.t] && !b.p && b.l + 1 >= CFG.siege.pathAt;
+// the build area: cells from -fortArea to fortArea - 1 on both axes (never past the land's edge and its gates)
+const fortAreaFor = (n) => CFG.siege.area.base + CFG.siege.area.step * n;
+const fortArea = (F = fortState()) => Math.min(fortAreaFor(F.area || 0), G.siege ? Math.floor((G.siege.half - 6) / CFG.siege.cell) : Infinity);
+const fortInArea = (x, z, s, F) => { const A = fortArea(F); return x >= -A && z >= -A && x + s <= A && z + s <= A; };
 const landFor = (L) => { const [a, b, l0, l1] = CFG.siege.land; return Math.round(lerp(a, b, clamp((L - l0) / (l1 - l0), 0, 1))); };
 // price of level l of type t in wood, stone and iron; huts get dearer with every hut you have
 function fortCost(t, l, F = fortState()) {
@@ -7253,7 +7271,7 @@ function fortCost(t, l, F = fortState()) {
   return { lvl: l, wood: Math.round(c[0] * m), stones: Math.round(c[1] * m), iron, time: CFG.siege.buildTime(l) };
 }
 // everything a building cost to get where it is (half comes back when it is torn down)
-function fortSpent(b) { const r = { wood: 0, stones: 0, iron: 0 }; for (let k = 1; k <= b.l; k++) { const c = fortCost(b.t, k, { b: [] }); for (const q of CFG.siege.res) r[q] += c[q]; } return r; }
+function fortSpent(b) { const r = { wood: 0, stones: 0, iron: 0, deeds: 0 }; for (let k = 1; k <= b.l; k++) { const c = fortCost(b.t, k, { b: [] }); for (const q of CFG.siege.res) r[q] += c[q]; } return r; }
 const fortBuilders = (F = fortState()) => fortCount('hut', F);
 const fortJobs = (F = fortState()) => { const now = fortNow(); return F.b.filter((b) => b.d > now).length + (F.kd > now ? 1 : 0); };
 // what a mill or mine holds now (it fills from b.c, the last time it was emptied)
@@ -7321,7 +7339,9 @@ function siegeGrid() {
 }
 // the monsters' map: walking cost from every cell to the nearest living objective. A building costs its path value to
 // cross (monsters break it), so they walk around walls while that is cheaper and break the cheapest one when it is not.
-function siegeCellCost(k) { const S = G.siege, o = S.occ[k]; if (o === -1) return Infinity; if (o <= 0) return 1; const u = S.units[o - 1]; if (!u.alive) return 1; const T = CFG.siege.towers[u.b.t]; return T.trap ? 1 : T.path ? T.path + fortLvl(u.b) : 30; }
+// Crossing a building costs far more than any walk round it, so monsters always take the fastest open way; only when
+// they are closed in do they break through, at the weakest wall piece (lowest level), or else another building
+function siegeCellCost(k) { const S = G.siege, o = S.occ[k]; if (o === -1) return Infinity; if (o <= 0) return 1; const u = S.units[o - 1]; if (!u.alive) return 1; const T = CFG.siege.towers[u.b.t]; return T.trap ? 1 : T.path ? T.path + 20 * fortLvl(u.b) : 900; }
 // recomputed only when a monster needs it after a change (drawing a long wall costs one pass, not one per piece)
 function siegeFlow() {
   G.siege.flowDirty = false;
@@ -7367,16 +7387,38 @@ function siegeFlowStep(e) {
   if (bk < 0) return null; // next to an objective
   const o = S.occ[bk]; if (o > 0 && S.units[o - 1].alive && !CFG.siege.towers[S.units[o - 1].b.t].trap) return S.units[o - 1];
   const bi = bk % n - S.h, bj = (bk - bk % n) / n - S.h;
-  return { x: SC.x + (bi + 0.5) * cs, z: SC.z + (bj + 0.5) * cs, far: S.dist[k] > 30 };
+  return { x: SC.x + (bi + 0.5) * cs, z: SC.z + (bj + 0.5) * cs, far: Math.hypot(e.x - SC.x, e.z - SC.z) > 34 }; // far from the Keep: they march faster
+}
+// solid for monsters: a living building that is not a trap (gates too). Monsters collide with the cells themselves, so
+// no gap between two wall pieces or a corner lets one slip through, and a knock-back never pushes one into a wall
+function siegeSolidAt(x, z) {
+  const S = G.siege; if (!S) return false; const k = siegeIdx(cellAt(x - SC.x), cellAt(z - SC.z)); if (k < 0) return false;
+  const o = S.occ[k]; if (o <= 0) return false; const u = S.units[o - 1]; return u.alive && !CFG.siege.towers[u.b.t].trap;
+}
+const siegeBoxHit = (x, z, r) => siegeSolidAt(x - r, z - r) || siegeSolidAt(x + r, z - r) || siegeSolidAt(x - r, z + r) || siegeSolidAt(x + r, z + r);
+function siegeTileCollide(e, ox, oz) {
+  const r = Math.min(e.r, 0.8); if (!siegeBoxHit(e.x, e.z, r)) return;
+  if (!siegeBoxHit(e.x, oz, r)) e.z = oz; else if (!siegeBoxHit(ox, e.z, r)) e.x = ox; else { e.x = ox; e.z = oz; } // slide along the wall
+}
+// can a monster walk straight from a to b without a building in the way (it chases heroes and warriors only then)
+function siegeLineFree(a, b) {
+  const d = Math.hypot(b.x - a.x, b.z - a.z), n = Math.ceil(d / 0.9);
+  for (let i = 1; i < n; i++) { const k = i / n; if (siegeSolidAt(a.x + (b.x - a.x) * k, a.z + (b.z - a.z) * k)) return false; }
+  return true;
 }
 
 // --- building: the same checks and changes for your own fort and for a shared world's host (op from fortDo or a guest)
-// op: { o: 'add', t, x, z } | { o: 'up', k, p } | { o: 'del', k } | { o: 'col', k } | { o: 'move', k, x, z } | { o: 'keep' } | { o: 'hold', v }
+// op: { o: 'add', t, x, z } | { o: 'up', k, p } | { o: 'del', k } | { o: 'col', k } | { o: 'move', k, x, z } | { o: 'keep' } | { o: 'hold', v } | { o: 'land' }
 // (k = index in the fort's building list; p = the path picked on the upgrade to level pathAt)
 function fortCheck(op, F = fortState()) {
   const S = G.siege; if (!S || !S.occ) return 'Only inside the fort';
   const C = CFG.siege, now = fortNow();
   if (op.o === 'hold') return '';
+  if (op.o === 'land') {
+    const n = F.area || 0, A = C.area; if (n >= A.deeds.length) return 'All land bought';
+    if (fortKeep(F) < A.keep[n]) return `Needs Keep level ${A.keep[n]}`;
+    if (fortAreaFor(n + 1) * C.cell > S.half - 6) return 'Your land grows with your hero level'; return '';
+  }
   if (op.o === 'keep') {
     if ((F.keep || 1) >= C.keep.max) return 'Max level'; if (F.kd > now) return 'Already upgrading';
     if (fortJobs(F) >= fortBuilders(F)) return 'All builders are busy'; return '';
@@ -7387,6 +7429,7 @@ function fortCheck(op, F = fortState()) {
     if (have >= lim) { const k = fortLimitAt(op.t, have); return k ? `Keep level ${k} allows ${lim ? 'more' : 'this'}` : `${lim} ${T.short}s at most`; }
     const s = FORT_TYPES[op.t];
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) { const k = siegeIdx(op.x + i, op.z + j); if (k < 0) return 'Outside your land'; if (S.occ[k] !== 0) return 'Something is in the way'; }
+    if (!fortInArea(op.x, op.z, s, F)) return 'Buy more land to build there';
     for (const e of S.mobs) if (e.alive && !e.flying && Math.abs(e.x - SC.x - (op.x + s / 2) * C.cell) < s + 0.5 && Math.abs(e.z - SC.z - (op.z + s / 2) * C.cell) < s + 0.5) return 'A monster is in the way';
     return '';
   }
@@ -7394,6 +7437,7 @@ function fortCheck(op, F = fortState()) {
   if (op.o === 'move') { // its own cells count as free
     const s = FORT_TYPES[b.t], u = S.units.find((q) => q.b === b), own = u ? u.k + 1 : -9;
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) { const k = siegeIdx(op.x + i, op.z + j); if (k < 0) return 'Outside your land'; if (S.occ[k] !== 0 && S.occ[k] !== own) return 'Something is in the way'; }
+    if (!fortInArea(op.x, op.z, s, F)) return 'Buy more land to build there';
     return '';
   }
   if (op.o === 'up') {
@@ -7411,6 +7455,7 @@ function fortCheck(op, F = fortState()) {
 function fortPrice(op, F = fortState()) {
   const none = { wood: 0, stones: 0, iron: 0 }, neg = (r) => ({ wood: -r.wood, stones: -r.stones, iron: -r.iron });
   if (op.o === 'add') return fortCost(op.t, 1, F);
+  if (op.o === 'land') return { deeds: CFG.siege.area.deeds[F.area || 0] };
   if (op.o === 'keep') return CFG.siege.keep.cost((F.keep || 1) + 1);
   if (op.o === 'hold') return none;
   const b = F.b[op.k];
@@ -7425,6 +7470,7 @@ function fortApply(op, F = fortState()) {
   const why = fortCheck(op, F); if (why) return why;
   const C = CFG.siege, now = fortNow();
   if (op.o === 'hold') { F.hold = op.v ? 1 : 0; fortChanged(F); return ''; }
+  if (op.o === 'land') { F.area = (F.area || 0) + 1; const o = G.siege.objs[0]; ev({ t: 'fortLand', n: F.area, size: fortArea(F) * 2 * C.cell, x: o.x, z: o.z }); fortChanged(F); return ''; }
   if (op.o === 'keep') {
     F.keep = (F.keep || 1) + 1; F.kd = now + C.keep.time(F.keep) * 1000;
     const o = G.siege.objs[0]; ev({ t: 'fortBuilt', type: 'keep', l: F.keep, x: o.x, z: o.z }); fortChanged(F); return '';
@@ -7569,7 +7615,7 @@ function siegeReward(n, lvl, wagons, mini) {
   if (n > (p.records.bestSiege || 0)) p.records.bestSiege = n;
   S.cleared = Math.max(S.cleared, n); S.held = (S.held || 0) + 1; addMastery('w:' + G.player.attackId, 15 + n * 3);
   checkAchievements(); G.dirty = true;
-  ev({ t: 'siegeClear', wave: n, gold, wood: pay.wood, stones: pay.stones, iron: pay.iron, item: !!item, wagons });
+  ev({ t: 'siegeClear', wave: n, gold, wood: pay.wood, stones: pay.stones, iron: pay.iron, deeds: pay.deeds, item: !!item, wagons });
 }
 function siegeWaveClear() {
   const S = G.siege, n = S.wave, C = CFG.siege, F = fortState(), wagons = S.objs.filter((o) => !o.def.main && o.alive).length;
@@ -7708,11 +7754,11 @@ function siegeHitObjective(o, amt) {
 function siegeTarget(e) {
   const S = G.siege, pl = G.player;
   let best = null, bd = e.flying ? 0 : 5; // flyers pass over the warriors
-  for (const s of S.soldiers) if (s.alive) { const d = Math.hypot(s.x - e.x, s.z - e.z); if (d < bd) { bd = d; best = s; } }
+  for (const s of S.soldiers) if (s.alive) { const d = Math.hypot(s.x - e.x, s.z - e.z); if (d < bd && (e.flying || siegeLineFree(e, s))) { bd = d; best = s; } }
   if (best) return best;
   const near = e.lastHurt > G.time - 2 ? 9 : 6;
-  if (pl.alive && G.menuSafe <= 0 && Math.hypot(pl.x - e.x, pl.z - e.z) < near) return pl;
-  if (typeof siegeMpPeerNear === 'function') { const q = siegeMpPeerNear(e, near); if (q) return q; }
+  if (pl.alive && G.menuSafe <= 0 && Math.hypot(pl.x - e.x, pl.z - e.z) < near && (e.flying || siegeLineFree(e, pl))) return pl;
+  if (typeof siegeMpPeerNear === 'function') { const q = siegeMpPeerNear(e, near); if (q && (e.flying || siegeLineFree(e, q))) return q; }
   bd = 3;
   for (const o of S.objs) if (o.alive) { const d = Math.hypot(o.x - e.x, o.z - e.z) - o.r; if (d < bd) { bd = d; best = o; } }
   return best;
@@ -7725,6 +7771,8 @@ function stepSiegeEnemy(e, dt) {
   if ((G.modal && siegeAlone()) || G.menuSafe > 0) { e.moveAmt = Math.max(0, (e.moveAmt || 0) - dt * 3); return; }
   if (HeroSupers.tickStatus(e, dt)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); e.moveAmt = 0; return; }
   const d = CFG.enemies[e.type], pl = G.player;
+  if (!e.flying) { if (e.okx != null && siegeBoxHit(e.x, e.z, Math.min(e.r, 0.8))) { e.x = e.okx; e.z = e.okz; } e.okx = e.x; e.okz = e.z; } // knocked into a wall: back out
+  const ox = e.x, oz = e.z;
   e.atkCd -= dt; e.flashT -= dt; e.slowT -= dt; e.lungeT -= dt; e.lungeCd -= dt;
   tickBurn(e, dt); if (!e.alive) return;
   if ((e.tgtT -= dt) <= 0 || !e.tgt || !e.tgt.alive) { e.tgt = siegeTarget(e); e.tgtT = 0.5; }
@@ -7744,7 +7792,7 @@ function stepSiegeEnemy(e, dt) {
   } else {
     const dx = t.x - e.x, dz = t.z - e.z, dd = Math.hypot(dx, dz) || 1, edge = dd - (t.r || 0.5) - e.r;
     // against the hero, monsters fight as they do everywhere else: telegraphed moves and champion affixes
-    if (t === pl && ((e.champ && champTick(e, dt, pl, dd)) || (d.moves && !e.champ && enemyMove(e, dt, pl, dd)))) { trackVel(e, dt); siegeCollide(e); siegeClamp(e, e.r); return; }
+    if (t === pl && ((e.champ && champTick(e, dt, pl, dd)) || (d.moves && !e.champ && enemyMove(e, dt, pl, dd)))) { trackVel(e, dt); siegeCollide(e); if (!e.flying) siegeTileCollide(e, ox, oz); siegeClamp(e, e.r); return; }
     markCombat();
     const hit = (mult) => {
       const amt = mobDmg(e, mult);
@@ -7754,9 +7802,10 @@ function stepSiegeEnemy(e, dt) {
       else if (t.kind === 'fortB') siegeHitBuilding(t, amt);
       else siegeHitObjective(t, amt);
     };
+    const reach = t.kind === 'fortB' ? 1.1 : 0.45; // a building is hit from its cell's edge, also from a corner
     if (d.attack === 'touch') {
-      mx = dx / dd; mz = dz / dd; sp = edge > 0.15 ? d.speed : 0;
-      if (edge < 0.45 && e.atkCd <= 0) { e.atkCd = d.cd; e.attackAnim = 1; hit(d.heavy ? CFG.enemies.heavyMult : 1); if (d.heavy) ev({ t: 'boom', x: t.x, z: t.z, r: 1.6, color: 0xdfeaf4 }); }
+      mx = dx / dd; mz = dz / dd; sp = edge > reach - 0.3 ? d.speed : 0;
+      if (edge < reach && e.atkCd <= 0) { e.atkCd = d.cd; e.attackAnim = 1; hit(d.heavy ? CFG.enemies.heavyMult : 1); if (d.heavy) ev({ t: 'boom', x: t.x, z: t.z, r: 1.6, color: 0xdfeaf4 }); }
     } else {
       sp = d.speed;
       if (edge > d.keep + 1.5) { mx = dx / dd; mz = dz / dd; } else if (edge < d.keep - 3) { mx = -dx / dd; mz = -dz / dd; } else sp = 0;
@@ -7781,7 +7830,7 @@ function stepSiegeEnemy(e, dt) {
   trackVel(e, dt);
   if (pl.alive) separate(e, pl);
   for (const o of S.mobs) if (o !== e && o.alive && !!o.flying === !!e.flying) separate(e, o);
-  if (!e.flying) siegeCollide(e); siegeClamp(e, e.r);
+  if (!e.flying) { siegeCollide(e); siegeTileCollide(e, ox, oz); e.okx = e.x; e.okz = e.z; } siegeClamp(e, e.r);
 }
 function siegeInteract(pl) {
   const S = G.siege, C = CFG.siege, near = (q, r) => Math.hypot(pl.x - SC.x - q.x, pl.z - SC.z - q.z) < r;
@@ -9241,7 +9290,8 @@ AssetSlots.register('enemy', (o) => {
   return {
     root,
     update(e, dt, t) {
-      root.position.set(e.x, 0, e.z);
+      // Bastion flyers fly over the walls, their shadow stays on the ground
+      const lift = e.flying ? 2.6 + Math.sin(t * 2.6 + phase) * 0.25 : 0; root.position.set(e.x, lift, e.z); shadow.position.y = 0.03 - lift;
       if (!model) swapModel();
       if (popT > 0 && popT < 1) popT = Math.min(1, popT + dt * 5);
       root.rotation.y += angDiff(root.rotation.y, e.facing) * (1 - Math.exp(-dt * 10));
@@ -11427,6 +11477,19 @@ function siegeTileTextures() {
   };
   return siegeTileTex;
 }
+// what a building gains round it at each look (until every look has its own model, and on top of it after): a second
+// banner (level 3), a torch (5), its trade's prop (7: weapon rack, log pile, ore, cart, workbench, rune stone), a glowing
+// crystal (9), a sapphire brazier instead of the torch (11), and a statue with gold banners (13)
+const SIEGE_TRADE = { archer: ['weapon_rack', 1.0], cannon: ['barrel_1', 0.8], ballista: ['weapon_rack', 1.0], warrior: ['weapon_rack', 1.0], mage: ['rune_obelisk', 1.5],
+  mill: ['log', 0.55], mine: ['ore_pile', 0.7], iron: ['mine_cart', 0.85], hut: ['workbench', 0.85] };
+function siegeLookProps(b, u, x, z, add, now) {
+  const k = siegeTier(b.l), e = u.size * CFG.siege.cell / 2 - 0.35, col = b.d > now ? 0xffe9a8 : k >= 6 ? 0xffd700 : SIEGE_PAD_COL[b.t];
+  if (k >= 1) add('banner_pole', { x: x + e, z: z + e, ry: 0, s: 2.2, color: col });
+  if (k >= 2) add(k >= 5 ? 'sapphire_brazier' : 'torch', { x: x + e, z: z - e, ry: 0, s: k >= 5 ? 1.1 : 1.3 });
+  if (k >= 3 && SIEGE_TRADE[b.t]) { const [n, h] = SIEGE_TRADE[b.t]; add(n, { x: x - e, z: z + e * 0.9, ry: 0.6, s: h }); }
+  if (k >= 4) add('crystal', { x: x, z: z + e + 0.1, ry: 0.4, s: 0.9 });
+  if (k >= 6) add('statue', { x: x - e - 0.1, z: z, ry: Math.PI / 2, s: 1.6 });
+}
 const SIEGE_TURN = { cannon: 1, ballista: 1, mage: 1 };
 const _siegeM4 = new THREE.Matrix4();
 // how a defender fires (Clash of Clans style): it winds up before the shot (cannon leans back, ballista draws, the mage
@@ -11456,8 +11519,9 @@ function buildSiegeBuildings() {
       const it = { x, z, ry: 0, s: h }; add(name, it); if (b.t === 'spike') aims.push({ it, u, name, bx: x, bz: z }); else idle.push({ it, u, name, bx: x, bz: z, ry0: 0 }); continue; }
     const it = { x, z, ry, s: h * k * SIEGE_SCALE, color: tint }; add(name, it);
     if (SIEGE_SHOOTERS[b.t]) aims.push({ it, u, name, bx: x, bz: z });
-    const ban = { x: x - u.size * cs / 2 + 0.3, z: z - u.size * cs / 2 + 0.3, ry: 0, s: (2.4 + Math.min(15, b.l) * 0.14) * 0.85, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] };
+    const ban = { x: x - u.size * cs / 2 + 0.3, z: z - u.size * cs / 2 + 0.3, ry: 0, s: (2.4 + Math.min(15, b.l) * 0.14) * 0.85, color: b.d > now ? 0xffe9a8 : siegeTier(b.l) >= 6 ? 0xffd700 : SIEGE_PAD_COL[b.t] };
     add('banner_pole', ban); idle.push({ it, u, name, bx: x, bz: z, ry0: ry, ban, ph: (x * 7.3 + z * 3.1) % 6.28 });
+    siegeLookProps(b, u, x, z, add, now);
   }
   // the tiles under the buildings: one instanced slab and one instanced rim (tinted per building) for the whole fort
   const tiles = S.units.filter((u) => u.alive && !CFG.siege.towers[u.b.t].wall && !CFG.siege.towers[u.b.t].trap);
@@ -11535,12 +11599,22 @@ function animateSiegeIdle(dt) {
   }
   if (banners && siegeParts.idle[0] && siegeParts.idle[0].hb) siegeParts.idle[0].hb.dirty = true;
 }
+// the edge of the build area: a gold band on the ground (VFX) with a banner at each corner
+function siegeAreaLine(A) {
+  if (siegeParts.areaLine) { siegeParts.areaLine.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); siegeParts.areaLine.removeFromParent(); }
+  if (siegeParts.areaBan) WorldModels.dispose(siegeParts.areaBan);
+  siegeParts.areaA = A; const g = siegeParts.areaLine = new THREE.Group(), mat = new THREE.MeshBasicMaterial({ color: 0xffd36b, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false });
+  for (const [w, d, x, z] of [[A * 2, 0.4, 0, A], [A * 2, 0.4, 0, -A], [0.4, A * 2, A, 0], [0.4, A * 2, -A, 0]]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2), mat); m.position.set(SC.x + x, 0.05, SC.z + z); g.add(m); }
+  siegeGroup.add(g);
+  siegeParts.areaBan = WorldModels.place(siegeGroup, 'banner_pole', [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => ({ x: SC.x + a * A, z: SC.z + b * A, ry: 0, s: 3.6, color: 0xffd36b })));
+}
 // builder mode: the field's grid over the land, Clash of Clans style (a checkered tint, thin lines, a stronger line every 5 cells)
 function siegeGridOverlay(on) {
   const S = G.siege;
   if (siegeParts.grid) { siegeParts.grid.geometry.dispose(); siegeParts.grid.material.dispose(); siegeParts.grid.removeFromParent(); siegeParts.grid = null; }
   if (!on || !S || !siegeGroup.visible) return;
-  const H = S.half, mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uC: { value: new THREE.Vector2(SC.x, SC.z) }, uCs: { value: CFG.siege.cell } },
+  const H = fortArea() * CFG.siege.cell; siegeParts.gridA = H; // only where you may build
+  const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uC: { value: new THREE.Vector2(SC.x, SC.z) }, uCs: { value: CFG.siege.cell } },
     vertexShader: 'varying vec2 vW; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xz; gl_Position = projectionMatrix * viewMatrix * w; }',
     fragmentShader: `varying vec2 vW; uniform vec2 uC; uniform float uCs;
       void main() { vec2 c = (vW - uC) / uCs, f = fract(c), d = min(f, 1.0 - f); float line = 1.0 - smoothstep(0.0, 0.05, min(d.x, d.y));
@@ -11574,6 +11648,7 @@ function siegePreview(list) {
 }
 function disposeSiegeView() {
   for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h); siegeParts.idle = [];
+  if (siegeParts.areaBan) WorldModels.dispose(siegeParts.areaBan); siegeParts.areaBan = siegeParts.areaLine = null; siegeParts.areaA = null;
   if (siegeParts.preview) { WorldModels.dispose(siegeParts.preview.h); siegeParts.preview = null; }
   siegeParts.grid = null;
   const geos = new Set(), mats = new Set();
@@ -11604,6 +11679,10 @@ function updateSiegeView(dt) {
     gh.count = n; if (n) { gh.instanceMatrix.needsUpdate = true; gh.instanceColor.needsUpdate = true; } gh.material.opacity = 0.35 + Math.sin(t * 6) * 0.12;
   }
   if (G.builder && typeof builderTick === 'function') builderTick();
+  // the grid shows only in builder mode, sized to the build area; the gold line marks the build area at all times
+  const A = fortArea() * CFG.siege.cell;
+  if (!!siegeParts.grid !== !!G.builder || (siegeParts.grid && siegeParts.gridA !== A)) siegeGridOverlay(!!G.builder);
+  if (siegeParts.areaA !== A) siegeAreaLine(A);
   // a fallen objective disappears in smoke
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });
   if (siegeParts.flame) siegeParts.flame.material.opacity = 0.75 + Math.sin(t * 13) * 0.08 + Math.sin(t * 7.3) * 0.08;
@@ -12203,6 +12282,7 @@ ICON.ess = '<svg viewBox="0 0 20 20" class="ic"><path d="M10 1.5l6 7-6 10-6-10z"
 // Bastion camp resources: pixel icons (crisp squares, ink outline) for wood, stone and iron
 ICON.wood = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="2" y="6" width="16" height="9" fill="#2a1608"/><rect x="3" y="7" width="14" height="7" fill="#9a6232"/><rect x="3" y="7" width="14" height="2" fill="#c8884a"/><rect x="13" y="7" width="4" height="7" fill="#e8c08a"/><rect x="14" y="9" width="2" height="3" fill="#b07a42"/></svg>';
 ICON.stone = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="3" y="5" width="14" height="11" fill="#1e1a16"/><rect x="4" y="6" width="12" height="9" fill="#9a958c"/><rect x="4" y="6" width="12" height="3" fill="#cfcac0"/><rect x="5" y="12" width="5" height="2" fill="#6e6a62"/><rect x="11" y="10" width="4" height="2" fill="#6e6a62"/></svg>';
+ICON.deeds = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="3" y="3" width="14" height="14" fill="#1e140a"/><rect x="4" y="4" width="12" height="12" fill="#e8d6a8"/><rect x="4" y="4" width="12" height="2" fill="#b89a62"/><rect x="4" y="14" width="12" height="2" fill="#b89a62"/><rect x="6" y="8" width="8" height="1" fill="#8a7046"/><rect x="6" y="10" width="6" height="1" fill="#8a7046"/><rect x="11" y="11" width="4" height="4" fill="#c42a2a"/><rect x="12" y="12" width="2" height="2" fill="#ff6a5a"/></svg>';
 ICON.iron = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="2" y="7" width="16" height="8" fill="#12161c"/><rect x="3" y="8" width="14" height="6" fill="#5e6e80"/><rect x="5" y="8" width="10" height="2" fill="#b8c8da"/><rect x="3" y="12" width="14" height="2" fill="#3a4654"/></svg>';
 const UI = { closable: true, current: null, menuSection: 'upgrades', hud: {} };
 function costHTML(gold, ess) { return `${ICON.coin}${fmtK(gold)}${ess ? ` <span class="essc">${ICON.ess}${fmtK(ess)}</span>` : ''}`; }
@@ -13194,6 +13274,18 @@ function openFortBPanel(k) {
     ${fork ? `<div class="row fortPaths">${upBtns}</div>` : ''}
     <div class="row end">${G.builder ? `<button class="ghost" data-act="fortMove" data-k="${fi}">Move</button>` : ''}<button class="warn" data-act="fortDel" data-k="${fi}">Tear down (+${fortResHTML(back)})</button><button class="ghost" data-act="close">Back</button>${fork ? '' : upBtns}</div>`);
 }
+// buy land: the build area grows by one plot all round (Land Deeds, which only waves pay, and a Keep level)
+function openFortLandPanel() {
+  const S = G.siege; if (!S) return UI.close();
+  UI.current = 'fortLand';
+  const C = CFG.siege, A = C.area, F = fortState(), M = myFort(), n = F.area || 0, top = n >= A.deeds.length, m = (k) => fortAreaFor(k) * 2 * C.cell;
+  const why = top ? '' : fortCheck({ o: 'land' }), cost = top ? null : { deeds: A.deeds[n] }, ok = !why && fortHas(cost, M);
+  openModal(`<div class="npcHead">${ICON.deeds.replace('class="ic"', 'class="ic big"')}<h3>Buy land</h3><span class="cnt">${n}/${A.deeds.length} plots</span></div>
+    <p>You build inside the gold line round the Keep. Each plot pushes it out ${A.step * C.cell} m on every side. Land Deeds come only from holding waves (a Siege Lord pays more); your whole field, where monsters walk in, still grows with your level.</p>
+    <p class="fine">Now ${fortArea(F) * 2 * C.cell} × ${fortArea(F) * 2 * C.cell} m. You have ${fortResHTML({ deeds: Math.max(1, M.deeds || 0) }).replace('<b>1</b>', '<b>' + fmtK(M.deeds || 0) + '</b>')}.</p>
+    ${top ? '<p class="fine">All land bought.</p>' : `<p class="fine">Plot ${n + 1}: ${m(n + 1)} × ${m(n + 1)} m · ${fortResHTML(cost, M)} · Keep level ${A.keep[n]}${why ? ` · ${why}` : ''}</p>`}
+    <div class="row end"><button class="ghost" data-act="close">Back</button>${top ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortLand"${ok ? '' : ' aria-disabled="true"'}>Buy the plot</button>`}</div>`);
+}
 // the Keep: its level sets how many of each building you may have and how high they go
 function openFortKeepPanel() {
   const S = G.siege; if (!S) return UI.close();
@@ -13205,7 +13297,7 @@ function openFortKeepPanel() {
   openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>The Keep</h3><span class="cnt">Level ${k}</span></div>
     <p>The Keep's level decides how many of each building your camp may have, and how high they can be upgraded (now level ${C.keep.lvl[eff - 1]}). Every level also makes the Keep and the wagons sturdier.</p>
     ${F.kd > now ? `<p class="fine">Upgrading to level ${k}, ${fortDur((F.kd - now) / 1000)} left (one builder).</p>` : ''}
-    <div class="list fortLimits">${rows}</div>
+    <div class="list fortLimits">${rows}<div class="row"><b>Land</b><small>${fortArea(F) * 2 * CFG.siege.cell} × ${fortArea(F) * 2 * CFG.siege.cell} m · <a data-act="fortLandOpen">buy more</a></small></div></div>
     ${top ? '<p class="fine">Max level.</p>' : `<p class="fine">Level ${k + 1}: buildings up to level ${C.keep.lvl[k]}<br>${fortResHTML(c, M)} · ${fortDur(C.keep.time(k + 1))} with a builder${why ? ` · ${why}` : ''}</p>`}
     <div class="row end"><button class="ghost" data-act="close">Back</button>${top ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortKeep"${ok ? '' : ' aria-disabled="true"'}>Upgrade the Keep</button>`}</div>`);
 }
@@ -13471,6 +13563,8 @@ function handlePanelClick(e) {
     case 'siegeCopy': { const c = myFort().code; try { navigator.clipboard.writeText(c).then(() => toast(`Copied ${c}`, 'good'), () => toast(c)); } catch (e) { toast(c); } break; }
     case 'fortWave': UI.close(); startSiegeWave(); break;
     case 'fortMove': { const fb = fortState().b[+b.dataset.k]; UI.close(); if (fb) builderMove(fb); break; }
+    case 'fortLandOpen': openFortLandPanel(); break;
+    case 'fortLand': { const why = fortDo({ o: 'land' }); if (why) { toast(why, 'bad'); openFortLandPanel(); } else { Sfx.play('unlock'); UI.close(); } break; }
     case 'fortKeep': { const why = fortDo({ o: 'keep' }); if (why) toast(why, 'bad'); else Sfx.play('unlock'); openFortKeepPanel(); break; }
     case 'fortUp': case 'fortDel': case 'fortCol': { const why = fortDo({ o: act === 'fortUp' ? 'up' : act === 'fortDel' ? 'del' : 'col', k: +b.dataset.k, p: +b.dataset.p || 0 });
       if (why) toast(why, 'bad'); else Sfx.play('unlock');
@@ -13680,10 +13774,11 @@ function processEvents() {
       case 'objectiveDown': burst(e.x, 2, e.z, 50, 0xff7a3d, 9, 1.2, 0.4, 4, 2); SpriteFX.play('explosion', 'fire', e.x, 0, e.z, 8); Cam.shake = Math.max(Cam.shake, 0.8); Sfx.play('boom');
         if (!e.main) showBanner(`${e.name} destroyed`, 'Less gold per wave · keep the Keep standing', 'red'); break;
       case 'siegeEnd': enterSiegeView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); if (e.why === 'keep') { Sfx.play('lose'); showToast('The Keep has fallen', 'bad'); } break;
-      case 'fortBuilt': if (e.type === 'wall' || e.type === 'gate') burst(e.x, 0.6, e.z, 8, 0xd8b07a, 3, 0.5, 0.25, 2, 0.8); else { SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); } if (e.done) showToast(`${e.type === 'keep' ? 'The Keep' : CFG.siege.towers[e.type].name} reached level ${e.l}`, 'good'); break;
+      case 'fortBuilt': if (e.type === 'wall' || e.type === 'gate') burst(e.x, 0.6, e.z, 8, 0xd8b07a, 3, 0.5, 0.25, 2, 0.8); else { SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); } if (e.done) { const look = e.type !== 'keep' && siegeTier(e.l) > siegeTier(e.l - 1); showToast(`${e.type === 'keep' ? 'The Keep' : CFG.siege.towers[e.type].name} reached level ${e.l}${look ? ' · new look!' : ''}`, 'good'); if (look) { SpriteFX.play('ring', 'gold', e.x, 0, e.z, 6, { speed: 1.2 }); burst(e.x, 3, e.z, 36, 0xffe08a, 6, 1, 0.3, 4, 1.6); } } break;
       case 'fortTrap': if (e.type === 'bomb') { SpriteFX.play('explosion', 'fire', e.x, 0, e.z, e.r * 1.4); SpriteFX.play('ring', 'fire', e.x, 0, e.z, e.r * 2.4, { speed: 1.2 }); SpriteFX.play('dust', 'dust', e.x, 0, e.z, e.r, { delay: 0.1 }); if (near(e, 30)) { Sfx.play('boom'); Cam.shake = Math.max(Cam.shake, 0.5); } }
         else { SpriteFX.play('slash', 'white', e.x, 0.6, e.z, 2.2); burst(e.x, 0.3, e.z, 10, 0xc8ccd4, 4, 0.4, 0.2, 3, 1.4); if (near(e, 22)) Sfx.play('melee', { gap: 0.1 }); }
         break;
+      case 'fortLand': SpriteFX.play('ring', 'gold', e.x, 0, e.z, e.size, { speed: 1.4 }); Sfx.play('unlock'); showBanner('The land grows', `You can build on ${e.size} × ${e.size} m now`, 'gold'); break;
       case 'fortGone': burst(e.x, 0.8, e.z, 16, 0x8a7a6a, 4, 0.8, 0.4, 3, 1.2); break;
       case 'fortBroken': burst(e.x, 1, e.z, 26, 0x6a5a4a, 6, 1, 0.4, 3, 1.4); Sfx.play('boom', { gap: 0.3 }); break;
       case 'fortShot': { const y = e.y || 1.6, hear = near(e, 26);
@@ -15977,7 +16072,7 @@ function delveHud() {
 const FW = { ft: 0, host: null, wasHost: true, dirty: false, wT: 0, sendT: 0, saveT: -1, saving: false, ask: new Map(), rid: 0, hits: new Map(), hitT: 0, mm: new Map(), sig: '' };
 const fortOnline = () => !LOCAL_PREVIEW && !TEST_MODE && Cloud.kind === 'supa' && Cloud.state === 'on';
 const fortCodeOk = (c) => typeof c === 'string' && /^[A-Z0-9-]{4,12}$/.test(c);
-const worldPart = (F) => ({ wave: F.wave, land: F.land, b: F.b, keep: F.keep || 1, kd: F.kd || 0, go: F.go || 0, hold: F.hold || 0 });
+const worldPart = (F) => ({ wave: F.wave, land: F.land, b: F.b, keep: F.keep || 1, kd: F.kd || 0, go: F.go || 0, hold: F.hold || 0, area: F.area || 0 });
 const FortApi = {
   all() { try { return JSON.parse(localStorage.getItem('aa-fort-worlds') || '{}') || {}; } catch (e) { return {}; } },
   put(all) { try { localStorage.setItem('aa-fort-worlds', JSON.stringify(all)); } catch (e) { /* private mode: the world lives this session */ } },
@@ -16002,7 +16097,7 @@ async function siegeEnterOwn() {
     if (!M.code) { const code = await FortApi.create(M); if (code) { M.code = code; G.dirty = true; } }
     else {
       const w = await FortApi.load(M.code);
-      if (w && w.fort) { const s = sanitizeFort(w.fort, false); M.b = s.b; M.land = Math.max(M.land || 0, s.land); M.keep = Math.max(M.keep || 1, s.keep); if (s.kd) M.kd = s.kd; if (s.go) M.go = 1; M.hold = s.hold; M.wave = Math.max(M.wave || 1, (w.wave | 0) || s.wave); } // the server's wave, not the one inside the fort data
+      if (w && w.fort) { const s = sanitizeFort(w.fort, false); M.b = s.b; M.land = Math.max(M.land || 0, s.land); M.keep = Math.max(M.keep || 1, s.keep); M.area = Math.max(M.area || 0, s.area); if (s.kd) M.kd = s.kd; if (s.go) M.go = 1; M.hold = s.hold; M.wave = Math.max(M.wave || 1, (w.wave | 0) || s.wave); } // the server's wave, not the one inside the fort data
     }
   } catch (e) { toast('Your fort is offline this time: friends can not join', 'bad'); }
   return startSiege(M.code ? { code: M.code, fort: M } : null);
@@ -16060,7 +16155,7 @@ function siegeMpStep(dt) {
   if (host !== FW.wasHost) { FW.wasHost = host; if (host) siegeMpPromote(); else siegeMpDemote(); }
   if (host) {
     if ((FW.sendT -= dt) <= 0) { FW.sendT = 0.25; siegeMpSendState(); }
-    if (FW.dirty || (FW.wT -= dt) <= 0) { FW.dirty = false; FW.wT = 8; const F = fortState(); fortSend('fw', { b: fwPack(F), w: F.wave, ld: F.land, kp: F.keep || 1, kd: F.kd || 0, go: F.go || 0, hd: F.hold || 0 }); }
+    if (FW.dirty || (FW.wT -= dt) <= 0) { FW.dirty = false; FW.wT = 8; const F = fortState(); fortSend('fw', { b: fwPack(F), w: F.wave, ld: F.land, kp: F.keep || 1, kd: F.kd || 0, go: F.go || 0, hd: F.hold || 0, ar: F.area || 0 }); }
     if (FW.saveT >= 0 && (FW.saveT -= dt) <= 0) siegeMpSave();
     return false;
   }
@@ -16098,7 +16193,7 @@ function siegeMpRecv(event, sid, P) {
     else if (event === 'fhit' && Array.isArray(P.h)) for (const [i, f] of P.h) { const e = S.mobs.find((q) => q.id === i); if (e && e.alive) { e.hp -= clamp(mpNum(f, 0), 0, 1) * e.maxHp; e.flashT = CFG.combat.hitFlash; e.lastHurt = G.time; if (e.hp <= 0) { e.hp = 0; killEntity(e, null); } } }
     else if (event === 'fbq' && P.op && typeof P.op === 'object') {
       const op = { o: String(P.op.o), t: String(P.op.t), x: P.op.x | 0, z: P.op.z | 0, p: P.op.p | 0, v: P.op.v ? 1 : 0 };
-      if (op.o !== 'add' && op.o !== 'keep' && op.o !== 'hold') op.k = fortState().b.findIndex((b) => b.t === op.t && b.x === op.x && b.z === op.z);
+      if (op.o !== 'add' && op.o !== 'keep' && op.o !== 'hold' && op.o !== 'land') op.k = fortState().b.findIndex((b) => b.t === op.t && b.x === op.x && b.z === op.z);
       if (op.o === 'move') { op.x = P.op.nx | 0; op.z = P.op.nz | 0; }
       const why = op.o === 'add' && !FORT_TYPES[op.t] ? 'Unknown building' : op.k < 0 ? 'Gone' : fortApply(op);
       fortSend('fbr', { to: sid, rid: P.rid, ok: !why, why });
@@ -16108,10 +16203,10 @@ function siegeMpRecv(event, sid, P) {
   // a guest listens to the host only
   FW.host = siegeHostSid(); if (sid !== FW.host) return;
   if (event === 'fw' && Array.isArray(P.b)) {
-    const F = fortState(), sig = JSON.stringify(P.b) + [P.kp, P.kd, P.go, P.hd]; F.wave = Math.max(F.wave || 1, mpNum(P.w, 1) | 0);
+    const F = fortState(), sig = JSON.stringify(P.b) + [P.kp, P.kd, P.go, P.hd, P.ar]; F.wave = Math.max(F.wave || 1, mpNum(P.w, 1) | 0);
     if (sig === FW.sig) return; FW.sig = sig;
-    const s = sanitizeFort({ b: P.b.map((r) => ({ t: FW_TYPES[r[0]], x: r[1], z: r[2], l: r[3], d: r[4], c: r[5], p: r[6] })), keep: P.kp, kd: P.kd, go: P.go, hold: P.hd, wave: F.wave }, false);
-    F.b = s.b; F.keep = s.keep; F.kd = s.kd; F.go = s.go; F.hold = s.hold; siegeLayout(); siegeScaleObjs(S.lvl);
+    const s = sanitizeFort({ b: P.b.map((r) => ({ t: FW_TYPES[r[0]], x: r[1], z: r[2], l: r[3], d: r[4], c: r[5], p: r[6] })), keep: P.kp, kd: P.kd, go: P.go, hold: P.hd, area: P.ar, wave: F.wave }, false);
+    F.b = s.b; F.keep = s.keep; F.kd = s.kd; F.go = s.go; F.hold = s.hold; F.area = s.area; siegeLayout(); siegeScaleObjs(S.lvl);
   } else if (event === 'fst') siegeMpMirror(P);
   else if (event === 'fclr') { const n = mpNum(P.w, 0) | 0; if (n > S.cleared) { siegeReward(n, mpNum(P.lvl, S.lvl) | 0, clamp(mpNum(P.wg, 0) | 0, 0, 2), !!P.mn); const F = fortState(); F.wave = Math.max(F.wave || 1, n + 1); } }
   else if (event === 'fend') endSiege('keep');
@@ -16186,7 +16281,7 @@ function builderShop() {
     const T = CFG.siege.towers[t], c = fortCost(t, 1), have = fortCount(t, F), lim = fortLimit(t, F), full = have >= lim, at = full ? fortLimitAt(t, have) : 0, poor = !fortHas(c, M);
     const tag = full ? (at && !lim ? `Keep ${at}` : `${have}/${lim}`) : `${have}/${lim}`;
     return `<button class="bdItem${B.sel === t && !B.move ? ' on' : ''}${full || poor ? ' off' : ''}" data-bd="${t}">${fortPic(t)}<b>${T.short}</b><small class="bdCnt">${tag}</small><small>${full ? '' : fortResHTML(c, M)}</small></button>`;
-  }).join('');
+  }).join('') + (B.cat === 'res' ? builderLandCard(F, M) : '');
   $('bdList').scrollLeft = sl;
 }
 function builderHud() {
@@ -16201,6 +16296,11 @@ function builderHud() {
   $('bdWave').textContent = !F.go ? `Start wave ${S.wave}` : 'Start now'; $('bdWave').hidden = S.phase !== 'build';
   $('bdHold').hidden = !F.go; $('bdHold').textContent = F.hold ? 'Resume waves' : 'Pause waves'; $('bdHold').classList.toggle('on', !!F.hold);
   $('bdWaveInfo').textContent = S.phase === 'build' ? (!F.go ? `Wave ${S.wave} waits for you` : F.hold ? `Paused before wave ${S.wave}` : `Wave ${S.wave} in ${Math.ceil(S.t)}s`) : S.phase === 'fight' ? `Wave ${S.wave} · ${siegeLeft()} left` : `Wave ${S.wave} held!`;
+}
+// the Resources tab ends with more land: a plot costs Land Deeds (only waves pay them)
+function builderLandCard(F, M) {
+  const A = CFG.siege.area, n = F.area || 0, top = n >= A.deeds.length, cost = top ? null : { deeds: A.deeds[n] }, off = top || !!fortCheck({ o: 'land' }) || !fortHas(cost, M);
+  return `<button class="bdItem bdLand${off ? ' off' : ''}" data-land="1">${ICON.deeds.replace('class="ic"', 'class="ic fortPic"')}<b>Land</b><small class="bdCnt">${n}/${A.deeds.length}</small><small>${top ? 'all bought' : fortResHTML(cost, M)}</small></button>`;
 }
 // the screen point on the ground (y = 0), and the cell a building of type t would take there
 const _bdRay = new THREE.Raycaster(), _bdV = new THREE.Vector2(), _bdPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), _bdHit = new THREE.Vector3();
@@ -16274,6 +16374,7 @@ function builderTap(x, y) {
 }
 // the shop strip (the open tab): a sideways swipe scrolls it, a drag up out of it carries the building onto the field
 function builderShopDown(e) {
+  if (e.target.closest('[data-land]') && G.builder) { BD.land = { id: e.pointerId, x: e.clientX, y: e.clientY }; }
   const it = e.target.closest('[data-bd]'), el = $('bdList'); if (!it || !G.builder) return;
   e.preventDefault(); el.setPointerCapture(e.pointerId);
   BD.shop = { id: e.pointerId, t: it.dataset.bd, x0: e.clientX, y0: e.clientY, sl: el.scrollLeft, mode: null, vx: 0, lx: e.clientX, lt: performance.now() };
@@ -16294,6 +16395,8 @@ function builderShopMove(e) {
   }
 }
 function builderShopUp(e) {
+  const L = BD.land; BD.land = null;
+  if (L && L.id === e.pointerId && e.type === 'pointerup' && Math.hypot(e.clientX - L.x, e.clientY - L.y) < 10) { Sfx.play('click'); openFortLandPanel(); return; }
   const P = BD.shop, B = G.builder; if (!P || P.id !== e.pointerId) return;
   BD.shop = null; if (!B) return;
   if (!P.mode && e.type === 'pointerup') { Sfx.play('click'); builderSelect(P.t); return; }
@@ -16362,7 +16465,7 @@ function siegeToggleHold() {
 function builderTick() {
   const B = G.builder; if (!B) return;
   if ((BD.hudT = (BD.hudT || 0) - 1 / 60) <= 0) { BD.hudT = 0.25; if (!B.line) builderHud(); }
-  const F = fortState(), M = myFort(), sig = [M.wood, M.stones, M.iron, F.b.length, F.keep, F.kd > fortNow()].join();
+  const F = fortState(), M = myFort(), sig = [M.wood, M.stones, M.iron, M.deeds, F.b.length, F.keep, F.kd > fortNow(), F.area].join();
   if (sig !== BD.sig && !BD.shop) { BD.sig = sig; builderShop(); }
 }
 builderInit();

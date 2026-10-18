@@ -35,7 +35,7 @@ function builderShop() {
     const T = CFG.siege.towers[t], c = fortCost(t, 1), have = fortCount(t, F), lim = fortLimit(t, F), full = have >= lim, at = full ? fortLimitAt(t, have) : 0, poor = !fortHas(c, M);
     const tag = full ? (at && !lim ? `Keep ${at}` : `${have}/${lim}`) : `${have}/${lim}`;
     return `<button class="bdItem${B.sel === t && !B.move ? ' on' : ''}${full || poor ? ' off' : ''}" data-bd="${t}">${fortPic(t)}<b>${T.short}</b><small class="bdCnt">${tag}</small><small>${full ? '' : fortResHTML(c, M)}</small></button>`;
-  }).join('');
+  }).join('') + (B.cat === 'res' ? builderLandCard(F, M) : '');
   $('bdList').scrollLeft = sl;
 }
 function builderHud() {
@@ -50,6 +50,11 @@ function builderHud() {
   $('bdWave').textContent = !F.go ? `Start wave ${S.wave}` : 'Start now'; $('bdWave').hidden = S.phase !== 'build';
   $('bdHold').hidden = !F.go; $('bdHold').textContent = F.hold ? 'Resume waves' : 'Pause waves'; $('bdHold').classList.toggle('on', !!F.hold);
   $('bdWaveInfo').textContent = S.phase === 'build' ? (!F.go ? `Wave ${S.wave} waits for you` : F.hold ? `Paused before wave ${S.wave}` : `Wave ${S.wave} in ${Math.ceil(S.t)}s`) : S.phase === 'fight' ? `Wave ${S.wave} · ${siegeLeft()} left` : `Wave ${S.wave} held!`;
+}
+// the Resources tab ends with more land: a plot costs Land Deeds (only waves pay them)
+function builderLandCard(F, M) {
+  const A = CFG.siege.area, n = F.area || 0, top = n >= A.deeds.length, cost = top ? null : { deeds: A.deeds[n] }, off = top || !!fortCheck({ o: 'land' }) || !fortHas(cost, M);
+  return `<button class="bdItem bdLand${off ? ' off' : ''}" data-land="1">${ICON.deeds.replace('class="ic"', 'class="ic fortPic"')}<b>Land</b><small class="bdCnt">${n}/${A.deeds.length}</small><small>${top ? 'all bought' : fortResHTML(cost, M)}</small></button>`;
 }
 // the screen point on the ground (y = 0), and the cell a building of type t would take there
 const _bdRay = new THREE.Raycaster(), _bdV = new THREE.Vector2(), _bdPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), _bdHit = new THREE.Vector3();
@@ -123,6 +128,7 @@ function builderTap(x, y) {
 }
 // the shop strip (the open tab): a sideways swipe scrolls it, a drag up out of it carries the building onto the field
 function builderShopDown(e) {
+  if (e.target.closest('[data-land]') && G.builder) { BD.land = { id: e.pointerId, x: e.clientX, y: e.clientY }; }
   const it = e.target.closest('[data-bd]'), el = $('bdList'); if (!it || !G.builder) return;
   e.preventDefault(); el.setPointerCapture(e.pointerId);
   BD.shop = { id: e.pointerId, t: it.dataset.bd, x0: e.clientX, y0: e.clientY, sl: el.scrollLeft, mode: null, vx: 0, lx: e.clientX, lt: performance.now() };
@@ -143,6 +149,8 @@ function builderShopMove(e) {
   }
 }
 function builderShopUp(e) {
+  const L = BD.land; BD.land = null;
+  if (L && L.id === e.pointerId && e.type === 'pointerup' && Math.hypot(e.clientX - L.x, e.clientY - L.y) < 10) { Sfx.play('click'); openFortLandPanel(); return; }
   const P = BD.shop, B = G.builder; if (!P || P.id !== e.pointerId) return;
   BD.shop = null; if (!B) return;
   if (!P.mode && e.type === 'pointerup') { Sfx.play('click'); builderSelect(P.t); return; }
@@ -211,7 +219,7 @@ function siegeToggleHold() {
 function builderTick() {
   const B = G.builder; if (!B) return;
   if ((BD.hudT = (BD.hudT || 0) - 1 / 60) <= 0) { BD.hudT = 0.25; if (!B.line) builderHud(); }
-  const F = fortState(), M = myFort(), sig = [M.wood, M.stones, M.iron, F.b.length, F.keep, F.kd > fortNow()].join();
+  const F = fortState(), M = myFort(), sig = [M.wood, M.stones, M.iron, M.deeds, F.b.length, F.keep, F.kd > fortNow(), F.area].join();
   if (sig !== BD.sig && !BD.shop) { BD.sig = sig; builderShop(); }
 }
 builderInit();
