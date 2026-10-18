@@ -24,6 +24,7 @@ function boot(hotData) {
   setupPools(); setupInput();
   $('panel').addEventListener('click', handlePanelClick);
   $('panel').addEventListener('change', handleSettingChange);
+  $('panel').addEventListener('input', handleVolumeInput);
   setupSheetGrip();
   // backdrop: tap to close normal menus; in the dressing room, drag to spin the hero
   let spinDrag = null;
@@ -72,14 +73,15 @@ function boot(hotData) {
   applyUiSize();
   window.addEventListener('resize', resize);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { G.paused = true; if (Sfx.ctx) Sfx.ctx.suspend(); G.dirty = false; saveNow(true); }
-    else { G.paused = false; lastFrame = nextFrameAt = performance.now(); simAcc = 0; if (Sfx.ctx && !G.profile.settings.mute) Sfx.ctx.resume(); }
+    if (document.hidden) { G.paused = true; Sfx.pause(); G.dirty = false; saveNow(true); }
+    else { G.paused = false; lastFrame = nextFrameAt = performance.now(); simAcc = 0; Sfx.resume(); }
   });
   if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
     try { window.claude.hot.snapshot(() => ({ profile: G.profile })); } catch (e) { /* optional */ }
   }
   window.addEventListener('pagehide', () => saveNow(true));
   if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, startSiege, endSiege, startSiegeWave, buyPad, fortState, SC, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
+  if (LOCAL_PREVIEW) window.__audio = { Sfx, Music, AUDIO_MANIFEST, sanitizeProfile, defaultProfile, openSettings, G, Cam };
   window.__gameBooted = true;
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});

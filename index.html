@@ -2095,6 +2095,16 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .dlvArt::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(10,8,16,.9)); }
 .dlvArt b, .dlvArt small { position: relative; text-shadow: 2px 2px 0 #000; } .dlvArt b { font-size: 22px; color: #f2ead2; } .dlvArt small { font-size: 12px; color: #fff; opacity: .9; }
 .panel .hubTile.wide { background: linear-gradient(90deg, rgba(20,10,20,.75), rgba(20,10,20,.2)), url(assets/ui/delve/cinder.webp) center / cover !important; }
+/* Settings › Sound: volume sliders. The box is a .savebox card (same stone panel); square pixel thumbs, rows as tall as the panel buttons (48px before the Menu size zoom) */
+.sndbox .vol { display: grid; grid-template-columns: 64px 1fr 34px; align-items: center; gap: 10px; min-height: 48px; }
+.sndbox .vol span { font-size: 13px; }
+.sndbox .vol output { font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+.sndbox input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 48px; background: transparent; margin: 0; touch-action: none; }
+.sndbox input[type=range]::-webkit-slider-runnable-track { height: 8px; background: var(--og-slate); box-shadow: 0 0 0 2px var(--og-ink); }
+.sndbox input[type=range]::-moz-range-track { height: 8px; background: var(--og-slate); box-shadow: 0 0 0 2px var(--og-ink); }
+.sndbox input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 24px; margin-top: -8px; border-radius: 0; background: #ece6d6; box-shadow: 0 0 0 3px var(--og-ink), inset 0 -4px 0 rgba(0,0,0,.25); }
+.sndbox input[type=range]::-moz-range-thumb { width: 20px; height: 24px; border: 0; border-radius: 0; background: #ece6d6; box-shadow: 0 0 0 3px var(--og-ink), inset 0 -4px 0 rgba(0,0,0,.25); }
+.sndbox input[type=range]:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 /* Bastion Siege: big objective bars (flash red under attack), warrior bars, the fort panels */
 .tag.obj .tn { font: 13px/1 var(--body); color: #fff; letter-spacing: .02em; }
 .tag.obj .tb { width: 96px; height: 10px; border: 2px solid rgba(0,0,0,.7); } .tag.obj .tb i { background: var(--hp); transition: width .15s; }
@@ -3362,7 +3372,7 @@ function defaultProfile() {
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
     essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, fort: { pads: [], stones: 0 }, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
-    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, hz120: true },
+    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, hz120: true, volMaster: 80, volMusic: 60, volSfx: 80, volUi: 70 },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
   if (TEST_MODE) prof.playtest = TEST_PROFILE_TAG;
@@ -3389,6 +3399,7 @@ function sanitizeProfile(p) {
   out.gear = Object.assign({}, d.gear, p.gear && typeof p.gear === 'object' ? p.gear : {});
   out.stats = Object.assign(defaultProfile().stats, p.stats || {});
   out.settings = Object.assign(defaultProfile().settings, p.settings || {});
+  for (const k of ['volMaster', 'volMusic', 'volSfx', 'volUi']) { const v = +out.settings[k]; out.settings[k] = Number.isFinite(v) ? Math.max(0, Math.min(100, Math.round(v))) : defaultProfile().settings[k]; }
   if (!p.artVersion) { out.settings.pixel = false; out.artVersion = 1; }
   if (!(p.settings && p.settings.testSeen)) { out.settings.fastXp = false; out.settings.testSeen = true; } // new players start in normal mode; Test mode stays a switch in Settings
   if (!LOCAL_PREVIEW) out.settings.fastXp = false;
@@ -10638,35 +10649,187 @@ const WorldModels = {
 };
 const _wm = new THREE.Matrix4();
 // ---------------------------------------------------------------------
-// 7. AUDIO — synthesized with Web Audio, no files
+// 7a. AUDIO DATA — which sounds exist as files, and which bus every sound uses
 // ---------------------------------------------------------------------
+// Buses (each has its own volume slider in Settings › Sound):
+//   music — background tracks, boss themes, stingers (compressed, ducked under big moments)
+//   amb   — ambience loops (wind, lava, ocean, town); follows the music slider at 70 %
+//   sfx   — combat and world sounds
+//   ui    — menu buttons, chests, unlocks, level ups
+//
+// AUDIO_MANIFEST entry (all fields optional except file):
+//   file:  path WITHOUT extension, e.g. 'assets/audio/ui/tap'. The engine adds '.webm' (Opus) or '.m4a' (AAC).
+//   n:     number of variants -> files are '<file>-1', '<file>-2', … ; one is picked at random each play
+//   bus:   'music' | 'amb' | 'sfx' | 'ui'   (default 'sfx')
+//   vol:   0..1 (default 1)          rate: pitch jitter, ±fraction (default 0.06 for sfx, 0 for music/ui)
+//   max:   voices of this key at once (default 3)      group: shared voice cap, e.g. 'mob'
+//   range: metres for distance falloff when played with {x, z} (default 28)
+//   loop:  true for music / ambience;  loopStart / loopEnd in seconds (optional)
+//   preload: true -> fetched as soon as audio starts (menu music, UI)
+// A key that has no file yet (or fails to load) falls back to the synthesized sound of the same name in 50-audio.js,
+// so new files can be dropped in one by one without breaking anything.
+const AUDIO_MANIFEST = {
+  // Phase 2 (UI), 3 (music), 4 (mobs/bosses) and 5 (player/ambience) add their entries here. Example:
+  // 'ui.tap':        { file: 'assets/audio/ui/tap', n: 2, bus: 'ui', preload: true },
+  // 'mus.menu':      { file: 'assets/audio/music/menu', bus: 'music', loop: true, preload: true },
+  // 'wolf.attack':   { file: 'assets/audio/mob/wolf-attack', n: 2, group: 'mob', range: 24 },
+};
+
+// bus for the synthesized sounds (anything not listed is 'sfx')
+const SYNTH_BUS = { click: 'ui', tick: 'ui', unlock: 'ui', job: 'ui', level: 'ui', win: 'ui', lose: 'ui', equipped: 'ui' };
+
+// voice caps per group (samples only; the synth has its own per-key gap)
+const AUDIO_GROUPS = { mob: 6, boss: 3, step: 2 };
+const AUDIO_MAX_VOICES = 24;
+// ---------------------------------------------------------------------
+// 7. AUDIO — Web Audio engine: buses, samples (49-audio-data.js), music, synth fallback
+// ---------------------------------------------------------------------
+// Graph:  sources → [per-voice gain → pan] → bus gain ─┬─ music → duck → compressor ─┐
+//                                                      ├─ amb ────────────────────────┤→ master → speakers
+//                                                      ├─ sfx ────────────────────────┤
+//                                                      └─ ui ─────────────────────────┘
+// Sfx.play(name, { x, z, gap, vol }) plays the sample if AUDIO_MANIFEST has it and it is loaded,
+// otherwise the synthesized sound of the same name. Music.set(key) crossfades background tracks.
+const AUDIO_VOL_KEYS = { master: 'volMaster', music: 'volMusic', amb: 'volMusic', sfx: 'volSfx', ui: 'volUi' };
 const Sfx = {
-  ctx: null, master: null, noiseBuf: null, last: {},
+  ctx: null, master: null, bus: {}, duckGain: null, noiseBuf: null, last: {}, _out: null,
+  buf: {}, loading: {}, missing: {}, voices: [], fmt: null, armed: false,
   init() {
-    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    if (this.ctx) { if (this.ctx.state === 'suspended' && !document.hidden) this.ctx.resume(); return; }
     try {
       const AC2 = window.AudioContext || window.webkitAudioContext; if (!AC2) return;
-      this.ctx = new AC2(); this.master = this.ctx.createGain(); this.master.gain.value = G.profile.settings.mute ? 0 : 0.5; this.master.connect(this.ctx.destination);
-      const n = this.ctx.sampleRate * 0.5; this.noiseBuf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
+      const c = this.ctx = new AC2();
+      this.master = c.createGain(); this.master.connect(c.destination);
+      // music: duck (dips under big moments) → soft compressor so boss tracks never clip
+      const comp = c.createDynamicsCompressor(); comp.threshold.value = -14; comp.knee.value = 10; comp.ratio.value = 4; comp.attack.value = 0.01; comp.release.value = 0.25;
+      this.duckGain = c.createGain(); this.duckGain.connect(comp); comp.connect(this.master);
+      for (const k of ['music', 'amb', 'sfx', 'ui']) { const g = c.createGain(); g.connect(k === 'music' ? this.duckGain : this.master); this.bus[k] = g; }
+      this._out = this.bus.sfx;
+      this.applyVolumes(true);
+      const n = c.sampleRate * 0.5; this.noiseBuf = c.createBuffer(1, n, c.sampleRate);
       const d = this.noiseBuf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      this.fmt = this.pickFormat();
+      this.preload();
+      if (Music.key) { const k = Music.key; Music.key = null; Music.set(k); } // a track was asked for before the first tap
     } catch (e) { this.ctx = null; }
   },
-  setMute(m) { if (this.master) this.master.gain.value = m ? 0 : 0.5; },
-  ok(key, gap) { if (!this.ctx || G.profile.settings.mute) return false; const now = this.ctx.currentTime; if (this.last[key] && now - this.last[key] < (gap || 0.04)) return false; this.last[key] = now; return true; },
+  // browsers only allow audio after a tap: start the context on the first touch anywhere (title screen included)
+  arm() {
+    if (this.armed) return; this.armed = true;
+    const go = () => { this.init(); if (this.ctx && this.ctx.state === 'running') { ['pointerdown', 'keydown', 'touchend'].forEach((t) => document.removeEventListener(t, go, true)); } };
+    ['pointerdown', 'keydown', 'touchend'].forEach((t) => document.addEventListener(t, go, true));
+  },
+  pickFormat() {
+    try { const a = document.createElement('audio'); if (a.canPlayType('audio/webm; codecs="opus"')) return 'webm'; if (a.canPlayType('audio/mp4; codecs="mp4a.40.2"')) return 'm4a'; } catch (e) { /* fall through */ }
+    return 'm4a';
+  },
+  // ---- volume -------------------------------------------------------
+  vol(bus) { const s = (G.profile && G.profile.settings) || {}, v = s[AUDIO_VOL_KEYS[bus]]; return (v == null ? 80 : v) / 100; },
+  applyVolumes(now) {
+    if (!this.ctx) return;
+    const s = (G.profile && G.profile.settings) || {}, t = this.ctx.currentTime, set = (p, v) => { if (now) p.value = v; else p.setTargetAtTime(v, t, 0.05); };
+    set(this.master.gain, s.mute ? 0 : this.vol('master') * 0.7);
+    for (const k in this.bus) set(this.bus[k].gain, this.vol(k) * (k === 'amb' ? 0.7 : 1));
+  },
+  setMute(m) { if (G.profile && G.profile.settings) G.profile.settings.mute = !!m; this.applyVolumes(); },
+  // music dips by `db` for `secs`, then comes back (boss roar, level up, legendary drop)
+  duck(db, secs) {
+    if (!this.duckGain) return; const g = this.duckGain.gain, t = this.ctx.currentTime;
+    g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(Math.pow(10, -(db || 6) / 20), t + 0.08);
+    g.setTargetAtTime(1, t + 0.08 + (secs || 0.6), 0.35);
+  },
+  pause() { if (this.ctx && this.ctx.state === 'running') this.ctx.suspend(); },
+  resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
+  // ---- position: quieter with distance, panned by where it is on screen ----
+  spatial(o, range) {
+    if (!o || o.x == null) return null;
+    const lx = Cam.look && Cam.look.x != null ? Cam.look.x : G.player.x, lz = Cam.look && Cam.look.z != null ? Cam.look.z : G.player.z;
+    const dx = o.x - lx, dz = o.z - lz, d = Math.hypot(dx, dz), r = range || 28;
+    if (d >= r) return { g: 0, pan: 0 };
+    let sx = -dx; // camera faces +z at yaw 0, so world +x is screen left
+    if (typeof camera !== 'undefined' && camera.matrixWorld) { const e = camera.matrixWorld.elements; sx = dx * e[0] + dz * e[2]; }
+    const f = 1 - d / r;
+    return { g: f * f, pan: Math.max(-0.8, Math.min(0.8, sx / 16)) };
+  },
+  // per-voice output node: gain (+ stereo pan when positioned) into a bus
+  voiceOut(bus, vol, sp) {
+    const c = this.ctx, g = c.createGain(); g.gain.value = vol * (sp ? sp.g : 1);
+    if (sp && sp.pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = sp.pan; g.connect(p); p.connect(this.bus[bus]); }
+    else g.connect(this.bus[bus]);
+    return g;
+  },
+  ok(key, gap) { if (!this.ctx || !G.profile || G.profile.settings.mute) return false; const now = this.ctx.currentTime; if (this.last[key] && now - this.last[key] < (gap || 0.04)) return false; this.last[key] = now; return true; },
+  // ---- sample loading -----------------------------------------------
+  load(key) {
+    const m = AUDIO_MANIFEST[key]; if (!m || !this.ctx) return Promise.resolve(null);
+    if (this.buf[key]) return Promise.resolve(this.buf[key]);
+    if (this.missing[key]) return Promise.resolve(null);
+    if (this.loading[key]) return this.loading[key];
+    const files = m.n > 1 ? Array.from({ length: m.n }, (_, i) => `${m.file}-${i + 1}`) : [m.file];
+    const one = (f, fmt) => fetch(`${f}.${fmt}`).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+      .then((ab) => new Promise((res, rej) => { const p = this.ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); }));
+    // Opus decode is missing on some older iPhones even when canPlayType says yes: retry once as AAC
+    const get = (f) => one(f, this.fmt).catch((e) => { if (this.fmt !== 'webm') throw e; return one(f, 'm4a').then((b) => { this.fmt = 'm4a'; return b; }); });
+    return (this.loading[key] = Promise.all(files.map((f) => get(f).catch(() => null))).then((bs) => {
+      delete this.loading[key]; bs = bs.filter(Boolean);
+      if (!bs.length) { this.missing[key] = true; return null; }
+      return (this.buf[key] = bs);
+    }));
+  },
+  preload() { for (const k in AUDIO_MANIFEST) if (AUDIO_MANIFEST[k].preload) this.load(k); },
+  // load everything whose key starts with one of the prefixes (e.g. a biome's mobs when entering it)
+  prefetch(prefixes) { for (const k in AUDIO_MANIFEST) if (prefixes.some((p) => k.startsWith(p))) this.load(k); },
+  // ---- voices ---------------------------------------------------------
+  // makes room for a new voice: per-key cap, group cap, global cap; the oldest voice is stopped
+  steal(key, m) {
+    const V = this.voices, cut = (pred, cap) => { const hit = V.filter(pred); if (hit.length >= cap) this.stopVoice(hit[0], 0.04); };
+    cut((v) => v.key === key, m.max || 3);
+    if (m.group) cut((v) => v.group === m.group, AUDIO_GROUPS[m.group] || 6);
+    cut((v) => !v.loop, AUDIO_MAX_VOICES);
+  },
+  stopVoice(v, fade) {
+    const i = this.voices.indexOf(v); if (i >= 0) this.voices.splice(i, 1);
+    try { const t = this.ctx.currentTime; v.out.gain.setTargetAtTime(0, t, (fade || 0.05) / 3); v.src.stop(t + (fade || 0.05) + 0.02); } catch (e) { /* already stopped */ }
+  },
+  playBuf(key, m, bufs, o) {
+    o = o || {}; const bus = m.bus || 'sfx', sp = this.spatial(o, m.range);
+    if (sp && sp.g < 0.02) return null;
+    this.steal(key, m);
+    const c = this.ctx, src = c.createBufferSource(); src.buffer = bufs[(Math.random() * bufs.length) | 0];
+    const jit = m.rate != null ? m.rate : (bus === 'sfx' ? 0.06 : 0);
+    src.playbackRate.value = (o.rate || 1) * (1 + (Math.random() * 2 - 1) * jit);
+    if (m.loop) { src.loop = true; if (m.loopStart != null) src.loopStart = m.loopStart; if (m.loopEnd != null) src.loopEnd = m.loopEnd; }
+    const out = this.voiceOut(bus, (m.vol != null ? m.vol : 1) * (o.vol != null ? o.vol : 1), sp);
+    src.connect(out); src.start(c.currentTime + (o.delay || 0));
+    const v = { key, group: m.group, loop: !!m.loop, src, out };
+    this.voices.push(v); src.onended = () => { const i = this.voices.indexOf(v); if (i >= 0) this.voices.splice(i, 1); };
+    return v;
+  },
+  // ---- synth (no files) ---------------------------------------------
   tone(f0, f1, dur, type, vol, delay) {
     const c = this.ctx, t = c.currentTime + (delay || 0), o = c.createOscillator(), g = c.createGain();
     o.type = type || 'square'; o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.2, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + dur + 0.02);
+    o.connect(g); g.connect(this._out || this.master); o.start(t); o.stop(t + dur + 0.02);
   },
   noise(dur, vol, freq, q, sweepTo) {
     const c = this.ctx, t = c.currentTime, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
     s.buffer = this.noiseBuf; f.type = 'bandpass'; f.frequency.setValueAtTime(freq || 1200, t); if (sweepTo) f.frequency.exponentialRampToValueAtTime(sweepTo, t + dur); f.Q.value = q || 1;
     g.gain.setValueAtTime(vol || 0.2, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    s.connect(f); f.connect(g); g.connect(this.master); s.start(t); s.stop(t + dur + 0.02);
+    s.connect(f); f.connect(g); g.connect(this._out || this.master); s.start(t); s.stop(t + dur + 0.02);
   },
+  // ---- main entry -----------------------------------------------------
   play(name, o) {
     if (!this.ok(name, o && o.gap)) return;
+    const m = AUDIO_MANIFEST[name];
+    if (m) { const b = this.buf[name]; if (b) { this.playBuf(name, m, b, o); return; } this.load(name); }
+    // synth fallback, routed into the right bus (and positioned when x/z are given)
+    const bus = (m && m.bus) || SYNTH_BUS[name] || 'sfx', sp = this.spatial(o, m && m.range);
+    if (sp && sp.g < 0.02) return;
+    this._out = this.voiceOut(bus, o && o.vol != null ? o.vol : 1, sp);
+    try { this.synth(name); } finally { this._out = this.bus.sfx; }
+  },
+  synth(name) {
     switch (name) {
       case 'bolt': this.tone(620, 280, 0.09, 'square', 0.07); break;
       case 'arrow': this.tone(1100, 520, 0.08, 'triangle', 0.1); this.noise(0.05, 0.05, 3000); break;
@@ -10712,6 +10875,37 @@ const Sfx = {
   },
 };
 
+// ---------------------------------------------------------------------
+// MUSIC — one track at a time, crossfaded; stingers play over a ducked track
+// ---------------------------------------------------------------------
+const Music = {
+  key: null, voice: null, fade: 1.5,
+  set(key, fade) {
+    if (key === this.key) return; this.key = key;
+    const f = fade != null ? fade : this.fade, old = () => { if (this.voice) { Sfx.stopVoice(this.voice, f); this.voice = null; } };
+    if (!key || !Sfx.ctx || !AUDIO_MANIFEST[key]) { old(); return; }
+    // the old track keeps playing until the new one is decoded, so a switch never leaves silence
+    Sfx.load(key).then((b) => {
+      if (this.key !== key) return; // switched away while loading
+      old(); if (!b) return;
+      const m = AUDIO_MANIFEST[key], v = Sfx.playBuf(key, Object.assign({ bus: 'music' }, m, { loop: m.loop !== false }), b, { vol: 0.0001 });
+      if (!v) return; this.voice = v;
+      const g = v.out.gain, t = Sfx.ctx.currentTime, target = m.vol != null ? m.vol : 1;
+      g.setValueAtTime(0.0001, t); g.linearRampToValueAtTime(target, t + f);
+    });
+  },
+  stop(fade) { this.set(null, fade); },
+  // short one-shot (boss intro, victory, defeat) over the current track, which dips meanwhile
+  stinger(key, o) {
+    if (!Sfx.ctx || G.profile.settings.mute) return;
+    Sfx.load(key).then((b) => {
+      if (!b) return; const m = AUDIO_MANIFEST[key];
+      Sfx.duck((o && o.db) || 10, b[0].duration * 0.8);
+      Sfx.playBuf(key, Object.assign({ bus: 'music' }, m, { loop: false }), b, o);
+    });
+  },
+};
+Sfx.arm();
 // ---------------------------------------------------------------------
 // 8. INPUT — touch twin-stick + buttons (keyboard/mouse for desktop testing)
 // ---------------------------------------------------------------------
@@ -11976,7 +12170,8 @@ function openSettings() {
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
     ${tg('calm', 'Reduce flashing', 'No red hit flash or screen shake, and a fixed render scale')}
-    ${tg('mute', 'Mute sound', 'All sound is generated live, no downloads')}${tg('fps', 'Show FPS', 'Frame rate, the refresh rate your browser gives the game, draw calls and render scale')}
+    <div class="savebox sndbox"><b>Sound</b>${[['volMaster', 'Master'], ['volMusic', 'Music'], ['volSfx', 'Effects'], ['volUi', 'Menu']].map(([k, l]) => `<label class="vol"><span>${l}</span><input type="range" min="0" max="100" step="5" data-vol="${k}" value="${s[k] | 0}" aria-label="${l} volume"><output id="out-${k}">${s[k] | 0}</output></label>`).join('')}</div>
+    ${tg('mute', 'Mute sound', 'Turns off music, effects and menu sounds')}${tg('fps', 'Show FPS', 'Frame rate, the refresh rate your browser gives the game, draw calls and render scale')}
     <div class="row"><button class="ghost sm" data-act="credits">Credits and licenses</button></div>
     <div class="danger"><button class="ghost" data-act="reset1" id="reset1">${TEST_MODE ? 'Reset test hero' : 'Reset progress'}</button><span id="resetConfirm" hidden>${TEST_MODE ? 'Erase this test hero only?' : 'Erase this hero everywhere?'} <button class="warn" data-act="reset2">Yes, erase</button></span></div>`);
 }
@@ -12133,7 +12328,15 @@ function handlePanelClick(e) {
     case 'reset2': Store.clear(); G.profile = defaultProfile(); saveNow(true); G.player.cls = 'novice'; refreshPlayerStats(true); G.player.x = CFG.world.spawn.x; G.player.z = CFG.world.spawn.z; UI.close(); toast('Progress erased. A new hero begins.'); Coach.render(); break;
   }
 }
+// volume sliders: live while dragging; on release a short sample of that bus plays
+function handleVolumeInput(e) {
+  const k = e.target.dataset.vol; if (!k) return;
+  G.profile.settings[k] = +e.target.value; G.dirty = true;
+  const o = $('out-' + k); if (o) o.textContent = e.target.value;
+  Sfx.init(); Sfx.applyVolumes();
+}
 function handleSettingChange(e) {
+  if (e.target.dataset.vol) { handleVolumeInput(e); Sfx.last = {}; Sfx.play(e.target.dataset.vol === 'volSfx' ? 'hit' : 'click'); return; }
   if (e.target.dataset.sel2 === 'tBrawler') { openSkills(e.target.value); return; }
   if (e.target.dataset.sel) { G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; if (e.target.dataset.sel === 'uiSize') { applyUiSize(); measureSheet(); } return; }
   const k = e.target.dataset.set; if (!k) return;
@@ -14645,7 +14848,7 @@ function applyProfile(prof, note) {
   if (!TEST_MODE && isTestProfile(prof)) return;
   G.profile = prof;
   refreshPlayerStats(true);
-  Sfx.setMute(!!prof.settings.mute);
+  Sfx.applyVolumes();
   applyUiSize();
   setMap(prof.settings.map !== false);
   G.zoneIdx = zoneAt(G.player.z);
@@ -14705,6 +14908,7 @@ function boot(hotData) {
   setupPools(); setupInput();
   $('panel').addEventListener('click', handlePanelClick);
   $('panel').addEventListener('change', handleSettingChange);
+  $('panel').addEventListener('input', handleVolumeInput);
   setupSheetGrip();
   // backdrop: tap to close normal menus; in the dressing room, drag to spin the hero
   let spinDrag = null;
@@ -14753,14 +14957,15 @@ function boot(hotData) {
   applyUiSize();
   window.addEventListener('resize', resize);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { G.paused = true; if (Sfx.ctx) Sfx.ctx.suspend(); G.dirty = false; saveNow(true); }
-    else { G.paused = false; lastFrame = nextFrameAt = performance.now(); simAcc = 0; if (Sfx.ctx && !G.profile.settings.mute) Sfx.ctx.resume(); }
+    if (document.hidden) { G.paused = true; Sfx.pause(); G.dirty = false; saveNow(true); }
+    else { G.paused = false; lastFrame = nextFrameAt = performance.now(); simAcc = 0; Sfx.resume(); }
   });
   if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
     try { window.claude.hot.snapshot(() => ({ profile: G.profile })); } catch (e) { /* optional */ }
   }
   window.addEventListener('pagehide', () => saveNow(true));
   if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, startSiege, endSiege, startSiegeWave, buyPad, fortState, SC, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
+  if (LOCAL_PREVIEW) window.__audio = { Sfx, Music, AUDIO_MANIFEST, sanitizeProfile, defaultProfile, openSettings, G, Cam };
   window.__gameBooted = true;
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
