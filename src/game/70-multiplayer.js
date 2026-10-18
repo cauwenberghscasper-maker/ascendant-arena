@@ -292,6 +292,7 @@ function bossRecv(event, sid, P) {
 function bossRemoteStep(dt) {
   const b = G.boss; if (!b) return;
   b.flashT -= dt; b.slowT -= dt; b.attackAnim = Math.max(0, b.attackAnim - dt * 1.5); trackVel(b, dt);
+  bossKitTick(b, dt, false);
   if (HeroSupers.tickStatus(b, dt)) b.moveAmt = 0;
   if (b.sx == null) return;
   const k = 1 - Math.exp(-dt * 8), dx = b.sx - b.x, dz = b.sz - b.z;

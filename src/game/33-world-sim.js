@@ -623,6 +623,10 @@ function stepEnemy(e, dt) {
 }
 
 // --- monster moves
+// every effect takes the look of the area it happens in: sprite palette and tint by biome (woods, mountains, volcano, arcane ruins, ocean, celestial)
+const BIOME_FX = ['venom', 'frost', 'fire', 'arcane', 'storm', 'gold'], BIOME_TINT = [0x7bd35a, 0x9fe8ff, 0xff7a2e, 0xc77dff, 0x3fc8ff, 0xffe27a];
+const areaBiome = (zi) => { const Z = CFG.world.zones[zi]; return Z ? Z.biome : 0; };
+const areaFx = (zi) => BIOME_FX[areaBiome(zi)] || 'dust';
 // Each move warns in red the moment its windup starts (a pendingAoE ring, cone or donut, a lane or a cast ring) and then
 // commits to what it showed: leaving the marker during the windup always avoids it. Damage always goes through mobDmg.
 function moveState(e) { const M = { k: null, t: 0, seen: 0, gap: 1, cd: {}, x: 0, z: 0, sx: 0, sz: 0, a: 0, lx: 1e9, lz: 1e9, frenzyT: 0, pack: [], packT: 0, spinT: 0, spinAcc: 0, spin: 0, dmg: 0, aoe: null }; for (const k of CFG.enemies[e.type].moves) M.cd[k] = rand(1, 3); return M; }
@@ -635,8 +639,8 @@ function eliteMods(e) {
 }
 // pendingAoE extras: inner (donut, safe centre), cone {a, half} (apex at x,z), grp (shared: one hit per target per volley),
 // slow/burn (applied on the hit). The renderer draws AOE_SHOWN ring markers and CONE_SHOWN cones; a move needing more waits.
-const AOE_SHOWN = 18, CONE_SHOWN = 6;
-const moveAoE = (e, x, z, r, t, dmg, o) => { const a = Object.assign({ x, z, r, t, max: t, dmg, team: 'mob', owner: e.id, kind: 'slam' }, o); G.pendingAoE.push(a); return a; };
+const AOE_SHOWN = 24, CONE_SHOWN = 10;
+const moveAoE = (e, x, z, r, t, dmg, o) => { const a = Object.assign({ x, z, r, t, max: t, dmg, team: 'mob', owner: e.id, kind: 'slam', pal: areaFx(e.zone) }, o); G.pendingAoE.push(a); return a; };
 function markersFree(n, cone) { let c = 0, k = 0; for (const a of G.pendingAoE) if (a.cone) k++; else c++; return cone ? k + n <= CONE_SHOWN : c + n <= AOE_SHOWN; }
 // does marker a cover a body of radius r at x,z? (the donut hole tests the body centre so hugging its owner is safe)
 function aoeCovers(a, x, z, r) {
@@ -653,7 +657,7 @@ function cloudPull(c, dt) {
 }
 const outOfTown = (e, x, z) => e.rift || inInstance() || distToTown(x, z) > CFG.world.town.r + 2;
 // a dropped or finished move: resurface a burrowed monster, stop a spiral
-function moveEnd(e) { const M = e.mv; M.k = null; M.spinT = 0; e.windT = 0; if (e.hidden) { e.hidden = false; e.invulnT = 0; } }
+function moveEnd(e) { const M = e.mv; M.k = null; M.spinT = 0; e.windT = 0; e.windK = null; if (e.hidden) { e.hidden = false; e.invulnT = 0; } }
 // mirror copies fade with their elite or after a while; a burrowed monster whose move stopped running resurfaces
 function moveUpkeep(e, dt) {
   if (e.mirror) {
@@ -702,19 +706,19 @@ function enemyMove(e, dt, pl, dp) {
     if (k === 'pounce' && M.t < S.leap) { const q = clamp(1 - M.t / S.leap, 0, 1); e.x = lerp(M.sx, M.x, q); e.z = lerp(M.sz, M.z, q); e.moveAmt = 1; }
     // burrow: the marker stalks the hero underground until it locks for the final beat
     if (k === 'burrow' && M.t > S.lock && M.aoe && outOfTown(e, pl.x, pl.z)) { M.aoe.x = pl.x; M.aoe.z = pl.z; }
-    if (M.t <= 0) { M.k = null; e.windT = 0; e.attackAnim = 1; M.gap = 0.8; fireMove(e, k, S, pl); }
+    if (M.t <= 0) { M.k = null; e.windT = 0; e.windK = null; e.attackAnim = 1; M.gap = 0.8; fireMove(e, k, S, pl); }
     return true;
   }
   if (e.windT > 0 || e.lungeT > 0 || M.gap > 0) return false;
   for (const k of d.moves) {
     const S = MON_MOVES[k]; if (!S.wind || M.cd[k] > 0 || dp > S.max || dp < (S.min || 0)) continue;
-    if (startMove(e, k, S, pl, slow)) { M.cd[k] = rand(S.cd[0], S.cd[1]); M.k = k; M.t = e.windT = S.wind; return true; }
+    if (startMove(e, k, S, pl, slow)) { M.cd[k] = rand(S.cd[0], S.cd[1]); M.k = k; M.t = e.windT = S.wind; e.windK = k; e.windMax = S.wind; ev({ t: 'windFx', x: e.x, z: e.z, r: e.r, k, life: S.wind, pal: areaFx(e.zone), color: d.shotColor || d.tint }); return true; }
   }
   return false;
 }
 function startMove(e, k, S, pl, slow) {
   const M = e.mv, a = Math.atan2(pl.x - e.x, pl.z - e.z), d = CFG.enemies[e.type], dmg = mobDmg(e, S.mult, pl);
-  if (S.marks && !markersFree(S.marks, k === 'breath')) return false; // every hit must be drawn
+  if (S.marks && !markersFree(S.marks, !!S.cone)) return false; // every hit must be drawn
   e.facing = a; M.a = a;
   if (k === 'cleave') { moveAoE(e, e.x + Math.sin(a) * S.ahead, e.z + Math.cos(a) * S.ahead, S.r, S.wind, dmg); return true; }
   if (k === 'slam') { moveAoE(e, e.x, e.z, S.r, S.wind, dmg); return true; }
@@ -770,6 +774,41 @@ function startMove(e, k, S, pl, slow) {
     for (let i = 0; i < S.n; i++) { const b = a + (i ? 1.6 : -1.6); ev({ t: 'moveTele', x: e.x + Math.sin(b) * 2.5, z: e.z + Math.cos(b) * 2.5, r: d.r * 1.6, life: S.wind, color: 0xc8b8ff }); }
     return true;
   }
+  if (k === 'sweep') {
+    // a scythe of cones swinging round the monster, one after the other (one hit per swing); alternates direction
+    const grp = [], dir = (M.flip = -(M.flip || 1)), a0 = a - dir * (S.n - 1) / 2 * S.rot;
+    for (let i = 0; i < S.n; i++) moveAoE(e, e.x, e.z, S.r, S.wind + i * S.step, dmg, { cone: { a: a0 + dir * i * S.rot, half: S.half }, grp, kind: 'sweep' });
+    return true;
+  }
+  if (k === 'ripple') {
+    // shock rings travelling outward: each is a donut band, the gaps between them are safe
+    for (let i = 0; i < S.n; i++) { const inner = e.r + 1.2 + i * S.gap; moveAoE(e, e.x, e.z, inner + S.w, S.wind + i * S.step, dmg, { inner, kind: 'ripple' }); }
+    return true;
+  }
+  if (k === 'cross') {
+    // four spike lines in a plus sign, one of them pointing at the hero: a diagonal is safe
+    const grp = [];
+    for (let j = 0; j < 4; j++) for (let i = 0; i < S.n; i++) { const aa = a + j * Math.PI / 2, dd = e.r + 1 + i * S.gap; moveAoE(e, e.x + Math.sin(aa) * dd, e.z + Math.cos(aa) * dd, S.r, S.wind + i * S.step, dmg, { grp, kind: 'spike' }); }
+    return true;
+  }
+  if (k === 'fan') { moveAoE(e, e.x, e.z, S.len, S.wind, 0, { cone: { a, half: S.spread / 2 }, quiet: true, kind: 'fan' }); return true; } // the cone only shows where the bolts will fly
+  if (k === 'flurry') {
+    for (let i = 0; i < S.n; i++) { const aa = a + (i - (S.n - 1) / 2) * S.turn; moveAoE(e, e.x + Math.sin(aa) * S.ahead, e.z + Math.cos(aa) * S.ahead, S.r, S.wind + i * S.step, dmg, { kind: 'flurry' }); }
+    return true;
+  }
+  if (k === 'rain') {
+    // shells falling around the hero's predicted spot, one every 0.13 s
+    const cx = pl.x + (pl.vx || 0) * 0.5, cz = pl.z + (pl.vz || 0) * 0.5;
+    for (let i = 0; i < S.n; i++) { const aa = Math.random() * Math.PI * 2, dd = i === 0 ? 0 : S.spread * Math.sqrt(Math.random()); moveAoE(e, cx + Math.sin(aa) * dd, cz + Math.cos(aa) * dd, S.r, S.wind + i * S.step, dmg, { kind: 'meteor' }); }
+    ev({ t: 'shoot', kind: 'enemy', x: e.x, z: e.z }); return true;
+  }
+  if (k === 'beam') { moveAoE(e, e.x, e.z, S.len, S.wind, dmg, { cone: { a, half: S.half }, kind: 'beam' }); return true; }
+  if (k === 'ambush') {
+    // vanishes, then lands just behind the hero: standing still gets you hit, any step away does not
+    const dx = pl.x - e.x, dz = pl.z - e.z, dd = Math.hypot(dx, dz) || 1; let x = pl.x + dx / dd * S.behind, z = pl.z + dz / dd * S.behind;
+    if (!outOfTown(e, x, z) || pointBlocked(x, z, e.r)) { x = pl.x; z = pl.z; } if (!outOfTown(e, x, z)) return false;
+    M.x = x; M.z = z; M.aoe = moveAoE(e, x, z, S.r, S.wind, dmg); e.hidden = true; e.invulnT = 1; ev({ t: 'boom', x: e.x, z: e.z, r: e.r * 1.4, color: 0x6a5a88 }); return true;
+  }
   return false;
 }
 function fireMove(e, k, S, pl) {
@@ -783,6 +822,11 @@ function fireMove(e, k, S, pl) {
   else if (k === 'vortex') G.clouds.push({ x: M.x, z: M.z, r: S.pullR, t: S.dur, max: S.dur, tick: 0, dmg: 0, pull: S.pull, color: 0xb36bff, team: 'mob', owner: e.id });
   else if (k === 'spiral') { M.spinT = S.dur; M.spinAcc = 0; M.spin = M.a; M.dmg = mobDmg(e, S.mult, pl); }
   else if (k === 'burrow') { if (M.aoe) { e.x = M.aoe.x; e.z = M.aoe.z; } M.aoe = null; moveEnd(e); }
+  else if (k === 'ambush') { if (M.aoe) { e.x = M.aoe.x; e.z = M.aoe.z; } M.aoe = null; moveEnd(e); ev({ t: 'boom', x: e.x, z: e.z, r: e.r * 1.6, color: 0x6a5a88 }); }
+  else if (k === 'fan') {
+    for (let i = 0; i < S.n; i++) { const aa = M.a + (i / (S.n - 1) - 0.5) * S.spread; spawnProjectile({ x: e.x, z: e.z, vx: Math.sin(aa) * S.speed, vz: Math.cos(aa) * S.speed, life: S.len / S.speed, r: 0.42, dmg: mobDmg(e, S.mult, pl), team: 'mob', owner: e.id, kind: 'orb', color: d.shotColor || 0xff7b2e, y: 1.2 }); }
+    ev({ t: 'shoot', kind: 'enemy', x: e.x, z: e.z });
+  }
   else if (k === 'trap') G.clouds.push({ x: M.x, z: M.z, r: S.r, t: S.dur, max: S.dur, tick: 0, dmg: mobDmg(e, S.tick, pl), color: d.shotColor || 0x9fe8ff, team: 'mob', owner: e.id });
   else if (k === 'mirror') {
     // frail, loot-free copies of the elite's plain self (normal damage, a third of normal HP)
@@ -881,6 +925,7 @@ function spawnBoss() {
 function stepBoss(b, dt) {
   const B = CFG.boss, pl = G.player;
   trackVel(b, dt);
+  bossKitTick(b, dt, !(typeof bossFollowing === 'function' && bossFollowing()));
   if (HeroSupers.tickStatus(b, dt)) { b.flashT -= dt; b.moveAmt = 0; return; }
   b.flashT -= dt; b.slowT -= dt; b.life -= dt; b.atkT -= dt; tickBurn(b, dt); if (!G.boss) return; b.attackAnim = Math.max(0, b.attackAnim - dt * 1.5);
   if (b.life <= 0 && G.time - b.lastHurt < 8 && b.life > -180) { /* still being fought: stay */ }
@@ -899,19 +944,16 @@ function stepBoss(b, dt) {
     if (d > 5 && Math.hypot(b.x - b.hx, b.z - b.hz) < B.leash) { b.x += dx / d * B.speed * dt * (b.slowT > 0 ? 0.5 : 1); b.z += dz / d * B.speed * dt; b.moveAmt = 1; }
     else b.moveAmt = Math.max(0, b.moveAmt - dt * 3);
     if (b.atkT <= 0) {
-      b.atkT = B.attackEvery * rand(0.85, 1.15); b.attackAnim = 1;
-      const roll = Math.random(), A = b.facing;
-      if (roll < 0.4) bossAttack(b, { k: 'slam', x: target.x, z: target.z });
-      else if (roll < 0.6 && markersFree(15)) bossAttack(b, { k: 'spike', A, bx: b.x, bz: b.z });
-      else if (roll < 0.78 && markersFree(1) && (target !== pl || distToTown(pl.x, pl.z) > CFG.world.town.r + 4)) bossAttack(b, { k: 'vortex', x: target.x, z: target.z });
-      else bossAttack(b, { k: 'rocks', off: Math.random() * Math.PI, bx: b.x, bz: b.z });
+      b.atkT = B.attackEvery * rand(0.85, 1.15) * BOSS_TEAM.atkSpeed[(b.phase || 1) - 1]; b.attackAnim = 1;
+      bossKitThink(b, target);
     }
   } else b.moveAmt = Math.max(0, b.moveAmt - dt * 3);
 }
 // one boss attack; the lobby leader sends the same call to the other players, who run it against their own hero
 function bossAttack(b, o, remote) {
   const B = CFG.boss;
-  if (o.k === 'slam') G.pendingAoE.push({ x: o.x, z: o.z, r: B.slamR, t: B.slamDelay, max: B.slamDelay, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'slam' });
+  if (BOSS_EXEC[o.k]) { bossKitCast(b, o); if (!remote && typeof mpBossAttack === 'function') mpBossAttack(o); return; }
+  if (o.k === 'slam') G.pendingAoE.push({ x: o.x, z: o.z, r: B.slamR, t: B.slamDelay, max: B.slamDelay, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'slam', pal: o.pal, col: o.col });
   else if (o.k === 'spike') {
     // three spike lines fan out toward the target, rippling outward; one hit at most
     const grp = [];
@@ -927,6 +969,7 @@ function bossAttack(b, o, remote) {
     }
   } else return;
   b.attackAnim = 1;
+  if (o.nm) ev({ t: 'bossCall', nm: o.nm, pal: o.pal, col: o.col, x: b.x, z: b.z });
   ev(o.k === 'rocks' ? { t: 'bossRocks', x: o.bx, z: o.bz } : { t: 'telegraph' });
   if (!remote && typeof mpBossAttack === 'function') mpBossAttack(o);
 }
@@ -935,7 +978,7 @@ function endBoss(killed) {
   if (typeof mpBossEnd === 'function') mpBossEnd(killed);
   G.boss = null; G.ents.delete(b.id);
   G.bossTimer = G.profile.settings.fastXp ? P.testBossInterval : CFG.boss.interval; G.bossWarned = false;
-  G.pendingAoE = G.pendingAoE.filter((a) => a.owner !== b.id);
+  G.pendingAoE = G.pendingAoE.filter((a) => a.owner !== b.id); bossKitClear();
   if (!killed) return;
   const L = CFG.boss.loot, p = G.profile;
   const contrib = b.total > 0 ? (b.dmgBy[G.player.id] || 0) / b.total : 0;
@@ -973,7 +1016,10 @@ function endBoss(killed) {
 function stepPendingAoE(dt) {
   for (let i = G.pendingAoE.length - 1; i >= 0; i--) {
     const a = G.pendingAoE[i]; a.t -= dt;
+    if (a.follow && G.player && G.player.alive) { a.x = G.player.x; a.z = G.player.z; } // a spread ring rides on its hero
     if (a.t <= 0) {
+      if (a.quiet) { G.pendingAoE.splice(i, 1); continue; } // a drawn-only warning (a fan of bolts follows it)
+      if (a.soak || a.spread) { bossTeamHit(a); a.t = -1; if (a.pal) ev({ t: 'aoeFx', x: a.x, z: a.z, r: a.r, kind: a.kind, pal: a.pal, ca: null, col: a.col }); G.pendingAoE.splice(i, 1); continue; }
       // plain circles keep aoeDamage; cones, donuts and one-hit volleys filter targets through aoeHits first
       if (!a.inner && !a.cone && !a.grp) aoeDamage(a.x, a.z, a.r, a.dmg, a.team, a.owner, { knock: 6, charge: 0, slow: a.slow || 0, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
       else forEachTarget((t) => {
@@ -983,6 +1029,7 @@ function stepPendingAoE(dt) {
       if (a.kind === 'zap') ev({ t: 'bolt', x: a.x, z: a.z });
       const C = a.cone, bx = C ? a.x + Math.sin(C.a) * a.r * 0.55 : a.x, bz = C ? a.z + Math.cos(C.a) * a.r * 0.55 : a.z;
       ev({ t: 'boom', x: bx, z: bz, r: C ? a.r * 0.45 : a.r, color: a.kind === 'meteor' || a.kind === 'breath' ? 0xff7b2e : a.kind === 'comet' || a.kind === 'zap' || a.kind === 'trap' ? 0x9fb8ff : a.kind === 'vortex' ? 0xb36bff : 0xc9a16b, big: a.kind !== 'comet' && a.kind !== 'spike' && a.kind !== 'zap' });
+      if (a.pal && a.team === 'mob') ev({ t: 'aoeFx', x: a.x, z: a.z, r: a.r, kind: a.kind, pal: a.pal, ca: a.cone ? a.cone.a : null, col: a.col });
       G.pendingAoE.splice(i, 1);
     }
   }

@@ -246,7 +246,7 @@ function updateRings(dt) {
   let used = 0, cones = 0;
   for (const s of rings) { s.tele = false; s.disc.material.userData.px.uIn.value = 0; }
   for (const a of G.pendingAoE) {
-    const k = 1 - a.t / a.max, col = a.team === 'mob' ? TELE_MOB : TELE_PLAYER;
+    const k = 1 - a.t / a.max, col = a.col && (a.soak || a.spread) ? a.col : a.team === 'mob' ? TELE_MOB : TELE_PLAYER;
     if (a.cone) { if (cones < CONE_SHOWN) mobCone(cones++, a, k, col); continue; }
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN) continue; used++;
     s.tele = true;
@@ -258,6 +258,16 @@ function updateRings(dt) {
     else { s.disc.scale.setScalar(a.r * k); s.disc.material.opacity = 0.35; }
   }
   for (let i = cones; i < MobCones.length; i++) MobCones[i].edge.visible = MobCones[i].fill.visible = false;
+  // ward plates: stand on every one together; they fill white-gold as the team holds them
+  const W = G.boss && G.boss.ward;
+  if (W) for (let i = 0; i < W.pl.length; i++) {
+    const s = rings[RING_MAX - 1 - used]; if (!s) break; used++; s.tele = true;
+    const on = W.held >= W.pl.length, pulse = 0.5 + 0.5 * Math.sin(G.time * (on ? 12 : 4)), prog = W.hold > 0 ? W.prog / W.hold : 0;
+    s.ring.visible = s.disc.visible = true;
+    s.ring.position.set(W.pl[i][0], 0.1, W.pl[i][1]); s.ring.scale.setScalar(W.r); s.ring.material.opacity = 0.9; s.ring.material.color.setHex(on ? 0xffffff : W.col);
+    s.disc.position.set(W.pl[i][0], 0.09, W.pl[i][1]); s.disc.scale.setScalar(W.r * (0.35 + 0.65 * prog)); s.disc.material.opacity = 0.25 + 0.3 * pulse; s.disc.material.color.setHex(on ? 0xfff2b0 : W.col);
+    if (Math.random() < 0.5) burst(W.pl[i][0] + (Math.random() - 0.5) * W.r, 0.2, W.pl[i][1] + (Math.random() - 0.5) * W.r, 1, W.col, 0.6, 0.8, 0.25, -1.2, 2.2);
+  }
   for (const c of G.clouds) {
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
     s.tele = true; const fade = Math.min(1, c.t / 0.5), tint = c.color || 0x5fd84a;

@@ -36,7 +36,7 @@ for (const proposed of [false,true]) {
     const boss = {kind:'boss',zone,x:4,z:4,facing:0,moveAmt:0,attackAnim:0,flashT:0,alive:true,hp:100};
     const G={mode:'hub',player,hubFighters:[],enemies:[],boss};
     const Showcase={on:false};
-    const ctx={THREE:{Group:Obj,Mesh,MeshBasicMaterial:Material,RingGeometry:Geo,Color:class{setRGB(){return this;}}},CFG:{world:{zones:Array.from({length:7},(_, i)=>({coreColor:0xff00ff,biome:Math.min(5,i)}))}},
+    const ctx={THREE:{Group:Obj,Mesh,MeshBasicMaterial:Material,RingGeometry:Geo,SphereGeometry:Geo,Color:class{setRGB(){return this;}}},CFG:{world:{zones:Array.from({length:7},(_, i)=>({coreColor:0xff00ff,biome:Math.min(5,i)}))}},
       AssetLibrary:{has:()=>false,status:()=>'none',request(){},flash(){},disposeInstance(){}},addRimLight(){},
       golemGeos:()=>({body:new Geo(),arm:new Geo(),glow:new Geo()}),geoShadow:new Geo(),matShadow:new Material(),
       flashMaterial:()=>new Material(),addOutline:()=>{},matOutlineBoss:new Material(),angDiff:(a,b)=>b-a,clamp:(x,a,b)=>Math.min(b,Math.max(a,x)),

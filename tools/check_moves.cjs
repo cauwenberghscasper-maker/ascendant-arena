@@ -25,7 +25,7 @@ function hurt(x, z, r, dmg, team, src) { const p = G.player; if (team !== p.team
 // pendingAoE shapes (cones, donuts, one-hit volleys) and the vortex pull use the real aoeHits / cloudPull
 function world(dt) {
   G.time += dt; const pl = G.player;
-  for (let i = G.pendingAoE.length - 1; i >= 0; i--) { const a = G.pendingAoE[i]; if ((a.t -= dt) <= 0) { if (a.team !== pl.team && c.aoeHits(a, pl)) c.dealDamage(pl, a.dmg, 'aoe'); G.pendingAoE.splice(i, 1); } }
+  for (let i = G.pendingAoE.length - 1; i >= 0; i--) { const a = G.pendingAoE[i]; if ((a.t -= dt) <= 0) { if (!a.quiet && a.team !== pl.team && c.aoeHits(a, pl)) c.dealDamage(pl, a.dmg, 'aoe'); G.pendingAoE.splice(i, 1); } }
   for (let i = G.clouds.length - 1; i >= 0; i--) { const k = G.clouds[i]; k.t -= dt; if (k.pull) c.cloudPull(k, dt); if ((k.tick -= dt) <= 0) { k.tick = c.config.elements.poison.tick; if (k.dmg > 0) hurt(k.x, k.z, k.r, k.dmg, k.team, 'cloud'); } if (k.t <= 0) G.clouds.splice(i, 1); }
   for (const p of projs) {
     if (p.dead) continue; p.life -= dt; p.x += p.vx * dt; p.z += p.vz * dt;
@@ -78,11 +78,16 @@ const hug = (e, pl) => { const [x, z] = away(e, pl), d = Math.hypot(pl.x - e.x, 
 const flee = (m) => (e, pl) => [...away(e, pl), m];
 const walkAway = (e, pl, dt) => { const [x, z] = away(e, pl); pl.x += x * pl.speed * dt; pl.z += z * pl.speed * dt; };
 const cases = [
-  ['cleave', 'bramble', 2, away], ['slam', 'glacialtroll', 2.5, away], ['pounce', 'hornet', 6, side], ['trample', 'scoriascorpion', 6, side],
-  ['snipe', 'myconid', 10, side], ['mortar', 'thistlehare', 8, away], ['nova', 'iceshard', 6, intoGap], ['pool', 'sulfurslime', 6, side],
+  ['cleave', 'glacialtroll', 2, away], ['slam', 'sulfurslime', 2.5, away], ['pounce', 'magmahound', 6, side], ['trample', 'scoriascorpion', 6, side],
+  ['snipe', 'pressuresquid', 10, side], ['mortar', 'rapidsiren', 8, away], ['nova', 'iceshard', 6, intoGap], ['pool', 'sulfurslime', 6, side],
   ['breath', 'emberwraith', 3, side, 'stepping out of the cone'], ['spikes', 'truffleboar', 6, side], ['quake', 'starsentry', 3.5, hug, 'stepping into the donut hole'],
   ['vortex', 'kelpie', 6, null, 'walking out against the pull', { walk: walkAway }], ['spiral', 'geodrone', 4, flee(4.4), 'backing out of its reach'],
-  ['boomerang', 'dustharpy', 8, side], ['burrow', 'trenchcrawler', 6, side], ['zap', 'voidray', 8, side], ['trap', 'chillbanshee', 7, side],
+  ['boomerang', 'dustharpy', 8, side], ['burrow', 'trenchcrawler', 6, side], ['zap', 'voidray', 8, side], ['trap', 'galeweaver', 7, side],
+  // v11 patterns
+  ['sweep', 'miragestalker', 4, flee(5), 'backing out of its reach'], ['ripple', 'cinderelemental', 6, (e, pl) => [...away(e, pl), e.r + 6.4 - 6], 'standing in the gap between two rings'],
+  ['cross', 'thornbeetle', 6, side, 'standing on a diagonal'], ['fan', 'dustharpy', 5, (e, pl) => [...side(e, pl), 4.6], 'stepping out of the cone'], ['flurry', 'hornet', 2.5, away],
+  ['rain', 'myconid', 8, (e, pl) => { for (const m of [2, 3, 4, 5, 6]) for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2, x = pl.x + Math.sin(a) * m, z = pl.z + Math.cos(a) * m; if (!G.pendingAoE.some(o => c.aoeCovers(o, x, z, pl.r + 0.05))) return [Math.sin(a), Math.cos(a), m]; } return [0, 0, 0]; }, 'finding a gap between the shells'],
+  ['beam', 'ashstalker', 10, side], ['ambush', 'barkviper', 6, (e, pl) => { const [x, z] = away(e, pl); return [-x, -z, 3]; }, 'stepping toward it, out of the strike zone behind you'],
 ];
 for (const [move, type, dist, dodge, how = 'a 3 m sidestep', o = {}] of cases) check(`${move} (${type}): red warning first, silent windup, ${how} dodges, standing still is hit`, () => {
   assert(c.config.enemies[type].moves.includes(move), type + ' has ' + move);
@@ -97,8 +102,16 @@ for (const [move, type, dist, dodge, how = 'a 3 m sidestep', o = {}] of cases) c
 });
 check('trample lays poison along the charge; mortar shells are markers first; pounce lands on its marker', () => {
   rig('scoriascorpion', 'trample', 6, true); for (let i = 0; i < 70; i++) { c.stepEnemy(G.enemies[0], DT); world(DT); } assert(G.clouds.length >= 2 && G.clouds.every(k => k.team === 'mob'));
-  rig('thistlehare', 'mortar', 8); c.stepEnemy(G.enemies[0], DT); assert.equal(G.pendingAoE.length, c.MOVES.mortar.n); assert(projs.length === 3 && projs.every(p => p.lob && p.dmg === 0));
-  const e = rig('hornet', 'pounce', 6); c.stepEnemy(e, DT); const a = G.pendingAoE[0]; for (let i = 0; i < 60 && e.mv.k; i++) c.stepEnemy(e, DT); assert(Math.hypot(e.x - a.x, e.z - a.z) < 1.5);
+  rig('rapidsiren', 'mortar', 8); c.stepEnemy(G.enemies[0], DT); assert.equal(G.pendingAoE.length, c.MOVES.mortar.n); assert(projs.length === 3 && projs.every(p => p.lob && p.dmg === 0));
+  const e = rig('magmahound', 'pounce', 6); c.stepEnemy(e, DT); const a = G.pendingAoE[0]; for (let i = 0; i < 60 && e.mv.k; i++) c.stepEnemy(e, DT); assert(Math.hypot(e.x - a.x, e.z - a.z) < 1.5);
+});
+check('every monster fights its own way: no two share a move set, the two in one area share no move, every move exists and is drawn', () => {
+  const sets = new Map(); let n = 0;
+  for (const Z of W.zones) { if (!Z.enemy || Z.safe) continue; const A = c.config.enemies[Z.enemy], B = c.config.enemies[Z.alt]; n += 2;
+    for (const D of [A, B]) { assert(D.moves.length >= 2, D.name + ' has at least two moves'); for (const k of D.moves) assert(c.MOVES[k], D.name + ' move ' + k + ' exists'); const key = [...D.moves].sort().join('+'); assert(!sets.has(key), D.name + ' repeats the move set of ' + sets.get(key)); sets.set(key, D.name); }
+    assert(!A.moves.some(k => B.moves.includes(k)), Z.name + ': its two monsters share a move'); }
+  assert.equal(n, 58, 'all 58 monsters checked');
+  for (const k of ['sweep', 'ripple', 'cross', 'fan', 'flurry', 'rain', 'beam', 'ambush']) { const S = c.MOVES[k]; assert(S.wind >= 0.45 && S.marks > 0 && S.cd && S.mult > 0, k + ' is a telegraphed move'); }
 });
 check('howl: a fallen pack-mate within 8 m frenzies the swarm (+40% speed)', () => {
   const pace = (frenzy) => { const e = rig('hornet', 'none', 12), o = c.makeEnemy('hornet', 2, { patrol: 4 }); Object.assign(o, { x: e.x + 3, z: e.z - 3, state: 'idle' }); G.enemies.push(o);
@@ -109,7 +122,7 @@ check('howl: a fallen pack-mate within 8 m frenzies the swarm (+40% speed)', () 
 check('elites roll champion affixes (two from area 10) at mobDmg x0.6; Rift champions keep their HP-share damage', () => {
   for (const zi of [1, 4, 10, 14]) { reset(); const e = c.makeEnemy(W.zones[zi].enemy, zi, { elite: true }); Object.assign(e, { state: 'chase' }); Object.assign(G.player, { x: e.x, z: e.z + 5 }); G.enemies.push(e);
     c.stepEnemy(e, DT); assert(e.champ && e.champ.mods.length === (zi >= 10 ? 2 : 1), 'mods in area ' + zi); assert(e.champName); }
-  const e = rig('bramble', 'none', 4); e.elite = true;
+  const e = rig('glacialtroll', 'none', 4); e.elite = true;
   c.stepEnemy(e, DT); Object.assign(e.champ, { mods: ['slam'], cd: { slam: 0 } }); e.mv.cd.cleave = e.mv.cd.slam = 99; c.stepEnemy(e, DT);
   assert(G.pendingAoE.length >= 3 && G.pendingAoE.every(a => Math.abs(a.dmg - c.mobDmg(e, 0.6, G.player)) < 1e-9));
   G.pendingAoE.length = 0; e.rift = true; e.champ.cd.slam = 0; c.stepEnemy(e, DT); assert(G.pendingAoE.length >= 3 && G.pendingAoE.every(a => a.dmg === G.player.maxHp * 0.2));
