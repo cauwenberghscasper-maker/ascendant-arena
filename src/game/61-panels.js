@@ -1,7 +1,7 @@
 // --- interact / panels ---
 function interact() {
   const n = G.interact; if (!n || G.mode !== 'hub') return;
-  Sfx.play('click');
+  Sfx.play('ui.open');
   if (n.kind === 'waypoint') return openWaypoints();
   if (n.kind === 'rift') return openRiftPanel();
   if (n.kind === 'riftLeave') return endRift('leave');
@@ -415,7 +415,7 @@ function openArenaPanel() {
 }
 function queueArena() {
   openModal(`<div class="queue"><div class="spin"></div><h3>Preparing Showdown…</h3><p>You versus 9 computer opponents</p></div>`, false);
-  Sfx.play('click');
+  Sfx.play('ui.go');
   setTimeout(() => { UI.close(); Coach.note('arenaStart'); startArena(); }, 1600);
 }
 function openResults() {
@@ -759,8 +759,8 @@ function openSettings() {
 function handlePanelClick(e) {
   const b = e.target.closest('[data-act]'); if (!b) return;
   UI.tapAnchor = panelAnchor(b);
-  if (b.getAttribute('aria-disabled') === 'true') { Sfx.play('click'); return; }
-  const act = b.dataset.act; Sfx.play('click');
+  if (b.getAttribute('aria-disabled') === 'true') { Sfx.ui(b.dataset.act, true); return; }
+  const act = b.dataset.act; Sfx.ui(act);
   unlockSeen(act);
   if (!LOCAL_PREVIEW && !TEST_MODE && ['tLevel', 't5', 't100', 'tGold', 'tEss', 'tShards', 'tBoss', 'tUnlock', 'tLegend', 'tFocus'].includes(act)) return;
   if (/^dlv/.test(act)) return partyAction(act, b);
@@ -912,14 +912,15 @@ function handleVolumeInput(e) {
   Sfx.init(); Sfx.applyVolumes();
 }
 function handleSettingChange(e) {
-  if (e.target.dataset.vol) { handleVolumeInput(e); Sfx.last = {}; Sfx.play(e.target.dataset.vol === 'volSfx' ? 'hit' : 'click'); return; }
+  if (e.target.dataset.vol) { handleVolumeInput(e); Sfx.last = {}; Sfx.play(e.target.dataset.vol === 'volSfx' ? 'hit' : 'ui.tap'); return; }
   if (e.target.dataset.sel2 === 'tBrawler') { openSkills(e.target.value); return; }
-  if (e.target.dataset.sel) { G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; if (e.target.dataset.sel === 'uiSize') { applyUiSize(); measureSheet(); } return; }
+  if (e.target.dataset.sel) { Sfx.play('ui.tab'); G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; if (e.target.dataset.sel === 'uiSize') { applyUiSize(); measureSheet(); } return; }
   const k = e.target.dataset.set; if (!k) return;
   if (k === 'fastXp' && !LOCAL_PREVIEW) return;
   if (k === 'pvp' && !e.target.checked && pvpOffWait() > 0) { e.target.checked = true; showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
   G.profile.settings[k] = e.target.checked; G.dirty = true;
   if (k === 'mute') Sfx.setMute(e.target.checked);
+  Sfx.play('ui.toggle');
   if (k === 'bots') { if (e.target.checked) addHubBots(); else removeHubBots(); }
   if (k === 'npcs') Coach.render();
   if (k === 'pixel') resize();

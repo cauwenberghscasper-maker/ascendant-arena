@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "node tools/build.cjs",
-    "check": "node tools/check_release.cjs && node tools/check_test_mode.cjs && node tools/check_companions.cjs && node tools/check_gameplay.cjs && node audit/checks.cjs && node tools/check_hardcore.cjs && node tools/check_moves.cjs && node tools/check_boss_kits.cjs && node tools/check_world_layout.cjs && node tools/check_dungeon.cjs && node tools/check_delve.cjs && node tools/check_mining.cjs && node tools/check_daily.cjs",
+    "check": "node tools/check_release.cjs && node tools/check_test_mode.cjs && node tools/check_companions.cjs && node tools/check_gameplay.cjs && node audit/checks.cjs && node tools/check_hardcore.cjs && node tools/check_moves.cjs && node tools/check_boss_kits.cjs && node tools/check_world_layout.cjs && node tools/check_dungeon.cjs && node tools/check_delve.cjs && node tools/check_mining.cjs && node tools/check_daily.cjs && node tools/check_audio.cjs",
     "app": "node tools/build.cjs --app && cap sync"
   },
   "dependencies": {

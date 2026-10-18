@@ -1,3 +1,11 @@
+# Audio phase 2: menu sounds (18 Oct 2026, branch `feat/audio-ui`, on top of PR #22)
+Done: every button now has a fitting sound: open (Menu, Settings, hub tiles, NPCs), back/close, sub-tabs, switches,
+equip, salvage/sell, spend gold/gems, forge anvil, claim, start (Showdown/Rift/dungeon/travel), a "can't" buzz for locked
+buttons, and chest opening (latch, reel ticks, a reveal that grows with rarity Common → Divine). Map of button → sound:
+`UI_ACT_SOUND` in `49-audio-data.js`. Files in `assets/audio/ui/` (Kenney starter kits, CC0/MIT, credited), packed with
+`tools/audio_pack.py`; new check `tools/check_audio.cjs`. Next: swap the placeholders for Kenney "Interface Sounds"/"RPG
+Audio" (needs Casper to download the zips; kenney.nl is blocked from cloud sessions), then phase 3 music.
+
 # Audio (18 Oct 2026, branch `feat/audio`, PR #22 to main)
 Done (phase 1 of `docs/AUDIO_PLAN.md`): sound engine. Buses music / ambience / effects / menu, each with a volume
 slider in Settings › Sound (saved as `volMaster`, `volMusic`, `volSfx`, `volUi`, clamped in `sanitizeProfile`).

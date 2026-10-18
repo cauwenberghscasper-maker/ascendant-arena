@@ -268,7 +268,7 @@ function spinCase(id) {
   const strip = $('reelStrip'), box = strip.parentNode, win = strip.children[WIN], cw = strip.children[1].offsetLeft - strip.firstChild.offsetLeft, vw = box.clientWidth;
   const end = win.offsetLeft - strip.firstChild.offsetLeft + win.offsetWidth / 2 - vw / 2 + (Math.random() - 0.5) * (win.offsetWidth - 26), dur = 5600, t0 = performance.now();
   let lastIdx = -1;
-  Sfx.play('super');
+  Sfx.play('ui.spin');
   const step = (now) => {
     if (UI.current !== 'reel') return;
     const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4), x = end * (Reel.skip ? 1 : e);
@@ -283,7 +283,7 @@ function reelFinish(card) {
   const res = Reel.res; Reel.done = true; UI.closable = true;
   if (card) card.classList.add('win');
   const it = res.item, ri = rarIdx(it.rarity), p = G.profile, better = res.kept && isBetter(it, p.gear[it.slot]);
-  Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
+  Sfx.play('ui.reveal', { r: ri });
   if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
   const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
   $('reelOut').innerHTML = `${bonusHTML(res.bonus)}${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
@@ -312,7 +312,7 @@ function openCasesFast(k) {
   const R = strips.map((_, j) => { const box = $('reel' + j), strip = box.firstChild, win = strip.children[WIN], cw = strip.children[1].offsetLeft - strip.firstChild.offsetLeft, vw = box.clientWidth;
     return { box, strip, cw, vw, end: win.offsetLeft - strip.firstChild.offsetLeft + win.offsetWidth / 2 - vw / 2 + (Math.random() - 0.5) * (win.offsetWidth - 18),
       dur: 2600 + j * 700 + (j === strips.length - 1 ? 1400 : 0), last: -1, done: false }; });
-  const t0 = performance.now(); Sfx.play('super');
+  const t0 = performance.now(); Sfx.play('ui.spin');
   const step = (now) => {
     if (UI.current !== 'reel') return;
     let left = 0;
@@ -330,7 +330,7 @@ function openCasesFast(k) {
 function reelLand(r, res, WIN) {
   const ri = rarIdx(res.item.rarity); r.strip.children[WIN].classList.add('win'); r.box.classList.add('landed', res.item.rarity);
   if (ri >= 3 || (res.bonus && res.bonus.k !== 'mats')) { r.box.classList.add('jackpot'); if (!G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, 0.25 + 0.1 * ri); }
-  Sfx.play(res.bonus && res.bonus.k === 'hero' ? 'radiant' : ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
+  if (res.bonus && res.bonus.k === 'hero') Sfx.play('radiant'); else Sfx.play('ui.reveal', { r: ri });
 }
 function reelManyFinish(out, k) {
   Reel.done = true; UI.closable = true;
