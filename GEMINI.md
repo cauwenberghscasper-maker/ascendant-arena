@@ -1,4 +1,3 @@
-# Gemini: read the shared rules first
+# Gemini
 
-All rules for this repo live in [`AGENTS.md`](AGENTS.md). Then read `docs/VISION.md`, `docs/3D-MODELS.md` and
-`docs/UNFINISHED.md` before changing anything.
+All rules, style, game info, vision and the 3D model guide are in [`README.md`](README.md). Read the whole README before changing anything, then the top of `docs/UNFINISHED.md`.
