@@ -256,7 +256,8 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
 - **Dungeon mode** (party dungeons, level 12, 1-4 heroes, bots fill the empty places): six dungeons, one per biome,
   each with its own boss, mini-boss and 5-piece set. A run is 6-8 halls of mixed sizes (20 m cells to 56 m arenas, a
   64 m boss hall) with monster packs that wake together, event rooms, a mini-boss halfway and a three-phase boss
-  (adds at 66% and 33%, then enraged), aimed at about 5 minutes. Difficulties Normal → Mythic → Ascendant 1, 2, …
+  (adds at 66% and 33%, then enraged), aimed at about 5 minutes. Puzzle halls (1-2 per run): wake the seals (floor plates
+  and lever stones) in the order the mural by the entrance shows; a wrong seal resets them and bites back. Difficulties Normal → Mythic → Ascendant 1, 2, …
 - **Dungeons** with Dungeon Keys (tier + affixes, par time) and **Legendary Trials** (sigils, Radiant 1/500 drops).
 - **Mining:** ore, pickaxe, geodes for the Museum, a 1/10,000 pet.
 - **Daily:** 7-day calendar that never resets, weekly Colossus chest.

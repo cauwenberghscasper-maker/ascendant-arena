@@ -111,7 +111,7 @@ function rtMessage(d) {
       if (P.event === 'hit' && P.payload && P.payload.to === MP.sid) { mobHitRecv(P.payload); break; }
       if (P.event === 'phit' && P.payload && P.payload.to === MP.sid) { pvpRecv(P.payload); break; }
       if (P.event === 'pdie' && P.payload && P.payload.to === MP.sid) { pvpDieRecv(P.payload); break; }
-      if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull|dbot|dask|dans|ddoor)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
+      if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull|dbot|dask|dans|ddoor|dpz)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^f[a-z]+$/.test(P.event) && typeof siegeMpRecv === 'function') { siegeMpRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^b/.test(P.event)) { bossRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
