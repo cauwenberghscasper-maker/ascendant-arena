@@ -164,13 +164,13 @@ function openQuickUpgrade(action) {
 // The menu starts with four big buttons; each opens its hub, whose sub-tabs hold the rest
 function openMenu() {
   UI.current = 'hubs';
-  const p = G.profile, A = menuAlerts(), gearDot = Object.values(slotAlerts()).some((a) => a.better);
+  const p = G.profile, A = menuAlerts(), gearDot = Object.values(slotAlerts()).some((a) => a.better) || p.cases.length > 0;
   const big = (act, icon, name, sub, dot) => `<button class="hubTile${gate(act)}" data-act="${act}">${gi(icon)}<b>${name}</b><small>${unlockOpen(act) ? sub : `Opens at level ${UNLOCK_AT[act]}`}</small>${dot && unlockOpen(act) ? '<i class="rdot"></i>' : ''}</button>`;
   openModal(`<div class="hubTiles">
     ${big('mHero', 'm_hero', 'Hero', `Level ${fmt(p.level)}`, A.skills || A.artifacts || A.brawlers)}
     ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
-    ${big('mGear', 'm_case', 'Inventory', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
-    ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()) || p.cases.length > 0)}
+    ${big('mGear', 'm_case', 'Inventory', p.cases.length ? `${p.cases.length} chest${p.cases.length > 1 ? 's' : ''} to open` : `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
+    ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()))}
   </div>`);
 }
 function openJournal() {

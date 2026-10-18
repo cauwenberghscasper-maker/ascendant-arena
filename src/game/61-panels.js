@@ -27,9 +27,9 @@ const gate = (k) => !unlockOpen(k) ? ' locked" aria-disabled="true' : unlockNew(
 const lockLabel = (k, name) => unlockOpen(k) ? name : `${gi('m_lock')} Lv ${UNLOCK_AT[k]}`;
 // Four hubs (Hero, Forge, Gear, Journal): one bar on top of every hub screen, plus the hub's own sub-tabs
 const HUB_OF = { hero: 'hero', skills: 'hero', artifacts: 'hero', brawlers: 'hero', smith: 'forge', merge: 'forge',
-  menu: 'journal', progress: 'journal', daily: 'journal', collection: 'journal', prestige: 'journal', idle: 'journal', cases: 'journal', players: 'journal' };
+  menu: 'journal', progress: 'journal', daily: 'journal', collection: 'journal', prestige: 'journal', idle: 'journal', cases: 'equip', players: 'journal' };
 const HUB_SUB = { hero: [['hero', 'Stats', 'mHero'], ['skills', 'Talents', 'mSkills'], ['artifacts', 'Relics', 'mArtifacts'], ['brawlers', 'Heroes', 'mBrawlers']],
-  journal: [['menu', 'World', 'mJournal'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily'], ['cases', 'Chests', 'mCases']] };
+  journal: [['menu', 'World', 'mJournal'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily']] };
 function hubNav() {
   let hub = HUB_OF[UI.current]; if (!hub) return '';
   if (UI.current === 'hero' && UI.heroTab === 'Gear') hub = 'equip';
@@ -272,6 +272,14 @@ function hsClose() {
   const w = $('panel').querySelector('.hswap'); if (!w) { UI.heroSlot = UI.heroPick = null; heroTab('Stats'); return; }
   UI.hsAll = false; w.classList.add('closing'); setTimeout(() => { UI.heroSlot = UI.heroPick = null; heroTab('Stats'); }, 220);
 }
+// what a bag piece sells for; worn gear is not for sale and protected gear must be unprotected first
+function sellRow(it) {
+  const p = G.profile, worn = Object.values(p.gear).some((x) => x && x.id === it.id);
+  if (worn) return '';
+  if (it.locked) return `<p class="sellLine fine">${gi('m_lock')} Protected. Unprotect it to sell.</p>`;
+  const armed = UI.sellArm === it.id, ask = rarIdx(it.rarity) >= CFG.gear.sellConfirmFrom;
+  return `<div class="sellLine"><button class="sellBtn${armed ? ' armed' : ''}" data-act="sellItem" data-id="${escapeHTML(it.id)}">${armed ? 'Tap again to sell' : 'Sell'}<span class="sp">${ICON.coin}<b>${fmtK(sellPrice(it))}</b></span></button>${ask && !armed ? '<small>Asks once more because it is rare.</small>' : ''}</div>`;
+}
 function openInspect(id) {
   const p = G.profile, it = p.bag.find((x) => x.id === id) || Object.values(p.gear).find((x) => x && x.id === id); if (!it) return;
   const back = UI.current, ri = rarIdx(it.rarity);
@@ -279,7 +287,7 @@ function openInspect(id) {
   openModal(`<div class="insp ${it.rarity} ${ri >= 3 ? 'rays' : ''}" style="--rc:${rarCol(it.rarity)}"><div class="inspArt"><img src="${thumbFor(it)}" alt=""></div>
     <b class="inspName">${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b>${rarityChip(it.rarity)}${it.unique != null ? '<span class="inspTag">Unique</span>' : ''}
     <p class="inspStat">${statLine(it)}</p>${it.aff && Object.keys(it.aff).length ? `<p class="inspAff">${affixText(it).split(' · ').join('<br>')}</p>` : ''}${perkLine(it)}
-    <div class="row end"><button class="primary" data-act="inspectClose">Back</button></div></div>`);
+    ${sellRow(it)}<div class="row end"><button class="primary" data-act="inspectClose">Back</button></div></div>`);
   if (ri >= 4) Sfx.play('unlock');
 }
 function openSmith(tab) {
@@ -315,20 +323,35 @@ function openSmith(tab) {
   openModal(dock(`<div class="npcHead"><h3>Forge</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
     <div class="tabs">${tabs}</div>`, `<div class="tabBody"><div class="pageArt" style="--art:url(assets/ui/forge/banner-${tab.toLowerCase()}.webp)"></div>${body}</div>`, ''), true, false);
 }
-// Inventory: your chests (tap to open them) and every resource you hold, right above the gear bag
-function invChests(p) {
+// Inventory has three tabs: Gear (the bag, tap a piece to inspect or sell it), Chests (tap to open) and Resources.
+const INV_TABS = ['Chests', 'Gear', 'Resources'];
+const invTabNow = (p) => INV_TABS.includes(UI.invTab) ? UI.invTab : (p.cases.length ? 'Chests' : 'Gear');
+function invTabsHTML(tab, p) {
+  return `<div class="tabs invTabs">${INV_TABS.map((t) => `<button class="tab ${t === tab ? 'on' : ''}${t === 'Chests' && p.cases.length ? ' hasChests' : ''}" data-act="invTab" data-tab="${t}" aria-pressed="${t === tab}">${t}${t === 'Chests' && p.cases.length ? `<span class="tcount">${p.cases.length}</span>` : ''}</button>`).join('')}</div>`;
+}
+function invChestsHTML(p) {
   const n = {}; for (const c of p.cases) n[c.k] = (n[c.k] || 0) + 1;
   const kinds = CFG.caseOrder.filter((k) => n[k]);
-  const chests = kinds.length ? `<div class="invChests">${kinds.map((k) => `<button class="ctile" data-act="caseSel" data-k="${k}" style="--cc:${CFG.cases[k].col}">${caseArt(k)}<b>${CFG.cases[k].name}</b><small>×${n[k]}</small></button>`).join('')}</div>`
+  const grid = kinds.length ? `<div class="invChestGrid">${kinds.map((k) => `<button class="ctile" data-act="caseSel" data-k="${k}" style="--cc:${CFG.cases[k].col}">${caseArt(k)}<b>${CFG.cases[k].name}</b><small>×${n[k]}</small></button>`).join('')}</div>`
     : '<p class="fine">No chests yet. Monsters, bosses and the Rift drop them.</p>';
-  const mats = Object.keys(MATS).filter((id) => matCount(id, p) > 0).map((id) => matChip(id, null, p)).join('');
-  return `<div class="subRow"><h4 class="sub">Chests · ${p.cases.length}</h4></div>${chests}
-    <div class="subRow"><h4 class="sub">Resources &amp; minerals</h4></div><div class="invMats"><span class="mat gold">${ICON.coin}<b>${fmtK(p.gold)}</b></span><span class="mat gold">${ICON.gem || ''}<b>${fmtK(p.gems || 0)}</b> gems</span>${mats}</div>`;
+  return `<div class="subRow"><h4 class="sub first">Chests · ${p.cases.length}</h4></div>${grid}
+    <p class="fine">Tap a chest to open it. Chests are earned in play and cannot be sold. Every chest shows its odds before you open it.</p>`;
+}
+// where each kind of material comes from, shown on its card
+const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses' };
+function invResourcesHTML(p) {
+  const tile = (img, name, n, col, src) => `<div class="rtile${n ? '' : ' none'}" style="--rc:${col}" title="${name}${src ? ' · ' + src : ''}"><img src="${img}" alt=""><b class="rn">${fmtK(n)}</b><small>${name}</small></div>`;
+  const mat = (id) => { const M = MATS[id]; return tile(matIcon(id), M.name, matCount(id, p), hex6(M.color), MAT_SRC[M.kind]); };
+  const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(svg.includes('xmlns') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
+  const money = `<div class="igrid rgrid">${tile(svgUrl(ICON.coin), 'Gold', p.gold, '#ffd23a')}${tile(svgUrl(ICON.ess), 'Gems', p.essence || 0, '#7fe3ff')}${mat(CFG.craft.titan.id)}</div>`;
+  const groups = CB.map((b, i) => biomeReached(i, p) ? `<h4 class="sub">${BIOMES[i].name}</h4><div class="igrid rgrid">${[b.ore, b.part, b.core].map(mat).join('')}</div>` : '').join('');
+  return `<h4 class="sub first">Gold, gems &amp; Titan Souls</h4>${money}${groups}
+    <p class="fine">Ore comes from Mining, parts from monsters, cores from dungeon chests, Titan Souls from world bosses. Spend them in the Forge. Biomes you have not reached stay hidden.</p>`;
 }
 // --- crafting tabs (src/game/39-crafting.js)
 const hex6 = (c) => '#' + c.toString(16).padStart(6, '0');
 function matChip(id, need, p) { const M = MATS[id], have = matCount(id, p), ok = need == null || have >= need;
-  return `<span class="mat k-${M.kind}${ok ? '' : ' missing'}"><i style="--mc:${hex6(M.color)}"></i>${M.name} <b>${need == null ? fmtK(have) : `${fmtK(have)}/${fmtK(need)}`}</b></span>`; }
+  return `<span class="mat k-${M.kind}${ok ? '' : ' missing'}"><img class="mi" src="${matIcon(id)}" alt="">${M.name} <b>${need == null ? fmtK(have) : `${fmtK(have)}/${fmtK(need)}`}</b></span>`; }
 function costChips(cost, p) { return cost.mats.map(([id, n]) => matChip(id, n, p)).join('') + `<span class="mat gold${p.gold >= cost.gold ? '' : ' missing'}">${ICON.coin}<b>${fmtK(cost.gold)}</b></span>`; }
 function craftTabHTML(p) {
   const C = CFG.craft, bi = clamp(UI.craftBiome == null ? Math.max(0, CB.findIndex((b, i) => !biomeReached(i + 1, p))) : UI.craftBiome, 0, 5), b = CB[bi], open = biomeReached(bi, p);
@@ -484,8 +507,11 @@ function heroTab(tab) {
       : `<div class="cmpc none"><small>${label}</small><span class="emptySlot">${label === 'Worn' ? '+' : '?'}</span></div>`;
     // Inventory is only what you have collected: chests, resources, all gear. Comparing and wearing happens on the Hero screen.
     const bagAll = p.bag.filter((x) => !equippedIds.has(x.id)).sort((x, y) => order.indexOf(x.slot) - order.indexOf(y.slot) || rarIdx(y.rarity) - rarIdx(x.rarity));
-    body = `${invChests(p)}<div class="subRow"><h4 class="sub">Gear · ${bagAll.length}</h4><small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
-      ${itemGrid(bagAll, { act: 'inspect', empty: 'Monsters, elites, dens, shrines and world bosses drop gear.' })}`;
+    const itab = invTabNow(p);
+    if (itab === 'Chests') body = invChestsHTML(p);
+    else if (itab === 'Resources') body = invResourcesHTML(p);
+    else body = `<div class="subRow"><h4 class="sub first">Gear · ${bagAll.length}</h4><small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
+      ${itemGrid(bagAll, { act: 'inspect', empty: 'Monsters, elites, dens, shrines and world bosses drop gear.' })}${bagAll.length ? '<p class="fine">Tap a piece to inspect it. You can sell it there for gold.</p>' : ''}`;
     bar = '';
   } else if (tab === 'Attacks') {
     const cur = resolvedAttack(p), av = availableAttacks(p), fresh = new Set(p.newUnlocks);
@@ -560,7 +586,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, false);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>${tab === 'Gear' ? invTabsHTML(invTabNow(p), p) : ''}`, `<div class="tabBody">${body}</div>`, bar), true, false);
 }
 // World map (the Map button): the whole road north, one row per area, top = furthest. Tap an attuned lodestone
 // to travel there from anywhere in the open world; areas you have not reached yet stay hidden.
@@ -768,7 +794,12 @@ function handlePanelClick(e) {
     case 'forge': if (buyForge(b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; openSmith('Forge'); } break;
     case 'smithTab': openSmith(b.dataset.tab); break;
     case 'inspect': openInspect(b.dataset.id); break;
-    case 'inspectClose': heroTab(UI.heroSlot ? 'Stats' : 'Gear'); break;
+    case 'inspectClose': UI.sellArm = null; heroTab(UI.heroSlot ? 'Stats' : 'Gear'); break;
+    case 'sellItem': { const it = G.profile.bag.find((x) => x.id === b.dataset.id); if (!it) break;
+      if (rarIdx(it.rarity) >= CFG.gear.sellConfirmFrom && UI.sellArm !== it.id) { UI.sellArm = it.id; openInspect(it.id); break; }
+      UI.sellArm = null; const v = sellItem(it.id);
+      if (v) { Sfx.play('coin'); toast(`Sold ${it.name} for ${fmtK(v)} gold`, 'good'); heroTab(UI.heroSlot ? 'Stats' : 'Gear'); } break; }
+    case 'invTab': UI.invTab = b.dataset.tab; heroTab('Gear'); break;
     case 'enchReroll': if (rerollAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gold', 'bad'); openSmith('Enchant'); break;
     case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;

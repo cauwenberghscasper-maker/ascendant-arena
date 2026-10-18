@@ -1999,6 +1999,25 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .setWrap::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: radial-gradient(circle, var(--sc) 0%, transparent 70%); opacity: .55; animation: setBreath 2.2s ease-in-out infinite; }
 .setWrap .setArt { position: relative; z-index: 1; animation: setFloat 2.6s ease-in-out infinite, setPulse 2.2s ease-in-out infinite !important; filter: none; }
 @keyframes setSpin { to { transform: rotate(360deg); } } @keyframes setBreath { 50% { opacity: .9; transform: scale(1.15); } } @keyframes setFloat { 50% { transform: translateY(-4px) scale(1.04); } }
+/* Inventory tabs: Chests first and lit up when chests are waiting; resources, gold and gems as gear-sized tiles */
+.invTabs { margin: 6px 0 2px; } .invTabs .tab { position: relative; }
+.invTabs .tcount { margin-left: 5px; min-width: 18px; padding: 1px 5px; background: #ffc94a; color: #3a2400; font: 700 11px/1.3 var(--body); border: 1px solid #000; }
+.invTabs .tab.hasChests:not(.on) { animation: chestTab 1.6s ease-in-out infinite; }
+@keyframes chestTab { 50% { box-shadow: 0 0 0 2px #ffc94a, 0 0 12px rgba(255,201,74,.7); } }
+.invChestGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin: 6px 0 10px; }
+.invChestGrid .ctile { min-height: 150px; }
+.rgrid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)) !important; gap: 14px 8px !important; margin-bottom: 30px; }
+.rtile { position: relative; aspect-ratio: 1; border: 1px solid #000; border-radius: 7px; padding: 4px; background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--rc) 26%, transparent), rgba(0,0,0,.4)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rc) 55%, #000); }
+.rtile img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; display: block; }
+.rtile .rn { position: absolute; right: 3px; bottom: 2px; font: 700 12px/1 var(--body); color: #fff3cf; text-shadow: 0 1px 0 #000, 0 0 3px #000; }
+.rtile small { position: absolute; left: 0; right: 0; top: 100%; margin-top: 2px; text-align: center; font: 600 10px/1.1 var(--body); color: #c9cde0; white-space: normal; }
+.rtile.none { opacity: .45; filter: grayscale(.6); }
+.mat img.mi { width: 18px; height: 18px; image-rendering: pixelated; flex: none; } .mat.missing img.mi { opacity: .55; }
+.sellLine { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 8px 0 2px; }
+.sellBtn { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; font: 700 15px/1 var(--display); color: #2b1a00; background: linear-gradient(#ffd96a, #d99a1c); border: 2px solid #000; border-radius: 8px; box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 3px 0 #000; }
+.sellBtn .sp { display: inline-flex; align-items: center; gap: 3px; } .sellBtn .sp svg { width: 16px; height: 16px; }
+.sellBtn.armed { background: linear-gradient(#ff8a8a, #d23a3a); color: #fff; }
+.sellLine small { color: #9aa0b8; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -2374,6 +2393,9 @@ const CFG = {
     maxUp: Infinity, upStep: 0.12, starEvery: 10, starBonus: 0.3, upCostBase: 30, upCostExp: 1.5, upCostGrowth: 1.06, bagMax: 50,
     essenceFrom: 6, // upgrades from +6 to +15 also cost essence (salvage Rare+ items to get it)
     salvageEssence: { common: 0, uncommon: 1, rare: 6, epic: 15, legendary: 36, mythic: 80, ancient: 160, divine: 320 },
+    // Selling pays gold only, on the same curve as salvage gold (rarity x upgrades x 1.06 per item level), times this.
+    // Salvage keeps the gems, so selling is the pick when you need gold. Epic and better ask for a second tap.
+    sellMult: 2.5, sellConfirmFrom: 3,
     // share of a same-level hero's base attack / HP that one item of this slot adds (x rarity x upgrades)
     statShare: { weapon: { atk: 0.30 }, helmet: { hp: 0.10 }, chest: { hp: 0.16 }, boots: { hp: 0.07 }, accessory: { atk: 0.12 } },
   },
@@ -4495,6 +4517,15 @@ function salvageItem(id) {
   addMastery('smith', 4 + rarIdx(it.rarity) * 5);
   G.gearPrompts = G.gearPrompts.filter((x) => x !== id); return true;
 }
+// Sell: bag gear only (never worn, never protected), gold only. Chests are never sold.
+const sellPrice = (it) => Math.max(1, Math.round(salvageValue(it) * CFG.gear.sellMult));
+function sellItem(id) {
+  const p = G.profile, i = p.bag.findIndex((x) => x.id === id); if (i < 0) return 0;
+  if (Object.values(p.gear).some((x) => x && x.id === id)) return 0;
+  const it = p.bag[i]; if (it.locked) { toast('Protected gear cannot be sold', 'bad'); return 0; }
+  const v = sellPrice(it); p.bag.splice(i, 1); addGold(v, true);
+  G.gearPrompts = G.gearPrompts.filter((x) => x !== id); G.dirty = true; return v;
+}
 const rerollCost = (it) => Math.round(400 * rarMult(it) * Math.pow(CFG.enemies.goldGrowth, it.ilvl - 1));
 function rerollItem(slot) {
   const p = G.profile, it = p.gear[slot]; if (!it || rarIdx(it.rarity) < 1) return false;
@@ -6452,6 +6483,105 @@ function lairBossKilled(e) {
   if (k) it.aff[k] = Math.round(CFG.affixes[k].max * (1 + 0.1 * rarIdx(it.rarity)) * 100) / 100;
   grantItem(it, 'boss'); toast(`Unique: ${U[2]}`, 'good');
 }
+// --- Material art: one hand-built pixel icon (16x16, shaded, ink outline) for every craft material --------------------
+// 6 ores, 6 monster parts, 6 dungeon cores and the Titan Soul, each its own shape and palette (not a tinted square).
+// matIcon(id) returns an SVG data URI, drawn once and cached. Shapes are rasterised from polygons/ellipses, lit from the
+// top left, outlined, then detail pixels are added on top (cracks, frost, runes, sparkles).
+const MAT_ART = (() => {
+  const N = 16, INK = '#1b1722';
+  const mk = () => Array.from({ length: N }, () => Array(N).fill(''));
+  const inPoly = (pts, x, y) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  const poly = (g, pts, ch = 'b') => { for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (inPoly(pts, x + 0.5, y + 0.5)) g[y][x] = ch; };
+  const ell = (g, cx, cy, rx, ry, ch = 'b') => { for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (((x + 0.5 - cx) / rx) ** 2 + ((y + 0.5 - cy) / ry) ** 2 <= 1) g[y][x] = ch; };
+  // detail pixels: on() only paints over the body, free() paints anywhere (sparkles outside the outline)
+  const put = (g, x, y, ch, bodyOnly) => { if (x < 0 || y < 0 || x >= N || y >= N) return; if (bodyOnly && (!g[y][x] || g[y][x] === 'k')) return; g[y][x] = ch; };
+  const on = (g, pts, ch) => pts.forEach(([x, y]) => put(g, x, y, ch, true));
+  const free = (g, pts, ch) => pts.forEach(([x, y]) => put(g, x, y, ch, false));
+  const line = (g, x0, y0, x1, y1, ch, bodyOnly = true) => { const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1; let e = dx + dy, x = x0, y = y0;
+    for (;;) { put(g, x, y, ch, bodyOnly); if (x === x1 && y === y1) break; const e2 = 2 * e; if (e2 >= dy) { e += dy; x += sx; } if (e2 <= dx) { e += dx; y += sy; } } };
+  const star = (g, x, y, ch) => free(g, [[x, y], [x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]], ch);
+  // light from the top left: body pixels with an empty neighbour above/left become light, below/right dark
+  const shade = (g) => { const e = (x, y) => x < 0 || y < 0 || x >= N || y >= N || !g[y][x];
+    const out = g.map((r) => r.slice());
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (g[y][x] === 'b') { if (e(x, y - 1) || e(x - 1, y)) out[y][x] = 'l'; else if (e(x, y + 1) || e(x + 1, y)) out[y][x] = 'd'; }
+    for (let y = 0; y < N; y++) g[y] = out[y]; };
+  const outline = (g) => { const f = (x, y) => x >= 0 && y >= 0 && x < N && y < N && g[y][x] && g[y][x] !== 'k'; const add = [];
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (!g[y][x] && (f(x - 1, y) || f(x + 1, y) || f(x, y - 1) || f(x, y + 1))) add.push([x, y]);
+    add.forEach(([x, y]) => { g[y][x] = 'k'; }); };
+  const hex = (s) => [1, 3, 5].map((i) => parseInt(s.slice(i, i + 2), 16));
+  const mix = (s, t, a) => { const A = hex(s), B = hex(t); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * a).toString(16).padStart(2, '0')).join(''); };
+  // one gloss for every core: a small white highlight on the orb
+  const gloss = (g) => free(g, [[5, 3], [6, 3], [5, 4]], 'w');
+  const orb = (g) => { poly(g, [[3, 14], [5, 11], [11, 11], [13, 14]], 'p'); ell(g, 8, 7, 5.3, 5.3); };
+  const D = {
+    // ---- ores ----
+    copper: { b: '#c8793a', a: '#6fc08a', c: '#ffd9a0',
+      body: (g) => { ell(g, 5.5, 10.5, 4, 3.2); ell(g, 10.5, 9.5, 4, 4); ell(g, 8, 5.5, 3.2, 3); },
+      detail: (g) => { on(g, [[4, 11], [5, 12], [11, 10], [10, 12], [8, 6], [9, 5], [12, 8]], 'a'); on(g, [[7, 4], [9, 8], [4, 9], [11, 7]], 'c'); } },
+    iron: { b: '#8f98a8', a: '#bfe6ff', c: '#ffffff',
+      body: (g) => poly(g, [[2, 13], [3, 7], [7, 3], [12, 4], [14, 9], [13, 13]]),
+      detail: (g) => { line(g, 4, 8, 8, 5, 'a'); line(g, 9, 12, 12, 9, 'a'); on(g, [[7, 4], [5, 8], [11, 6], [6, 11]], 'c'); } },
+    obsidian: { b: '#3a3148', a: '#ff7a3a', c: '#ffd27a',
+      body: (g) => poly(g, [[8, 1], [12, 6], [11, 13], [6, 14], [3, 9], [5, 4]]),
+      detail: (g) => { line(g, 8, 3, 7, 8, 'a'); line(g, 7, 8, 9, 12, 'a'); line(g, 7, 8, 5, 9, 'a'); on(g, [[7, 8]], 'c'); } },
+    mithril: { b: '#a9a3d9', a: '#ece8ff', c: '#7b5cd6',
+      body: (g) => { poly(g, [[2, 13], [2, 9], [4, 6], [6, 9], [6, 13]]); poly(g, [[5, 13], [6, 5], [8, 1], [10, 5], [11, 13]]); poly(g, [[9, 13], [10, 8], [12, 5], [14, 8], [14, 13]]); },
+      detail: (g) => { line(g, 7, 4, 7, 11, 'a'); on(g, [[9, 8], [4, 10], [12, 9]], 'c'); on(g, [[11, 7], [3, 9]], 'a'); } },
+    abyssal: { b: '#1f6f78', a: '#7ff7ea', c: '#ffffff',
+      body: (g) => { ell(g, 8, 9, 6, 4.6); ell(g, 6, 6, 3.4, 2.6); ell(g, 11, 6.5, 3, 2.4); },
+      detail: (g) => { on(g, [[5, 6], [10, 5], [8, 10], [11, 9], [4, 10], [7, 8]], 'a'); on(g, [[5, 5], [10, 4]], 'c'); } },
+    starsteel: { b: '#e6c24a', a: '#fff6c0', c: '#ffffff',
+      body: (g) => poly(g, [[2, 14], [4, 7], [11, 7], [14, 14]]),
+      detail: (g) => { line(g, 5, 8, 10, 8, 'a'); line(g, 4, 12, 12, 12, 'd'); star(g, 8, 3, 'c'); free(g, [[13, 4], [3, 3]], 'a'); } },
+    // ---- monster parts ----
+    thornhide: { b: '#7a5a35', a: '#7fc65a', p: '#e8dcb0',
+      body: (g) => { poly(g, [[2, 6], [7, 5], [13, 6], [14, 10], [11, 13], [5, 13], [2, 10]]); poly(g, [[3, 6], [4, 2], [5, 6]], 'p'); poly(g, [[7, 5], [8, 1], [9, 5]], 'p'); poly(g, [[11, 6], [12, 2], [13, 6]], 'p'); },
+      detail: (g) => on(g, [[4, 9], [9, 10], [6, 11], [11, 8], [7, 8]], 'a') },
+    frostfang: { b: '#e9f6ff', a: '#7ec8ff', c: '#ffffff',
+      body: (g) => poly(g, [[4, 2], [12, 2], [11, 6], [9, 13], [8, 14], [7, 12], [5, 6]]),
+      detail: (g) => { line(g, 5, 3, 11, 3, 'a'); line(g, 6, 5, 7, 9, 'c'); on(g, [[9, 6]], 'a'); } },
+    emberscale: { b: '#d4442a', a: '#ffb347', c: '#ffe9a0',
+      body: (g) => poly(g, [[3, 3], [13, 3], [14, 8], [8, 14], [2, 8]]),
+      detail: (g) => { line(g, 4, 6, 8, 10, 'a'); line(g, 12, 6, 8, 10, 'a'); line(g, 8, 4, 8, 7, 'a'); on(g, [[8, 4], [8, 5]], 'c'); } },
+    arcdust: { b: '#6e4bb8', a: '#e0c0ff', c: '#ffffff', p: '#ffd27a',
+      body: (g) => { ell(g, 8, 10.5, 5, 4); poly(g, [[6, 6], [10, 6], [9, 8], [7, 8]]); },
+      detail: (g) => { line(g, 6, 6, 10, 6, 'p'); on(g, [[8, 10], [7, 11], [9, 11], [8, 12]], 'a'); star(g, 4, 3, 'c'); star(g, 11, 2, 'a'); free(g, [[8, 3], [13, 5]], 'c'); } },
+    pearl: { b: '#e8fff9', a: '#3fe0d0', c: '#ffffff', p: '#2f8f93',
+      body: (g) => { poly(g, [[2, 11], [8, 9], [14, 11], [12, 14], [4, 14]], 'p'); ell(g, 8, 6.5, 4.6, 4.6); },
+      detail: (g) => { line(g, 6, 12, 6, 13, 'a'); line(g, 8, 12, 8, 13, 'a'); line(g, 10, 12, 10, 13, 'a'); on(g, [[6, 4], [6, 5], [7, 4]], 'c'); on(g, [[10, 8]], 'a'); } },
+    starfeather: { b: '#ffe27a', a: '#fff7c8', c: '#ff9a3a',
+      body: (g) => poly(g, [[2, 14], [4, 10], [5, 6], [9, 2], [13, 2], [13, 6], [10, 10], [6, 13]]),
+      detail: (g) => { line(g, 3, 13, 12, 3, 'a'); on(g, [[6, 9], [8, 8], [10, 6], [8, 11], [11, 8]], 'c'); free(g, [[14, 1]], 'a'); } },
+    // ---- dungeon cores (an orb on a socket, each with its own symbol) ----
+    verdant: { b: '#3fa84a', a: '#d8ffb0', c: '#ffffff', p: '#6d6a78', body: orb,
+      detail: (g) => { gloss(g); line(g, 6, 10, 8, 8, 'a'); on(g, [[8, 5], [9, 5], [10, 5], [9, 6], [8, 6], [8, 7], [10, 6], [9, 7]], 'a'); } },
+    glacial: { b: '#5bb4e6', a: '#ffffff', c: '#ffffff', p: '#6d6a78', body: orb,
+      detail: (g) => { gloss(g); line(g, 8, 4, 8, 10, 'a'); line(g, 5, 7, 11, 7, 'a'); line(g, 6, 5, 10, 9, 'a'); line(g, 10, 5, 6, 9, 'a'); } },
+    magma: { b: '#c8321a', a: '#ffd23a', c: '#ffffff', p: '#6d6a78', body: orb,
+      detail: (g) => { gloss(g); line(g, 5, 6, 8, 8, 'a'); line(g, 8, 8, 7, 11, 'a'); line(g, 8, 8, 11, 6, 'a'); line(g, 8, 8, 10, 10, 'a'); } },
+    void: { b: '#2a1650', a: '#c08aff', c: '#ffffff', p: '#6d6a78', body: orb,
+      detail: (g) => { gloss(g); on(g, [[8, 4], [10, 5], [11, 7], [10, 9], [8, 10], [6, 9], [5, 7], [6, 5]], 'a'); on(g, [[8, 7], [7, 7], [8, 6]], 'c'); } },
+    tidal: { b: '#1f8fb5', a: '#b8fff5', c: '#ffffff', p: '#6d6a78', body: orb,
+      detail: (g) => { gloss(g); for (let x = 4; x <= 11; x++) { put(g, x, 6 + (x % 4 < 2 ? 0 : 1), 'a', true); put(g, x, 9 + (x % 4 < 2 ? 1 : 0), 'a', true); } } },
+    solar: { b: '#ffb93a', a: '#ffffff', c: '#fffbe0', p: '#6d6a78', body: orb,
+      detail: (g) => { gloss(g); ell(g, 8, 7, 1.9, 1.9, 'c'); on(g, [[8, 3], [8, 11], [4, 7], [12, 7], [5, 4], [11, 4], [5, 10], [11, 10]], 'a'); } },
+    // ---- Titan Soul: a pink wisp with a hollow face ----
+    titansoul: { b: '#ff5d8f', a: '#ffffff', c: '#ffd1e0', p: '#ffd1e0',
+      body: (g) => { poly(g, [[8, 1], [11, 5], [13, 9], [11, 13], [8, 14], [5, 13], [3, 9], [5, 5]]); ell(g, 8, 10, 2.8, 3.2, 'p'); },
+      detail: (g) => { put(g, 7, 9, 'k', true); put(g, 9, 9, 'k', true); put(g, 8, 12, 'k', true); free(g, [[2, 3], [14, 4]], 'c'); } },
+  };
+  const cache = {};
+  function svg(id) {
+    const d = D[id]; if (!d) return null;
+    const g = mk(); d.body(g); shade(g); outline(g); d.detail(g);
+    const col = { b: d.b, l: mix(d.b, '#ffffff', 0.38), d: mix(d.b, '#000000', 0.4), a: d.a, c: d.c, p: d.p, k: INK, w: '#ffffff' };
+    let r = '';
+    for (let y = 0; y < N; y++) { let x = 0; while (x < N) { const ch = g[y][x]; if (!ch || !col[ch]) { x++; continue; } let w = 1; while (x + w < N && g[y][x + w] === ch) w++; r += `<rect x="${x}" y="${y}" width="${w}" height="1" fill="${col[ch]}"/>`; x += w; } }
+    return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges">${r}</svg>`)}`;
+  }
+  return { ids: Object.keys(D), url: (id) => cache[id] || (cache[id] = svg(id)) };
+})();
+const matIcon = (id) => MAT_ART.url(id) || '';
 // ---------------------------------------------------------------------
 // 6. RENDER — Three.js scene, procedural assets behind AssetSlots
 // ---------------------------------------------------------------------
@@ -9777,9 +9907,9 @@ const gate = (k) => !unlockOpen(k) ? ' locked" aria-disabled="true' : unlockNew(
 const lockLabel = (k, name) => unlockOpen(k) ? name : `${gi('m_lock')} Lv ${UNLOCK_AT[k]}`;
 // Four hubs (Hero, Forge, Gear, Journal): one bar on top of every hub screen, plus the hub's own sub-tabs
 const HUB_OF = { hero: 'hero', skills: 'hero', artifacts: 'hero', brawlers: 'hero', smith: 'forge', merge: 'forge',
-  menu: 'journal', progress: 'journal', daily: 'journal', collection: 'journal', prestige: 'journal', idle: 'journal', cases: 'journal', players: 'journal' };
+  menu: 'journal', progress: 'journal', daily: 'journal', collection: 'journal', prestige: 'journal', idle: 'journal', cases: 'equip', players: 'journal' };
 const HUB_SUB = { hero: [['hero', 'Stats', 'mHero'], ['skills', 'Talents', 'mSkills'], ['artifacts', 'Relics', 'mArtifacts'], ['brawlers', 'Heroes', 'mBrawlers']],
-  journal: [['menu', 'World', 'mJournal'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily'], ['cases', 'Chests', 'mCases']] };
+  journal: [['menu', 'World', 'mJournal'], ['progress', 'Log', 'mProgress'], ['daily', 'Daily', 'mDaily']] };
 function hubNav() {
   let hub = HUB_OF[UI.current]; if (!hub) return '';
   if (UI.current === 'hero' && UI.heroTab === 'Gear') hub = 'equip';
@@ -10022,6 +10152,14 @@ function hsClose() {
   const w = $('panel').querySelector('.hswap'); if (!w) { UI.heroSlot = UI.heroPick = null; heroTab('Stats'); return; }
   UI.hsAll = false; w.classList.add('closing'); setTimeout(() => { UI.heroSlot = UI.heroPick = null; heroTab('Stats'); }, 220);
 }
+// what a bag piece sells for; worn gear is not for sale and protected gear must be unprotected first
+function sellRow(it) {
+  const p = G.profile, worn = Object.values(p.gear).some((x) => x && x.id === it.id);
+  if (worn) return '';
+  if (it.locked) return `<p class="sellLine fine">${gi('m_lock')} Protected. Unprotect it to sell.</p>`;
+  const armed = UI.sellArm === it.id, ask = rarIdx(it.rarity) >= CFG.gear.sellConfirmFrom;
+  return `<div class="sellLine"><button class="sellBtn${armed ? ' armed' : ''}" data-act="sellItem" data-id="${escapeHTML(it.id)}">${armed ? 'Tap again to sell' : 'Sell'}<span class="sp">${ICON.coin}<b>${fmtK(sellPrice(it))}</b></span></button>${ask && !armed ? '<small>Asks once more because it is rare.</small>' : ''}</div>`;
+}
 function openInspect(id) {
   const p = G.profile, it = p.bag.find((x) => x.id === id) || Object.values(p.gear).find((x) => x && x.id === id); if (!it) return;
   const back = UI.current, ri = rarIdx(it.rarity);
@@ -10029,7 +10167,7 @@ function openInspect(id) {
   openModal(`<div class="insp ${it.rarity} ${ri >= 3 ? 'rays' : ''}" style="--rc:${rarCol(it.rarity)}"><div class="inspArt"><img src="${thumbFor(it)}" alt=""></div>
     <b class="inspName">${escapeHTML(it.name)}${it.up ? ` +${it.up}` : ''}</b>${rarityChip(it.rarity)}${it.unique != null ? '<span class="inspTag">Unique</span>' : ''}
     <p class="inspStat">${statLine(it)}</p>${it.aff && Object.keys(it.aff).length ? `<p class="inspAff">${affixText(it).split(' · ').join('<br>')}</p>` : ''}${perkLine(it)}
-    <div class="row end"><button class="primary" data-act="inspectClose">Back</button></div></div>`);
+    ${sellRow(it)}<div class="row end"><button class="primary" data-act="inspectClose">Back</button></div></div>`);
   if (ri >= 4) Sfx.play('unlock');
 }
 function openSmith(tab) {
@@ -10065,20 +10203,35 @@ function openSmith(tab) {
   openModal(dock(`<div class="npcHead"><h3>Forge</h3><span class="goldchip big">${ICON.coin}${fmtK(p.gold)}</span><span class="esschip big">${ICON.ess}${fmtK(p.essence)}</span></div>
     <div class="tabs">${tabs}</div>`, `<div class="tabBody"><div class="pageArt" style="--art:url(assets/ui/forge/banner-${tab.toLowerCase()}.webp)"></div>${body}</div>`, ''), true, false);
 }
-// Inventory: your chests (tap to open them) and every resource you hold, right above the gear bag
-function invChests(p) {
+// Inventory has three tabs: Gear (the bag, tap a piece to inspect or sell it), Chests (tap to open) and Resources.
+const INV_TABS = ['Chests', 'Gear', 'Resources'];
+const invTabNow = (p) => INV_TABS.includes(UI.invTab) ? UI.invTab : (p.cases.length ? 'Chests' : 'Gear');
+function invTabsHTML(tab, p) {
+  return `<div class="tabs invTabs">${INV_TABS.map((t) => `<button class="tab ${t === tab ? 'on' : ''}${t === 'Chests' && p.cases.length ? ' hasChests' : ''}" data-act="invTab" data-tab="${t}" aria-pressed="${t === tab}">${t}${t === 'Chests' && p.cases.length ? `<span class="tcount">${p.cases.length}</span>` : ''}</button>`).join('')}</div>`;
+}
+function invChestsHTML(p) {
   const n = {}; for (const c of p.cases) n[c.k] = (n[c.k] || 0) + 1;
   const kinds = CFG.caseOrder.filter((k) => n[k]);
-  const chests = kinds.length ? `<div class="invChests">${kinds.map((k) => `<button class="ctile" data-act="caseSel" data-k="${k}" style="--cc:${CFG.cases[k].col}">${caseArt(k)}<b>${CFG.cases[k].name}</b><small>×${n[k]}</small></button>`).join('')}</div>`
+  const grid = kinds.length ? `<div class="invChestGrid">${kinds.map((k) => `<button class="ctile" data-act="caseSel" data-k="${k}" style="--cc:${CFG.cases[k].col}">${caseArt(k)}<b>${CFG.cases[k].name}</b><small>×${n[k]}</small></button>`).join('')}</div>`
     : '<p class="fine">No chests yet. Monsters, bosses and the Rift drop them.</p>';
-  const mats = Object.keys(MATS).filter((id) => matCount(id, p) > 0).map((id) => matChip(id, null, p)).join('');
-  return `<div class="subRow"><h4 class="sub">Chests · ${p.cases.length}</h4></div>${chests}
-    <div class="subRow"><h4 class="sub">Resources &amp; minerals</h4></div><div class="invMats"><span class="mat gold">${ICON.coin}<b>${fmtK(p.gold)}</b></span><span class="mat gold">${ICON.gem || ''}<b>${fmtK(p.gems || 0)}</b> gems</span>${mats}</div>`;
+  return `<div class="subRow"><h4 class="sub first">Chests · ${p.cases.length}</h4></div>${grid}
+    <p class="fine">Tap a chest to open it. Chests are earned in play and cannot be sold. Every chest shows its odds before you open it.</p>`;
+}
+// where each kind of material comes from, shown on its card
+const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses' };
+function invResourcesHTML(p) {
+  const tile = (img, name, n, col, src) => `<div class="rtile${n ? '' : ' none'}" style="--rc:${col}" title="${name}${src ? ' · ' + src : ''}"><img src="${img}" alt=""><b class="rn">${fmtK(n)}</b><small>${name}</small></div>`;
+  const mat = (id) => { const M = MATS[id]; return tile(matIcon(id), M.name, matCount(id, p), hex6(M.color), MAT_SRC[M.kind]); };
+  const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(svg.includes('xmlns') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
+  const money = `<div class="igrid rgrid">${tile(svgUrl(ICON.coin), 'Gold', p.gold, '#ffd23a')}${tile(svgUrl(ICON.ess), 'Gems', p.essence || 0, '#7fe3ff')}${mat(CFG.craft.titan.id)}</div>`;
+  const groups = CB.map((b, i) => biomeReached(i, p) ? `<h4 class="sub">${BIOMES[i].name}</h4><div class="igrid rgrid">${[b.ore, b.part, b.core].map(mat).join('')}</div>` : '').join('');
+  return `<h4 class="sub first">Gold, gems &amp; Titan Souls</h4>${money}${groups}
+    <p class="fine">Ore comes from Mining, parts from monsters, cores from dungeon chests, Titan Souls from world bosses. Spend them in the Forge. Biomes you have not reached stay hidden.</p>`;
 }
 // --- crafting tabs (src/game/39-crafting.js)
 const hex6 = (c) => '#' + c.toString(16).padStart(6, '0');
 function matChip(id, need, p) { const M = MATS[id], have = matCount(id, p), ok = need == null || have >= need;
-  return `<span class="mat k-${M.kind}${ok ? '' : ' missing'}"><i style="--mc:${hex6(M.color)}"></i>${M.name} <b>${need == null ? fmtK(have) : `${fmtK(have)}/${fmtK(need)}`}</b></span>`; }
+  return `<span class="mat k-${M.kind}${ok ? '' : ' missing'}"><img class="mi" src="${matIcon(id)}" alt="">${M.name} <b>${need == null ? fmtK(have) : `${fmtK(have)}/${fmtK(need)}`}</b></span>`; }
 function costChips(cost, p) { return cost.mats.map(([id, n]) => matChip(id, n, p)).join('') + `<span class="mat gold${p.gold >= cost.gold ? '' : ' missing'}">${ICON.coin}<b>${fmtK(cost.gold)}</b></span>`; }
 function craftTabHTML(p) {
   const C = CFG.craft, bi = clamp(UI.craftBiome == null ? Math.max(0, CB.findIndex((b, i) => !biomeReached(i + 1, p))) : UI.craftBiome, 0, 5), b = CB[bi], open = biomeReached(bi, p);
@@ -10234,8 +10387,11 @@ function heroTab(tab) {
       : `<div class="cmpc none"><small>${label}</small><span class="emptySlot">${label === 'Worn' ? '+' : '?'}</span></div>`;
     // Inventory is only what you have collected: chests, resources, all gear. Comparing and wearing happens on the Hero screen.
     const bagAll = p.bag.filter((x) => !equippedIds.has(x.id)).sort((x, y) => order.indexOf(x.slot) - order.indexOf(y.slot) || rarIdx(y.rarity) - rarIdx(x.rarity));
-    body = `${invChests(p)}<div class="subRow"><h4 class="sub">Gear · ${bagAll.length}</h4><small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
-      ${itemGrid(bagAll, { act: 'inspect', empty: 'Monsters, elites, dens, shrines and world bosses drop gear.' })}`;
+    const itab = invTabNow(p);
+    if (itab === 'Chests') body = invChestsHTML(p);
+    else if (itab === 'Resources') body = invResourcesHTML(p);
+    else body = `<div class="subRow"><h4 class="sub first">Gear · ${bagAll.length}</h4><small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
+      ${itemGrid(bagAll, { act: 'inspect', empty: 'Monsters, elites, dens, shrines and world bosses drop gear.' })}${bagAll.length ? '<p class="fine">Tap a piece to inspect it. You can sell it there for gold.</p>' : ''}`;
     bar = '';
   } else if (tab === 'Attacks') {
     const cur = resolvedAttack(p), av = availableAttacks(p), fresh = new Set(p.newUnlocks);
@@ -10310,7 +10466,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>`, `<div class="tabBody">${body}</div>`, bar), true, false);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>${tab === 'Gear' ? invTabsHTML(invTabNow(p), p) : ''}`, `<div class="tabBody">${body}</div>`, bar), true, false);
 }
 // World map (the Map button): the whole road north, one row per area, top = furthest. Tap an attuned lodestone
 // to travel there from anywhere in the open world; areas you have not reached yet stay hidden.
@@ -10518,7 +10674,12 @@ function handlePanelClick(e) {
     case 'forge': if (buyForge(b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; openSmith('Forge'); } break;
     case 'smithTab': openSmith(b.dataset.tab); break;
     case 'inspect': openInspect(b.dataset.id); break;
-    case 'inspectClose': heroTab(UI.heroSlot ? 'Stats' : 'Gear'); break;
+    case 'inspectClose': UI.sellArm = null; heroTab(UI.heroSlot ? 'Stats' : 'Gear'); break;
+    case 'sellItem': { const it = G.profile.bag.find((x) => x.id === b.dataset.id); if (!it) break;
+      if (rarIdx(it.rarity) >= CFG.gear.sellConfirmFrom && UI.sellArm !== it.id) { UI.sellArm = it.id; openInspect(it.id); break; }
+      UI.sellArm = null; const v = sellItem(it.id);
+      if (v) { Sfx.play('coin'); toast(`Sold ${it.name} for ${fmtK(v)} gold`, 'good'); heroTab(UI.heroSlot ? 'Stats' : 'Gear'); } break; }
+    case 'invTab': UI.invTab = b.dataset.tab; heroTab('Gear'); break;
     case 'enchReroll': if (rerollAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gold', 'bad'); openSmith('Enchant'); break;
     case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast('Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
@@ -11356,13 +11517,13 @@ function openQuickUpgrade(action) {
 // The menu starts with four big buttons; each opens its hub, whose sub-tabs hold the rest
 function openMenu() {
   UI.current = 'hubs';
-  const p = G.profile, A = menuAlerts(), gearDot = Object.values(slotAlerts()).some((a) => a.better);
+  const p = G.profile, A = menuAlerts(), gearDot = Object.values(slotAlerts()).some((a) => a.better) || p.cases.length > 0;
   const big = (act, icon, name, sub, dot) => `<button class="hubTile${gate(act)}" data-act="${act}">${gi(icon)}<b>${name}</b><small>${unlockOpen(act) ? sub : `Opens at level ${UNLOCK_AT[act]}`}</small>${dot && unlockOpen(act) ? '<i class="rdot"></i>' : ''}</button>`;
   openModal(`<div class="hubTiles">
     ${big('mHero', 'm_hero', 'Hero', `Level ${fmt(p.level)}`, A.skills || A.artifacts || A.brawlers)}
     ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
-    ${big('mGear', 'm_case', 'Inventory', `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
-    ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()) || p.cases.length > 0)}
+    ${big('mGear', 'm_case', 'Inventory', p.cases.length ? `${p.cases.length} chest${p.cases.length > 1 ? 's' : ''} to open` : `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
+    ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()))}
   </div>`);
 }
 function openJournal() {
@@ -12468,7 +12629,7 @@ function openCases(sel) {
       <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
     bar = selBar('', `${p.cases.length > 1 ? `<button class="ghost boost big5" data-act="caseFast" data-k="${sel}"><b>×${Math.min(5, p.cases.length)}</b><small>Open all</small></button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
-  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mCollection">Open the Collection Log</button></div>`, bar));
+  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="invTab" data-tab="Chests">Back to Inventory</button><button class="ghost" data-act="mCollection">Collection Log</button></div>`, bar));
   $('panel').classList.add('wide');
 }
 // the CS:GO-style reel: a long strip of items slides past a golden marker and slows down on your item

@@ -163,6 +163,15 @@ function salvageItem(id) {
   addMastery('smith', 4 + rarIdx(it.rarity) * 5);
   G.gearPrompts = G.gearPrompts.filter((x) => x !== id); return true;
 }
+// Sell: bag gear only (never worn, never protected), gold only. Chests are never sold.
+const sellPrice = (it) => Math.max(1, Math.round(salvageValue(it) * CFG.gear.sellMult));
+function sellItem(id) {
+  const p = G.profile, i = p.bag.findIndex((x) => x.id === id); if (i < 0) return 0;
+  if (Object.values(p.gear).some((x) => x && x.id === id)) return 0;
+  const it = p.bag[i]; if (it.locked) { toast('Protected gear cannot be sold', 'bad'); return 0; }
+  const v = sellPrice(it); p.bag.splice(i, 1); addGold(v, true);
+  G.gearPrompts = G.gearPrompts.filter((x) => x !== id); G.dirty = true; return v;
+}
 const rerollCost = (it) => Math.round(400 * rarMult(it) * Math.pow(CFG.enemies.goldGrowth, it.ilvl - 1));
 function rerollItem(slot) {
   const p = G.profile, it = p.gear[slot]; if (!it || rarIdx(it.rarity) < 1) return false;

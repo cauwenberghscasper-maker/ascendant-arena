@@ -157,6 +157,9 @@ const CFG = {
     maxUp: Infinity, upStep: 0.12, starEvery: 10, starBonus: 0.3, upCostBase: 30, upCostExp: 1.5, upCostGrowth: 1.06, bagMax: 50,
     essenceFrom: 6, // upgrades from +6 to +15 also cost essence (salvage Rare+ items to get it)
     salvageEssence: { common: 0, uncommon: 1, rare: 6, epic: 15, legendary: 36, mythic: 80, ancient: 160, divine: 320 },
+    // Selling pays gold only, on the same curve as salvage gold (rarity x upgrades x 1.06 per item level), times this.
+    // Salvage keeps the gems, so selling is the pick when you need gold. Epic and better ask for a second tap.
+    sellMult: 2.5, sellConfirmFrom: 3,
     // share of a same-level hero's base attack / HP that one item of this slot adds (x rarity x upgrades)
     statShare: { weapon: { atk: 0.30 }, helmet: { hp: 0.10 }, chest: { hp: 0.16 }, boots: { hp: 0.07 }, accessory: { atk: 0.12 } },
   },

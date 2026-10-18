@@ -609,3 +609,22 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .setWrap::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: radial-gradient(circle, var(--sc) 0%, transparent 70%); opacity: .55; animation: setBreath 2.2s ease-in-out infinite; }
 .setWrap .setArt { position: relative; z-index: 1; animation: setFloat 2.6s ease-in-out infinite, setPulse 2.2s ease-in-out infinite !important; filter: none; }
 @keyframes setSpin { to { transform: rotate(360deg); } } @keyframes setBreath { 50% { opacity: .9; transform: scale(1.15); } } @keyframes setFloat { 50% { transform: translateY(-4px) scale(1.04); } }
+/* Inventory tabs: Chests first and lit up when chests are waiting; resources, gold and gems as gear-sized tiles */
+.invTabs { margin: 6px 0 2px; } .invTabs .tab { position: relative; }
+.invTabs .tcount { margin-left: 5px; min-width: 18px; padding: 1px 5px; background: #ffc94a; color: #3a2400; font: 700 11px/1.3 var(--body); border: 1px solid #000; }
+.invTabs .tab.hasChests:not(.on) { animation: chestTab 1.6s ease-in-out infinite; }
+@keyframes chestTab { 50% { box-shadow: 0 0 0 2px #ffc94a, 0 0 12px rgba(255,201,74,.7); } }
+.invChestGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin: 6px 0 10px; }
+.invChestGrid .ctile { min-height: 150px; }
+.rgrid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)) !important; gap: 14px 8px !important; margin-bottom: 30px; }
+.rtile { position: relative; aspect-ratio: 1; border: 1px solid #000; border-radius: 7px; padding: 4px; background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--rc) 26%, transparent), rgba(0,0,0,.4)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rc) 55%, #000); }
+.rtile img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; display: block; }
+.rtile .rn { position: absolute; right: 3px; bottom: 2px; font: 700 12px/1 var(--body); color: #fff3cf; text-shadow: 0 1px 0 #000, 0 0 3px #000; }
+.rtile small { position: absolute; left: 0; right: 0; top: 100%; margin-top: 2px; text-align: center; font: 600 10px/1.1 var(--body); color: #c9cde0; white-space: normal; }
+.rtile.none { opacity: .45; filter: grayscale(.6); }
+.mat img.mi { width: 18px; height: 18px; image-rendering: pixelated; flex: none; } .mat.missing img.mi { opacity: .55; }
+.sellLine { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 8px 0 2px; }
+.sellBtn { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; font: 700 15px/1 var(--display); color: #2b1a00; background: linear-gradient(#ffd96a, #d99a1c); border: 2px solid #000; border-radius: 8px; box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 3px 0 #000; }
+.sellBtn .sp { display: inline-flex; align-items: center; gap: 3px; } .sellBtn .sp svg { width: 16px; height: 16px; }
+.sellBtn.armed { background: linear-gradient(#ff8a8a, #d23a3a); color: #fff; }
+.sellLine small { color: #9aa0b8; }
