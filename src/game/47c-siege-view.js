@@ -1,5 +1,5 @@
 // --- Bastion Siege view: the fort's land, built on entry and disposed on exit. Everything standing is a generated world
-// model (keep, wagons, defenders, walls, gates, huts, mines, flags); code geometry is only ground, the land's edge, the
+// model (keep, wagons, the siege_* buildings and walls, flags); code geometry is only ground, the land's edge, the
 // placing ghost and VFX. Buildings are rebuilt whenever the fort changes; cannons, ballistas and mage towers turn to their target.
 const siegeParts = { sets: [], bSets: [], bGroup: null, aims: [], objItems: [], objSets: [], portal: null, flame: null, ghost: null, sig: '', t: 0 };
 const SIEGE_PAD_COL = { archer: 0x58e08a, cannon: 0xff7a4a, ballista: 0x5dd6ff, mage: 0xb98cff, warrior: 0xffc94a, mine: 0x9fe8ff, hut: 0xd8b07a };
@@ -44,40 +44,36 @@ function buildSiegeView() {
   siegeParts.bGroup = new THREE.Group(); siegeGroup.add(siegeParts.bGroup); siegeParts.sig = '';
   buildSiegeBuildings();
 }
-// defenders and buildings: archer = stone tower, cannon = iron mortar pot, ballista = the siege turret, mage = rune
-// obelisk, warriors = tent and weapon rack, mine = lift over an ore pile, builder = shack. A banner in the building's
-// colour grows with its level. Walls: wood to level 5, stone to 10, iron after; each cell draws a half piece toward every
-// wall or gate next to it, so lines, corners and crossings join up.
+// buildings: TRELLIS.2 models made for the fort (siege_*), each on its cell; cannons, ballistas and mage towers turn to
+// their target. A banner in the building's colour grows with its level. Walls: wood to level 5, stone to 10, iron
+// after; each cell draws a half piece toward every wall or gate next to it, so lines, corners and crossings join up.
+const SIEGE_MODEL = { archer: ['siege_archer', 6.2], cannon: ['siege_cannon', 2.3], ballista: ['siege_ballista', 2.4], mage: ['siege_mage', 6.6],
+  warrior: ['siege_barracks', 2.6], mine: ['siege_mine', 3.2], hut: ['siege_hut', 3.1], gate: ['siege_gate', 2.1] };
+const SIEGE_TURN = { cannon: 1, ballista: 1, mage: 1 };
 function buildSiegeBuildings() {
-  const g = siegeParts.bGroup, S = G.siege, cs = CFG.siege.cell, top = 0.38, now = fortNow();
+  const g = siegeParts.bGroup, S = G.siege, cs = CFG.siege.cell, now = fortNow();
   for (const h of siegeParts.bSets) WorldModels.dispose(h);
   g.clear(); siegeParts.bSets = []; siegeParts.aims = [];
   const L = {}, add = (name, it) => (L[name] || (L[name] = [])).push(it), aims = [];
   const wallAt = (i, j) => { const k = siegeIdx(i, j), o = k >= 0 ? S.occ[k] : 0, u = o > 0 ? S.units[o - 1] : null; return !!u && u.alive && CFG.siege.towers[u.b.t].wall; };
   for (const u of S.units) {
     if (!u.alive) continue;
-    const b = u.b, x = u.x, z = u.z, k = (b.d > now ? 0.85 : 1) * (1 + (b.l - 1) * 0.03), ry = Math.atan2(SC.x - x, SC.z - z);
+    const b = u.b, x = u.x, z = u.z, k = (b.d > now ? 0.85 : 1) * (1 + (b.l - 1) * 0.02), ry = Math.atan2(SC.x - x, SC.z - z);
     if (b.t === 'wall') {
-      const m = b.l > 10 ? { name: 'dwall', s: 0.92, color: 0x6a7484 } : b.l > 5 ? { name: 'dwall', s: 0.92, color: 0xffffff } : { name: 'fence', s: 0.85 }, len = m.name === 'fence' ? 2.46 : 2.24;
+      const name = b.l > 10 ? 'siege_wall_iron' : b.l > 5 ? 'siege_wall_stone' : 'siege_wall_wood', h = name === 'siege_wall_wood' ? 1.8 : 1.4, len = (WORLD_MODEL_BOX[name] || [2])[0] * h;
       const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([di, dj]) => wallAt(b.x + di, b.z + dj));
-      if (!dirs.length) add(m.name, { x, z, ry: 0, s: m.s, color: m.color });
-      for (const [di, dj] of dirs) add(m.name, { x: x + di * cs / 4, z: z + dj * cs / 4, ry: di ? 0 : Math.PI / 2, s: m.s, sx: (cs / 2 + 0.15) / (len * m.s), color: m.color });
+      if (!dirs.length) add(name, { x, z, ry: 0, s: h, sx: cs / len });
+      for (const [di, dj] of dirs) add(name, { x: x + di * cs / 4, z: z + dj * cs / 4, ry: di ? 0 : Math.PI / 2, s: h, sx: (cs / 2 + 0.15) / len });
       continue;
     }
-    if (b.t === 'gate') { add('portcullis', { x, z, ry: wallAt(b.x + 1, b.z) || wallAt(b.x - 1, b.z) ? 0 : Math.PI / 2, s: 1.8 }); continue; }
-    if (b.t === 'archer') add('tower', { x, z, y: top, ry, s: 4.6 * k });
-    else if (b.t === 'warrior') { add('war_tent', { x: x - 0.3, z: z - 0.2, y: top, ry, s: 2.2 * k }); add('weapon_rack', { x: x + 0.9, z: z + 0.7, y: top, ry: ry + 0.6, s: 1.1 }); }
-    else if (b.t === 'mine') { add('mine_lift', { x, z, ry, s: 3.2 * k }); add('ore_pile', { x: x + 1, z: z - 1, ry: 0, s: 1.2 }); }
-    else if (b.t === 'hut') add('hermit_shack', { x, z, ry, s: 2.8 * k });
-    else {
-      const it = b.t === 'cannon' ? { x, z, y: top, ry, s: 1.7 * k, color: 0x6a6a78 } : b.t === 'mage' ? { x, z, y: top, ry, s: 5.2 * k, color: 0xc9a8ff } : { x, z, y: top, ry, s: 3.0 * k };
-      add(b.t === 'cannon' ? 'kettle' : b.t === 'mage' ? 'rune_obelisk' : 'arena_tower', it); aims.push({ it, u, name: b.t === 'cannon' ? 'kettle' : b.t === 'mage' ? 'rune_obelisk' : 'arena_tower' });
-      add('ruin_block', { x, z, ry: 0, s: 2.4, sy: 0.16 });
-    }
-    add('banner_pole', { x: x - 1.05, z: z - 1.05, y: top, ry: 0, s: 2.4 + Math.min(15, b.l) * 0.14, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] });
+    const [name, h] = SIEGE_MODEL[b.t];
+    if (b.t === 'gate') { add(name, { x, z, ry: wallAt(b.x + 1, b.z) || wallAt(b.x - 1, b.z) ? 0 : Math.PI / 2, s: h }); continue; }
+    const it = { x, z, ry, s: h * k }; add(name, it);
+    if (SIEGE_TURN[b.t]) aims.push({ it, u, name });
+    add('banner_pole', { x: x - 1.6, z: z - 1.6, ry: 0, s: 2.4 + Math.min(15, b.l) * 0.14, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] });
   }
   const hs = {};
-  for (const name in L) { const h = WorldModels.place(g, name, L[name], name === 'rune_obelisk' ? { glow: 0xb98cff, glowK: 0.25 } : {}); siegeParts.bSets.push(h); hs[name] = h; }
+  for (const name in L) { const h = WorldModels.place(g, name, L[name], name === 'siege_mage' ? { glow: 0xb98cff, glowK: 0.12 } : {}); siegeParts.bSets.push(h); hs[name] = h; }
   siegeParts.aims = aims.map((a) => Object.assign(a, { h: hs[a.name] }));
 }
 function disposeSiegeView() {

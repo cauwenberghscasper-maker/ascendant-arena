@@ -18,9 +18,11 @@ Built from `docs/BASTION_PLAN.md` phases 1-3:
   `fw`), guests send hits/builds/start-wave to the host; every player gets their own wave pay. Tested with two browsers on
   a fake lobby (the sandbox cannot reach Supabase): sync, guest building (paid by the guest), wave pay for both, host
   hand-over. Local previews and test mode keep worlds in localStorage.
-- **Open:** test on two real phones; models (archer tower, cannon, ballista, barracks + soldier, mage tower, mine, builder
-  hut, 9 wall pieces) still use stand-in models (`tower`, `kettle`, `arena_tower`, `rune_obelisk`, `mine_lift`,
-  `hermit_shack`, `fence`/`dwall`, `portcullis`); anyone with a code can build in (or wreck) that fort; balance of costs
+- **Models:** TRELLIS.2 + Z-Image (HF MCP, relay batches `bastion-a`/`bastion-b` on `asset-drop`): `siege_archer`, `siege_cannon`,
+  `siege_ballista`, `siege_mage`, `siege_barracks`, `siege_mine`, `siege_hut`, `siege_wall_wood/stone/iron`, `siege_gate`
+  (1.2-4k tris, 512 textures). Barracks and builder hut came out with streaky textures and roof holes: regenerate them.
+  Stone/iron walls are long models squeezed into 2 m cells (narrow crenels); a 2:1 wall piece would look better.
+- **Open:** test on two real phones; the soldier still uses the Smith Garo model (needs a rigged soldier); anyone with a code can build in (or wreck) that fort; balance of costs
   and build times is not playtested; moving a building is not possible (tear down and rebuild).
 
 # Bastion Siege (18 Oct 2026, branch `bastion-siege`, PR #23 to main)

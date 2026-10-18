@@ -1,6 +1,6 @@
 # Bastion plan: shared worlds, free building, walls, a land that grows
 
-Status 18 Oct 2026: phases 1-3 are built (branch `claude/bastion-update`, see `docs/UNFINISHED.md`); phase 4 (models) is open.
+Status 18 Oct 2026: phases 1-3 are built and phase 4 has its first models (branch `claude/bastion-update`, see `docs/UNFINISHED.md`); still open: a rigged soldier, better barracks and hut.
 
 From the brainstorm with Casper (18 Oct 2026). Today Bastion Siege (`src/game/36c-siege.js`, view `47c-siege-view.js`)
 is a solo instance: a 48×48 m fort with fixed walls and three gates, 8 fixed pads, the Keep + two wagons, and every run
