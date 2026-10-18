@@ -221,7 +221,8 @@ deeper you go inside an area). Biomes and their world bosses:
 | Ocean Depths | Abyssal Leviathan |
 | Celestial Ascension | Celestial Colossus |
 
-Every area has: two monster kinds, monster dens (fast respawn, best XP), a lair with a lair boss and unique item,
+Every area has: two monster kinds (24 generated bodies in `assets/enemy/`, shared and tinted per species; each
+monster shows its wind-up in its body and then strikes: slams drop, pounces lunge, sweeps swing through, shooters kick back), monster dens (fast respawn, best XP), a lair with a lair boss and unique item,
 a hero landmark, three dungeons (Caves, Warrens, Sanctum), four ore veins and a mine, runestones for a Legendary
 Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team kits), World Tiers. The world map
 (Map button) shows a pixel-art scene per area.

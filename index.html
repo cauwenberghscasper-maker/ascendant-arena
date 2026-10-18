@@ -2853,8 +2853,9 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
 }
 const lootTier = (zi) => ((CFG.world.zones[zi] || CFG.world.zones[0]).loot | 0);
 const zoneIndex = (name) => CFG.world.zones.findIndex((zn) => zn.name === name);
-// ---- v9 monsters: two per area (see the area guide). Each reuses a body ("base") from the 14 sculpted
-// monsters with its own tint, size and fighting style until it gets bespoke art. ------------------------
+// ---- v9 monsters: two per area (see the area guide). Each uses a body ("base") from the 24 sculpted
+// monsters (assets/enemy/) with its own tint, size and fighting style; tintK: how far the tint repaints the body
+// (low for species with their own body, high for borrowed ones). ------------------------
 const MON_KIT = {
   swarm: { hp: 44, atk: 9, speed: 6.0, r: 0.7, aggro: 12, leash: 26, attack: 'touch', cd: 0.75, gold: [3, 6], lunge: true, moves: ['pounce', 'howl'] },
   charger: { hp: 74, atk: 12, speed: 4.4, r: 0.85, aggro: 10, leash: 24, attack: 'touch', cd: 1.1, gold: [3, 7], charge: true, moves: ['trample'] },
@@ -2908,33 +2909,33 @@ const MON_MOVES = {
 // id: [name, kit, base body, tint, size, extra]
 const MON_ROWS = {
   thistlehare: ['Thistle-Hare', 'spray', 'boar', 0xe8cf98, 0.72, { hp: 40, atk: 7, aggro: 8, keep: 7, cd: 2.0, shots: 2, shotSpeed: 12, shotColor: 0xe8e0a0, spread: 0.36, moves: ['fan', 'pounce'] }],
-  hornet: ['Sun-Drunk Hornet', 'swarm', 'imp', 0xffd23a, 0.78, { hp: 38, atk: 7, aggro: 7, speed: 6.2, moves: ['flurry', 'howl'] }],
+  hornet: ['Sun-Drunk Hornet', 'swarm', 'hornet', 0xffd23a, 0.78, { tintK: 0.2, hp: 38, atk: 7, aggro: 7, speed: 6.2, moves: ['flurry', 'howl'] }],
   truffleboar: ['Truffle-Grubbing Boar', 'charger', 'boar', 0xa07858, 1.05, { hp: 86, moves: ['spikes', 'ripple'] }],
-  myconid: ['Myconid Spore-Tosser', 'shooter', 'slime', 0xd77cff, 1.2, { aggro: 9, burn: 0.25, shotColor: 0xd77cff, shots: 2, spread: 0.4, moves: ['rain', 'pool'] }],
+  myconid: ['Myconid Spore-Tosser', 'shooter', 'myconid', 0xd77cff, 1.2, { tintK: 0.15, aggro: 9, burn: 0.25, shotColor: 0xd77cff, shots: 2, spread: 0.4, moves: ['rain', 'pool'] }],
   bramble: ['Bramble-Lasher', 'brute', 'spider', 0x6a7a3a, 1.25, { speed: 1.6, aggro: 6, cd: 1.1, moves: ['sweep', 'spikes'] }],
-  barkviper: ['Bark-Scale Viper', 'ambusher', 'crawler', 0x8a6a48, 0.95, { speed: 5.2, moves: ['ambush', 'pounce'] }],
+  barkviper: ['Bark-Scale Viper', 'ambusher', 'viper', 0x8a6a48, 0.95, { tintK: 0.15, speed: 5.2, moves: ['ambush', 'pounce'] }],
   thornbeetle: ['Thorn-Carapace Beetle', 'charger', 'beetle', 0x7f9a5a, 1.1, { hp: 110, heavy: true, moves: ['slam', 'cross'] }],
   gloompanther: ['Gloom-Panther', 'swarm', 'wolf', 0x3a3456, 1.05, { hp: 58, atk: 12, speed: 6.6, aggro: 10, moves: ['flurry', 'ambush'] }],
-  craggoat: ['Crag-Goat', 'charger', 'boar', 0xc8c0b0, 0.95, { heavy: true, moves: ['quake', 'cleave'] }],
+  craggoat: ['Crag-Goat', 'charger', 'glassbull', 0xc8c0b0, 0.9, { tintK: 0.7, heavy: true, moves: ['quake', 'cleave'] }],
   dustharpy: ['Dust-Harpy', 'shooter', 'fireimp', 0xd8b080, 1.0, { atk: 12, shotSpeed: 10, cd: 1.7, shotColor: 0xa08a70, moves: ['fan', 'boomerang'] }],
   bouldermimic: ['Boulder-Mimic', 'ambusher', 'crawler', 0x9a9a92, 1.25, { hp: 150, speed: 3.2, aggro: 5, moves: ['burrow', 'slam'] }],
   galeweaver: ['Gale-Weaver', 'spray', 'spider', 0xdfe6ee, 1.0, { shotColor: 0xe6f2ff, shots: 2, spread: 0.6, moves: ['trap', 'cross'] }],
   miragestalker: ['Mirage-Stalker', 'swarm', 'wolf', 0xe8c890, 1.0, { hp: 52, atk: 11, moves: ['pounce', 'sweep', 'mirror'] }],
-  pitfallwurm: ['Pitfall-Wurm', 'charger', 'crawler', 0xc89a7a, 1.15, { hp: 96, moves: ['burrow', 'ripple'] }],
+  pitfallwurm: ['Pitfall-Wurm', 'charger', 'viper', 0xc89a7a, 1.15, { tintK: 0.55, hp: 96, moves: ['burrow', 'ripple'] }],
   frostgargoyle: ['Frost-Gargoyle', 'ambusher', 'imp', 0x5a6a80, 1.2, { moves: ['slam', 'beam'] }],
   chillbanshee: ['Chill-Banshee', 'spray', 'wraith', 0xbfe6ff, 1.0, { shotColor: 0x9fe8ff, moves: ['ripple', 'zap'] }],
   glacialtroll: ['Glacial-Troll', 'brute', 'yeti', 0xd8f0ff, 1.08, { hp: 140, moves: ['cleave', 'quake', 'howl'] }],
   iceshard: ['Ice-Shard Elemental', 'turret', 'sentinel', 0x9fe8ff, 0.95, { shotColor: 0xbff4ff, moves: ['nova', 'rain'] }],
   screecrawler: ['Scree-Crawler', 'swarm', 'crawler', 0x9a8a7a, 1.0, { hp: 54, moves: ['pounce', 'cross'] }],
-  echobat: ['Echo-Bat', 'spray', 'fireimp', 0x6a5a88, 0.85, { shotColor: 0xc8a8ff, shotSpeed: 14, keep: 5.5, moves: ['breath', 'fan'] }],
+  echobat: ['Echo-Bat', 'spray', 'bat', 0x6a5a88, 0.85, { tintK: 0.15, shotColor: 0xc8a8ff, shotSpeed: 14, keep: 5.5, moves: ['breath', 'fan'] }],
   sulfurslime: ['Sulfur-Slime', 'brute', 'slime', 0xe0d84a, 1.25, { speed: 3.0, burn: 0.35, moves: ['slam', 'pool'] }],
-  fumetoad: ['Fume-Toad', 'spray', 'slime', 0x8a9a3a, 1.5, { burn: 0.3, shotColor: 0xb8d040, shotSpeed: 9, keep: 5.5, moves: ['breath', 'rain'] }],
+  fumetoad: ['Fume-Toad', 'spray', 'toad', 0x8a9a3a, 1.2, { tintK: 0.15, burn: 0.3, shotColor: 0xb8d040, shotSpeed: 9, keep: 5.5, moves: ['breath', 'rain'] }],
   magmahound: ['Magma-Hound', 'swarm', 'wolf', 0xff7a3a, 1.05, { burn: 0.3, moves: ['pounce', 'flurry'] }],
   cinderelemental: ['Cinder-Elemental', 'brute', 'fireimp', 0xe8e0d8, 1.2, { burn: 0.35, moves: ['sweep', 'ripple'] }],
   ashstalker: ['Ash-Stalker', 'ambusher', 'wolf', 0x8a8480, 1.1, { moves: ['ambush', 'beam'] }],
   emberwraith: ['Ember-Wraith', 'spray', 'wraith', 0xff8a3a, 1.0, { burn: 0.25, shotColor: 0xff8a3a, keep: 5.5, moves: ['breath', 'pool'] }],
-  scoriascorpion: ['Scoria-Scorpion', 'charger', 'beetle', 0xff9a6a, 1.35, { hp: 120, burn: 0.3, heavy: true, moves: ['trample', 'cross'] }],
-  flamewyrm: ['Flame-Wyrm', 'spray', 'fireimp', 0xff5a2a, 1.3, { burn: 0.3, shotColor: 0xff6a1f, keep: 5.5, moves: ['breath', 'mortar'] }],
+  scoriascorpion: ['Scoria-Scorpion', 'charger', 'scorpion', 0xff9a6a, 1.35, { tintK: 0.15, hp: 120, burn: 0.3, heavy: true, moves: ['trample', 'cross'] }],
+  flamewyrm: ['Flame-Wyrm', 'spray', 'wyvern', 0xff5a2a, 1.1, { tintK: 0.15, burn: 0.3, shotColor: 0xff6a1f, keep: 5.5, moves: ['breath', 'mortar'] }],
   manaleech: ['Mana-Leech', 'swarm', 'crawler', 0x4a8aff, 0.85, { hp: 48, moves: ['pounce', 'zap'] }],
   azuregolem: ['Azure-Golem', 'brute', 'warden', 0x6a9aff, 1.05, { charge: true, hp: 150, moves: ['cleave', 'vortex'] }],
   riftspider: ['Rift-Spider', 'swarm', 'spider', 0xa06aff, 1.1, { speed: 7.0, moves: ['trap', 'howl', 'ambush'] }],
@@ -2942,24 +2943,24 @@ const MON_ROWS = {
   voidray: ['Void-Ray', 'spray', 'wraith', 0x2a5a7a, 1.15, { shotColor: 0x4fd8ff, moves: ['zap', 'beam'] }],
   asteroidhermit: ['Asteroid-Hermit', 'brute', 'crawler', 0x7a7088, 1.4, { hp: 175, speed: 2.6, moves: ['slam', 'vortex'] }],
   prismmimic: ['Prism-Mimic', 'ambusher', 'slime', 0xd0f4ff, 1.0, { speed: 5.6, moves: ['ambush', 'cross'] }],
-  glassminotaur: ['Glass-Minotaur', 'charger', 'yeti', 0xbfe8ff, 1.1, { hp: 140, heavy: true, moves: ['slam', 'sweep'] }],
+  glassminotaur: ['Glass-Minotaur', 'charger', 'glassbull', 0xbfe8ff, 1.1, { tintK: 0.15, hp: 140, heavy: true, moves: ['slam', 'sweep'] }],
   starsentry: ['Starlight-Sentry', 'brute', 'warden', 0xfff0c0, 1.0, { charge: true, moves: ['quake', 'beam'] }],
   astronomer: ['Fallen-Astronomer', 'spray', 'wraith', 0x6a5fc9, 1.05, { shots: 2, spread: 0.36, shotColor: 0xc77dff, moves: ['rain', 'zap'] }],
-  nebulajelly: ['Nebula-Jellyfish', 'turret', 'sentinel', 0xff9bf2, 0.95, { speed: 2.4, shotColor: 0xff9bf2, moves: ['nova', 'zap'] }],
+  nebulajelly: ['Nebula-Jellyfish', 'turret', 'jelly', 0xff9bf2, 0.95, { tintK: 0.15, speed: 2.4, shotColor: 0xff9bf2, moves: ['nova', 'zap'] }],
   kelpie: ['Ruins-Kelpie', 'charger', 'boar', 0x2fbfa0, 1.1, { moves: ['vortex', 'ripple'] }],
   rapidsiren: ['Rapids-Siren', 'spray', 'drowned', 0x7fd0ff, 1.0, { shotColor: 0x7fd0ff, moves: ['mortar', 'fan'] }],
   thrasher: ['Current-Thrasher', 'charger', 'crawler', 0x5a7a9a, 1.15, { speed: 5.0, moves: ['burrow', 'sweep'] }],
-  sporeurchin: ['Spore-Urchin', 'brute', 'slime', 0x4fffb0, 1.1, { burn: 0.3, speed: 2.4, moves: ['cross', 'pool'] }],
+  sporeurchin: ['Spore-Urchin', 'brute', 'myconid', 0x4fffb0, 1.0, { tintK: 0.6, burn: 0.3, speed: 2.4, moves: ['cross', 'pool'] }],
   angler: ['Grotto-Angler', 'ambusher', 'beetle', 0x2a4a8a, 1.2, { moves: ['beam', 'burrow'] }],
   trenchcrawler: ['Trench-Crawler', 'swarm', 'crawler', 0x2a3a4a, 1.0, { hp: 60, burn: 0.15, moves: ['howl', 'burrow'] }],
   pressuresquid: ['Pressure-Squid', 'shooter', 'drowned', 0x7a3a9a, 1.05, { shotSpeed: 17, atk: 13, shotColor: 0x3a1a5a, moves: ['snipe', 'trap'] }],
   leviathan: ['Eldritch-Leviathan', 'charger', 'crawler', 0x1a3a40, 1.6, { hp: 160, heavy: true, moves: ['ripple', 'slam'] }],
   abyssphantom: ['Abyssal-Phantom', 'spray', 'wraith', 0x2fffd0, 1.0, { shotColor: 0x2fffd0, moves: ['zap', 'ambush'] }],
-  boilcrab: ['Boil-Crab', 'brute', 'crawler', 0xff6a4a, 1.3, { burn: 0.3, moves: ['flurry', 'quake'] }],
+  boilcrab: ['Boil-Crab', 'brute', 'crab', 0xff6a4a, 1.2, { tintK: 0.15, burn: 0.3, moves: ['flurry', 'quake'] }],
   steamelemental: ['Steam-Elemental', 'spray', 'wraith', 0xf0f0f4, 1.1, { burn: 0.3, shotColor: 0xffffff, keep: 5.5, moves: ['breath', 'ripple'] }],
   shaftvulture: ['Shaft-Vulture', 'swarm', 'imp', 0x4a3a30, 1.1, { speed: 7.0, moves: ['pounce', 'boomerang'] }],
   obsidiangargoyle: ['Obsidian-Gargoyle', 'charger', 'fireimp', 0x2a2236, 1.2, { heavy: true, hp: 120, moves: ['spikes', 'slam'] }],
-  lightningwyvern: ['Lightning-Wyvern', 'shooter', 'imp', 0xfff04a, 1.25, { shotSpeed: 18, shots: 2, spread: 0.3, shotColor: 0xfff04a, moves: ['snipe', 'zap'] }],
+  lightningwyvern: ['Lightning-Wyvern', 'shooter', 'wyvern', 0xfff04a, 1.1, { tintK: 0.55, shotSpeed: 18, shots: 2, spread: 0.3, shotColor: 0xfff04a, moves: ['snipe', 'zap'] }],
   cyclone: ['Cyclone-Elemental', 'turret', 'sentinel', 0xd8e0ea, 1.1, { speed: 3.2, shots: 6, spread: 1.4, shotColor: 0xe6f2ff, moves: ['spiral', 'vortex'] }],
   aetherray: ['Aether-Ray', 'spray', 'seraph', 0xc8b8ff, 1.0, { shotColor: 0xc8b8ff, keep: 5.5, moves: ['fan', 'zap'] }],
   halosentinel: ['Halo-Sentinel', 'turret', 'sentinel', 0xffd86a, 1.05, { shotColor: 0xffd86a, moves: ['nova', 'beam'] }],
@@ -8647,6 +8648,16 @@ const GENERATED_ASSETS = {
   'enemy.wolf': {"dir": "assets/enemy/wolf/", "tris": 7139, "kb": 641, "size": 1.75, "glow": 1.0, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'enemy.wraith': {"dir": "assets/enemy/wraith/", "tris": 6997, "kb": 550, "size": 2.3, "glow": 1.5, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'enemy.yeti': {"dir": "assets/enemy/yeti/", "tris": 19788, "kb": 1135, "size": 2.6, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
+  'enemy.toad': {"dir": "assets/enemy/toad/", "tris": 8999, "kb": 704, "size": 1.35, "glow": 1.3, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.bat': {"dir": "assets/enemy/bat/", "tris": 8910, "kb": 640, "size": 1.7, "glow": 1.4, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.hornet': {"dir": "assets/enemy/hornet/", "tris": 8965, "kb": 604, "size": 1.45, "glow": 1.2, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.scorpion': {"dir": "assets/enemy/scorpion/", "tris": 9000, "kb": 752, "size": 1.3, "glow": 1.5, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.viper': {"dir": "assets/enemy/viper/", "tris": 8990, "kb": 792, "size": 1.6, "glow": 1.0, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.myconid': {"dir": "assets/enemy/myconid/", "tris": 9000, "kb": 532, "size": 1.85, "glow": 1.3, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.crab': {"dir": "assets/enemy/crab/", "tris": 8998, "kb": 808, "size": 1.3, "glow": 1.2, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.jelly': {"dir": "assets/enemy/jelly/", "tris": 8861, "kb": 544, "size": 2.1, "glow": 1.5, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.wyvern': {"dir": "assets/enemy/wyvern/", "tris": 8998, "kb": 776, "size": 2.2, "glow": 1.2, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.glassbull': {"dir": "assets/enemy/glassbull/", "tris": 8992, "kb": 884, "size": 1.8, "glow": 1.3, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
   'hero.arrow': {"dir": "assets/hero/ayla/", "tris": 13998, "kb": 832, "size": 1.9, "hand": [0.3219, 0.272, -0.02], "rig": {"head": {"y": 0.795, "r": 0.2488, "cx": -0.0005, "cz": 0.0211, "top": 1.0, "brow": 0.8155}, "neckY": 0.59, "shoulder": {"y": 0.52, "x": 0.174}, "torso": {"y0": 0.3, "y1": 0.58, "hw": 0.174, "hd": 0.1393, "cz": 0.058}, "chestFront": 0.2061, "hand": [0.2913, 0.1632, -0.1327, 0.0515], "hand2": [-0.2891, 0.1618, -0.1329, 0.055], "foot": {"x": 0.1871, "z": 0.0649, "toe": 0.1956}, "fit": {"y0": 0.24, "y1": 0.59, "hw": 0.39, "hd": 0.2097, "cz": 0.0335}}, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'hero.mortar': {"dir": "assets/hero/boomer/", "tris": 16100, "kb": 804, "size": 1.9, "legs": {"legL": [-0.1585, 0.172, 0.044], "legR": [0.1541, 0.172, 0.0415]}, "hand": [0.3592, 0.2774, 0.0043], "rig": {"head": {"y": 0.77, "r": 0.3294, "cx": -0.0008, "cz": 0.0235, "top": 1.0, "brow": 0.793}, "neckY": 0.54, "shoulder": {"y": 0.47, "x": 0.206}, "torso": {"y0": 0.3, "y1": 0.53, "hw": 0.206, "hd": 0.212, "cz": -0.0163}, "chestFront": 0.2017, "hand": [0.3562, 0.2371, 0.014, 0.1001], "hand2": [-0.3575, 0.2367, 0.0133, 0.1002], "foot": {"x": 0.1776, "z": 0.0601, "toe": 0.1935}, "fit": {"y0": 0.26, "y1": 0.54, "hw": 0.42, "hd": 0.263, "cz": -0.0337}}, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'hero.wave': {"dir": "assets/hero/brick/", "tris": 17521, "kb": 993, "size": 1.95, "legs": {"legL": [-0.1269, 0.142, 0.054], "legR": [0.1299, 0.142, 0.0572]}, "hand": [0.3449, 0.2964, 0.0119], "rig": {"head": {"y": 0.815, "r": 0.268, "cx": 0.0004, "cz": -0.0172, "top": 1.0, "brow": 0.8335}, "neckY": 0.63, "shoulder": {"y": 0.56, "x": 0.1877}, "torso": {"y0": 0.3, "y1": 0.62, "hw": 0.1877, "hd": 0.126, "cz": 0.0327}, "chestFront": 0.2182, "hand": [0.3317, 0.1876, 0.0386, 0.1004], "hand2": [-0.3351, 0.1872, 0.0394, 0.0991], "foot": {"x": 0.1382, "z": 0.0655, "toe": 0.1727}, "fit": {"y0": 0.3, "y1": 0.63, "hw": 0.362, "hd": 0.1959, "cz": 0.068}}, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
@@ -9211,6 +9222,12 @@ const POSE_REAR = [-0.45, 0.35, 0, 0.1], POSE_LEAN = [-0.4, 0.25, 0, 0.14], POSE
 const MOVE_POSE = { slam: POSE_REAR, quake: POSE_REAR, ripple: POSE_REAR, cross: [-0.35, 0.3, 0, 0.12], cleave: [-0.2, 0.1, 0.9, 0.05], flurry: [-0.15, 0.1, 1.1, 0.04], sweep: [-0.1, 0.05, -1.5, 0.03],
   pounce: POSE_COIL, ambush: [0.3, -0.25, 0, -0.35], burrow: [0.1, -0.8, 0, -0.3], beam: POSE_LEAN, snipe: POSE_LEAN, fan: POSE_LEAN, boomerang: [-0.3, 0.2, 0.7, 0.08], nova: [-0.1, 0.4, 0, 0.18], spiral: [-0.1, 0.35, 0.6, 0.12],
   rain: [-0.5, 0.45, 0, 0.12], mortar: POSE_LEAN, breath: [-0.5, 0.2, 0, 0.16], zap: POSE_LEAN, vortex: [-0.3, 0.4, 0, 0.1], trap: POSE_LEAN, pool: [0.15, 0, 0, -0.1] };
+// the strike that follows the wind-up (and every plain attack): slams drop and squash, pounces and bites lunge,
+// sweeps swing through, shots kick back, novas pulse, burrowers burst up
+const STRIKE_OF = { slam: 'slam', quake: 'slam', ripple: 'slam', cross: 'slam', spikes: 'slam', trample: 'slam', cleave: 'swing', flurry: 'swing', sweep: 'swing',
+  pounce: 'lunge', ambush: 'lunge', burrow: 'burst', beam: 'recoil', snipe: 'recoil', fan: 'recoil', boomerang: 'swing', mortar: 'recoil', rain: 'recoil', zap: 'recoil', trap: 'recoil',
+  breath: 'breath', nova: 'pulse', spiral: 'pulse', vortex: 'pulse', pool: 'slam' };
+const SHOOTER_KIT = { shooter: 1, spray: 1, turret: 1 };
 AssetSlots.register('enemy', (o) => {
   const root = new THREE.Group();
   const ED = CFG.enemies[o.type] || {}, bt = enemyBase(o.type), tint = ED.tint != null ? new THREE.Color(ED.tint) : null, esz = ED.scale || 1;
@@ -9237,7 +9254,7 @@ AssetSlots.register('enemy', (o) => {
   if (o.elite) {
     aura = pxRingMesh(0.88, 1.05, { color: 0xffc94a, transparent: true, opacity: 0.6, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -40 }, 8, 0.62); aura.position.y = 0.25; root.add(aura);
   }
-  let phase = Math.random() * 6, deadT = 0;
+  let phase = Math.random() * 6, deadT = 0, relK = null, struck = false;
   return {
     root,
     update(e, dt, t) {
@@ -9248,24 +9265,47 @@ AssetSlots.register('enemy', (o) => {
       phase += dt * (2 + (e.moveAmt || 0) * 8);
       pivot.rotation.set(0, 0, 0); pivot.scale.set(1, 1, 1); // the move pose below adds to (and stretches) whatever the body animation sets, so both reset every frame
       if (bt === 'slime') { const b = Math.abs(Math.sin(phase)); pivot.scale.set(1 + (1 - b) * 0.18, 0.8 + b * 0.3, 1 + (1 - b) * 0.18); pivot.position.y = b * 0.25 * (e.moveAmt || 0.2); }
-      else if (bt === 'wolf') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.12 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'wolf') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.12 * (e.moveAmt || 0); }
       else if (bt === 'beetle') { pivot.position.y = Math.abs(Math.sin(phase * 2)) * 0.05 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.25 + Math.sin(t * 40) * 0.05 : 0; pivot.rotation.z = Math.sin(phase * 2) * 0.04 * (e.moveAmt || 0); }
-      else if (bt === 'wraith') { pivot.position.y = Math.sin(t * 2.2 + phase) * 0.25 + 0.35; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'wraith') { pivot.position.y = Math.sin(t * 2.2 + phase) * 0.25 + 0.35; pivot.rotation.x = 0.1; }
       else if (bt === 'boar') { pivot.position.y = Math.abs(Math.sin(phase * 1.5)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.2 + Math.sin(t * 40) * 0.04 : 0; }
       else if (bt === 'spider') { pivot.position.y = Math.abs(Math.sin(phase * 2.5)) * 0.05; pivot.rotation.z = Math.sin(phase * 2.5) * 0.06 * (e.moveAmt || 0); }
-      else if (bt === 'yeti') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.15 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.35; pivot.rotation.z = Math.sin(phase * 0.8) * 0.06 * (e.moveAmt || 0); }
-      else if (bt === 'crawler') { pivot.position.y = Math.abs(Math.sin(phase * 3)) * 0.04; pivot.rotation.z = Math.sin(phase * 3) * 0.08 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.25; }
-      else if (bt === 'drowned') { pivot.position.y = Math.sin(t * 1.9 + phase) * 0.22 + 0.3; pivot.rotation.z = Math.sin(t * 1.3 + phase) * 0.1; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
-      else if (bt === 'seraph') { pivot.position.y = Math.sin(t * 2.4 + phase) * 0.25 + 0.35; pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
-      else if (bt === 'warden') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.22 + Math.sin(t * 40) * 0.04 : (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'yeti') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.15 * (e.moveAmt || 0); pivot.rotation.z = Math.sin(phase * 0.8) * 0.06 * (e.moveAmt || 0); }
+      else if (bt === 'crawler') { pivot.position.y = Math.abs(Math.sin(phase * 3)) * 0.04; pivot.rotation.z = Math.sin(phase * 3) * 0.08 * (e.moveAmt || 0); }
+      else if (bt === 'drowned') { pivot.position.y = Math.sin(t * 1.9 + phase) * 0.22 + 0.3; pivot.rotation.z = Math.sin(t * 1.3 + phase) * 0.1; pivot.rotation.x = 0.1; }
+      else if (bt === 'seraph') { pivot.position.y = Math.sin(t * 2.4 + phase) * 0.25 + 0.35; }
+      else if (bt === 'warden') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.22 + Math.sin(t * 40) * 0.04 : 0; }
       else if (bt === 'sentinel') { pivot.position.y = Math.sin(t * 1.6 + phase) * 0.2 + 0.25; pivot.rotation.y = t * 0.8; }
+      else if (bt === 'toad') { const h = Math.max(0, Math.sin(phase * 0.9)); pivot.position.y = h * 0.35 * (e.moveAmt || 0); pivot.scale.set(1 + (1 - h) * 0.08, 0.92 + h * 0.14, 1 + (1 - h) * 0.08); pivot.rotation.x = -h * 0.12 * (e.moveAmt || 0); }
+      else if (bt === 'bat') { const f = Math.sin(t * 9 + phase); pivot.position.y = 0.55 + f * 0.12; pivot.scale.x = 1 + f * 0.12; pivot.rotation.x = 0.15; }
+      else if (bt === 'hornet') { pivot.position.y = 0.5 + Math.sin(t * 5 + phase) * 0.12 + Math.sin(t * 61) * 0.015; pivot.rotation.z = Math.sin(t * 3.1 + phase) * 0.12; pivot.rotation.x = 0.12; }
+      else if (bt === 'jelly') { const b = Math.sin(t * 2.2 + phase); pivot.position.y = 0.45 + b * 0.22; pivot.scale.set(1 - b * 0.07, 1 + b * 0.1, 1 - b * 0.07); }
+      else if (bt === 'wyvern') { pivot.position.y = Math.abs(Math.sin(phase * 0.9)) * 0.12 * (e.moveAmt || 0) + Math.sin(t * 2 + phase) * 0.04; pivot.rotation.z = Math.sin(phase * 0.9) * 0.06 * (e.moveAmt || 0); }
+      else if (bt === 'viper') { pivot.rotation.z = Math.sin(phase * 1.6) * 0.1; pivot.rotation.y = Math.sin(phase * 0.8) * 0.18; pivot.scale.y = 1 + Math.sin(t * 2 + phase) * 0.03; }
+      else if (bt === 'scorpion' || bt === 'crab') { pivot.position.y = Math.abs(Math.sin(phase * 2.6)) * 0.04; pivot.rotation.z = Math.sin(phase * 2.6) * 0.07 * (e.moveAmt || 0); }
+      else if (bt === 'myconid') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.08 * (e.moveAmt || 0); pivot.rotation.z = Math.sin(phase) * 0.1 * (e.moveAmt || 0); pivot.scale.y = 1 + Math.sin(t * 1.7 + phase) * 0.025; }
+      else if (bt === 'glassbull') { pivot.position.y = Math.abs(Math.sin(phase * 1.3)) * 0.09 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.2 + Math.sin(t * 40) * 0.04 : 0; }
       else { pivot.position.y = Math.sin(t * 3 + phase) * 0.2 + 0.2; pivot.rotation.z = Math.sin(t * 2 + phase) * 0.08; }
       // wind-up poses: each move has its own telegraph in the body (rear up, coil, lean back, wind the arms), eased in as the marker fills
+      if (e.windK && e.windT > 0) relK = e.windK;
       if (e.windK && e.windT > 0) {
         const wp = clamp(1 - e.windT / (e.windMax || 1), 0, 1), ez = wp * wp * (3 - 2 * wp), P = MOVE_POSE[e.windK] || MOVE_POSE.slam;
         pivot.rotation.x += P[0] * ez; pivot.position.y += P[1] * ez; pivot.rotation.y += P[2] * ez; pivot.scale.y *= 1 + P[3] * ez; pivot.scale.x *= 1 - P[3] * 0.5 * ez; pivot.scale.z *= 1 - P[3] * 0.5 * ez;
         if (Math.random() < 0.25 * wp * fxK) burst(e.x + (Math.random() - 0.5) * e.r * 2, 0.15, e.z + (Math.random() - 0.5) * e.r * 2, 1, BIOME_TINT[areaBiome(e.zone)] || 0xffffff, 1.2, 0.35, 0.2, -0.4, 1.4);
       }
+      // the strike: attackAnim jumps to 1 when a move or a plain attack goes off and fades in a third of a second
+      const a = e.attackAnim || 0;
+      if (a > 0.02 && !(e.windT > 0)) {
+        const k = STRIKE_OF[relK] || (SHOOTER_KIT[ED.kit] ? 'recoil' : 'lunge'), v = a * a, ez = 1 - Math.pow(1 - a, 3);
+        if (k === 'slam') { pivot.position.y -= 0.12 * v; pivot.rotation.x += 0.4 * ez; pivot.scale.y *= 1 - 0.28 * v; pivot.scale.x *= 1 + 0.18 * v; pivot.scale.z *= 1 + 0.18 * v; }
+        else if (k === 'lunge') { pivot.position.z += 0.55 * Math.sin(a * Math.PI); pivot.rotation.x += 0.3 * ez; pivot.scale.z *= 1 + 0.12 * v; }
+        else if (k === 'swing') { const P = MOVE_POSE[relK] || MOVE_POSE.cleave; pivot.rotation.y -= P[2] * 1.3 * Math.sin(a * Math.PI * 0.5); pivot.position.z += 0.2 * v; }
+        else if (k === 'recoil') { pivot.position.z -= 0.22 * v; pivot.rotation.x -= 0.22 * v; pivot.scale.z *= 1 - 0.08 * v; }
+        else if (k === 'breath') { pivot.rotation.x += 0.35 * ez; pivot.position.z += 0.18 * ez; pivot.scale.z *= 1 + 0.1 * ez; }
+        else if (k === 'pulse') { const g = 1 + 0.22 * v; pivot.scale.multiplyScalar(g); pivot.position.y += 0.1 * v; }
+        else if (k === 'burst') { pivot.position.y += 0.6 * Math.sin(a * Math.PI); pivot.rotation.x -= 0.3 * v; }
+        if (!struck && a > 0.85) { struck = true; if (k === 'slam' && fxK > 0) burst(e.x, 0.1, e.z, Math.round(10 * fxK), BIOME_TINT[areaBiome(e.zone)] || 0xc8b89a, 4.5, 0.45, 0.32, -2, 0.6); }
+      } else { struck = false; if (!(e.windT > 0)) relK = null; }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
       else if (e.invulnT > 0) mat.emissive.setRGB(0.15 + f, 0.55 + f, 0.85 + f);
@@ -11064,6 +11104,8 @@ function dungeonPalette(zn) {
   return { a: base.clone().multiplyScalar(0.62), b: (g ? new THREE.Color(g[1]) : base.clone()).multiplyScalar(0.5), wall: fog.clone().lerp(new THREE.Color(0x2a2430), 0.55),
     trim: fog.clone().lerp(new THREE.Color(0x14101c), 0.75), fog: fog.clone().multiplyScalar(0.35) };
 }
+// one dressing prop per biome: [world model, height in m]
+const DUNGEON_THEME_PROP = [['delve_sarcophagus', 1.3], ['delve_icecoffin', 1.4], ['delve_slagcart', 1.6], ['delve_bookshelf', 3.0], ['delve_coralshrine', 3.0], ['delve_meteor', 1.8]];
 function buildDungeonView(D) {
   disposeDungeonView();
   const zn = CFG.world.zones[D.zone], pal = dungeonPalette(zn), rng = mulberry32(strSeed(D.id) ^ 0x9e37), parts = [];
@@ -11094,6 +11136,16 @@ function buildDungeonView(D) {
       { x: m.x0 + ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 });
   });
   dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz), WorldModels.place(dungeonGroup, 'clutter', clutter));
+  // the biome's own dressing along the walls of every hall but the first and the boss's (TRELLIS.2 models):
+  // root-split sarcophagi, glacier coffins, slag carts, toppled bookshelves, coral shrines, fallen stars
+  const [themeId, themeS] = DUNGEON_THEME_PROP[areaBiome(D.zone)] || DUNGEON_THEME_PROP[0], theme = [];
+  D.rooms.forEach((m, i) => {
+    if (i === 0 || i === D.rooms.length - 1) return;
+    const hx = m.hx || m.h, hz = m.hz || m.h, ins = 1.6 + themeS * 0.35, spots = [[m.x0 + ins, m.z + 0.78 * hz], [m.x1 - ins, m.z - 0.78 * hz]];
+    if (D.delve && hx >= 15) spots.push([m.x - 0.78 * hx, m.z0 + ins], [m.x + 0.78 * hx, m.z1 - ins]);
+    for (const [x, z] of spots) if (rng() < 0.85) theme.push({ x, z, ry: Math.atan2(m.x - x, m.z - z) + (rng() - 0.5) * 0.5, s: themeS * (0.9 + rng() * 0.2) });
+  });
+  if (theme.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, themeId, theme, { bright: 1.15 }));
   // brazier flames share one additive mesh so the flicker is a single opacity change
   const fp = braz.map((b) => part(GEO.ico0, 0xffa040, [b.x, b.s * 0.98, b.z], null, [0.32, 0.5, 0.32]));
   if (fp.length) { dungeonParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); dungeonGroup.add(dungeonParts.flame); }
@@ -11629,7 +11681,8 @@ const WORLD_MODEL_BOX = {
   boss_frost: [0.99, 0.51], boss_golem: [1.04, 0.55], boss_magma: [1.01, 0.47], boss_void: [1, 0.5], brazier: [0.86, 0.84], bucket: [1.48, 1.31],
   bush_a_1: [1.21, 1.24], bush_a_2: [3.36, 3.16], bush_a_3: [0.77, 0.83], bush_flower_1: [1.21, 1.24], cage: [1.06, 1.1], camp: [3.01, 2.74],
   cave: [1.5, 1.21], chest: [1.46, 1.37], chest_open: [1.13, 1.07], clutter: [2.44, 2.16], crate_1: [0.91, 0.98], crate_2: [1.02, 1.02],
-  crystal: [1.04, 1.05], delve_altar: [0.58, 0.57], delve_echo: [1, 0.82], delve_hoard: [2.39, 2.45], delve_moonwell: [1.3, 1.3], delve_throne: [0.69, 0.59],
+  crystal: [1.04, 1.05], delve_altar: [0.58, 0.57], delve_bookshelf: [0.53, 0.46], delve_coralshrine: [0.44, 0.45], delve_echo: [1, 0.82], delve_hoard: [2.39, 2.45],
+  delve_icecoffin: [1.6, 0.83], delve_meteor: [1.43, 1.43], delve_moonwell: [1.3, 1.3], delve_sarcophagus: [2.27, 1.52], delve_slagcart: [0.83, 1.26], delve_throne: [0.69, 0.59],
   dragon_skull: [1.29, 1.6], dummy: [0.43, 0.31], dwall: [2.24, 0.48], elder_stump: [1.33, 1.42], fairy_ring: [2.91, 2.91], farm_crate: [2.93, 1.7],
   fence: [2.46, 0.14], floating_isle: [0.93, 0.98], flower_1: [0.72, 0.77], flower_2: [0.67, 0.66], forge: [1.3, 1.25], fountain: [1.25, 1.26],
   frozen_fall: [1.46, 1.4], gatehouse: [1.27, 0.63], geyser: [2.13, 2.08], ghost_ship: [0.79, 0.5], glass_chimney: [0.75, 0.78], graves: [0.8, 0.77],
@@ -11639,7 +11692,7 @@ const WORLD_MODEL_BOX = {
   pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61], pond: [2.99, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39], ribcage: [2.8, 1.26],
   rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15], rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3], rock_a_3: [1.48, 1.5],
   ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61], ruined_tower: [1.24, 1.06], rune_obelisk: [0.52, 0.51], sapphire_brazier: [0.65, 0.63], sea_stack: [0.9, 0.88],
-  siege_archer: [0.49, 0.52], siege_ballista: [1.67, 1.66], siege_barracks: [1.03, 1.56], siege_cannon: [1.64, 0.94], siege_gate: [1.03, 0.3], siege_hut: [1.25, 1.15],
+  siege_archer: [0.49, 0.52], siege_ballista: [1.67, 1.66], siege_barracks: [1.18, 1.04], siege_cannon: [1.64, 0.94], siege_gate: [1.03, 0.3], siege_hut: [1.25, 1.15],
   siege_mage: [0.49, 0.45], siege_mine: [1.15, 1.13], siege_trap_bomb: [1.02, 1.02], siege_trap_spike: [5.57, 5.56], siege_trap_tar: [5.18, 5.21], siege_wall_iron: [5.34, 0.64],
   siege_wall_stone: [5.55, 0.67], siege_wall_wood: [1.88, 0.36], signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], snow_mountain: [1.34, 1.39], stall: [1.01, 1.29],
   stall_kit_1: [0.7, 0.35], stall_kit_2: [1.15, 0.4], standing_stone: [0.69, 0.73], statue: [0.65, 0.64], stump: [1.12, 1.05], sundial: [1.74, 1.75],
