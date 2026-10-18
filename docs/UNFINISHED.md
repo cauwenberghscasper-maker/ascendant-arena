@@ -1,3 +1,15 @@
+# Chests: Open 5 per kind, resources in every chest, rarity by chest and level (18 Oct 2026, branch `claude/chest-rewards`)
+Casper: Open 5 opened every kind of chest; chests should give resources and gear (and heroes); better chests more
+special items, low-level chests lower rarity.
+- **Open 5** (`openCasesFast`) only opens the selected kind; the button shows ×N of that kind, "Open N more" too.
+- **Rewards** (`caseLoot`, replaces `caseBonus`): every chest gives its gear piece plus gold (~0.3 h of Bank income ×
+  `res`), biome ore + monster part, Bastion wood/stone (iron from Treasure up) once level 20, gems (always from
+  Treasure up, 30% below), a 4% six-hour gold jackpot and a hero chance per kind (`CFG.cases[k].hero`, 0.2-1%).
+- **Rarity:** new weights per kind (Hunter/Geode low, Treasure mid, Colossus/regional high, Rift highest). Epic and up
+  shrink below about level 60 (`caseLevelMul`). The Legendary guarantee only counts chests with at least 5% Legendary
+  (`casePity`). Named item chance per kind (`named`: 30% Hunter → 65% Rift) on top of the normal named roll.
+- **Open:** balance not playtested; check the resource amounts feel right next to Bastion wave pay.
+
 # Bastion: Clash of Clans + Balloons TD (18 Oct 2026, branch `claude/bastion-coc`)
 Casper: shop didn't scroll, drag should show the building on the board, limits per tower kind, camp resources, straight
 wall lines, auto waves after the first start with time to upgrade, smaller models with looks per level and animations,

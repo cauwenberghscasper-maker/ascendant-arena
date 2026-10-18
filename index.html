@@ -15289,16 +15289,18 @@ function openPlayers() {
 // Cases are only ever EARNED in play (drops, bosses, Rift, Level Road, Vault, Expeditions).
 // They are never sold for money or for any currency, and every case shows its odds.
 // ---------------------------------------------------------------------
+// w: rarity weights at full level (see caseTable: low-level chests roll lower), hi: endgame weight scale,
+// named: chance the gear piece is a named collection item, res: size of the resource bundle, hero: chance of a hero
 CFG.cases = {
-  hunter: { name: 'Hunter’s Chest', sub: 'Dropped by monsters, elites, dens and shrines', col: '#58b4ff', w: { common: 14, uncommon: 24, rare: 30, epic: 21, legendary: 9 }, hi: 5 },
-  treasure: { name: 'Treasure Chest', sub: 'From the Vault, expeditions and level-ups', col: '#ffc94a', w: { uncommon: 20, rare: 36, epic: 28, legendary: 14 }, hi: 6 },
-  boss: { name: 'Colossus Chest', sub: 'World boss loot', col: '#ff7a45', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  rift: { name: 'Rift Chest', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 46, legendary: 40 }, hi: 14 },
-  milestone: { name: 'Milestone Chest', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0 },
-  frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  geode: { name: 'Geode', sub: 'Cracked from ore veins (Mining) · also holds a Museum mineral', col: '#7fe3c4', w: { uncommon: 30, rare: 40, epic: 22, legendary: 8 }, hi: 4 },
+  hunter: { name: 'Hunter’s Chest', sub: 'Dropped by monsters, elites, dens and shrines', col: '#58b4ff', w: { common: 26, uncommon: 32, rare: 27, epic: 12, legendary: 3 }, hi: 3, named: 0.3, res: 1, hero: 0.002 },
+  treasure: { name: 'Treasure Chest', sub: 'From the Vault, expeditions and level-ups', col: '#ffc94a', w: { uncommon: 24, rare: 36, epic: 28, legendary: 12 }, hi: 6, named: 0.4, res: 1.6, hero: 0.004 },
+  boss: { name: 'Colossus Chest', sub: 'World boss loot', col: '#ff7a45', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
+  rift: { name: 'Rift Chest', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 44, legendary: 46 }, hi: 16, named: 0.65, res: 3.5, hero: 0.01 },
+  milestone: { name: 'Milestone Chest', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0, named: 0.5, res: 2, hero: 0.005 },
+  frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
+  ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
+  celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
+  geode: { name: 'Geode', sub: 'Cracked from ore veins (Mining) · also holds a Museum mineral', col: '#7fe3c4', w: { common: 22, uncommon: 34, rare: 28, epic: 13, legendary: 3 }, hi: 2, named: 0.3, res: 1, hero: 0.002 },
 };
 CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial', 'geode'];
 const CASE_LUCK = { legendary: 30, mythic: 120 };
@@ -15316,11 +15318,17 @@ function caseTable(c) {
     return w;
   }
   w = Object.assign({}, K.w);
+  // low-level chests roll lower: Epic and up shrink until about level 60 (Legendary twice as hard, and so on)
+  const g = caseLevelMul(c.l);
+  for (const r in w) if (rarIdx(r) >= 3) w[r] *= Math.pow(g, rarIdx(r) - 2);
   if (c.k === 'rift') { const n = c.n || 0; if (n >= 25) w.mythic = 6 + Math.min(20, (n - 25) * 0.4); if (n >= 50) w.ancient = 2 + Math.min(10, (n - 50) * 0.15); if (n >= 100) w.divine = 0.6 + Math.min(4, (n - 100) * 0.05); }
   else { const H = highWeights(c.t || 0, c.z || 0); for (const h of HIGH_RAR) if (H[h] > 0) w[h] = H[h] * K.hi; }
   if (c.f) for (const r in w) if (rarIdx(r) < rarIdx(c.f)) delete w[r];
   return w;
 }
+function caseLevelMul(l) { return Math.max(0.25, Math.min(1, 0.25 + (l || 1) / 80)); }
+// the Legendary guarantee only counts chests that can really give one (at least 5%), so low chests don't force it
+function casePity(w) { let tot = 0; for (const k in w) tot += w[k]; return !!w.legendary && w.legendary / tot >= 0.05; }
 function caseOdds(c) { const w = caseTable(c); let tot = 0; for (const k in w) tot += w[k]; return RARITIES.filter((r) => w[r]).map((r) => [r, w[r] / tot]); }
 function addCase(k, o) {
   const p = G.profile; o = o || {};
@@ -15333,32 +15341,47 @@ function rollCase(c) {
   const p = G.profile, w = caseTable(c); let r = rollRarity(w), lucky = false;
   const L = p.caseLuck || (p.caseLuck = { legendary: 0, mythic: 0 });
   if (w.mythic && rarIdx(r) < 5 && L.mythic + 1 >= CASE_LUCK.mythic) { r = 'mythic'; lucky = true; }
-  else if (w.legendary && rarIdx(r) < 4 && L.legendary + 1 >= CASE_LUCK.legendary) { r = 'legendary'; lucky = true; }
-  L.legendary = rarIdx(r) >= 4 ? 0 : L.legendary + 1;
+  else if (casePity(w) && rarIdx(r) < 4 && L.legendary + 1 >= CASE_LUCK.legendary) { r = 'legendary'; lucky = true; }
+  if (rarIdx(r) >= 4) L.legendary = 0; else if (casePity(w)) L.legendary++;
   if (w.mythic) L.mythic = rarIdx(r) >= 5 ? 0 : L.mythic + 1;
   return { r, lucky };
 }
-// bonus on top of the item: a very rare hero, a gold or gem jackpot, or crafting materials (shown with the odds)
-const CASE_BONUS = { hero: 0.002, gold: 0.04, gems: 0.03, mats: 0.25 };
-function caseBonus() {
-  const p = G.profile, x = Math.random(); let acc = 0;
+// every chest also holds resources: gold, the biome's crafting materials, Bastion wood/stone/iron once the fort is
+// open, gems from the bigger chests, a 4% gold jackpot and a very rare hero (all shown with the odds)
+const CASE_JACKPOT = 0.04;
+function caseLoot(c) {
+  const p = G.profile, K = CFG.cases[c.k] || CFG.cases.hunter, m = K.res || 1, L = Math.max(1, c.l || p.level), out = { gold: 0, gems: 0, mats: [], fort: null, hero: null, jackpot: false };
   const locked = CFG.brawlerOrder.filter((id) => id !== STARTER_HERO && !p.unlocked.attacks.includes(id) && !(CFG.attacks[id].unlock && CFG.attacks[id].unlock.sigils != null));
-  if (locked.length && x < (acc += CASE_BONUS.hero)) {
-    const id = pick(locked); p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id);
-    ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: CFG.attacks[id].name }); return { k: 'hero', id, name: CFG.brawlers[id].name };
+  if (locked.length && Math.random() < (K.hero || 0)) {
+    const id = pick(locked); p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); out.hero = { id, name: CFG.brawlers[id].name };
+    ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: CFG.attacks[id].name });
   }
-  if (x < (acc += CASE_BONUS.gold)) { const n = Math.round(6 * Math.pow(CFG.enemies.goldGrowth, p.level - 1) * 360); addGold(n, true); return { k: 'gold', n }; } // about six hours of Bank income
-  if (x < (acc += CASE_BONUS.gems)) { const n = 20 + Math.round(p.level / 3); addEssence(n); return { k: 'gems', n }; }
-  // CB (crafting) is absent in the node-only checks
-  if (typeof CB !== 'undefined' && x < (acc += CASE_BONUS.mats)) { const B = CB[zoneBiome(highestZone(p.level))]; return { k: 'mats', got: addMats([[B.ore, 8 + p.level / 10], [B.part, 3 + p.level / 25]], true) }; }
-  return null;
+  const hour = 6 * Math.pow(CFG.enemies.goldGrowth, L - 1) * 60; // an hour of Bank income at the chest's level
+  out.jackpot = Math.random() < CASE_JACKPOT; out.gold = Math.max(1, Math.round(hour * (out.jackpot ? 6 : 0.3 * m))); addGold(out.gold, true);
+  if (m >= 1.5 || Math.random() < 0.3) { out.gems = Math.round((5 + L / 10) * m); addEssence(out.gems); }
+  // CB (crafting) and the fort are absent in the node-only checks
+  if (typeof CB !== 'undefined') { const B = CB[zoneBiome(highestZone(p.level))]; out.mats = addMats([[B.ore, Math.round((6 + L / 12) * m)], [B.part, Math.round((2 + L / 30) * m)]], true); }
+  if (typeof myFort !== 'undefined' && p.level >= CFG.siege.unlock) {
+    const M = myFort(); out.fort = { wood: Math.round((10 + L / 10) * m), stones: Math.round((5 + L / 20) * m), iron: m >= 1.5 ? Math.round((1 + L / 60) * m) : 0 };
+    for (const q of CFG.siege.res) M[q] = (M[q] || 0) + out.fort[q];
+  }
+  return out;
 }
-function bonusHTML(b) {
-  if (!b) return '';
-  if (b.k === 'hero') return `<div class="cbonus hero"><b>HERO!</b> ${escapeHTML(b.name)} joins you</div>`;
-  if (b.k === 'gold') return `<div class="cbonus gold"><b>JACKPOT</b> ${ICON.coin}${fmtK(b.n)}</div>`;
-  if (b.k === 'gems') return `<div class="cbonus gems"><b>GEMS</b> ${ICON.ess}${fmtK(b.n)}</div>`;
-  return `<div class="cbonus mats">${b.got.map(([id, n]) => matChip(id, null, G.profile).replace(/<b>.*?<\/b>/, `<b>+${n}</b>`)).join('')}</div>`;
+// one line of chips for the resources (several chests are added together first)
+function lootSum(list) {
+  const t = { gold: 0, gems: 0, mats: {}, fort: null, hero: [], jackpot: false };
+  for (const b of list) { if (!b) continue; t.gold += b.gold; t.gems += b.gems; t.jackpot = t.jackpot || b.jackpot; if (b.hero) t.hero.push(b.hero.name);
+    for (const [id, n] of b.mats || []) t.mats[id] = (t.mats[id] || 0) + n;
+    if (b.fort) { t.fort = t.fort || { wood: 0, stones: 0, iron: 0 }; for (const q in b.fort) t.fort[q] += b.fort[q]; } }
+  return t;
+}
+function lootHTML(list) {
+  const t = lootSum(list), chips = [];
+  if (t.gold) chips.push(`<span class="mat">${ICON.coin}<b>+${fmtK(t.gold)}</b></span>`);
+  if (t.gems) chips.push(`<span class="mat">${ICON.ess}<b>+${fmtK(t.gems)}</b></span>`);
+  for (const id in t.mats) chips.push(matChip(id, null, G.profile).replace(/<b>.*?<\/b>/, `<b>+${t.mats[id]}</b>`));
+  if (t.fort) { const ic = { wood: ICON.wood, stones: ICON.stone, iron: ICON.iron }; for (const q in t.fort) if (t.fort[q]) chips.push(`<span class="mat">${ic[q]}<b>+${fmtK(t.fort[q])}</b></span>`); }
+  return `${t.hero.map((n) => `<div class="cbonus hero"><b>HERO!</b> ${escapeHTML(n)} joins you</div>`).join('')}${t.jackpot ? '<div class="cbonus gold"><b>JACKPOT</b> six hours of gold</div>' : ''}<div class="cbonus mats">${chips.join('')}</div>`;
 }
 // opening grants the item at once (so closing mid-spin never loses it); the reel only shows it
 function openCase(id) {
@@ -15366,13 +15389,16 @@ function openCase(id) {
   // Case rewards are always kept: when the bag is full they overflow it instead of blocking the case.
   const c = p.cases.splice(i, 1)[0], { r, lucky } = rollCase(c);
   const it = makeItem(pick(CFG.gear.slots), r, c.l);
+  // better chests turn their gear into a named collection item more often (the bag roll below still counts too)
+  const K = CFG.cases[c.k] || CFG.cases.hunter;
+  if (K.named > COLLECTION_CHANCE) rollCollectionItem(p, it, () => Math.random() * COLLECTION_CHANCE / K.named);
   p.stats.cases = (p.stats.cases || 0) + 1;
   p.records.bestCase = Math.max(p.records.bestCase || 0, rarIdx(r));
   grantItem(it, 'case');
-  const mineral = c.k === 'geode' ? crackGeode() : null, bonus = caseBonus();
+  const mineral = c.k === 'geode' ? crackGeode() : null, loot = caseLoot(c);
   G.dirty = true; checkAchievements();
   saveNow(true); // Persist the case removal and exact reward together, before the reel.
-  return { item: it, lucky, c, mineral, bonus, kept: p.bag.some((b) => b.id === it.id) };
+  return { item: it, lucky, c, mineral, loot, kept: p.bag.some((b) => b.id === it.id) };
 }
 
 // --- Vault: fills while you play or are away; collect any time ---------------------------------
@@ -15526,9 +15552,10 @@ function openCases(sel) {
     const c = groups[sel][0], odds = caseOdds(c), L = p.caseLuck || { legendary: 0, mythic: 0 };
     body = `<div class="caseHero" style="--cc:${CFG.cases[sel].col}">${caseArt(sel, 'big')}<div><b>${CFG.cases[sel].name}</b><small>${CFG.cases[sel].sub} · item level ${c.l}${c.f ? ` · at least ${CFG.gear.rarity[c.f].name}` : ''}</small></div></div>
       <div class="odds">${odds.map(([r, x]) => `<div class="od ${r}"><span>${CFG.gear.rarity[r].name}</span><b>${x >= 0.01 ? (x * 100).toFixed(1) : (x * 100).toFixed(2)}%</b></div>`).join('')}</div>
-      <div class="odds bonusOdds"><div class="od"><span>Hero</span><b>0.2%</b></div><div class="od"><span>Gold jackpot</span><b>4%</b></div><div class="od"><span>Gems</span><b>3%</b></div><div class="od"><span>Materials</span><b>25%</b></div></div>
-      <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
-    bar = selBar('', `${p.cases.length > 1 ? `<button class="ghost boost big5" data-act="caseFast" data-k="${sel}"><b>×${Math.min(5, p.cases.length)}</b><small>Open all</small></button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
+      <div class="odds bonusOdds"><div class="od"><span>Hero</span><b>${(CFG.cases[sel].hero * 100).toFixed(1)}%</b></div><div class="od"><span>Named item</span><b>${Math.round(Math.max(COLLECTION_CHANCE, CFG.cases[sel].named || 0) * 100)}%+</b></div><div class="od"><span>Gold jackpot</span><b>${CASE_JACKPOT * 100}%</b></div></div>
+      <p class="fine">Every chest also holds gold, crafting materials${p.level >= CFG.siege.unlock ? `, Bastion wood and stone${CFG.cases[sel].res >= 1.5 ? ' and iron' : ''}` : ''}${CFG.cases[sel].res >= 1.5 ? ' and gems' : ''}.</p>
+      <p class="fine">${casePity(caseTable(c)) ? `Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests` : 'Low-level chests roll lower rarities'}${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
+    bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost boost big5" data-act="caseFast" data-k="${sel}"><b>×${Math.min(5, groups[sel].length)}</b><small>Open ${Math.min(5, groups[sel].length)}</small></button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
   openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mGear">Back to Inventory</button><button class="ghost" data-act="mCollection">Collection Log</button></div>`, bar));
   $('panel').classList.add('wide');
@@ -15572,7 +15599,7 @@ function reelFinish(card) {
   Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
   if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
   const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
-  $('reelOut').innerHTML = `${bonusHTML(res.bonus)}${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
+  $('reelOut').innerHTML = `${lootHTML([res.loot])}${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
     <div class="row end">${res.kept ? `${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">${wearWord(it.slot)}</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
     ${left.length ? `<button class="primary gold" data-act="caseOpen" data-id="${left[0].id}">Open next (${left.length})</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
@@ -15580,8 +15607,8 @@ function reelFinish(card) {
 // the last one takes longest. Every reward is granted before the reels start, so closing never loses one.
 function openCasesFast(k) {
   const p = G.profile, out = [];
-  // the chosen kind first, then any other chests, so Open 5 also works with mixed chests
-  for (const id of p.cases.filter((c) => c.k === k).concat(p.cases.filter((c) => c.k !== k)).slice(0, 5).map((c) => c.id)) { const r = openCase(id); if (r) out.push(r); }
+  // only the chosen kind of chest
+  for (const id of p.cases.filter((c) => c.k === k).slice(0, 5).map((c) => c.id)) { const r = openCase(id); if (r) out.push(r); }
   if (!out.length) return;
   const N = 40, WIN = 32;
   const strips = out.map((res) => { const w = caseTable(res.c), cards = [];
@@ -15615,15 +15642,15 @@ function openCasesFast(k) {
 // one reel stops: its card lights up, rarer pulls flash the reel and shake the screen
 function reelLand(r, res, WIN) {
   const ri = rarIdx(res.item.rarity); r.strip.children[WIN].classList.add('win'); r.box.classList.add('landed', res.item.rarity);
-  if (ri >= 3 || (res.bonus && res.bonus.k !== 'mats')) { r.box.classList.add('jackpot'); if (!G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, 0.25 + 0.1 * ri); }
-  Sfx.play(res.bonus && res.bonus.k === 'hero' ? 'radiant' : ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
+  if (ri >= 3 || res.loot.hero || res.loot.jackpot) { r.box.classList.add('jackpot'); if (!G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, 0.25 + 0.1 * ri); }
+  Sfx.play(res.loot.hero ? 'radiant' : ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
 }
 function reelManyFinish(out, k) {
   Reel.done = true; UI.closable = true;
-  const p = G.profile, left = p.cases.length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
+  const p = G.profile, left = p.cases.filter((c) => c.k === k).length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
   if (best >= 4) burst(G.player.x, 1.4, G.player.z, 50 + best * 6, RAR_HEX[RARITIES[best]], 7, 1.1, 0.32, 3, 1.6);
   $('reelOut').innerHTML = `<div class="reelSum">${out.map((r) => `<div class="rcard ${r.item.rarity}"><img src="${thumbFor(r.item)}" alt=""><i></i></div>`).join('')}</div>
-    ${out.map((r) => bonusHTML(r.bonus)).join('')}
+    ${lootHTML(out.map((r) => r.loot))}
     <div class="row end">${left ? `<button class="primary" data-act="caseFast" data-k="${k}">Open ${Math.min(5, left)} more</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
 function openIdle(tab) {
