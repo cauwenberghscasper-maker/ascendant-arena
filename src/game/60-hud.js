@@ -231,7 +231,7 @@ function updateHUD(dt) {
   MM.t -= dt; if (MM.t <= 0) { MM.t = 0.15; drawMinimap(); }
   // fps
   setHidden('fps', !p.settings.fps);
-  if (p.settings.fps) setText('fps', `${Math.round(Q.fps)} fps · ${renderer.info.render.calls} calls · ${Q.dpr.toFixed(2)}x`);
+  if (p.settings.fps) setText('fps', `${Math.round(Q.fps)} fps · screen ${Math.round(Q.hz)} Hz · ${renderer.info.render.calls} calls · ${Q.dpr.toFixed(2)}x`);
   // banner fade
   if (bannerT > 0) { bannerT -= dt; if (bannerT <= 0) $('banner').className = ''; }
   // vignette

@@ -186,9 +186,17 @@ check('old saves retain current hero and inventory; auto salvage migration happe
   p.settings.autoSalvage=2;assert.equal(ctx.sanitizeProfile(p).settings.autoSalvage,2);
   assert.doesNotThrow(()=>ctx.sanitizeProfile({v:2,gear:null,brawlers:{hob:null}}));
 });
+check('120 Hz is on for new and older saves once, then keeps the player\'s choice',()=>{
+  assert.equal(ctx.sanitizeProfile(fresh()).settings.hz120,true);
+  const old=fresh();old.settings.hz120=false;delete old.hzVersion;const p=ctx.sanitizeProfile(old);assert.equal(p.settings.hz120,true);
+  p.settings.hz120=false;assert.equal(ctx.sanitizeProfile(JSON.parse(JSON.stringify(p))).settings.hz120,false);
+});
 check('60 Hz and 120 Hz schedulers preserve cadence on 60/90/120/144/165 Hz displays',()=>{
   const prefix=section('  if (now < nextFrameAt','  let dt =');
-  for(const cap of [60,120])for(const hz of [60,90,120,144,165]){const c={ms:1000/cap,nextFrameAt:0,count:0};vm.createContext(c);vm.runInContext('function tick(now){'+prefix+'count++;}',c);for(let i=0;i<hz*10;i++)c.tick(i*1000/hz);const want=Math.min(cap,hz)*10;assert(Math.abs(c.count-want)<=1,`${cap} cap, ${hz} Hz: ${c.count}`);}
+  { // a 120 Hz screen whose timestamps jitter by up to 0.8 ms keeps every frame at the 120 cap
+    const c={ms:1000/120,hz120:true,nextFrameAt:0,count:0};vm.createContext(c);vm.runInContext('function tick(now){'+prefix+'count++;}',c);
+    for(let i=0;i<1200;i++)c.tick(i*1000/120+(i%2?0.8:-0.8)+0.8);assert(c.count>=1195,`jittery 120 Hz: ${c.count}`);}
+  for(const cap of [60,120])for(const hz of [60,90,120,144,165]){const c={ms:1000/cap,hz120:cap===120,nextFrameAt:0,count:0};vm.createContext(c);vm.runInContext('function tick(now){'+prefix+'count++;}',c);for(let i=0;i<hz*10;i++)c.tick(i*1000/hz);const want=Math.min(cap,hz)*10;assert(Math.abs(c.count-want)<=1,`${cap} cap, ${hz} Hz: ${c.count}`);}
 });
 check('instance disposal frees owned materials once and retains shared resources',()=>{
   const code=section('  disposeInstance(model) {','  // tint a model');const c={};vm.createContext(c);vm.runInContext('const lib={'+code+'};this.dispose=lib.disposeInstance;',c);

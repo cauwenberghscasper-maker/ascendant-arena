@@ -8,8 +8,9 @@ function frame(now) {
   // Keep a 60 Hz cadence even on 90/120/144 Hz screens (up to 120 with the 120 Hz option). Accumulate elapsed
   // time between processed frames so simulation stays at its existing fixed timestep.
   const hz120 = !!(G.profile && G.profile.settings.hz120), ms = hz120 ? FRAME_MS_120 : FRAME_MS;
-  if (now < nextFrameAt - 0.5) return;
-  nextFrameAt = now + ms - (Math.max(0, now - nextFrameAt) % ms);
+  Q.raf++;
+  if (now < nextFrameAt - (hz120 ? 1 : 0.5)) return;
+  nextFrameAt = now < nextFrameAt ? nextFrameAt + ms : now + ms - ((now - nextFrameAt) % ms); // an early frame keeps the grid
   let dt = (now - lastFrame) / 1000; lastFrame = now;
   if (dt > 0.1) dt = 0.1;
   fxK = hz120 ? Math.min(1, dt * 60) : 1;

@@ -3353,7 +3353,7 @@ function defaultProfile() {
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
     essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
-    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, hz120: false, volMaster: 80, volMusic: 60, volSfx: 80, volUi: 70 },
+    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, hz120: true, volMaster: 80, volMusic: 60, volSfx: 80, volUi: 70 },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
   if (TEST_MODE) prof.playtest = TEST_PROFILE_TAG;
@@ -3391,6 +3391,7 @@ function sanitizeProfile(p) {
   out.starterBrawler = CFG.brawlerOrder.includes(p.starterBrawler) ? p.starterBrawler : out.cls;
   if (out.starterBrawler !== oldFirst && out.mastery && out.mastery['w:' + oldFirst]) out.mastery = Object.assign({}, out.mastery, { ['w:' + out.starterBrawler]: Math.max(out.mastery['w:' + out.starterBrawler] || 0, out.mastery['w:' + oldFirst]) });
   if (!p.npcVersion) { out.settings.npcs = true; out.npcVersion = 1; } // townsfolk are 3D models now: show them once for every save (still a switch in Options)
+  if (!p.hzVersion) { out.settings.hz120 = true; out.hzVersion = 1; } // 120 Hz became the default: switch it on once for every save (still a switch in Options)
   if (!p.mergeVersion) { out.settings.autoSalvage = 0; out.mergeVersion = 1; }
   if (!out.brawlers || typeof out.brawlers !== 'object') out.brawlers = {};
   if (!out.brawlers[out.cls]) out.brawlers[out.cls] = newBrawlerState();
@@ -7328,6 +7329,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'hi
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 // neutral tone mapping keeps the saturated toy colours but rolls off blown highlights (gold, white hair, sand)
 renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.debug.checkShaderErrors = LOCAL_PREVIEW; // reading the compile log waits for the GPU to finish compiling (a hitch whenever a new model or effect appears)
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = true;
 renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); G.paused = true; }, false);
 renderer.domElement.addEventListener('webglcontextrestored', () => { G.paused = false; }, false);
@@ -9727,7 +9729,7 @@ function updateCompanion(dt,t) {
 // --- adaptive quality ----------------------------------------------------------------------------
 // Render scale: pick once, then only ever step DOWN after sustained slowness.
 // Every scale change reallocates the canvas, which shows as a flash on phones, so changes are rare.
-const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.quality.cullFar, lowTier: false, noPost: false, lastChange: 0, locked: false };
+const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.quality.cullFar, lowTier: false, noPost: false, lastChange: 0, locked: false, raf: 0, hz: 60 };
 // phones and small devices start lighter: a lower pixel-ratio cap, a smaller shadow map, fewer parallel downloads,
 // and on weak ones no cinematic post pass at all (the adaptive steps below can still go further)
 const DEVICE = (() => { const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches, mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8;
@@ -9738,7 +9740,7 @@ function setDpr(d) { Q.dpr = clamp(d, CFG.quality.minDpr, Math.min(window.device
 function qualityTick(dt) {
   Q.frames++; Q.acc += dt;
   if (Q.acc < CFG.quality.sampleSec) return;
-  Q.fps = Q.frames / Q.acc; Q.frames = 0; Q.acc = 0;
+  Q.fps = Q.frames / Q.acc; Q.hz = Q.raf / Q.acc; Q.frames = 0; Q.raf = 0; Q.acc = 0;
   if (Q.locked || document.hidden || G.modal) { Q.slowWindows = 0; return; }
   if (Q.fps < CFG.quality.downFps) Q.slowWindows++; else Q.slowWindows = 0;
   if (Q.slowWindows >= 3 && performance.now() - Q.lastChange > 10000) {
@@ -10875,7 +10877,7 @@ function updateHUD(dt) {
   MM.t -= dt; if (MM.t <= 0) { MM.t = 0.15; drawMinimap(); }
   // fps
   setHidden('fps', !p.settings.fps);
-  if (p.settings.fps) setText('fps', `${Math.round(Q.fps)} fps · ${renderer.info.render.calls} calls · ${Q.dpr.toFixed(2)}x`);
+  if (p.settings.fps) setText('fps', `${Math.round(Q.fps)} fps · screen ${Math.round(Q.hz)} Hz · ${renderer.info.render.calls} calls · ${Q.dpr.toFixed(2)}x`);
   // banner fade
   if (bannerT > 0) { bannerT -= dt; if (bannerT <= 0) $('banner').className = ''; }
   // vignette
@@ -11632,6 +11634,13 @@ function openSaveCode() {
     <h4 class="sub">Load a code</h4><textarea id="codeIn" class="code" rows="3" placeholder="Paste a code that starts with AA8:"></textarea>
     <div class="row end"><button class="ghost" data-act="openSettings">Back</button><button class="warn" data-act="loadCode">Load and replace this hero</button></div>`);
 }
+// when 120 Hz is on but the browser only refreshes the page 60 times a second, say where the limit is (a page can't lift it)
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function hz120Hint(s) {
+  if (!s.hz120 || Q.hz > 75) return 'Smoother motion on 120 Hz screens. Uses more battery. Turn off to save battery. No change on 60 Hz screens';
+  return IS_IOS ? 'Safari limits web pages to 60 Hz. To unlock 120: iPhone Settings › Apps › Safari › Advanced › Feature Flags, turn off "Prefer Page Rendering Updates near 60fps", then reload'
+    : 'Your browser or phone gives this page only 60 Hz. Check battery saver and the display refresh-rate setting';
+}
 function openSettings() {
   UI.current = 'settings';
   const s = G.profile.settings;
@@ -11655,13 +11664,13 @@ function openSettings() {
       <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
     ${tg('fx', 'Cinematic effects', 'Bloom on crystals, lava, torches and magic, soft shadows and colour grading (with High graphics)')}
-    ${tg('hz120', '120 Hz', 'Smoother motion on 120 Hz screens. Uses more battery. No change on 60 Hz screens')}
+    ${tg('hz120', '120 Hz', hz120Hint(s))}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
     ${tg('calm', 'Reduce flashing', 'No red hit flash or screen shake, and a fixed render scale')}
     <div class="savebox sndbox"><b>Sound</b>${[['volMaster', 'Master'], ['volMusic', 'Music'], ['volSfx', 'Effects'], ['volUi', 'Menu']].map(([k, l]) => `<label class="vol"><span>${l}</span><input type="range" min="0" max="100" step="5" data-vol="${k}" value="${s[k] | 0}" aria-label="${l} volume"><output id="out-${k}">${s[k] | 0}</output></label>`).join('')}</div>
-    ${tg('mute', 'Mute sound', 'Turns off music, effects and menu sounds')}${tg('fps', 'Show FPS', 'Frame rate, draw calls and render scale')}
+    ${tg('mute', 'Mute sound', 'Turns off music, effects and menu sounds')}${tg('fps', 'Show FPS', 'Frame rate, the refresh rate your browser gives the game, draw calls and render scale')}
     <div class="row"><button class="ghost sm" data-act="credits">Credits and licenses</button></div>
     <div class="danger"><button class="ghost" data-act="reset1" id="reset1">${TEST_MODE ? 'Reset test hero' : 'Reset progress'}</button><span id="resetConfirm" hidden>${TEST_MODE ? 'Erase this test hero only?' : 'Erase this hero everywhere?'} <button class="warn" data-act="reset2">Yes, erase</button></span></div>`);
 }
@@ -14198,8 +14207,9 @@ function frame(now) {
   // Keep a 60 Hz cadence even on 90/120/144 Hz screens (up to 120 with the 120 Hz option). Accumulate elapsed
   // time between processed frames so simulation stays at its existing fixed timestep.
   const hz120 = !!(G.profile && G.profile.settings.hz120), ms = hz120 ? FRAME_MS_120 : FRAME_MS;
-  if (now < nextFrameAt - 0.5) return;
-  nextFrameAt = now + ms - (Math.max(0, now - nextFrameAt) % ms);
+  Q.raf++;
+  if (now < nextFrameAt - (hz120 ? 1 : 0.5)) return;
+  nextFrameAt = now < nextFrameAt ? nextFrameAt + ms : now + ms - ((now - nextFrameAt) % ms); // an early frame keeps the grid
   let dt = (now - lastFrame) / 1000; lastFrame = now;
   if (dt > 0.1) dt = 0.1;
   fxK = hz120 ? Math.min(1, dt * 60) : 1;

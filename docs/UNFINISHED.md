@@ -9,6 +9,19 @@ Next: phase 2 menu sounds — needs sound files first. Kenney "Interface Sounds"
 "Impact Sounds" (CC0) are the best fit; kenney.nl is blocked from cloud sessions, so Casper downloads them and attaches
 the zips. Then phase 3 music (needs tracks with a commercial licence). No sound files are in the repo yet.
 
+# Safari 60 Hz hint (18 Oct 2026, on `main`)
+iPhone Safari limits web pages to 60 Hz (feature flag "Prefer Page Rendering Updates near 60fps"); a page can't lift it.
+Options › 120 Hz now says how to turn that flag off when 120 Hz is on but the browser refreshes the page at 60 (`hz120Hint`).
+
+# 120 Hz by default, frame-rate work (18 Oct 2026, on `main`)
+Done: 120 Hz is on by default (old saves switched on once via `hzVersion`, still a switch in Options). Shader error checks only
+run on localhost (`renderer.debug.checkShaderErrors`): reading the compile log stalled the frame whenever a new model or effect
+appeared. 120 Hz pacing tolerates 1 ms of timestamp jitter and keeps its grid. Show FPS now also prints "screen N Hz", the
+refresh rate the browser actually gives the page. Measured load (town, 390x844): ~58 draw calls, ~380k triangles incl. the
+1024 shadow map, game JS ~2-3 ms per frame, so a high-end phone is not GPU/CPU bound at 120.
+Open: if "screen" reads 60 the browser caps the page (iPhone Safari limits web pages to 60; Android battery saver does too).
+The store apps would need native settings for ProMotion (iOS `CADisableMinimumFrameDurationOnPhone`); not set up yet.
+
 # Dungeon team power set very low (18 Oct 2026, on `main`)
 Casper's party couldn't enter: `CFG.delve.powK` 1 → 0.05 and the per-hero floor 0.7 → 0 (`src/game/36b-delve.js`); a teammate whose Power hasn't arrived yet no longer counts as 0. Raise them again once parties work on real phones.
 
@@ -33,7 +46,7 @@ re-export those three models with clean normals.
 - **Next steps:** test a party on two real phones against the live Supabase project (create + join by code, random match, revive); then rejoin-after-disconnect and set pieces in the Collection Log.
 
 # 120 Hz option (18 Oct 2026, on `main`)
-Done: Options › 120 Hz (`settings.hz120`, off by default). The sim still steps at 60 Hz; at 120 Hz each frame draws heroes,
+Done: Options › 120 Hz (`settings.hz120`, on by default since the entry at the top). The sim still steps at 60 Hz; at 120 Hz each frame draws heroes,
 monsters, bosses and projectiles part way between their last two steps (`Interp` in `80-main-loop.js`); teleports, respawns
 and new projectiles snap. Projectile trails and per-frame sparks scale with `fxK` so effects keep the same density.
 Open: test on a real 120 Hz phone. On 144 Hz+ screens the 120 cap can't divide the refresh rate, so motion is better than
