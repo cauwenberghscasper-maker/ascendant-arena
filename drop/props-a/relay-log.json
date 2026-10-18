@@ -1,0 +1,54 @@
+{
+ "batch": "props-a",
+ "files": [
+  {
+   "name": "delve_sarcophagus.glb",
+   "ok": true,
+   "bytes": 5819868,
+   "sha256": "15ee4f8bdef8f1ed26183e188c5691eea426b12e8dfa2bf5a36ad4783b33b500",
+   "error": null
+  },
+  {
+   "name": "delve_icecoffin.glb",
+   "ok": true,
+   "bytes": 6148140,
+   "sha256": "1ae89bb35d569d1380eed1fb09af9b1e41e59ef7bb11e287dcd86a0155f5bcf4",
+   "error": null
+  },
+  {
+   "name": "delve_slagcart.glb",
+   "ok": true,
+   "bytes": 5437904,
+   "sha256": "8ca868cc2ecca8dadd1e2ce521a9ca1ccae63f96a371da2a36c061ce75aca8f7",
+   "error": null
+  },
+  {
+   "name": "delve_bookshelf.glb",
+   "ok": true,
+   "bytes": 4913644,
+   "sha256": "ba2ab1167dbca37d8a37650641068824addbc6a8bee36c5f7c4e0ed9e5ac1c4a",
+   "error": null
+  },
+  {
+   "name": "delve_coralshrine.glb",
+   "ok": true,
+   "bytes": 5813756,
+   "sha256": "dad3714535200ae683ffbc1d3b51e1bff1e6d676344193a59d905a25c2ddd68e",
+   "error": null
+  },
+  {
+   "name": "delve_meteor.glb",
+   "ok": true,
+   "bytes": 5799432,
+   "sha256": "504688b57696a6c9a7d99a3026964c9485b5f8c02b436ced0cf305f9f1007dcd",
+   "error": null
+  },
+  {
+   "name": "siege_barracks2.glb",
+   "ok": true,
+   "bytes": 5078904,
+   "sha256": "c44a726f82018c8802ac254c2ae307585a3027210d02daa6e304207153e37123",
+   "error": null
+  }
+ ]
+}
