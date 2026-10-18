@@ -1,5 +1,7 @@
-{"batch": "cc0-quaternius", "files": [
- {"name": "stylized_nature_megakit.zip", "url": "https://opengameart.org/sites/default/files/stylized_nature_megakitstandard.zip"},
- {"name": "medieval_village_megakit.zip", "url": "https://opengameart.org/sites/default/files/medieval_village_megakitstandard.zip"},
- {"name": "fantasy_props_megakit.zip", "url": "https://opengameart.org/sites/default/files/fantasy_props_megakitstandard.zip"}
+{"batch": "delve-setpieces", "files": [
+ {"name": "delve_altar.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/8408833893fd7f1567e02b43eddfeb068dd95cef1b0cfe3e3a01179f1d3e01eb/trellis_output_2026-10-18T145319.glb"},
+ {"name": "delve_moonwell.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/52cedd4ef70aec761069124011bd08ac62f9d2b3855b992daed0ea6353af7c27/trellis_output_2026-10-18T145445.glb"},
+ {"name": "delve_echo.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/e41c56e47eaf73a55f0ebf8d0eebfa356548c7dc54709517597131b617968120/trellis_output_2026-10-18T145516.glb"},
+ {"name": "delve_hoard.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/459b13f99503c38ced4c782415e14406b762d5ec4ae4fd6fe972bdb7662a4ac8/trellis_output_2026-10-18T145558.glb"},
+ {"name": "delve_throne.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/a7e65e16d2dd1cafd91683e4c9b1cf47ad453292ff2ef5edb827de22e63753fe/trellis_output_2026-10-18T145628.glb"}
 ]}
