@@ -1,7 +1,6 @@
-{"batch": "delve-setpieces", "files": [
- {"name": "delve_altar.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/8408833893fd7f1567e02b43eddfeb068dd95cef1b0cfe3e3a01179f1d3e01eb/trellis_output_2026-10-18T145319.glb"},
- {"name": "delve_moonwell.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/52cedd4ef70aec761069124011bd08ac62f9d2b3855b992daed0ea6353af7c27/trellis_output_2026-10-18T145445.glb"},
- {"name": "delve_echo.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/e41c56e47eaf73a55f0ebf8d0eebfa356548c7dc54709517597131b617968120/trellis_output_2026-10-18T145516.glb"},
- {"name": "delve_hoard.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/459b13f99503c38ced4c782415e14406b762d5ec4ae4fd6fe972bdb7662a4ac8/trellis_output_2026-10-18T145558.glb"},
- {"name": "delve_throne.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/a7e65e16d2dd1cafd91683e4c9b1cf47ad453292ff2ef5edb827de22e63753fe/trellis_output_2026-10-18T145628.glb"}
+{"batch": "bastion-a", "files": [
+ {"name": "siege_archer.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/95028594598bd640bcb146f5b6f1b17826f137616dd8fb3986fa05a70c23aae5/trellis_output_2026-10-18T180453.glb"},
+ {"name": "siege_cannon.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/6df8d0d64c8100c173a8554d6954e62131621096abe5baf27160ea557b388f9d/trellis_output_2026-10-18T180642.glb"},
+ {"name": "siege_ballista.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/eb7637312ee81a78acf9578b597b0b104b60b05d2045e37f28e18a2d2bdc955e/trellis_output_2026-10-18T180737.glb"},
+ {"name": "siege_mage.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/470eededcac68087c2597e938114bec57519a0dfc59b5e761a0fceb8188b3172/trellis_output_2026-10-18T180829.glb"}
 ]}
