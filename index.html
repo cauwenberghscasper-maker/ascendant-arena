@@ -11636,12 +11636,13 @@ function openSaveCode() {
     <h4 class="sub">Load a code</h4><textarea id="codeIn" class="code" rows="3" placeholder="Paste a code that starts with AA8:"></textarea>
     <div class="row end"><button class="ghost" data-act="openSettings">Back</button><button class="warn" data-act="loadCode">Load and replace this hero</button></div>`);
 }
-// the game runs at 120 Hz; when the browser only refreshes the page 60 times a second, say where the limit is (a page can't lift it)
+// the game runs at 120 Hz; when the phone (or Safari) only refreshes it 60 times a second, say where the limit is (the game can't lift it)
 const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 function fps60Hint(s) {
   if (s.fps60 || Q.hz > 75) return 'Play at 60 frames a second instead of 120. Saves battery';
-  return IS_IOS ? 'Safari limits web pages to 60 Hz. To unlock 120: iPhone Settings › Apps › Safari › Advanced › Feature Flags, turn off "Prefer Page Rendering Updates near 60fps", then reload'
-    : 'Your browser or phone gives this page only 60 Hz. Check battery saver and the display refresh-rate setting';
+  if (IS_IOS) return window.Capacitor?.isNativePlatform?.() ? 'Your iPhone gives the game only 60 Hz. Turn off Low Power Mode and Settings › Accessibility › Motion › Limit Frame Rate'
+    : 'Safari limits web pages to 60 Hz: play the app for 120, or turn off Settings › Apps › Safari › Advanced › Feature Flags › "Prefer Page Rendering Updates near 60fps"';
+  return 'Your phone gives the game only 60 Hz. Check battery saver and the display refresh-rate setting';
 }
 function openSettings() {
   UI.current = 'settings';

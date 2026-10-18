@@ -64,6 +64,10 @@ the code disagree, check `git log` and fix this file in the same commit.
 
 The game is played on phones. Every change must work there.
 
+- **It is an app, not a browser game.** The product is the iOS/Android store app (Capacitor, section 6); the web page
+  on GitHub Pages is for testing and sharing builds. Make design, performance and settings decisions for the app (a
+  native web view, full screen, no browser bar), and don't add advice or UI that only makes sense in a browser.
+
 - Twin-stick touch: left thumb moves, right thumb aims. Moving and pressing any button must work at the same time
   (multi-touch, one pointer id per control). Don't add controls that need two hands on one side.
 - Buttons are at least 44 CSS px. Respect the safe-area insets (`--sat`, `--sar`, …).
@@ -408,4 +412,8 @@ The apps are Capacitor shells around `www/`, which `node tools/build.cjs --app` 
 
 1. Once: `npm install`, then `npx cap add ios` (needs a Mac with Xcode) and `npx cap add android` (needs Android Studio).
 2. Each release: `npm run app` (build `www/` and copy it into both native projects), then build and upload from Xcode / Android Studio.
-3. Before the first upload: set your final `appId` in `capacitor.config.json` (it can't change after release), make a 1024×1024 app icon and a splash image and run `npx @capacitor/assets generate`, and add a privacy policy URL (the game sends a device id and the save to Supabase).
+3. 120 Hz on iPhone: iOS holds apps at 60 Hz unless `ios/App/App/Info.plist` has
+   `<key>CADisableMinimumFrameDurationOnPhone</key><true/>` (add it once after `npx cap add ios`). Whether the web view
+   then gives the game 120 must be checked on a ProMotion iPhone with Options › Show FPS ("screen 120 Hz"). Android
+   follows the phone's display setting.
+4. Before the first upload: set your final `appId` in `capacitor.config.json` (it can't change after release), make a 1024×1024 app icon and a splash image and run `npx @capacitor/assets generate`, and add a privacy policy URL (the game sends a device id and the save to Supabase).
