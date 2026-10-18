@@ -2031,6 +2031,7 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .enchNeed { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 6px 8px; border: 1px solid #000; background: rgba(176,107,255,.16); color: #e9dcff; font: 600 12px/1.25 var(--body); }
 .enchNeed img { width: 26px; height: 26px; image-rendering: pixelated; flex: none; } .enchNeed b { color: #fff; } .enchNeed.short { background: rgba(255,93,108,.16); color: #ffc9c9; }
 .arow button small img.mi { width: 14px; height: 14px; vertical-align: -2px; }
+#invSecRes { min-height: 75vh; } #invSecChests, #invSecGear { scroll-margin-top: 4px; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -10231,7 +10232,8 @@ function openSmith(tab) {
 }
 // Inventory has three tabs: Gear (the bag, tap a piece to inspect or sell it), Chests (tap to open) and Resources.
 const INV_TABS = ['Chests', 'Gear', 'Resources'];
-const invTabNow = (p) => INV_TABS.includes(UI.invTab) ? UI.invTab : (p.cases.length ? 'Chests' : 'Gear');
+const invTabNow = () => INV_TABS.includes(UI.invTab) ? UI.invTab : 'Chests';
+const INV_SEC = { Chests: 'invSecChests', Gear: 'invSecGear', Resources: 'invSecRes' };
 function invTabsHTML(tab, p) {
   return `<div class="tabs invTabs">${INV_TABS.map((t) => `<button class="tab ${t === tab ? 'on' : ''}${t === 'Chests' && p.cases.length ? ' hasChests' : ''}" data-act="invTab" data-tab="${t}" aria-pressed="${t === tab}">${t}${t === 'Chests' && p.cases.length ? `<span class="tcount">${p.cases.length}</span>` : ''}</button>`).join('')}</div>`;
 }
@@ -10240,7 +10242,7 @@ function invChestsHTML(p) {
   const kinds = CFG.caseOrder.filter((k) => n[k]);
   const grid = kinds.length ? `<div class="invChestGrid">${kinds.map((k) => `<button class="ctile" data-act="caseSel" data-k="${k}" style="--cc:${CFG.cases[k].col}">${caseArt(k)}<b>${CFG.cases[k].name}</b><small>×${n[k]}</small></button>`).join('')}</div>`
     : '<p class="fine">No chests yet. Monsters, bosses and the Rift drop them.</p>';
-  return `<div class="subRow"><h4 class="sub first">Chests · ${p.cases.length}</h4></div>${grid}
+  return `<div class="subRow"><h4 class="sub">Chests · ${p.cases.length}</h4></div>${grid}
     <p class="fine">Tap a chest to open it. Chests are earned in play and cannot be sold. Every chest shows its odds before you open it.</p>`;
 }
 // where each kind of material comes from, shown on its card
@@ -10251,7 +10253,7 @@ function invResourcesHTML(p) {
   const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(svg.includes('xmlns') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
   const money = `<div class="igrid rgrid">${tile(svgUrl(ICON.coin), 'Gold', p.gold, '#ffd23a')}${tile(svgUrl(ICON.ess), 'Gems', p.essence || 0, '#7fe3ff')}${mat(CFG.craft.titan.id)}${mat(CFG.craft.rune.id)}</div>`;
   const groups = CB.map((b, i) => biomeReached(i, p) ? `<h4 class="sub">${BIOMES[i].name}</h4><div class="igrid rgrid">${[b.ore, b.part, b.core].map(mat).join('')}</div>` : '').join('');
-  return `<h4 class="sub first">Gold, gems, Titan Souls &amp; Rune Shards</h4>${money}${groups}
+  return `<div class="subRow"><h4 class="sub">Resources</h4></div><h4 class="sub first">Gold, gems, Titan Souls &amp; Rune Shards</h4>${money}${groups}
     <p class="fine">Ore comes from Mining, parts from monsters, cores from dungeon chests, Titan Souls from world bosses, Rune Shards (for Enchanting) from elites, bosses, dungeon chests and now and then any monster. Spend them in the Forge. Biomes you have not reached stay hidden.</p>`;
 }
 // --- crafting tabs (src/game/39-crafting.js)
@@ -10415,11 +10417,11 @@ function heroTab(tab) {
       : `<div class="cmpc none"><small>${label}</small><span class="emptySlot">${label === 'Worn' ? '+' : '?'}</span></div>`;
     // Inventory is only what you have collected: chests, resources, all gear. Comparing and wearing happens on the Hero screen.
     const bagAll = p.bag.filter((x) => !equippedIds.has(x.id)).sort((x, y) => order.indexOf(x.slot) - order.indexOf(y.slot) || rarIdx(y.rarity) - rarIdx(x.rarity));
-    const itab = invTabNow(p);
-    if (itab === 'Chests') body = invChestsHTML(p);
-    else if (itab === 'Resources') body = invResourcesHTML(p);
-    else body = `<div class="subRow"><h4 class="sub first">Gear · ${bagAll.length}</h4><small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
-      ${itemGrid(bagAll, { act: 'inspect', empty: 'Monsters, elites, dens, shrines and world bosses drop gear.' })}${bagAll.length ? '<p class="fine">Tap a piece to inspect it. You can sell it there for gold.</p>' : ''}`;
+    // one page: chests, gear and resources stacked; the buttons under the hero name jump to each part
+    body = `<section id="invSecChests">${invChestsHTML(p)}</section>
+      <section id="invSecGear"><div class="subRow"><h4 class="sub">Gear · ${bagAll.length}</h4><small>${p.bag.length}/${CFG.gear.bagMax}</small></div>
+      ${itemGrid(bagAll, { act: 'inspect', empty: 'Monsters, elites, dens, shrines and world bosses drop gear.' })}${bagAll.length ? '<p class="fine">Tap a piece to inspect it. You can sell it there for gold.</p>' : ''}</section>
+      <section id="invSecRes">${invResourcesHTML(p)}</section>`;
     bar = '';
   } else if (tab === 'Attacks') {
     const cur = resolvedAttack(p), av = availableAttacks(p), fresh = new Set(p.newUnlocks);
@@ -10494,7 +10496,7 @@ function heroTab(tab) {
       <h4 class="sub">Feats</h4><div class="feats">${ACHIEVEMENTS.map((a) => `<div class="feat ${p.ach[a.id] ? 'got' : ''}"><b>${a.name}</b><small>${a.desc}</small></div>`).join('')}</div>`;
     setTimeout(() => { const n = document.getElementById('roadNext'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   }
-  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>${tab === 'Gear' ? invTabsHTML(invTabNow(p), p) : ''}`, `<div class="tabBody">${body}</div>`, bar), true, false);
+  openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>${tab === 'Gear' ? invTabsHTML(invTabNow(), p) : ''}`, `<div class="tabBody">${body}</div>`, bar), true, false);
 }
 // World map (the Map button): the whole road north, one row per area, top = furthest. Tap an attuned lodestone
 // to travel there from anywhere in the open world; areas you have not reached yet stay hidden.
@@ -10707,7 +10709,8 @@ function handlePanelClick(e) {
       if (rarIdx(it.rarity) >= CFG.gear.sellConfirmFrom && UI.sellArm !== it.id) { UI.sellArm = it.id; openInspect(it.id); break; }
       UI.sellArm = null; const v = sellItem(it.id);
       if (v) { Sfx.play('coin'); toast(`Sold ${it.name} for ${fmtK(v)} gold`, 'good'); heroTab(UI.heroSlot ? 'Stats' : 'Gear'); } break; }
-    case 'invTab': UI.invTab = b.dataset.tab; heroTab('Gear'); break;
+    case 'invTab': { UI.invTab = b.dataset.tab; const el = document.getElementById(INV_SEC[UI.invTab]); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.invTabs .tab').forEach((t) => { const on = t.dataset.tab === UI.invTab; t.classList.toggle('on', on); t.setAttribute('aria-pressed', on); }); break; }
     case 'enchPick': UI.enchSlot = b.dataset.slot; openSmith('Enchant'); break;
     case 'enchReroll': if (rerollAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast(matCount(runeId()) < enchantRunes(G.profile.gear[b.dataset.slot] || { rarity: 'common' }) ? 'Not enough Rune Shards' : 'Not enough gold', 'bad'); openSmith('Enchant'); break;
     case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast(matCount(runeId()) < enchantRunes(G.profile.gear[b.dataset.slot] || { rarity: 'common' }) ? 'Not enough Rune Shards' : 'Not enough gems', 'bad'); openSmith('Enchant'); break;
@@ -10721,7 +10724,7 @@ function handlePanelClick(e) {
     case 'tab': heroTab(b.dataset.tab); break;
     case 'openMenu': openMenu(); break;
     case 'mHero': heroTab('Stats'); break;
-    case 'mGear': heroTab('Gear'); break;
+    case 'mGear': UI.invTab = null; heroTab('Gear'); break;
     case 'mBrawlers': openBrawlers(); break;
     case 'mSkills': openSkills(G.profile.cls); break;
     case 'mArtifacts': openArtifacts('Equip'); break;
@@ -12659,7 +12662,7 @@ function openCases(sel) {
       <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
     bar = selBar('', `${p.cases.length > 1 ? `<button class="ghost boost big5" data-act="caseFast" data-k="${sel}"><b>×${Math.min(5, p.cases.length)}</b><small>Open all</small></button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
-  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="invTab" data-tab="Chests">Back to Inventory</button><button class="ghost" data-act="mCollection">Collection Log</button></div>`, bar));
+  openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mGear">Back to Inventory</button><button class="ghost" data-act="mCollection">Collection Log</button></div>`, bar));
   $('panel').classList.add('wide');
 }
 // the CS:GO-style reel: a long strip of items slides past a golden marker and slows down on your item
