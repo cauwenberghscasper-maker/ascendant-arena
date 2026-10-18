@@ -2854,8 +2854,9 @@ CFG.world.zones = WORLD_AREAS; CFG.world.maxZ = WORLD_AREAS[WORLD_AREAS.length -
 }
 const lootTier = (zi) => ((CFG.world.zones[zi] || CFG.world.zones[0]).loot | 0);
 const zoneIndex = (name) => CFG.world.zones.findIndex((zn) => zn.name === name);
-// ---- v9 monsters: two per area (see the area guide). Each reuses a body ("base") from the 14 sculpted
-// monsters with its own tint, size and fighting style until it gets bespoke art. ------------------------
+// ---- v9 monsters: two per area (see the area guide). Each uses a body ("base") from the 24 sculpted
+// monsters (assets/enemy/) with its own tint, size and fighting style; tintK: how far the tint repaints the body
+// (low for species with their own body, high for borrowed ones). ------------------------
 const MON_KIT = {
   swarm: { hp: 44, atk: 9, speed: 6.0, r: 0.7, aggro: 12, leash: 26, attack: 'touch', cd: 0.75, gold: [3, 6], lunge: true, moves: ['pounce', 'howl'] },
   charger: { hp: 74, atk: 12, speed: 4.4, r: 0.85, aggro: 10, leash: 24, attack: 'touch', cd: 1.1, gold: [3, 7], charge: true, moves: ['trample'] },
@@ -2909,33 +2910,33 @@ const MON_MOVES = {
 // id: [name, kit, base body, tint, size, extra]
 const MON_ROWS = {
   thistlehare: ['Thistle-Hare', 'spray', 'boar', 0xe8cf98, 0.72, { hp: 40, atk: 7, aggro: 8, keep: 7, cd: 2.0, shots: 2, shotSpeed: 12, shotColor: 0xe8e0a0, spread: 0.36, moves: ['fan', 'pounce'] }],
-  hornet: ['Sun-Drunk Hornet', 'swarm', 'imp', 0xffd23a, 0.78, { hp: 38, atk: 7, aggro: 7, speed: 6.2, moves: ['flurry', 'howl'] }],
+  hornet: ['Sun-Drunk Hornet', 'swarm', 'hornet', 0xffd23a, 0.78, { tintK: 0.2, hp: 38, atk: 7, aggro: 7, speed: 6.2, moves: ['flurry', 'howl'] }],
   truffleboar: ['Truffle-Grubbing Boar', 'charger', 'boar', 0xa07858, 1.05, { hp: 86, moves: ['spikes', 'ripple'] }],
-  myconid: ['Myconid Spore-Tosser', 'shooter', 'slime', 0xd77cff, 1.2, { aggro: 9, burn: 0.25, shotColor: 0xd77cff, shots: 2, spread: 0.4, moves: ['rain', 'pool'] }],
+  myconid: ['Myconid Spore-Tosser', 'shooter', 'myconid', 0xd77cff, 1.2, { tintK: 0.15, aggro: 9, burn: 0.25, shotColor: 0xd77cff, shots: 2, spread: 0.4, moves: ['rain', 'pool'] }],
   bramble: ['Bramble-Lasher', 'brute', 'spider', 0x6a7a3a, 1.25, { speed: 1.6, aggro: 6, cd: 1.1, moves: ['sweep', 'spikes'] }],
-  barkviper: ['Bark-Scale Viper', 'ambusher', 'crawler', 0x8a6a48, 0.95, { speed: 5.2, moves: ['ambush', 'pounce'] }],
+  barkviper: ['Bark-Scale Viper', 'ambusher', 'viper', 0x8a6a48, 0.95, { tintK: 0.15, speed: 5.2, moves: ['ambush', 'pounce'] }],
   thornbeetle: ['Thorn-Carapace Beetle', 'charger', 'beetle', 0x7f9a5a, 1.1, { hp: 110, heavy: true, moves: ['slam', 'cross'] }],
   gloompanther: ['Gloom-Panther', 'swarm', 'wolf', 0x3a3456, 1.05, { hp: 58, atk: 12, speed: 6.6, aggro: 10, moves: ['flurry', 'ambush'] }],
-  craggoat: ['Crag-Goat', 'charger', 'boar', 0xc8c0b0, 0.95, { heavy: true, moves: ['quake', 'cleave'] }],
+  craggoat: ['Crag-Goat', 'charger', 'glassbull', 0xc8c0b0, 0.9, { tintK: 0.7, heavy: true, moves: ['quake', 'cleave'] }],
   dustharpy: ['Dust-Harpy', 'shooter', 'fireimp', 0xd8b080, 1.0, { atk: 12, shotSpeed: 10, cd: 1.7, shotColor: 0xa08a70, moves: ['fan', 'boomerang'] }],
   bouldermimic: ['Boulder-Mimic', 'ambusher', 'crawler', 0x9a9a92, 1.25, { hp: 150, speed: 3.2, aggro: 5, moves: ['burrow', 'slam'] }],
   galeweaver: ['Gale-Weaver', 'spray', 'spider', 0xdfe6ee, 1.0, { shotColor: 0xe6f2ff, shots: 2, spread: 0.6, moves: ['trap', 'cross'] }],
   miragestalker: ['Mirage-Stalker', 'swarm', 'wolf', 0xe8c890, 1.0, { hp: 52, atk: 11, moves: ['pounce', 'sweep', 'mirror'] }],
-  pitfallwurm: ['Pitfall-Wurm', 'charger', 'crawler', 0xc89a7a, 1.15, { hp: 96, moves: ['burrow', 'ripple'] }],
+  pitfallwurm: ['Pitfall-Wurm', 'charger', 'viper', 0xc89a7a, 1.15, { tintK: 0.55, hp: 96, moves: ['burrow', 'ripple'] }],
   frostgargoyle: ['Frost-Gargoyle', 'ambusher', 'imp', 0x5a6a80, 1.2, { moves: ['slam', 'beam'] }],
   chillbanshee: ['Chill-Banshee', 'spray', 'wraith', 0xbfe6ff, 1.0, { shotColor: 0x9fe8ff, moves: ['ripple', 'zap'] }],
   glacialtroll: ['Glacial-Troll', 'brute', 'yeti', 0xd8f0ff, 1.08, { hp: 140, moves: ['cleave', 'quake', 'howl'] }],
   iceshard: ['Ice-Shard Elemental', 'turret', 'sentinel', 0x9fe8ff, 0.95, { shotColor: 0xbff4ff, moves: ['nova', 'rain'] }],
   screecrawler: ['Scree-Crawler', 'swarm', 'crawler', 0x9a8a7a, 1.0, { hp: 54, moves: ['pounce', 'cross'] }],
-  echobat: ['Echo-Bat', 'spray', 'fireimp', 0x6a5a88, 0.85, { shotColor: 0xc8a8ff, shotSpeed: 14, keep: 5.5, moves: ['breath', 'fan'] }],
+  echobat: ['Echo-Bat', 'spray', 'bat', 0x6a5a88, 0.85, { tintK: 0.15, shotColor: 0xc8a8ff, shotSpeed: 14, keep: 5.5, moves: ['breath', 'fan'] }],
   sulfurslime: ['Sulfur-Slime', 'brute', 'slime', 0xe0d84a, 1.25, { speed: 3.0, burn: 0.35, moves: ['slam', 'pool'] }],
-  fumetoad: ['Fume-Toad', 'spray', 'slime', 0x8a9a3a, 1.5, { burn: 0.3, shotColor: 0xb8d040, shotSpeed: 9, keep: 5.5, moves: ['breath', 'rain'] }],
+  fumetoad: ['Fume-Toad', 'spray', 'toad', 0x8a9a3a, 1.2, { tintK: 0.15, burn: 0.3, shotColor: 0xb8d040, shotSpeed: 9, keep: 5.5, moves: ['breath', 'rain'] }],
   magmahound: ['Magma-Hound', 'swarm', 'wolf', 0xff7a3a, 1.05, { burn: 0.3, moves: ['pounce', 'flurry'] }],
   cinderelemental: ['Cinder-Elemental', 'brute', 'fireimp', 0xe8e0d8, 1.2, { burn: 0.35, moves: ['sweep', 'ripple'] }],
   ashstalker: ['Ash-Stalker', 'ambusher', 'wolf', 0x8a8480, 1.1, { moves: ['ambush', 'beam'] }],
   emberwraith: ['Ember-Wraith', 'spray', 'wraith', 0xff8a3a, 1.0, { burn: 0.25, shotColor: 0xff8a3a, keep: 5.5, moves: ['breath', 'pool'] }],
-  scoriascorpion: ['Scoria-Scorpion', 'charger', 'beetle', 0xff9a6a, 1.35, { hp: 120, burn: 0.3, heavy: true, moves: ['trample', 'cross'] }],
-  flamewyrm: ['Flame-Wyrm', 'spray', 'fireimp', 0xff5a2a, 1.3, { burn: 0.3, shotColor: 0xff6a1f, keep: 5.5, moves: ['breath', 'mortar'] }],
+  scoriascorpion: ['Scoria-Scorpion', 'charger', 'scorpion', 0xff9a6a, 1.35, { tintK: 0.15, hp: 120, burn: 0.3, heavy: true, moves: ['trample', 'cross'] }],
+  flamewyrm: ['Flame-Wyrm', 'spray', 'wyvern', 0xff5a2a, 1.1, { tintK: 0.15, burn: 0.3, shotColor: 0xff6a1f, keep: 5.5, moves: ['breath', 'mortar'] }],
   manaleech: ['Mana-Leech', 'swarm', 'crawler', 0x4a8aff, 0.85, { hp: 48, moves: ['pounce', 'zap'] }],
   azuregolem: ['Azure-Golem', 'brute', 'warden', 0x6a9aff, 1.05, { charge: true, hp: 150, moves: ['cleave', 'vortex'] }],
   riftspider: ['Rift-Spider', 'swarm', 'spider', 0xa06aff, 1.1, { speed: 7.0, moves: ['trap', 'howl', 'ambush'] }],
@@ -2943,24 +2944,24 @@ const MON_ROWS = {
   voidray: ['Void-Ray', 'spray', 'wraith', 0x2a5a7a, 1.15, { shotColor: 0x4fd8ff, moves: ['zap', 'beam'] }],
   asteroidhermit: ['Asteroid-Hermit', 'brute', 'crawler', 0x7a7088, 1.4, { hp: 175, speed: 2.6, moves: ['slam', 'vortex'] }],
   prismmimic: ['Prism-Mimic', 'ambusher', 'slime', 0xd0f4ff, 1.0, { speed: 5.6, moves: ['ambush', 'cross'] }],
-  glassminotaur: ['Glass-Minotaur', 'charger', 'yeti', 0xbfe8ff, 1.1, { hp: 140, heavy: true, moves: ['slam', 'sweep'] }],
+  glassminotaur: ['Glass-Minotaur', 'charger', 'glassbull', 0xbfe8ff, 1.1, { tintK: 0.15, hp: 140, heavy: true, moves: ['slam', 'sweep'] }],
   starsentry: ['Starlight-Sentry', 'brute', 'warden', 0xfff0c0, 1.0, { charge: true, moves: ['quake', 'beam'] }],
   astronomer: ['Fallen-Astronomer', 'spray', 'wraith', 0x6a5fc9, 1.05, { shots: 2, spread: 0.36, shotColor: 0xc77dff, moves: ['rain', 'zap'] }],
-  nebulajelly: ['Nebula-Jellyfish', 'turret', 'sentinel', 0xff9bf2, 0.95, { speed: 2.4, shotColor: 0xff9bf2, moves: ['nova', 'zap'] }],
+  nebulajelly: ['Nebula-Jellyfish', 'turret', 'jelly', 0xff9bf2, 0.95, { tintK: 0.15, speed: 2.4, shotColor: 0xff9bf2, moves: ['nova', 'zap'] }],
   kelpie: ['Ruins-Kelpie', 'charger', 'boar', 0x2fbfa0, 1.1, { moves: ['vortex', 'ripple'] }],
   rapidsiren: ['Rapids-Siren', 'spray', 'drowned', 0x7fd0ff, 1.0, { shotColor: 0x7fd0ff, moves: ['mortar', 'fan'] }],
   thrasher: ['Current-Thrasher', 'charger', 'crawler', 0x5a7a9a, 1.15, { speed: 5.0, moves: ['burrow', 'sweep'] }],
-  sporeurchin: ['Spore-Urchin', 'brute', 'slime', 0x4fffb0, 1.1, { burn: 0.3, speed: 2.4, moves: ['cross', 'pool'] }],
+  sporeurchin: ['Spore-Urchin', 'brute', 'myconid', 0x4fffb0, 1.0, { tintK: 0.6, burn: 0.3, speed: 2.4, moves: ['cross', 'pool'] }],
   angler: ['Grotto-Angler', 'ambusher', 'beetle', 0x2a4a8a, 1.2, { moves: ['beam', 'burrow'] }],
   trenchcrawler: ['Trench-Crawler', 'swarm', 'crawler', 0x2a3a4a, 1.0, { hp: 60, burn: 0.15, moves: ['howl', 'burrow'] }],
   pressuresquid: ['Pressure-Squid', 'shooter', 'drowned', 0x7a3a9a, 1.05, { shotSpeed: 17, atk: 13, shotColor: 0x3a1a5a, moves: ['snipe', 'trap'] }],
   leviathan: ['Eldritch-Leviathan', 'charger', 'crawler', 0x1a3a40, 1.6, { hp: 160, heavy: true, moves: ['ripple', 'slam'] }],
   abyssphantom: ['Abyssal-Phantom', 'spray', 'wraith', 0x2fffd0, 1.0, { shotColor: 0x2fffd0, moves: ['zap', 'ambush'] }],
-  boilcrab: ['Boil-Crab', 'brute', 'crawler', 0xff6a4a, 1.3, { burn: 0.3, moves: ['flurry', 'quake'] }],
+  boilcrab: ['Boil-Crab', 'brute', 'crab', 0xff6a4a, 1.2, { tintK: 0.15, burn: 0.3, moves: ['flurry', 'quake'] }],
   steamelemental: ['Steam-Elemental', 'spray', 'wraith', 0xf0f0f4, 1.1, { burn: 0.3, shotColor: 0xffffff, keep: 5.5, moves: ['breath', 'ripple'] }],
   shaftvulture: ['Shaft-Vulture', 'swarm', 'imp', 0x4a3a30, 1.1, { speed: 7.0, moves: ['pounce', 'boomerang'] }],
   obsidiangargoyle: ['Obsidian-Gargoyle', 'charger', 'fireimp', 0x2a2236, 1.2, { heavy: true, hp: 120, moves: ['spikes', 'slam'] }],
-  lightningwyvern: ['Lightning-Wyvern', 'shooter', 'imp', 0xfff04a, 1.25, { shotSpeed: 18, shots: 2, spread: 0.3, shotColor: 0xfff04a, moves: ['snipe', 'zap'] }],
+  lightningwyvern: ['Lightning-Wyvern', 'shooter', 'wyvern', 0xfff04a, 1.1, { tintK: 0.55, shotSpeed: 18, shots: 2, spread: 0.3, shotColor: 0xfff04a, moves: ['snipe', 'zap'] }],
   cyclone: ['Cyclone-Elemental', 'turret', 'sentinel', 0xd8e0ea, 1.1, { speed: 3.2, shots: 6, spread: 1.4, shotColor: 0xe6f2ff, moves: ['spiral', 'vortex'] }],
   aetherray: ['Aether-Ray', 'spray', 'seraph', 0xc8b8ff, 1.0, { shotColor: 0xc8b8ff, keep: 5.5, moves: ['fan', 'zap'] }],
   halosentinel: ['Halo-Sentinel', 'turret', 'sentinel', 0xffd86a, 1.05, { shotColor: 0xffd86a, moves: ['nova', 'beam'] }],
@@ -5454,6 +5455,8 @@ function stepEnemy(e, dt) {
   const d = CFG.enemies[e.type], pl = e.delve ? delveTarget(e) : G.player, Z = CFG.world.zones[e.zone]; // party dungeons: you or a bot
   if (e.rift && e.state !== 'chase') e.state = 'chase';
   const dp = Math.hypot(pl.x - e.x, pl.z - e.z);
+  // a party-dungeon boss (or mini-boss) casts its phase kit (36e-delve-boss.js); while casting it stands or charges
+  if (e.delveBoss && e.state === 'chase' && delveBossTick(e, dt, pl)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); trackVel(e, dt); collideObstacles(e); dungeonClamp(e, e.r); return; }
   // far-away monsters sleep (keeps big maps cheap on phones)
   if (e.state === 'idle' && dp > 64 && !(e.burnT > 0)) return;
   e.atkCd -= dt; e.flashT -= dt; e.slowT -= dt; e.wanderT -= dt; e.lungeT -= dt; e.lungeCd -= dt;
@@ -6691,23 +6694,23 @@ CFG.delve = {
   // blocked); raise powK toward 1 and floor toward 0.7 once parties are tested on real phones.
   powK: 0.05, floor: 0,
   dungeons: [
-    { id: 'crypt', puzzle: 'Root Seals', mini: 'The Rootbound Gravekeeper', name: 'Rootbound Crypt', biome: 0, boss: 'The Hollow Warden', blurb: 'Roots have split the tombs of the first foresters. Something old keeps the keys.',
+    { id: 'crypt', gem: { id: 'rootamber', name: 'Rootbound Amber', color: 0xe09a2a }, puzzle: 'Root Seals', mini: 'The Rootbound Gravekeeper', name: 'Rootbound Crypt', biome: 0, boss: 'The Hollow Warden', blurb: 'Roots have split the tombs of the first foresters. Something old keeps the keys.',
       set: { name: 'Rootwarden', b2: { hp: 0.08, armor: 0.05 }, b4: { lifesteal: 0.05, dmg: 0.08 } } },
-    { id: 'frostvault', puzzle: 'Frost Runes', mini: 'Rime Huntsman Ulfa', name: 'Frostvault', biome: 1, boss: 'Queen Rime', blurb: 'A vault cut into the glacier, where the mountain clans buried their winters.',
+    { id: 'frostvault', gem: { id: 'rimeglass', name: 'Rimeglass', color: 0x9fe0ff }, puzzle: 'Frost Runes', mini: 'Rime Huntsman Ulfa', name: 'Frostvault', biome: 1, boss: 'Queen Rime', blurb: 'A vault cut into the glacier, where the mountain clans buried their winters.',
       set: { name: 'Rimebound', b2: { armor: 0.08, hp: 0.06 }, b4: { critDmg: 0.25, superGain: 0.08 } } },
-    { id: 'cinder', puzzle: 'Forge Valves', mini: 'The Slag Overseer', name: 'Cinder Halls', biome: 2, boss: 'Forgemaw', blurb: 'The dwarf-forges under the volcano still burn, and so does whatever stokes them.',
+    { id: 'cinder', gem: { id: 'emberheart', name: 'Forgeheart Ember', color: 0xff6a2a }, puzzle: 'Forge Valves', mini: 'The Slag Overseer', name: 'Cinder Halls', biome: 2, boss: 'Forgemaw', blurb: 'The dwarf-forges under the volcano still burn, and so does whatever stokes them.',
       set: { name: 'Cinderborn', b2: { dmg: 0.08, atkSpeed: 0.05 }, b4: { crit: 0.06, critDmg: 0.3 } } },
-    { id: 'archive', puzzle: 'The Lost Index', mini: 'The Inkbound Scribe', name: 'Sunken Archive', biome: 3, boss: 'The Last Librarian', blurb: 'A library that fell through the floor of the world. The books read you back.',
+    { id: 'archive', gem: { id: 'inkpearl', name: 'Ink Pearl', color: 0x8a6ad8 }, puzzle: 'The Lost Index', mini: 'The Inkbound Scribe', name: 'Sunken Archive', biome: 3, boss: 'The Last Librarian', blurb: 'A library that fell through the floor of the world. The books read you back.',
       set: { name: 'Archivist', b2: { cdr: 0.06, superGain: 0.08 }, b4: { dmg: 0.1, cdr: 0.06 } } },
-    { id: 'grotto', puzzle: 'Tide Shells', mini: 'The Brine Knight', name: 'Abyssal Grotto', biome: 4, boss: 'Mother of Tides', blurb: 'Below the reef the sea keeps a cathedral of its own, and a mother who guards it.',
+    { id: 'grotto', gem: { id: 'tidestone', name: 'Tidestone', color: 0x2fb5a8 }, puzzle: 'Tide Shells', mini: 'The Brine Knight', name: 'Abyssal Grotto', biome: 4, boss: 'Mother of Tides', blurb: 'Below the reef the sea keeps a cathedral of its own, and a mother who guards it.',
       set: { name: 'Tidewrought', b2: { move: 0.06, hp: 0.06 }, b4: { lifesteal: 0.06, atkSpeed: 0.08 } } },
-    { id: 'starfall', puzzle: 'Star Sigils', mini: 'The Fallen Acolyte', name: 'Starfall Sanctum', biome: 5, boss: 'The Fallen Seraph', blurb: 'Where a star came down, a temple grew around it. Its guardian never forgave the sky.',
+    { id: 'starfall', gem: { id: 'starshard', name: 'Starshard', color: 0xffd84a }, puzzle: 'Star Sigils', mini: 'The Fallen Acolyte', name: 'Starfall Sanctum', biome: 5, boss: 'The Fallen Seraph', blurb: 'Where a star came down, a temple grew around it. Its guardian never forgave the sky.',
       set: { name: 'Starsworn', b2: { crit: 0.05, dmg: 0.08 }, b4: { critDmg: 0.35, superGain: 0.1 } } },
   ],
   // named difficulties; past the last one Ascendant ranks go on forever (diffDef)
   diffs: [
-    { name: 'Normal', lvl: 2, hp: 1, dmg: 1, pow: 0.8, rooms: [6, 6], events: 2, puzzles: 1, items: 2, floor: 'rare', unique: 0.05, col: '#7bd35a' },
-    { name: 'Hard', lvl: 8, hp: 1.15, dmg: 1.1, pow: 1.0, rooms: [6, 7], events: 2, puzzles: 1, items: 3, floor: 'epic', unique: 0.08, col: '#58b4ff' },
+    { name: 'Normal', lvl: 2, hp: 1, dmg: 1, pow: 0.8, rooms: [7, 7], events: 2, puzzles: 2, items: 2, floor: 'rare', unique: 0.05, col: '#7bd35a' },
+    { name: 'Hard', lvl: 8, hp: 1.15, dmg: 1.1, pow: 1.0, rooms: [7, 8], events: 2, puzzles: 2, items: 3, floor: 'epic', unique: 0.08, col: '#58b4ff' },
     { name: 'Heroic', lvl: 16, hp: 1.3, dmg: 1.2, pow: 1.25, rooms: [7, 7], events: 3, puzzles: 2, items: 3, floor: 'epic', unique: 0.12, col: '#c77dff' },
     { name: 'Mythic', lvl: 28, hp: 1.5, dmg: 1.3, pow: 1.6, rooms: [7, 8], events: 3, puzzles: 2, items: 4, floor: 'legendary', unique: 0.16, col: '#ff9a3c' },
   ],
@@ -6716,13 +6719,20 @@ CFG.delve = {
   shapes: [{ n: 'cell', hx: 10, hz: 10, w: 2 }, { n: 'hall', hx: 15, hz: 15, w: 3 }, { n: 'gallery', hx: 22, hz: 12, w: 2 }, { n: 'longhall', hx: 12, hz: 22, w: 2 },
     { n: 'chamber', hx: 19, hz: 19, w: 2 }, { n: 'arena', hx: 28, hz: 28, w: 1 }],
   start: { n: 'hall', hx: 13, hz: 13 }, bossH: 32, corridor: 10, corW: 6,
-  // what a combat hall holds: packs of monsters (n per pack) that wake together, more packs in bigger halls (one per
-  // `packArea` m², at most `packs`); swarm halls send their packs in waves; events sit only in their own rooms
-  fights: [{ k: 'guard', w: 4, n: [3, 4] }, { k: 'swarm', w: 2, n: [3, 4], waves: 3 }, { k: 'elites', w: 2, n: [1, 2] }],
-  packArea: 320, packs: [1, 7], packR: 3.2,
+  // what a combat hall holds: few, tough monsters spread over the hall for tactics (Casper, 18 Oct: no more spam).
+  // One per `spread.area` m² (`spread.n` min-max), at least `gap` m apart, none within `entry` m of the way in;
+  // ranged ones stand at the back (behind pillars where there are some), melee ones in front. A monster wakes by
+  // itself (close by or hit) and calls only its neighbours within `alert` m: pull them one or two at a time.
+  // Swarm halls send waves; elite halls hold fewer, all elite; events sit only in their own rooms.
+  fights: [{ k: 'guard', w: 4 }, { k: 'swarm', w: 2, waves: 3 }, { k: 'elites', w: 2 }],
+  // rare veins: a run may hide one (sometimes two) glowing veins of the dungeon's own rare resource in its halls, from
+  // the seed so every phone shows the same; each hero mines their own share. Now and then a vein is a motherlode.
+  veins: { chance: 0.4, perDiff: 0.06, max: 0.85, second: 0.25, n: [1, 3], nDiff: 0.5, lode: 0.08, lodeN: [5, 8] },
+  spread: { area: 170, n: [3, 10], gap: 7, entry: 11, alert: 9, cover: 9 },
+  tough: { hp: 1.6, dmg: 1.2 },
   // halfway through, a hall holds the dungeon's mini-boss with guards; the boss fights in three phases (adds at 66% and
   // 33%, then it gets faster and hits harder)
-  mini: { hp: 0.55, guards: 2 }, boss: { hp: 2.4, phases: [0.66, 0.33], rage: { spd: 1.25, atk: 1.2 } },
+  mini: { hp: 0.55, guards: 3 }, boss: { hp: 2.4, phases: [0.66, 0.33], rage: { spd: 1.25, atk: 1.2 } },
   events: {
     vault: { name: 'Treasure Vault', d: 'A gold goblin! Catch it before it vanishes', time: 20 },
     altar: { name: 'Cursed Altar', d: 'Take the curse: less health for the rest of the run, better loot at the end', hpCap: 0.75, unique: 1.6, items: 1 },
@@ -6732,12 +6742,17 @@ CFG.delve = {
     mimic: { name: 'Lonely Chest', d: 'A chest in an empty room. Surely nothing is wrong', odds: 0.5 },
     fountain: { name: 'Moonwell', d: 'Drink once: full health and a moment of grace' },
   },
-  mods: { dark: 0.25, pillars: 0.35 },
+  mods: { dark: 0.25, pillars: 0.6 },
   // puzzle halls: seals (floor plates and lever stones) to wake in the order a mural by the entrance shows. Stand on or
   // by a seal for `hold` s. A wrong seal resets the lot and bites back: a spike burst, then a monster pack, in turn.
   // Easy runs sometimes number the seals with pips instead of runes. Bots pitch in once the first seal is right.
   puzzle: { switches: [4, 5], hold: 0.6, r: 1.7, failCd: 2.5, spike: 0.18, pack: 3, botWait: 2,
-    hint: 'Wake the seals in the order the mural shows', pipsHint: 'Wake the seals in the order of their marks' },
+    hint: 'Wake the seals in the order the mural shows', pipsHint: 'Wake the seals in the order of their marks',
+    // four kinds, never the same twice in a run: the mural order, a light show to repeat, a race against the clock
+    // (its time comes from the walk between the seals), and lights-out (a seal flips itself and both neighbours)
+    kinds: { order: { name: 'The Mural' }, memory: { name: 'The Echo', hint: 'Watch the seals light up, then wake them in the same order', show: 0.9 },
+      timed: { name: 'The Race', hint: 'Wake every seal before the light fades: the first one starts the clock', walk: 5, slack: 3 },
+      toggle: { name: 'The Balance', hint: 'Each seal flips itself and both its neighbours: light them all' } } },
   chest: { xpFrac: 0.5, gold: [60, 10], gems: [8, 14], shards: [3, 6], ilvlAdd: 4, caseChance: 0.15 },
   bonus: { gold: 0.4, items: 1 },
   reviveT: 3, reviveR: 2.6, wipeT: 2,
@@ -6749,6 +6764,12 @@ function diffDef(i) {
   return { i, name: `Ascendant ${r}`, lvl: 40 + 10 * r, hp: 1.6 * Math.pow(1.08, r - 1), dmg: 1.35 * Math.pow(1.05, r - 1), pow: 2 * Math.pow(1.12, r - 1), rooms: [8, 8], events: 4, puzzles: 2,
     items: Math.min(6, 4 + Math.floor(r / 3)), floor: r >= 6 ? 'ancient' : 'mythic', unique: Math.min(0.35, 0.18 + 0.02 * r), col: '#ffe27a', asc: r };
 }
+// RULE: a party dungeon must come out the same on every phone in the run (README 1.1). Everything that shapes the map,
+// its rooms, monsters, puzzles and veins comes from the leader's seed. Never Math.random there, and never
+// Array.sort with a random comparator: Safari and Chrome sort it differently, so iPhones and Androids got other maps.
+function seededShuffle(arr, rng) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; }
+// code shared with the open world rolls Math.random (champion modifiers, facing, wander timers): run it on a seeded stream
+function withSeed(seed, fn) { const R = Math.random; Math.random = mulberry32(seed >>> 0); try { return fn(); } finally { Math.random = R; } }
 const delveDef = (id) => DV.dungeons.find((d) => d.id === id) || DV.dungeons[0];
 const biomeZones = (bi) => CFG.world.zones.map((z, i) => ({ z, i })).filter((o) => !o.z.safe && o.z.biome === bi);
 // a dungeon opens once you reach its biome; its level is the biome's top level plus the difficulty's
@@ -6787,14 +6808,17 @@ function delveLayout(seed, def, di) {
     const boss = i === n, sh = boss ? { n: 'throne', hx: C.bossH, hz: C.bossH } : i === 0 ? C.start : wpick(C.shapes);
     const mk = (x, z) => Object.assign(rect(x, z, sh.hx, sh.hz), { x, z, hx: sh.hx, hz: sh.hz, h: Math.min(sh.hx, sh.hz), i, boss, shape: sh.n });
     if (!i) { rooms.push(mk(DC.x, DC.z)); continue; }
-    const a = rooms[i - 1], dirs = [[0, 1], [1, 0], [-1, 0]].sort(() => rng() - 0.5);
+    const a = rooms[i - 1], dirs = seededShuffle([[0, 1], [1, 0], [-1, 0]], rng);
+    // the next hall goes north, east or west; when none fits, the corridor grows until one does (never through a hall
+    // or another corridor). North always frees up in the end: the layout only ever grows north.
     let nr = null, dir = [0, 1];
-    for (const d of dirs) {
-      const x = a.x + d[0] * (a.hx + C.corridor + sh.hx), z = a.z + d[1] * (a.hz + C.corridor + sh.hz), r = rect(x, z, sh.hx, sh.hz);
-      if (rooms.some((o) => r.x0 < o.x1 + 3 && r.x1 > o.x0 - 3 && r.z0 < o.z1 + 3 && r.z1 > o.z0 - 3)) continue;
+    const hit = (r, m, skip) => rooms.some((o) => o !== skip && r.x0 < o.x1 + m && r.x1 > o.x0 - m && r.z0 < o.z1 + m && r.z1 > o.z0 - m) || cors.some((c) => r.x0 < c.x1 + m && r.x1 > c.x0 - m && r.z0 < c.z1 + m && r.z1 > c.z0 - m);
+    for (let extra = 0; !nr && extra <= 600; extra += 12) for (const d of extra > 72 ? [[0, 1]] : dirs) {
+      const L = C.corridor + extra, x = a.x + d[0] * (a.hx + L + sh.hx), z = a.z + d[1] * (a.hz + L + sh.hz), r = rect(x, z, sh.hx, sh.hz), w = C.corW / 2;
+      const c = d[1] ? { x0: a.x - w, x1: a.x + w, z0: a.z1, z1: r.z0 } : { x0: d[0] > 0 ? a.x1 : r.x1, x1: d[0] > 0 ? r.x0 : a.x0, z0: a.z - w, z1: a.z + w };
+      if (hit(r, 3) || hit(c, 0.5, a)) continue;
       nr = mk(x, z); dir = d; break;
     }
-    if (!nr) nr = mk(a.x, a.z + a.hz + C.corridor + sh.hz);
     rooms.push(nr);
     const w = C.corW / 2;
     cors.push(dir[1] ? { x0: a.x - w, x1: a.x + w, z0: a.z1, z1: nr.z0, ax: 'z' } : { x0: dir[0] > 0 ? a.x1 : nr.x1, x1: dir[0] > 0 ? nr.x0 : a.x0, z0: a.z - w, z1: a.z + w, ax: 'x' });
@@ -6816,50 +6840,70 @@ function delveLayout(seed, def, di) {
   for (const c of cors) { if (c.ax === 'z') { seg(c.x0, c.z0, c.x0, c.z1); seg(c.x1, c.z0, c.x1, c.z1); } else { seg(c.x0, c.z0, c.x1, c.z0); seg(c.x0, c.z1, c.x1, c.z1); } }
   // the mini-boss hall sits halfway; events go in the other middle rooms (never the start or boss hall), no type twice
   const mi = n >= 3 ? Math.floor(n / 2) : -1;
-  const mids = rooms.slice(1, n).map((m) => m.i).filter((i) => i !== mi).sort(() => rng() - 0.5), evKeys = Object.keys(C.events).sort(() => rng() - 0.5);
-  const nev = Math.min(D.events, mids.length - 1 > 0 ? mids.length - 1 : mids.length);
+  const mids = seededShuffle(rooms.slice(1, n).map((m) => m.i).filter((i) => i !== mi), rng), evKeys = seededShuffle(Object.keys(C.events), rng);
+  // puzzle halls first (two a run), then events, always leaving one plain fight hall
+  const npz = clamp(Math.min(D.puzzles || 1, mids.length - 1), 0, 2), nev = Math.max(0, Math.min(D.events, mids.length - npz - 1));
   for (let k = 0; k < nev; k++) rooms[mids[k]].event = evKeys[k];
-  // puzzle halls take the next middle rooms, always leaving one plain fight hall
-  const npz = clamp(Math.min(D.puzzles || 1, mids.length - nev - 1), 0, 2);
   for (let k = 0; k < npz; k++) rooms[mids[nev + k]].puzzle = true;
+  const pzKinds = seededShuffle(Object.keys(C.puzzle.kinds), rng); let pzAt = 0;
   for (const m of rooms) {
     if (m.boss) { m.fight = 'boss'; continue; }
-    const packs = clamp(Math.round(4 * m.hx * m.hz / C.packArea), C.packs[0], C.packs[1]);
-    if (m.puzzle) { m.fight = 'puzzle'; m.per = 0; m.packs = 0; m.waves = 1; }
-    else if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.per = 3; m.packs = C.mini.guards; m.waves = 1; }
-    else if (!m.event) { const f = wpick(C.fights); m.fight = f.k; m.per = ri(f.n[0], f.n[1]); m.waves = f.waves || 1; m.packs = f.k === 'guard' ? packs : Math.ceil(packs / 2); }
-    else { m.fight = m.event === 'traps' ? 'guard' : 'none'; m.per = m.event === 'traps' ? 3 : 0; m.packs = m.event === 'traps' ? Math.ceil(packs / 2) : 0; m.waves = 1; }
-    m.count = m.per * m.packs;
+    const SP = C.spread, full = clamp(Math.round(4 * m.hx * m.hz / SP.area), SP.n[0], SP.n[1]);
+    if (m.puzzle) { m.fight = 'puzzle'; m.count = 0; m.waves = 1; }
+    else if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.count = C.mini.guards; m.waves = 1; }
+    else if (!m.event) { const f = wpick(C.fights); m.fight = f.k; m.waves = f.waves || 1; m.count = f.k === 'guard' ? full : Math.max(2, Math.ceil(full / 2)); }
+    else { m.fight = m.event === 'traps' ? 'guard' : 'none'; m.count = m.event === 'traps' ? Math.ceil(full / 2) : 0; m.waves = 1; }
     m.dark = m.i > 0 && rng() < C.mods.dark;
     // pillars: cover in the big halls (more in the arenas), kept clear of the doors' lanes
     if (!m.event && m.i > 0 && m.hx >= 15 && m.hz >= 15 && rng() < C.mods.pillars) {
       m.pillars = true; const at = [[0.45, 0.45]]; if (m.hx >= 24) at.push([0.22, 0.65], [0.65, 0.22]);
       for (const [ax, az] of at) for (const sx of [-1, 1]) for (const sz of [-1, 1]) props.push({ x: m.x + sx * m.hx * ax, z: m.z + sz * m.hz * az, r: 0.9, room: m.i });
     }
-    // fixed spawn spots, pack by pack: the run's slots (room × 100 + k) match in every party member's game; the start
-    // hall keeps its southern half free (you arrive there)
-    m.spots = []; const R = C.packR, mx = m.hx - R - 3, mz = m.hz - R - 3;
-    for (let w = 0; w < m.waves; w++) for (let p = 0; p < m.packs; p++) {
-      const cx = m.x + (rng() * 2 - 1) * mx, cz = m.i ? m.z + (rng() * 2 - 1) * mz : m.z + 3 + rng() * (mz - 3);
-      for (let k = 0; k < m.per; k++) { const a = rng() * Math.PI * 2, r = R * Math.sqrt(rng()); m.spots.push({ x: cx + Math.sin(a) * r, z: cz + Math.cos(a) * r, e: rng(), p }); }
+    // fixed spawn spots, spread over the hall: the run's slots (room × 100 + k) match in every party member's game.
+    // `d` is the distance from the way in (the start hall's way in is the south wall, where you arrive)
+    const pv = m.i ? rooms[m.i - 1] : null, ex = pv ? Math.sign(Math.round(pv.x - m.x)) : 0, ez = pv ? Math.sign(Math.round(pv.z - m.z)) : -1;
+    m.entry = { x: m.x + ex * m.hx, z: m.z + ez * m.hz }; m.spots = [];
+    for (let w = 0; w < m.waves; w++) {
+      const pts = [];
+      for (const gap of [SP.gap, SP.gap * 0.7, SP.gap * 0.45, 0]) for (let t = 0; t < 300 && pts.length < m.count; t++) {
+        const x = m.x + (rng() * 2 - 1) * (m.hx - 3), z = m.z + (rng() * 2 - 1) * (m.hz - 3), d = Math.hypot(x - m.entry.x, z - m.entry.z);
+        if (d < Math.min(SP.entry, Math.max(m.hx, m.hz)) || pts.some((q) => Math.hypot(q.x - x, q.z - z) < gap) || props.some((q) => q.room === m.i && Math.hypot(q.x - x, q.z - z) < 2)) continue;
+        pts.push({ x, z, d, e: rng() });
+      }
+      m.spots.push(...pts);
     }
-    for (let k = 0; k < 8; k++) m.spots.push({ x: m.x + (rng() * 2 - 1) * (m.hx - 3), z: m.z + (rng() * 2 - 1) * (m.hz - 3), e: rng(), p: -1 });
     if (m.event === 'plates') m.plates = [[-1, -1], [1, 1], [-1, 1], [1, -1]].map(([a, b]) => ({ x: m.x + a * m.hx * 0.5, z: m.z + b * m.hz * 0.5 }));
     if (m.event === 'mimic') m.mimic = rng() < C.events.mimic.odds;
-    if (m.puzzle) { m.pz = delvePuzzleMake(rng, m, rooms[m.i - 1], di); for (const q of m.pz.sw) if (q.lever) props.push({ x: q.x, z: q.z, r: 0.55, room: m.i, kind: 'lever' }); }
+    if (m.puzzle) { m.pz = delvePuzzleMake(rng, m, rooms[m.i - 1], di, pzKinds[pzAt++ % pzKinds.length]); for (const q of m.pz.sw) if (q.lever) props.push({ x: q.x, z: q.z, r: 0.55, room: m.i, kind: 'lever' }); }
+  }
+  // rare veins, tucked toward a hall's corner (clear of the walls, braziers, doors and pillars)
+  const veins = [], V = C.veins, okRoom = rooms.filter((m) => m.i > 0 && !m.boss && !m.pz);
+  for (const want of [Math.min(V.max, V.chance + V.perDiff * di), V.second]) {
+    if (rng() >= want || !okRoom.length) break;
+    const m = okRoom.splice(Math.floor(rng() * okRoom.length), 1)[0], sx = rng() < 0.5 ? -1 : 1, sz = rng() < 0.5 ? -1 : 1;
+    veins.push({ room: m.i, x: m.x + sx * m.hx * 0.78, z: m.z + sz * m.hz * 0.78, lode: rng() < V.lode });
   }
   const r0 = rooms[0], b = rooms[n], span = Math.max(...rooms.map((m) => Math.hypot(Math.max(Math.abs(m.x0 - DC.x), Math.abs(m.x1 - DC.x)), Math.max(Math.abs(m.z0 - DC.z), Math.abs(m.z1 - DC.z))))) + 40;
-  return { rooms, cors, walls, doors, props, span, start: { x: r0.x, z: r0.z0 + 4 }, exit: { x: r0.x - 4, z: r0.z0 + 2.2 }, chest: { x: b.x, z: b.z }, exit2: { x: b.x, z: b.z + 5 } };
+  return { rooms, cors, walls, doors, props, veins, span, start: { x: r0.x, z: r0.z0 + 4 }, exit: { x: r0.x - 4, z: r0.z0 + 2.2 }, chest: { x: b.x, z: b.z }, exit2: { x: b.x, z: b.z + 5 } };
 }
 // a puzzle hall's seals round the room (clear of the door lanes), their order, and the mural by the entrance
-function delvePuzzleMake(rng, m, prev, di) {
-  const P = DV.puzzle, K = di >= 2 ? P.switches[1] : P.switches[0], rot = rng() * Math.PI * 2, glyphs = [0, 1, 2, 3, 4, 5, 6, 7].sort(() => rng() - 0.5), sw = [];
+function delvePuzzleMake(rng, m, prev, di, kind) {
+  const P = DV.puzzle, K = di >= 2 ? P.switches[1] : P.switches[0], rot = rng() * Math.PI * 2, glyphs = seededShuffle([0, 1, 2, 3, 4, 5, 6, 7], rng), sw = [];
   for (let k = 0; k < K; k++) { const a = rot + (k + 0.5) / K * Math.PI * 2 + (rng() - 0.5) * 0.4; sw.push({ x: m.x + Math.sin(a) * m.hx * 0.58, z: m.z + Math.cos(a) * m.hz * 0.58, lever: rng() < 0.5, g: glyphs[k] }); }
-  const order = sw.map((_, k) => k).sort(() => rng() - 0.5), dx = Math.sign(Math.round(m.x - prev.x)), dz = Math.sign(Math.round(m.z - prev.z)), half = K * 0.85;
+  const order = seededShuffle(sw.map((_, k) => k), rng), dx = Math.sign(Math.round(m.x - prev.x)), dz = Math.sign(Math.round(m.z - prev.z)), half = K * 0.85;
   // the mural: a strip of tiles (read left to right on screen) by the entry wall, beside the door lane
   const clue = dz ? { x: m.x - (4 + half), z: m.z - dz * (m.hz - 3) } : { x: m.x - dx * (m.hx - 2.5 - half), z: m.z + 6 };
-  return { sw, order, clue, pips: di <= 1 && rng() < 0.5 };
+  const pz = { kind, sw, order, clue, pips: kind === 'order' && di <= 1 && rng() < 0.5, all: (1 << K) - 1 };
+  if (kind === 'timed') { // the clock: the walk round the seals plus a moment on each, a little slack
+    let path = 0, gap = 0; for (let k = 0; k < K; k++) { const a = sw[k], b = sw[(k + 1) % K], d = Math.hypot(a.x - b.x, a.z - b.z); path += d; gap = Math.max(gap, d); }
+    const T = DV.puzzle.kinds.timed; pz.clock = Math.round((path - gap) / T.walk + K * DV.puzzle.hold + T.slack);
+  }
+  if (kind === 'toggle') { // scrambled from all lit by two presses, so it can always be solved
+    const a = Math.floor(rng() * K), b = (a + 1 + Math.floor(rng() * (K - 1))) % K; pz.start = pz.all ^ delvePzMask(K, a) ^ delvePzMask(K, b);
+  }
+  return pz;
 }
+const delvePzMask = (K, j) => (1 << j) | (1 << ((j + 1) % K)) | (1 << ((j + K - 1) % K));
 // --- run
 const delveOn = () => !!(G.dungeon && G.dungeon.delve);
 function delveRoster(def) { const out = []; for (const { z } of biomeZones(def.biome)) for (const t of [z.enemy, z.alt]) if (t && CFG.enemies[t] && !out.includes(t)) out.push(t); return out.length ? out : ['thistlehare']; }
@@ -6867,19 +6911,31 @@ function delveRoster(def) { const out = []; for (const { z } of biomeZones(def.b
 function delveMob(D, room, k, o) {
   const X = D.delve, slot = room * 100 + k; if (X.slots.has(slot)) return X.slots.get(slot);
   const type = o.type || X.roster[Math.floor((o.pick != null ? o.pick : 0) * X.roster.length) % X.roster.length];
-  const e = dungeonMob(D, type, o.lvl || D.lvl, room, o);
+  const e = withSeed(X.seed ^ Math.imul(slot + 1, 2654435761), () => dungeonMob(D, type, o.lvl || D.lvl, room, o));
   e.delve = true; e.slot = slot; e.own = null;
   const m = X.diff, hp = DV.hpParty[clamp(X.n, 1, 4) - 1] * m.hp;
-  e.maxHp = Math.round(e.maxHp * hp); e.hp = e.maxHp; e.atk *= m.dmg;
+  const T = o.boss ? { hp: 1, dmg: 1 } : DV.tough; // fewer monsters, each one tougher
+  e.maxHp = Math.round(e.maxHp * hp * T.hp); e.hp = e.maxHp; e.atk *= m.dmg * T.dmg;
   if (o.goblin) { e.goblin = true; e.flee = true; e.atkCd = 1e9; e.maxHp = e.hp = Math.round(e.maxHp * 0.6); }
   if (o.name) e.champName = o.name;
   X.slots.set(slot, e); return e;
 }
 function spawnRoomWave(D, m, w) {
   const X = D.delve, el = m.fight === 'elites';
-  for (let k = 0; k < m.count; k++) { const s = m.spots[w * m.count + k], e = delveMob(D, m.i, w * m.count + k, { x: s.x, z: s.z, pick: s.e, elite: el || s.e < 0.12 + X.diff.i * 0.03, chase: w > 0 }); e.pack = s.p; m.mobs.push(e); }
+  // roles: ranged monsters take the spots furthest from the way in (tucked behind a pillar when one is near), melee ones
+  // the nearer spots; all of it from the seed, so every game puts every monster in the same place
+  const spots = m.spots.slice(w * m.count, (w + 1) * m.count), SP = DV.spread;
+  const type = (s) => X.roster[Math.floor(s.e * X.roster.length) % X.roster.length], ranged = (s) => (CFG.enemies[type(s)] || {}).attack !== 'touch';
+  const where = spots.slice().sort((a, b) => b.d - a.d);
+  const place = spots.map((s) => (ranged(s) ? where.shift() : where.pop()));
+  for (let k = 0; k < spots.length; k++) {
+    const s = spots[k]; let { x, z } = place[k];
+    if (ranged(s)) { const pil = D.props.find((q) => q.room === m.i && !q.kind && Math.hypot(q.x - x, q.z - z) < SP.cover);
+      if (pil) { const dx = pil.x - m.entry.x, dz = pil.z - m.entry.z, dd = Math.hypot(dx, dz) || 1; x = pil.x + dx / dd * 2.2; z = pil.z + dz / dd * 2.2; } }
+    const e = delveMob(D, m.i, w * m.count + k, { x, z, pick: s.e, elite: el || s.e < 0.12 + X.diff.i * 0.03, chase: w > 0 }); m.mobs.push(e);
+  }
   // the mini-boss stands in the middle of its hall, its guards round it
-  if (m.mini && !w) { const e = delveMob(D, m.i, 90, { boss: true, pick: 0.7, lvl: D.lvl + 1, x: m.x, z: m.z, name: X.def.mini }); e.maxHp = e.hp = Math.round(e.maxHp * DV.mini.hp); e.pack = 0; e.mini = true; m.mobs.push(e); }
+  if (m.mini && !w) { const e = delveMob(D, m.i, 90, { boss: true, pick: 0.7, lvl: D.lvl + 1, x: m.x, z: m.z, name: X.def.mini }); e.maxHp = e.hp = Math.round(e.maxHp * DV.mini.hp); e.mini = true; e.delveBoss = true; m.mobs.push(e); }
   m.wave = w;
 }
 // diff: difficulty index; n: party size at the start (sets monster HP); seed: the leader's run seed
@@ -6894,7 +6950,7 @@ function startDelve(id, di, seed, n, lead = true) {
   const D = G.dungeon = Object.assign(L, { id: poi.id, poi, zone: zi, variant: { name: def.name, counts: [], par: 600, hp: 14, mods: diff.i >= 3 ? 4 : 3, trial: false }, key: null, lvl, t0: G.time, clearT: 0, newKey: null,
     room: 0, mobs: [], boss: null, bossDead: false, chestOpen: false, addsDone: false, enterPos: { x: pl.x, z: pl.z } });
   const humans = clamp(n | 0 || 1, 1, DV.maxParty);
-  D.delve = { def, diff, di, seed, humans, n: DV.bots && DV.bots.on ? DV.maxParty : humans, bots: [], roster: delveRoster(def), slots: new Map(), cursed: false, bonus: {}, used: {}, downT: 0, wipeT: 0, revive: null, plates: {}, ev: {}, pz: {} };
+  D.delve = { def, diff, di, seed, humans, n: DV.bots && DV.bots.on ? DV.maxParty : humans, bots: [], roster: delveRoster(def), slots: new Map(), cursed: false, bonus: {}, used: {}, downT: 0, wipeT: 0, revive: null, plates: {}, ev: {}, pz: {}, emit: [], mined: {} };
   dungeonGrid(D); clearProjectiles();
   pl.x = D.start.x; pl.z = D.start.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
   if (lead && D.delve.n > humans) delveBotsMake(D, humans); // computer heroes fill the empty places (36d-delve-bots.js)
@@ -6902,7 +6958,7 @@ function startDelve(id, di, seed, n, lead = true) {
   D.rooms.forEach((m) => { m.mobs = []; m.cleared = false; m.wave = -1; m.seen = false; if (!m.boss && m.count) spawnRoomWave(D, m, 0); });
   const b = D.rooms.at(-1);
   D.boss = delveMob(D, b.i, 0, { type: D.delve.roster[D.delve.roster.length - 1], boss: true, lvl: lvl + CFG.dungeon.boss.lvlAdd, x: b.x, z: b.z + 4, name: def.boss });
-  D.boss.maxHp = D.boss.hp = Math.round(D.boss.maxHp * DV.boss.hp); b.mobs = [D.boss]; D.phase = 0;
+  D.boss.maxHp = D.boss.hp = Math.round(D.boss.maxHp * DV.boss.hp); D.boss.delveBoss = true; b.mobs = [D.boss]; D.phase = 0;
   ev({ t: 'dungeonStart', name: def.name, lvl, key: 0, x: pl.x, z: pl.z, delve: true, diff: diff.name, n: D.delve.n }); return true;
 }
 // who of the party is in this run with us (peers in the same run seed); always includes the local player
@@ -6934,11 +6990,14 @@ function stepDelve(dt) {
   if (X.cursed && pl.alive && pl.hp > pl.maxHp * E.altar.hpCap) pl.hp = pl.maxHp * E.altar.hpCap;
   stepDelveRevive(dt, party);
   stepDelveBots(dt);
+  stepDelveEmit(dt);
   for (const m of D.rooms) {
     if (m.boss) continue;
-    const seen = m.seen || anyoneIn(m); if (seen && !m.seen) { m.seen = true; if (m.event) ev({ t: 'delveEvent', k: m.event, x: m.x, z: m.z }); if (m.mini) ev({ t: 'delveMini', name: X.def.mini, x: m.x, z: m.z }); if (m.pz) ev({ t: 'delvePuzzle', name: X.def.puzzle, pips: m.pz.pips, x: m.x, z: m.z }); }
-    // a pack wakes together: one of them hunting wakes the rest of its pack
-    for (const e of m.mobs) if (e.alive && e.state === 'chase' && e.pack >= 0 && !e.own) for (const o of m.mobs) if (o !== e && o.alive && o.pack === e.pack && o.state === 'idle' && !o.own) o.state = 'chase';
+    const seen = m.seen || anyoneIn(m); if (seen && !m.seen) { m.seen = true; if (m.event) ev({ t: 'delveEvent', k: m.event, x: m.x, z: m.z }); if (m.mini) ev({ t: 'delveMini', name: X.def.mini, x: m.x, z: m.z }); if (m.pz) ev({ t: 'delvePuzzle', name: X.def.puzzle, kind: m.pz.kind, pips: m.pz.pips, x: m.x, z: m.z }); }
+    // a monster that wakes by itself calls its close neighbours; those don't call further (no chain through the hall)
+    for (const e of m.mobs) if (e.alive && e.state === 'chase' && !e.alerted && !e.own) {
+      e.alerted = true; for (const o of m.mobs) if (o !== e && o.alive && o.state === 'idle' && !o.own && Math.hypot(o.x - e.x, o.z - e.z) < DV.spread.alert) { o.state = 'chase'; o.alerted = true; }
+    }
     // swarm waves: the next wave comes when the last one is down
     if (m.waves > 1 && m.wave < m.waves - 1 && m.seen && m.mobs.length && !m.mobs.some((e) => e.alive)) { spawnRoomWave(D, m, m.wave + 1); ev({ t: 'delveWave', n: m.wave + 1, of: m.waves, x: m.x, z: m.z }); }
     if (m.event && m.seen) stepDelveEvent(D, m, dt);
@@ -6957,7 +7016,7 @@ function stepDelve(dt) {
     const ph = D.phase = (D.phase | 0) + 1, bm = D.rooms.at(-1), last = ph === PH.length; D.addsDone = true;
     for (let k = 0; k < 2 + Math.min(2, X.n - 1); k++) { const a = (k / 4) * Math.PI * 2; bm.mobs.push(delveMob(D, bm.i, ph * 10 + k, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, pick: k / 4, chase: true, elite: X.diff.i >= 2 || last })); }
     if (last) { b.spd = (b.spd || 1) * DV.boss.rage.spd; b.atk *= DV.boss.rage.atk; b.raged = true; }
-    ev({ t: 'dungeonAdds', x: b.x, z: b.z }); ev({ t: 'delvePhase', n: ph + 1, of: PH.length + 1, rage: last, name: X.def.boss, x: b.x, z: b.z });
+    ev({ t: 'dungeonAdds', x: b.x, z: b.z }); ev({ t: 'delvePhase', n: ph + 1, of: PH.length + 1, rage: last, name: X.def.boss, adds: (CFG.delve.bossKit.unlock[ph] || []).map((k) => CFG.delve.bossKit.names[k]), x: b.x, z: b.z });
   }
   if (!b.alive && !D.bossDead) { D.bossDead = D.rooms.at(-1).cleared = true; D.clearT = G.time - D.t0; ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: X.def.name, secs: Math.round(D.clearT), par: 0, key: 0, up: 0, delve: true }); }
 }
@@ -6980,44 +7039,60 @@ function delveDoorRecv(P) {
     delveDoorOpen(D, k, false);
   }
 }
-// --- puzzles: the state every game keeps per puzzle hall; `step` seals are awake (order[0..step-1])
-const delvePz = (D, m) => D.delve.pz[m.i] || (D.delve.pz[m.i] = { step: 0, fails: 0, hold: m.pz.sw.map(() => 0), cd: 0, done: false, flash: 0 });
+// --- puzzles: the state every game keeps per puzzle hall. `v` counts changes (the newest wins, ties go to the lower
+// session id), `step` = seals awake in order (mural, echo), `bits` = which seals are lit (race, balance)
+const delvePz = (D, m) => D.delve.pz[m.i] || (D.delve.pz[m.i] = { v: 0, step: 0, bits: m.pz.kind === 'toggle' ? m.pz.start : 0, fails: 0, hold: m.pz.sw.map(() => 0), cd: 0, done: false, flash: 0, t: 0, show: 0 });
+const pzOrdered = (pz) => pz.kind === 'order' || pz.kind === 'memory';
+function delvePzLit(m, S, j) { return S.done || (pzOrdered(m.pz) ? m.pz.order.indexOf(j) < S.step : !!((S.bits >> j) & 1)); }
 function stepDelvePuzzle(D, m, dt) {
-  const P = DV.puzzle, S = delvePz(D, m), pz = m.pz; S.flash = Math.max(0, S.flash - dt);
+  const P = DV.puzzle, S = delvePz(D, m), pz = m.pz; S.flash = Math.max(0, S.flash - dt); S.show += dt;
   if (S.done) return; if (S.cd > 0) { S.cd -= dt; return; }
+  // the race: the clock runs out with seals still dark
+  if (pz.kind === 'timed' && S.bits && (S.t -= dt) <= 0) { delvePzApply(D, m, { v: S.v + 1, s: 0, b: 0, f: S.fails + 1 }, true); return; }
   const next = pz.order[S.step], party = delveParty().filter((f) => f.alive !== false);
   pz.sw.forEach((q, j) => {
-    if (pz.order.indexOf(j) < S.step) return; // already awake
-    // heroes count on any seal; a bot only on the right one (it never guesses)
-    const on = party.some((f) => (!f.delveBot || j === next) && Math.hypot(f.x - q.x, f.z - q.z) < P.r);
-    if (!on) { S.hold[j] = 0; return; } if (S.hold[j] < 0) return; // still standing there since the last reset: step off first
+    if (pz.kind !== 'toggle' && delvePzLit(m, S, j)) return; // already awake
+    // heroes count on any seal; a bot only where it can't be wrong (the next seal in order, any dark seal in a race)
+    const botOk = pzOrdered(pz) ? j === next : pz.kind === 'timed';
+    const on = party.some((f) => (!f.delveBot || botOk) && Math.hypot(f.x - q.x, f.z - q.z) < P.r);
+    if (!on) { S.hold[j] = 0; return; } if (S.hold[j] < 0) return; // still standing there since the last change: step off first
     if ((S.hold[j] += dt) < P.hold) return;
-    if (j === next) { S.hold[j] = 0; delvePzSet(D, m, S.step + 1, S.fails, true); }
-    else delvePzSet(D, m, 0, S.fails + 1, true);
+    S.hold[j] = pz.kind === 'toggle' ? -1 : 0;
+    const st = { v: S.v + 1, s: S.step, b: S.bits, f: S.fails };
+    if (pzOrdered(pz)) { if (j === next) st.s++; else { st.s = 0; st.f++; } }
+    else if (pz.kind === 'timed') st.b |= 1 << j;
+    else st.b ^= delvePzMask(pz.sw.length, j);
+    delvePzApply(D, m, st, true);
   });
 }
-// apply a puzzle state (ours or a party member's 'dpz'): a new fail resets and punishes, a later step wakes seals
-function delvePzSet(D, m, step, fails, mine) {
-  const S = delvePz(D, m), P = DV.puzzle, K = m.pz.sw.length, X = D.delve;
-  if (S.done || fails < S.fails || (fails === S.fails && step <= S.step)) return;
-  if (fails > S.fails) {
-    S.fails = fails; S.step = 0; S.cd = P.failCd; S.flash = 0.8; S.hold = S.hold.map(() => -1);
-    if (fails % 2) { // spike burst under every hero this game runs in the hall
+// apply a puzzle state (ours, or a party member's 'dpz'): a new fail resets and punishes, woken seals light up
+function delvePzApply(D, m, st, mine, sid) {
+  const S = delvePz(D, m), P = DV.puzzle, pz = m.pz, K = pz.sw.length, X = D.delve;
+  if (S.done || st.v < S.v || (st.v === S.v && (mine || !sid || !(sid < MP.sid)))) return;
+  if (!mine && st.v === S.v && st.s === S.step && st.b === S.bits && st.f === S.fails) return;
+  const lit0 = pzOrdered(pz) ? S.step : popcount(S.bits);
+  if (st.f > S.fails) {
+    S.cd = P.failCd; S.flash = 0.8; S.hold = S.hold.map(() => -1); S.show = 0;
+    if (st.f % 2) { // spike burst under every hero this game runs in the hall
       for (const f of [G.player, ...(X.bots || [])]) if (f.alive !== false && inRoom(m, f.x, f.z)) G.pendingAoE.push({ x: f.x, z: f.z, r: 2.4, t: 0.9, max: 0.9, dmg: f.maxHp * P.spike * X.diff.dmg, team: 'mob', owner: 0, kind: 'slam', pal: areaFx(D.zone) });
     } else for (let k = 0; k < P.pack; k++) { // a pack crawls out of the floor, the same slots in every game
-      const a = k / P.pack * Math.PI * 2, e = delveMob(D, m.i, 50 + (fails % 40) * 5 + k, { x: m.x + Math.sin(a) * 2.5, z: m.z + Math.cos(a) * 2.5, pick: (fails + k) / 7 % 1, chase: true });
+      const a = k / P.pack * Math.PI * 2, e = delveMob(D, m.i, 50 + (st.f % 40) * 5 + k, { x: m.x + Math.sin(a) * 2.5, z: m.z + Math.cos(a) * 2.5, pick: (st.f + k) / 7 % 1, chase: true });
       if (!m.mobs.includes(e)) m.mobs.push(e);
     }
-    ev({ t: 'delvePzFail', spikes: !!(fails % 2), x: m.x, z: m.z });
+    ev({ t: 'delvePzFail', spikes: !!(st.f % 2), timed: pz.kind === 'timed', x: m.x, z: m.z });
   }
-  if (step > S.step) { S.step = step; ev({ t: 'delvePzStep', n: step, of: K, x: m.pz.sw[m.pz.order[step - 1]].x, z: m.pz.sw[m.pz.order[step - 1]].z }); }
-  if (S.step >= K) { S.done = true; ev({ t: 'delvePzDone', name: X.def.puzzle, x: m.x, z: m.z }); }
-  if (mine && typeof partySend === 'function') partySend('dpz', { dr: X.seed, r: m.i, s: S.step, f: S.fails });
+  if (pz.kind === 'timed' && !S.bits && st.b) { S.t = pz.clock; ev({ t: 'delvePzClock', secs: pz.clock, x: m.x, z: m.z }); }
+  S.v = st.v; S.step = st.s; S.bits = st.b; S.fails = st.f;
+  const lit = pzOrdered(pz) ? S.step : popcount(S.bits);
+  if (lit > lit0 || pz.kind === 'toggle') ev({ t: 'delvePzStep', n: lit, of: K, flip: pz.kind === 'toggle', x: m.x, z: m.z });
+  if (pzOrdered(pz) ? S.step >= K : S.bits === pz.all) { S.done = true; ev({ t: 'delvePzDone', name: X.def.puzzle, x: m.x, z: m.z }); }
+  if (mine && typeof partySend === 'function') partySend('dpz', { dr: X.seed, r: m.i, v: S.v, s: S.step, b: S.bits, f: S.fails });
 }
+function popcount(b) { let n = 0; for (; b; b &= b - 1) n++; return n; }
 function delvePzRecv(P) {
   if (!delveOn() || mpNum(P.dr, -1) >>> 0 !== G.dungeon.delve.seed) return;
-  const D = G.dungeon, m = D.rooms[mpNum(P.r, -1) | 0]; if (!m || !m.pz) return;
-  delvePzSet(D, m, clamp(mpNum(P.s, 0) | 0, 0, m.pz.sw.length), clamp(mpNum(P.f, 0) | 0, 0, 999), false);
+  const D = G.dungeon, m = D.rooms[mpNum(P.r, -1) | 0]; if (!m || !m.pz) return; const K = m.pz.sw.length;
+  delvePzApply(D, m, { v: clamp(mpNum(P.v, 0) | 0, 0, 1e6), s: clamp(mpNum(P.s, 0) | 0, 0, K), b: (mpNum(P.b, 0) | 0) & m.pz.all, f: clamp(mpNum(P.f, 0) | 0, 0, 999) }, false, typeof P.sid === 'string' ? P.sid : '');
 }
 // an event room lets you on once its own fight is done (the echo and a woken mimic must fall; the rest never block)
 function roomDoorFree(D, m) { const s = D.delve.ev[m.i] || {}; if (m.pz && !delvePz(D, m).done) return false; return !(m.event === 'echo' && !s.done) && !(m.event === 'vault' && s.t != null && !s.done); }
@@ -7091,10 +7166,16 @@ function delveInteract(pl) {
     if (m.event === 'altar' && !X.used.altar && near(m)) return { kind: 'delveAltar', label: 'Take the Curse' };
     if (m.event === 'fountain' && !X.used.fountain && near(m)) return { kind: 'delveFountain', label: 'Drink' };
   }
+  for (let i = 0; i < (D.veins || []).length; i++) { const v = D.veins[i]; if (!X.mined[i] && near(v)) return { kind: 'delveVein', room: i, label: v.lode ? 'Mine the Motherlode' : 'Mine Rare Vein' }; }
   return null;
 }
 function delveUse(kind, room) {
   const D = G.dungeon; if (!delveOn()) return null; const X = D.delve, pl = G.player;
+  if (kind === 'delveVein') { // your own share of a rare vein (each hero mines their own)
+    const v = (D.veins || [])[room | 0], V = DV.veins, gem = X.def.gem; if (!v || X.mined[room | 0] || !gem) return null;
+    X.mined[room | 0] = true; const n = v.lode ? randInt(V.lodeN[0], V.lodeN[1]) : randInt(V.n[0], V.n[1]) + Math.floor(X.diff.i * V.nDiff);
+    addMats([[gem.id, n]], true); ev({ t: 'delveVein', name: gem.name, n, lode: v.lode, x: v.x, z: v.z }); return true;
+  }
   if (kind === 'delveAltar' && !X.used.altar) { X.used.altar = X.cursed = true; pl.hp = Math.min(pl.hp, pl.maxHp * DV.events.altar.hpCap); ev({ t: 'delveCurse', x: pl.x, z: pl.z }); return true; }
   if (kind === 'delveFountain' && !X.used.fountain) { X.used.fountain = true; pl.hp = X.cursed ? pl.maxHp * DV.events.altar.hpCap : pl.maxHp; pl.invulnT = 3; pl.ammo = pl.ammoMax; ev({ t: 'delveHeal', x: pl.x, z: pl.z }); return true; }
   if (kind === 'delveBonus' && X.bonus[room] === 1) { X.bonus[room] = 2; return claimDelveLoot(false); }
@@ -7959,11 +8040,16 @@ function delveBotThink(b, dt) {
   // 2. pressure plates in a quiet room: each bot takes the plate after the humans' ones
   const s = myRoom && myRoom.event === 'plates' ? X.ev[myRoom.i] || {} : null;
   const plate = s && !s.done && myRoom.seen && !myRoom.mobs.some((e) => e.alive) ? myRoom.plates[humans.length + X.bots.indexOf(b)] : null;
-  // 3. a puzzle hall: once the first seal is right, the first bot walks to the next one after a short think
-  let seal = null; const pzS = myRoom && myRoom.pz && !myRoom.mobs.some((e) => e.alive) ? delvePz(D, myRoom) : null;
-  if (pzS && !pzS.done && pzS.step >= 1 && pzS.cd <= 0 && X.bots.indexOf(b) === 0) {
-    if (ai.pzStep !== pzS.step) { ai.pzStep = pzS.step; ai.pzT = 0; }
-    if ((ai.pzT += dt) >= DV.puzzle.botWait) seal = myRoom.pz.sw[myRoom.pz.order[pzS.step]];
+  // 3. a puzzle hall: in an ordered one (mural, echo) the first bot walks to the next seal after a short think, once the
+  // first seal is right; in a race every bot runs for its own dark seal once the clock runs; the balance is yours alone
+  let seal = null; const pz = myRoom && myRoom.pz, pzS = pz && !myRoom.mobs.some((e) => e.alive) ? delvePz(D, myRoom) : null;
+  if (pzS && !pzS.done && pzS.cd <= 0) {
+    if (pzOrdered(pz) && pzS.step >= 1 && X.bots.indexOf(b) === 0) {
+      if (ai.pzStep !== pzS.step) { ai.pzStep = pzS.step; ai.pzT = 0; }
+      if ((ai.pzT += dt) >= DV.puzzle.botWait) seal = pz.sw[pz.order[pzS.step]];
+    } else if (pz.kind === 'timed' && pzS.bits) {
+      const dark = pz.sw.filter((_, j) => !((pzS.bits >> j) & 1)); seal = dark.length ? dark[X.bots.indexOf(b) % dark.length] : null;
+    }
   }
   if (down) { tx = down.x; tz = down.z; stop = DV.reviveR * 0.5; }
   else if (plate) { tx = plate.x; tz = plate.z; stop = 0.3; }
@@ -8046,6 +8132,95 @@ function delveBotsRecv(sid, P) {
   if (added) mpRebuild();
 }
 // --- end dungeon bots
+// ---------------------------------------------------------------------
+// Dungeon bosses fight with a kit that grows each phase (Casper, 18 Oct: intense, three phases, every phase more
+// attacks and patterns). Phase 1: Volley and Ground Slam. Phase 2 adds Nova Ring and Charge. Phase 3 adds Death Spiral
+// and Falling Stones, and every attack comes faster. Mini-bosses use the phase 1 kit.
+// The game that runs the boss (its shared-monster owner) picks each attack and sends it ('dbs'); every game in the
+// run plays the same cast from the same numbers, and each one deals the damage to its own heroes (you and your bots).
+// ---------------------------------------------------------------------
+CFG.delve.bossKit = {
+  unlock: [['volley', 'slam'], ['ring', 'charge'], ['spiral', 'meteors']],
+  cd: [2.8, 2.1, 1.4], miniCd: 3.4, first: 1.6,
+  names: { volley: 'Volley', slam: 'Ground Slam', ring: 'Nova Ring', charge: 'Charge', spiral: 'Death Spiral', meteors: 'Falling Stones' },
+  // damage per hit, times the boss's own hit
+  dmg: { volley: 0.7, slam: 1.5, ring: 0.6, charge: 1.8, spiral: 0.4, meteors: 1.3 },
+  shot: 13, slamR: 3.4, slamT: 1.1, charge: { len: 15, warn: 0.9, speed: 22, r: 2.3 }, spiral: { time: 3, every: 0.12, arms: 3, turn: 2.4 },
+  meteors: { n: 9, r: 3, warn: 1.3, spread: 20 }, ring: { n: 18, gap: 0.5 },
+};
+const BK = CFG.delve.bossKit, BOSS_KINDS = Object.keys(BK.dmg);
+const delveBossPhase = (e) => (e.mini ? 0 : clamp(G.dungeon.phase | 0, 0, 2));
+// the attacks open to this boss right now, in the order it cycles through them
+function delveBossPool(e) { const out = []; for (let p = 0; p <= delveBossPhase(e); p++) out.push(...BK.unlock[p]); return out; }
+// called from stepEnemy for a party-dungeon boss this game runs; true while it is busy casting (it stands or charges)
+function delveBossTick(e, dt, tgt) {
+  const k = e.bk || (e.bk = { cd: BK.first, i: 0, busy: 0, dash: null });
+  k.cd -= dt; // the next attack's timer runs during a cast too, so phase 3 chains them
+  if (k.dash) { // charging along its warned line
+    const d = k.dash, dx = d.x - e.x, dz = d.z - e.z, dd = Math.hypot(dx, dz), step = BK.charge.speed * dt;
+    if ((d.wait -= dt) > 0) return true;
+    if (dd <= step) { e.x = d.x; e.z = d.z; k.dash = null; } else { e.x += dx / dd * step; e.z += dz / dd * step; }
+    e.facing = Math.atan2(dx, dz); e.moveAmt = 1; return true;
+  }
+  if (k.busy > 0) { k.busy -= dt; e.moveAmt = Math.max(0, (e.moveAmt || 0) - dt * 4); return true; }
+  if (k.cd > 0 || !tgt || tgt.alive === false) return false;
+  const pool = delveBossPool(e), kind = pool[k.i++ % pool.length], ph = delveBossPhase(e);
+  k.cd = e.mini ? BK.miniCd : BK.cd[ph];
+  const heroes = delveParty().filter((f) => f.alive !== false && Math.hypot(f.x - e.x, f.z - e.z) < 40).slice(0, 4);
+  const c = { k: kind, x: Math.round(e.x * 10) / 10, z: Math.round(e.z * 10) / 10, tx: Math.round(tgt.x * 10) / 10, tz: Math.round(tgt.z * 10) / 10,
+    p: heroes.map((f) => [Math.round(f.x * 10) / 10, Math.round(f.z * 10) / 10]), s: (Math.random() * 1e9) >>> 0, mini: e.mini ? 1 : 0 };
+  delveBossCast(c);
+  if (typeof partySend === 'function') partySend('dbs', Object.assign({ dr: G.dungeon.delve.seed }, c));
+  return true;
+}
+// play one cast in this game: warnings, bolts and the damage to the heroes this game runs
+function delveBossCast(c) {
+  const D = G.dungeon, X = D && D.delve; if (!X) return;
+  const e = c.mini ? D.rooms.flatMap((m) => m.mobs).find((o) => o.mini && o.alive) : D.boss; if (!e || !e.alive) return;
+  const pal = areaFx(D.zone), col = BIOMES[X.def.biome].coreColor, dmg = (k) => mobDmg(e, BK.dmg[k]);
+  const shot = (x, z, a, k, sp = BK.shot) => spawnProjectile({ x, z, vx: Math.sin(a) * sp, vz: Math.cos(a) * sp, life: 34 / sp, r: 0.55, dmg: dmg(k), team: 'mob', owner: e.id, kind: 'orb', color: col, y: 1.4 });
+  const ring = (x, z, r, t, k) => G.pendingAoE.push({ x, z, r, t, max: t, dmg: dmg(k), team: 'mob', owner: e.id, kind: 'slam', pal });
+  const later = (t, fn) => X.emit.push({ t, fn });
+  const a0 = Math.atan2(c.tx - c.x, c.tz - c.z);
+  e.facing = a0; e.attackAnim = 1;
+  if (e.bk) e.bk.busy = 0.5;
+  switch (c.k) {
+    case 'volley': for (let i = 0; i < 5; i++) shot(c.x, c.z, a0 + (i / 4 - 0.5) * 0.6, 'volley'); break;
+    case 'slam': for (const [x, z] of c.p) ring(x, z, BK.slamR, BK.slamT, 'slam'); if (e.bk) e.bk.busy = BK.slamT; break;
+    case 'ring': for (let w = 0; w < 2; w++) later(w * BK.ring.gap, () => { for (let i = 0; i < BK.ring.n; i++) shot(e.x, e.z, (i + w * 0.5) / BK.ring.n * Math.PI * 2, 'ring', 10); }); break;
+    case 'charge': {
+      const C = BK.charge, ex = c.x + Math.sin(a0) * C.len, ez = c.z + Math.cos(a0) * C.len;
+      for (let d = 0; d <= C.len; d += 2.5) ring(c.x + Math.sin(a0) * d, c.z + Math.cos(a0) * d, C.r, C.warn + d / C.speed, 'charge');
+      ev({ t: 'telegraph', x: c.x, z: c.z, a: a0, len: C.len, w: C.r * 2 });
+      if (e.bk && !e.own) { const f = { x: ex, z: ez }; dungeonClamp(f, e.r); e.bk.dash = { x: f.x, z: f.z, wait: C.warn }; }
+      break;
+    }
+    case 'spiral': { const S = BK.spiral; for (let t = 0; t < S.time; t += S.every) later(t, () => { for (let i = 0; i < S.arms; i++) shot(e.x, e.z, a0 + t * S.turn + i / S.arms * Math.PI * 2, 'spiral', 9); }); if (e.bk) e.bk.busy = S.time; break; }
+    case 'meteors': {
+      const M = BK.meteors, rng = mulberry32(c.s), bm = D.rooms.find((m) => inRoom(m, c.x, c.z)) || D.rooms.at(-1);
+      for (let i = 0; i < M.n; i++) {
+        const x = clamp(c.x + (rng() * 2 - 1) * M.spread, bm.x0 + 2, bm.x1 - 2), z = clamp(c.z + (rng() * 2 - 1) * M.spread, bm.z0 + 2, bm.z1 - 2);
+        later(rng() * 0.8, () => ring(x, z, M.r, M.warn, 'meteors'));
+      }
+      // one always lands on the target, so standing still is never safe
+      later(0.4, () => ring(c.tx, c.tz, M.r, M.warn, 'meteors'));
+      break;
+    }
+  }
+  ev({ t: 'delveBossCast', k: c.k, x: c.x, z: c.z });
+}
+// a cast from the game that runs the boss
+function delveBossRecv(P) {
+  if (!delveOn() || mpNum(P.dr, -1) >>> 0 !== G.dungeon.delve.seed || !BOSS_KINDS.includes(P.k)) return;
+  const n = (v) => clamp(mpNum(v, 0), -1e5, 1e5);
+  delveBossCast({ k: P.k, x: n(P.x), z: n(P.z), tx: n(P.tx), tz: n(P.tz), p: (Array.isArray(P.p) ? P.p : []).slice(0, 4).map((q) => [n(q && q[0]), n(q && q[1])]), s: mpNum(P.s, 1) >>> 0, mini: P.mini ? 1 : 0 });
+}
+// delayed parts of casts (ring waves, the spiral, staggered stones)
+function stepDelveEmit(dt) {
+  const X = G.dungeon.delve; if (!X.emit) X.emit = [];
+  for (let i = X.emit.length - 1; i >= 0; i--) { const q = X.emit[i]; if ((q.t -= dt) <= 0) { X.emit.splice(i, 1); q.fn(); } }
+}
+// --- end delve boss
 // --- Mining: four ore veins per combat area (POIs kind 'node'; n 3 is the rare glowing vein). Tap a ready vein to
 // mine it: Ore (spent on pickaxe levels), a Geode roll per ore (a case opened on the reel that also fills the Museum)
 // and a 1 in 10,000 pet. Veins regrow on a timer; 1% regrow as rich veins that pay triple. Expeditions mine too.
@@ -8193,7 +8368,9 @@ const CB = CFG.craft.biomes;
 // every material by id -> { name, biome, kind, color }
 const MATS = (() => { const o = {}; CB.forEach((b, i) => { o[b.ore] = { name: b.oreN, biome: i, kind: 'ore', color: b.color }; o[b.part] = { name: b.partN, biome: i, kind: 'part', color: b.color }; o[b.core] = { name: b.coreN, biome: i, kind: 'core', color: b.color }; });
   o[CFG.craft.titan.id] = { name: CFG.craft.titan.name, biome: -1, kind: 'soul', color: CFG.craft.titan.color };
-  o[CFG.craft.rune.id] = { name: CFG.craft.rune.name, biome: -1, kind: 'rune', color: CFG.craft.rune.color }; return o; })();
+  o[CFG.craft.rune.id] = { name: CFG.craft.rune.name, biome: -1, kind: 'rune', color: CFG.craft.rune.color };
+  for (const d of CFG.delve.dungeons) if (d.gem) o[d.gem.id] = { name: d.gem.name, biome: d.biome, kind: 'gem', color: d.gem.color, dungeon: d.id }; // rare veins in Dungeon mode
+  return o; })();
 // dungeon-only heroes: their Level Road unlock is replaced by sigils from that biome's dungeons
 CB.forEach((b, i) => { if (CFG.attacks[b.hero]) CFG.attacks[b.hero].unlock = { sigils: i }; });
 function craftState(p) {
@@ -8379,6 +8556,25 @@ const MAT_ART = (() => {
   const gloss = (g) => free(g, [[5, 3], [6, 3], [5, 4]], 'w');
   const orb = (g) => { poly(g, [[3, 14], [5, 11], [11, 11], [13, 14]], 'p'); ell(g, 8, 7, 5.3, 5.3); };
   const D = {
+    // ---- rare dungeon treasures (Dungeon mode veins) ----
+    rootamber: { b: '#e09a2a', a: '#7fc65a', c: '#fff0b0',
+      body: (g) => { ell(g, 8, 9.5, 5, 5); poly(g, [[5, 7], [8, 1.5], [11, 7]]); },
+      detail: (g) => { on(g, [[8, 9], [7, 10], [9, 10], [8, 11]], 'a'); on(g, [[6, 7], [7, 6], [6, 8]], 'c'); } },
+    rimeglass: { b: '#9fe0ff', a: '#ffffff', c: '#dff6ff',
+      body: (g) => { poly(g, [[4, 15], [3.5, 7], [6.5, 1], [9, 7], [8.5, 15]]); poly(g, [[8.5, 15], [9.5, 8], [12, 4.5], [13.5, 9], [12.5, 15]]); },
+      detail: (g) => { line(g, 6, 3, 6, 12, 'a'); on(g, [[11, 7], [12, 9]], 'c'); star(g, 14, 2, 'w'); } },
+    emberheart: { b: '#ff6a2a', a: '#ffd27a', c: '#fff3c0',
+      body: (g) => poly(g, [[8, 1.5], [13.5, 7], [8, 14.5], [2.5, 7]]),
+      detail: (g) => { line(g, 3, 7, 13, 7, 'a'); line(g, 8, 2, 5, 7, 'a'); line(g, 8, 2, 11, 7, 'a'); on(g, [[7, 4], [6, 5]], 'c'); } },
+    inkpearl: { b: '#8a6ad8', a: '#c9b8ff', c: '#ffffff',
+      body: (g) => ell(g, 8, 8.5, 5.5, 5.5),
+      detail: (g) => { on(g, [[6, 6], [7, 6], [6, 7]], 'c'); on(g, [[10, 11], [11, 10], [9, 12]], 'a'); free(g, [[13, 3]], 'w'); } },
+    tidestone: { b: '#2fb5a8', a: '#c8fff4', c: '#ffffff',
+      body: (g) => poly(g, [[4, 3], [12, 3], [14.5, 8], [12, 13.5], [4, 13.5], [1.5, 8]]),
+      detail: (g) => { line(g, 4, 9, 6, 7, 'a'); line(g, 6, 7, 8, 9, 'a'); line(g, 8, 9, 10, 7, 'a'); line(g, 10, 7, 12, 9, 'a'); on(g, [[5, 4], [6, 4]], 'c'); } },
+    starshard: { b: '#ffd84a', a: '#fff7c0', c: '#ffffff',
+      body: (g) => poly(g, [[8, 0.5], [10, 6], [15.5, 8], [10, 10], [8, 15.5], [6, 10], [0.5, 8], [6, 6]]),
+      detail: (g) => { on(g, [[8, 4], [8, 5], [7, 7], [8, 7]], 'a'); on(g, [[8, 8]], 'c'); star(g, 13, 2, 'w'); } },
     // ---- ores ----
     copper: { b: '#c8793a', a: '#6fc08a', c: '#ffd9a0',
       body: (g) => { ell(g, 5.5, 10.5, 4, 3.2); ell(g, 10.5, 9.5, 4, 4); ell(g, 8, 5.5, 3.2, 3); },
@@ -8733,6 +8929,16 @@ const GENERATED_ASSETS = {
   'enemy.wolf': {"dir": "assets/enemy/wolf/", "tris": 7139, "kb": 641, "size": 1.75, "glow": 1.0, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'enemy.wraith': {"dir": "assets/enemy/wraith/", "tris": 6997, "kb": 550, "size": 2.3, "glow": 1.5, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'enemy.yeti': {"dir": "assets/enemy/yeti/", "tris": 19788, "kb": 1135, "size": 2.6, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
+  'enemy.toad': {"dir": "assets/enemy/toad/", "tris": 8999, "kb": 704, "size": 1.35, "glow": 1.3, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.bat': {"dir": "assets/enemy/bat/", "tris": 8910, "kb": 640, "size": 1.7, "glow": 1.4, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.hornet': {"dir": "assets/enemy/hornet/", "tris": 8965, "kb": 604, "size": 1.45, "glow": 1.2, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.scorpion': {"dir": "assets/enemy/scorpion/", "tris": 9000, "kb": 752, "size": 1.3, "glow": 1.5, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.viper': {"dir": "assets/enemy/viper/", "tris": 8990, "kb": 792, "size": 1.6, "glow": 1.0, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.myconid': {"dir": "assets/enemy/myconid/", "tris": 9000, "kb": 532, "size": 1.85, "glow": 1.3, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.crab': {"dir": "assets/enemy/crab/", "tris": 8998, "kb": 808, "size": 1.3, "glow": 1.2, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.jelly': {"dir": "assets/enemy/jelly/", "tris": 8861, "kb": 544, "size": 2.1, "glow": 1.5, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.wyvern': {"dir": "assets/enemy/wyvern/", "tris": 8998, "kb": 776, "size": 2.2, "glow": 1.2, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
+  'enemy.glassbull': {"dir": "assets/enemy/glassbull/", "tris": 8992, "kb": 884, "size": 1.8, "glow": 1.3, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
   'hero.arrow': {"dir": "assets/hero/ayla/", "tris": 13998, "kb": 832, "size": 1.9, "hand": [0.3219, 0.272, -0.02], "rig": {"head": {"y": 0.795, "r": 0.2488, "cx": -0.0005, "cz": 0.0211, "top": 1.0, "brow": 0.8155}, "neckY": 0.59, "shoulder": {"y": 0.52, "x": 0.174}, "torso": {"y0": 0.3, "y1": 0.58, "hw": 0.174, "hd": 0.1393, "cz": 0.058}, "chestFront": 0.2061, "hand": [0.2913, 0.1632, -0.1327, 0.0515], "hand2": [-0.2891, 0.1618, -0.1329, 0.055], "foot": {"x": 0.1871, "z": 0.0649, "toe": 0.1956}, "fit": {"y0": 0.24, "y1": 0.59, "hw": 0.39, "hd": 0.2097, "cz": 0.0335}}, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'hero.mortar': {"dir": "assets/hero/boomer/", "tris": 16100, "kb": 804, "size": 1.9, "legs": {"legL": [-0.1585, 0.172, 0.044], "legR": [0.1541, 0.172, 0.0415]}, "hand": [0.3592, 0.2774, 0.0043], "rig": {"head": {"y": 0.77, "r": 0.3294, "cx": -0.0008, "cz": 0.0235, "top": 1.0, "brow": 0.793}, "neckY": 0.54, "shoulder": {"y": 0.47, "x": 0.206}, "torso": {"y0": 0.3, "y1": 0.53, "hw": 0.206, "hd": 0.212, "cz": -0.0163}, "chestFront": 0.2017, "hand": [0.3562, 0.2371, 0.014, 0.1001], "hand2": [-0.3575, 0.2367, 0.0133, 0.1002], "foot": {"x": 0.1776, "z": 0.0601, "toe": 0.1935}, "fit": {"y0": 0.26, "y1": 0.54, "hw": 0.42, "hd": 0.263, "cz": -0.0337}}, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'hero.wave': {"dir": "assets/hero/brick/", "tris": 17521, "kb": 993, "size": 1.95, "legs": {"legL": [-0.1269, 0.142, 0.054], "legR": [0.1299, 0.142, 0.0572]}, "hand": [0.3449, 0.2964, 0.0119], "rig": {"head": {"y": 0.815, "r": 0.268, "cx": 0.0004, "cz": -0.0172, "top": 1.0, "brow": 0.8335}, "neckY": 0.63, "shoulder": {"y": 0.56, "x": 0.1877}, "torso": {"y0": 0.3, "y1": 0.62, "hw": 0.1877, "hd": 0.126, "cz": 0.0327}, "chestFront": 0.2182, "hand": [0.3317, 0.1876, 0.0386, 0.1004], "hand2": [-0.3351, 0.1872, 0.0394, 0.0991], "foot": {"x": 0.1382, "z": 0.0655, "toe": 0.1727}, "fit": {"y0": 0.3, "y1": 0.63, "hw": 0.362, "hd": 0.1959, "cz": 0.068}}, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
@@ -9297,6 +9503,12 @@ const POSE_REAR = [-0.45, 0.35, 0, 0.1], POSE_LEAN = [-0.4, 0.25, 0, 0.14], POSE
 const MOVE_POSE = { slam: POSE_REAR, quake: POSE_REAR, ripple: POSE_REAR, cross: [-0.35, 0.3, 0, 0.12], cleave: [-0.2, 0.1, 0.9, 0.05], flurry: [-0.15, 0.1, 1.1, 0.04], sweep: [-0.1, 0.05, -1.5, 0.03],
   pounce: POSE_COIL, ambush: [0.3, -0.25, 0, -0.35], burrow: [0.1, -0.8, 0, -0.3], beam: POSE_LEAN, snipe: POSE_LEAN, fan: POSE_LEAN, boomerang: [-0.3, 0.2, 0.7, 0.08], nova: [-0.1, 0.4, 0, 0.18], spiral: [-0.1, 0.35, 0.6, 0.12],
   rain: [-0.5, 0.45, 0, 0.12], mortar: POSE_LEAN, breath: [-0.5, 0.2, 0, 0.16], zap: POSE_LEAN, vortex: [-0.3, 0.4, 0, 0.1], trap: POSE_LEAN, pool: [0.15, 0, 0, -0.1] };
+// the strike that follows the wind-up (and every plain attack): slams drop and squash, pounces and bites lunge,
+// sweeps swing through, shots kick back, novas pulse, burrowers burst up
+const STRIKE_OF = { slam: 'slam', quake: 'slam', ripple: 'slam', cross: 'slam', spikes: 'slam', trample: 'slam', cleave: 'swing', flurry: 'swing', sweep: 'swing',
+  pounce: 'lunge', ambush: 'lunge', burrow: 'burst', beam: 'recoil', snipe: 'recoil', fan: 'recoil', boomerang: 'swing', mortar: 'recoil', rain: 'recoil', zap: 'recoil', trap: 'recoil',
+  breath: 'breath', nova: 'pulse', spiral: 'pulse', vortex: 'pulse', pool: 'slam' };
+const SHOOTER_KIT = { shooter: 1, spray: 1, turret: 1 };
 AssetSlots.register('enemy', (o) => {
   const root = new THREE.Group();
   const ED = CFG.enemies[o.type] || {}, bt = enemyBase(o.type), tint = ED.tint != null ? new THREE.Color(ED.tint) : null, esz = ED.scale || 1;
@@ -9323,7 +9535,7 @@ AssetSlots.register('enemy', (o) => {
   if (o.elite) {
     aura = pxRingMesh(0.88, 1.05, { color: 0xffc94a, transparent: true, opacity: 0.6, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -40 }, 8, 0.62); aura.position.y = 0.25; root.add(aura);
   }
-  let phase = Math.random() * 6, deadT = 0;
+  let phase = Math.random() * 6, deadT = 0, relK = null, struck = false;
   return {
     root,
     update(e, dt, t) {
@@ -9335,24 +9547,47 @@ AssetSlots.register('enemy', (o) => {
       phase += dt * (2 + (e.moveAmt || 0) * 8);
       pivot.rotation.set(0, 0, 0); pivot.scale.set(1, 1, 1); // the move pose below adds to (and stretches) whatever the body animation sets, so both reset every frame
       if (bt === 'slime') { const b = Math.abs(Math.sin(phase)); pivot.scale.set(1 + (1 - b) * 0.18, 0.8 + b * 0.3, 1 + (1 - b) * 0.18); pivot.position.y = b * 0.25 * (e.moveAmt || 0.2); }
-      else if (bt === 'wolf') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.12 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'wolf') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.12 * (e.moveAmt || 0); }
       else if (bt === 'beetle') { pivot.position.y = Math.abs(Math.sin(phase * 2)) * 0.05 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.25 + Math.sin(t * 40) * 0.05 : 0; pivot.rotation.z = Math.sin(phase * 2) * 0.04 * (e.moveAmt || 0); }
-      else if (bt === 'wraith') { pivot.position.y = Math.sin(t * 2.2 + phase) * 0.25 + 0.35; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'wraith') { pivot.position.y = Math.sin(t * 2.2 + phase) * 0.25 + 0.35; pivot.rotation.x = 0.1; }
       else if (bt === 'boar') { pivot.position.y = Math.abs(Math.sin(phase * 1.5)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.2 + Math.sin(t * 40) * 0.04 : 0; }
       else if (bt === 'spider') { pivot.position.y = Math.abs(Math.sin(phase * 2.5)) * 0.05; pivot.rotation.z = Math.sin(phase * 2.5) * 0.06 * (e.moveAmt || 0); }
-      else if (bt === 'yeti') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.15 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.35; pivot.rotation.z = Math.sin(phase * 0.8) * 0.06 * (e.moveAmt || 0); }
-      else if (bt === 'crawler') { pivot.position.y = Math.abs(Math.sin(phase * 3)) * 0.04; pivot.rotation.z = Math.sin(phase * 3) * 0.08 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.25; }
-      else if (bt === 'drowned') { pivot.position.y = Math.sin(t * 1.9 + phase) * 0.22 + 0.3; pivot.rotation.z = Math.sin(t * 1.3 + phase) * 0.1; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
-      else if (bt === 'seraph') { pivot.position.y = Math.sin(t * 2.4 + phase) * 0.25 + 0.35; pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
-      else if (bt === 'warden') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.22 + Math.sin(t * 40) * 0.04 : (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'yeti') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.15 * (e.moveAmt || 0); pivot.rotation.z = Math.sin(phase * 0.8) * 0.06 * (e.moveAmt || 0); }
+      else if (bt === 'crawler') { pivot.position.y = Math.abs(Math.sin(phase * 3)) * 0.04; pivot.rotation.z = Math.sin(phase * 3) * 0.08 * (e.moveAmt || 0); }
+      else if (bt === 'drowned') { pivot.position.y = Math.sin(t * 1.9 + phase) * 0.22 + 0.3; pivot.rotation.z = Math.sin(t * 1.3 + phase) * 0.1; pivot.rotation.x = 0.1; }
+      else if (bt === 'seraph') { pivot.position.y = Math.sin(t * 2.4 + phase) * 0.25 + 0.35; }
+      else if (bt === 'warden') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.22 + Math.sin(t * 40) * 0.04 : 0; }
       else if (bt === 'sentinel') { pivot.position.y = Math.sin(t * 1.6 + phase) * 0.2 + 0.25; pivot.rotation.y = t * 0.8; }
+      else if (bt === 'toad') { const h = Math.max(0, Math.sin(phase * 0.9)); pivot.position.y = h * 0.35 * (e.moveAmt || 0); pivot.scale.set(1 + (1 - h) * 0.08, 0.92 + h * 0.14, 1 + (1 - h) * 0.08); pivot.rotation.x = -h * 0.12 * (e.moveAmt || 0); }
+      else if (bt === 'bat') { const f = Math.sin(t * 9 + phase); pivot.position.y = 0.55 + f * 0.12; pivot.scale.x = 1 + f * 0.12; pivot.rotation.x = 0.15; }
+      else if (bt === 'hornet') { pivot.position.y = 0.5 + Math.sin(t * 5 + phase) * 0.12 + Math.sin(t * 61) * 0.015; pivot.rotation.z = Math.sin(t * 3.1 + phase) * 0.12; pivot.rotation.x = 0.12; }
+      else if (bt === 'jelly') { const b = Math.sin(t * 2.2 + phase); pivot.position.y = 0.45 + b * 0.22; pivot.scale.set(1 - b * 0.07, 1 + b * 0.1, 1 - b * 0.07); }
+      else if (bt === 'wyvern') { pivot.position.y = Math.abs(Math.sin(phase * 0.9)) * 0.12 * (e.moveAmt || 0) + Math.sin(t * 2 + phase) * 0.04; pivot.rotation.z = Math.sin(phase * 0.9) * 0.06 * (e.moveAmt || 0); }
+      else if (bt === 'viper') { pivot.rotation.z = Math.sin(phase * 1.6) * 0.1; pivot.rotation.y = Math.sin(phase * 0.8) * 0.18; pivot.scale.y = 1 + Math.sin(t * 2 + phase) * 0.03; }
+      else if (bt === 'scorpion' || bt === 'crab') { pivot.position.y = Math.abs(Math.sin(phase * 2.6)) * 0.04; pivot.rotation.z = Math.sin(phase * 2.6) * 0.07 * (e.moveAmt || 0); }
+      else if (bt === 'myconid') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.08 * (e.moveAmt || 0); pivot.rotation.z = Math.sin(phase) * 0.1 * (e.moveAmt || 0); pivot.scale.y = 1 + Math.sin(t * 1.7 + phase) * 0.025; }
+      else if (bt === 'glassbull') { pivot.position.y = Math.abs(Math.sin(phase * 1.3)) * 0.09 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.2 + Math.sin(t * 40) * 0.04 : 0; }
       else { pivot.position.y = Math.sin(t * 3 + phase) * 0.2 + 0.2; pivot.rotation.z = Math.sin(t * 2 + phase) * 0.08; }
       // wind-up poses: each move has its own telegraph in the body (rear up, coil, lean back, wind the arms), eased in as the marker fills
+      if (e.windK && e.windT > 0) relK = e.windK;
       if (e.windK && e.windT > 0) {
         const wp = clamp(1 - e.windT / (e.windMax || 1), 0, 1), ez = wp * wp * (3 - 2 * wp), P = MOVE_POSE[e.windK] || MOVE_POSE.slam;
         pivot.rotation.x += P[0] * ez; pivot.position.y += P[1] * ez; pivot.rotation.y += P[2] * ez; pivot.scale.y *= 1 + P[3] * ez; pivot.scale.x *= 1 - P[3] * 0.5 * ez; pivot.scale.z *= 1 - P[3] * 0.5 * ez;
         if (Math.random() < 0.25 * wp * fxK) burst(e.x + (Math.random() - 0.5) * e.r * 2, 0.15, e.z + (Math.random() - 0.5) * e.r * 2, 1, BIOME_TINT[areaBiome(e.zone)] || 0xffffff, 1.2, 0.35, 0.2, -0.4, 1.4);
       }
+      // the strike: attackAnim jumps to 1 when a move or a plain attack goes off and fades in a third of a second
+      const a = e.attackAnim || 0;
+      if (a > 0.02 && !(e.windT > 0)) {
+        const k = STRIKE_OF[relK] || (SHOOTER_KIT[ED.kit] ? 'recoil' : 'lunge'), v = a * a, ez = 1 - Math.pow(1 - a, 3);
+        if (k === 'slam') { pivot.position.y -= 0.12 * v; pivot.rotation.x += 0.4 * ez; pivot.scale.y *= 1 - 0.28 * v; pivot.scale.x *= 1 + 0.18 * v; pivot.scale.z *= 1 + 0.18 * v; }
+        else if (k === 'lunge') { pivot.position.z += 0.55 * Math.sin(a * Math.PI); pivot.rotation.x += 0.3 * ez; pivot.scale.z *= 1 + 0.12 * v; }
+        else if (k === 'swing') { const P = MOVE_POSE[relK] || MOVE_POSE.cleave; pivot.rotation.y -= P[2] * 1.3 * Math.sin(a * Math.PI * 0.5); pivot.position.z += 0.2 * v; }
+        else if (k === 'recoil') { pivot.position.z -= 0.22 * v; pivot.rotation.x -= 0.22 * v; pivot.scale.z *= 1 - 0.08 * v; }
+        else if (k === 'breath') { pivot.rotation.x += 0.35 * ez; pivot.position.z += 0.18 * ez; pivot.scale.z *= 1 + 0.1 * ez; }
+        else if (k === 'pulse') { const g = 1 + 0.22 * v; pivot.scale.multiplyScalar(g); pivot.position.y += 0.1 * v; }
+        else if (k === 'burst') { pivot.position.y += 0.6 * Math.sin(a * Math.PI); pivot.rotation.x -= 0.3 * v; }
+        if (!struck && a > 0.85) { struck = true; if (k === 'slam' && fxK > 0) burst(e.x, 0.1, e.z, Math.round(10 * fxK), BIOME_TINT[areaBiome(e.zone)] || 0xc8b89a, 4.5, 0.45, 0.32, -2, 0.6); }
+      } else { struck = false; if (!(e.windT > 0)) relK = null; }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
       else if (e.invulnT > 0) mat.emissive.setRGB(0.15 + f, 0.55 + f, 0.85 + f);
@@ -11151,6 +11386,8 @@ function dungeonPalette(zn) {
   return { a: base.clone().multiplyScalar(0.62), b: (g ? new THREE.Color(g[1]) : base.clone()).multiplyScalar(0.5), wall: fog.clone().lerp(new THREE.Color(0x2a2430), 0.55),
     trim: fog.clone().lerp(new THREE.Color(0x14101c), 0.75), fog: fog.clone().multiplyScalar(0.35) };
 }
+// one dressing prop per biome: [world model, height in m]
+const DUNGEON_THEME_PROP = [['delve_sarcophagus', 1.3], ['delve_icecoffin', 1.4], ['delve_slagcart', 1.6], ['delve_bookshelf', 3.0], ['delve_coralshrine', 3.0], ['delve_meteor', 1.8]];
 function buildDungeonView(D) {
   disposeDungeonView();
   const zn = CFG.world.zones[D.zone], pal = dungeonPalette(zn), rng = mulberry32(strSeed(D.id) ^ 0x9e37), parts = [];
@@ -11181,6 +11418,16 @@ function buildDungeonView(D) {
       { x: m.x0 + ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 });
   });
   dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz), WorldModels.place(dungeonGroup, 'clutter', clutter));
+  // the biome's own dressing along the walls of every hall but the first and the boss's (TRELLIS.2 models):
+  // root-split sarcophagi, glacier coffins, slag carts, toppled bookshelves, coral shrines, fallen stars
+  const [themeId, themeS] = DUNGEON_THEME_PROP[areaBiome(D.zone)] || DUNGEON_THEME_PROP[0], theme = [];
+  D.rooms.forEach((m, i) => {
+    if (i === 0 || i === D.rooms.length - 1) return;
+    const hx = m.hx || m.h, hz = m.hz || m.h, ins = 1.6 + themeS * 0.35, spots = [[m.x0 + ins, m.z + 0.78 * hz], [m.x1 - ins, m.z - 0.78 * hz]];
+    if (D.delve && hx >= 15) spots.push([m.x - 0.78 * hx, m.z0 + ins], [m.x + 0.78 * hx, m.z1 - ins]);
+    for (const [x, z] of spots) if (rng() < 0.85) theme.push({ x, z, ry: Math.atan2(m.x - x, m.z - z) + (rng() - 0.5) * 0.5, s: themeS * (0.9 + rng() * 0.2) });
+  });
+  if (theme.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, themeId, theme, { bright: 1.15 }));
   // brazier flames share one additive mesh so the flicker is a single opacity change
   const fp = braz.map((b) => part(GEO.ico0, 0xffa040, [b.x, b.s * 0.98, b.z], null, [0.32, 0.5, 0.32]));
   if (fp.length) { dungeonParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); dungeonGroup.add(dungeonParts.flame); }
@@ -11216,7 +11463,7 @@ function enterDungeonView(on) {
   if (on && G.dungeon) {
     buildDungeonView(G.dungeon);
     const pal = dungeonPalette(CFG.world.zones[G.dungeon.zone]);
-    scene.fog.color.copy(pal.fog); scene.fog.near = 22; scene.fog.far = 75; paintSky(pal.fog.clone().multiplyScalar(0.4), pal.fog);
+    scene.fog.color.copy(pal.fog); scene.fog.near = 70; scene.fog.far = 150; // starts past the camera (~35 m up): only far halls fade, the screen stays clear paintSky(pal.fog.clone().multiplyScalar(0.4), pal.fog);
   } else { disposeDungeonView(); scene.fog.near = 50; scene.fog.far = Q.lowTier ? 95 : 140; }
 }
 function updateDungeonView(dt) {
@@ -11237,8 +11484,8 @@ function updateDungeonView(dt) {
 }
 // --- party-dungeon view: event-room set pieces on top of the hall builder (47-dungeon-view.js). Generated models
 // (delve_altar, delve_moonwell, delve_echo, delve_hoard, delve_throne) plus existing ones (chest, pillar); code geometry
-// here is only VFX: rune rings, glows, the moonwell shimmer and the pressure-plate floor sigils. Dark halls pull the fog in.
-const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [], seals: [], tex: [] };
+// here is only VFX: rune rings, glows, the moonwell shimmer and the pressure-plate floor sigils.
+const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [], seals: [], tex: [], veins: [] };
 // --- puzzle halls: pixel runes (7×7, bone white with an ink outline) floating over each seal; a floor mural shows the
 // order. Pips (1-5 dots) stand in for runes on the easy runs that number their seals.
 const PZ_GLYPHS = ['0011100,0100010,1000001,1111111,1000001,0100010,0011100', '1000001,0100010,0010100,0001000,0010100,0100010,1000001', '0001000,0011100,0101010,1001001,0001000,0001000,0011100',
@@ -11275,7 +11522,8 @@ function buildDelvePuzzles(D, tint) {
       sp.position.set(q.x, lever ? 3.6 : 2.2, q.z); sp.scale.setScalar(1.25);
       delveParts.seals.push({ room: m.i, j, ring, disc, sp, base: sp.position.y });
     });
-    // the mural: the runes in their order (or the pips counting up), between two standing stones
+    // the mural (only the ordered puzzle has one): the runes in their order (or the pips counting up), between two standing stones
+    if (pz.kind !== 'order') continue;
     const seq = pz.order.map((j, k) => ({ g: pz.sw[j].g, pip: pz.pips ? k : null })), w = K * 1.7, tex = pzTexture(seq, true);
     const mural = add(new THREE.Mesh(new THREE.PlaneGeometry(w + (K - 1) * 0.85, 1.7).rotateX(-Math.PI / 2).rotateY(Math.PI), new THREE.MeshBasicMaterial({ map: tex, color: tint, transparent: true, depthWrite: false })));
     mural.position.set(pz.clue.x, 0.05, pz.clue.z); mural.material.color.lerp(new THREE.Color(0xffffff), 0.55);
@@ -11289,10 +11537,14 @@ function buildDelvePuzzles(D, tint) {
 function updateDelvePuzzles(D, t) {
   const tint = BIOMES[D.delve.def.biome].coreColor;
   for (const q of delveParts.seals) {
-    const m = D.rooms[q.room], S = D.delve.pz[q.room], at = m.pz.order.indexOf(q.j), awake = !!S && (S.done || at < S.step), red = S && S.flash > 0 && Math.sin(t * 30) > 0;
+    const m = D.rooms[q.room], S = D.delve.pz[q.room], awake = !!S && delvePzLit(m, S, q.j), red = S && S.flash > 0 && Math.sin(t * 30) > 0;
+    // the echo shows its order: one seal after the other flashes white while nothing is awake yet
+    const K = m.pz.sw.length, sh = DV.puzzle.kinds.memory.show, ph = S ? S.show % (K * sh + 2.5) : 0, showing = m.pz.kind === 'memory' && S && !S.done && !S.step && S.cd <= 0 && ph < K * sh && m.pz.order[Math.floor(ph / sh)] === q.j && ph % sh < sh * 0.7;
+    // the race: dark seals pulse faster while the clock runs
+    const racing = m.pz.kind === 'timed' && S && S.bits && !S.done;
     const hold = S && S.hold[q.j] > 0 ? S.hold[q.j] / DV.puzzle.hold : 0;
-    q.sp.material.color.setHex(red ? 0xff4040 : awake ? tint : hold > 0 ? 0xffffff : 0x8a8590);
-    q.ring.material.color.setHex(red ? 0xff3030 : tint); q.ring.material.opacity = awake ? 0.95 : 0.3 + hold * 0.5 + Math.sin(t * 3 + q.j) * 0.08;
+    q.sp.material.color.setHex(red ? 0xff4040 : showing ? 0xffffff : awake ? tint : hold > 0 ? 0xffffff : 0x8a8590);
+    q.ring.material.color.setHex(red ? 0xff3030 : showing ? 0xffffff : tint); q.ring.material.opacity = awake || showing ? 0.95 : 0.3 + hold * 0.5 + Math.sin(t * (racing ? 12 : 3) + q.j) * (racing ? 0.2 : 0.08);
     q.sp.position.y = q.base + (awake ? 0.5 : 0) + Math.sin(t * 2 + q.j) * 0.08;
     if (q.disc) q.disc.material.color.setHex(awake ? tint : 0x5a5060);
   }
@@ -11304,6 +11556,13 @@ function buildDelveProps(D) {
   const cover = D.props.filter((q) => !q.kind); // lever stones are placed with their puzzle below
   if (cover.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', cover.map((q, k) => ({ x: q.x, z: q.z, ry: k * 1.3, s: 3.4 }))));
   buildDelvePuzzles(D, tint);
+  // rare veins: the existing crystal model in the dungeon's treasure colour, a soft glow under it; gone once you mined it
+  delveParts.veins = (D.veins || []).map((v, i) => {
+    const col = X.def.gem ? X.def.gem.color : tint, item = { x: v.x, z: v.z, ry: i * 2.1, s: v.lode ? 3.6 : 2.8 };
+    const set = WorldModels.place(dungeonGroup, 'crystal', [item], { glow: col, glowK: v.lode ? 0.75 : 0.6 }); dungeonParts.sets.push(set);
+    const ring = add(new THREE.Mesh(new THREE.RingGeometry(1.6, 2.5, 32).rotateX(-Math.PI / 2), glow(col, 0.5))); ring.position.set(v.x, 0.04, v.z);
+    return { i, item, set, ring };
+  });
   const echo = [];
   for (const m of D.rooms) {
     if (!m.event) continue;
@@ -11347,6 +11606,7 @@ function buildDelveProps(D) {
 function updateDelveView(dt, t) {
   const D = G.dungeon, X = D.delve;
   updateDelvePuzzles(D, t);
+  for (const v of delveParts.veins) { const gone = !!X.mined[v.i]; if (v.item.hidden !== gone) { v.item.hidden = gone; v.set.dirty = true; v.ring.visible = !gone; } v.ring.material.opacity = 0.25 + Math.sin(t * 2.5 + v.i) * 0.15; }
   for (const c of delveParts.caches) {
     const b = X.bonus[c.room] | 0, [cc, co] = c.items, hc = b !== 1, ho = b !== 2;
     if (cc.hidden !== hc || co.hidden !== ho) { cc.hidden = hc; co.hidden = ho; for (const h of c.sets) h.dirty = true; if (b === 1) burst(cc.x, 1, cc.z, 20, 0xffd34a, 4, 0.8, 0.4, 6, 3); }
@@ -11357,8 +11617,7 @@ function updateDelveView(dt, t) {
   if (delveParts.altar) { const A = delveParts.altar; A.orb.position.y = 2.2 + Math.sin(t * 2) * 0.12; A.rune.rotation.y = t * 0.4; A.rune.material.opacity = X.used.altar ? 0.2 : 0.7; }
   if (delveParts.well) { delveParts.well.water.rotation.y = -t * 0.5; delveParts.well.water.material.opacity = X.used.fountain ? 0.25 : 0.8; }
   for (const r of delveParts.glows) r.material.opacity = 0.14 + Math.sin(t * 1.7 + r.position.x) * 0.05;
-  // dark halls: the fog closes in while you are inside one
-  const m = D.rooms[D.room], far = m && m.dark ? 34 : 75; scene.fog.far += (far - scene.fog.far) * Math.min(1, dt * 2); scene.fog.near = Math.min(22, scene.fog.far * 0.4);
+
 }
 // --- Bastion Siege view: the fort's land, built on entry and disposed on exit. Everything standing is a generated world
 // model (keep, wagons, the siege_* buildings and walls, flags); code geometry is only ground, the land's edge, the
@@ -11764,7 +12023,8 @@ const WORLD_MODEL_BOX = {
   boss_frost: [0.99, 0.51], boss_golem: [1.04, 0.55], boss_magma: [1.01, 0.47], boss_void: [1, 0.5], brazier: [0.86, 0.84], bucket: [1.48, 1.31],
   bush_a_1: [1.21, 1.24], bush_a_2: [3.36, 3.16], bush_a_3: [0.77, 0.83], bush_flower_1: [1.21, 1.24], cage: [1.06, 1.1], camp: [3.01, 2.74],
   cave: [1.5, 1.21], chest: [1.46, 1.37], chest_open: [1.13, 1.07], clutter: [2.44, 2.16], crate_1: [0.91, 0.98], crate_2: [1.02, 1.02],
-  crystal: [1.04, 1.05], delve_altar: [0.58, 0.57], delve_echo: [1, 0.82], delve_hoard: [2.39, 2.45], delve_moonwell: [1.3, 1.3], delve_throne: [0.69, 0.59],
+  crystal: [1.04, 1.05], delve_altar: [0.58, 0.57], delve_bookshelf: [0.53, 0.46], delve_coralshrine: [0.44, 0.45], delve_echo: [1, 0.82], delve_hoard: [2.39, 2.45],
+  delve_icecoffin: [1.6, 0.83], delve_meteor: [1.43, 1.43], delve_moonwell: [1.3, 1.3], delve_sarcophagus: [2.27, 1.52], delve_slagcart: [0.83, 1.26], delve_throne: [0.69, 0.59],
   dragon_skull: [1.29, 1.6], dummy: [0.43, 0.31], dwall: [2.24, 0.48], elder_stump: [1.33, 1.42], fairy_ring: [2.91, 2.91], farm_crate: [2.93, 1.7],
   fence: [2.46, 0.14], floating_isle: [0.93, 0.98], flower_1: [0.72, 0.77], flower_2: [0.67, 0.66], forge: [1.3, 1.25], fountain: [1.25, 1.26],
   frozen_fall: [1.46, 1.4], gatehouse: [1.27, 0.63], geyser: [2.13, 2.08], ghost_ship: [0.79, 0.5], glass_chimney: [0.75, 0.78], graves: [0.8, 0.77],
@@ -11774,7 +12034,7 @@ const WORLD_MODEL_BOX = {
   pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61], pond: [2.99, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39], ribcage: [2.8, 1.26],
   rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15], rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3], rock_a_3: [1.48, 1.5],
   ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61], ruined_tower: [1.24, 1.06], rune_obelisk: [0.52, 0.51], sapphire_brazier: [0.65, 0.63], sea_stack: [0.9, 0.88],
-  siege_archer: [0.49, 0.52], siege_ballista: [1.67, 1.66], siege_barracks: [1.03, 1.56], siege_cannon: [1.64, 0.94], siege_gate: [1.03, 0.3], siege_hut: [1.25, 1.15],
+  siege_archer: [0.49, 0.52], siege_ballista: [1.67, 1.66], siege_barracks: [1.18, 1.04], siege_cannon: [1.64, 0.94], siege_gate: [1.03, 0.3], siege_hut: [1.25, 1.15],
   siege_mage: [0.49, 0.45], siege_mine: [1.15, 1.13], siege_trap_bomb: [1.02, 1.02], siege_trap_spike: [5.57, 5.56], siege_trap_tar: [5.18, 5.21], siege_wall_iron: [5.34, 0.64],
   siege_wall_stone: [5.55, 0.67], siege_wall_wood: [1.88, 0.36], signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], snow_mountain: [1.34, 1.39], stall: [1.01, 1.29],
   stall_kit_1: [0.7, 0.35], stall_kit_2: [1.15, 0.4], standing_stone: [0.69, 0.73], statue: [0.65, 0.64], stump: [1.12, 1.05], sundial: [1.74, 1.75],
@@ -12969,14 +13229,15 @@ function invChestsHTML(p) {
     <p class="fine">Tap a chest to open it. Chests are earned in play and cannot be sold. Every chest shows its odds before you open it.</p>`;
 }
 // where each kind of material comes from, shown on its card
-const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses', rune: 'Elites, bosses, dungeons' };
+const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses', rune: 'Elites, bosses, dungeons', gem: 'Rare veins in Dungeon mode' };
 function invResourcesHTML(p) {
   const tile = (img, name, n, col, src) => `<div class="rtile${n ? '' : ' none'}" style="--rc:${col}" title="${name}${src ? ' · ' + src : ''}"><img src="${img}" alt=""><b class="rn">${fmtK(n)}</b><small>${name}</small></div>`;
   const mat = (id) => { const M = MATS[id]; return tile(matIcon(id), M.name, matCount(id, p), hex6(M.color), MAT_SRC[M.kind]); };
   const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(svg.includes('xmlns') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
   const money = `<div class="igrid rgrid">${tile(svgUrl(ICON.coin), 'Gold', p.gold, '#ffd23a')}${tile(svgUrl(ICON.ess), 'Gems', p.essence || 0, '#7fe3ff')}${mat(CFG.craft.titan.id)}${mat(CFG.craft.rune.id)}</div>`;
   const groups = CB.map((b, i) => biomeReached(i, p) ? `<h4 class="sub">${BIOMES[i].name}</h4><div class="igrid rgrid">${[b.ore, b.part, b.core].map(mat).join('')}</div>` : '').join('');
-  return `<div class="subRow"><h4 class="sub">Resources</h4></div><h4 class="sub first">Gold, gems, Titan Souls &amp; Rune Shards</h4>${money}${groups}
+  const rare = CFG.delve.dungeons.filter((d) => d.gem && (delveOpen(d) || matCount(d.gem.id, p))), rareHTML = rare.length ? `<h4 class="sub">Dungeon treasures</h4><div class="igrid rgrid">${rare.map((d) => mat(d.gem.id)).join('')}</div>` : '';
+  return `<div class="subRow"><h4 class="sub">Resources</h4></div><h4 class="sub first">Gold, gems, Titan Souls &amp; Rune Shards</h4>${money}${groups}${rareHTML}
     <p class="fine">Ore comes from Mining, parts from monsters, cores from dungeon chests, Titan Souls from world bosses, Rune Shards (for Enchanting) from elites, bosses, dungeon chests and now and then any monster. Spend them in the Forge. Biomes you have not reached stay hidden.</p>`;
 }
 // --- crafting tabs (src/game/39-crafting.js)
@@ -13806,11 +14067,14 @@ function processEvents() {
       // party dungeons (36b-delve.js)
       case 'delveEvent': { const E = CFG.delve.events[e.k]; showBanner(E.name, E.d, 'gold'); ringFx(e.x, e.z, 5, 0xffd34a, 1.1); Sfx.play('horn'); break; }
       case 'delveMini': showBanner(escapeHTML(e.name), 'A champion of the dungeon guards this hall', 'red'); ringFx(e.x, e.z, 7, 0xff5d8f, 1.1); Sfx.play('horn'); break;
-      case 'delvePhase': showBanner(`Phase ${e.n} of ${e.of}`, e.rage ? `${escapeHTML(e.name)} is enraged: faster and harder hitting` : `${escapeHTML(e.name)} calls for help`, 'red'); ringFx(e.x, e.z, 6, e.rage ? 0xff3030 : 0xff5d8f, 1); Sfx.play('horn'); if (e.rage) burst(e.x, 1.5, e.z, 34, 0xff3030, 6, 0.9, 0.4, 3, 2); break;
-      case 'delvePuzzle': showBanner(escapeHTML(e.name), e.pips ? CFG.delve.puzzle.pipsHint : CFG.delve.puzzle.hint, 'gold'); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break;
-      case 'delvePzStep': showToast(`Seal ${e.n} of ${e.of} awake`, 'good'); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
-      case 'delvePzFail': showToast(e.spikes ? 'Wrong seal! The floor bites back' : 'Wrong seal! Something crawls out', 'bad'); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
+      case 'delvePhase': showBanner(`Phase ${e.n} of ${e.of}`, `${escapeHTML(e.name)}${e.rage ? ' is enraged' : ' calls for help'}${e.adds && e.adds.length ? ' · new: ' + e.adds.map(escapeHTML).join(', ') : ''}`, 'red'); ringFx(e.x, e.z, 6, e.rage ? 0xff3030 : 0xff5d8f, 1); Sfx.play('horn'); if (e.rage) burst(e.x, 1.5, e.z, 34, 0xff3030, 6, 0.9, 0.4, 3, 2); break;
+      case 'delvePuzzle': { const K = CFG.delve.puzzle.kinds[e.kind] || {}; showBanner(`${escapeHTML(e.name)} · ${K.name || ''}`, e.pips ? CFG.delve.puzzle.pipsHint : K.hint || CFG.delve.puzzle.hint, 'gold'); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break; }
+      case 'delvePzClock': showToast(`The race is on: ${e.secs} seconds!`, 'bad'); ringFx(e.x, e.z, 7, 0xffd34a, 0.8); Sfx.play('horn'); break;
+      case 'delvePzStep': showToast(e.flip ? `${e.n} of ${e.of} seals lit` : `Seal ${e.n} of ${e.of} awake`, 'good'); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
+      case 'delvePzFail': showToast(`${e.timed ? 'Too slow!' : 'Wrong seal!'} ${e.spikes ? 'The floor bites back' : 'Something crawls out'}`, 'bad'); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
       case 'delvePzDone': showBanner(`${escapeHTML(e.name)} solved`, 'The gate opens', 'gold'); burst(e.x, 1, e.z, 30, 0xffd34a, 6, 0.9, 0.4, 3, 2); Sfx.play('unlock'); break;
+      case 'delveBossCast': if (e.k === 'charge' || e.k === 'spiral' || e.k === 'meteors') Sfx.play('horn', { gap: 1 }); ringFx(e.x, e.z, 3, 0xff5d8f, 0.5); break;
+      case 'delveVein': if (e.lode) showBanner('Motherlode!', `+${e.n} ${escapeHTML(e.name)}`, 'gold'); else showToast(`+${e.n} ${escapeHTML(e.name)} · a rare dungeon treasure`, 'good'); burst(e.x, 1.2, e.z, e.lode ? 40 : 24, 0xffe27a, 5, 0.9, 0.4, 4, 2); Sfx.play(e.lode ? 'radiant' : 'unlock'); break;
       case 'delveWave': showToast(`Wave ${e.n + 1} of ${e.of}!`, 'bad'); ringFx(e.x, e.z, 6, 0xff5d8f, 0.9); break;
       case 'delveBonus': Feed.remove('dlvEvent'); showToast(e.why + ' · open the cache', 'good'); burst(e.x, 1, e.z, 26, 0xffd34a, 5, 0.9, 0.4, 4, 2); Sfx.play('unlock'); break;
       case 'delveEscape': Feed.remove('dlvEvent'); showToast('The goblin got away with its gold…', 'bad'); burst(e.x, 1, e.z, 18, 0xffd34a, 4, 0.6, 0.3, -2, 3); break;
@@ -15085,7 +15349,7 @@ function rtMessage(d) {
       if (P.event === 'hit' && P.payload && P.payload.to === MP.sid) { mobHitRecv(P.payload); break; }
       if (P.event === 'phit' && P.payload && P.payload.to === MP.sid) { pvpRecv(P.payload); break; }
       if (P.event === 'pdie' && P.payload && P.payload.to === MP.sid) { pvpDieRecv(P.payload); break; }
-      if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull|dbot|dask|dans|ddoor|dpz)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
+      if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull|dbot|dask|dans|ddoor|dpz|dbs)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^f[a-z]+$/.test(P.event) && typeof siegeMpRecv === 'function') { siegeMpRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^b/.test(P.event)) { bossRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
@@ -15440,16 +15704,18 @@ function openPlayers() {
 // Cases are only ever EARNED in play (drops, bosses, Rift, Level Road, Vault, Expeditions).
 // They are never sold for money or for any currency, and every case shows its odds.
 // ---------------------------------------------------------------------
+// w: rarity weights at full level (see caseTable: low-level chests roll lower), hi: endgame weight scale,
+// named: chance the gear piece is a named collection item, res: size of the resource bundle, hero: chance of a hero
 CFG.cases = {
-  hunter: { name: 'Hunter’s Chest', sub: 'Dropped by monsters, elites, dens and shrines', col: '#58b4ff', w: { common: 14, uncommon: 24, rare: 30, epic: 21, legendary: 9 }, hi: 5 },
-  treasure: { name: 'Treasure Chest', sub: 'From the Vault, expeditions and level-ups', col: '#ffc94a', w: { uncommon: 20, rare: 36, epic: 28, legendary: 14 }, hi: 6 },
-  boss: { name: 'Colossus Chest', sub: 'World boss loot', col: '#ff7a45', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  rift: { name: 'Rift Chest', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 46, legendary: 40 }, hi: 14 },
-  milestone: { name: 'Milestone Chest', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0 },
-  frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 26, epic: 42, legendary: 28 }, hi: 10 },
-  geode: { name: 'Geode', sub: 'Cracked from ore veins (Mining) · also holds a Museum mineral', col: '#7fe3c4', w: { uncommon: 30, rare: 40, epic: 22, legendary: 8 }, hi: 4 },
+  hunter: { name: 'Hunter’s Chest', sub: 'Dropped by monsters, elites, dens and shrines', col: '#58b4ff', w: { common: 26, uncommon: 32, rare: 27, epic: 12, legendary: 3 }, hi: 3, named: 0.3, res: 1, hero: 0.002 },
+  treasure: { name: 'Treasure Chest', sub: 'From the Vault, expeditions and level-ups', col: '#ffc94a', w: { uncommon: 24, rare: 36, epic: 28, legendary: 12 }, hi: 6, named: 0.4, res: 1.6, hero: 0.004 },
+  boss: { name: 'Colossus Chest', sub: 'World boss loot', col: '#ff7a45', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
+  rift: { name: 'Rift Chest', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 44, legendary: 46 }, hi: 16, named: 0.65, res: 3.5, hero: 0.01 },
+  milestone: { name: 'Milestone Chest', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0, named: 0.5, res: 2, hero: 0.005 },
+  frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
+  ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
+  celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
+  geode: { name: 'Geode', sub: 'Cracked from ore veins (Mining) · also holds a Museum mineral', col: '#7fe3c4', w: { common: 22, uncommon: 34, rare: 28, epic: 13, legendary: 3 }, hi: 2, named: 0.3, res: 1, hero: 0.002 },
 };
 CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial', 'geode'];
 const CASE_LUCK = { legendary: 30, mythic: 120 };
@@ -15467,11 +15733,17 @@ function caseTable(c) {
     return w;
   }
   w = Object.assign({}, K.w);
+  // low-level chests roll lower: Epic and up shrink until about level 60 (Legendary twice as hard, and so on)
+  const g = caseLevelMul(c.l);
+  for (const r in w) if (rarIdx(r) >= 3) w[r] *= Math.pow(g, rarIdx(r) - 2);
   if (c.k === 'rift') { const n = c.n || 0; if (n >= 25) w.mythic = 6 + Math.min(20, (n - 25) * 0.4); if (n >= 50) w.ancient = 2 + Math.min(10, (n - 50) * 0.15); if (n >= 100) w.divine = 0.6 + Math.min(4, (n - 100) * 0.05); }
   else { const H = highWeights(c.t || 0, c.z || 0); for (const h of HIGH_RAR) if (H[h] > 0) w[h] = H[h] * K.hi; }
   if (c.f) for (const r in w) if (rarIdx(r) < rarIdx(c.f)) delete w[r];
   return w;
 }
+function caseLevelMul(l) { return Math.max(0.25, Math.min(1, 0.25 + (l || 1) / 80)); }
+// the Legendary guarantee only counts chests that can really give one (at least 5%), so low chests don't force it
+function casePity(w) { let tot = 0; for (const k in w) tot += w[k]; return !!w.legendary && w.legendary / tot >= 0.05; }
 function caseOdds(c) { const w = caseTable(c); let tot = 0; for (const k in w) tot += w[k]; return RARITIES.filter((r) => w[r]).map((r) => [r, w[r] / tot]); }
 function addCase(k, o) {
   const p = G.profile; o = o || {};
@@ -15484,32 +15756,47 @@ function rollCase(c) {
   const p = G.profile, w = caseTable(c); let r = rollRarity(w), lucky = false;
   const L = p.caseLuck || (p.caseLuck = { legendary: 0, mythic: 0 });
   if (w.mythic && rarIdx(r) < 5 && L.mythic + 1 >= CASE_LUCK.mythic) { r = 'mythic'; lucky = true; }
-  else if (w.legendary && rarIdx(r) < 4 && L.legendary + 1 >= CASE_LUCK.legendary) { r = 'legendary'; lucky = true; }
-  L.legendary = rarIdx(r) >= 4 ? 0 : L.legendary + 1;
+  else if (casePity(w) && rarIdx(r) < 4 && L.legendary + 1 >= CASE_LUCK.legendary) { r = 'legendary'; lucky = true; }
+  if (rarIdx(r) >= 4) L.legendary = 0; else if (casePity(w)) L.legendary++;
   if (w.mythic) L.mythic = rarIdx(r) >= 5 ? 0 : L.mythic + 1;
   return { r, lucky };
 }
-// bonus on top of the item: a very rare hero, a gold or gem jackpot, or crafting materials (shown with the odds)
-const CASE_BONUS = { hero: 0.002, gold: 0.04, gems: 0.03, mats: 0.25 };
-function caseBonus() {
-  const p = G.profile, x = Math.random(); let acc = 0;
+// every chest also holds resources: gold, the biome's crafting materials, Bastion wood/stone/iron once the fort is
+// open, gems from the bigger chests, a 4% gold jackpot and a very rare hero (all shown with the odds)
+const CASE_JACKPOT = 0.04;
+function caseLoot(c) {
+  const p = G.profile, K = CFG.cases[c.k] || CFG.cases.hunter, m = K.res || 1, L = Math.max(1, c.l || p.level), out = { gold: 0, gems: 0, mats: [], fort: null, hero: null, jackpot: false };
   const locked = CFG.brawlerOrder.filter((id) => id !== STARTER_HERO && !p.unlocked.attacks.includes(id) && !(CFG.attacks[id].unlock && CFG.attacks[id].unlock.sigils != null));
-  if (locked.length && x < (acc += CASE_BONUS.hero)) {
-    const id = pick(locked); p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id);
-    ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: CFG.attacks[id].name }); return { k: 'hero', id, name: CFG.brawlers[id].name };
+  if (locked.length && Math.random() < (K.hero || 0)) {
+    const id = pick(locked); p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); out.hero = { id, name: CFG.brawlers[id].name };
+    ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: CFG.attacks[id].name });
   }
-  if (x < (acc += CASE_BONUS.gold)) { const n = Math.round(6 * Math.pow(CFG.enemies.goldGrowth, p.level - 1) * 360); addGold(n, true); return { k: 'gold', n }; } // about six hours of Bank income
-  if (x < (acc += CASE_BONUS.gems)) { const n = 20 + Math.round(p.level / 3); addEssence(n); return { k: 'gems', n }; }
-  // CB (crafting) is absent in the node-only checks
-  if (typeof CB !== 'undefined' && x < (acc += CASE_BONUS.mats)) { const B = CB[zoneBiome(highestZone(p.level))]; return { k: 'mats', got: addMats([[B.ore, 8 + p.level / 10], [B.part, 3 + p.level / 25]], true) }; }
-  return null;
+  const hour = 6 * Math.pow(CFG.enemies.goldGrowth, L - 1) * 60; // an hour of Bank income at the chest's level
+  out.jackpot = Math.random() < CASE_JACKPOT; out.gold = Math.max(1, Math.round(hour * (out.jackpot ? 6 : 0.3 * m))); addGold(out.gold, true);
+  if (m >= 1.5 || Math.random() < 0.3) { out.gems = Math.round((5 + L / 10) * m); addEssence(out.gems); }
+  // CB (crafting) and the fort are absent in the node-only checks
+  if (typeof CB !== 'undefined') { const B = CB[zoneBiome(highestZone(p.level))]; out.mats = addMats([[B.ore, Math.round((6 + L / 12) * m)], [B.part, Math.round((2 + L / 30) * m)]], true); }
+  if (typeof myFort !== 'undefined' && p.level >= CFG.siege.unlock) {
+    const M = myFort(); out.fort = { wood: Math.round((10 + L / 10) * m), stones: Math.round((5 + L / 20) * m), iron: m >= 1.5 ? Math.round((1 + L / 60) * m) : 0 };
+    for (const q of CFG.siege.res) M[q] = (M[q] || 0) + out.fort[q];
+  }
+  return out;
 }
-function bonusHTML(b) {
-  if (!b) return '';
-  if (b.k === 'hero') return `<div class="cbonus hero"><b>HERO!</b> ${escapeHTML(b.name)} joins you</div>`;
-  if (b.k === 'gold') return `<div class="cbonus gold"><b>JACKPOT</b> ${ICON.coin}${fmtK(b.n)}</div>`;
-  if (b.k === 'gems') return `<div class="cbonus gems"><b>GEMS</b> ${ICON.ess}${fmtK(b.n)}</div>`;
-  return `<div class="cbonus mats">${b.got.map(([id, n]) => matChip(id, null, G.profile).replace(/<b>.*?<\/b>/, `<b>+${n}</b>`)).join('')}</div>`;
+// one line of chips for the resources (several chests are added together first)
+function lootSum(list) {
+  const t = { gold: 0, gems: 0, mats: {}, fort: null, hero: [], jackpot: false };
+  for (const b of list) { if (!b) continue; t.gold += b.gold; t.gems += b.gems; t.jackpot = t.jackpot || b.jackpot; if (b.hero) t.hero.push(b.hero.name);
+    for (const [id, n] of b.mats || []) t.mats[id] = (t.mats[id] || 0) + n;
+    if (b.fort) { t.fort = t.fort || { wood: 0, stones: 0, iron: 0 }; for (const q in b.fort) t.fort[q] += b.fort[q]; } }
+  return t;
+}
+function lootHTML(list) {
+  const t = lootSum(list), chips = [];
+  if (t.gold) chips.push(`<span class="mat">${ICON.coin}<b>+${fmtK(t.gold)}</b></span>`);
+  if (t.gems) chips.push(`<span class="mat">${ICON.ess}<b>+${fmtK(t.gems)}</b></span>`);
+  for (const id in t.mats) chips.push(matChip(id, null, G.profile).replace(/<b>.*?<\/b>/, `<b>+${t.mats[id]}</b>`));
+  if (t.fort) { const ic = { wood: ICON.wood, stones: ICON.stone, iron: ICON.iron }; for (const q in t.fort) if (t.fort[q]) chips.push(`<span class="mat">${ic[q]}<b>+${fmtK(t.fort[q])}</b></span>`); }
+  return `${t.hero.map((n) => `<div class="cbonus hero"><b>HERO!</b> ${escapeHTML(n)} joins you</div>`).join('')}${t.jackpot ? '<div class="cbonus gold"><b>JACKPOT</b> six hours of gold</div>' : ''}<div class="cbonus mats">${chips.join('')}</div>`;
 }
 // opening grants the item at once (so closing mid-spin never loses it); the reel only shows it
 function openCase(id) {
@@ -15517,13 +15804,16 @@ function openCase(id) {
   // Case rewards are always kept: when the bag is full they overflow it instead of blocking the case.
   const c = p.cases.splice(i, 1)[0], { r, lucky } = rollCase(c);
   const it = makeItem(pick(CFG.gear.slots), r, c.l);
+  // better chests turn their gear into a named collection item more often (the bag roll below still counts too)
+  const K = CFG.cases[c.k] || CFG.cases.hunter;
+  if (K.named > COLLECTION_CHANCE) rollCollectionItem(p, it, () => Math.random() * COLLECTION_CHANCE / K.named);
   p.stats.cases = (p.stats.cases || 0) + 1;
   p.records.bestCase = Math.max(p.records.bestCase || 0, rarIdx(r));
   grantItem(it, 'case');
-  const mineral = c.k === 'geode' ? crackGeode() : null, bonus = caseBonus();
+  const mineral = c.k === 'geode' ? crackGeode() : null, loot = caseLoot(c);
   G.dirty = true; checkAchievements();
   saveNow(true); // Persist the case removal and exact reward together, before the reel.
-  return { item: it, lucky, c, mineral, bonus, kept: p.bag.some((b) => b.id === it.id) };
+  return { item: it, lucky, c, mineral, loot, kept: p.bag.some((b) => b.id === it.id) };
 }
 
 // --- Vault: fills while you play or are away; collect any time ---------------------------------
@@ -15677,9 +15967,10 @@ function openCases(sel) {
     const c = groups[sel][0], odds = caseOdds(c), L = p.caseLuck || { legendary: 0, mythic: 0 };
     body = `<div class="caseHero" style="--cc:${CFG.cases[sel].col}">${caseArt(sel, 'big')}<div><b>${CFG.cases[sel].name}</b><small>${CFG.cases[sel].sub} · item level ${c.l}${c.f ? ` · at least ${CFG.gear.rarity[c.f].name}` : ''}</small></div></div>
       <div class="odds">${odds.map(([r, x]) => `<div class="od ${r}"><span>${CFG.gear.rarity[r].name}</span><b>${x >= 0.01 ? (x * 100).toFixed(1) : (x * 100).toFixed(2)}%</b></div>`).join('')}</div>
-      <div class="odds bonusOdds"><div class="od"><span>Hero</span><b>0.2%</b></div><div class="od"><span>Gold jackpot</span><b>4%</b></div><div class="od"><span>Gems</span><b>3%</b></div><div class="od"><span>Materials</span><b>25%</b></div></div>
-      <p class="fine">Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
-    bar = selBar('', `${p.cases.length > 1 ? `<button class="ghost boost big5" data-act="caseFast" data-k="${sel}"><b>×${Math.min(5, p.cases.length)}</b><small>Open all</small></button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
+      <div class="odds bonusOdds"><div class="od"><span>Hero</span><b>${(CFG.cases[sel].hero * 100).toFixed(1)}%</b></div><div class="od"><span>Named item</span><b>${Math.round(Math.max(COLLECTION_CHANCE, CFG.cases[sel].named || 0) * 100)}%+</b></div><div class="od"><span>Gold jackpot</span><b>${CASE_JACKPOT * 100}%</b></div></div>
+      <p class="fine">Every chest also holds gold, crafting materials${p.level >= CFG.siege.unlock ? `, Bastion wood and stone${CFG.cases[sel].res >= 1.5 ? ' and iron' : ''}` : ''}${CFG.cases[sel].res >= 1.5 ? ' and gems' : ''}.</p>
+      <p class="fine">${casePity(caseTable(c)) ? `Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests` : 'Low-level chests roll lower rarities'}${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
+    bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost boost big5" data-act="caseFast" data-k="${sel}"><b>×${Math.min(5, groups[sel].length)}</b><small>Open ${Math.min(5, groups[sel].length)}</small></button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
   }
   openModal(dock(`<div class="npcHead">${gi('m_case', 'hd')}<h3>Treasure Chests</h3><span class="cnt">${p.cases.length} stored</span></div>`, `${body}<div class="ctiles">${tiles}</div><div class="row end"><button class="ghost" data-act="mGear">Back to Inventory</button><button class="ghost" data-act="mCollection">Collection Log</button></div>`, bar));
   $('panel').classList.add('wide');
@@ -15723,7 +16014,7 @@ function reelFinish(card) {
   Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
   if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
   const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
-  $('reelOut').innerHTML = `${bonusHTML(res.bonus)}${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
+  $('reelOut').innerHTML = `${lootHTML([res.loot])}${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
     <div class="row end">${res.kept ? `${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">${wearWord(it.slot)}</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
     ${left.length ? `<button class="primary gold" data-act="caseOpen" data-id="${left[0].id}">Open next (${left.length})</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
@@ -15731,8 +16022,8 @@ function reelFinish(card) {
 // the last one takes longest. Every reward is granted before the reels start, so closing never loses one.
 function openCasesFast(k) {
   const p = G.profile, out = [];
-  // the chosen kind first, then any other chests, so Open 5 also works with mixed chests
-  for (const id of p.cases.filter((c) => c.k === k).concat(p.cases.filter((c) => c.k !== k)).slice(0, 5).map((c) => c.id)) { const r = openCase(id); if (r) out.push(r); }
+  // only the chosen kind of chest
+  for (const id of p.cases.filter((c) => c.k === k).slice(0, 5).map((c) => c.id)) { const r = openCase(id); if (r) out.push(r); }
   if (!out.length) return;
   const N = 40, WIN = 32;
   const strips = out.map((res) => { const w = caseTable(res.c), cards = [];
@@ -15766,15 +16057,15 @@ function openCasesFast(k) {
 // one reel stops: its card lights up, rarer pulls flash the reel and shake the screen
 function reelLand(r, res, WIN) {
   const ri = rarIdx(res.item.rarity); r.strip.children[WIN].classList.add('win'); r.box.classList.add('landed', res.item.rarity);
-  if (ri >= 3 || (res.bonus && res.bonus.k !== 'mats')) { r.box.classList.add('jackpot'); if (!G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, 0.25 + 0.1 * ri); }
-  Sfx.play(res.bonus && res.bonus.k === 'hero' ? 'radiant' : ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
+  if (ri >= 3 || res.loot.hero || res.loot.jackpot) { r.box.classList.add('jackpot'); if (!G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, 0.25 + 0.1 * ri); }
+  Sfx.play(res.loot.hero ? 'radiant' : ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
 }
 function reelManyFinish(out, k) {
   Reel.done = true; UI.closable = true;
-  const p = G.profile, left = p.cases.length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
+  const p = G.profile, left = p.cases.filter((c) => c.k === k).length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
   if (best >= 4) burst(G.player.x, 1.4, G.player.z, 50 + best * 6, RAR_HEX[RARITIES[best]], 7, 1.1, 0.32, 3, 1.6);
   $('reelOut').innerHTML = `<div class="reelSum">${out.map((r) => `<div class="rcard ${r.item.rarity}"><img src="${thumbFor(r.item)}" alt=""><i></i></div>`).join('')}</div>
-    ${out.map((r) => bonusHTML(r.bonus)).join('')}
+    ${lootHTML(out.map((r) => r.loot))}
     <div class="row end">${left ? `<button class="primary" data-act="caseFast" data-k="${k}">Open ${Math.min(5, left)} more</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
 function openIdle(tab) {
@@ -15933,6 +16224,7 @@ function partyRecv(event, sid, P) {
   if (event === 'dbot') { delveBotsRecv(sid, P); return; }
   if (event === 'ddoor') { delveDoorRecv(P); return; }
   if (event === 'dpz') { delvePzRecv(P); return; }
+  if (event === 'dbs') { delveBossRecv(P); return; }
   if (event === 'dask') { // the leader asks to play (again): only my party's leader, and only while I'm not already in
     const L = partyLeader(); if (!PARTY.code || !L || L.me || L.key !== sid || delveOn()) return;
     PARTY.dg = delveDef(P.dg).id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999); PARTY.ready = false;
@@ -16095,7 +16387,7 @@ function openDelveChest(r) {
 // a cache or an event: the interact button inside a party dungeon
 function delveAct(n) {
   if (n.kind === 'delveBonus') { const r = delveUse('delveBonus', n.room); if (r) openDelveChest(r); return; }
-  delveUse(n.kind);
+  delveUse(n.kind, n.room);
 }
 // HUD inside a party dungeon: the room line, the event line and a revive ring
 function delveHud() {

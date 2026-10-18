@@ -61,11 +61,16 @@ function delveBotThink(b, dt) {
   // 2. pressure plates in a quiet room: each bot takes the plate after the humans' ones
   const s = myRoom && myRoom.event === 'plates' ? X.ev[myRoom.i] || {} : null;
   const plate = s && !s.done && myRoom.seen && !myRoom.mobs.some((e) => e.alive) ? myRoom.plates[humans.length + X.bots.indexOf(b)] : null;
-  // 3. a puzzle hall: once the first seal is right, the first bot walks to the next one after a short think
-  let seal = null; const pzS = myRoom && myRoom.pz && !myRoom.mobs.some((e) => e.alive) ? delvePz(D, myRoom) : null;
-  if (pzS && !pzS.done && pzS.step >= 1 && pzS.cd <= 0 && X.bots.indexOf(b) === 0) {
-    if (ai.pzStep !== pzS.step) { ai.pzStep = pzS.step; ai.pzT = 0; }
-    if ((ai.pzT += dt) >= DV.puzzle.botWait) seal = myRoom.pz.sw[myRoom.pz.order[pzS.step]];
+  // 3. a puzzle hall: in an ordered one (mural, echo) the first bot walks to the next seal after a short think, once the
+  // first seal is right; in a race every bot runs for its own dark seal once the clock runs; the balance is yours alone
+  let seal = null; const pz = myRoom && myRoom.pz, pzS = pz && !myRoom.mobs.some((e) => e.alive) ? delvePz(D, myRoom) : null;
+  if (pzS && !pzS.done && pzS.cd <= 0) {
+    if (pzOrdered(pz) && pzS.step >= 1 && X.bots.indexOf(b) === 0) {
+      if (ai.pzStep !== pzS.step) { ai.pzStep = pzS.step; ai.pzT = 0; }
+      if ((ai.pzT += dt) >= DV.puzzle.botWait) seal = pz.sw[pz.order[pzS.step]];
+    } else if (pz.kind === 'timed' && pzS.bits) {
+      const dark = pz.sw.filter((_, j) => !((pzS.bits >> j) & 1)); seal = dark.length ? dark[X.bots.indexOf(b) % dark.length] : null;
+    }
   }
   if (down) { tx = down.x; tz = down.z; stop = DV.reviveR * 0.5; }
   else if (plate) { tx = plate.x; tz = plate.z; stop = 0.3; }

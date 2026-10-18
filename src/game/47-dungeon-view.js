@@ -30,6 +30,8 @@ function dungeonPalette(zn) {
   return { a: base.clone().multiplyScalar(0.62), b: (g ? new THREE.Color(g[1]) : base.clone()).multiplyScalar(0.5), wall: fog.clone().lerp(new THREE.Color(0x2a2430), 0.55),
     trim: fog.clone().lerp(new THREE.Color(0x14101c), 0.75), fog: fog.clone().multiplyScalar(0.35) };
 }
+// one dressing prop per biome: [world model, height in m]
+const DUNGEON_THEME_PROP = [['delve_sarcophagus', 1.3], ['delve_icecoffin', 1.4], ['delve_slagcart', 1.6], ['delve_bookshelf', 3.0], ['delve_coralshrine', 3.0], ['delve_meteor', 1.8]];
 function buildDungeonView(D) {
   disposeDungeonView();
   const zn = CFG.world.zones[D.zone], pal = dungeonPalette(zn), rng = mulberry32(strSeed(D.id) ^ 0x9e37), parts = [];
@@ -60,6 +62,16 @@ function buildDungeonView(D) {
       { x: m.x0 + ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 });
   });
   dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz), WorldModels.place(dungeonGroup, 'clutter', clutter));
+  // the biome's own dressing along the walls of every hall but the first and the boss's (TRELLIS.2 models):
+  // root-split sarcophagi, glacier coffins, slag carts, toppled bookshelves, coral shrines, fallen stars
+  const [themeId, themeS] = DUNGEON_THEME_PROP[areaBiome(D.zone)] || DUNGEON_THEME_PROP[0], theme = [];
+  D.rooms.forEach((m, i) => {
+    if (i === 0 || i === D.rooms.length - 1) return;
+    const hx = m.hx || m.h, hz = m.hz || m.h, ins = 1.6 + themeS * 0.35, spots = [[m.x0 + ins, m.z + 0.78 * hz], [m.x1 - ins, m.z - 0.78 * hz]];
+    if (D.delve && hx >= 15) spots.push([m.x - 0.78 * hx, m.z0 + ins], [m.x + 0.78 * hx, m.z1 - ins]);
+    for (const [x, z] of spots) if (rng() < 0.85) theme.push({ x, z, ry: Math.atan2(m.x - x, m.z - z) + (rng() - 0.5) * 0.5, s: themeS * (0.9 + rng() * 0.2) });
+  });
+  if (theme.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, themeId, theme, { bright: 1.15 }));
   // brazier flames share one additive mesh so the flicker is a single opacity change
   const fp = braz.map((b) => part(GEO.ico0, 0xffa040, [b.x, b.s * 0.98, b.z], null, [0.32, 0.5, 0.32]));
   if (fp.length) { dungeonParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); dungeonGroup.add(dungeonParts.flame); }
@@ -95,7 +107,7 @@ function enterDungeonView(on) {
   if (on && G.dungeon) {
     buildDungeonView(G.dungeon);
     const pal = dungeonPalette(CFG.world.zones[G.dungeon.zone]);
-    scene.fog.color.copy(pal.fog); scene.fog.near = 22; scene.fog.far = 75; paintSky(pal.fog.clone().multiplyScalar(0.4), pal.fog);
+    scene.fog.color.copy(pal.fog); scene.fog.near = 70; scene.fog.far = 150; // starts past the camera (~35 m up): only far halls fade, the screen stays clear paintSky(pal.fog.clone().multiplyScalar(0.4), pal.fog);
   } else { disposeDungeonView(); scene.fog.near = 50; scene.fog.far = Q.lowTier ? 95 : 140; }
 }
 function updateDungeonView(dt) {
