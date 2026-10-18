@@ -1,8 +1,27 @@
-# Bastion plan (18 Oct 2026, on `main`, plan only)
-Casper's next Bastion update is written down in `docs/BASTION_PLAN.md`: never below your wave, building anywhere on a grid,
-walls placed and upgraded by the player, builder huts, land that grows to 500x500 m, random wave sides, shared worlds others
-join with a code (saved on the server, open while the owner is offline), new building models. Nothing is built yet;
-Phase 1 (wave record) is next. Three questions are still open (see the end of the plan).
+# Bastion update (18 Oct 2026, branch `claude/bastion-update`, PR to main)
+Built from `docs/BASTION_PLAN.md` phases 1-3:
+- **Wave memory:** `profile.fort.wave` = the wave a run starts on; a fallen Keep restarts that wave, never lower (old saves:
+  best wave + 1).
+- **Free building:** 2 m grid around the Keep (`siegeLayout`), anything anywhere that fits (no overlaps, not on the Keep,
+  wagons, spawn or portal, inside the land). Build button opens the list; a green/red ghost in front of the hero; walls and
+  gates are drawn by walking (`stepFortDraw`). New: mage tower, stone mine (stones per hour, tap to empty), builder huts
+  (upgrades from level 2 take time and one builder each), walls/gates (wood, stone from 6, iron from 11). Tear down = half
+  the stones back. Old pads move onto the grid at the same spots, plus a free hut (`sanitizeFort`).
+- **Pathing:** one Dijkstra map from the objectives (`siegeFlow`, lazy); buildings cost their `path` value to cross, so
+  monsters walk round open walls and break the cheapest piece of a closed ring. Fallen buildings come back after the wave.
+- **Land and waves:** land half-size 30 m at level 20 → 250 m at level 200 (`CFG.siege.land`), spawns at the edge, a
+  march speed-up far from the fort, camera zoom ×1.3, minimap shows 120 m around you and the coming sides. Sides 1-4 per
+  wave (1 for waves 1-2), Siege Lord every 10th wave, a Siege Captain mini-boss sometimes.
+- **Shared worlds:** your fort gets a code on first entry (`create_world`); others join with it in the Bastion house, also
+  while you are offline. Supabase table `bastion_worlds` + RPCs (applied, file `supabase/bastion_worlds.sql`; the server
+  only lets the wave rise, by 3 per save at most). Channel `fort-<code>`; the earliest player in runs the waves (`fst`,
+  `fw`), guests send hits/builds/start-wave to the host; every player gets their own wave pay. Tested with two browsers on
+  a fake lobby (the sandbox cannot reach Supabase): sync, guest building (paid by the guest), wave pay for both, host
+  hand-over. Local previews and test mode keep worlds in localStorage.
+- **Open:** test on two real phones; models (archer tower, cannon, ballista, barracks + soldier, mage tower, mine, builder
+  hut, 9 wall pieces) still use stand-in models (`tower`, `kettle`, `arena_tower`, `rune_obelisk`, `mine_lift`,
+  `hermit_shack`, `fence`/`dwall`, `portcullis`); anyone with a code can build in (or wreck) that fort; balance of costs
+  and build times is not playtested; moving a building is not possible (tear down and rebuild).
 
 # Bastion Siege (18 Oct 2026, branch `bastion-siege`, PR #23 to main)
 - **Now:** a tower-defense instance like the Rift, entered from the Bastion house west of the town plaza (level 20,
