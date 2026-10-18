@@ -7568,25 +7568,37 @@ function endSiege(why) {
 // Dungeon bots: a run with fewer than four heroes is filled up with computer heroes, so the Dungeon mode can be played
 // alone or with one or two friends (Casper, 18 Oct). The game that starts the run (the leader, or you alone) runs the
 // bots; in a party it sends them to the others ('dbot', ~7 times a second), where they show up like players
-// (`e.bot`, never owners of shared monsters). Bots follow the leader, fight what they can see, stand on pressure
-// plates, and pull fallen teammates back up; monsters fight them back. They take no loot.
+// (`e.bot`, never owners of shared monsters). Bots roam the room the party is in and pick their own fights, stand on
+// pressure plates, and pull fallen teammates back up; monsters fight them back. They take no loot. Their level and
+// stats follow the average level of the real heroes in the run (`delveBotScale`).
 // ---------------------------------------------------------------------
-CFG.delve.bots = { on: true, hp: 0.9, dmg: 0.75, follow: 3.2, leash: 24, aggro: 14, keep: 0.7, send: 0.15 };
+CFG.delve.bots = { on: true, hp: 0.9, dmg: 0.75, aggro: 18, keep: 0.7, roam: [2, 4.5], lost: 34, stuck: 3, rescale: 3, send: 0.15 };
 const delveBots = () => (delveOn() && G.dungeon.delve.bots) || [];
+// the real heroes' average level (you plus friends in the run; bots don't count)
+function delveHumanLevel() {
+  const ls = delveParty().filter((f) => !f.delveBot && !f.bot).map((f) => (f === G.player ? G.profile.level : f.level || G.profile.level));
+  return Math.max(1, Math.round(ls.reduce((a, l) => a + l, 0) / ls.length));
+}
+// a bot keeps up with the heroes it fills in for: most of your health and damage, moved along the level curve to the
+// party's average level, never below what its own level gives; the HP it has lost stays lost
+function delveBotScale(b) {
+  const pl = G.player, K = DV.bots, L = delveHumanLevel(), myL = G.profile.level, frac = b.maxHp > 0 ? clamp(b.hp / b.maxHp, 0, 1) : 1;
+  if (b.level !== L || !b.scaled) { b.level = L; applyStats(b, 'hub', { level: L, gear: null }); }
+  b.maxHp = Math.max(b.maxHp, pl.maxHp * K.hp * hpAt(L) / hpAt(myL)); b.dmg = Math.max(b.dmg, pl.dmg * K.dmg * atkAt(L) / atkAt(myL));
+  b.hp = b.scaled ? b.maxHp * frac : b.maxHp; b.scaled = true;
+}
 // called by startDelve: fill the party up to four
 function delveBotsMake(D, humans) {
-  const X = D.delve, pl = G.player, K = DV.bots, names = BOT_NAMES.slice().sort(() => Math.random() - 0.5);
+  const X = D.delve, pl = G.player, names = BOT_NAMES.slice().sort(() => Math.random() - 0.5);
   const classes = CFG.brawlerOrder.filter((c) => c !== pl.cls).sort(() => Math.random() - 0.5);
-  X.bots = []; X.botSendT = 0;
+  X.bots = []; X.botSendT = 0; X.botScaleT = DV.bots.rescale;
   for (let i = 0; i < DV.maxParty - humans; i++) {
     const a = (i + 1) / DV.maxParty * Math.PI * 2, cls = classes[i % classes.length], name = names[i % names.length];
     const b = makeFighter({ name, team: 'ally', isBot: true, cls, x: pl.x + Math.sin(a) * 2, z: pl.z + Math.cos(a) * 2, level: G.profile.level,
-      color: BOT_COLORS[i % BOT_COLORS.length], ai: { slot: a, shootT: 0, stuckT: 0, lx: pl.x, lz: pl.z, rev: null, revT: 0, tgt: null, tgtT: 0 } });
-    applyLoadout(b, cls, []); applyStats(b, 'hub', { level: G.profile.level, gear: null });
-    // a bot keeps up with the hero it fills in for: most of your health and damage, so the run's monster HP still fits
-    b.maxHp = Math.max(b.maxHp, pl.maxHp * K.hp); b.dmg = Math.max(b.dmg, pl.dmg * K.dmg); b.hp = b.maxHp;
+      color: BOT_COLORS[i % BOT_COLORS.length], ai: { side: a, roamT: 0, rx: pl.x, rz: pl.z, stuckT: 0, lx: pl.x, lz: pl.z, rev: null, revT: 0 } });
+    applyLoadout(b, cls, []);
     b.delveBot = true; b.nick = name; b.key = 'bot:' + MP.sid + ':' + i; b.shots = 0; b.lastShot = b.lastAttack;
-    X.bots.push(b);
+    X.bots.push(b); delveBotScale(b);
   }
 }
 // a monster in a party dungeon goes for the nearest hero this game runs (you or a bot), and sticks with it for a moment
@@ -7598,38 +7610,55 @@ function delveTarget(e) {
   e.tgt = best || pl; e.tgtT = 1; return e.tgt;
 }
 const botSees = (b, t) => { const d = Math.hypot(t.x - b.x, t.z - b.z); return rayLen(b.x, b.z, Math.atan2(t.x - b.x, t.z - b.z), d).d >= d - (t.r || 0.4); };
+const roomOf = (D, x, z) => D.rooms.find((r) => inRoom(r, x, z));
 function delveBotThink(b, dt) {
   const ai = b.ai, it = b.intent, D = G.dungeon, X = D.delve, K = DV.bots;
-  it.mx = it.mz = 0; it.aiming = false; ai.shootT -= dt;
+  it.mx = it.mz = 0; it.aiming = false;
   const party = delveParty(), humans = party.filter((f) => !f.delveBot && !f.bot);
   const lead = (G.player.alive ? G.player : humans.find((f) => f.alive !== false)) || party.find((f) => f !== b && f.alive !== false) || G.player;
-  let tx = null, tz = null, stop = 1.2;
+  const myRoom = roomOf(D, b.x, b.z), leadRoom = roomOf(D, lead.x, lead.z) || myRoom;
+  let tx = null, tz = null, stop = 1;
   // the nearest monster it can see
   let foe = null, fd = K.aggro;
   for (const e of G.enemies) { if (!e.delve || !e.alive || e.hidden) continue; const d = Math.hypot(e.x - b.x, e.z - b.z); if (d < fd && botSees(b, e)) { fd = d; foe = e; } }
   // 1. a fallen teammate with no monster right on them: go and pull them up
   const down = party.find((f) => f !== b && f.alive === false && !G.enemies.some((e) => e.delve && e.alive && Math.hypot(e.x - f.x, e.z - f.z) < 5));
   // 2. pressure plates in a quiet room: each bot takes the plate after the humans' ones
-  const m = D.rooms.find((r) => inRoom(r, b.x, b.z)), s = m && m.event === 'plates' ? X.ev[m.i] || {} : null;
-  const plate = s && !s.done && m.seen && !m.mobs.some((e) => e.alive) ? m.plates[humans.length + X.bots.indexOf(b)] : null;
+  const s = myRoom && myRoom.event === 'plates' ? X.ev[myRoom.i] || {} : null;
+  const plate = s && !s.done && myRoom.seen && !myRoom.mobs.some((e) => e.alive) ? myRoom.plates[humans.length + X.bots.indexOf(b)] : null;
   if (down) { tx = down.x; tz = down.z; stop = DV.reviveR * 0.5; }
   else if (plate) { tx = plate.x; tz = plate.z; stop = 0.3; }
   if (foe) {
-    const w = weaponOf(b), range = (w.range || 10) * K.keep;
-    it.ax = (foe.x - b.x) / fd; it.az = (foe.z - b.z) / fd; it.aiming = true; it.fire = fd <= (w.range || 10);
-    if (tx == null) { // hold at range: close in, back off when crowded, otherwise strafe round the leader's side
-      if (fd > range) { tx = foe.x; tz = foe.z; stop = range; }
-      else if (fd < range * 0.45) { tx = b.x - it.ax * 3; tz = b.z - it.az * 3; stop = 0.5; }
+    const w = weaponOf(b), range = w.range || 10, keep = range * K.keep;
+    it.ax = (foe.x - b.x) / fd; it.az = (foe.z - b.z) / fd; it.aiming = true; it.fire = fd <= range;
+    if (b.superCharge >= 1 && fd < range) it.super = true;
+    if (tx == null) {
+      // its own spot on a ring round the monster, at its weapon's range; the spot drifts so the bots spread and circle
+      ai.side += dt * 0.5 * (b.id % 2 ? 1 : -1);
+      tx = foe.x + Math.sin(ai.side) * keep; tz = foe.z + Math.cos(ai.side) * keep; stop = 0.8;
     }
-    if (b.superCharge >= 1 && fd < (w.range || 10)) it.super = true;
   }
-  if (tx == null) { tx = lead.x + Math.sin(ai.slot) * K.follow; tz = lead.z + Math.cos(ai.slot) * K.follow; }
+  if (tx == null) {
+    // no fight here: wander the room the leader is in (its own picks), or walk over when the leader went on ahead
+    const R = leadRoom || myRoom;
+    if ((ai.roamT -= dt) <= 0 || Math.hypot(ai.rx - b.x, ai.rz - b.z) < 1 || (R && !inRoom(R, ai.rx, ai.rz))) {
+      ai.roamT = rand(K.roam[0], K.roam[1]);
+      if (R && myRoom === R) { ai.rx = rand(R.x0 + 2, R.x1 - 2); ai.rz = rand(R.z0 + 2, R.z1 - 2); }
+      else { ai.rx = lead.x + rand(-2.5, 2.5); ai.rz = lead.z + rand(-2.5, 2.5); }
+    }
+    tx = ai.rx; tz = ai.rz; stop = 0.8;
+  }
   const dx = tx - b.x, dz = tz - b.z, d = Math.hypot(dx, dz);
   if (d > stop) { it.mx = dx / d; it.mz = dz / d; }
-  // stuck on a wall or left far behind (a corridor, a door that opened behind the leader): step back in beside the leader
+  // walking into a wall or a pillar: pick a new spot; still stuck, or lost far from the party: step in beside the leader
   ai.stuckT += dt;
-  if (ai.stuckT > 1.5) { const moved = Math.hypot(b.x - ai.lx, b.z - ai.lz); if (moved < 0.6 && d > stop + 1) ai.slot += 1.7; ai.stuckT = 0; ai.lx = b.x; ai.lz = b.z; }
-  if (lead.alive !== false && Math.hypot(lead.x - b.x, lead.z - b.z) > K.leash && !foe) { b.x = lead.x + Math.sin(ai.slot) * 1.5; b.z = lead.z + Math.cos(ai.slot) * 1.5; dungeonClamp(b, b.r); }
+  if (ai.stuckT > 1) {
+    const moved = Math.hypot(b.x - ai.lx, b.z - ai.lz); ai.lx = b.x; ai.lz = b.z;
+    ai.stuck = moved < 0.5 && d > stop + 1 ? (ai.stuck || 0) + 1 : 0; ai.stuckT = 0;
+    if (ai.stuck) { ai.roamT = 0; ai.side += 1.9; }
+  }
+  const far = lead.alive !== false && Math.hypot(lead.x - b.x, lead.z - b.z) > K.lost;
+  if ((ai.stuck >= K.stuck || far) && !foe) { b.x = lead.x + Math.sin(ai.side) * 1.5; b.z = lead.z + Math.cos(ai.side) * 1.5; dungeonClamp(b, b.r); ai.stuck = 0; }
 }
 function delveBotRevive(b, by) {
   if (!b || b.alive) return;
@@ -7644,7 +7673,8 @@ function delveRevive(f, by) {
 }
 function stepDelveBots(dt) {
   const bots = delveBots(); if (!bots.length) return;
-  const party = delveParty();
+  const party = delveParty(), X = G.dungeon.delve;
+  if ((X.botScaleT -= dt) <= 0) { X.botScaleT = DV.bots.rescale; for (const b of bots) delveBotScale(b); } // a friend joined late or someone levelled
   for (const b of bots) {
     if (!b.alive) continue;
     delveBotThink(b, dt); stepFighter(b, dt, 'hub');
@@ -7668,7 +7698,7 @@ function delveBotsRecv(sid, P) {
   if (!delveOn() || mpNum(P.dr, -1) >>> 0 !== G.dungeon.delve.seed || !Array.isArray(P.b)) return;
   let added = false;
   for (const r of P.b.slice(0, DV.maxParty)) {
-    if (!Array.isArray(r) || r.length < 11 || typeof r[0] !== 'string' || !r[0].startsWith('bot:' + sid + ':')) continue;
+    if (!Array.isArray(r) || r.length < 11 || typeof r[0] !== 'string' || !r[0].startsWith('bot:' + sid) || r[0].length > 40) continue; // only the sender's own bots
     if (!MP.peers.has(r[0])) added = true;
     const e = mpApply(r[0], { v: 8, n: r[1], c: r[2], l: r[3], x: r[4], z: r[5], f: r[6], m: r[7], s: r[8], a: r[6], h: r[9], al: r[10], md: 'delve', dr: G.dungeon.delve.seed, pv: 0, t: Date.now() }, 'rt');
     if (e) e.bot = true;
@@ -14467,7 +14497,7 @@ function rtMessage(d) {
       if (P.event === 'hit' && P.payload && P.payload.to === MP.sid) { mobHitRecv(P.payload); break; }
       if (P.event === 'phit' && P.payload && P.payload.to === MP.sid) { pvpRecv(P.payload); break; }
       if (P.event === 'pdie' && P.payload && P.payload.to === MP.sid) { pvpDieRecv(P.payload); break; }
-      if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
+      if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull|dbot)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^f[a-z]+$/.test(P.event) && typeof siegeMpRecv === 'function') { siegeMpRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^b/.test(P.event)) { bossRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
@@ -15977,7 +16007,7 @@ function boot(hotData) {
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
-  if (LOCAL_PREVIEW) window.__delve = { startDelve, delveLayout, delveGate, delveReq, diffDef, playerPower, refPower, claimDelveChest, openDelvePanel, PARTY, partyMembers, get D() { return G.dungeon; } };
+  if (LOCAL_PREVIEW) window.__delve = { startDelve, delveBots, delveBotsRecv, delveHumanLevel, delveLayout, delveGate, delveReq, diffDef, playerPower, refPower, claimDelveChest, openDelvePanel, PARTY, partyMembers, get D() { return G.dungeon; } };
   if (LOCAL_PREVIEW) window.__dbg = { matGround, bossAttack, bossPlan, bossPlanMech, bossKit, bossDamageMod, BOSS_KITS, BOSS_TEAM, bossPartySize, MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, pvpRecv, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
