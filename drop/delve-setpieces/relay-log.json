@@ -1,0 +1,40 @@
+{
+ "batch": "delve-setpieces",
+ "files": [
+  {
+   "name": "delve_altar.glb",
+   "ok": true,
+   "bytes": 3896776,
+   "sha256": "31b75ddd3abaaf830160181758afe14ea4e9c94b939d1b0677e19bee623847aa",
+   "error": null
+  },
+  {
+   "name": "delve_moonwell.glb",
+   "ok": true,
+   "bytes": 4002244,
+   "sha256": "5f69a6682f7c1e6e00296372e0991a1d4f00b717f034488276989b4f538a1a64",
+   "error": null
+  },
+  {
+   "name": "delve_echo.glb",
+   "ok": true,
+   "bytes": 4123632,
+   "sha256": "e9de22a89d52020f1cd00bcc0d664a17daa7e7b83b6837732408fda2092e958e",
+   "error": null
+  },
+  {
+   "name": "delve_hoard.glb",
+   "ok": true,
+   "bytes": 5658664,
+   "sha256": "2210e72563e38a9dd5614efbc01b60d74be164554df20fc7ca26fa427fc84d5a",
+   "error": null
+  },
+  {
+   "name": "delve_throne.glb",
+   "ok": true,
+   "bytes": 4711972,
+   "sha256": "8667230e31dc019cd6af8db490290393203a18eaffef992e7f70fdbf9597ebc6",
+   "error": null
+  }
+ ]
+}
