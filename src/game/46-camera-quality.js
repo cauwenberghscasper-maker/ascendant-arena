@@ -10,7 +10,7 @@ function viewFor(e) {
   if (v) return v;
   if (e.kind === 'fighter') {
     const c = CFG.classes[e.cls];
-    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (!!(G.profile && G.profile.settings.pvp) ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : null);
+    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (!!(G.profile && G.profile.settings.pvp) ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : e.delveBot ? 0x8dd96a : null);
     const gear = e.isPlayer ? G.profile.gear : null;
     const cape = e.isPlayer ? capeColor(G.profile) : null;
     const BR = CFG.brawlers[e.cls] || {};
@@ -63,6 +63,7 @@ function syncViews(dt, t) {
     for (const n of shownNpcs()) handle(n);
     if (G.siege) for (const s of G.siege.soldiers) handle(s);
     if (G.boss) handle(G.boss);
+    if (G.dungeon && G.dungeon.delve) for (const b of G.dungeon.delve.bots || []) handle(b); // dungeon bots (36d-delve-bots.js)
   }
   for (const [e, v] of views) if (!seen.has(e)) { dynGroup.remove(v.root); v.dispose(); views.delete(e); }
 }

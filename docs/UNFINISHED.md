@@ -1,3 +1,15 @@
+# Dungeon bots (18 Oct 2026, branch `claude/dungeon-bots`, PR to main)
+Casper: make the Dungeon mode playable without 4 friends. `36d-delve-bots.js`: a run with fewer than 4 heroes gets bots
+up to 4 (`CFG.delve.bots`; the party size, and so monster HP and the plate count, is always 4 with bots on). The game that
+starts the run (`startDelve(..., lead)`: you alone, the party leader, or whoever formed a random match) runs them; in a
+party it sends them as 'dbot' and the others show them like players (`e.bot`, never shared-monster owners). Bots follow
+the leader, shoot what they can see (`rayLen`), take the plate after the humans' ones, revive anyone down (you, a bot,
+or a friend via 'drev'), and step back in beside the leader when stuck or 24 m behind. Monsters target the nearest
+hero this game runs (`delveTarget` in `stepEnemy`), monster shots/slams hit bots (`forEachTarget`), bots' hits give you
+kill credit. Bots have 90% of your HP and 75% of your damage (at least their own level's), take no loot.
+Tested in the browser solo (follow, fight, room cleared, revive in 2.9 s). Open: a real party with friends (the leader's
+bots on the other phones); smarter paths through doors (today: catch-up teleport); bot supers are on, watch them.
+
 # Bastion builder mode (18 Oct 2026, branch `claude/bastion-builder`, PR to main)
 - **Crash fixed on `main` (2822acc):** leaving the fort threw in `WorldModels.dispose` (a variant set's handle has no
   meshes, only `multi`) and the fort minimap read a colour the traps had no entry for. Both fixed.

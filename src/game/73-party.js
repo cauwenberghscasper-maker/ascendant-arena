@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------
-// Parties and matchmaking for the Dungeon mode (36b-delve.js). Up to 4 real players, no bots: a party can always go in
-// short-handed (even alone) when the team power is met. A party is its own Realtime channel (mpRoomKey →
+// Parties and matchmaking for the Dungeon mode (36b-delve.js). Up to 4 real players: a party can always go in
+// short-handed (even alone) when the team power is met; computer heroes fill the empty places (36d-delve-bots.js). A party is its own Realtime channel (mpRoomKey →
 // 'party-<code>'): presence carries each member's card (join time, Power, ready, the leader's pick), and the leader's
 // 'dgo' starts the same seeded run in every member's game. Random match waits in 'dq-<dungeon>-<difficulty>'; the
 // earliest player there forms a party of 4, or of whoever came after 40 s, and sends 'mmgo'. While in a party the open
@@ -49,13 +49,14 @@ function partyStart(solo) {
 }
 function partyRecv(event, sid, P) {
   if (!G.started) return;
-  if (event === 'drev') { if (P.to === MP.sid) delveReviveMe(cleanNick(P.by) || 'A teammate'); return; }
+  if (event === 'drev') { const by = cleanNick(P.by) || 'A teammate'; if (P.to === MP.sid) delveReviveMe(by); else delveBotRevive(delveBots().find((b) => b.key === P.to), by); return; }
+  if (event === 'dbot') { delveBotsRecv(sid, P); return; }
   if (event === 'dgo') {
     // only the leader of my party starts runs, and only for the members it names
     const L = partyLeader(); if (!PARTY.code || !L || L.key !== sid || !Array.isArray(P.m) || !P.m.includes(MP.sid)) return;
     const def = delveDef(P.dg); PARTY.dg = def.id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999);
     if (G.modal) UI.close();
-    if (!startDelve(def.id, PARTY.df, mpNum(P.seed, 1) >>> 0, Math.min(P.m.length, CFG.delve.maxParty))) toast('Your party went in, but you could not follow (finish what you are doing)', 'bad');
+    if (!startDelve(def.id, PARTY.df, mpNum(P.seed, 1) >>> 0, Math.min(P.m.length, CFG.delve.maxParty), false)) toast('Your party went in, but you could not follow (finish what you are doing)', 'bad');
     return;
   }
   if (event === 'mmgo') {
@@ -64,7 +65,7 @@ function partyRecv(event, sid, P) {
     PARTY.q = ''; PARTY.code = P.code.slice(0, 5); PARTY.jt = mpNum(P.jt, Date.now()) + i; PARTY.ready = true; PARTY.dg = def.id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999);
     if (G.modal) UI.close();
     toast(`Matched with ${P.m.length - 1} hero${P.m.length > 2 ? 'es' : ''}!`, 'good');
-    startDelve(def.id, PARTY.df, mpNum(P.seed, 1) >>> 0, Math.min(P.m.length, CFG.delve.maxParty));
+    startDelve(def.id, PARTY.df, mpNum(P.seed, 1) >>> 0, Math.min(P.m.length, CFG.delve.maxParty), P.m[0] === MP.sid); // the one who formed the match runs the bots
   }
 }
 function partyUpdate(dt) {
@@ -107,7 +108,7 @@ function openDelvePanel() {
   }).join('');
   const pieces = R.pieces[def.id] || {}, have = SET_SLOTS.filter((s) => pieces[s]).length, wk = delveWeekly(def, di);
   const slot = (m) => m ? `<div class="dlvSlot${m.rd || (m.me && !PARTY.code) ? ' rd' : ''}"><i>${gi(m.me ? 'm_hero' : 'm_players')}</i><b>${escapeHTML(m.nick)}${m.me ? ' (you)' : ''}</b><small>${escapeHTML((CFG.brawlers[m.cls] || {}).name || 'Hero')} · Lv ${fmt(m.level)} · ${fmtK(m.pw)} Power${m.pw < g.min ? ' · too weak' : ''}</small><em>${M[0] === m && PARTY.code ? 'Leader' : m.rd ? 'Ready' : PARTY.code ? 'Not ready' : ''}</em></div>`
-    : `<div class="dlvSlot empty"><small>Open slot</small></div>`;
+    : `<div class="dlvSlot empty"><small>Open slot · a bot fills in</small></div>`;
   const slots = Array.from({ length: CFG.delve.maxParty }, (_, i) => slot(M[i])).join('');
   const q = PARTY.q, online = partyOnline(), qn = q ? 1 + MP.list.filter((e) => e.qk === q).length : 0;
   let buttons;
@@ -174,7 +175,7 @@ function delveHud() {
   const party = delveParty(); bar.hidden = party.length < 2;
   if (party.length > 1 && (X.barT = (X.barT || 0) - 1) <= 0) {
     X.barT = 10;
-    bar.innerHTML = party.map((f) => { const hp = f === G.player ? clamp(f.hp / f.maxHp, 0, 1) : clamp(f.hp, 0, 1), dn = f.alive === false;
+    bar.innerHTML = party.map((f) => { const hp = f === G.player || f.delveBot ? clamp(f.hp / f.maxHp, 0, 1) : clamp(f.hp, 0, 1), dn = f.alive === false;
       return `<div class="pb${dn ? ' down' : ''}"><b>${escapeHTML(f === G.player ? mpNick(G.profile) : f.nick)}</b><i style="width:${Math.round((dn ? 0 : hp) * 100)}%"></i>${dn ? '<small>down</small>' : ''}</div>`; }).join('');
   }
 }

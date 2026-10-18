@@ -153,7 +153,7 @@ const mobSyncable = (e) => e && e.slot != null && !e.rift && (delveOn() ? !!e.de
 const mobAt = (i) => (delveOn() ? G.dungeon.delve.slots.get(i) : G.enemies[i]);
 function mobPeers() {
   if (RT.state !== 'on' || !G.started || G.mode !== 'hub') return [];
-  if (delveOn()) { const seed = G.dungeon.delve.seed; return MP.list.filter((e) => e.via === 'rt' && e.md === 'delve' && e.dr === seed && e.alive); }
+  if (delveOn()) { const seed = G.dungeon.delve.seed; return MP.list.filter((e) => e.via === 'rt' && e.md === 'delve' && e.dr === seed && e.alive && !e.bot); }
   return inInstance() ? [] : MP.list.filter((e) => e.via === 'rt' && e.md === 'hub' && e.alive);
 }
 function mobOwnership() {
@@ -332,7 +332,7 @@ function mpApply(key, s, via, guest) {
     e = { id: 'peer:' + key, key, kind: 'fighter', isPeer: true, team: 'peer', cls, x, z, tx: x, tz: z, facing: 0, tf: 0, moveAmt: 0, alive: true, level: 1, r: 0.55,
       hp: 1, maxHp: 1, nick: 'Hero', md: 'hub', seq: mpNum(s.s, 0), guest: !!guest, attackAnim: 0, t: 0 };
     MP.peers.set(key, e);
-    if (G.started && s.n) Feed.add(`${gi('m_players')} <b>${escHtml(cleanNick(s.n) || 'A hero')}</b> is in the world`, 'mp', null, 5);
+    if (G.started && s.n && !key.startsWith('bot:')) Feed.add(`${gi('m_players')} <b>${escHtml(cleanNick(s.n) || 'A hero')}</b> is in the world`, 'mp', null, 5);
   }
   { const pdt = (t - (e.t || t)) / 1000; if (pdt > 0.02 && pdt < 1) { e.vx = clamp((x - e.tx) / pdt, -20, 20); e.vz = clamp((z - e.tz) / pdt, -20, 20); } if (!(mpNum(s.m, 0) > 0)) e.vx = e.vz = 0; }
   e.t = t; e.seenAt = Date.now(); e.via = via; e.rcv = performance.now();

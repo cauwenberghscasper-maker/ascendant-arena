@@ -234,6 +234,7 @@ function endDungeon(why) {
   if (D.key && !D.bossDead) addKey(makeKey(D.key.t - 1)); // a failed keyed run hands the key back one tier lower
   const ids = new Set(D.mobs.map((e) => e.id));
   G.enemies = G.enemies.filter((e) => !ids.has(e.id)); for (const id of ids) G.ents.delete(id);
+  if (D.delve) for (const b of D.delve.bots || []) G.ents.delete(b.id); // dungeon bots leave with the run
   clearProjectiles();
   G.dungeon = null; G.dungeonObstacles = null; G.obstacles = G.hubObstacles;
   const pl = G.player;

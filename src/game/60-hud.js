@@ -76,6 +76,7 @@ function updateTags() {
     const pl = G.player;
     if (pl.alive) put(pl.x, 2.5 * growthScale(pl), pl.z, '', pl.hp / pl.maxHp, 'me');
     for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; if (near(b, 30)) put(b.x, 2.45 * growthScale(b), b.z, `${b.name} · ${b.level}`, null, 'bot'); }
+    for (const b of delveBots()) put(b.x, b.alive ? 2.5 * growthScale(b) : 1.6, b.z, b.alive ? `${b.nick} · bot` : `${b.nick} is down · stand close to revive`, b.alive ? b.hp / b.maxHp : null, b.alive ? 'peer' : 'peer down');
     if (delveOn()) for (const e of mpVisible()) if (e.alive === false) put(e.x, 1.6, e.z, `${e.nick} is down · stand close to revive`, null, 'peer down');
     for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.pvp ? 'PvP · ' : ''}${e.nick} · ${e.level}`, e.hp, e.pvp ? 'peer pvp' : 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');

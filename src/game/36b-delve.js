@@ -167,7 +167,7 @@ function spawnRoomWave(D, m, w) {
   m.wave = w;
 }
 // diff: difficulty index; n: party size at the start (sets monster HP); seed: the leader's run seed
-function startDelve(id, di, seed, n) {
+function startDelve(id, di, seed, n, lead = true) {
   const p = G.profile, pl = G.player, def = delveDef(id);
   if (inInstance() || G.mode !== 'hub' || !pl.alive || !delveOpen(def) || di > delveTop(def)) return false;
   if (G.boss && Math.hypot(G.boss.x - pl.x, G.boss.z - pl.z) < CFG.dungeon.bossBlock) return false;
@@ -177,9 +177,11 @@ function startDelve(id, di, seed, n) {
   const poi = { id: 'delve:' + def.id, kind: 'delve', zone: zi, lvl, name: def.name };
   const D = G.dungeon = Object.assign(L, { id: poi.id, poi, zone: zi, variant: { name: def.name, counts: [], par: 600, hp: 14, mods: diff.i >= 3 ? 4 : 3, trial: false }, key: null, lvl, t0: G.time, clearT: 0, newKey: null,
     room: 0, mobs: [], boss: null, bossDead: false, chestOpen: false, addsDone: false, enterPos: { x: pl.x, z: pl.z } });
-  D.delve = { def, diff, di, seed, n: clamp(n | 0 || 1, 1, DV.maxParty), roster: delveRoster(def), slots: new Map(), cursed: false, bonus: {}, used: {}, downT: 0, wipeT: 0, revive: null, plates: {}, ev: {} };
+  const humans = clamp(n | 0 || 1, 1, DV.maxParty);
+  D.delve = { def, diff, di, seed, humans, n: DV.bots && DV.bots.on ? DV.maxParty : humans, bots: [], roster: delveRoster(def), slots: new Map(), cursed: false, bonus: {}, used: {}, downT: 0, wipeT: 0, revive: null, plates: {}, ev: {} };
   dungeonGrid(D); clearProjectiles();
   pl.x = D.start.x; pl.z = D.start.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
+  if (lead && D.delve.n > humans) delveBotsMake(D, humans); // computer heroes fill the empty places (36d-delve-bots.js)
   G.zoneIdx = zi;
   D.rooms.forEach((m) => { m.mobs = []; m.cleared = false; m.wave = -1; m.seen = false; if (!m.boss && m.count) spawnRoomWave(D, m, 0); });
   const b = D.rooms.at(-1);
@@ -191,7 +193,7 @@ function startDelve(id, di, seed, n) {
 function delveParty() {
   const D = G.dungeon, X = D && D.delve; if (!X) return [];
   const peers = typeof MP !== 'undefined' ? MP.list.filter((e) => e.md === 'delve' && e.dr === X.seed) : [];
-  return [G.player, ...peers];
+  return [G.player, ...peers, ...(X.bots || [])];
 }
 const anyoneIn = (m) => delveParty().some((f) => f.alive !== false && inRoom(m, f.x, f.z));
 // the monster runs away from the nearest hero (gold goblin); called from stepEnemy
@@ -215,6 +217,7 @@ function stepDelve(dt) {
   } else X.wipeT = 0;
   if (X.cursed && pl.alive && pl.hp > pl.maxHp * E.altar.hpCap) pl.hp = pl.maxHp * E.altar.hpCap;
   stepDelveRevive(dt, party);
+  stepDelveBots(dt);
   for (const m of D.rooms) {
     if (m.boss) continue;
     const seen = m.seen || anyoneIn(m); if (seen && !m.seen) { m.seen = true; if (m.event) ev({ t: 'delveEvent', k: m.event, x: m.x, z: m.z }); }
@@ -293,7 +296,7 @@ function stepDelveRevive(dt, party) {
   if (!down) { X.revive = null; return; }
   if (!X.revive || X.revive.key !== down.key) X.revive = { key: down.key, t: 0, nick: down.nick };
   X.revive.t += dt;
-  if (X.revive.t >= DV.reviveT) { if (typeof partySend === 'function') partySend('drev', { to: down.key, by: G.profile.nick || 'A teammate' }); ev({ t: 'delveRevived', who: down.nick, x: down.x, z: down.z }); X.revive = null; }
+  if (X.revive.t >= DV.reviveT) { delveRevive(down, G.profile.nick || 'A teammate'); ev({ t: 'delveRevived', who: down.nick, x: down.x, z: down.z }); X.revive = null; }
 }
 function delveReviveMe(by) {
   const pl = G.player; if (!delveOn() || pl.alive) return;

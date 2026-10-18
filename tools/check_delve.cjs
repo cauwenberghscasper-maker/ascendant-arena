@@ -17,9 +17,10 @@ for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions', 'hero
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') + 'const P = CFG.progression;' + section('const hpAt =', 'const ITEM_NAMES') + section('function itemStats(', 'function gearTotals(') + section('const AC =', 'const G = {') +
   section('class Grid {', '// --- entities') + section('function patrolCountFor(', 'function rewardEnemyKill(') + section('const PELLET_COLORS', '// --- hub step') +
   section('function separate(', '// --- world boss') + section('// --- world boss', 'function spawnBoss(') + section('function boundFighter(', '// --- progression') +
-  section('// --- Dungeons:', '// --- end dungeons') + section('// --- Dungeon mode', '// --- end dungeon mode') +
+  section('// --- Dungeons:', '// --- end dungeons') + section('// --- Dungeon mode', '// --- end dungeon mode') + section('// Dungeon bots:', '// --- end dungeon bots') +
   '\nthis.CFG = CFG; this.Grid = Grid; this.DC = DC; this.DV = DV; this.SET_SLOTS = SET_SLOTS; Object.assign(this, { delveOpen, delveTop, delveOn, delveDef, inInstance });', c);
 const DV = c.DV, defs = DV.dungeons;
+DV.bots.on = false; // these checks run real-player parties; the bots (36d-delve-bots.js) need the full fighter code and are checked in the browser
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }
 function reset(level = 200) {
   const hub = new c.Grid(6); hub.add({ x: 500, z: 500, r: 1 });
