@@ -1,0 +1,78 @@
+{
+ "batch": "delve-props-crypt-3d",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "crypt_sarcophagus",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:35:04. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.9
+  },
+  {
+   "name": "crypt_tombslab",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:35:03. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
+  },
+  {
+   "name": "crypt_rootpillar",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:35:03. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
+  },
+  {
+   "name": "crypt_warden_statue",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:35:02. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.8
+  },
+  {
+   "name": "crypt_ossuary",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:35:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.4
+  },
+  {
+   "name": "crypt_bonepile",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:35:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
+  },
+  {
+   "name": "crypt_mushrooms",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:35:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
+  },
+  {
+   "name": "crypt_reliquary",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:35:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
+  },
+  {
+   "name": "crypt_urns",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:34:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
+  },
+  {
+   "name": "crypt_runestone",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:34:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.4
+  },
+  {
+   "name": "crypt_rootarch",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:34:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
+  },
+  {
+   "name": "crypt_brazier",
+   "ok": false,
+   "error": "You have exceeded your Pro ZeroGPU quota (240s requested vs. 56s left). Try again in 19:34:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
+  }
+ ]
+}
