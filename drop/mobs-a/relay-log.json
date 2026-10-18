@@ -1,0 +1,82 @@
+{
+ "batch": "mobs-a",
+ "files": [
+  {
+   "name": "mob_toad.glb",
+   "ok": true,
+   "bytes": 5161180,
+   "sha256": "2cdd4471f8222e3f693336934323d6f6804a32c3e40588b5f116c134efccc2ff",
+   "error": null
+  },
+  {
+   "name": "mob_toad_concept.webp",
+   "ok": true,
+   "bytes": 44438,
+   "sha256": "f602184998969ece14d9bf6a9eb78937aefd17dfb770e600d83c61820fdfdd40",
+   "error": null
+  },
+  {
+   "name": "mob_bat.glb",
+   "ok": true,
+   "bytes": 5201448,
+   "sha256": "ba222bb17bd2fb43e32da70789dae3fba7bc31bd457e7fa142d2dbf3b1b95488",
+   "error": null
+  },
+  {
+   "name": "mob_hornet.glb",
+   "ok": true,
+   "bytes": 6325036,
+   "sha256": "a5805f6ef5ba988743d95b7fdbfeca8825b1fb59d5452f08c33ed6fda1c81c3d",
+   "error": null
+  },
+  {
+   "name": "mob_scorpion.glb",
+   "ok": true,
+   "bytes": 5179724,
+   "sha256": "371bf733f6100ad5821ee851e274211bd6a0fc4c94e2b912ae81edb4657867c7",
+   "error": null
+  },
+  {
+   "name": "mob_viper.glb",
+   "ok": true,
+   "bytes": 5430168,
+   "sha256": "535a34a75885c45f72afa506247929be99616068f42ea04553cee312d2ce59c1",
+   "error": null
+  },
+  {
+   "name": "mob_myconid.glb",
+   "ok": true,
+   "bytes": 4395652,
+   "sha256": "239548deac2df8448e7842c0d7d115feea6459e2622b640f69903c6bc88194d3",
+   "error": null
+  },
+  {
+   "name": "mob_crab.glb",
+   "ok": true,
+   "bytes": 5458584,
+   "sha256": "cf6c160b4cb4ac2e91cd266403bae207254424d0a485cb2b9efc01b9ab93f124",
+   "error": null
+  },
+  {
+   "name": "mob_jelly.glb",
+   "ok": true,
+   "bytes": 4527540,
+   "sha256": "5548d5b569769363c42a09a3ee4c83179c94740edc763794c28962e5ddc5cd26",
+   "error": null
+  },
+  {
+   "name": "mob_wyvern.glb",
+   "ok": true,
+   "bytes": 5398224,
+   "sha256": "4763ed8e012cd4042a2c4fcd61c14d84e7ff03b0729e9b8862c84fdcc1918a59",
+   "error": null
+  },
+  {
+   "name": "mob_glassbull.glb",
+   "ok": true,
+   "bytes": 5906160,
+   "sha256": "592b3b516f33ab08afa6fe2ad652780e87ce435fa2e51eabd5377834ab723dbc",
+   "error": null
+  }
+ ]
+}
