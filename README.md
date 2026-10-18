@@ -354,7 +354,8 @@ the existing bob/sway code until a rigged version exists. Look at how `assets/en
 
 Casper's own batches run through GitHub Actions on the `asset-pipeline` branch (`pipeline/gen.json`, repo secret
 `HF_TOKEN`, outputs on `asset-drop`). Only use it if Casper asks you to; it spends his daily GPU quota. Never copy the
-token anywhere.
+token anywhere. `asset-pipeline` and `asset-drop` are tool branches with their own history: never merge them into `main`
+and ignore GitHub's "Compare & pull request" banner for them.
 
 ### Licences we ship (keep this list true)
 

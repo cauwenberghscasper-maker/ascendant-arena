@@ -7,6 +7,13 @@ refresh rate the browser actually gives the page. Measured load (town, 390x844):
 Open: if "screen" reads 60 the browser caps the page (iPhone Safari limits web pages to 60; Android battery saver does too).
 The store apps would need native settings for ProMotion (iOS `CADisableMinimumFrameDurationOnPhone`); not set up yet.
 
+# Dungeon team power set very low (18 Oct 2026, on `main`)
+Casper's party couldn't enter: `CFG.delve.powK` 1 → 0.05 and the per-hero floor 0.7 → 0 (`src/game/36b-delve.js`); a teammate whose Power hasn't arrived yet no longer counts as 0. Raise them again once parties work on real phones.
+
+# Branch housekeeping (18 Oct 2026, on `main`)
+`asset-pipeline`/`asset-drop` are tool branches (own history) and are never merged into `main`; both READMEs now say so.
+`wip/enchant-forge` only holds d11b07a, a duplicate of 4815a7a already in `main`: safe to delete (left for Casper).
+
 # Black screen flashes (18 Oct 2026, on `main`)
 Done: the bloom pass (Cinematic effects) turned a single NaN/overflowed pixel into a black patch or a black screen.
 `Post` now reads any such sample as black (`okc` in `46-camera-quality.js`). Three world models had zero-length normals
@@ -24,7 +31,7 @@ re-export those three models with clean normals.
 - **Next steps:** test a party on two real phones against the live Supabase project (create + join by code, random match, revive); then rejoin-after-disconnect and set pieces in the Collection Log.
 
 # 120 Hz option (18 Oct 2026, on `main`)
-Done: Options › 120 Hz (`settings.hz120`, off by default). The sim still steps at 60 Hz; at 120 Hz each frame draws heroes,
+Done: Options › 120 Hz (`settings.hz120`, on by default since the entry at the top). The sim still steps at 60 Hz; at 120 Hz each frame draws heroes,
 monsters, bosses and projectiles part way between their last two steps (`Interp` in `80-main-loop.js`); teleports, respawns
 and new projectiles snap. Projectile trails and per-frame sparks scale with `fxK` so effects keep the same density.
 Open: test on a real 120 Hz phone. On 144 Hz+ screens the 120 cap can't divide the refresh rate, so motion is better than
