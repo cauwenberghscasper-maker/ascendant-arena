@@ -45,7 +45,8 @@ function solution(m) {
   for (let set = 0; set < 1 << K; set++) { let b = pz.start; for (let j = 0; j < K; j++) if ((set >> j) & 1) b ^= c.delvePzMask(K, j); if (b === pz.all) return pz.sw.map((_, j) => j).filter((j) => (set >> j) & 1); }
   throw Error('balance puzzle without a solution');
 }
-function walkSeals(D, m, order) { const pl = c.G.player; for (const j of order) { Object.assign(pl, m.pz.sw[j]); for (let k = 0; k < 45; k++) c.stepDungeon(1 / 60); Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); } }
+// a hero watches the echo's light show to the end before walking (the seals don't listen while it plays)
+function walkSeals(D, m, order) { const pl = c.G.player; for (let k = 0; k < 1200 && c.delvePzShow(m, D.delve.pz[m.i]) != null; k++) c.stepDungeon(1 / 60); for (const j of order) { Object.assign(pl, m.pz.sw[j]); for (let k = 0; k < 45; k++) c.stepDungeon(1 / 60); Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); } }
 
 check('layouts: same seed same dungeon, mixed hall shapes, no overlaps, events only in middle rooms and never twice', () => {
   const shapes = new Set(), evs = new Set();
@@ -153,6 +154,36 @@ check('makeover: mixed hall sizes up to a giant boss hall, a mini-boss halfway, 
   b.hp = b.maxHp * 0.3; c.stepDungeon(1 / 60); assert.equal(D.phase, 2); assert(b.raged && b.atk > atk && b.spd > 1 && bm.mobs.length > adds1, 'enraged with fresh adds');
   assert(events.some((e) => e.t === 'delvePhase' && e.rage)); c.stepDungeon(1 / 60); assert.equal(D.phase, 2, 'no more phases'); c.endDungeon('leave');
 });
+check('puzzle fixes: many mistakes never tie the gate to the next hall, packs crumble on a solve, the echo replays from its first seal', () => {
+  let done = 0;
+  for (let sd = 1; sd < 400 && done < 4; sd++) {
+    reset(); const di = sd % 5; c.startDelve(defs[sd % 6].id, di, sd * 977, 1); const D = c.G.dungeon, X = D.delve, pl = c.G.player;
+    const m = D.rooms.find((r) => r.pz && (r.pz.kind === 'order' || r.pz.kind === 'memory')); if (!m) { c.endDungeon('leave'); continue; } done++;
+    const pz = m.pz; for (const d of D.doors.slice(0, m.i)) d.open = true; c.dungeonGrid(D); killAll(D); X.slots.forEach((e) => { e.alive = false; });
+    Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); const S = () => X.pz[m.i];
+    // twenty mistakes (sent as a friend's states, so no walking): every pack monster stays in this hall's own slots
+    for (let f = 1; f <= 20; f++) c.delvePzApply(D, m, { v: f, s: 0, b: 0, f }, false, '');
+    for (const e of m.mobs) assert(Math.floor(e.slot / 100) === m.i, 'a pack monster from another hall: ' + e.slot);
+    const alive = m.mobs.filter((e) => e.alive).length; assert(alive > 0, 'packs are out');
+    c.delvePzApply(D, m, { v: 21, s: pz.sw.length, b: 0, f: 20 }, false, '');
+    assert(S().done && !m.mobs.some((e) => e.alive), 'the packs crumble with the puzzle'); c.stepDungeon(1 / 60); assert(D.doors[m.i].open, 'and the gate really opens');
+    c.endDungeon('leave');
+  }
+  assert(done >= 4);
+  // the echo: its show starts from the first seal after the red flash, and seals ignore a hero while it plays
+  for (let sd = 1; sd < 600; sd++) {
+    reset(); c.startDelve(defs[sd % 6].id, sd % 5, sd * 977, 1); const D = c.G.dungeon, X = D.delve, pl = c.G.player;
+    const m = D.rooms.find((r) => r.pz && r.pz.kind === 'memory'); if (!m) { c.endDungeon('leave'); continue; }
+    for (const d of D.doors.slice(0, m.i)) d.open = true; c.dungeonGrid(D); killAll(D); X.slots.forEach((e) => { e.alive = false; });
+    Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); const S = X.pz[m.i], E = DV.puzzle.kinds.memory;
+    c.delvePzApply(D, m, { v: 1, s: 0, b: 0, f: 1 }, false, ''); for (let k = 0; k < 60 * (DV.puzzle.failCd + E.lead) + 6; k++) c.stepDungeon(1 / 60);
+    assert.equal(c.delvePzShow(m, S), m.pz.order[0], 'the replay starts with the first seal');
+    Object.assign(pl, m.pz.sw[m.pz.order[1]]); for (let k = 0; k < 60; k++) c.stepDungeon(1 / 60);
+    assert(S.fails === 1 && S.step === 0, 'no step counts while the show plays');
+    c.endDungeon('leave'); return;
+  }
+  assert(false, 'no echo puzzle found');
+});
 check('puzzles: seals wake only in the mural order, a wrong one resets and bites back (spikes, then a pack), the gate waits, the party stays in step', () => {
   let found = 0;
   for (let sd = 1; sd < 400 && found < 6; sd++) {
@@ -175,7 +206,7 @@ check('puzzles: seals wake only in the mural order, a wrong one resets and bites
     for (const e of m.mobs) e.alive = false; for (let k = 0; k < 200; k++) c.stepDungeon(1 / 60);
     assert(!D.doors[m.i].open, 'the gate waits for the puzzle');
     walkSeals(D, m, pz.order); assert(S().done && S().step === K, 'solved in order'); c.stepDungeon(1 / 60); c.stepDungeon(1 / 60);
-    assert(D.doors[m.i].open, 'the gate opens'); assert(pack === DV.puzzle.pack);
+    assert(D.doors[m.i].open, 'the gate opens'); assert(pack === Math.min(DV.puzzle.packMax, DV.puzzle.pack + Math.floor(di * DV.puzzle.packDiff)), 'harder runs bring a bigger pack');
     c.endDungeon('leave');
     // a party member's 'dpz': steps and fails arrive the same way in another game
     const sent = []; c.partySend = (e, P) => sent.push([e, P]); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d);
@@ -188,17 +219,18 @@ check('puzzles: seals wake only in the mural order, a wrong one resets and bites
   }
   assert(found >= 6, 'puzzle halls show up');
 });
-check('puzzle kinds: every run has two different ones; the echo, the race and the balance each play by their rules and sync', () => {
+check('puzzle kinds: every run has two (three from Heroic) different ones; the echo, the race and the balance each play by their rules and sync', () => {
   const seen = {}, sent = []; c.partySend = (e, P) => sent.push([e, P]); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d);
   for (let sd = 1; sd < 300; sd++) {
     reset(); const def = defs[sd % 6], di = sd % 5; c.startDelve(def.id, di, sd * 3571, 1);
-    const pzs = c.G.dungeon.rooms.filter((r) => r.pz).map((r) => r.i); assert(pzs.length === 2, 'two puzzle halls'); assert.notEqual(c.G.dungeon.rooms[pzs[0]].pz.kind, c.G.dungeon.rooms[pzs[1]].pz.kind, 'never the same kind twice');
+    const pzs = c.G.dungeon.rooms.filter((r) => r.pz).map((r) => r.i); assert.equal(pzs.length, c.diffDef(di).puzzles, 'two puzzle halls, three from Heroic'); assert.equal(new Set(pzs.map((i) => c.G.dungeon.rooms[i].pz.kind)).size, pzs.length, 'never the same kind twice');
     for (const mi of pzs) {
       const D = c.G.dungeon, X = D.delve, pl = c.G.player, m = D.rooms[mi];
       const k = m.pz.kind; if (seen[k] >= 2) continue; seen[k] = (seen[k] || 0) + 1;
       for (const d of D.doors.slice(0, m.i)) d.open = true; c.dungeonGrid(D); X.slots.forEach((e) => { e.alive = false; });
       Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); const S = () => X.pz[m.i], K = m.pz.sw.length;
-      if (k === 'memory') { walkSeals(D, m, [m.pz.order[1]]); assert.equal(S().fails, 1, 'the echo punishes a wrong first seal'); for (let i = 0; i < 200; i++) c.stepDungeon(1 / 60); }
+      const waitShow = () => { for (let i = 0; i < 1200 && c.delvePzShow(m, S()) != null; i++) c.stepDungeon(1 / 60); };
+      if (k === 'memory') { waitShow(); walkSeals(D, m, [m.pz.order[1]]); assert.equal(S().fails, 1, 'the echo punishes a wrong first seal'); for (let i = 0; i < 200; i++) c.stepDungeon(1 / 60); waitShow(); }
       if (k === 'timed') {
         assert(m.pz.clock >= 6 && m.pz.clock <= 40, 'a fair clock: ' + m.pz.clock); walkSeals(D, m, [0]); assert.equal(S().bits, 1); assert(S().t > 0);
         for (let i = 0; i < (m.pz.clock + 1) * 60; i++) c.stepDungeon(1 / 60); assert(S().bits === 0 && S().fails === 1, 'the clock runs out: reset and a bite');

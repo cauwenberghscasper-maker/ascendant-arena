@@ -6701,9 +6701,9 @@ CFG.delve = {
   // named difficulties; past the last one Ascendant ranks go on forever (diffDef)
   diffs: [
     { name: 'Normal', lvl: 2, hp: 1, dmg: 1, pow: 0.8, rooms: [7, 7], events: 2, puzzles: 2, items: 2, floor: 'rare', unique: 0.05, col: '#7bd35a' },
-    { name: 'Hard', lvl: 8, hp: 1.15, dmg: 1.1, pow: 1.0, rooms: [7, 8], events: 2, puzzles: 2, items: 3, floor: 'epic', unique: 0.08, col: '#58b4ff' },
-    { name: 'Heroic', lvl: 16, hp: 1.3, dmg: 1.2, pow: 1.25, rooms: [7, 7], events: 3, puzzles: 2, items: 3, floor: 'epic', unique: 0.12, col: '#c77dff' },
-    { name: 'Mythic', lvl: 28, hp: 1.5, dmg: 1.3, pow: 1.6, rooms: [7, 8], events: 3, puzzles: 2, items: 4, floor: 'legendary', unique: 0.16, col: '#ff9a3c' },
+    { name: 'Hard', lvl: 8, hp: 1.15, dmg: 1.1, pow: 1.0, rooms: [8, 8], events: 2, puzzles: 2, items: 3, floor: 'epic', unique: 0.08, col: '#58b4ff' },
+    { name: 'Heroic', lvl: 16, hp: 1.3, dmg: 1.2, pow: 1.25, rooms: [8, 9], events: 3, puzzles: 3, items: 3, floor: 'epic', unique: 0.12, col: '#c77dff' },
+    { name: 'Mythic', lvl: 28, hp: 1.5, dmg: 1.3, pow: 1.6, rooms: [9, 9], events: 3, puzzles: 3, items: 4, floor: 'legendary', unique: 0.16, col: '#ff9a3c' },
   ],
   // room shapes: half sizes (x, z) of a hall, from tight cells (20 m) to huge arenas (56 m); the boss hall is always the
   // giant square (64 m). Big enough for a party of four to spread out (Casper, 18 Oct: the old halls were too small).
@@ -6719,7 +6719,7 @@ CFG.delve = {
   // rare veins: a run may hide one (sometimes two) glowing veins of the dungeon's own rare resource in its halls, from
   // the seed so every phone shows the same; each hero mines their own share. Now and then a vein is a motherlode.
   veins: { chance: 0.4, perDiff: 0.06, max: 0.85, second: 0.25, n: [1, 3], nDiff: 0.5, lode: 0.08, lodeN: [5, 8] },
-  spread: { area: 170, n: [3, 10], gap: 7, entry: 11, alert: 9, cover: 9 },
+  spread: { area: 135, n: [4, 12], gap: 7, entry: 11, alert: 9, cover: 9 },
   tough: { hp: 1.6, dmg: 1.2 },
   // halfway through, a hall holds the dungeon's mini-boss with guards; the boss fights in three phases (adds at 66% and
   // 33%, then it gets faster and hits harder)
@@ -6737,11 +6737,13 @@ CFG.delve = {
   // puzzle halls: seals (floor plates and lever stones) to wake in the order a mural by the entrance shows. Stand on or
   // by a seal for `hold` s. A wrong seal resets the lot and bites back: a spike burst, then a monster pack, in turn.
   // Easy runs sometimes number the seals with pips instead of runes. Bots pitch in once the first seal is right.
-  puzzle: { switches: [4, 5], hold: 0.6, r: 1.7, failCd: 2.5, spike: 0.18, pack: 3, botWait: 2,
+  // Seals by difficulty (`switches`; the mural never shows more than 5), guards that must fall too (`guards` by
+  // difficulty), a bigger pack on harder runs (+`packDiff` a difficulty). The packs crumble once the seals are solved.
+  puzzle: { switches: [4, 4, 5, 5, 6], hold: 0.6, r: 1.7, failCd: 2.5, spike: 0.18, pack: 3, packDiff: 0.5, packMax: 6, guards: [0, 2, 2, 3, 4], botWait: 2,
     hint: 'Wake the seals in the order the mural shows', pipsHint: 'Wake the seals in the order of their marks',
     // four kinds, never the same twice in a run: the mural order, a light show to repeat, a race against the clock
     // (its time comes from the walk between the seals), and lights-out (a seal flips itself and both neighbours)
-    kinds: { order: { name: 'The Mural' }, memory: { name: 'The Echo', hint: 'Watch the seals light up, then wake them in the same order', show: 0.9 },
+    kinds: { order: { name: 'The Mural' }, memory: { name: 'The Echo', hint: 'Watch the seals light up, then wake them in the same order', show: 1.1, lead: 1, gap: 2.5 },
       timed: { name: 'The Race', hint: 'Wake every seal before the light fades: the first one starts the clock', walk: 5, slack: 3 },
       toggle: { name: 'The Balance', hint: 'Each seal flips itself and both its neighbours: light them all' } } },
   chest: { xpFrac: 0.5, gold: [60, 10], gems: [8, 14], shards: [3, 6], ilvlAdd: 4, caseChance: 0.15 },
@@ -6752,7 +6754,7 @@ const DV = CFG.delve, DV_RAR = ['rare', 'epic', 'legendary', 'mythic', 'ancient'
 function diffDef(i) {
   i = Math.max(0, i | 0); if (i < DV.diffs.length) return Object.assign({ i }, DV.diffs[i]);
   const r = i - DV.diffs.length + 1; // Ascendant rank
-  return { i, name: `Ascendant ${r}`, lvl: 40 + 10 * r, hp: 1.6 * Math.pow(1.08, r - 1), dmg: 1.35 * Math.pow(1.05, r - 1), pow: 2 * Math.pow(1.12, r - 1), rooms: [8, 8], events: 4, puzzles: 2,
+  return { i, name: `Ascendant ${r}`, lvl: 40 + 10 * r, hp: 1.6 * Math.pow(1.08, r - 1), dmg: 1.35 * Math.pow(1.05, r - 1), pow: 2 * Math.pow(1.12, r - 1), rooms: [9, 10], events: 4, puzzles: 3,
     items: Math.min(6, 4 + Math.floor(r / 3)), floor: r >= 6 ? 'ancient' : 'mythic', unique: Math.min(0.35, 0.18 + 0.02 * r), col: '#ffe27a', asc: r };
 }
 // RULE: a party dungeon must come out the same on every phone in the run (README 1.1). Everything that shapes the map,
@@ -6833,14 +6835,14 @@ function delveLayout(seed, def, di) {
   const mi = n >= 3 ? Math.floor(n / 2) : -1;
   const mids = seededShuffle(rooms.slice(1, n).map((m) => m.i).filter((i) => i !== mi), rng), evKeys = seededShuffle(Object.keys(C.events), rng);
   // puzzle halls first (two a run), then events, always leaving one plain fight hall
-  const npz = clamp(Math.min(D.puzzles || 1, mids.length - 1), 0, 2), nev = Math.max(0, Math.min(D.events, mids.length - npz - 1));
+  const npz = clamp(Math.min(D.puzzles || 1, mids.length - 1), 0, 3), nev = Math.max(0, Math.min(D.events, mids.length - npz - 1));
   for (let k = 0; k < nev; k++) rooms[mids[k]].event = evKeys[k];
   for (let k = 0; k < npz; k++) rooms[mids[nev + k]].puzzle = true;
   const pzKinds = seededShuffle(Object.keys(C.puzzle.kinds), rng); let pzAt = 0;
   for (const m of rooms) {
     if (m.boss) { m.fight = 'boss'; continue; }
     const SP = C.spread, full = clamp(Math.round(4 * m.hx * m.hz / SP.area), SP.n[0], SP.n[1]);
-    if (m.puzzle) { m.fight = 'puzzle'; m.count = 0; m.waves = 1; }
+    if (m.puzzle) { m.fight = 'puzzle'; m.count = C.puzzle.guards[Math.min(di, C.puzzle.guards.length - 1)]; m.waves = 1; }
     else if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.count = C.mini.guards; m.waves = 1; }
     else if (!m.event) { const f = wpick(C.fights); m.fight = f.k; m.waves = f.waves || 1; m.count = f.k === 'guard' ? full : Math.max(2, Math.ceil(full / 2)); }
     else { m.fight = m.event === 'traps' ? 'guard' : 'none'; m.count = m.event === 'traps' ? Math.ceil(full / 2) : 0; m.waves = 1; }
@@ -6879,7 +6881,7 @@ function delveLayout(seed, def, di) {
 }
 // a puzzle hall's seals round the room (clear of the door lanes), their order, and the mural by the entrance
 function delvePuzzleMake(rng, m, prev, di, kind) {
-  const P = DV.puzzle, K = di >= 2 ? P.switches[1] : P.switches[0], rot = rng() * Math.PI * 2, glyphs = seededShuffle([0, 1, 2, 3, 4, 5, 6, 7], rng), sw = [];
+  const P = DV.puzzle, K = Math.min(kind === 'order' ? 5 : 6, P.switches[Math.min(di, P.switches.length - 1)]), rot = rng() * Math.PI * 2, glyphs = seededShuffle([0, 1, 2, 3, 4, 5, 6, 7], rng), sw = [];
   for (let k = 0; k < K; k++) { const a = rot + (k + 0.5) / K * Math.PI * 2 + (rng() - 0.5) * 0.4; sw.push({ x: m.x + Math.sin(a) * m.hx * 0.58, z: m.z + Math.cos(a) * m.hz * 0.58, lever: rng() < 0.5, g: glyphs[k] }); }
   const order = seededShuffle(sw.map((_, k) => k), rng), dx = Math.sign(Math.round(m.x - prev.x)), dz = Math.sign(Math.round(m.z - prev.z)), half = K * 0.85;
   // the mural: a strip of tiles (read left to right on screen) by the entry wall, beside the door lane
@@ -7034,10 +7036,22 @@ function delveDoorRecv(P) {
 // session id), `step` = seals awake in order (mural, echo), `bits` = which seals are lit (race, balance)
 const delvePz = (D, m) => D.delve.pz[m.i] || (D.delve.pz[m.i] = { v: 0, step: 0, bits: m.pz.kind === 'toggle' ? m.pz.start : 0, fails: 0, hold: m.pz.sw.map(() => 0), cd: 0, done: false, flash: 0, t: 0, show: 0 });
 const pzOrdered = (pz) => pz.kind === 'order' || pz.kind === 'memory';
+// the echo's light show: after a short lead-in each seal of the order flashes in turn, then a pause, then again. It
+// plays while no seal is awake, and the seals don't listen while it plays. Returns the flashing seal, -1 between
+// flashes, or null when the show isn't playing.
+function delvePzShow(m, S) {
+  if (m.pz.kind !== 'memory' || !S || S.done || S.step || S.cd > 0) return null;
+  const E = DV.puzzle.kinds.memory, K = m.pz.sw.length, ph = S.show % (E.lead + K * E.show + E.gap) - E.lead;
+  if (ph >= K * E.show) return null; if (ph < 0) return -1; // the lead-in counts as playing: nothing lit yet
+  return ph % E.show < E.show * 0.7 ? m.pz.order[Math.floor(ph / E.show)] : -1;
+}
 function delvePzLit(m, S, j) { return S.done || (pzOrdered(m.pz) ? m.pz.order.indexOf(j) < S.step : !!((S.bits >> j) & 1)); }
 function stepDelvePuzzle(D, m, dt) {
-  const P = DV.puzzle, S = delvePz(D, m), pz = m.pz; S.flash = Math.max(0, S.flash - dt); S.show += dt;
+  const P = DV.puzzle, S = delvePz(D, m), pz = m.pz; S.flash = Math.max(0, S.flash - dt);
   if (S.done) return; if (S.cd > 0) { S.cd -= dt; return; }
+  // the show's clock only runs while it can play, so after a mistake it starts again from the first seal (it used to
+  // run on through the red flash and restart halfway, showing a wrong order)
+  if (pz.kind === 'memory' && !S.step) { S.show += dt; if (delvePzShow(m, S) != null) { S.hold = S.hold.map(() => 0); return; } }
   // the race: the clock runs out with seals still dark
   if (pz.kind === 'timed' && S.bits && (S.t -= dt) <= 0) { delvePzApply(D, m, { v: S.v + 1, s: 0, b: 0, f: S.fails + 1 }, true); return; }
   const next = pz.order[S.step], party = delveParty().filter((f) => f.alive !== false);
@@ -7066,9 +7080,12 @@ function delvePzApply(D, m, st, mine, sid) {
     S.cd = P.failCd; S.flash = 0.8; S.hold = S.hold.map(() => -1); S.show = 0;
     if (st.f % 2) { // spike burst under every hero this game runs in the hall
       for (const f of [G.player, ...(X.bots || [])]) if (f.alive !== false && inRoom(m, f.x, f.z)) G.pendingAoE.push({ x: f.x, z: f.z, r: 2.4, t: 0.9, max: 0.9, dmg: f.maxHp * P.spike * X.diff.dmg, team: 'mob', owner: 0, kind: 'slam', pal: areaFx(D.zone) });
-    } else for (let k = 0; k < P.pack; k++) { // a pack crawls out of the floor, the same slots in every game
-      const a = k / P.pack * Math.PI * 2, e = delveMob(D, m.i, 50 + (st.f % 40) * 5 + k, { x: m.x + Math.sin(a) * 2.5, z: m.z + Math.cos(a) * 2.5, pick: (st.f + k) / 7 % 1, chase: true });
-      if (!m.mobs.includes(e)) m.mobs.push(e);
+    } else for (let k = 0, n = Math.min(P.packMax, P.pack + Math.floor(X.di * P.packDiff)); k < n; k++) { // a pack crawls out of the floor, the same slots in every game
+      // slots 50-85 of this hall, reused once their monster is down (they used to run past 99 into the next hall's
+      // slots: the hall then waited on a monster behind its own closed gate, which never opened)
+      const slot = 50 + ((st.f >> 1) % 6) * 6 + k, old = X.slots.get(m.i * 100 + slot); if (old && !old.alive) X.slots.delete(m.i * 100 + slot);
+      const a = k / n * Math.PI * 2, e = delveMob(D, m.i, slot, { x: m.x + Math.sin(a) * 2.5, z: m.z + Math.cos(a) * 2.5, pick: (st.f + k) / 7 % 1, chase: true });
+      e.pzPack = true; if (!m.mobs.includes(e)) m.mobs.push(e);
     }
     ev({ t: 'delvePzFail', spikes: !!(st.f % 2), timed: pz.kind === 'timed', x: m.x, z: m.z });
   }
@@ -7076,7 +7093,11 @@ function delvePzApply(D, m, st, mine, sid) {
   S.v = st.v; S.step = st.s; S.bits = st.b; S.fails = st.f;
   const lit = pzOrdered(pz) ? S.step : popcount(S.bits);
   if (lit > lit0 || pz.kind === 'toggle') ev({ t: 'delvePzStep', n: lit, of: K, flip: pz.kind === 'toggle', x: m.x, z: m.z });
-  if (pzOrdered(pz) ? S.step >= K : S.bits === pz.all) { S.done = true; ev({ t: 'delvePzDone', name: X.def.puzzle, x: m.x, z: m.z }); }
+  if (pzOrdered(pz) ? S.step >= K : S.bits === pz.all) {
+    // the wrong-seal packs crumble with the puzzle; the hall's guards still have to fall
+    S.done = true; for (const e of m.mobs) if (e.alive && e.pzPack) { e.alive = false; e.hp = 0; e.respawnT = 1e9; ev({ t: 'die', x: e.x, z: e.z, kind: e.type, elite: !!e.elite }); }
+    ev({ t: 'delvePzDone', name: X.def.puzzle, guards: m.mobs.some((e) => e.alive), x: m.x, z: m.z });
+  }
   if (mine && typeof partySend === 'function') partySend('dpz', { dr: X.seed, r: m.i, v: S.v, s: S.step, b: S.bits, f: S.fails });
 }
 function popcount(b) { let n = 0; for (; b; b &= b - 1) n++; return n; }
@@ -11452,7 +11473,7 @@ function updateDelvePuzzles(D, t) {
   for (const q of delveParts.seals) {
     const m = D.rooms[q.room], S = D.delve.pz[q.room], awake = !!S && delvePzLit(m, S, q.j), red = S && S.flash > 0 && Math.sin(t * 30) > 0;
     // the echo shows its order: one seal after the other flashes white while nothing is awake yet
-    const K = m.pz.sw.length, sh = DV.puzzle.kinds.memory.show, ph = S ? S.show % (K * sh + 2.5) : 0, showing = m.pz.kind === 'memory' && S && !S.done && !S.step && S.cd <= 0 && ph < K * sh && m.pz.order[Math.floor(ph / sh)] === q.j && ph % sh < sh * 0.7;
+    const showing = delvePzShow(m, S) === q.j;
     // the race: dark seals pulse faster while the clock runs
     const racing = m.pz.kind === 'timed' && S && S.bits && !S.done;
     const hold = S && S.hold[q.j] > 0 ? S.hold[q.j] / DV.puzzle.hold : 0;
@@ -13922,7 +13943,7 @@ function processEvents() {
       case 'delvePzClock': showToast(`The race is on: ${e.secs} seconds!`, 'bad'); ringFx(e.x, e.z, 7, 0xffd34a, 0.8); Sfx.play('horn'); break;
       case 'delvePzStep': showToast(e.flip ? `${e.n} of ${e.of} seals lit` : `Seal ${e.n} of ${e.of} awake`, 'good'); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
       case 'delvePzFail': showToast(`${e.timed ? 'Too slow!' : 'Wrong seal!'} ${e.spikes ? 'The floor bites back' : 'Something crawls out'}`, 'bad'); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
-      case 'delvePzDone': showBanner(`${escapeHTML(e.name)} solved`, 'The gate opens', 'gold'); burst(e.x, 1, e.z, 30, 0xffd34a, 6, 0.9, 0.4, 3, 2); Sfx.play('unlock'); break;
+      case 'delvePzDone': showBanner(`${escapeHTML(e.name)} solved`, e.guards ? 'Defeat the guards to open the gate' : 'The gate opens', 'gold'); burst(e.x, 1, e.z, 30, 0xffd34a, 6, 0.9, 0.4, 3, 2); Sfx.play('unlock'); break;
       case 'delveBossCast': if (e.k === 'charge' || e.k === 'spiral' || e.k === 'meteors') Sfx.play('horn', { gap: 1 }); ringFx(e.x, e.z, 3, 0xff5d8f, 0.5); break;
       case 'delveVein': if (e.lode) showBanner('Motherlode!', `+${e.n} ${escapeHTML(e.name)}`, 'gold'); else showToast(`+${e.n} ${escapeHTML(e.name)} · a rare dungeon treasure`, 'good'); burst(e.x, 1.2, e.z, e.lode ? 40 : 24, 0xffe27a, 5, 0.9, 0.4, 4, 2); Sfx.play(e.lode ? 'radiant' : 'unlock'); break;
       case 'delveWave': showToast(`Wave ${e.n + 1} of ${e.of}!`, 'bad'); ringFx(e.x, e.z, 6, 0xff5d8f, 0.9); break;

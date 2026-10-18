@@ -263,11 +263,11 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
   with your level to 500×500 m. A fallen Keep restarts the wave it fell on, never lower. Your fort is a shared world:
   friends join with its code, even while you are offline (saved on the server; the player in it longest runs the waves).
 - **Dungeon mode** (party dungeons, level 12, 1-4 heroes, bots fill the empty places): six dungeons, one per biome,
-  each with its own boss, mini-boss, 5-piece set and rare treasure. A run is 7-8 halls of mixed sizes (20 m cells to
+  each with its own boss, mini-boss, 5-piece set and rare treasure. A run is 7-10 halls of mixed sizes (more on harder difficulties) (20 m cells to
   56 m arenas, a 64 m boss hall) with few, tough monsters spread over each hall (ranged ones at the back behind pillars;
   a wake calls only close neighbours, so you can pull them), event rooms, a mini-boss halfway and a three-phase boss
   whose kit grows each phase (Volley and Ground Slam, then Nova Ring and Charge, then Death Spiral and Falling Stones,
-  plus adds and an enrage). Two puzzle halls per run, never the same kind: the mural order, the echo (repeat a light
+  plus adds and an enrage). Two puzzle halls per run (three from Heroic; 4-6 seals; guards from Hard), never the same kind: the mural order, the echo (repeat a light
   show), the race (every seal before the clock runs out) and the balance (lights-out). Some runs hide a rare vein of
   the dungeon's own treasure (Rootbound Amber, Rimeglass, Forgeheart Ember, Ink Pearl, Tidestone, Starshard), each
   hero mines their own. Every phone in a party sees the same run (rule 8). Difficulties Normal → Mythic → Ascendant 1, 2, …
