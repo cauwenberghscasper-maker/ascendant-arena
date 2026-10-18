@@ -2095,18 +2095,16 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .dlvArt::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(10,8,16,.9)); }
 .dlvArt b, .dlvArt small { position: relative; text-shadow: 2px 2px 0 #000; } .dlvArt b { font-size: 22px; color: #f2ead2; } .dlvArt small { font-size: 12px; color: #fff; opacity: .9; }
 .panel .hubTile.wide { background: linear-gradient(90deg, rgba(20,10,20,.75), rgba(20,10,20,.2)), url(assets/ui/delve/cinder.webp) center / cover !important; }
-/* Settings › Sound: volume sliders (big thumbs for touch) */
-.sndbox { display: flex; flex-direction: column; gap: 4px; background: var(--ink2); border-radius: 14px; padding: 11px 12px; border-left: 4px solid var(--xp); }
-.sndbox > b { font: 16px/1.2 var(--display); margin-bottom: 2px; }
-.sndbox .vol { display: grid; grid-template-columns: 64px 1fr 34px; align-items: center; gap: 10px; min-height: 40px; }
-.sndbox .vol span { font-size: 13px; color: var(--muted); }
-.sndbox .vol output { font: 600 13px/1 var(--body); text-align: right; font-variant-numeric: tabular-nums; }
-.sndbox input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; margin: 0; touch-action: none; }
-.sndbox input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--ink3); }
-.sndbox input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--ink3); }
-.sndbox input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -9px; border-radius: 50%; background: var(--gold); border: 2px solid #2e1c00; }
-.sndbox input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--gold); border: 2px solid #2e1c00; }
-.sndbox input[type=range]:focus-visible { outline: 3px solid #fff; outline-offset: 2px; border-radius: 6px; }
+/* Settings › Sound: volume sliders. The box is a .savebox card (same stone panel); square pixel thumbs, rows as tall as the panel buttons (48px before the Menu size zoom) */
+.sndbox .vol { display: grid; grid-template-columns: 64px 1fr 34px; align-items: center; gap: 10px; min-height: 48px; }
+.sndbox .vol span { font-size: 13px; }
+.sndbox .vol output { font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+.sndbox input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 48px; background: transparent; margin: 0; touch-action: none; }
+.sndbox input[type=range]::-webkit-slider-runnable-track { height: 8px; background: var(--og-slate); box-shadow: 0 0 0 2px var(--og-ink); }
+.sndbox input[type=range]::-moz-range-track { height: 8px; background: var(--og-slate); box-shadow: 0 0 0 2px var(--og-ink); }
+.sndbox input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 24px; margin-top: -8px; border-radius: 0; background: #ece6d6; box-shadow: 0 0 0 3px var(--og-ink), inset 0 -4px 0 rgba(0,0,0,.25); }
+.sndbox input[type=range]::-moz-range-thumb { width: 20px; height: 24px; border: 0; border-radius: 0; background: #ece6d6; box-shadow: 0 0 0 3px var(--og-ink), inset 0 -4px 0 rgba(0,0,0,.25); }
+.sndbox input[type=range]:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -11659,7 +11657,7 @@ function openSettings() {
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
     ${tg('calm', 'Reduce flashing', 'No red hit flash or screen shake, and a fixed render scale')}
-    <div class="sndbox"><b>Sound</b>${[['volMaster', 'Master'], ['volMusic', 'Music'], ['volSfx', 'Effects'], ['volUi', 'Menu']].map(([k, l]) => `<label class="vol"><span>${l}</span><input type="range" min="0" max="100" step="5" data-vol="${k}" value="${s[k] | 0}" aria-label="${l} volume"><output id="out-${k}">${s[k] | 0}</output></label>`).join('')}</div>
+    <div class="savebox sndbox"><b>Sound</b>${[['volMaster', 'Master'], ['volMusic', 'Music'], ['volSfx', 'Effects'], ['volUi', 'Menu']].map(([k, l]) => `<label class="vol"><span>${l}</span><input type="range" min="0" max="100" step="5" data-vol="${k}" value="${s[k] | 0}" aria-label="${l} volume"><output id="out-${k}">${s[k] | 0}</output></label>`).join('')}</div>
     ${tg('mute', 'Mute sound', 'Turns off music, effects and menu sounds')}${tg('fps', 'Show FPS', 'Frame rate, draw calls and render scale')}
     <div class="row"><button class="ghost sm" data-act="credits">Credits and licenses</button></div>
     <div class="danger"><button class="ghost" data-act="reset1" id="reset1">${TEST_MODE ? 'Reset test hero' : 'Reset progress'}</button><span id="resetConfirm" hidden>${TEST_MODE ? 'Erase this test hero only?' : 'Erase this hero everywhere?'} <button class="warn" data-act="reset2">Yes, erase</button></span></div>`);

@@ -743,7 +743,7 @@ function openSettings() {
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
     ${tg('calm', 'Reduce flashing', 'No red hit flash or screen shake, and a fixed render scale')}
-    <div class="sndbox"><b>Sound</b>${[['volMaster', 'Master'], ['volMusic', 'Music'], ['volSfx', 'Effects'], ['volUi', 'Menu']].map(([k, l]) => `<label class="vol"><span>${l}</span><input type="range" min="0" max="100" step="5" data-vol="${k}" value="${s[k] | 0}" aria-label="${l} volume"><output id="out-${k}">${s[k] | 0}</output></label>`).join('')}</div>
+    <div class="savebox sndbox"><b>Sound</b>${[['volMaster', 'Master'], ['volMusic', 'Music'], ['volSfx', 'Effects'], ['volUi', 'Menu']].map(([k, l]) => `<label class="vol"><span>${l}</span><input type="range" min="0" max="100" step="5" data-vol="${k}" value="${s[k] | 0}" aria-label="${l} volume"><output id="out-${k}">${s[k] | 0}</output></label>`).join('')}</div>
     ${tg('mute', 'Mute sound', 'Turns off music, effects and menu sounds')}${tg('fps', 'Show FPS', 'Frame rate, draw calls and render scale')}
     <div class="row"><button class="ghost sm" data-act="credits">Credits and licenses</button></div>
     <div class="danger"><button class="ghost" data-act="reset1" id="reset1">${TEST_MODE ? 'Reset test hero' : 'Reset progress'}</button><span id="resetConfirm" hidden>${TEST_MODE ? 'Erase this test hero only?' : 'Erase this hero everywhere?'} <button class="warn" data-act="reset2">Yes, erase</button></span></div>`);
