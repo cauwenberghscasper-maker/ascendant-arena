@@ -1,0 +1,230 @@
+{
+ "note": "Bastion level looks for TRELLIS.2 (see docs/UNFINISHED.md). t1 = the base model; t2..t7 are the looks for levels 3, 5, 7, 9, 11, 13. siege_mill and siege_iron also need a t1.",
+ "style": "hand-painted stylized fantasy game asset, World of Warcraft style, single building, front three-quarter view, plain grey background, no ground slab, no text",
+ "models": [
+  {
+   "name": "siege_archer_t2",
+   "prompt": "A medieval archer watchtower on stilts with a lookout platform, reinforced timber with iron bands"
+  },
+  {
+   "name": "siege_archer_t3",
+   "prompt": "A medieval archer watchtower on stilts with a lookout platform, grey stone base with timber top"
+  },
+  {
+   "name": "siege_archer_t4",
+   "prompt": "A medieval archer watchtower on stilts with a lookout platform, grey stone with red banners and gold trim"
+  },
+  {
+   "name": "siege_archer_t5",
+   "prompt": "A medieval archer watchtower on stilts with a lookout platform, dark iron plates and rivets"
+  },
+  {
+   "name": "siege_archer_t6",
+   "prompt": "A medieval archer watchtower on stilts with a lookout platform, blue-violet arcane runes glowing on stone"
+  },
+  {
+   "name": "siege_archer_t7",
+   "prompt": "A medieval archer watchtower on stilts with a lookout platform, white marble with gold and crystal details"
+  },
+  {
+   "name": "siege_cannon_t2",
+   "prompt": "A medieval fortress cannon on a wheeled carriage, reinforced timber with iron bands"
+  },
+  {
+   "name": "siege_cannon_t3",
+   "prompt": "A medieval fortress cannon on a wheeled carriage, grey stone base with timber top"
+  },
+  {
+   "name": "siege_cannon_t4",
+   "prompt": "A medieval fortress cannon on a wheeled carriage, grey stone with red banners and gold trim"
+  },
+  {
+   "name": "siege_cannon_t5",
+   "prompt": "A medieval fortress cannon on a wheeled carriage, dark iron plates and rivets"
+  },
+  {
+   "name": "siege_cannon_t6",
+   "prompt": "A medieval fortress cannon on a wheeled carriage, blue-violet arcane runes glowing on stone"
+  },
+  {
+   "name": "siege_cannon_t7",
+   "prompt": "A medieval fortress cannon on a wheeled carriage, white marble with gold and crystal details"
+  },
+  {
+   "name": "siege_ballista_t2",
+   "prompt": "A medieval giant siege ballista crossbow on a turntable, reinforced timber with iron bands"
+  },
+  {
+   "name": "siege_ballista_t3",
+   "prompt": "A medieval giant siege ballista crossbow on a turntable, grey stone base with timber top"
+  },
+  {
+   "name": "siege_ballista_t4",
+   "prompt": "A medieval giant siege ballista crossbow on a turntable, grey stone with red banners and gold trim"
+  },
+  {
+   "name": "siege_ballista_t5",
+   "prompt": "A medieval giant siege ballista crossbow on a turntable, dark iron plates and rivets"
+  },
+  {
+   "name": "siege_ballista_t6",
+   "prompt": "A medieval giant siege ballista crossbow on a turntable, blue-violet arcane runes glowing on stone"
+  },
+  {
+   "name": "siege_ballista_t7",
+   "prompt": "A medieval giant siege ballista crossbow on a turntable, white marble with gold and crystal details"
+  },
+  {
+   "name": "siege_mage_t2",
+   "prompt": "A medieval tall slender wizard tower with a glowing crystal on top, reinforced timber with iron bands"
+  },
+  {
+   "name": "siege_mage_t3",
+   "prompt": "A medieval tall slender wizard tower with a glowing crystal on top, grey stone base with timber top"
+  },
+  {
+   "name": "siege_mage_t4",
+   "prompt": "A medieval tall slender wizard tower with a glowing crystal on top, grey stone with red banners and gold trim"
+  },
+  {
+   "name": "siege_mage_t5",
+   "prompt": "A medieval tall slender wizard tower with a glowing crystal on top, dark iron plates and rivets"
+  },
+  {
+   "name": "siege_mage_t6",
+   "prompt": "A medieval tall slender wizard tower with a glowing crystal on top, blue-violet arcane runes glowing on stone"
+  },
+  {
+   "name": "siege_mage_t7",
+   "prompt": "A medieval tall slender wizard tower with a glowing crystal on top, white marble with gold and crystal details"
+  },
+  {
+   "name": "siege_barracks_t2",
+   "prompt": "A medieval soldiers barracks hall with a weapon rack and banner, reinforced timber with iron bands"
+  },
+  {
+   "name": "siege_barracks_t3",
+   "prompt": "A medieval soldiers barracks hall with a weapon rack and banner, grey stone base with timber top"
+  },
+  {
+   "name": "siege_barracks_t4",
+   "prompt": "A medieval soldiers barracks hall with a weapon rack and banner, grey stone with red banners and gold trim"
+  },
+  {
+   "name": "siege_barracks_t5",
+   "prompt": "A medieval soldiers barracks hall with a weapon rack and banner, dark iron plates and rivets"
+  },
+  {
+   "name": "siege_barracks_t6",
+   "prompt": "A medieval soldiers barracks hall with a weapon rack and banner, blue-violet arcane runes glowing on stone"
+  },
+  {
+   "name": "siege_barracks_t7",
+   "prompt": "A medieval soldiers barracks hall with a weapon rack and banner, white marble with gold and crystal details"
+  },
+  {
+   "name": "siege_mine_t2",
+   "prompt": "A medieval stone quarry mine entrance with a minecart and pickaxes, reinforced timber with iron bands"
+  },
+  {
+   "name": "siege_mine_t3",
+   "prompt": "A medieval stone quarry mine entrance with a minecart and pickaxes, grey stone base with timber top"
+  },
+  {
+   "name": "siege_mine_t4",
+   "prompt": "A medieval stone quarry mine entrance with a minecart and pickaxes, grey stone with red banners and gold trim"
+  },
+  {
+   "name": "siege_mine_t5",
+   "prompt": "A medieval stone quarry mine entrance with a minecart and pickaxes, dark iron plates and rivets"
+  },
+  {
+   "name": "siege_mine_t6",
+   "prompt": "A medieval stone quarry mine entrance with a minecart and pickaxes, blue-violet arcane runes glowing on stone"
+  },
+  {
+   "name": "siege_mine_t7",
+   "prompt": "A medieval stone quarry mine entrance with a minecart and pickaxes, white marble with gold and crystal details"
+  },
+  {
+   "name": "siege_hut_t2",
+   "prompt": "A medieval small builder's hut with a workbench and hammer sign, reinforced timber with iron bands"
+  },
+  {
+   "name": "siege_hut_t3",
+   "prompt": "A medieval small builder's hut with a workbench and hammer sign, grey stone base with timber top"
+  },
+  {
+   "name": "siege_hut_t4",
+   "prompt": "A medieval small builder's hut with a workbench and hammer sign, grey stone with red banners and gold trim"
+  },
+  {
+   "name": "siege_hut_t5",
+   "prompt": "A medieval small builder's hut with a workbench and hammer sign, dark iron plates and rivets"
+  },
+  {
+   "name": "siege_hut_t6",
+   "prompt": "A medieval small builder's hut with a workbench and hammer sign, blue-violet arcane runes glowing on stone"
+  },
+  {
+   "name": "siege_hut_t7",
+   "prompt": "A medieval small builder's hut with a workbench and hammer sign, white marble with gold and crystal details"
+  },
+  {
+   "name": "siege_mill",
+   "prompt": "A medieval lumber mill with a round saw blade, stacked logs and a small water wheel, made of rough timber and rope"
+  },
+  {
+   "name": "siege_mill_t2",
+   "prompt": "A medieval lumber mill with a round saw blade, stacked logs and a small water wheel, reinforced timber with iron bands"
+  },
+  {
+   "name": "siege_mill_t3",
+   "prompt": "A medieval lumber mill with a round saw blade, stacked logs and a small water wheel, grey stone base with timber top"
+  },
+  {
+   "name": "siege_mill_t4",
+   "prompt": "A medieval lumber mill with a round saw blade, stacked logs and a small water wheel, grey stone with red banners and gold trim"
+  },
+  {
+   "name": "siege_mill_t5",
+   "prompt": "A medieval lumber mill with a round saw blade, stacked logs and a small water wheel, dark iron plates and rivets"
+  },
+  {
+   "name": "siege_mill_t6",
+   "prompt": "A medieval lumber mill with a round saw blade, stacked logs and a small water wheel, blue-violet arcane runes glowing on stone"
+  },
+  {
+   "name": "siege_mill_t7",
+   "prompt": "A medieval lumber mill with a round saw blade, stacked logs and a small water wheel, white marble with gold and crystal details"
+  },
+  {
+   "name": "siege_iron",
+   "prompt": "A medieval iron mine with a smelting furnace, ore cart and bellows, made of rough timber and rope"
+  },
+  {
+   "name": "siege_iron_t2",
+   "prompt": "A medieval iron mine with a smelting furnace, ore cart and bellows, reinforced timber with iron bands"
+  },
+  {
+   "name": "siege_iron_t3",
+   "prompt": "A medieval iron mine with a smelting furnace, ore cart and bellows, grey stone base with timber top"
+  },
+  {
+   "name": "siege_iron_t4",
+   "prompt": "A medieval iron mine with a smelting furnace, ore cart and bellows, grey stone with red banners and gold trim"
+  },
+  {
+   "name": "siege_iron_t5",
+   "prompt": "A medieval iron mine with a smelting furnace, ore cart and bellows, dark iron plates and rivets"
+  },
+  {
+   "name": "siege_iron_t6",
+   "prompt": "A medieval iron mine with a smelting furnace, ore cart and bellows, blue-violet arcane runes glowing on stone"
+  },
+  {
+   "name": "siege_iron_t7",
+   "prompt": "A medieval iron mine with a smelting furnace, ore cart and bellows, white marble with gold and crystal details"
+  }
+ ]
+}

@@ -239,13 +239,20 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
   5-piece sets with glowing set auras), Forge shop, Enchant.
 - **Showdown arena:** 10 fighters vs bots, closing gas, power cubes, trophies. **The Rift.**
 - **Bastion Siege** (level 20, the Bastion house west of the plaza): endless waves from 1-4 random sides attack The
-  Keep and two wagons. Build in builder mode (the Build button: the field from above with its grid, pan and pinch-zoom, a shop strip with a
-  picture of every building, a see-through preview, drag to draw walls, move buildings): walls and gates (wood, stone, iron), archers,
-  cannons, ballistas, mage towers, barracks, stone mines and builder huts (one upgrade at a time per hut), and traps
-  monsters walk over: spike plates, powder kegs (once per wave) and tar pits (slow and burn). Monsters walk
-  around walls and break the cheapest piece when closed in. The land grows with your level to 500×500 m. A fallen
-  Keep restarts the wave it fell on, never lower. Your fort is a shared world: friends join with its code, even while
-  you are offline (saved on the server; the player in it longest runs the waves).
+  Keep and two wagons, Clash of Clans meets Balloons TD. Build in builder mode (the Build button: the field from above
+  with its grid, pan and pinch-zoom, a shop strip you swipe sideways; drag a building up out of it and its see-through
+  preview follows your finger, drag walls and gates in straight lines, move buildings): walls and gates (wood, stone,
+  iron), archers, cannons, ballistas, mage towers, barracks, builder huts (one upgrade at a time per hut), traps (spike
+  plates, powder kegs, tar pits) and the camp's producers. **The camp pays for itself:** wood (lumber mill), stone
+  (stone mine) and iron (iron mine, needed from building level 6) fill up even while you are away; tap one to collect.
+  Waves pay hero gold and items plus some of each. **The Keep has 10 levels:** each allows more of every building and
+  higher building levels (`CFG.siege.keep`, `towers[t].lim`). After the first start, waves come by themselves with a
+  20 s break (Pause/Resume in the builder and on the HUD chip). From level 5 a tower picks one of two paths
+  (`CFG.siege.paths`); later waves bring armoured monsters (light shots barely scratch them) and flyers that cross
+  walls (only towers with air hit them). Buildings get a new look every two levels (7 looks, `SIEGE_TIERS`) and
+  their own idle animations. Monsters walk around walls and break the cheapest piece when closed in. The land grows
+  with your level to 500×500 m. A fallen Keep restarts the wave it fell on, never lower. Your fort is a shared world:
+  friends join with its code, even while you are offline (saved on the server; the player in it longest runs the waves).
 - **Dungeon mode** (party dungeons, level 12, 1-4 heroes, bots fill the empty places): six dungeons, one per biome,
   each with its own boss, mini-boss and 5-piece set. A run is 6-8 halls of mixed sizes (20 m cells to 56 m arenas, a
   64 m boss hall) with monster packs that wake together, event rooms, a mini-boss halfway and a three-phase boss

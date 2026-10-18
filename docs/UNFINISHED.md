@@ -1,3 +1,36 @@
+# Bastion: Clash of Clans + Balloons TD (18 Oct 2026, branch `claude/bastion-coc`)
+Casper: shop didn't scroll, drag should show the building on the board, limits per tower kind, camp resources, straight
+wall lines, auto waves after the first start with time to upgrade, smaller models with looks per level and animations,
+a CoC + Balloons TD mix. Agreed: only camp resources, ~20 s break with a pause, 7 looks, plus Balloons TD paths/monsters.
+- **Builder (`75-siege-builder.js`):** the shop is scrolled by hand (the builder layer has `touch-action: none`, which
+  killed native scrolling), with a glide. Drag an item up out of the strip: the preview stands just above the finger
+  and is built on release where it fits (red stays to be dragged; Place). A press on the preview drags it. Walls/gates:
+  drag a line, it locks to a row or column, shows count and price, builds on release (`builderLinePlan`). Tapping a
+  mill/mine with something in it collects; tapping the Keep opens its panel. Fixed: the preview set was registered at
+  the origin, so it never streamed in.
+- **Resources (`CFG.siege.res`, `fortCost/fortPrice/fortPay`):** wood/stone/iron in `profile.fort`; no hero gold for
+  building. Producers `mill` (new), `mine`, `iron` (new, Keep 4): `make/rate/cap`, `fortMade`. Iron from building level 6.
+  Waves pay `CFG.siege.pay(n)`. Bubbles over full producers (HUD tags). Pixel icons `ICON.wood/stone/iron`.
+- **Keep levels (`CFG.siege.keep`):** 10 levels, limits `towers[t].lim`, max building level `keep.lvl`, upgrade op
+  `{ o: 'keep' }` (builder + time), sturdier Keep/wagons. Panel `openFortKeepPanel`.
+- **Auto waves:** `F.go` once wave 1 was started, then 20 s breaks; `F.hold` pauses (op `{ o: 'hold' }`, builder buttons
+  and the `#fortChip` HUD chip). Builder mode no longer freezes the fort; it stays open during waves.
+- **Balloons TD:** paths at level 5 (`CFG.siege.paths`, `b.p`, `siegeStats`): Volley/Longbow, Mortar/Fire Cannon,
+  Repeater/Sky Piercer, Frost/Storm, Shield Wall/Berserkers. Armoured monsters from wave 6 and flyers from wave 8
+  (`siegeComposition`, `siegeDmgMul` hooked into `dealDamage`): light shots ×0.2 on armour; flyers skip walls,
+  warriors and traps, only `air` towers hit them; mirrored to guests (flags 8/16 in 'fst').
+- **Save:** `sanitizeFort` keeps everything; old forts get the lowest Keep level that holds what they built
+  (`fortKeepFor`), a stock of wood, `go` if they held waves. Shared worlds carry keep/kd/go/hold and paths.
+- **Looks and animations (`47c-siege-view.js`):** buildings at 0.75 size; 7 looks at levels 1/3/5/7/9/11/13
+  (`siegeModelName`): uses `siege_<kind>_t2..t7` when that model exists, else the best lower one tinted toward the
+  look. Idle life per kind (`animateSiegeIdle`): banners flutter, saw strokes + sawdust, mine dust / iron sparks, mage
+  motes, huts hammer while a builder works, idle cannons/ballistas scan and smoke, scaffold dust while upgrading.
+- **Open:** the 56 TRELLIS models in `tools/bastion_tiers.json` (6 looks × 9 kinds + base mill and iron mine) are not
+  made yet: Casper's ZeroGPU quota was used up today. Until then mills use the hut model and iron mines the mine model
+  (tinted), and the shop pictures `mill.webp`/`iron.webp` are tinted copies. Once made: pack, `v10_boxes.cjs`, rerun
+  `tools/fort_icons.mjs`; nothing else changes. Balance (costs, rates, limits) is not playtested; try drag and pinch on
+  a real phone.
+
 # Dungeon makeover phase 1: bigger halls, longer runs (18 Oct 2026, branch `claude/dungeon-makeover`, PR to main)
 Casper: the halls were too small for four heroes and runs too short (goal about 5 minutes). Plan agreed in chat, six
 phases (1 sizes + run length, 2 lever/plate puzzles, 3 enrage + smart patterns, 4 three new monsters per dungeon,
