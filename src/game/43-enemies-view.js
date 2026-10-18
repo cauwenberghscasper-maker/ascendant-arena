@@ -70,7 +70,7 @@ AssetSlots.register('enemy', (o) => {
       if (e.windK && e.windT > 0) {
         const wp = clamp(1 - e.windT / (e.windMax || 1), 0, 1), ez = wp * wp * (3 - 2 * wp), P = MOVE_POSE[e.windK] || MOVE_POSE.slam;
         pivot.rotation.x += P[0] * ez; pivot.position.y += P[1] * ez; pivot.rotation.y += P[2] * ez; pivot.scale.y *= 1 + P[3] * ez; pivot.scale.x *= 1 - P[3] * 0.5 * ez; pivot.scale.z *= 1 - P[3] * 0.5 * ez;
-        if (Math.random() < 0.25 * wp) burst(e.x + (Math.random() - 0.5) * e.r * 2, 0.15, e.z + (Math.random() - 0.5) * e.r * 2, 1, BIOME_TINT[areaBiome(e.zone)] || 0xffffff, 1.2, 0.35, 0.2, -0.4, 1.4);
+        if (Math.random() < 0.25 * wp * fxK) burst(e.x + (Math.random() - 0.5) * e.r * 2, 0.15, e.z + (Math.random() - 0.5) * e.r * 2, 1, BIOME_TINT[areaBiome(e.zone)] || 0xffffff, 1.2, 0.35, 0.2, -0.4, 1.4);
       }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
@@ -82,7 +82,7 @@ AssetSlots.register('enemy', (o) => {
       const pop = popT > 0 && popT < 1 ? 0.6 + 0.4 * (1 - Math.pow(1 - popT, 3)) : 1;
       if (!e.alive) { deadT += dt; const k = Math.max(0, 1 - deadT * 3); root.scale.setScalar(s * k); root.visible = k > 0; }
       else { deadT = 0; root.scale.setScalar(s * pop); root.visible = !e.hidden; } // hidden: burrowed (a burrow move's marker shows where it is)
-      if (e.hidden && Math.random() < 0.3) burst(e.x + (Math.random() - 0.5), 0.2, e.z + (Math.random() - 0.5), 1, 0x9a8a6a, 1.2, 0.4, 0.25, 6, 2);
+      if (e.hidden && Math.random() < 0.3 * fxK) burst(e.x + (Math.random() - 0.5), 0.2, e.z + (Math.random() - 0.5), 1, 0x9a8a6a, 1.2, 0.4, 0.25, 6, 2);
     },
     dispose() { AssetLibrary.disposeInstance(model); mat.dispose(); if (aura) aura.material.dispose(); },
   };

@@ -345,9 +345,12 @@ const Post = {
     this.main = rt(2, 2, { depthBuffer: true, samples: DEVICE.touch ? 2 : 4 });
     this.a = [rt(2, 2), rt(2, 2)]; this.b = [rt(2, 2), rt(2, 2)];
     const vs = 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
-    const quad = (fs, u) => new THREE.ShaderMaterial({ uniforms: u, vertexShader: vs, fragmentShader: fs, depthTest: false, depthWrite: false });
+    // one NaN or overflowed pixel (a bad normal, a shader edge case on some phone GPUs) would be blurred into a black
+    // patch over the screen, so any such sample is read as black before it reaches the blur or the final picture
+    const ok = 'vec3 okc(vec3 c) { uvec3 e = floatBitsToUint(c) & 0x7f800000u; return any(equal(e, uvec3(0x7f800000u))) ? vec3(0.0) : c; }\n';
+    const quad = (fs, u) => new THREE.ShaderMaterial({ uniforms: u, vertexShader: vs, fragmentShader: ok + fs, depthTest: false, depthWrite: false });
     this.bright = quad(`uniform sampler2D t; uniform float thr; uniform vec2 tx; varying vec2 vUv;
-      void main() { vec3 c = (texture2D(t, vUv + tx * vec2(-1.,-1.)).rgb + texture2D(t, vUv + tx * vec2(1.,-1.)).rgb + texture2D(t, vUv + tx * vec2(-1.,1.)).rgb + texture2D(t, vUv + tx * vec2(1.,1.)).rgb) * .25;
+      void main() { vec3 c = (okc(texture2D(t, vUv + tx * vec2(-1.,-1.)).rgb) + okc(texture2D(t, vUv + tx * vec2(1.,-1.)).rgb) + okc(texture2D(t, vUv + tx * vec2(-1.,1.)).rgb) + okc(texture2D(t, vUv + tx * vec2(1.,1.)).rgb)) * .25;
         float l = max(c.r, max(c.g, c.b)); gl_FragColor = vec4(c * smoothstep(thr, thr + 0.6, l), 1.0); }`, { t: { value: null }, thr: { value: 0.78 }, tx: { value: new THREE.Vector2() } });
     this.blur = quad(`uniform sampler2D t; uniform vec2 dir; varying vec2 vUv;
       void main() { vec3 c = texture2D(t, vUv).rgb * .227027;
@@ -356,7 +359,7 @@ const Post = {
         gl_FragColor = vec4(c, 1.0); }`, { t: { value: null }, dir: { value: new THREE.Vector2() } });
     this.final = quad(`uniform sampler2D t; uniform sampler2D b1; uniform sampler2D b2; uniform float bloom; uniform float dark; varying vec2 vUv;
       void main() {
-        vec3 c = texture2D(t, vUv).rgb + (texture2D(b1, vUv).rgb * .65 + texture2D(b2, vUv).rgb * .55) * bloom;
+        vec3 c = okc(texture2D(t, vUv).rgb) + okc(texture2D(b1, vUv).rgb * .65 + texture2D(b2, vUv).rgb * .55) * bloom;
         float l = dot(c, vec3(.2126, .7152, .0722));
         c = mix(c * vec3(.94, .98, 1.06), c * vec3(1.05, 1.0, .93), smoothstep(.05, .7, l)); // cool shade, warm light
         c = mix(vec3(l), c, 1.08);                                                           // a touch more colour

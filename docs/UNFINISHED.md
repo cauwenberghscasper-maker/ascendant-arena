@@ -1,3 +1,26 @@
+# Black screen flashes (18 Oct 2026, on `main`)
+Done: the bloom pass (Cinematic effects) turned a single NaN/overflowed pixel into a black patch or a black screen.
+`Post` now reads any such sample as black (`okc` in `46-camera-quality.js`). Three world models had zero-length normals
+(rift_gate, upside_tower, sky_altar), which give NaN pixels on phone GPUs; `fixZeroNormals` in `41-assets.js` repairs
+them on load for every model. Open: confirm on a real phone (software rendering here never makes the NaN pixels), and
+re-export those three models with clean normals.
+
+# Dungeon mode (18 Oct 2026, branch `claude/serene-franklin-blymcb`, PR #21 to main)
+- **Now:** a main mode (menu tile "Dungeons", opens at level 12) next to Showdown. Six dungeons, one per biome (`CFG.delve.dungeons`), each with its own boss and a five-piece set (2- and 4-piece bonuses, `delveSetBonus` in `gearTotals`). Difficulties Normal → Hard → Heroic → Mythic → Ascendant 1, 2, … (endless); clearing one opens the next. Each asks a **team power** (average Power of the party, plus a per-hero floor of 70%), measured against a level-L hero in Rare level-L gear (`refPower`). Monster HP scales with party size (×1/1.7/2.3/2.9).
+- **Rooms:** seeded per run (`delveLayout`): mixed hall shapes, pillars, dark halls, fight types (guard, 3-wave swarm, elites) and event rooms (gold goblin vault, cursed altar, pressure plates, spike hall, echo shrine, mimic chest, moonwell). Doors open strictly in order. Loot is each player's own roll; weekly first clear per difficulty gives a sure set piece.
+- **Party / matchmaking:** `73-party.js`. A party is its own Realtime channel (`mpRoomKey` → `party-<code>`); the leader's `dgo` starts the same seeded run for every member. Random match waits in `dq-<dungeon>-<difficulty>`: 4 players, or 2+ after 40 s; "Go alone now" any time. Monsters are shared with the existing nearest-player ownership (slot = room × 100 + k). Revive a downed teammate by standing next to them for 3 s; a party wipe ends the run. PvP is off inside. While in a party the open world shows only your party.
+- **Art:** dungeon banners (Z-Image Turbo) in `assets/ui/delve/`; TRELLIS.2 set pieces `delve_altar`, `delve_moonwell`, `delve_echo`, `delve_hoard`, `delve_throne` (relay batch `delve-setpieces`). Pressure plates are floor sigils (VFX); cache chests and pillars use the existing chest and pillar models.
+- **Not done yet:** rejoining a run after a disconnect; party chat; per-dungeon unique boss models (bosses use the biome's monsters as champions); the Collection Log does not list set pieces yet (the panel shows found/5). Tested over a local Realtime stand-in with two browsers, not yet on two real phones.
+- **Checks:** `tools/check_delve.cjs` (in `npm run check`).
+- **Next steps:** test a party on two real phones against the live Supabase project (create + join by code, random match, revive); then rejoin-after-disconnect and set pieces in the Collection Log.
+
+# 120 Hz option (18 Oct 2026, on `main`)
+Done: Options › 120 Hz (`settings.hz120`, off by default). The sim still steps at 60 Hz; at 120 Hz each frame draws heroes,
+monsters, bosses and projectiles part way between their last two steps (`Interp` in `80-main-loop.js`); teleports, respawns
+and new projectiles snap. Projectile trails and per-frame sparks scale with `fxK` so effects keep the same density.
+Open: test on a real 120 Hz phone. On 144 Hz+ screens the 120 cap can't divide the refresh rate, so motion is better than
+the 60 cap but not perfectly even.
+
 # Unfinished work (state at 17 Oct 2026, 17:20) — branch `wip/menus-v3`
 
 ## Menus & UI update (17 Oct, on `wip/menus-v3`, PR to main)

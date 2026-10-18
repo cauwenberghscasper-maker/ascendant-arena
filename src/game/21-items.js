@@ -74,6 +74,7 @@ function gearTotals(gear) {
     t.score += (it.ilvl + it.up * 1.2) * (CFG.gear.rarity[it.rarity] || CFG.gear.rarity.common).mult;
     if (it.aff) for (const k in it.aff) t.aff[k] = (t.aff[k] || 0) + it.aff[k];
   }
+  if (CFG.delve) t.sets = delveSetBonus(gear, t.aff); // party-dungeon set bonuses (36b-delve.js)
   return t;
 }
 const rarMult = (it) => (CFG.gear.rarity[it.rarity] || CFG.gear.rarity.common).mult;

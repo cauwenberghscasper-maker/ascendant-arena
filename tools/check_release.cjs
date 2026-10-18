@@ -186,9 +186,9 @@ check('old saves retain current hero and inventory; auto salvage migration happe
   p.settings.autoSalvage=2;assert.equal(ctx.sanitizeProfile(p).settings.autoSalvage,2);
   assert.doesNotThrow(()=>ctx.sanitizeProfile({v:2,gear:null,brawlers:{hob:null}}));
 });
-check('60 Hz scheduler preserves cadence on 60/90/120/144/165 Hz displays',()=>{
+check('60 Hz and 120 Hz schedulers preserve cadence on 60/90/120/144/165 Hz displays',()=>{
   const prefix=section('  if (now < nextFrameAt','  let dt =');
-  for(const hz of [60,90,120,144,165]){const c={FRAME_MS:1000/60,nextFrameAt:0,count:0};vm.createContext(c);vm.runInContext('function tick(now){'+prefix+'count++;}',c);for(let i=0;i<hz*10;i++)c.tick(i*1000/hz);assert(Math.abs(c.count-600)<=1,`${hz} Hz: ${c.count}`);}
+  for(const cap of [60,120])for(const hz of [60,90,120,144,165]){const c={ms:1000/cap,nextFrameAt:0,count:0};vm.createContext(c);vm.runInContext('function tick(now){'+prefix+'count++;}',c);for(let i=0;i<hz*10;i++)c.tick(i*1000/hz);const want=Math.min(cap,hz)*10;assert(Math.abs(c.count-want)<=1,`${cap} cap, ${hz} Hz: ${c.count}`);}
 });
 check('instance disposal frees owned materials once and retains shared resources',()=>{
   const code=section('  disposeInstance(model) {','  // tint a model');const c={};vm.createContext(c);vm.runInContext('const lib={'+code+'};this.dispose=lib.disposeInstance;',c);

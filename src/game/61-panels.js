@@ -9,16 +9,17 @@ function interact() {
   if (n.kind === 'trial') return openTrialPanel(n.zone);
   if (n.kind === 'mine') return mineNode(n.st);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
-  if (n.kind === 'dungeonChest') return openDungeonChest();
+  if (n.kind === 'dungeonChest') return delveOn() ? openDelveChest(claimDelveChest()) : openDungeonChest();
+  if (/^delve/.test(n.kind)) return delveAct(n);
   const d = n.def;
   if (d.role === 'smith') return openSmith();
   if (d.role === 'arena') return openArenaPanel();
   openNpc(d);
 }
 // Systems open slowly with level: a locked button shows its level; a newly opened one glows until you tap it
-const UNLOCK_AT = { mArtifacts: 2, mDaily: 2, mSmith: 3, mCollection: 4, mSkills: 5, Forge: 6, mIdle: 8, mBrawlers: 9, Masterwork: 10, mArena: 10, Enchant: 12, Craft: 15 };
+const UNLOCK_AT = { mArtifacts: 2, mDaily: 2, mSmith: 3, mCollection: 4, mSkills: 5, Forge: 6, mIdle: 8, mBrawlers: 9, Masterwork: 10, mArena: 10, Enchant: 12, mDelve: CFG.delve.unlock, Craft: 15 };
 const UNLOCK_NAME = { mArtifacts: 'Relics', mDaily: 'Daily rewards', mSmith: 'Forge', mCollection: 'Collection Log', mSkills: 'Talents', Forge: 'Forge › Buy gear', mIdle: 'Bank & Camp',
-  mBrawlers: 'Heroes', Masterwork: 'Forge › Masterwork', mArena: 'Showdown', Enchant: 'Forge › Enchant', Craft: 'Forge › Craft' };
+  mBrawlers: 'Heroes', Masterwork: 'Forge › Masterwork', mArena: 'Showdown', mDelve: 'Dungeons', Enchant: 'Forge › Enchant', Craft: 'Forge › Craft' };
 const unlockOpen = (k) => !G.profile || G.profile.level >= (UNLOCK_AT[k] || 0);
 const unlockNew = (k) => !!UNLOCK_AT[k] && unlockOpen(k) && !(G.profile.uiSeen || {})[k];
 function unlockSeen(k) { if (!unlockNew(k)) return; (G.profile.uiSeen || (G.profile.uiSeen = {}))[k] = true; G.dirty = true; }
@@ -737,6 +738,7 @@ function openSettings() {
       <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
     ${tg('fx', 'Cinematic effects', 'Bloom on crystals, lava, torches and magic, soft shadows and colour grading (with High graphics)')}
+    ${tg('hz120', '120 Hz', 'Smoother motion on 120 Hz screens. Uses more battery. No change on 60 Hz screens')}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
@@ -754,7 +756,9 @@ function handlePanelClick(e) {
   const act = b.dataset.act; Sfx.play('click');
   unlockSeen(act);
   if (!LOCAL_PREVIEW && !TEST_MODE && ['tLevel', 't5', 't100', 'tGold', 'tEss', 'tShards', 'tBoss', 'tUnlock', 'tLegend', 'tFocus'].includes(act)) return;
+  if (/^dlv/.test(act)) return partyAction(act, b);
   switch (act) {
+    case 'mDelve': openDelvePanel(); break;
     case 'testMode': saveNow(true); location.assign(testModeUrl(location.href, !TEST_MODE)); break;
     case 'close': UI.close(); break;
     case 'tZoom': treeZoom(b.dataset.z); break;
