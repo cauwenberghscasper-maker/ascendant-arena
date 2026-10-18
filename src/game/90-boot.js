@@ -47,6 +47,13 @@ function boot(hotData) {
   $('gearPrompt').addEventListener('pointerdown', (e) => e.stopPropagation());
   $('caseChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openCases(); } });
   $('autoChip').addEventListener('click', () => { if (G.started && !G.modal) { const s = G.profile.settings; s.autoHunt = !s.autoHunt; G.dirty = true; Sfx.play('click'); showToast(s.autoHunt ? 'Auto hunt on: your hero fights by itself' : 'Auto hunt off'); } });
+  // Fight / Normal: the same switch as Settings > PvP, one tap from the HUD
+  $('pvpChip').addEventListener('click', () => {
+    if (!G.started || G.modal) return;
+    const s = G.profile.settings; s.pvp = !s.pvp; G.dirty = true; Sfx.play('click');
+    const live = typeof MP !== 'undefined' && MP.state === 'on';
+    showToast(s.pvp ? (live ? 'Fight mode: other fighters can hit you outside town. You glow red' : 'Fight mode on. It starts once you are online with other players') : 'Normal mode: no PvP');
+  });
   $('mpChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openPlayers(); } });
   $('bMap').addEventListener('click', () => { if (!G.started) return; Sfx.play('click'); setMap($('mapBox').hidden); });
   // the enlarged minimap carries a Travel button that opens the world map with every area

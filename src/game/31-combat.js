@@ -323,35 +323,36 @@ function losBlocked(x0, z0, x1, z1) {
   for (let i = 1; i < n; i++) { const k = i / n; if (obstacleAt(x0 + (x1 - x0) * k, z0 + (z1 - z0) * k, 0.05)) return true; }
   return false;
 }
-function autoTarget(f, range) {
+function autoTarget(f, range, strong) {
   let best = null, bs = Infinity;
   const fx = Math.sin(f.facing), fz = Math.cos(f.facing);
   forEachTarget((t) => {
     if (!t.alive || t.team === f.team || t === f) return;
     const dx = t.x - f.x, dz = t.z - f.z, d = Math.hypot(dx, dz);
     if (d > range + t.r) return;
-    let sc = d - ((dx * fx + dz * fz) / (d || 1)) * 2;
-    if (t.id === f.lockId && G.time - f.lockT < 2.5) sc -= 4;
+    let sc = d - ((dx * fx + dz * fz) / (d || 1)) * (strong ? 0.8 : 2); // strong (tap / auto fire): closest first, facing matters less
+    if (t.id === f.lockId && G.time - f.lockT < (strong ? 4 : 2.5)) sc -= strong ? 9 : 4; // and it sticks to its target
     if (t.hp < t.maxHp * 0.3) sc -= 1.5;
     if (t.kind === 'boss' || t.elite) sc -= 1;
     if (t.isPeer) sc -= 4; // PvP: an enemy player nearby comes before monsters
-    if (losBlocked(f.x, f.z, t.x, t.z)) sc += 7;
+    if (losBlocked(f.x, f.z, t.x, t.z)) sc += strong ? 5 : 7;
     if (sc < bs) { bs = sc; best = t; }
   });
   return best;
 }
-function leadPoint(f, t, speed) {
-  const d = Math.hypot(t.x - f.x, t.z - f.z), tt = Math.min(1.2, d / Math.max(4, speed));
-  return [t.x + (t.vx || 0) * tt * 0.85, t.z + (t.vz || 0) * tt * 0.85];
+function leadPoint(f, t, speed, k) {
+  const d = Math.hypot(t.x - f.x, t.z - f.z), tt = Math.min(1.2, d / Math.max(4, speed)), m = k || 0.85;
+  return [t.x + (t.vx || 0) * tt * m, t.z + (t.vz || 0) * tt * m];
 }
 // returns [dirX, dirZ, distanceFraction] — the fraction is used by lobbed shots
 function aimDir(f, it) {
   const w = weaponOf(f);
   if (it.autoFire) {
-    const t = autoTarget(f, w.range * 1.1);
+    const strong = !!f.isPlayer; // your own taps and held fire get the strong aimbot: wider reach, sticky lock, full lead on movers
+    const t = autoTarget(f, w.range * (strong ? 1.25 : 1.1), strong);
     if (t) {
       f.lockId = t.id; f.lockT = G.time;
-      const [lx, lz] = leadPoint(f, t, w.speed), dx = lx - f.x, dz = lz - f.z, d = Math.hypot(dx, dz) || 1;
+      const [lx, lz] = leadPoint(f, t, w.speed, strong ? 1 : 0.85), dx = lx - f.x, dz = lz - f.z, d = Math.hypot(dx, dz) || 1;
       return [dx / d, dz / d, clamp(d / w.range, 0.2, 1)];
     }
     return [Math.sin(f.facing), Math.cos(f.facing), 0];
@@ -361,13 +362,13 @@ function aimDir(f, it) {
   let dx = it.ax / d, dz = it.az / d;
   // gentle aim assist for thumbs: bend a hand-aimed shot up to ~8 degrees toward a target on that line
   if (f.isPlayer && !w.lob) {
-    const a0 = Math.atan2(dx, dz); let best = null, ba = 0.14;
+    const a0 = Math.atan2(dx, dz); let best = null, ba = 0.2;
     forEachTarget((t) => {
       if (!t.alive || t.team === f.team || t === f) return;
       const tdx = t.x - f.x, tdz = t.z - f.z, td = Math.hypot(tdx, tdz); if (td > w.range * 1.05) return;
       const da = Math.abs(angDiff(a0, Math.atan2(tdx, tdz))); if (da < ba) { ba = da; best = t; }
     });
-    if (best) { const [lx, lz] = leadPoint(f, best, w.speed), a1 = Math.atan2(lx - f.x, lz - f.z), a = a0 + clamp(angDiff(a0, a1), -0.14, 0.14); dx = Math.sin(a); dz = Math.cos(a); f.lockId = best.id; f.lockT = G.time; }
+    if (best) { const [lx, lz] = leadPoint(f, best, w.speed), a1 = Math.atan2(lx - f.x, lz - f.z), a = a0 + clamp(angDiff(a0, a1), -0.2, 0.2); dx = Math.sin(a); dz = Math.cos(a); f.lockId = best.id; f.lockT = G.time; }
   }
   return [dx, dz, it.aimDist || 0];
 }

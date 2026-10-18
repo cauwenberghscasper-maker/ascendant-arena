@@ -141,12 +141,21 @@ function claimExped(i) {
 const onExpedition = (p, b) => (p.exp || []).some((e) => e.b === b);
 
 // --- Auto Hunt: your hero fights on its own (walks to monsters at your level, shoots, dashes, supers) ---
-const AH = { tgt: null, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1, lastDen: null };
+const AH = { tgt: null, node: null, mineT: 0, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1, lastDen: null };
 // the best open den for your level; the den you just emptied scores as if it were 300 m further away
 function autoHuntDen(f, level) {
   let D = null, bd = 1e9;
   CFG.world.dens.forEach((dn) => { if (level < CFG.world.zones[dn.zone].minLevel) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2 + (dn === AH.lastDen ? 60 : 0); if (score < bd) { bd = score; D = dn; } });
   return D;
+}
+// the nearest ready ore vein you are allowed to mine (veins that blocked the hero recently are skipped for a while)
+function autoHuntNode(f, level, maxD) {
+  let best = null, bd = maxD;
+  for (const st of nodeStates()) {
+    if (st.t > 0 || (st.ahSkip || 0) > G.time || level < CFG.world.zones[st.q.zone].minLevel) continue;
+    const d = Math.hypot(st.q.x - f.x, st.q.z - f.z); if (d < bd) { bd = d; best = st; }
+  }
+  return best;
 }
 function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && G.started); }
 function autoHuntIntent(f, it, manual, dt) {
@@ -162,7 +171,17 @@ function autoHuntIntent(f, it, manual, dt) {
   }
   let tx, tz;
   const e = AH.tgt;
-  if (e) {
+  // ore: when a vein is ready close by (and nothing closer is attacking), walk over and mine it; fights come first when hurt
+  AH.mineT -= dt; AH.node = null;
+  if (f.hp >= f.maxHp * 0.5) {
+    const nd = autoHuntNode(f, p.level, 45);
+    if (nd) { const ed = e ? Math.hypot(e.x - f.x, e.z - f.z) : 1e9; if (!e || Math.hypot(nd.q.x - f.x, nd.q.z - f.z) < Math.min(ed, 14)) AH.node = nd; }
+  }
+  if (AH.node) {
+    const nd = AH.node, dx = nd.q.x - f.x, dz = nd.q.z - f.z, d = Math.hypot(dx, dz) || 1;
+    if (d <= CFG.mining.interactR - 0.8) { tx = tz = 0; if (AH.mineT <= 0) { mineNode(nd); AH.mineT = 0.5; AH.node = null; } }
+    else { tx = dx / d; tz = dz / d; }
+  } else if (e) {
     const dx = e.x - f.x, dz = e.z - f.z, d = Math.hypot(dx, dz) || 1, want = range * 0.7;
     if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * 0.7 * AH.side; tz = dx / d * 0.7 * AH.side; }
     if (d < range + 1) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
@@ -178,7 +197,7 @@ function autoHuntIntent(f, it, manual, dt) {
     const dx = D.x - f.x, dz = D.z - f.z, d = Math.hypot(dx, dz) || 1; tx = dx / d; tz = dz / d;
   }
   // unstick: if we barely moved for a while, sidestep
-  AH.stuckT += dt; if (AH.stuckT > 1.6) { if (Math.hypot(f.x - AH.lx, f.z - AH.lz) < 0.8) AH.side = -AH.side; AH.stuckT = 0; AH.lx = f.x; AH.lz = f.z; }
+  AH.stuckT += dt; if (AH.stuckT > 1.6) { if (Math.hypot(f.x - AH.lx, f.z - AH.lz) < 0.8) { AH.side = -AH.side; if (AH.node) AH.node.ahSkip = G.time + 25; } AH.stuckT = 0; AH.lx = f.x; AH.lz = f.z; }
   it.mx = tx; it.mz = tz;
 }
 const powerOf = (f) => Math.round(Math.sqrt(Math.max(1, f.dmg) * Math.max(1, f.maxHp)));

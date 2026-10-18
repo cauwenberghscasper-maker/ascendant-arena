@@ -702,6 +702,7 @@ button.inl { margin-left: 8px; vertical-align: middle; }
 .chipRow { position: absolute; left: 2px; top: calc(100% + 6px); flex-wrap: nowrap; gap: 6px; max-width: none; } .chipRow > * { margin-top: 0; }
 .hchip, #mpChip { height: 26px; padding: 0 9px; border-radius: 13px; font: 800 11px/1 var(--body); background: rgba(18,20,44,.7); box-shadow: 0 2px 0 rgba(0,0,0,.25); }
 #autoChip { color: #c9cbe8; letter-spacing: .06em; } #autoChip.on { color: #1b1300; background: linear-gradient(180deg,#ffe08a,#ffb02e); }
+#pvpChip { color: #c9cbe8; letter-spacing: .06em; } #pvpChip.on { color: #fff; background: linear-gradient(180deg,#ff6b78,#c4202f); box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 10px rgba(255,51,68,.55); }
 #caseChip::before { width: 12px; height: 12px; border-radius: 4px; }
 .hbtn.ic { width: 44px; min-width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(18,20,44,.62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 3px 0 rgba(0,0,0,.28); }
 .hbtn.ic svg { width: 21px; height: 21px; }

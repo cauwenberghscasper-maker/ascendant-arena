@@ -162,7 +162,8 @@ function updateHUD(dt) {
     const nc = G.profile.cases.length; setHidden('caseChip', !nc); if (nc) setText('caseChip', String(nc));
     UI.caseFlash = Math.max(0, (UI.caseFlash || 0) - dt); $('caseChip').classList.toggle('flash', UI.caseFlash > 0);
     setHidden('autoChip', G.mode !== 'hub' || !!G.rift); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
-  } else { setHidden('caseChip', true); setHidden('autoChip', true); }
+    setHidden('pvpChip', G.mode !== 'hub' || !!G.rift || !!G.dungeon); setText('pvpChip', G.profile.settings.pvp ? 'FIGHT' : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
+  } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); }
   $('bMenu').classList.toggle('newU', G.started && Object.keys(UNLOCK_AT).some(unlockNew)); // the menu button glows while something new is unopened
   { const n = mpCount(), on = G.started && !inArena; setHidden('mpChip', !on || !n); if (on && n) setText('mpChip', String(n + 1)); }
   const stk = G.streak >= 3 && !inArena;
