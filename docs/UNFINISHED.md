@@ -13,6 +13,11 @@ Casper (phone screenshot): the fort was an empty green plane and the buildings w
   wave, refilled when the wave is held), tar pit (half speed + a slow burn, bubbles). Walkable: no path cost, not solid,
   never targeted. Upgrade like walls. TRELLIS.2 models `siege_trap_spike/bomb/tar` (relay `bastion-traps`). Check added.
 - **Fun:** pollen and fireflies drift around the camera (additive points).
+- **Menu pictures and placing preview:** every building and trap has a pixel-art picture rendered from its model
+  (`tools/fort_icons.mjs` renders the simplified glbs in `tools/.gen/bastion/`, `tools/fort_icons.py` outlines them →
+  `assets/ui/fort/<type>.webp`), shown in Build and in each building's panel. While placing, a see-through copy of the
+  building stands on the ghost square, tinted green where it fits and red where not (`siegePreview`, WorldModels `ghost` option).
+  Rerun both tools when a model is regenerated.
 - **Open:** Casper's phone showed 30 FPS with "screen 30 Hz" (likely Low Power Mode); check FPS in the fort on a phone
   with a large land; the barracks and builder hut models still need a better generation.
 

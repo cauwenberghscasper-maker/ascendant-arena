@@ -75,6 +75,7 @@ const WorldModels = {
       if (h.opts.glow) { mat.emissive = new THREE.Color(h.opts.glow); mat.emissiveIntensity = h.opts.glowK || 0.35; if (mat.map) mat.emissiveMap = mat.map; }
       if (h.opts.bright) mat.color.multiplyScalar(h.opts.bright);
       if (h.opts.tint) mat.color.multiply(new THREE.Color(h.opts.tint));
+      if (h.opts.ghost) { mat.transparent = true; mat.opacity = 0.55; mat.depthWrite = false; mat.emissive = new THREE.Color(0x58e08a); mat.emissiveIntensity = 0.5; } // a see-through preview (Bastion placing)
       h.mats.push(mat);
       for (const items of bands.values()) {
         const im = new THREE.InstancedMesh(o.geometry, mat, items.length); im.frustumCulled = true; im.userData.local = local; im.userData.items = items;

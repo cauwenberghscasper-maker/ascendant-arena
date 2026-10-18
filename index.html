@@ -2124,6 +2124,8 @@ b.stones { color: #e8d9b5; }
 .fortPadBtn .gi { width: 22px; height: 22px; } .fortPadBtn small { font-size: 11px; opacity: .85; }
 .fortPadBtn.archer { border-color: #58e08a !important; } .fortPadBtn.cannon { border-color: #ff7a4a !important; } .fortPadBtn.ballista { border-color: #5dd6ff !important; } .fortPadBtn.warrior { border-color: #ffc94a !important; }
 .fortCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 8px 0; }
+.fortPic { width: 56px; height: 56px; flex: none; image-rendering: pixelated; margin: -6px 2px -6px -4px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.35)); }
+.fortPic.big { width: 72px; height: 72px; margin: -10px 4px -10px -4px; }
 .fortCard { background: rgba(255,255,255,.05); border: 2px solid var(--line); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .fortCard.mine { border-color: var(--gold); background: rgba(255,201,74,.08); }
 .fortCard p { margin: 0; font-size: 12px; line-height: 1.35; } .fortCard button { margin-top: auto; }
@@ -10948,8 +10950,25 @@ function animateSiegeDefenders(dt) {
     it.x = a.bx - ax * back; it.z = a.bz - az * back; it.sy = sy; it.sx = it.sz = sw; a.h.dirty = true;
   }
 }
+function siegePreview(q) {
+  const P = siegeParts.preview, cs = CFG.siege.cell;
+  if (!q) { if (P) { WorldModels.dispose(P.h); siegeParts.preview = null; } return; }
+  const wall = CFG.siege.towers[q.t].wall && q.t === 'wall', name = wall ? 'siege_wall_wood' : SIEGE_MODEL[q.t][0];
+  const s = FORT_TYPES[q.t], x = SC.x + (q.x + s / 2) * cs, z = SC.z + (q.z + s / 2) * cs;
+  let pv = P;
+  if (!pv || pv.name !== name) { // placed where it stands (the streamer loads a set by its distance to the camera)
+    if (P) WorldModels.dispose(P.h);
+    const it = { x, z, ry: 0, s: 1 }; pv = siegeParts.preview = { name, it, h: WorldModels.place(siegeGroup, name, [it], { ghost: true, far: 999 }) };
+  }
+  const it = pv.it;
+  it.x = x; it.z = z; it.ry = CFG.siege.towers[q.t].trap || q.t === 'gate' || wall ? 0 : Math.atan2(SC.x - x, SC.z - z);
+  if (wall) { it.s = 1.8; it.sx = cs / ((WORLD_MODEL_BOX[name] || [2])[0] * 1.8); } else it.s = SIEGE_MODEL[q.t][1];
+  pv.h.dirty = true;
+  for (const m of pv.h.mats) { m.emissive.setHex(q.ok ? 0x58e08a : 0xff5d6c); m.opacity = 0.45 + Math.sin(siegeParts.t * 5) * 0.08; }
+}
 function disposeSiegeView() {
   for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h);
+  if (siegeParts.preview) { WorldModels.dispose(siegeParts.preview.h); siegeParts.preview = null; }
   const geos = new Set(), mats = new Set();
   siegeGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matVC && o.material !== matDungeonFloor) mats.add(o.material); });
   geos.forEach((g) => g.dispose()); mats.forEach((m) => m.dispose());
@@ -10969,8 +10988,9 @@ function updateSiegeView(dt) {
   const sig = S.units.map((u) => `${u.b.t}${u.b.x},${u.b.z},${u.b.l}${u.b.d > now ? 'u' : ''}${u.alive ? '' : 'x'}${u.spent ? 's' : ''}`).join('|');
   if (sig !== siegeParts.sig) { if (siegeParts.sig) buildSiegeBuildings(); siegeParts.sig = sig; }
   animateSiegeDefenders(dt);
-  // the placing ghost
+  // the placing ghost: the footprint square plus a see-through copy of the building, green where it fits, red where not
   const gh = siegeParts.ghost, q = fortGhost();
+  siegePreview(q);
   if (gh) { gh.visible = !!q; if (q) { const s = FORT_TYPES[q.t], cs = CFG.siege.cell; gh.scale.set(s * cs * 0.96, 1, s * cs * 0.96); gh.position.set(SC.x + (q.x + s / 2) * cs, 0.07, SC.z + (q.z + s / 2) * cs); gh.material.color.set(q.ok ? 0x58e08a : 0xff5d6c); gh.material.opacity = 0.35 + Math.sin(t * 6) * 0.12; } }
   // a fallen objective disappears in smoke
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });
@@ -11063,6 +11083,7 @@ const WorldModels = {
       if (h.opts.glow) { mat.emissive = new THREE.Color(h.opts.glow); mat.emissiveIntensity = h.opts.glowK || 0.35; if (mat.map) mat.emissiveMap = mat.map; }
       if (h.opts.bright) mat.color.multiplyScalar(h.opts.bright);
       if (h.opts.tint) mat.color.multiply(new THREE.Color(h.opts.tint));
+      if (h.opts.ghost) { mat.transparent = true; mat.opacity = 0.55; mat.depthWrite = false; mat.emissive = new THREE.Color(0x58e08a); mat.emissiveIntensity = 0.5; } // a see-through preview (Bastion placing)
       h.mats.push(mat);
       for (const items of bands.values()) {
         const im = new THREE.InstancedMesh(o.geometry, mat, items.length); im.frustumCulled = true; im.userData.local = local; im.userData.items = items;
@@ -12500,6 +12521,8 @@ function openRiftPanel() {
 // Bastion Siege: the house in town opens your fort (and other players' forts by their code); inside, you build with the
 // Build button, and walk up to a building to upgrade, empty or tear it down
 const fortStones = (n) => `<b class="stones">${fmt(n)}</b> Bastion Stones`;
+// the building's picture, rendered from its 3D model (tools/fort_icons.mjs)
+const fortPic = (t, cls) => `<img class="fortPic${cls ? ' ' + cls : ''}" src="assets/ui/fort/${t}.webp" alt="" draggable="false">`;
 const fortDur = (s) => (s < 60 ? `${Math.ceil(s)}s` : s < 3600 ? `${Math.ceil(s / 60)} min` : `${Math.floor(s / 3600)} h ${Math.ceil((s % 3600) / 60)} min`);
 function openSiegePanel() {
   UI.current = 'siege';
@@ -12533,7 +12556,7 @@ function openFortBuildPanel() {
   const p = G.profile, S = G.siege, F = fortState(), M = myFort();
   const cards = SIEGE_TYPES.map((t) => {
     const T = CFG.siege.towers[t], c = fortCost(t, 1), have = F.b.filter((b) => b.t === t).length, full = T.max && have >= T.max, ok = !full && p.gold >= c.gold && M.stones >= c.stones;
-    return `<div class="fortCard"><div class="fcHead">${gi(T.icon)}<b>${T.name}</b>${T.max ? `<span class="cnt">${have}/${T.max}</span>` : ''}</div><p>${T.blurb}</p><p class="fine">${fortStat(t, 1)}</p>
+    return `<div class="fortCard"><div class="fcHead">${fortPic(t)}<b>${T.name}</b>${T.max ? `<span class="cnt">${have}/${T.max}</span>` : ''}</div><p>${T.blurb}</p><p class="fine">${fortStat(t, 1)}</p>
       <p class="fine">${ICON.coin}${fmtK(c.gold)}${c.stones ? ' · ' + fortStones(c.stones) : ''}${T.wall ? ' each' : ''}</p><button class="${ok ? 'primary' : 'ghost'}" data-act="fortPick" data-t="${t}"${ok ? '' : ' aria-disabled="true"'}>${full ? 'Max built' : T.wall ? 'Draw' : 'Place'}</button></div>`;
   }).join('');
   openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Build</h3><span class="cnt">${fortJobs(F)}/${fortBuilders(F)} builders busy</span></div>
@@ -12549,7 +12572,7 @@ function openFortBPanel(k) {
   const p = G.profile, F = fortState(), M = myFort(), b = u.b, T = CFG.siege.towers[b.t], fi = F.b.indexOf(b), max = b.l >= fortMaxLvl(b.t), now = fortNow();
   const c = max ? null : fortCost(b.t, b.l + 1), busy = b.d > now, why = max ? '' : fortCheck({ o: 'up', k: fi }), ok = !why && p.gold >= c.gold && M.stones >= c.stones;
   const mine = b.t === 'mine' ? fortMineStones(b) : 0;
-  openModal(`<div class="npcHead">${gi(T.icon, 'hd')}<h3>${T.name}</h3><span class="cnt">${T.maxLvl === 1 ? '' : 'Lv ' + b.l}</span></div>
+  openModal(`<div class="npcHead">${fortPic(b.t, 'big')}<h3>${T.name}</h3><span class="cnt">${T.maxLvl === 1 ? '' : 'Lv ' + b.l}</span></div>
     <p>${T.blurb}</p><p class="fine">${fortStat(b.t, Math.max(1, fortLvl(b)))}${busy ? ` · upgrading to level ${b.l}, ${fortDur((b.d - now) / 1000)} left` : ''}</p>
     ${b.t === 'mine' ? `<div class="row"><button class="${mine > 0 ? 'primary' : 'ghost'}" data-act="fortCol" data-k="${fi}"${mine > 0 ? '' : ' aria-disabled="true"'}>Take ${fortStones(mine)}</button></div>` : ''}
     ${max ? '<p class="fine">Max level.</p>' : `<p class="fine">Level ${b.l + 1}: ${fortStat(b.t, b.l + 1)}<br>${ICON.coin}${fmtK(c.gold)} · ${fortStones(c.stones)}${c.time ? ` · ${fortDur(c.time)} with a builder` : ''}${why ? ` · ${why}` : ''}</p>`}

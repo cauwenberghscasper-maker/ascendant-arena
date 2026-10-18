@@ -721,6 +721,8 @@ b.stones { color: #e8d9b5; }
 .fortPadBtn .gi { width: 22px; height: 22px; } .fortPadBtn small { font-size: 11px; opacity: .85; }
 .fortPadBtn.archer { border-color: #58e08a !important; } .fortPadBtn.cannon { border-color: #ff7a4a !important; } .fortPadBtn.ballista { border-color: #5dd6ff !important; } .fortPadBtn.warrior { border-color: #ffc94a !important; }
 .fortCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 8px 0; }
+.fortPic { width: 56px; height: 56px; flex: none; image-rendering: pixelated; margin: -6px 2px -6px -4px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.35)); }
+.fortPic.big { width: 72px; height: 72px; margin: -10px 4px -10px -4px; }
 .fortCard { background: rgba(255,255,255,.05); border: 2px solid var(--line); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .fortCard.mine { border-color: var(--gold); background: rgba(255,201,74,.08); }
 .fortCard p { margin: 0; font-size: 12px; line-height: 1.35; } .fortCard button { margin-top: auto; }
