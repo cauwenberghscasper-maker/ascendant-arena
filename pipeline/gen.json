@@ -1,99 +1,161 @@
 {
- "batch": "test-3d-b",
+ "batch": "delve-props-crypt",
  "jobs": [
   {
-   "name": "chapel_ms_a",
-   "space": "microsoft/TRELLIS.2",
-   "api": "/image_to_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_sarcophagus_concept",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/world-b/chapel_concept.webp",
-    "seed": 7,
-    "resolution": "1536"
-   },
-   "noout": true
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. An ancient stone sarcophagus of a forest king, its carved lid cracked open by thick twisting tree roots, green moss, a faint green glow from inside.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9100,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "name": "chapel_ms",
-   "space": "microsoft/TRELLIS.2",
-   "api": "/extract_glb",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_tombslab_concept",
    "args": {
-    "decimation_target": 120000,
-    "texture_size": 2048
-   },
-   "ext": ".glb"
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A toppled stone tomb slab with a carved relief of an antlered forest warden, broken corner, roots and ivy creeping over it.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9101,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "name": "lava_forge_ms_a",
-   "space": "microsoft/TRELLIS.2",
-   "api": "/image_to_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_rootpillar_concept",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/world-b/lava_forge_concept.webp",
-    "seed": 7,
-    "resolution": "1536"
-   },
-   "noout": true
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A broken carved stone pillar wrapped and split by gnarled ancient tree roots, small glowing green mushrooms at its base.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9102,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "name": "lava_forge_ms",
-   "space": "microsoft/TRELLIS.2",
-   "api": "/extract_glb",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_warden_statue_concept",
    "args": {
-    "decimation_target": 120000,
-    "texture_size": 2048
-   },
-   "ext": ".glb"
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A weathered stone statue of a hooded elven forest warden holding a lantern with a green spirit flame, roots climbing up the robe.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9103,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "name": "chapel_hy",
-   "space": "tencent/Hunyuan3D-2.1",
-   "api": "/generation_all",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_ossuary_concept",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/world-b/chapel_concept.webp",
-    "steps": 40,
-    "guidance_scale": 5.0,
-    "seed": 7,
-    "octree_resolution": 384,
-    "check_box_rembg": true,
-    "num_chunks": 8000,
-    "randomize_seed": false
-   },
-   "ext": ".glb",
-   "pick": 1
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A stone ossuary shelf built into a wall niche, neatly stacked skulls and bones, melted candles and old cobwebs, gothic fantasy.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9104,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "name": "lava_forge_hy",
-   "space": "tencent/Hunyuan3D-2.1",
-   "api": "/generation_all",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_bonepile_concept",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/world-b/lava_forge_concept.webp",
-    "steps": 40,
-    "guidance_scale": 5.0,
-    "seed": 7,
-    "octree_resolution": 384,
-    "check_box_rembg": true,
-    "num_chunks": 8000,
-    "randomize_seed": false
-   },
-   "ext": ".glb",
-   "pick": 1
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A heap of old bones and skulls with a pair of large antlers and a rusty bronze hunting horn lying on top.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9105,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_mushrooms_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A cluster of tall glowing teal and green fantasy mushrooms growing from a knotted old tree root.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9106,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_reliquary_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A small iron-bound wooden reliquary chest with a carved leaf emblem, half swallowed by roots, a gold glint at the keyhole.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9107,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_urns_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A group of three cracked stone funeral urns with leaf carvings, spilled grave dust and lit candles around them.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9108,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_runestone_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall standing runestone carved with glowing green druidic leaf runes, moss on top, a few small stones around its base.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9109,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_rootarch_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A gnarled archway made of twisted ancient tree roots grown into old carved stonework, hanging moss, glowing green spores.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9110,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crypt_brazier_concept",
+   "args": {
+    "prompt": "Stylized 3D game environment asset render, hand-painted textures, chunky readable shapes, high fantasy MMORPG dungeon prop in the style of World of Warcraft and RuneScape 3, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. A tall stone brazier shaped like an antlered stag head, burning with a ghostly green spirit flame.",
+    "resolution": "864x1152 ( 3:4 )",
+    "seed": 9111,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   }
  ]
 }
