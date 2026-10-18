@@ -1,3 +1,13 @@
+# Painted ground tiles (18 Oct 2026, branch `claude/ground-tiles`, PR to main)
+Casper: the ground felt cheap. Seven seamless hand-painted tiles (Z-Image Turbo, made seamless by
+`tools/ground_tiles.py` offset blending; 512 px webp in `assets/world/_ground/`): grass, dirt, snow, basalt (lava
+seams), flagstone, seabed, cobblestone. `loadGroundTiles` packs them into one texture array; the ground shader samples
+the zone's tile at two scales and angles (no visible repeat), divides by the tile's mean colour and multiplies the zone's
+own palette with it, so every area keeps its colours and gains painted detail. Animation: drifting cloud shadows
+everywhere, a wind sheen through grass, twinkling frost, lava seams that breathe, light ripples on the seabed (`uTime`,
+ticked in `Pixel.render`). Works in pixel-art mode and normal 3D (screenshots of both). Until the tiles load, the old
+procedural ground shows. Open: judge on a phone; more tile kinds (a darker forest floor, sand, marble) per area.
+
 # Bastion update (18 Oct 2026, branch `claude/bastion-update`, PR to main)
 Built from `docs/BASTION_PLAN.md` phases 1-3:
 - **Wave memory:** `profile.fort.wave` = the wave a run starts on; a fallen Keep restarts that wave, never lower (old saves:
