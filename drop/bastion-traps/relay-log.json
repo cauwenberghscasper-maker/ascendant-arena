@@ -1,0 +1,26 @@
+{
+ "batch": "bastion-traps",
+ "files": [
+  {
+   "name": "siege_trap_spike.glb",
+   "ok": true,
+   "bytes": 4036576,
+   "sha256": "c7f018feafd88ed9a492e36fc0764c6c7b183876e43d9a49449f4ca18b9b33d7",
+   "error": null
+  },
+  {
+   "name": "siege_trap_bomb.glb",
+   "ok": true,
+   "bytes": 4394572,
+   "sha256": "6c3aa84f52f39f55fa64590d3d4374e39e991ac9c4531b6ecff6f53d1766f2e6",
+   "error": null
+  },
+  {
+   "name": "siege_trap_tar.glb",
+   "ok": true,
+   "bytes": 3661676,
+   "sha256": "0dcd8ead4d3ac6118329651de01a2e7a793dee40ba17bb7f4ca225d191ed57dc",
+   "error": null
+  }
+ ]
+}
