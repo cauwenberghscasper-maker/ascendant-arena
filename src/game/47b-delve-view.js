@@ -1,7 +1,7 @@
 // --- party-dungeon view: event-room set pieces on top of the hall builder (47-dungeon-view.js). Generated models
 // (delve_altar, delve_moonwell, delve_echo, delve_hoard, delve_throne) plus existing ones (chest, pillar); code geometry
-// here is only VFX: rune rings, glows, the moonwell shimmer and the pressure-plate floor sigils. Dark halls pull the fog in.
-const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [], seals: [], tex: [] };
+// here is only VFX: rune rings, glows, the moonwell shimmer and the pressure-plate floor sigils.
+const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [], seals: [], tex: [], veins: [] };
 // --- puzzle halls: pixel runes (7×7, bone white with an ink outline) floating over each seal; a floor mural shows the
 // order. Pips (1-5 dots) stand in for runes on the easy runs that number their seals.
 const PZ_GLYPHS = ['0011100,0100010,1000001,1111111,1000001,0100010,0011100', '1000001,0100010,0010100,0001000,0010100,0100010,1000001', '0001000,0011100,0101010,1001001,0001000,0001000,0011100',
@@ -38,7 +38,8 @@ function buildDelvePuzzles(D, tint) {
       sp.position.set(q.x, lever ? 3.6 : 2.2, q.z); sp.scale.setScalar(1.25);
       delveParts.seals.push({ room: m.i, j, ring, disc, sp, base: sp.position.y });
     });
-    // the mural: the runes in their order (or the pips counting up), between two standing stones
+    // the mural (only the ordered puzzle has one): the runes in their order (or the pips counting up), between two standing stones
+    if (pz.kind !== 'order') continue;
     const seq = pz.order.map((j, k) => ({ g: pz.sw[j].g, pip: pz.pips ? k : null })), w = K * 1.7, tex = pzTexture(seq, true);
     const mural = add(new THREE.Mesh(new THREE.PlaneGeometry(w + (K - 1) * 0.85, 1.7).rotateX(-Math.PI / 2).rotateY(Math.PI), new THREE.MeshBasicMaterial({ map: tex, color: tint, transparent: true, depthWrite: false })));
     mural.position.set(pz.clue.x, 0.05, pz.clue.z); mural.material.color.lerp(new THREE.Color(0xffffff), 0.55);
@@ -52,10 +53,14 @@ function buildDelvePuzzles(D, tint) {
 function updateDelvePuzzles(D, t) {
   const tint = BIOMES[D.delve.def.biome].coreColor;
   for (const q of delveParts.seals) {
-    const m = D.rooms[q.room], S = D.delve.pz[q.room], at = m.pz.order.indexOf(q.j), awake = !!S && (S.done || at < S.step), red = S && S.flash > 0 && Math.sin(t * 30) > 0;
+    const m = D.rooms[q.room], S = D.delve.pz[q.room], awake = !!S && delvePzLit(m, S, q.j), red = S && S.flash > 0 && Math.sin(t * 30) > 0;
+    // the echo shows its order: one seal after the other flashes white while nothing is awake yet
+    const K = m.pz.sw.length, sh = DV.puzzle.kinds.memory.show, ph = S ? S.show % (K * sh + 2.5) : 0, showing = m.pz.kind === 'memory' && S && !S.done && !S.step && S.cd <= 0 && ph < K * sh && m.pz.order[Math.floor(ph / sh)] === q.j && ph % sh < sh * 0.7;
+    // the race: dark seals pulse faster while the clock runs
+    const racing = m.pz.kind === 'timed' && S && S.bits && !S.done;
     const hold = S && S.hold[q.j] > 0 ? S.hold[q.j] / DV.puzzle.hold : 0;
-    q.sp.material.color.setHex(red ? 0xff4040 : awake ? tint : hold > 0 ? 0xffffff : 0x8a8590);
-    q.ring.material.color.setHex(red ? 0xff3030 : tint); q.ring.material.opacity = awake ? 0.95 : 0.3 + hold * 0.5 + Math.sin(t * 3 + q.j) * 0.08;
+    q.sp.material.color.setHex(red ? 0xff4040 : showing ? 0xffffff : awake ? tint : hold > 0 ? 0xffffff : 0x8a8590);
+    q.ring.material.color.setHex(red ? 0xff3030 : showing ? 0xffffff : tint); q.ring.material.opacity = awake || showing ? 0.95 : 0.3 + hold * 0.5 + Math.sin(t * (racing ? 12 : 3) + q.j) * (racing ? 0.2 : 0.08);
     q.sp.position.y = q.base + (awake ? 0.5 : 0) + Math.sin(t * 2 + q.j) * 0.08;
     if (q.disc) q.disc.material.color.setHex(awake ? tint : 0x5a5060);
   }
@@ -67,6 +72,13 @@ function buildDelveProps(D) {
   const cover = D.props.filter((q) => !q.kind); // lever stones are placed with their puzzle below
   if (cover.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', cover.map((q, k) => ({ x: q.x, z: q.z, ry: k * 1.3, s: 3.4 }))));
   buildDelvePuzzles(D, tint);
+  // rare veins: the existing crystal model in the dungeon's treasure colour, a soft glow under it; gone once you mined it
+  delveParts.veins = (D.veins || []).map((v, i) => {
+    const col = X.def.gem ? X.def.gem.color : tint, item = { x: v.x, z: v.z, ry: i * 2.1, s: v.lode ? 3.6 : 2.8 };
+    const set = WorldModels.place(dungeonGroup, 'crystal', [item], { glow: col, glowK: v.lode ? 0.75 : 0.6 }); dungeonParts.sets.push(set);
+    const ring = add(new THREE.Mesh(new THREE.RingGeometry(1.6, 2.5, 32).rotateX(-Math.PI / 2), glow(col, 0.5))); ring.position.set(v.x, 0.04, v.z);
+    return { i, item, set, ring };
+  });
   const echo = [];
   for (const m of D.rooms) {
     if (!m.event) continue;
@@ -110,6 +122,7 @@ function buildDelveProps(D) {
 function updateDelveView(dt, t) {
   const D = G.dungeon, X = D.delve;
   updateDelvePuzzles(D, t);
+  for (const v of delveParts.veins) { const gone = !!X.mined[v.i]; if (v.item.hidden !== gone) { v.item.hidden = gone; v.set.dirty = true; v.ring.visible = !gone; } v.ring.material.opacity = 0.25 + Math.sin(t * 2.5 + v.i) * 0.15; }
   for (const c of delveParts.caches) {
     const b = X.bonus[c.room] | 0, [cc, co] = c.items, hc = b !== 1, ho = b !== 2;
     if (cc.hidden !== hc || co.hidden !== ho) { cc.hidden = hc; co.hidden = ho; for (const h of c.sets) h.dirty = true; if (b === 1) burst(cc.x, 1, cc.z, 20, 0xffd34a, 4, 0.8, 0.4, 6, 3); }
@@ -120,6 +133,5 @@ function updateDelveView(dt, t) {
   if (delveParts.altar) { const A = delveParts.altar; A.orb.position.y = 2.2 + Math.sin(t * 2) * 0.12; A.rune.rotation.y = t * 0.4; A.rune.material.opacity = X.used.altar ? 0.2 : 0.7; }
   if (delveParts.well) { delveParts.well.water.rotation.y = -t * 0.5; delveParts.well.water.material.opacity = X.used.fountain ? 0.25 : 0.8; }
   for (const r of delveParts.glows) r.material.opacity = 0.14 + Math.sin(t * 1.7 + r.position.x) * 0.05;
-  // dark halls: the fog closes in while you are inside one
-  const m = D.rooms[D.room], far = m && m.dark ? 34 : 75; scene.fog.far += (far - scene.fog.far) * Math.min(1, dt * 2); scene.fog.near = Math.min(22, scene.fog.far * 0.4);
+
 }

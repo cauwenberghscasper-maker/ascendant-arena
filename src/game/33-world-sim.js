@@ -546,6 +546,8 @@ function stepEnemy(e, dt) {
   const d = CFG.enemies[e.type], pl = e.delve ? delveTarget(e) : G.player, Z = CFG.world.zones[e.zone]; // party dungeons: you or a bot
   if (e.rift && e.state !== 'chase') e.state = 'chase';
   const dp = Math.hypot(pl.x - e.x, pl.z - e.z);
+  // a party-dungeon boss (or mini-boss) casts its phase kit (36e-delve-boss.js); while casting it stands or charges
+  if (e.delveBoss && e.state === 'chase' && delveBossTick(e, dt, pl)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); trackVel(e, dt); collideObstacles(e); dungeonClamp(e, e.r); return; }
   // far-away monsters sleep (keeps big maps cheap on phones)
   if (e.state === 'idle' && dp > 64 && !(e.burnT > 0)) return;
   e.atkCd -= dt; e.flashT -= dt; e.slowT -= dt; e.wanderT -= dt; e.lungeT -= dt; e.lungeCd -= dt;

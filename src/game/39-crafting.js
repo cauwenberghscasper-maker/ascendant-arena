@@ -46,7 +46,9 @@ const CB = CFG.craft.biomes;
 // every material by id -> { name, biome, kind, color }
 const MATS = (() => { const o = {}; CB.forEach((b, i) => { o[b.ore] = { name: b.oreN, biome: i, kind: 'ore', color: b.color }; o[b.part] = { name: b.partN, biome: i, kind: 'part', color: b.color }; o[b.core] = { name: b.coreN, biome: i, kind: 'core', color: b.color }; });
   o[CFG.craft.titan.id] = { name: CFG.craft.titan.name, biome: -1, kind: 'soul', color: CFG.craft.titan.color };
-  o[CFG.craft.rune.id] = { name: CFG.craft.rune.name, biome: -1, kind: 'rune', color: CFG.craft.rune.color }; return o; })();
+  o[CFG.craft.rune.id] = { name: CFG.craft.rune.name, biome: -1, kind: 'rune', color: CFG.craft.rune.color };
+  for (const d of CFG.delve.dungeons) if (d.gem) o[d.gem.id] = { name: d.gem.name, biome: d.biome, kind: 'gem', color: d.gem.color, dungeon: d.id }; // rare veins in Dungeon mode
+  return o; })();
 // dungeon-only heroes: their Level Road unlock is replaced by sigils from that biome's dungeons
 CB.forEach((b, i) => { if (CFG.attacks[b.hero]) CFG.attacks[b.hero].unlock = { sigils: i }; });
 function craftState(p) {
