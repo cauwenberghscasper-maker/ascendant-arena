@@ -110,11 +110,12 @@ check('v8 saves move onto the 29-area map: open gates, remapped jobs, no lost pr
   assert.equal(Z.length,30);assert(Z.every((z,i)=>!i||z.z0===Z[i-1].z1));assert.equal(Z.at(-1).lvl[1],210);
   for(const z of Z.slice(1)){assert(ctx.config.enemies[z.enemy]&&ctx.config.enemies[z.alt],z.name);}
 });
-check('Bastion Siege fort saves: eight pads, known defender types, levels 1-15, whole stones',()=>{
-  const p=ctx.sanitizeProfile(JSON.parse(JSON.stringify(ctx.newProfile())));assert.equal(p.fort.pads.length,8);assert(p.fort.pads.every(q=>q===null));assert.equal(p.fort.stones,0);
-  const bad=ctx.sanitizeProfile(JSON.parse(JSON.stringify({...ctx.newProfile(),fort:{stones:-5.5,pads:[{t:'archer',l:3},{t:'laser',l:2},{t:'cannon',l:99},null,{t:'warrior',l:0},'x',{t:'ballista',l:1},{t:'archer',l:2},{t:'archer',l:4}]}})));
-  assert.equal(bad.fort.stones,0);assert.equal(bad.fort.pads.length,8);assert.deepEqual(JSON.parse(JSON.stringify(bad.fort.pads)),[{t:'archer',l:3},null,{t:'cannon',l:15},null,null,null,{t:'ballista',l:1},{t:'archer',l:2}]);
-  assert.equal(ctx.sanitizeProfile(JSON.parse(JSON.stringify({...ctx.newProfile(),fort:[1,2]}))).fort.pads.length,8);
+check('Bastion Siege fort saves: old pads move onto the grid, known types, levels 1-15, whole stones, a builder hut',()=>{
+  const p=ctx.sanitizeProfile(JSON.parse(JSON.stringify(ctx.newProfile())));assert.equal(p.fort.b.map(b=>b.t).join(),'hut');assert.equal(p.fort.stones,0);assert.equal(p.fort.wave,1);
+  const bad=ctx.sanitizeProfile(JSON.parse(JSON.stringify({...ctx.newProfile(),records:{bestSiege:6},fort:{stones:-5.5,pads:[{t:'archer',l:3},{t:'laser',l:2},{t:'cannon',l:99},null,{t:'warrior',l:0},'x',{t:'ballista',l:1},{t:'archer',l:2},{t:'archer',l:4}]}})));
+  assert.equal(bad.fort.stones,0);assert.equal(bad.fort.b.map(b=>b.t+b.l).join(),'archer3,cannon15,ballista1,archer2,hut1');assert.equal(bad.fort.wave,7,'restart one past the best wave');
+  assert.equal(ctx.sanitizeProfile(JSON.parse(JSON.stringify(bad))).fort.b.map(b=>b.t+b.l+':'+b.x+','+b.z).join(),bad.fort.b.map(b=>b.t+b.l+':'+b.x+','+b.z).join(),'stable on the next load');
+  assert.equal(ctx.sanitizeProfile(JSON.parse(JSON.stringify({...ctx.newProfile(),fort:[1,2]}))).fort.b.map(b=>b.t).join(),'hut');
 });
 check('v9 saves move onto the widened v10 map: indices kept, secrets/POIs/dungeons added, found secrets survive',()=>{
   const old={...ctx.newProfile(),level:80,savedAt:Date.now()-1000,worldVersion:9,waypoints:[0,3,7],stats:{...ctx.newProfile().stats,zone:7,kills:5}};delete old.secrets;delete old.pois;delete old.dungeons;

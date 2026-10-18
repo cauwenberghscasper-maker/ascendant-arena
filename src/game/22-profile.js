@@ -103,10 +103,8 @@ function sanitizeProfile(p) {
   // Dungeon Keys (CFG.dungeon loads later; the cap of 12 matches CFG.dungeon.keys.max)
   out.keys = (Array.isArray(out.keys) ? out.keys : []).filter((k) => k && k.t >= 1 && Array.isArray(k.a)).slice(0, 12)
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));
-  // Bastion Siege fort: eight pads, each empty or { t: type, l: 1-15 } (CFG.siege loads later; the lists match it)
-  { const f = out.fort && typeof out.fort === 'object' && !Array.isArray(out.fort) ? out.fort : {}, T = ['archer', 'cannon', 'ballista', 'warrior'];
-    out.fort = { stones: Math.max(0, Math.floor(+f.stones || 0)), pads: Array.from({ length: 8 }, (_, i) => { const q = Array.isArray(f.pads) ? f.pads[i] : null;
-      return q && T.includes(q.t) && q.l >= 1 ? { t: q.t, l: Math.min(15, q.l | 0) } : null; }) }; }
+  // the wave a fort restarts on: before it was saved, one past the best wave ever held
+  { const had = out.fort && out.fort.wave; out.fort = sanitizeFort(out.fort, true); if (!had) out.fort.wave = Math.max(1, ((out.records && out.records.bestSiege) | 0) + 1); }
   if (CFG.world && CFG.world.waypoints) out.waypoints = out.waypoints.filter((i) => Number.isInteger(i) && i >= 0 && i < CFG.world.waypoints.length);
   { const m = out.mine && typeof out.mine === 'object' ? out.mine : {}; out.mine = { ore: Math.max(0, +m.ore || 0), pick: Math.max(0, Math.min(20, m.pick | 0)), mined: Math.max(0, m.mined | 0), museum: m.museum && typeof m.museum === 'object' && !Array.isArray(m.museum) ? m.museum : {} }; }
   { const c = out.craft && typeof out.craft === 'object' && !Array.isArray(out.craft) ? out.craft : {}, obj = (o) => (o && typeof o === 'object' && !Array.isArray(o) ? o : {}), num = (o) => { const r = {}; for (const k in obj(o)) { const v = +o[k]; if (v > 0 && isFinite(v)) r[k] = Math.floor(v); } return r; };
@@ -121,6 +119,39 @@ function sanitizeProfile(p) {
   if (TEST_MODE) { out.playtest = TEST_PROFILE_TAG; out.settings.fastXp = false; }
   return out;
 }
+// Bastion fort: { wave, land, b: buildings }, plus what only this player owns (stones, code of their world, recent worlds).
+// A building is { t, x, z, l } on 2 m cells (x, z = its lowest corner around the Keep); d = when an upgrade finishes (ms),
+// c = when a mine was last emptied. Old saves had eight fixed pads: each defender moves to the cell under its pad.
+// (CFG.siege loads later; the lists here match it.) Shared worlds from the server go through here too (mine = false).
+const FORT_TYPES = { archer: 2, cannon: 2, ballista: 2, warrior: 2, mage: 2, mine: 2, hut: 2, wall: 1, gate: 1 };
+const FORT_OLD_PADS = [[-5, 13], [5, 13], [-13, 6], [13, 6], [-13, -5], [13, -5], [-5, -8], [5, -8]];
+function sanitizeFort(f, mine) {
+  f = f && typeof f === 'object' && !Array.isArray(f) ? f : {};
+  const int = (v, a, b) => Math.max(a, Math.min(b, Math.floor(+v || 0)));
+  let b = Array.isArray(f.b) ? f.b : [];
+  if (!Array.isArray(f.b)) { // first load since the grid: pads become buildings, and every fort gets its first builder hut
+    if (Array.isArray(f.pads)) f.pads.forEach((q, i) => { if (q && FORT_TYPES[q.t] && q.l >= 1 && FORT_OLD_PADS[i]) b.push({ t: q.t, x: Math.round(FORT_OLD_PADS[i][0] / 2) - 1, z: Math.round(FORT_OLD_PADS[i][1] / 2) - 1, l: q.l }); });
+    b.push({ t: 'hut', x: 4, z: -1, l: 1 });
+  }
+  const used = new Set(), out = [];
+  for (const q of b.slice(0, 3000)) {
+    if (!q || !FORT_TYPES[q.t]) continue;
+    const n = { t: q.t, x: int(q.x, -125, 124), z: int(q.z, -125, 124), l: int(q.l, 1, 15) }, s = FORT_TYPES[q.t], cells = [];
+    for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) cells.push((n.x + i) * 1000 + n.z + j);
+    if (cells.some((c) => used.has(c))) continue; // two buildings on one cell: the first one stays
+    cells.forEach((c) => used.add(c));
+    if (+q.d > 0) n.d = Math.floor(+q.d); if (q.t === 'mine') n.c = Math.max(0, Math.floor(+q.c || 0));
+    out.push(n);
+  }
+  const r = { wave: int(f.wave, 1, 1e6), land: int(f.land, 0, 250), b: out };
+  if (mine) {
+    r.stones = int(f.stones, 0, 1e12);
+    if (typeof f.code === 'string' && /^[A-Z0-9-]{4,12}$/.test(f.code)) r.code = f.code;
+    r.recent = (Array.isArray(f.recent) ? f.recent : []).filter((c) => typeof c === 'string' && /^[A-Z0-9-]{4,12}$/.test(c)).slice(0, 5);
+  }
+  return r;
+}
+// --- end Bastion fort save
 const Store = {
   load() {
     try {

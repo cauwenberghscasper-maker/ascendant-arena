@@ -78,7 +78,7 @@ function stepProjectiles(dt) {
     }
     p.x += p.vx * dt; p.z += p.vz * dt;
     // another player's shot: looks the same, hits nothing here
-    if (p.ghost) { if (p.life <= 0 || obstacleAt(p.x, p.z, p.r * 0.5)) p.active = false; continue; }
+    if (p.ghost) { if (p.life <= 0 || (!G.siege && obstacleAt(p.x, p.z, p.r * 0.5))) p.active = false; continue; }
     // lobbed shells arc over everything and only explode on landing
     if (p.lob) {
       const k = 1 - Math.max(0, p.life) / p.total; p.y = 0.6 + 4 * p.lobH * k * (1 - k);
@@ -91,7 +91,7 @@ function stepProjectiles(dt) {
       const h = CFG.arena.half;
       if (Math.abs(p.x - AC.x) > h) wall = 'x'; else if (Math.abs(p.z - AC.z) > h) wall = 'z';
     }
-    const ob = wall ? null : obstacleAt(p.x, p.z, p.r * 0.5);
+    const ob = wall || G.siege ? null : obstacleAt(p.x, p.z, p.r * 0.5); // in the fort, shots fly over walls and buildings
     if (wall || ob) {
       if (p.bounce > 0) {
         p.bounce--; p.hits.length = 0;
@@ -210,6 +210,7 @@ function dealDamage(t, amount, srcId, o) {
   t.hp -= amt; t.flashT = CFG.combat.hitFlash; t.lastHurt = G.time;
   // lobby: send our hit to whoever runs this monster or the world boss (70-multiplayer.js; absent in the node checks)
   if (t.own && t.kind === 'enemy' && src && src.isPlayer) mpMobHit(t, amt);
+  if (t.mirror && src && src.isPlayer) siegeMpMobHit(t, amt);
   if (t.kind === 'boss' && src && src.isPlayer && typeof bossFollowing === 'function' && bossFollowing()) mpBossHit(t, amt);
   if (o.slow) t.slowT = Math.max(t.slowT || 0, o.slow);
   if (o.burn) { t.burnT = o.burnT || 3; t.burnDmg = o.burn; t.burnSrc = srcId; if (!(t.burnTick > 0)) t.burnTick = 0.5; }

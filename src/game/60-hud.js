@@ -83,6 +83,7 @@ function updateTags() {
       // fort objectives: always shown, big bars that flash while under attack
       for (const o of G.siege.objs) put(o.x, o.def.h, o.z, o.alive ? `${o.name} · ${Math.ceil(clamp(o.hp / o.maxHp, 0, 1) * 100)}%` : `${o.name} · destroyed`, o.alive ? o.hp / o.maxHp : 0, `obj${o.def.main ? ' main' : ''}${o.hurtT > 0 ? ' hurt' : ''}${o.alive ? '' : ' down'}`);
       for (const s of G.siege.soldiers) if (s.alive && s.hp < s.maxHp && near(s, 26)) put(s.x, 2.4, s.z, '', s.hp / s.maxHp, 'ally');
+      for (const u of G.siege.units) if (u.alive && u.hp < u.maxHp && near(u, 26)) put(u.x, u.size === 1 ? 2.2 : 4.6, u.z, '', u.hp / u.maxHp, 'ally');
     }
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
@@ -93,7 +94,7 @@ function updateTags() {
     for (const dl of hubParts.denLabels) { const D = CFG.world.dens[dl.den]; if (Math.hypot(dl.x - cx, dl.z - cz) < 55) put(dl.x, dl.y, dl.z, `${D.name} · Lv ${areaLevel(D.zone, D.z) + CFG.world.denLevelBonus + tierAdd()}`, null, 'den'); }
     for (const q of CFG.world.pois) if (q.major && !CFG.world.zones[q.zone].safe && Math.hypot(q.x - cx, q.z - cz) < 40) put(q.x, 6.5, q.z, trialOpen(q.zone) ? `${q.name} · Legendary Trial` : `${q.name} · ${runesLit(q.zone)}/${CFG.dungeon.trial.runes} runestones`, null, 'wp');
     for (const q of dungeonPois()) if (Math.hypot(q.x - cx, q.z - cz) < 90) put(q.x, 7.2, q.z, G.profile.level >= dungeonReq(q) ? `${q.name} · Dungeon` : `${q.name} · Level ${dungeonReq(q)}`, null, 'den');
-    { const SG = CFG.siege.gate; if (!G.siege && Math.hypot(SG.x - cx, SG.z - cz) < 30) put(CFG.siege.house.x + 1, 7.4, SG.z, G.profile.level >= CFG.siege.unlock ? `Bastion Siege · best wave ${G.profile.records.bestSiege || 0}` : `Bastion Siege · Level ${CFG.siege.unlock}`, null, 'wp'); }
+    { const SG = CFG.siege.gate; if (!G.siege && Math.hypot(SG.x - cx, SG.z - cz) < 30) put(CFG.siege.house.x + 1, 7.4, SG.z, G.profile.level >= CFG.siege.unlock ? `Bastion Siege · wave ${(G.profile.fort && G.profile.fort.wave) || 1}` : `Bastion Siege · Level ${CFG.siege.unlock}`, null, 'wp'); }
     { const RG = CFG.rift.gate; if (Math.hypot(RG.x - cx, RG.z - cz) < 30) put(RG.x, 4.4, RG.z, G.profile.level >= CFG.rift.unlock ? `The Rift · best floor ${G.profile.records.bestRift || 0}` : `The Rift · Level ${CFG.rift.unlock}`, null, 'wp'); }
     CFG.world.waypoints.forEach((w, i) => { if (Math.hypot(w.x - cx, w.z - cz) < 30) put(w.x, 4.4, w.z, G.profile.waypoints.includes(i) ? 'Waypoint' : 'Waypoint · touch to unlock', null, 'wp'); });
     for (const gl of hubParts.gateLabels) { const zn = CFG.world.zones[gl.zone]; if (G.profile.level < zn.minLevel && Math.hypot(gl.x - cx, gl.z - cz) < 60) put(gl.x, gl.y, gl.z, `${zn.name} · Level ${zn.minLevel}`, null, 'gate'); }
@@ -222,6 +223,7 @@ function updateHUD(dt) {
   // interact
   const act = !inArena && G.interact && G.started;
   setHidden('bAct', !act);
+  setHidden('bAct2', !(act && G.siege && G.fortPlace));
   if (act) setText('bAct', G.interact.label ? G.interact.label : G.interact.kind === 'waypoint' ? 'Travel' : G.interact.kind === 'rift' ? 'Enter Rift' : G.interact.kind === 'riftLeave' ? 'Leave Rift' : G.interact.def.role === 'arena' ? 'Play Arena' : G.interact.def.role === 'smith' ? 'Blacksmith' : 'Talk to ' + G.interact.def.name.split(' ').pop());
   // arena hud
   setHidden('arenaHud', !inArena);
@@ -255,7 +257,7 @@ function updateObjective() {
   const shr = activeShrine();
   if (G.rift) { const r = G.rift; text = r.phase === 'intro' ? `Rift floor ${r.floor} · get ready` : r.phase === 'clear' ? `Floor ${r.floor} cleared! Next floor…` : `Rift floor ${r.floor} · ${riftLeft()} left · ${Math.ceil(r.t)}s`; }
   else if (G.siege) { const S = G.siege, k = S.objs[0];
-    text = S.phase === 'build' ? `Wave ${S.wave} in ${Math.ceil(S.t)}s · build on the pads` : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }
+    text = S.phase === 'build' ? `Wave ${S.wave} in ${Math.ceil(S.t)}s · from ${siegeSideNames(S.sides)}` : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }
   else if (shr) { text = `Shrine challenge: ${shr.wave.filter((e) => e.alive).length} left · ${Math.ceil(shr.t)}s`; tx = shr.x; tz = shr.z; }
   else if (p.job) {
     const j = p.job, npc = NPC_DEFS.find((n) => n.id === j.npc);

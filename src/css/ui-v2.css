@@ -712,6 +712,10 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 @keyframes objHurt { from { box-shadow: 0 0 0 rgba(255,59,59,0); } to { box-shadow: 0 0 10px 3px rgba(255,59,59,.85); } }
 .tag.ally .tb { width: 34px; height: 5px; } .tag.ally .tb i { background: #5dd6ff; }
 b.stones { color: #e8d9b5; }
+#bAct2 { position: absolute; right: 6px; bottom: 256px; min-height: 44px; padding: 0 16px; font: 13px/1 var(--body); color: #ece3cc; background: linear-gradient(#5a4a3a, #2e241b); border: 2px solid var(--og-ink, #120a03); border-radius: 8px; box-shadow: 0 2px 0 #120a03; }
+.fortCode { letter-spacing: .12em; color: #ffe08a; }
+.fortRecent { flex-wrap: wrap; gap: 6px; align-items: center; } .fortRecent small { opacity: .8; }
+#fortCode { flex: 1; min-width: 0; min-height: 44px; font: 15px var(--body); letter-spacing: .1em; text-transform: uppercase; }
 .fortPads { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
 .fortPadBtn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px !important; min-width: 0; font-size: 12px; }
 .fortPadBtn .gi { width: 22px; height: 22px; } .fortPadBtn small { font-size: 11px; opacity: .85; }

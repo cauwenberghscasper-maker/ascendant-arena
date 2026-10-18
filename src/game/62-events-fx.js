@@ -154,15 +154,22 @@ function processEvents() {
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
       case 'dungeonBoss': Feed.remove('dungeon'); Feed.remove('dlvEvent'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
       case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); Feed.remove('dlvEvent'); if (e.why === 'down') showToast(e.delve ? `Your party fell in ${e.name}` : `${e.name} resets · you fell`, 'bad'); if (e.delve && typeof openDelvePanel === 'function' && e.why !== 'away') setTimeout(() => { if (!G.modal && G.mode === 'hub' && !inInstance()) openDelvePanel(); }, 900); break;
-      case 'siegeStart': enterSiegeView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 6); Sfx.play('super'); showBanner('Bastion Siege', 'Protect the Keep and the wagons · build on the stone pads', 'gold'); break;
-      case 'siegeWave': if (e.boss) { showBanner(`Wave ${e.wave} · Siege Lord!`, `${e.count} monsters · Lv ${e.lvl}`, 'red'); Sfx.play('horn'); } else { showBanner(`Wave ${e.wave}`, `${e.count} monsters · ${e.theme} · Lv ${e.lvl}`, 'red'); Sfx.play('tick'); } break;
+      case 'siegeStart': enterSiegeView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`Bastion Siege · Wave ${e.wave}`, 'Protect the Keep and the wagons · tap Build to place defenders', 'gold'); break;
+      case 'siegeWave': if (e.boss) { showBanner(`Wave ${e.wave} · Siege Lord!`, `${e.count} monsters from ${e.sides} · Lv ${e.lvl}`, 'red'); Sfx.play('horn'); } else { showBanner(`Wave ${e.wave}${e.mini ? ' · Siege Captain' : ''}`, `${e.count} monsters from ${e.sides} · Lv ${e.lvl}`, 'red'); Sfx.play(e.mini ? 'horn' : 'tick'); } break;
       case 'siegeClear': Feed.add(`${gi('m_hero')} Wave <b>${e.wave}</b> held · +${fmtK(e.gold)} gold · +${e.stones} Bastion Stones${e.item ? ' · Siege Lord item!' : ''}`, 'rift'); Sfx.play('job'); burst(G.player.x, 1, G.player.z, 24, 0xffc94a, 6, 0.8, 0.25, 3, 1.3); break;
       case 'objectiveHit': if (e.main) { showToast(`${e.name} is under attack!`, 'bad'); Sfx.play('hurt', { gap: 0.5 }); } ringFx(e.x, e.z, 3, 0xff3b3b, 0.5); break;
       case 'objectiveDown': burst(e.x, 2, e.z, 50, 0xff7a3d, 9, 1.2, 0.4, 4, 2); SpriteFX.play('explosion', 'fire', e.x, 0, e.z, 8); Cam.shake = Math.max(Cam.shake, 0.8); Sfx.play('boom');
         if (!e.main) showBanner(`${e.name} destroyed`, 'Less gold per wave · keep the Keep standing', 'red'); break;
       case 'siegeEnd': enterSiegeView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); if (e.why === 'keep') { Sfx.play('lose'); showToast('The Keep has fallen', 'bad'); } break;
-      case 'fortBuilt': SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); break;
-      case 'fortShot': if (e.type === 'cannon') burst(e.x, 1.6, e.z, 6, 0xdddddd, 3, 0.4, 0.25, 2, 0.6); break;
+      case 'fortBuilt': if (e.type === 'wall' || e.type === 'gate') burst(e.x, 0.6, e.z, 8, 0xd8b07a, 3, 0.5, 0.25, 2, 0.8); else { SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); } if (e.done) showToast(`${CFG.siege.towers[e.type].name} reached level ${e.l}`, 'good'); break;
+      case 'fortGone': burst(e.x, 0.8, e.z, 16, 0x8a7a6a, 4, 0.8, 0.4, 3, 1.2); break;
+      case 'fortBroken': burst(e.x, 1, e.z, 26, 0x6a5a4a, 6, 1, 0.4, 3, 1.4); Sfx.play('boom', { gap: 0.3 }); break;
+      case 'fortShot': { const y = e.y || 1.6, hear = near(e, 26);
+        if (e.type === 'cannon') { SpriteFX.play('explosion', 'fire', e.x, y, e.z, 1.5); burst(e.x, y, e.z, 12, 0xcfcac2, 3, 0.7, 0.35, -0.6, 0.8); if (hear) { Sfx.play('boom', { gap: 0.2 }); if (near(e, 12)) Cam.shake = Math.max(Cam.shake, 0.15); } }
+        else if (e.type === 'ballista') { burst(e.x, y, e.z, 8, 0xd8b07a, 4, 0.35, 0.22, 2, 0.4); if (hear) Sfx.play('bounce', { gap: 0.15 }); }
+        else if (e.type === 'mage') { SpriteFX.play('nova', 'arcane', e.x, y, e.z, 1.4); burst(e.x, y, e.z, 10, 0xc58cff, 4, 0.45, 0.25, 0, 0.5); if (hear) Sfx.play('zap', { gap: 0.15 }); }
+        else { burst(e.x, y, e.z, 5, 0xffe08a, 3, 0.3, 0.18, 1, 0.3); if (hear) Sfx.play('pellet', { gap: 0.1 }); }
+        break; }
       case 'riftEnd': enterRiftView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); break;
       case 'teleport': burst(e.x, 1, e.z, 30, 0x9fe8ff, 6, 0.8, 0.3, 2, 1.5); SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 5.5); Sfx.play('super'); Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; showToast(e.name); break;
       case 'proc': burst(e.x, 1.2, e.z, 8, e.kind === 'grasp' ? 0x8dff6a : e.kind === 'kraken' ? 0x5dd6ff : 0xffe066, 4, 0.4, 0.22, 4); SpriteFX.play(e.kind === 'kraken' ? 'zap' : 'impact', e.kind === 'grasp' ? 'venom' : e.kind === 'kraken' ? 'storm' : 'gold', e.x, 1.3, e.z, 1.9); break;
@@ -422,13 +429,18 @@ function drawMinimap() {
     return;
   }
   if (G.siege) {
-    // the fort from above: walls, objectives with their health, defenders, monsters and you
-    const S = G.siege, C = CFG.siege, s = W2 / (C.half * 2.3), cx = W2 / 2, cy = H2 / 2, ax = (x) => cx - (x - SC.x) * s, ay = (z) => cy - (z - SC.z) * s, dot = (x, z, r, c) => { g.fillStyle = c; g.beginPath(); g.arc(ax(x), ay(z), r * dpr, 0, Math.PI * 2); g.fill(); };
-    g.fillStyle = '#7a6c5c'; g.fillRect(cx - C.half * s, cy - C.half * s, C.half * 2 * s, C.half * 2 * s);
-    g.strokeStyle = '#3b3128'; g.lineWidth = 3 * dpr; g.strokeRect(cx - C.half * s, cy - C.half * s, C.half * 2 * s, C.half * 2 * s);
+    // the land from above: buildings (walls grey), objectives with their health, monsters, friends and you
+    // a big land shows the 120 m around you
+    const S = G.siege, cs = CFG.siege.cell, H = S.half, V = Math.min(H, 60), s = W2 / (V * 2.15), fx = clamp(G.player.x, SC.x - H + V, SC.x + H - V), fz = clamp(G.player.z, SC.z - H + V, SC.z + H - V),
+      cx = W2 / 2 - (SC.x - fx) * s, cy = H2 / 2 + (SC.z - fz) * s, ax = (x) => cx - (x - SC.x) * s, ay = (z) => cy - (z - SC.z) * s, dot = (x, z, r, c) => { g.fillStyle = c; g.beginPath(); g.arc(ax(x), ay(z), r * dpr, 0, Math.PI * 2); g.fill(); };
+    g.fillStyle = '#3d5a2a'; g.fillRect(cx - H * s, cy - H * s, H * 2 * s, H * 2 * s);
+    g.strokeStyle = '#ffd36b'; g.lineWidth = 2 * dpr; g.strokeRect(cx - H * s, cy - H * s, H * 2 * s, H * 2 * s);
+    // the sides the next wave comes from
+    g.fillStyle = 'rgba(255,93,108,.55)'; for (const i of S.sides) { const d = CFG.siege.sides[i]; g.fillRect(d.x ? ax(SC.x + d.x * H) - 2 * dpr : cx - H * s, d.z ? ay(SC.z + d.z * H) - 2 * dpr : cy - H * s, d.x ? 4 * dpr : H * 2 * s, d.z ? 4 * dpr : H * 2 * s); }
+    for (const u of S.units) { if (!u.alive) continue; const w = Math.max(1.5 * dpr, u.size * cs * s); g.fillStyle = CFG.siege.towers[u.b.t].wall ? '#cfc6b8' : '#' + SIEGE_PAD_COL[u.b.t].toString(16).padStart(6, '0'); g.fillRect(ax(u.x) - w / 2, ay(u.z) - w / 2, w, w); }
     for (const o of S.objs) if (o.alive) { const k = clamp(o.hp / o.maxHp, 0, 1); dot(o.x, o.z, o.def.main ? 6 : 4, k > 0.5 ? '#58e08a' : k > 0.25 ? '#ffb347' : '#ff5d6c'); }
-    const F = fortState(); C.pads.forEach((q, i) => { const pad = F.pads[i]; g.fillStyle = pad ? '#' + SIEGE_PAD_COL[pad.t].toString(16).padStart(6, '0') : 'rgba(255,233,168,.5)'; g.fillRect(ax(SC.x + q.x) - 2.5 * dpr, ay(SC.z + q.z) - 2.5 * dpr, 5 * dpr, 5 * dpr); });
     for (const e of S.mobs) if (e.alive) dot(e.x, e.z, e.guardian ? 4 : 2.5, e.guardian ? '#ffc94a' : '#ff5d6c');
+    for (const q of mpVisible()) dot(q.x, q.z, 3.5, '#9fe8ff');
     dot(G.player.x, G.player.z, 4, '#3fa9ff');
     return;
   }

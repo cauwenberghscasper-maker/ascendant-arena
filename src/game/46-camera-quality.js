@@ -143,7 +143,7 @@ function updateCamera(dt) {
   Showcase.b = clamp(Showcase.b + (Showcase.on ? dt / 0.45 : -dt / 0.45), 0, 1);
   const sb = Showcase.b * Showcase.b * (3 - 2 * Showcase.b);
   // angled top-down: camera south of the player, looking north
-  let zoom = Math.min(CFG.growth.zoomCap, 1 + CFG.growth.zoomPerLevel * (G.profile.level - 1) * (G.mode === 'arena' ? 0.5 : 1)) * (LOCAL_PREVIEW && window.__camZoom || 1); // __camZoom: local tours only
+  let zoom = Math.min(CFG.growth.zoomCap, 1 + CFG.growth.zoomPerLevel * (G.profile.level - 1) * (G.mode === 'arena' ? 0.5 : 1)) * (LOCAL_PREVIEW && window.__camZoom || 1) * (G.siege ? CFG.siege.zoom : 1); // __camZoom: local tours only; the fort sees further
   // frame the world boss with the hero when you fight it, so it is never hidden under the top bar
   let fx = pl.x, fz = pl.z + 1.5;
   const bb = G.mode === 'hub' ? G.boss : null;
