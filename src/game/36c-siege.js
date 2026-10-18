@@ -98,6 +98,8 @@ function siegeLayout() {
     const u = old.get(b) || siegeUnit(b); u.k = S.units.length; S.units.push(u); ks.forEach((k) => { occ[k] = u.k + 1; });
     if (!u.maxHp) siegeUnitHp(u);
   }
+  // the monster gate on each side (a gatehouse, 47c-siege-view.js): kept clear of new buildings
+  for (const d of CFG.siege.sides) { const gx = d.x * (S.half - 3), gz = d.z * (S.half - 3); for (let i = cellAt(gx - 4.5); i <= cellAt(gx + 4.5); i++) for (let j = cellAt(gz - 4.5); j <= cellAt(gz + 4.5); j++) { const k = siegeIdx(i, j); if (k >= 0 && occ[k] === 0) occ[k] = -2; } }
   S.soldiers = S.soldiers.filter((s) => old.get(s.u.b) === s.u && S.units.includes(s.u));
   for (const u of S.units) if (u.b.t === 'warrior' && !S.soldiers.some((s) => s.u === u)) siegeMuster(u);
   siegeGrid(); S.flowDirty = true;
@@ -302,9 +304,10 @@ function startSiegeWave() {
   return true;
 }
 function siegeSpawnPoint() {
-  const S = G.siege, sd = CFG.siege.sides[S.sides[S.sideI++ % S.sides.length]], edge = S.half - 2.5;
+  const S = G.siege, sd = CFG.siege.sides[S.sides[S.sideI++ % S.sides.length]], edge = S.half - 4;
   for (let tries = 0; ; tries++) {
-    const along = rand(-0.7, 0.7) * S.half, x = SC.x + sd.x * edge + sd.z * along, z = SC.z + sd.z * edge + sd.x * along, k = siegeIdx(cellAt(x - SC.x), cellAt(z - SC.z));
+    // through that side's gate
+    const along = rand(-1, 1) * (3 + S.half * 0.06), x = SC.x + sd.x * edge + sd.z * along, z = SC.z + sd.z * edge + sd.x * along, k = siegeIdx(cellAt(x - SC.x), cellAt(z - SC.z));
     if (tries > 8 || (k >= 0 && S.occ[k] <= 0)) return { x, z, a: Math.atan2(-sd.x, -sd.z) };
   }
 }

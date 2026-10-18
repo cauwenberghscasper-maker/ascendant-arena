@@ -1,3 +1,17 @@
+# Bastion layout (18 Oct 2026, branch `claude/bastion-layout`, PR to main)
+Casper (phone screenshot): the fort was an empty green plane and the buildings were hard to see. Now (`47c-siege-view.js`):
+- **Land:** the town's painted meadow shader (`matGround`, grass style) over the whole land, rolling hills past the edge;
+  flagstone courtyard round the Keep; dirt paths from each side's gate to the courtyard (decals); tufts, flowers and
+  mushrooms near the Keep (hidden under buildings, `siegeDecorHide`); a forest ring (oak + far LOD, rocks, bushes) just
+  outside the land, placed as one set per model so WorldModels' 64 m cells cull it.
+- **Monster gates:** a gatehouse at the middle of each side; waves now come through that side's gate (`siegeSpawnPoint`)
+  and the ground before it glows red for the coming wave's sides. Gate cells are kept clear of new buildings.
+- **Buildings:** bigger (archer/mage 7.4-7.6 m, cannon 3 m, ballista 3.3 m...), brighter (`bright: 1.3`), and each stands on
+  a stone tile with a rim in its colour (instanced decals). Landscape sets are created last so the Keep and buildings
+  stream in first (WorldModels builds 2 sets per frame).
+- **Open:** Casper's phone showed 30 FPS with "screen 30 Hz" (likely Low Power Mode); check FPS in the fort on a phone
+  with a large land; the barracks and builder hut models still need a better generation.
+
 # Bastion update (18 Oct 2026, branch `claude/bastion-update`, PR to main)
 Built from `docs/BASTION_PLAN.md` phases 1-3:
 - **Wave memory:** `profile.fort.wave` = the wave a run starts on; a fallen Keep restarts that wave, never lower (old saves:

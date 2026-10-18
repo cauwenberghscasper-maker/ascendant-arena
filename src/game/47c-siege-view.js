@@ -2,6 +2,71 @@
 // model (keep, wagons, the siege_* buildings and walls, flags); code geometry is only ground, the land's edge, the
 // placing ghost and VFX. Buildings are rebuilt whenever the fort changes; cannons, ballistas and mage towers turn to their target.
 const siegeParts = { sets: [], bSets: [], bGroup: null, aims: [], objItems: [], objSets: [], portal: null, flame: null, ghost: null, sig: '', t: 0 };
+// the land: the town's painted meadow shader (grass clumps, blades, dirt patches), flat where you build and rolling
+// beyond the edge, so the fort sits in a clearing of the Starting Woodlands
+function siegeMeadow(H) {
+  const w = H * 2 + 140, seg = Math.min(140, Math.round(w / 5));
+  let g = new THREE.PlaneGeometry(w, w, seg, seg).rotateX(-Math.PI / 2);
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) { const x = pos.getX(i), z = pos.getZ(i), out = Math.max(Math.abs(x), Math.abs(z)) - H; pos.setY(i, out > 2 ? Math.min(5, (out - 2) * 0.12) + (hashf(x * 0.7, z * 0.7) - 0.5) * 1.4 : -0.03); }
+  g.computeVertexNormals(); g = g.toNonIndexed();
+  const gp = g.attributes.position, n = gp.count, col = new Float32Array(n * 3), th = new Float32Array(n).fill(1), gl = new Float32Array(n * 3);
+  const lo = new THREE.Color(0x3f6a2c), hi = new THREE.Color(0x6d9a3c), dirt = new THREE.Color(0x7a6a46);
+  for (let i = 0; i < n; i++) {
+    const x = gp.getX(i), z = gp.getZ(i), k = clamp(vnoise((x + SC.x) * 0.06, (z + SC.z) * 0.06) * 1.2 - 0.1, 0, 1);
+    _col.copy(lo).lerp(hi, k); if (vnoise(x * 0.11 + 7, z * 0.11) > 0.78) _col.lerp(dirt, 0.35);
+    col.set([_col.r, _col.g, _col.b], i * 3);
+  }
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.setAttribute('aTh', new THREE.BufferAttribute(th, 1)); g.setAttribute('aGc', new THREE.BufferAttribute(gl, 3)); g.deleteAttribute('uv');
+  const m = new THREE.Mesh(g, matGround); m.position.set(SC.x, 0, SC.z); m.receiveShadow = true; siegeGroup.add(m);
+}
+// a soft-edged dirt texture for the paths (a decal on the meadow)
+let siegePathTex = null;
+function siegeDirtTex() {
+  if (siegePathTex) return siegePathTex;
+  const cv = document.createElement('canvas'); cv.width = 32; cv.height = 64; const x = cv.getContext('2d'), r = mulberry32(77);
+  for (let i = 0; i < 32; i++) for (let j = 0; j < 64; j++) { const e = Math.min(i, 31 - i) / 8, a = clamp(e - 0.25 + r() * 0.35, 0, 1), v = 96 + r() * 40; x.fillStyle = `rgba(${v + 30},${v + 10},${v - 25},${a.toFixed(2)})`; x.fillRect(i, j, 1, 1); }
+  siegePathTex = new THREE.CanvasTexture(cv); siegePathTex.wrapT = THREE.RepeatWrapping; siegePathTex.magFilter = THREE.NearestFilter; siegePathTex.colorSpace = THREE.SRGBColorSpace;
+  return siegePathTex;
+}
+// what is around the fort: a forest beyond the land's edge (in chunks, so only the part on screen is drawn), a monster
+// gate on each side where the waves come in, dirt paths from the gates to the Keep, and flowers and tufts on the meadow
+function siegeLandscape(H, rng) {
+  const C = CFG.siege;
+  // paths: one per side, from its gate to the courtyard
+  for (const d of C.sides) {
+    const L = H - 16, tex = new THREE.CanvasTexture(siegeDirtTex().image), mat = new THREE.MeshLambertMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
+    tex.wrapT = THREE.RepeatWrapping; tex.magFilter = THREE.NearestFilter; tex.colorSpace = THREE.SRGBColorSpace; tex.repeat.set(1, L / 6);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(4.2, L).rotateX(-Math.PI / 2), mat);
+    m.rotation.y = Math.atan2(d.x, d.z); m.position.set(SC.x + d.x * (16 + L / 2), 0.02, SC.z + d.z * (16 + L / 2)); siegeGroup.add(m);
+  }
+  // monster gates: a gatehouse at each side's entry; the ground before it glows red when that side is coming
+  siegeParts.gates = C.sides.map((d) => ({ x: SC.x + d.x * (H - 3), z: SC.z + d.z * (H - 3), ry: Math.atan2(d.x, d.z), d }));
+  siegeParts.sets.push(WorldModels.place(siegeGroup, 'gatehouse', siegeParts.gates.map((q) => ({ x: q.x, z: q.z, ry: Math.atan2(-q.d.x, -q.d.z), s: 7.4 }))));
+  siegeParts.gateGlow = siegeParts.gates.map((q) => { const m = new THREE.Mesh(new THREE.CircleGeometry(4.5, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xff3b3b, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })); m.position.set(q.x, 0.05, q.z); siegeGroup.add(m); return m; });
+  // the forest: three rows just past the edge (WorldModels cuts big sets into 64 m cells, so only what is on screen draws)
+  const rows = [[4, 'tree_oak', 5.2], [10, 'tree_oak_lod', 6], [17, 'tree_oak_lod', 6.8]], L = {}, add = (n, it) => (L[n] || (L[n] = [])).push(it);
+  for (const d of C.sides) {
+    const px = d.z, pz = -d.x; // along the side
+    for (const [off, name, s] of rows) for (let t = -H - 20; t < H + 20; t += 4.5 + rng() * 2) {
+      const o = H + off + rng() * 4, x = SC.x + d.x * o + px * t, z = SC.z + d.z * o + pz * t;
+      const r = rng(); add(r < 0.78 ? name : r < 0.88 ? 'rock_a' : r < 0.96 ? 'bush_a' : 'stump', { x, z, ry: rng() * 6.28, s: r < 0.78 ? s * (0.8 + rng() * 0.45) : 1.6 + rng() * 1.4 });
+    }
+  }
+  for (const n in L) siegeParts.sets.push(WorldModels.place(siegeGroup, n, L[n]));
+  // meadow dressing inside the land near the Keep (hidden under anything you build: siegeDecorHide)
+  const R = Math.min(H - 4, 70), deco = { tuft: [], flower: [], mushrooms: [] };
+  for (let i = 0; i < R * R / 18; i++) {
+    const x = (rng() * 2 - 1) * R, z = (rng() * 2 - 1) * R; if (Math.abs(x) < 19 && Math.abs(z) < 21) continue;
+    const r = rng(); (r < 0.7 ? deco.tuft : r < 0.93 ? deco.flower : deco.mushrooms).push({ x: SC.x + x, z: SC.z + z, ry: rng() * 6.28, s: r < 0.7 ? 1.2 + rng() : 0.9 + rng() * 0.6 });
+  }
+  siegeParts.deco = Object.entries(deco).map(([n, items]) => { const h = WorldModels.place(siegeGroup, n, items); siegeParts.sets.push(h); return { h, items }; });
+}
+// flowers and tufts never poke through a building
+function siegeDecorHide() {
+  const S = G.siege; if (!siegeParts.deco || !S.occ) return;
+  for (const d of siegeParts.deco) { let ch = false; for (const it of d.items) { const k = siegeIdx(cellAt(it.x - SC.x), cellAt(it.z - SC.z)), hide = k >= 0 && S.occ[k] > 0; if (!!it.hidden !== hide) { it.hidden = hide; ch = true; } } if (ch) d.h.dirty = true; }
+}
 const SIEGE_PAD_COL = { archer: 0x58e08a, cannon: 0xff7a4a, ballista: 0x5dd6ff, mage: 0xb98cff, warrior: 0xffc94a, mine: 0x9fe8ff, hut: 0xd8b07a };
 // a flat ground plane (terrain); vertex colours feed the flagstone shader
 function siegeGround(w, d, color, mat, y) {
@@ -16,7 +81,7 @@ function buildSiegeView() {
   const at = (q) => ({ x: SC.x + q.x, z: SC.z + q.z });
   // flagstones around the Keep, meadow over the whole land and beyond
   siegeGround(36, 40, 0x857563, matDungeonFloor, 0.01);
-  siegeGround(H * 2 + 120, H * 2 + 120, 0x3d5a2a, new THREE.MeshLambertMaterial({ vertexColors: true }), -0.05);
+  siegeMeadow(H);
   // the edge of your land: a faint gold line (VFX) and a banner on every corner
   { const mat = new THREE.MeshBasicMaterial({ color: 0xffd36b, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false });
     for (const [w, d, x, z] of [[H * 2, 0.3, 0, H], [H * 2, 0.3, 0, -H], [0.3, H * 2, H, 0], [0.3, H * 2, -H, 0]]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2), mat); m.position.set(SC.x + x, 0.04, SC.z + z); siegeGroup.add(m); } }
@@ -43,18 +108,31 @@ function buildSiegeView() {
   siegeParts.ghost.visible = false; siegeGroup.add(siegeParts.ghost);
   siegeParts.bGroup = new THREE.Group(); siegeGroup.add(siegeParts.bGroup); siegeParts.sig = '';
   buildSiegeBuildings();
+  siegeLandscape(H, rng); // after the Keep and the buildings, so those are built first
 }
 // buildings: TRELLIS.2 models made for the fort (siege_*), each on its cell; cannons, ballistas and mage towers turn to
 // their target. A banner in the building's colour grows with its level. Walls: wood to level 5, stone to 10, iron
 // after; each cell draws a half piece toward every wall or gate next to it, so lines, corners and crossings join up.
-const SIEGE_MODEL = { archer: ['siege_archer', 6.2], cannon: ['siege_cannon', 2.3], ballista: ['siege_ballista', 2.4], mage: ['siege_mage', 6.6],
-  warrior: ['siege_barracks', 2.6], mine: ['siege_mine', 3.2], hut: ['siege_hut', 3.1], gate: ['siege_gate', 2.1] };
+const SIEGE_MODEL = { archer: ['siege_archer', 7.4], cannon: ['siege_cannon', 3.0], ballista: ['siege_ballista', 3.3], mage: ['siege_mage', 7.6],
+  warrior: ['siege_barracks', 3.3], mine: ['siege_mine', 3.9], hut: ['siege_hut', 3.6], gate: ['siege_gate', 2.1] };
+// every building stands on a stone tile with a rim in its colour (decals), Clash of Clans style, so it reads from far
+let siegeTileTex = null;
+function siegeTileTextures() {
+  if (siegeTileTex) return siegeTileTex;
+  const mk = (draw) => { const cv = document.createElement('canvas'); cv.width = cv.height = 32; draw(cv.getContext('2d'), mulberry32(31)); const t = new THREE.CanvasTexture(cv); t.magFilter = THREE.NearestFilter; t.colorSpace = THREE.SRGBColorSpace; return t; };
+  siegeTileTex = {
+    slab: mk((x, r) => { for (let i = 0; i < 32; i++) for (let j = 0; j < 32; j++) { const e = Math.min(i, j, 31 - i, 31 - j), v = (e < 2 ? 70 : 128) + r() * 26 - ((i % 11 === 0 || j % 11 === 0) && e > 2 ? 30 : 0); x.fillStyle = `rgb(${v},${v - 6},${v - 16})`; x.fillRect(i, j, 1, 1); } }),
+    rim: mk((x) => { x.fillStyle = '#fff'; x.fillRect(0, 0, 32, 32); x.clearRect(3, 3, 26, 26); }),
+  };
+  return siegeTileTex;
+}
 const SIEGE_TURN = { cannon: 1, ballista: 1, mage: 1 };
 // how a defender fires (Clash of Clans style): it winds up before the shot (cannon leans back, ballista draws, the mage
 // orb swells) and kicks when it fires (recoil back along the aim, a squash and bounce); see animateSiegeDefenders
 function buildSiegeBuildings() {
   const g = siegeParts.bGroup, S = G.siege, cs = CFG.siege.cell, now = fortNow();
   for (const h of siegeParts.bSets) WorldModels.dispose(h);
+  g.traverse((o) => { if (o.isInstancedMesh && !o.userData.items) { o.geometry.dispose(); o.material.dispose(); } }); // the tiles (models are disposed above)
   g.clear(); siegeParts.bSets = []; siegeParts.aims = [];
   const L = {}, add = (name, it) => (L[name] || (L[name] = [])).push(it), aims = [];
   const wallAt = (i, j) => { const k = siegeIdx(i, j), o = k >= 0 ? S.occ[k] : 0, u = o > 0 ? S.units[o - 1] : null; return !!u && u.alive && CFG.siege.towers[u.b.t].wall; };
@@ -72,10 +150,20 @@ function buildSiegeBuildings() {
     if (b.t === 'gate') { add(name, { x, z, ry: wallAt(b.x + 1, b.z) || wallAt(b.x - 1, b.z) ? 0 : Math.PI / 2, s: h }); continue; }
     const it = { x, z, ry, s: h * k }; add(name, it);
     if (SIEGE_SHOOTERS[b.t]) aims.push({ it, u, name, bx: x, bz: z });
-    add('banner_pole', { x: x - 1.6, z: z - 1.6, ry: 0, s: 2.4 + Math.min(15, b.l) * 0.14, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] });
+    add('banner_pole', { x: x - u.size * cs / 2 + 0.3, z: z - u.size * cs / 2 + 0.3, ry: 0, s: 2.4 + Math.min(15, b.l) * 0.14, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] });
+  }
+  // the tiles under the buildings: one instanced slab and one instanced rim (tinted per building) for the whole fort
+  const tiles = S.units.filter((u) => u.alive && !CFG.siege.towers[u.b.t].wall);
+  if (tiles.length) {
+    const T = siegeTileTextures(), geo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), m4 = new THREE.Matrix4();
+    const slab = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ map: T.slab, polygonOffset: true, polygonOffsetFactor: -3 }), tiles.length);
+    const rim = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({ map: T.rim, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.85 }), tiles.length);
+    tiles.forEach((u, i) => { const w = u.size * cs - 0.1; m4.makeScale(w, 1, w).setPosition(u.x, 0.04, u.z); slab.setMatrixAt(i, m4); m4.setPosition(u.x, 0.06, u.z); rim.setMatrixAt(i, m4); rim.setColorAt(i, _col.set(u.b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[u.b.t])); });
+    slab.receiveShadow = true; g.add(slab, rim);
   }
   const hs = {};
-  for (const name in L) { const h = WorldModels.place(g, name, L[name], name === 'siege_mage' ? { glow: 0xb98cff, glowK: 0.12 } : {}); siegeParts.bSets.push(h); hs[name] = h; }
+  for (const name in L) { const h = WorldModels.place(g, name, L[name], Object.assign({ bright: 1.3 }, name === 'siege_mage' ? { glow: 0xb98cff, glowK: 0.12 } : {})); siegeParts.bSets.push(h); hs[name] = h; }
+  siegeDecorHide();
   siegeParts.aims = aims.map((a) => Object.assign(a, { h: hs[a.name] }));
 }
 function animateSiegeDefenders(dt) {
@@ -101,7 +189,7 @@ function disposeSiegeView() {
   const geos = new Set(), mats = new Set();
   siegeGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matVC && o.material !== matDungeonFloor) mats.add(o.material); });
   geos.forEach((g) => g.dispose()); mats.forEach((m) => m.dispose());
-  siegeGroup.clear(); Object.assign(siegeParts, { sets: [], bSets: [], bGroup: null, aims: [], objItems: [], objSets: [], portal: null, flame: null, ghost: null, sig: '' });
+  siegeGroup.clear(); Object.assign(siegeParts, { sets: [], bSets: [], bGroup: null, aims: [], objItems: [], objSets: [], portal: null, flame: null, ghost: null, gates: null, gateGlow: null, deco: null, sig: '' });
 }
 function enterSiegeView(on) {
   hubGroup.visible = !on; riftGroup.visible = false; siegeGroup.visible = on;
@@ -124,5 +212,6 @@ function updateSiegeView(dt) {
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });
   if (siegeParts.flame) siegeParts.flame.material.opacity = 0.75 + Math.sin(t * 13) * 0.08 + Math.sin(t * 7.3) * 0.08;
   if (siegeParts.portal) siegeParts.portal.rotation.y = t * 0.8;
+  if (siegeParts.gateGlow) siegeParts.gateGlow.forEach((m, i) => { m.material.opacity = S.sides.includes(i) ? (S.phase === 'fight' ? 0.45 : 0.25 + Math.sin(t * 4) * 0.15) : 0; });
   WorldModels.update();
 }

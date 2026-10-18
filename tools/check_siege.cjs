@@ -123,7 +123,7 @@ check('walls: monsters walk around an open wall, and break the cheapest piece of
 });
 check('a full fort holds wave 1: towers shoot, warriors man their posts, the wave pays gold and stones, the next start never goes lower', () => {
   reset(40, 1e12, 1e6); assert(c.startSiege());
-  const spots = [[-8, 6], [5, 6], [-8, -3], [5, -4], [-7, 1], [9, 0], [-3, 9], [1, 9]], types = ['archer', 'cannon', 'ballista', 'warrior', 'mage', 'archer', 'cannon', 'warrior'];
+  const spots = [[-8, 6], [5, 6], [-8, -3], [5, -4], [-7, 1], [3, -10], [-3, 9], [1, 9]], types = ['archer', 'cannon', 'ballista', 'warrior', 'mage', 'archer', 'cannon', 'warrior'];
   spots.forEach(([x, z], i) => assert.equal(c.fortDo({ o: 'add', t: types[i], x, z }), '', types[i] + ' at ' + x + ',' + z));
   c.endSiege('leave'); c.G.siegeResult = null;
   const gold0 = c.G.profile.gold, stones0 = c.myFort().stones;
