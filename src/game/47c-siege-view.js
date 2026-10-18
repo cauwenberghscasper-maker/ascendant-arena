@@ -195,8 +195,41 @@ function animateSiegeDefenders(dt) {
     it.x = a.bx - ax * back; it.z = a.bz - az * back; it.sy = sy; it.sx = it.sz = sw; a.h.dirty = true;
   }
 }
+// builder mode: the field's grid over the land, Clash of Clans style (a checkered tint, thin lines, a stronger line every 5 cells)
+function siegeGridOverlay(on) {
+  const S = G.siege;
+  if (siegeParts.grid) { siegeParts.grid.geometry.dispose(); siegeParts.grid.material.dispose(); siegeParts.grid.removeFromParent(); siegeParts.grid = null; }
+  if (!on || !S || !siegeGroup.visible) return;
+  const H = S.half, mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uC: { value: new THREE.Vector2(SC.x, SC.z) }, uCs: { value: CFG.siege.cell } },
+    vertexShader: 'varying vec2 vW; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `varying vec2 vW; uniform vec2 uC; uniform float uCs;
+      void main() { vec2 c = (vW - uC) / uCs, f = fract(c), d = min(f, 1.0 - f); float line = 1.0 - smoothstep(0.0, 0.05, min(d.x, d.y));
+        vec2 big = fract(c / 5.0), db = min(big, 1.0 - big); float major = 1.0 - smoothstep(0.0, 0.012, min(db.x, db.y));
+        float chk = mod(floor(c.x) + floor(c.y), 2.0);
+        gl_FragColor = vec4(mix(vec3(1.0, 1.0, 0.85), vec3(0.08, 0.16, 0.05), max(line, major)), chk * 0.07 + line * 0.22 + major * 0.3); }` });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(H * 2, H * 2).rotateX(-Math.PI / 2), mat); m.position.set(SC.x, 0.06, SC.z); m.renderOrder = 1;
+  siegeGroup.add(m); siegeParts.grid = m;
+}
+function siegePreview(q) {
+  const P = siegeParts.preview, cs = CFG.siege.cell;
+  if (!q) { if (P) { WorldModels.dispose(P.h); siegeParts.preview = null; } return; }
+  const wall = CFG.siege.towers[q.t].wall && q.t === 'wall', name = wall ? 'siege_wall_wood' : SIEGE_MODEL[q.t][0];
+  const s = FORT_TYPES[q.t], x = SC.x + (q.x + s / 2) * cs, z = SC.z + (q.z + s / 2) * cs;
+  let pv = P;
+  if (!pv || pv.name !== name) { // placed where it stands (the streamer loads a set by its distance to the camera)
+    if (P) WorldModels.dispose(P.h);
+    const it = { x, z, ry: 0, s: 1 }; pv = siegeParts.preview = { name, it, h: WorldModels.place(siegeGroup, name, [it], { ghost: true, far: 999 }) };
+  }
+  const it = pv.it;
+  it.x = x; it.z = z; it.ry = CFG.siege.towers[q.t].trap || q.t === 'gate' || wall ? 0 : Math.atan2(SC.x - x, SC.z - z);
+  if (wall) { it.s = 1.8; it.sx = cs / ((WORLD_MODEL_BOX[name] || [2])[0] * 1.8); } else it.s = SIEGE_MODEL[q.t][1];
+  pv.h.dirty = true;
+  for (const m of pv.h.mats) { m.emissive.setHex(q.ok ? 0x58e08a : 0xff5d6c); m.opacity = 0.45 + Math.sin(siegeParts.t * 5) * 0.08; }
+}
 function disposeSiegeView() {
   for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h);
+  if (siegeParts.preview) { WorldModels.dispose(siegeParts.preview.h); siegeParts.preview = null; }
+  siegeParts.grid = null;
   const geos = new Set(), mats = new Set();
   siegeGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matVC && o.material !== matDungeonFloor) mats.add(o.material); });
   geos.forEach((g) => g.dispose()); mats.forEach((m) => m.dispose());
@@ -216,8 +249,9 @@ function updateSiegeView(dt) {
   const sig = S.units.map((u) => `${u.b.t}${u.b.x},${u.b.z},${u.b.l}${u.b.d > now ? 'u' : ''}${u.alive ? '' : 'x'}${u.spent ? 's' : ''}`).join('|');
   if (sig !== siegeParts.sig) { if (siegeParts.sig) buildSiegeBuildings(); siegeParts.sig = sig; }
   animateSiegeDefenders(dt);
-  // the placing ghost
+  // the placing ghost: the footprint square plus a see-through copy of the building, green where it fits, red where not
   const gh = siegeParts.ghost, q = fortGhost();
+  siegePreview(q);
   if (gh) { gh.visible = !!q; if (q) { const s = FORT_TYPES[q.t], cs = CFG.siege.cell; gh.scale.set(s * cs * 0.96, 1, s * cs * 0.96); gh.position.set(SC.x + (q.x + s / 2) * cs, 0.07, SC.z + (q.z + s / 2) * cs); gh.material.color.set(q.ok ? 0x58e08a : 0xff5d6c); gh.material.opacity = 0.35 + Math.sin(t * 6) * 0.12; } }
   // a fallen objective disappears in smoke
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });

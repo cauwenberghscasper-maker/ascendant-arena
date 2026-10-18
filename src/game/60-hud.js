@@ -223,7 +223,6 @@ function updateHUD(dt) {
   // interact
   const act = !inArena && G.interact && G.started;
   setHidden('bAct', !act);
-  setHidden('bAct2', !(act && G.siege && G.fortPlace));
   if (act) setText('bAct', G.interact.label ? G.interact.label : G.interact.kind === 'waypoint' ? 'Travel' : G.interact.kind === 'rift' ? 'Enter Rift' : G.interact.kind === 'riftLeave' ? 'Leave Rift' : G.interact.def.role === 'arena' ? 'Play Arena' : G.interact.def.role === 'smith' ? 'Blacksmith' : 'Talk to ' + G.interact.def.name.split(' ').pop());
   // arena hud
   setHidden('arenaHud', !inArena);

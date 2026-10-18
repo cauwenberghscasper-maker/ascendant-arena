@@ -72,11 +72,15 @@ check('building anywhere on the grid: no overlaps, not on the Keep or outside th
   const spent = c.fortStonesSpent(F.b[k]), before = M.stones; assert.equal(c.fortDo({ o: 'del', k }), ''); assert.equal(M.stones, before + Math.floor(spent / 2));
   assert(!S.units.some((q) => q.b.t === 'archer' && q.b.x === -10));
   assert.equal(c.fortDo({ o: 'del', k: F.b.findIndex((b) => b.t === 'hut') }), '', 'one of two huts may go'); assert.equal(c.fortDo({ o: 'del', k: F.b.findIndex((b) => b.t === 'hut') }), 'Your last builder stays');
-  // drawing walls: every cell the hero walks off gets a segment
-  c.G.fortPlace = { t: 'wall', draw: false }; c.fortPlaceNow(); assert(c.G.fortPlace.draw);
-  const pl = c.G.player, w0 = F.b.filter((b) => b.t === 'wall').length; pl.x = c.SC.x - 20.5; pl.z = c.SC.z + 20.5;
-  for (let i = 0; i < 40; i++) { pl.x += 0.25; c.stepFortDraw(); }
-  const walls = F.b.filter((b) => b.t === 'wall'); assert(walls.length - w0 >= 3, 'a line of walls'); assert(walls.every((b) => b.z === walls[0].z));
+  // moving (builder mode): free, onto free cells only, and the old cells open up
+  const km = F.b.findIndex((b) => b.t === 'mage'), mb = F.b[km], gm = c.G.profile.gold;
+  assert.equal(c.fortDo({ o: 'move', k: km, x: 0, z: 1 }), 'Something is in the way', 'not onto the Keep');
+  assert.equal(c.fortDo({ o: 'move', k: km, x: 11, z: 10 }), '', 'one cell over, partly on its own cells'); assert.equal(mb.x, 11); assert.equal(c.G.profile.gold, gm, 'moving is free');
+  assert.equal(c.fortDo({ o: 'add', t: 'wall', x: 10, z: 10 }), '', 'its old cell is free again');
+  // the builder's ghost: the picked cell, checked as it would be built
+  c.G.builder = { sel: 'archer', cell: [0, 1] }; assert.equal(c.fortGhost().ok, false, 'red on the Keep');
+  c.G.builder.cell = [-14, 4]; assert.equal(c.fortGhost().ok, true, 'green on free ground');
+  c.G.builder = { sel: 'mage', move: mb, cell: [11, 10] }; assert.equal(c.fortGhost().ok, true, 'a moved building may stay where it is'); c.G.builder = null;
   c.endSiege('leave');
 });
 check('waves: level never far below the hero and climbs, more monsters each wave, a Siege Lord every 10th wave', () => {

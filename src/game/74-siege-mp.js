@@ -69,7 +69,7 @@ function siegeMpGo() { fortSend('fgo', { to: siegeHostSid() }); }
 function siegeMpAsk(op, pr) {
   const b = op.k != null ? fortState().b[op.k] : null, rid = ++FW.rid;
   FW.ask.set(rid, { pr, at: G.time });
-  fortSend('fbq', { to: siegeHostSid(), rid, op: b ? { o: op.o, t: b.t, x: b.x, z: b.z } : op });
+  fortSend('fbq', { to: siegeHostSid(), rid, op: b ? { o: op.o, t: b.t, x: b.x, z: b.z, nx: op.x, nz: op.z } : op }); // nx, nz: where a moved building goes
 }
 // a shared fort was entered: the clock decides who runs it (the earliest in)
 function siegeMpStart() { Object.assign(FW, { ft: Date.now(), host: null, wasHost: true, dirty: false, wT: 0, sendT: 0, saveT: -1, sig: '' }); FW.ask.clear(); FW.hits.clear(); FW.mm.clear(); }
@@ -132,6 +132,7 @@ function siegeMpRecv(event, sid, P) {
     else if (event === 'fbq' && P.op && typeof P.op === 'object') {
       const op = { o: String(P.op.o), t: String(P.op.t), x: P.op.x | 0, z: P.op.z | 0 };
       if (op.o !== 'add') op.k = fortState().b.findIndex((b) => b.t === op.t && b.x === op.x && b.z === op.z);
+      if (op.o === 'move') { op.x = P.op.nx | 0; op.z = P.op.nz | 0; }
       const why = op.o === 'add' && !FORT_TYPES[op.t] ? 'Unknown building' : op.k < 0 ? 'Gone' : fortApply(op);
       fortSend('fbr', { to: sid, rid: P.rid, ok: !why, why });
     }

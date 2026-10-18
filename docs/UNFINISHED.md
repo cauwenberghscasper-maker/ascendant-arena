@@ -1,3 +1,16 @@
+# Bastion builder mode (18 Oct 2026, branch `claude/bastion-builder`, PR to main)
+- **Crash fixed on `main` (2822acc):** leaving the fort threw in `WorldModels.dispose` (a variant set's handle has no
+  meshes, only `multi`) and the fort minimap read a colour the traps had no entry for. Both fixed.
+- **Builder mode** (`75-siege-builder.js`, the Build button in the fort): Clash of Clans style. The camera leaves the hero and
+  shows the field from above with a grid overlay (`siegeGridOverlay`: checkered cells, a stronger line every 5); one
+  finger pans, two pinch-zoom. The bottom strip is the shop (pictures, prices, counts). Pick → tap a cell → the
+  see-through preview stands there (green/red) → tap again or Place. Walls/gates: drag to draw. With nothing picked, tap
+  a building for its panel, which now has Move (free, any free cells; `{ o: 'move' }` in `fortCheck/fortApply`, also over
+  the shared-world host). Your fort pauses while you build when nobody else is in it (`siegeAlone`); Start wave closes
+  the mode. The old walk-to-place flow (Done button, draw-while-walking) is gone.
+- Menu pictures and the see-through preview (from the previous branch, carried here): see below.
+- **Open:** try it with real fingers on a phone (pinch and drag); a "place many" toggle for towers; snapping walls to straight lines.
+
 # Painted ground tiles (18 Oct 2026, branch `claude/ground-tiles`, PR to main)
 Casper: the ground felt cheap. Seven seamless hand-painted tiles (Z-Image Turbo, made seamless by
 `tools/ground_tiles.py` offset blending; 512 px webp in `assets/world/_ground/`): grass, dirt, snow, basalt (lava
@@ -22,6 +35,11 @@ Casper (phone screenshot): the fort was an empty green plane and the buildings w
   wave, refilled when the wave is held), tar pit (half speed + a slow burn, bubbles). Walkable: no path cost, not solid,
   never targeted. Upgrade like walls. TRELLIS.2 models `siege_trap_spike/bomb/tar` (relay `bastion-traps`). Check added.
 - **Fun:** pollen and fireflies drift around the camera (additive points).
+- **Menu pictures and placing preview:** every building and trap has a pixel-art picture rendered from its model
+  (`tools/fort_icons.mjs` renders the simplified glbs in `tools/.gen/bastion/`, `tools/fort_icons.py` outlines them →
+  `assets/ui/fort/<type>.webp`), shown in Build and in each building's panel. While placing, a see-through copy of the
+  building stands on the ghost square, tinted green where it fits and red where not (`siegePreview`, WorldModels `ghost` option).
+  Rerun both tools when a model is regenerated.
 - **Open:** Casper's phone showed 30 FPS with "screen 30 Hz" (likely Low Power Mode); check FPS in the fort on a phone
   with a large land; the barracks and builder hut models still need a better generation.
 

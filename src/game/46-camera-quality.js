@@ -148,7 +148,8 @@ function updateCamera(dt) {
   let fx = pl.x, fz = pl.z + 1.5;
   const bb = G.mode === 'hub' ? G.boss : null;
   if (bb && pl.alive) { const d = Math.hypot(bb.x - pl.x, bb.z - pl.z); if (d < 28) { const k = clamp(1 - (d - 14) / 14, 0, 1); fx = lerp(fx, lerp(pl.x, bb.x, 0.6), k); fz = lerp(fz, lerp(pl.z, bb.z, 0.62) - 3.5, k); zoom *= 1 + 0.3 * k; } }
-  Cam.zoom = lerp(Cam.zoom || zoom, zoom, 1 - Math.exp(-dt * 1.5));
+  if (G.builder) { fx = G.builder.cx; fz = G.builder.cz; zoom = G.builder.zoom; } // Bastion builder mode: the camera you pan and zoom
+  Cam.zoom = lerp(Cam.zoom || zoom, zoom, 1 - Math.exp(-dt * (G.builder ? 8 : 1.5)));
   Cam.fx = lerp(Cam.fx == null ? fx : Cam.fx, fx, 1 - Math.exp(-dt * 4)); Cam.fz = lerp(Cam.fz == null ? fz : Cam.fz, fz, 1 - Math.exp(-dt * 4));
   // ~50 degree view (was ~62): shows the heroes' faces and bodies, and a bit more of the world around them
   const th = (Cam.portrait ? 21.5 : 16) * Cam.zoom, tb = (Cam.portrait ? 16.5 : 12.5) * Cam.zoom;
