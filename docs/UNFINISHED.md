@@ -1,3 +1,10 @@
+# Dungeon revive: fallen heroes stay visible (18 Oct 2026, on `main`)
+A downed hero in a party dungeon used to shrink away (teammates couldn't find them) and the HUD showed "back in 1000000000"
+(the run sets `G.respawnT = 1e9`). Now the body stays in its death pose (`downed` in `42-characters.js`), teammates see a
+pulsing green revive ring that fills while they stand in it (`updateRings`) and a tag "<name> is down · stand close to
+revive"; your own screen says "You are down · wait for a teammate to revive you" ("Your party has fallen…" if nobody is up).
+Open: test with two real phones.
+
 # The game is an app (18 Oct 2026, on `main`)
 Casper: the game is meant as an app, not a browser game; README 1.2 now says so. iPhone 120 Hz in the app needs
 `CADisableMinimumFrameDurationOnPhone` in Info.plist (README 6, step 3); there is no `ios/` project in the repo yet, so

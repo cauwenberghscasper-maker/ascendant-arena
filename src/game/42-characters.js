@@ -255,9 +255,10 @@ AssetSlots.register('character', (o) => {
     }
     ring.position.y = 0.3; ring.renderOrder = 0; root.add(ring); // sits above the bumpiest ground; the offset keeps it under the hero
   }
-  let phase = Math.random() * 6, deadT = 0;
+  let phase = Math.random() * 6, deadT = 0, downed = false;
   return {
     root, ring,
+    get downed() { return downed; },
     update(e, dt, t) {
       root.position.set(e.x, 0, e.z);
       root.rotation.y += angDiff(root.rotation.y, e.facing) * (1 - Math.exp(-dt * 18));
@@ -278,8 +279,11 @@ AssetSlots.register('character', (o) => {
       else if (o.xray && e.invulnT > 0 && e.dashT <= 0) { const k = 0.25 + Math.sin(t * 20) * 0.15; tint.setRGB(k + f, k + f, k * 0.8 + f); }
       else tint.setRGB(f, f, f);
       if (hero) AssetLibrary.flash(hero, tint.r * 0.6, tint.g * 0.6, tint.b * 0.6);
-      if (e.alive === false) { deadT += dt; const s = Math.max(0, 1 - Math.max(0, deadT - (clipMotion ? .8 : 0)) * 2.5); root.scale.setScalar(s); root.visible = s > 0; }
-      else { deadT = 0; root.scale.setScalar(1); root.visible = true; }
+      // a fallen hero in a party dungeon stays on the floor (death pose) so teammates can find and revive them
+      downed = e.alive === false && delveOn() && (e.isPlayer || e.isPeer);
+      if (downed) { deadT += dt; root.visible = true; if (!clipMotion) pivot.rotation.x = -Math.min(1.45, deadT * 6); }
+      else if (e.alive === false) { deadT += dt; const s = Math.max(0, 1 - Math.max(0, deadT - (clipMotion ? .8 : 0)) * 2.5); root.scale.setScalar(s); root.visible = s > 0; }
+      else { if (deadT > 0 && !clipMotion) pivot.rotation.x = 0; deadT = 0; root.scale.setScalar(1); root.visible = true; }
       if (ring) { if (o.xray) { ring.rotation.y = -root.rotation.y + e.facing; ring.material.opacity = 0.42 + Math.sin(t * 4) * 0.1; if (ring.userData.tm) ring.userData.tm.opacity = ring.material.opacity; } else ring.rotation.y += dt * 0.6; }
       if (asc) asc.update(t, amt);
     },
