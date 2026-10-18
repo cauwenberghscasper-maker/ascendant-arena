@@ -1,4 +1,4 @@
-# Audio (18 Oct 2026, merged from `feat/audio` into `main`)
+# Audio (18 Oct 2026, branch `feat/audio`, PR #22 to main)
 Done (phase 1 of `docs/AUDIO_PLAN.md`): sound engine. Buses music / ambience / effects / menu, each with a volume
 slider in Settings › Sound (saved as `volMaster`, `volMusic`, `volSfx`, `volUi`, clamped in `sanitizeProfile`).
 Sample files from `AUDIO_MANIFEST` (`49-audio-data.js`) load lazily as .webm (Opus) with .m4a fallback; until a file
@@ -8,6 +8,13 @@ on the first tap anywhere. Fixed: no sound after unmuting if the app was backgro
 Next: phase 2 menu sounds — needs sound files first. Kenney "Interface Sounds", "UI Audio", "RPG Audio",
 "Impact Sounds" (CC0) are the best fit; kenney.nl is blocked from cloud sessions, so Casper downloads them and attaches
 the zips. Then phase 3 music (needs tracks with a commercial licence). No sound files are in the repo yet.
+
+# Dungeon team power set very low (18 Oct 2026, on `main`)
+Casper's party couldn't enter: `CFG.delve.powK` 1 → 0.05 and the per-hero floor 0.7 → 0 (`src/game/36b-delve.js`); a teammate whose Power hasn't arrived yet no longer counts as 0. Raise them again once parties work on real phones.
+
+# Branch housekeeping (18 Oct 2026, on `main`)
+`asset-pipeline`/`asset-drop` are tool branches (own history) and are never merged into `main`; both READMEs now say so.
+`wip/enchant-forge` only holds d11b07a, a duplicate of 4815a7a already in `main`: safe to delete (left for Casper).
 
 # Black screen flashes (18 Oct 2026, on `main`)
 Done: the bloom pass (Cinematic effects) turned a single NaN/overflowed pixel into a black patch or a black screen.

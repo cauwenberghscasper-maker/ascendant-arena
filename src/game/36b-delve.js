@@ -11,7 +11,9 @@ CFG.delve = {
   // monster HP by party size (1-4 heroes), so a short-handed party still fits the fight
   hpParty: [1, 1.7, 2.3, 2.9],
   // Team power needed = pow × the reference hero's Power at the dungeon's level; each member needs at least `floor` of it
-  powK: 1, floor: 0.7,
+  // Team power needed = pow × powK × the reference hero's Power. Set very low for now (Casper, 18 Oct: joining was
+  // blocked); raise powK toward 1 and floor toward 0.7 once parties are tested on real phones.
+  powK: 0.05, floor: 0,
   dungeons: [
     { id: 'crypt', name: 'Rootbound Crypt', biome: 0, boss: 'The Hollow Warden', blurb: 'Roots have split the tombs of the first foresters. Something old keeps the keys.',
       set: { name: 'Rootwarden', b2: { hp: 0.08, armor: 0.05 }, b4: { lifesteal: 0.05, dmg: 0.08 } } },
@@ -77,6 +79,7 @@ function refPower(L) {
 function delveReq(def, di) { return Math.round(DV.powK * diffDef(di).pow * refPower(delveLevel(def, di))); }
 // team: average Power; every member also needs the floor share of the requirement
 function delveGate(def, di, powers) {
+  powers = powers.filter((p) => p > 0); // a teammate whose Power has not arrived yet does not drag the average to 0
   const req = delveReq(def, di), avg = powers.length ? powers.reduce((a, b) => a + b, 0) / powers.length : 0, min = Math.round(req * DV.floor);
   return { req, avg: Math.round(avg), min, ok: avg >= req && powers.every((p) => p >= min), weak: powers.filter((p) => p < min).length };
 }
