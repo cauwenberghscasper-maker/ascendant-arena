@@ -10225,14 +10225,46 @@ const _wm = new THREE.Matrix4();
 // A key that has no file yet (or fails to load) falls back to the synthesized sound of the same name in 50-audio.js,
 // so new files can be dropped in one by one without breaking anything.
 const AUDIO_MANIFEST = {
-  // Phase 2 (UI), 3 (music), 4 (mobs/bosses) and 5 (player/ambience) add their entries here. Example:
-  // 'ui.tap':        { file: 'assets/audio/ui/tap', n: 2, bus: 'ui', preload: true },
+  // ---- menu / UI (phase 2). Sources: Kenney starter kits, see assets/audio/LICENSES.md
+  'ui.tap':     { file: 'assets/audio/ui/tap', n: 2, bus: 'ui', vol: 0.5, rate: 0.03, preload: true },
+  'ui.open':    { file: 'assets/audio/ui/open', n: 2, bus: 'ui', vol: 0.55, rate: 0.02, preload: true },
+  'ui.back':    { file: 'assets/audio/ui/back', n: 2, bus: 'ui', vol: 0.45, preload: true },
+  'ui.tab':     { file: 'assets/audio/ui/tab', bus: 'ui', vol: 0.35, rate: 0.04, preload: true },
+  'ui.toggle':  { file: 'assets/audio/ui/toggle', bus: 'ui', vol: 0.35, preload: true },
+  'ui.equip':   { file: 'assets/audio/ui/equip', bus: 'ui', vol: 0.8, preload: true },
+  'ui.salvage': { file: 'assets/audio/ui/salvage', bus: 'ui', vol: 0.55, rate: 0.05, preload: true },
+  'ui.buy':     { file: 'assets/audio/ui/coin', bus: 'ui', vol: 0.6, rate: 0.03, preload: true },
+  'ui.reel':    { file: 'assets/audio/ui/tab', bus: 'ui', vol: 0.22, rate: 0.06, max: 4, preload: true }, // chest reel ticks
+  // Phase 3 (music), 4 (mobs/bosses) and 5 (player/ambience) add their entries here. Example:
   // 'mus.menu':      { file: 'assets/audio/music/menu', bus: 'music', loop: true, preload: true },
   // 'wolf.attack':   { file: 'assets/audio/mob/wolf-attack', n: 2, group: 'mob', range: 24 },
 };
 
-// bus for the synthesized sounds (anything not listed is 'sfx')
+// bus for the synthesized sounds (anything not listed is 'sfx'); every ui.* key has a synth fallback in 50-audio.js
+// old names that now play a ui.* sound
+const AUDIO_ALIAS = { click: 'ui.tap', tick: 'ui.reel' };
 const SYNTH_BUS = { click: 'ui', tick: 'ui', unlock: 'ui', job: 'ui', level: 'ui', win: 'ui', lose: 'ui', equipped: 'ui' };
+
+// which UI sound a panel button plays (data-act → key). Anything not listed plays 'ui.tap';
+// a disabled button (aria-disabled) plays 'ui.deny'. Results (forged, crafted, level up…) keep their own event sounds.
+const UI_ACT_SOUND = (() => {
+  const m = {}, put = (key, acts) => acts.split(' ').forEach((a) => { m[a] = key; });
+  put('ui.open', 'mSmith mMenu mJournal mCases cases mCollection mDaily mPrestige mIdle mArena mPlayers mHero mGear mBrawlers mSkills mArtifacts mProgress mDelve openMenu openSettings credits inspect hub prestigeReview');
+  put('ui.back', 'close inspectClose mergeBack hsBack hsAllBack unequip abandon');
+  put('ui.tab', 'smithTab invTab idleTab artTab progTab tab relicTier tWhich ownedOnly tZoom collectionSlot');
+  put('ui.equip', 'equip equip2 gwear hsWear petEquip equipAtk toggleArt bSel');
+  put('ui.salvage', 'salvage salvage2 salvageAll sellItem');
+  put('ui.buy', 'buyUpg gems upgradeHere upgradeMax upgradeMax2 vaultUp artUp key spend tSpend');
+  put('ui.forge', 'forge upgrade mergeConfirm reroll enchReroll enchUp craftPiece trialForge');
+  put('ui.claim', 'dailyClaim vaultCollect expClaim pickUp accept turnin offline prestigeConfirm');
+  put('ui.go', 'bPlay mpGo riftGo trialGo dungeonGo expGo travel again queue');
+  put('ui.none', 'caseOpen caseFast reelSkip'); // the chest reel plays its own unlock, ticks and reveal
+  return m;
+})();
+
+// loudness of the synthesized ui.* sounds, matched by measurement to the file-based ones (peaks around -16 dB at
+// default volumes): the synth was tuned quieter, so without this the deny buzz and the chest reveal disappear
+const SYNTH_GAIN = { 'ui.deny': 5.5, 'ui.go': 4.5, 'ui.claim': 2.8, 'ui.reveal': 3.2, 'ui.spin': 2.4, 'ui.forge': 1.3 };
 
 // voice caps per group (samples only; the synth has its own per-key gap)
 const AUDIO_GROUPS = { mob: 6, boss: 3, step: 2 };
@@ -10376,17 +10408,50 @@ const Sfx = {
   },
   // ---- main entry -----------------------------------------------------
   play(name, o) {
+    if (AUDIO_ALIAS[name]) name = AUDIO_ALIAS[name];
     if (!this.ok(name, o && o.gap)) return;
     const m = AUDIO_MANIFEST[name];
     if (m) { const b = this.buf[name]; if (b) { this.playBuf(name, m, b, o); return; } this.load(name); }
     // synth fallback, routed into the right bus (and positioned when x/z are given)
-    const bus = (m && m.bus) || SYNTH_BUS[name] || 'sfx', sp = this.spatial(o, m && m.range);
+    const bus = (m && m.bus) || SYNTH_BUS[name] || (name.startsWith('ui.') ? 'ui' : 'sfx'), sp = this.spatial(o, m && m.range);
     if (sp && sp.g < 0.02) return;
-    this._out = this.voiceOut(bus, o && o.vol != null ? o.vol : 1, sp);
-    try { this.synth(name); } finally { this._out = this.bus.sfx; }
+    this._out = this.voiceOut(bus, (o && o.vol != null ? o.vol : 1) * (SYNTH_GAIN[name] || 1), sp);
+    try { this.synth(name, o || {}); } finally { this._out = this.bus.sfx; }
   },
-  synth(name) {
+  // the sound a panel button makes, from its data-act (UI_ACT_SOUND in 49-audio-data.js)
+  ui(act, disabled) {
+    if (disabled) { this.play('ui.deny'); return; }
+    const k = UI_ACT_SOUND[act] || 'ui.tap'; if (k !== 'ui.none') this.play(k);
+  },
+  synth(name, o) {
     switch (name) {
+      // ---- menu / UI fallbacks (used until a file exists, or if it fails to load) ----
+      case 'ui.tap': this.tone(700, 500, 0.05, 'square', 0.05); break;
+      case 'ui.open': this.tone(520, 0, 0.05, 'triangle', 0.08); this.tone(780, 0, 0.07, 'triangle', 0.08, 0.045); break;
+      case 'ui.back': this.tone(620, 0, 0.05, 'triangle', 0.07); this.tone(415, 0, 0.08, 'triangle', 0.07, 0.045); break;
+      case 'ui.tab': this.tone(1500, 1100, 0.025, 'triangle', 0.06); break;
+      case 'ui.toggle': this.tone(1200, 0, 0.02, 'square', 0.04); this.tone(1600, 0, 0.02, 'square', 0.03, 0.03); break;
+      case 'ui.equip': this.noise(0.12, 0.12, 1800, 1.2, 4000); this.tone(330, 660, 0.12, 'triangle', 0.07, 0.04); break;
+      case 'ui.salvage': this.noise(0.16, 0.2, 900, 0.8, 300); this.tone(140, 70, 0.12, 'square', 0.05); break;
+      case 'ui.buy': this.tone(988, 0, 0.07, 'triangle', 0.08); this.tone(1319, 0, 0.12, 'triangle', 0.08, 0.06); break;
+      case 'ui.reel': this.tone(1800, 1400, 0.02, 'triangle', 0.035); break;
+      // can't do that: two low dull blips
+      case 'ui.deny': this.tone(196, 185, 0.07, 'square', 0.05); this.tone(185, 174, 0.09, 'square', 0.05, 0.09); break;
+      // anvil: inharmonic metal partials + a bright strike
+      case 'ui.forge': [[1250, 0.5, 0.11], [1870, 0.35, 0.07], [2690, 0.22, 0.05], [3970, 0.12, 0.03]].forEach(([f, d, v]) => this.tone(f, f * 0.995, d, 'sine', v)); this.noise(0.05, 0.22, 3500, 0.7); this.tone(160, 90, 0.08, 'square', 0.05); break;
+      case 'ui.claim': [659, 880, 1175].forEach((f, i) => this.tone(f, 0, 0.14, 'triangle', 0.1, i * 0.06)); break;
+      case 'ui.go': this.tone(220, 660, 0.22, 'sawtooth', 0.04); this.noise(0.25, 0.1, 600, 1, 2400); break;
+      // chest lid: latch clack, then a rising shimmer
+      case 'ui.spin': this.noise(0.05, 0.25, 1200, 0.9); this.tone(150, 100, 0.08, 'square', 0.06); this.noise(0.6, 0.06, 2000, 2, 7000); this.tone(330, 990, 0.5, 'triangle', 0.04, 0.05); break;
+      // chest reveal: longer, higher and brighter with rarity (o.r = 0 common … 7 divine)
+      case 'ui.reveal': {
+        const r = Math.max(0, Math.min(7, o.r | 0)), S = [523, 587, 659, 784, 880, 1047, 1175, 1319, 1568, 1760, 2093, 2349];
+        const n = Math.min(2 + r, 7), at = Math.min(r, 4), step = r >= 4 ? 0.075 : 0.06;
+        for (let i = 0; i < n; i++) { const f = S[at + i], last = i === n - 1; this.tone(f, 0, last ? 0.25 + r * 0.06 : 0.14, 'triangle', 0.11, i * step); if (r >= 3) this.tone(f * 2, 0, last ? 0.3 : 0.1, 'sine', 0.035, i * step + 0.01); }
+        if (r >= 4) { this.noise(0.7 + r * 0.1, 0.05 + r * 0.01, 6000, 2, 11000); this.duck(8, 0.6 + r * 0.1); }
+        if (r >= 6) [S[at + n - 1] / 2, S[at + n - 1] * 0.75].forEach((f) => this.tone(f, 0, 0.9, 'sine', 0.06, n * step));
+        break;
+      }
       case 'bolt': this.tone(620, 280, 0.09, 'square', 0.07); break;
       case 'arrow': this.tone(1100, 520, 0.08, 'triangle', 0.1); this.noise(0.05, 0.05, 3000); break;
       case 'orb': this.tone(340, 170, 0.18, 'sine', 0.16); break;
@@ -10922,7 +10987,7 @@ function updateObjective() {
 // --- interact / panels ---
 function interact() {
   const n = G.interact; if (!n || G.mode !== 'hub') return;
-  Sfx.play('click');
+  Sfx.play('ui.open');
   if (n.kind === 'waypoint') return openWaypoints();
   if (n.kind === 'rift') return openRiftPanel();
   if (n.kind === 'riftLeave') return endRift('leave');
@@ -11336,7 +11401,7 @@ function openArenaPanel() {
 }
 function queueArena() {
   openModal(`<div class="queue"><div class="spin"></div><h3>Preparing Showdown…</h3><p>You versus 9 computer opponents</p></div>`, false);
-  Sfx.play('click');
+  Sfx.play('ui.go');
   setTimeout(() => { UI.close(); Coach.note('arenaStart'); startArena(); }, 1600);
 }
 function openResults() {
@@ -11681,8 +11746,8 @@ function openSettings() {
 function handlePanelClick(e) {
   const b = e.target.closest('[data-act]'); if (!b) return;
   UI.tapAnchor = panelAnchor(b);
-  if (b.getAttribute('aria-disabled') === 'true') { Sfx.play('click'); return; }
-  const act = b.dataset.act; Sfx.play('click');
+  if (b.getAttribute('aria-disabled') === 'true') { Sfx.ui(b.dataset.act, true); return; }
+  const act = b.dataset.act; Sfx.ui(act);
   unlockSeen(act);
   if (!LOCAL_PREVIEW && !TEST_MODE && ['tLevel', 't5', 't100', 'tGold', 'tEss', 'tShards', 'tBoss', 'tUnlock', 'tLegend', 'tFocus'].includes(act)) return;
   if (/^dlv/.test(act)) return partyAction(act, b);
@@ -11834,14 +11899,15 @@ function handleVolumeInput(e) {
   Sfx.init(); Sfx.applyVolumes();
 }
 function handleSettingChange(e) {
-  if (e.target.dataset.vol) { handleVolumeInput(e); Sfx.last = {}; Sfx.play(e.target.dataset.vol === 'volSfx' ? 'hit' : 'click'); return; }
+  if (e.target.dataset.vol) { handleVolumeInput(e); Sfx.last = {}; Sfx.play(e.target.dataset.vol === 'volSfx' ? 'hit' : 'ui.tap'); return; }
   if (e.target.dataset.sel2 === 'tBrawler') { openSkills(e.target.value); return; }
-  if (e.target.dataset.sel) { G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; if (e.target.dataset.sel === 'uiSize') { applyUiSize(); measureSheet(); } return; }
+  if (e.target.dataset.sel) { Sfx.play('ui.tab'); G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; if (e.target.dataset.sel === 'uiSize') { applyUiSize(); measureSheet(); } return; }
   const k = e.target.dataset.set; if (!k) return;
   if (k === 'fastXp' && !LOCAL_PREVIEW) return;
   if (k === 'pvp' && !e.target.checked && pvpOffWait() > 0) { e.target.checked = true; showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
   G.profile.settings[k] = e.target.checked; G.dirty = true;
   if (k === 'mute') Sfx.setMute(e.target.checked);
+  Sfx.play('ui.toggle');
   if (k === 'bots') { if (e.target.checked) addHubBots(); else removeHubBots(); }
   if (k === 'npcs') Coach.render();
   if (k === 'pixel') resize();
@@ -13103,7 +13169,8 @@ function creditsPanel() {
   const by = {}; for (const k in GI_SRC) { const [n, a] = GI_SRC[k]; (by[a] = by[a] || []).push(n); }
   const rows = Object.keys(by).sort().map((a) => `<div class="cr"><b>${a}</b><small>${by[a].join(', ')}</small></div>`).join('');
   openModal(`<h3>Credits</h3><p class="fine">Skeletal animations adapted from KayKit by Kay Lousberg (CC0 1.0). Original character meshes retained, with fitted fantasy equipment. See assets/animation/LICENSE.txt.</p><p class="fine">Icons from <b>game-icons.net</b>, licensed under Creative Commons BY 3.0 (creativecommons.org/licenses/by/3.0). Made by:</p><div class="credits">${rows}</div>
-    <p class="fine">Most 3D models, effects and sounds are made in code for this game. Engine: three.js (MIT). Fonts: Cinzel, Lilita One, Pixelify Sans and Rubik (SIL Open Font License 1.1, see assets/fonts).</p>
+    <p class="fine">Menu sounds: Kenney (kenney.nl), starter kit sounds under CC0 and MIT (© 2026 Kenney), see assets/audio/LICENSES.md. Other sounds are made in code for this game.</p>
+    <p class="fine">Most effects are made in code for this game. Engine: three.js (MIT). Fonts: Cinzel, Lilita One, Pixelify Sans and Rubik (SIL Open Font License 1.1, see assets/fonts).</p>
     <p class="fine">Generated 3D models: Microsoft TRELLIS.2 (MIT) from concept images made with Z-Image-Turbo by Tongyi-MAI (Apache 2.0).</p><div class="row end"><button class="primary" data-act="openSettings">Back</button></div>`);
 }
 function openV8Intro() {
@@ -13846,7 +13913,7 @@ function spinCase(id) {
   const strip = $('reelStrip'), box = strip.parentNode, win = strip.children[WIN], cw = strip.children[1].offsetLeft - strip.firstChild.offsetLeft, vw = box.clientWidth;
   const end = win.offsetLeft - strip.firstChild.offsetLeft + win.offsetWidth / 2 - vw / 2 + (Math.random() - 0.5) * (win.offsetWidth - 26), dur = 5600, t0 = performance.now();
   let lastIdx = -1;
-  Sfx.play('super');
+  Sfx.play('ui.spin');
   const step = (now) => {
     if (UI.current !== 'reel') return;
     const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4), x = end * (Reel.skip ? 1 : e);
@@ -13861,7 +13928,7 @@ function reelFinish(card) {
   const res = Reel.res; Reel.done = true; UI.closable = true;
   if (card) card.classList.add('win');
   const it = res.item, ri = rarIdx(it.rarity), p = G.profile, better = res.kept && isBetter(it, p.gear[it.slot]);
-  Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
+  Sfx.play('ui.reveal', { r: ri });
   if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
   const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
   $('reelOut').innerHTML = `${bonusHTML(res.bonus)}${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
@@ -13890,7 +13957,7 @@ function openCasesFast(k) {
   const R = strips.map((_, j) => { const box = $('reel' + j), strip = box.firstChild, win = strip.children[WIN], cw = strip.children[1].offsetLeft - strip.firstChild.offsetLeft, vw = box.clientWidth;
     return { box, strip, cw, vw, end: win.offsetLeft - strip.firstChild.offsetLeft + win.offsetWidth / 2 - vw / 2 + (Math.random() - 0.5) * (win.offsetWidth - 18),
       dur: 2600 + j * 700 + (j === strips.length - 1 ? 1400 : 0), last: -1, done: false }; });
-  const t0 = performance.now(); Sfx.play('super');
+  const t0 = performance.now(); Sfx.play('ui.spin');
   const step = (now) => {
     if (UI.current !== 'reel') return;
     let left = 0;
@@ -13908,7 +13975,7 @@ function openCasesFast(k) {
 function reelLand(r, res, WIN) {
   const ri = rarIdx(res.item.rarity); r.strip.children[WIN].classList.add('win'); r.box.classList.add('landed', res.item.rarity);
   if (ri >= 3 || (res.bonus && res.bonus.k !== 'mats')) { r.box.classList.add('jackpot'); if (!G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, 0.25 + 0.1 * ri); }
-  Sfx.play(res.bonus && res.bonus.k === 'hero' ? 'radiant' : ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
+  if (res.bonus && res.bonus.k === 'hero') Sfx.play('radiant'); else Sfx.play('ui.reveal', { r: ri });
 }
 function reelManyFinish(out, k) {
   Reel.done = true; UI.closable = true;
@@ -14395,31 +14462,31 @@ function boot(hotData) {
   $('modal').addEventListener('pointermove', (e) => { if (spinDrag && e.pointerId === spinDrag.id) Showcase.spin = spinDrag.spin + (e.clientX - spinDrag.x) * 0.012; });
   const endSpin = (e) => { if (spinDrag && e.pointerId === spinDrag.id) spinDrag = null; };
   $('modal').addEventListener('pointerup', endSpin); $('modal').addEventListener('pointercancel', endSpin);
-  $('bHero').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); heroTab('Stats'); } });
-  $('bMenu').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openMenu(); } });
+  $('bHero').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); heroTab('Stats'); } });
+  $('bMenu').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); openMenu(); } });
   for (const icon of $('hubShortcuts').querySelectorAll('[data-icon]')) icon.innerHTML = gi(icon.dataset.icon);
   $('hubShortcuts').addEventListener('click', e => { const button = e.target.closest('[data-quick]'); if (button) openQuickUpgrade(button.dataset.quick); });
   for (const [id, key] of [['bHero', 'm_hero']]) $(id).querySelector('svg').outerHTML = gi(key); // the game's own icon set
-  $('bSet').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openSettings(); } });
+  $('bSet').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); openSettings(); } });
   $('coachX').addEventListener('click', () => { G.profile.tut = Coach.steps.length; G.dirty = true; Coach.render(); });
   $('playBtn').addEventListener('click', startGame);
   $('gearPrompt').addEventListener('click', onGearPrompt);
   $('gearPrompt').addEventListener('pointerdown', (e) => e.stopPropagation());
-  $('caseChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openCases(); } });
-  $('autoChip').addEventListener('click', () => { if (G.started && !G.modal) { const s = G.profile.settings; s.autoHunt = !s.autoHunt; G.dirty = true; Sfx.play('click'); showToast(s.autoHunt ? 'Auto hunt on: your hero fights by itself' : 'Auto hunt off'); } });
+  $('caseChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); openCases(); } });
+  $('autoChip').addEventListener('click', () => { if (G.started && !G.modal) { const s = G.profile.settings; s.autoHunt = !s.autoHunt; G.dirty = true; Sfx.play('ui.toggle'); showToast(s.autoHunt ? 'Auto hunt on: your hero fights by itself' : 'Auto hunt off'); } });
   // Fight / Normal: the same switch as Settings > PvP, one tap from the HUD
   $('pvpChip').addEventListener('click', () => {
     if (!G.started || G.modal) return;
     const s = G.profile.settings;
-    if (s.pvp && pvpOffWait() > 0) { Sfx.play('click'); showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
-    s.pvp = !s.pvp; G.dirty = true; Sfx.play('click');
+    if (s.pvp && pvpOffWait() > 0) { Sfx.play('ui.deny'); showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
+    s.pvp = !s.pvp; G.dirty = true; Sfx.play('ui.toggle');
     const live = typeof MP !== 'undefined' && MP.state === 'on';
     showToast(s.pvp ? (live ? 'Fight mode: other fighters can hit you outside town. You glow red' : 'Fight mode on. It starts once you are online with other players') : 'Normal mode: no PvP');
   });
-  $('mpChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openPlayers(); } });
-  $('bMap').addEventListener('click', () => { if (!G.started) return; Sfx.play('click'); setMap($('mapBox').hidden); });
+  $('mpChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); openPlayers(); } });
+  $('bMap').addEventListener('click', () => { if (!G.started) return; Sfx.play('ui.tab'); setMap($('mapBox').hidden); });
   // the enlarged minimap carries a Travel button that opens the world map with every area
-  $('mapTravel').addEventListener('click', (ev) => { ev.stopPropagation(); if (!G.started || G.modal) return; Sfx.play('click'); openWorldMap(); });
+  $('mapTravel').addEventListener('click', (ev) => { ev.stopPropagation(); if (!G.started || G.modal) return; Sfx.play('ui.open'); openWorldMap(); });
   $('mapBox').addEventListener('click', () => { MM.big = !MM.big; $('mapBox').classList.toggle('big', MM.big); MM.t = 0; });
   setMap(G.profile.settings.map !== false);
   $('ammo').innerHTML = '<i></i><i></i><i></i><i></i><i></i>';
@@ -14440,7 +14507,7 @@ function boot(hotData) {
   }
   window.addEventListener('pagehide', () => saveNow(true));
   if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
-  if (LOCAL_PREVIEW) window.__audio = { Sfx, Music, AUDIO_MANIFEST, sanitizeProfile, defaultProfile, openSettings, G, Cam };
+  if (LOCAL_PREVIEW) window.__audio = { Sfx, Music, AUDIO_MANIFEST, SYNTH_GAIN, sanitizeProfile, defaultProfile, openSettings, G, Cam };
   window.__gameBooted = true;
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});

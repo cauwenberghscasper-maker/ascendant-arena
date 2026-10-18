@@ -31,7 +31,15 @@ New `src/game/49-audio-data.js` (before 50): `AUDIO_MANIFEST` — key → files,
 `22-profile.js`: settings `vol: { master: 0.8, music: 0.6, sfx: 0.8, ui: 0.7 }` + migration in `sanitizeProfile`.
 `61-panels.js`: Settings › Sound — 4 sliders + mute; replace the "All sound is generated live" text (line 744).
 
-## Phase 2 — UI / menu sounds (small, high payoff)
+## Phase 2 — UI / menu sounds (small, high payoff) — DONE 18 Oct 2026 (branch `feat/audio-ui`)
+
+Built: every panel button picks its sound from `UI_ACT_SOUND` (data-act → key, default `ui.tap`, disabled → `ui.deny`)
+via `Sfx.ui(act, disabled)`; Settings switches/dropdowns, HUD buttons, NPC talk and the chest reel (unlock, ticks,
+rarity reveal `ui.reveal {r}`) are wired too. Old `click`/`tick` names are aliases (`AUDIO_ALIAS`). 8 file sounds
+(Kenney starter kits, `assets/audio/ui/`, 96 KB, packed with `tools/audio_pack.py`), the rest synthesized and levelled
+to the files with `SYNTH_GAIN`. `tools/check_audio.cjs` (in `npm run check`) checks files, names, budget, credits.
+Swap in Kenney "Interface Sounds" later: same keys, rerun `tools/audio_pack.py`.
+
 
 | Key | When |
 |---|---|

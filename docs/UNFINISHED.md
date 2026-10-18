@@ -1,3 +1,11 @@
+# Audio phase 2: menu sounds (18 Oct 2026, branch `feat/audio-ui`, PR to main)
+Done: every button now has a fitting sound: open (Menu, Settings, hub tiles, NPCs), back/close, sub-tabs, switches,
+equip, salvage/sell, spend gold/gems, forge anvil, claim, start (Showdown/Rift/dungeon/travel), a "can't" buzz for locked
+buttons, and chest opening (latch, reel ticks, a reveal that grows with rarity Common → Divine). Map of button → sound:
+`UI_ACT_SOUND` in `49-audio-data.js`. Files in `assets/audio/ui/` (Kenney starter kits, CC0/MIT, credited), packed with
+`tools/audio_pack.py`; new check `tools/check_audio.cjs`. Next: swap the placeholders for Kenney "Interface Sounds"/"RPG
+Audio" (needs Casper to download the zips; kenney.nl is blocked from cloud sessions), then phase 3 music.
+
 # The game is an app (18 Oct 2026, on `main`)
 Casper: the game is meant as an app, not a browser game; README 1.2 now says so. iPhone 120 Hz in the app needs
 `CADisableMinimumFrameDurationOnPhone` in Info.plist (README 6, step 3); there is no `ios/` project in the repo yet, so
@@ -10,7 +18,7 @@ Migration `hzVersion` 2: a player who had turned 120 Hz off after it became the 
 Fixed with it: new profiles start with `hzVersion` (brand-new saves skip `sanitizeProfile`, so the old marker never
 saved and the switch reset on every reload). The Safari 60 Hz hint now sits under 60 FPS (`fps60Hint`).
 
-# Audio (18 Oct 2026, branch `feat/audio`, PR #22 to main)
+# Audio phase 1: sound engine (18 Oct 2026, PR #22, merged into main)
 Done (phase 1 of `docs/AUDIO_PLAN.md`): sound engine. Buses music / ambience / effects / menu, each with a volume
 slider in Settings › Sound (saved as `volMaster`, `volMusic`, `volSfx`, `volUi`, clamped in `sanitizeProfile`).
 Sample files from `AUDIO_MANIFEST` (`49-audio-data.js`) load lazily as .webm (Opus) with .m4a fallback; until a file

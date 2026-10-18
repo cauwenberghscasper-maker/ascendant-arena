@@ -36,31 +36,31 @@ function boot(hotData) {
   $('modal').addEventListener('pointermove', (e) => { if (spinDrag && e.pointerId === spinDrag.id) Showcase.spin = spinDrag.spin + (e.clientX - spinDrag.x) * 0.012; });
   const endSpin = (e) => { if (spinDrag && e.pointerId === spinDrag.id) spinDrag = null; };
   $('modal').addEventListener('pointerup', endSpin); $('modal').addEventListener('pointercancel', endSpin);
-  $('bHero').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); heroTab('Stats'); } });
-  $('bMenu').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openMenu(); } });
+  $('bHero').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); heroTab('Stats'); } });
+  $('bMenu').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); openMenu(); } });
   for (const icon of $('hubShortcuts').querySelectorAll('[data-icon]')) icon.innerHTML = gi(icon.dataset.icon);
   $('hubShortcuts').addEventListener('click', e => { const button = e.target.closest('[data-quick]'); if (button) openQuickUpgrade(button.dataset.quick); });
   for (const [id, key] of [['bHero', 'm_hero']]) $(id).querySelector('svg').outerHTML = gi(key); // the game's own icon set
-  $('bSet').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openSettings(); } });
+  $('bSet').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); openSettings(); } });
   $('coachX').addEventListener('click', () => { G.profile.tut = Coach.steps.length; G.dirty = true; Coach.render(); });
   $('playBtn').addEventListener('click', startGame);
   $('gearPrompt').addEventListener('click', onGearPrompt);
   $('gearPrompt').addEventListener('pointerdown', (e) => e.stopPropagation());
-  $('caseChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openCases(); } });
-  $('autoChip').addEventListener('click', () => { if (G.started && !G.modal) { const s = G.profile.settings; s.autoHunt = !s.autoHunt; G.dirty = true; Sfx.play('click'); showToast(s.autoHunt ? 'Auto hunt on: your hero fights by itself' : 'Auto hunt off'); } });
+  $('caseChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); openCases(); } });
+  $('autoChip').addEventListener('click', () => { if (G.started && !G.modal) { const s = G.profile.settings; s.autoHunt = !s.autoHunt; G.dirty = true; Sfx.play('ui.toggle'); showToast(s.autoHunt ? 'Auto hunt on: your hero fights by itself' : 'Auto hunt off'); } });
   // Fight / Normal: the same switch as Settings > PvP, one tap from the HUD
   $('pvpChip').addEventListener('click', () => {
     if (!G.started || G.modal) return;
     const s = G.profile.settings;
-    if (s.pvp && pvpOffWait() > 0) { Sfx.play('click'); showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
-    s.pvp = !s.pvp; G.dirty = true; Sfx.play('click');
+    if (s.pvp && pvpOffWait() > 0) { Sfx.play('ui.deny'); showToast(`Normal mode needs ${pvpOffWait()}s without taking damage`); return; }
+    s.pvp = !s.pvp; G.dirty = true; Sfx.play('ui.toggle');
     const live = typeof MP !== 'undefined' && MP.state === 'on';
     showToast(s.pvp ? (live ? 'Fight mode: other fighters can hit you outside town. You glow red' : 'Fight mode on. It starts once you are online with other players') : 'Normal mode: no PvP');
   });
-  $('mpChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('click'); openPlayers(); } });
-  $('bMap').addEventListener('click', () => { if (!G.started) return; Sfx.play('click'); setMap($('mapBox').hidden); });
+  $('mpChip').addEventListener('click', () => { if (G.started && !G.modal) { Sfx.play('ui.open'); openPlayers(); } });
+  $('bMap').addEventListener('click', () => { if (!G.started) return; Sfx.play('ui.tab'); setMap($('mapBox').hidden); });
   // the enlarged minimap carries a Travel button that opens the world map with every area
-  $('mapTravel').addEventListener('click', (ev) => { ev.stopPropagation(); if (!G.started || G.modal) return; Sfx.play('click'); openWorldMap(); });
+  $('mapTravel').addEventListener('click', (ev) => { ev.stopPropagation(); if (!G.started || G.modal) return; Sfx.play('ui.open'); openWorldMap(); });
   $('mapBox').addEventListener('click', () => { MM.big = !MM.big; $('mapBox').classList.toggle('big', MM.big); MM.t = 0; });
   setMap(G.profile.settings.map !== false);
   $('ammo').innerHTML = '<i></i><i></i><i></i><i></i><i></i>';
@@ -81,7 +81,7 @@ function boot(hotData) {
   }
   window.addEventListener('pagehide', () => saveNow(true));
   if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
-  if (LOCAL_PREVIEW) window.__audio = { Sfx, Music, AUDIO_MANIFEST, sanitizeProfile, defaultProfile, openSettings, G, Cam };
+  if (LOCAL_PREVIEW) window.__audio = { Sfx, Music, AUDIO_MANIFEST, SYNTH_GAIN, sanitizeProfile, defaultProfile, openSettings, G, Cam };
   window.__gameBooted = true;
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});

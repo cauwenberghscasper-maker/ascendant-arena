@@ -137,17 +137,50 @@ const Sfx = {
   },
   // ---- main entry -----------------------------------------------------
   play(name, o) {
+    if (AUDIO_ALIAS[name]) name = AUDIO_ALIAS[name];
     if (!this.ok(name, o && o.gap)) return;
     const m = AUDIO_MANIFEST[name];
     if (m) { const b = this.buf[name]; if (b) { this.playBuf(name, m, b, o); return; } this.load(name); }
     // synth fallback, routed into the right bus (and positioned when x/z are given)
-    const bus = (m && m.bus) || SYNTH_BUS[name] || 'sfx', sp = this.spatial(o, m && m.range);
+    const bus = (m && m.bus) || SYNTH_BUS[name] || (name.startsWith('ui.') ? 'ui' : 'sfx'), sp = this.spatial(o, m && m.range);
     if (sp && sp.g < 0.02) return;
-    this._out = this.voiceOut(bus, o && o.vol != null ? o.vol : 1, sp);
-    try { this.synth(name); } finally { this._out = this.bus.sfx; }
+    this._out = this.voiceOut(bus, (o && o.vol != null ? o.vol : 1) * (SYNTH_GAIN[name] || 1), sp);
+    try { this.synth(name, o || {}); } finally { this._out = this.bus.sfx; }
   },
-  synth(name) {
+  // the sound a panel button makes, from its data-act (UI_ACT_SOUND in 49-audio-data.js)
+  ui(act, disabled) {
+    if (disabled) { this.play('ui.deny'); return; }
+    const k = UI_ACT_SOUND[act] || 'ui.tap'; if (k !== 'ui.none') this.play(k);
+  },
+  synth(name, o) {
     switch (name) {
+      // ---- menu / UI fallbacks (used until a file exists, or if it fails to load) ----
+      case 'ui.tap': this.tone(700, 500, 0.05, 'square', 0.05); break;
+      case 'ui.open': this.tone(520, 0, 0.05, 'triangle', 0.08); this.tone(780, 0, 0.07, 'triangle', 0.08, 0.045); break;
+      case 'ui.back': this.tone(620, 0, 0.05, 'triangle', 0.07); this.tone(415, 0, 0.08, 'triangle', 0.07, 0.045); break;
+      case 'ui.tab': this.tone(1500, 1100, 0.025, 'triangle', 0.06); break;
+      case 'ui.toggle': this.tone(1200, 0, 0.02, 'square', 0.04); this.tone(1600, 0, 0.02, 'square', 0.03, 0.03); break;
+      case 'ui.equip': this.noise(0.12, 0.12, 1800, 1.2, 4000); this.tone(330, 660, 0.12, 'triangle', 0.07, 0.04); break;
+      case 'ui.salvage': this.noise(0.16, 0.2, 900, 0.8, 300); this.tone(140, 70, 0.12, 'square', 0.05); break;
+      case 'ui.buy': this.tone(988, 0, 0.07, 'triangle', 0.08); this.tone(1319, 0, 0.12, 'triangle', 0.08, 0.06); break;
+      case 'ui.reel': this.tone(1800, 1400, 0.02, 'triangle', 0.035); break;
+      // can't do that: two low dull blips
+      case 'ui.deny': this.tone(196, 185, 0.07, 'square', 0.05); this.tone(185, 174, 0.09, 'square', 0.05, 0.09); break;
+      // anvil: inharmonic metal partials + a bright strike
+      case 'ui.forge': [[1250, 0.5, 0.11], [1870, 0.35, 0.07], [2690, 0.22, 0.05], [3970, 0.12, 0.03]].forEach(([f, d, v]) => this.tone(f, f * 0.995, d, 'sine', v)); this.noise(0.05, 0.22, 3500, 0.7); this.tone(160, 90, 0.08, 'square', 0.05); break;
+      case 'ui.claim': [659, 880, 1175].forEach((f, i) => this.tone(f, 0, 0.14, 'triangle', 0.1, i * 0.06)); break;
+      case 'ui.go': this.tone(220, 660, 0.22, 'sawtooth', 0.04); this.noise(0.25, 0.1, 600, 1, 2400); break;
+      // chest lid: latch clack, then a rising shimmer
+      case 'ui.spin': this.noise(0.05, 0.25, 1200, 0.9); this.tone(150, 100, 0.08, 'square', 0.06); this.noise(0.6, 0.06, 2000, 2, 7000); this.tone(330, 990, 0.5, 'triangle', 0.04, 0.05); break;
+      // chest reveal: longer, higher and brighter with rarity (o.r = 0 common … 7 divine)
+      case 'ui.reveal': {
+        const r = Math.max(0, Math.min(7, o.r | 0)), S = [523, 587, 659, 784, 880, 1047, 1175, 1319, 1568, 1760, 2093, 2349];
+        const n = Math.min(2 + r, 7), at = Math.min(r, 4), step = r >= 4 ? 0.075 : 0.06;
+        for (let i = 0; i < n; i++) { const f = S[at + i], last = i === n - 1; this.tone(f, 0, last ? 0.25 + r * 0.06 : 0.14, 'triangle', 0.11, i * step); if (r >= 3) this.tone(f * 2, 0, last ? 0.3 : 0.1, 'sine', 0.035, i * step + 0.01); }
+        if (r >= 4) { this.noise(0.7 + r * 0.1, 0.05 + r * 0.01, 6000, 2, 11000); this.duck(8, 0.6 + r * 0.1); }
+        if (r >= 6) [S[at + n - 1] / 2, S[at + n - 1] * 0.75].forEach((f) => this.tone(f, 0, 0.9, 'sine', 0.06, n * step));
+        break;
+      }
       case 'bolt': this.tone(620, 280, 0.09, 'square', 0.07); break;
       case 'arrow': this.tone(1100, 520, 0.08, 'triangle', 0.1); this.noise(0.05, 0.05, 3000); break;
       case 'orb': this.tone(340, 170, 0.18, 'sine', 0.16); break;

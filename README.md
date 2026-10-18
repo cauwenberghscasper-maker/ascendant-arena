@@ -364,7 +364,8 @@ and ignore GitHub's "Compare & pull request" banner for them.
 ### Licences we ship (keep this list true)
 
 TRELLIS.2 MIT · Z-Image Turbo Apache-2.0 · KayKit CC0 · Quaternius CC0 · game-icons.net CC BY 3.0 (named on the
-Credits screen). Anything new gets added here, to `assets/world/CREDITS.md`, and to the Credits screen if its licence
+Credits screen) · Kenney starter-kit sounds CC0/MIT (MIT: © Kenney on the Credits screen; per file in
+`assets/audio/LICENSES.md`). Anything new gets added here, to `assets/world/CREDITS.md`, and to the Credits screen if its licence
 needs attribution. Keep concepts, `tools/.gen/`, rejected meshes and zips out of the shipped `www/`.
 
 ## 4. Where to change what
@@ -394,7 +395,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Panels, settings, button actions (`data-act`) | `src/game/61-panels.js` (`handlePanelClick`) |
 | Menus, skill-tree screen, credits | `src/game/63-menus.js` |
 | Effects for hits, kills and events | `src/game/62-events-fx.js` (`processEvents`); particles and sprite FX: `45-fx.js` |
-| Sound: engine, buses, music crossfade, synth fallback | `src/game/50-audio.js` (`Sfx`, `Music`); which sound files exist and their bus/volume/voice caps: `49-audio-data.js` (`AUDIO_MANIFEST`), files in `assets/audio/` |
+| Sound: engine, buses, music crossfade, synth fallback | `src/game/50-audio.js` (`Sfx`, `Music`); which sound files exist and their bus/volume/voice caps: `49-audio-data.js` (`AUDIO_MANIFEST`), files in `assets/audio/` (sources and licences: `assets/audio/LICENSES.md`, pack new files with `tools/audio_pack.py`); which sound each menu button makes: `UI_ACT_SOUND` |
 | Touch and keyboard controls | `src/game/51-input.js` |
 | Camera, adaptive quality, pixel-art pass | `src/game/46-camera-quality.js` |
 | Game loop, startup, 120 Hz frame cap (standard; Options › 60 FPS caps at 60). Frames between the 60 Hz sim steps are interpolated: `Interp` | `src/game/80-main-loop.js`, `90-boot.js` |
