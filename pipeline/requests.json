@@ -1,49 +1,33 @@
 {
-"batch": "mobs-a",
+"batch": "props-a",
 "files": [
 {
-"name": "mob_toad.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/e4a8d8fb951d79f46474cf280d746cdd7d4dc21dc4dd8961e9af1ffcf61a8482/trellis_output_2026-10-18T221254.glb"
+"name": "delve_sarcophagus.glb",
+"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/12c0dba1859751eec5ccbd92407e76d3aac85430e4659a8bbcd64bbe783e67bb/trellis_output_2026-10-18T222258.glb"
 },
 {
-"name": "mob_toad_concept.webp",
-"url": "https://mcp-tools-z-image-turbo.hf.space/--replicas/pc2q4/gradio_api/file=/tmp/gradio/41c5127c51914c3caea41e308631aff849ad6c920623e83d8ffbae60a404e4dd/image.webp"
+"name": "delve_icecoffin.glb",
+"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/52ac4e1cfe4a4bb9a798b775e8ef2e3f8d37ee15e89f00fc95c7693d261082f0/trellis_output_2026-10-18T222330.glb"
 },
 {
-"name": "mob_bat.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/2413f0c4c16ea64b4208d1077809fef7c8c6ef654418a49e63d25aa5847f1091/trellis_output_2026-10-18T221522.glb"
+"name": "delve_slagcart.glb",
+"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/6f84c4f6a498263c7b09632c852a92e3caa69b93164c779807a29a23f5ec0a39/trellis_output_2026-10-18T222406.glb"
 },
 {
-"name": "mob_hornet.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/4f5b8de1abb44b75f4e77197f07d7e6d8147a0c3885fa7bfdd1b98dbd8564083/trellis_output_2026-10-18T221548.glb"
+"name": "delve_bookshelf.glb",
+"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/2b60a46936b46e59d01f8a976034a7693c45f0a53a8996d6ee0b49c5b0af0641/trellis_output_2026-10-18T222445.glb"
 },
 {
-"name": "mob_scorpion.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/a7bd0f1528b629267326ad30f837433074f1c0e0bbbc8da759c0f82a626221d1/trellis_output_2026-10-18T221607.glb"
+"name": "delve_coralshrine.glb",
+"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/8c7711792ca1d06255090a73f6fe997d5589c3a21cfbaa4ade0e20ecf6bf9cfc/trellis_output_2026-10-18T222507.glb"
 },
 {
-"name": "mob_viper.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/02589621699ac6a222e122b39fd52a388d91971fde67bfe4c83c9f97581b53c6/trellis_output_2026-10-18T221650.glb"
+"name": "delve_meteor.glb",
+"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/47175cd12c81986e7ca31919f17e856b1b92501bfcd5b1da81b3cd4da6b4257b/trellis_output_2026-10-18T222537.glb"
 },
 {
-"name": "mob_myconid.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/8e93df9766013aebcbf00bec97a5a3a4e1fa65b97c0877cc62b5da429c692735/trellis_output_2026-10-18T221714.glb"
-},
-{
-"name": "mob_crab.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/714189c620a00f77a665a71559dd34baf91a1188b8403f035546aa4b69717cb0/trellis_output_2026-10-18T221738.glb"
-},
-{
-"name": "mob_jelly.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/f62b4283e766c4a951929054401d444e504ab68abe604184d1d8ea14e182f4c0/trellis_output_2026-10-18T221816.glb"
-},
-{
-"name": "mob_wyvern.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/2846a8419e3e743b0702f3729d156ef5595391a16735c803d615a34f5817f646/trellis_output_2026-10-18T221830.glb"
-},
-{
-"name": "mob_glassbull.glb",
-"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/88867d8a2e71e41b24bfda6ae3132846513eb3eb5bd3a2c905e6e700d302754e/trellis_output_2026-10-18T221849.glb"
+"name": "siege_barracks2.glb",
+"url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/7ce41aafdb81dcc2d93c5c801d3cdc8dcfcc747f8e4ebd619d2cecb7a1c11077/trellis_output_2026-10-18T222624.glb"
 }
 ]
 }
