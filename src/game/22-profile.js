@@ -6,12 +6,12 @@ function defaultProfile() {
   const gear = {};
   for (const s of CFG.gear.slots) gear[s] = makeItem(s, 'common', 1, 'Worn ' + ITEM_NAMES[s][0]);
   const prof = {
-    v: 2, level: 1, xp: 0, prestige: 0, gold: 0, trophies: 0, bestTrophies: 0, cls: STARTER_HERO, starterBrawler: STARTER_HERO, mergeVersion: 1, artVersion: 1, gear, bag: [],
+    v: 2, level: 1, xp: 0, prestige: 0, gold: 0, trophies: 0, bestTrophies: 0, cls: STARTER_HERO, starterBrawler: STARTER_HERO, mergeVersion: 1, artVersion: 1, hzVersion: 2, gear, bag: [],
     treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
     essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
-    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, hz120: true, volMaster: 80, volMusic: 60, volSfx: 80, volUi: 70 },
+    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, fps60: false, volMaster: 80, volMusic: 60, volSfx: 80, volUi: 70 },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
   if (TEST_MODE) prof.playtest = TEST_PROFILE_TAG;
@@ -49,7 +49,9 @@ function sanitizeProfile(p) {
   out.starterBrawler = CFG.brawlerOrder.includes(p.starterBrawler) ? p.starterBrawler : out.cls;
   if (out.starterBrawler !== oldFirst && out.mastery && out.mastery['w:' + oldFirst]) out.mastery = Object.assign({}, out.mastery, { ['w:' + out.starterBrawler]: Math.max(out.mastery['w:' + out.starterBrawler] || 0, out.mastery['w:' + oldFirst]) });
   if (!p.npcVersion) { out.settings.npcs = true; out.npcVersion = 1; } // townsfolk are 3D models now: show them once for every save (still a switch in Options)
-  if (!p.hzVersion) { out.settings.hz120 = true; out.hzVersion = 1; } // 120 Hz became the default: switch it on once for every save (still a switch in Options)
+  // 120 Hz is the standard; the Options switch is now "60 FPS". A player who turned 120 Hz off after it became the default keeps 60
+  if ((p.hzVersion | 0) < 2) { out.settings.fps60 = !!(p.hzVersion && p.settings && p.settings.hz120 === false); out.hzVersion = 2; }
+  delete out.settings.hz120;
   if (!p.mergeVersion) { out.settings.autoSalvage = 0; out.mergeVersion = 1; }
   if (!out.brawlers || typeof out.brawlers !== 'object') out.brawlers = {};
   if (!out.brawlers[out.cls]) out.brawlers[out.cls] = newBrawlerState();
