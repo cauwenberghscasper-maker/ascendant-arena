@@ -1,3 +1,10 @@
+# Black screen flashes (18 Oct 2026, on `main`)
+Done: the bloom pass (Cinematic effects) turned a single NaN/overflowed pixel into a black patch or a black screen.
+`Post` now reads any such sample as black (`okc` in `46-camera-quality.js`). Three world models had zero-length normals
+(rift_gate, upside_tower, sky_altar), which give NaN pixels on phone GPUs; `fixZeroNormals` in `41-assets.js` repairs
+them on load for every model. Open: confirm on a real phone (software rendering here never makes the NaN pixels), and
+re-export those three models with clean normals.
+
 # Dungeon mode (18 Oct 2026, branch `claude/serene-franklin-blymcb`, PR #21 to main)
 - **Now:** a main mode (menu tile "Dungeons", opens at level 12) next to Showdown. Six dungeons, one per biome (`CFG.delve.dungeons`), each with its own boss and a five-piece set (2- and 4-piece bonuses, `delveSetBonus` in `gearTotals`). Difficulties Normal → Hard → Heroic → Mythic → Ascendant 1, 2, … (endless); clearing one opens the next. Each asks a **team power** (average Power of the party, plus a per-hero floor of 70%), measured against a level-L hero in Rare level-L gear (`refPower`). Monster HP scales with party size (×1/1.7/2.3/2.9).
 - **Rooms:** seeded per run (`delveLayout`): mixed hall shapes, pillars, dark halls, fight types (guard, 3-wave swarm, elites) and event rooms (gold goblin vault, cursed altar, pressure plates, spike hall, echo shrine, mimic chest, moonwell). Doors open strictly in order. Loot is each player's own roll; weekly first clear per difficulty gives a sure set piece.

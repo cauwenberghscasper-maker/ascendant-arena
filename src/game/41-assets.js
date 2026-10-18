@@ -82,6 +82,22 @@ function heldWeaponAsset(cls) {
   const id = SIGNATURE_WEAPON[cls] || 'weapon.' + cls;
   return ASSET_MANIFEST[id] ? id : null;
 }
+// a few generated models carry vertices with a zero-length normal (rift_gate, upside_tower, sky_altar). Lit on a phone GPU
+// they give NaN pixels that the bloom blur spreads into black flashes, so point each one along a face it belongs to.
+function fixZeroNormals(g) {
+  const n = g.attributes.normal, pos = g.attributes.position; if (!n || !pos || g.userData.normalsChecked) return; g.userData.normalsChecked = true;
+  const bad = new Set(); for (let i = 0; i < n.count; i++) { const x = n.getX(i), y = n.getY(i), z = n.getZ(i); if (!(x * x + y * y + z * z > 1e-4)) bad.add(i); }
+  if (!bad.size) return;
+  const idx = g.index, tris = idx ? idx.count : pos.count, at = (k) => (idx ? idx.getX(k) : k), a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  for (let k = 0; k + 2 < tris && bad.size; k += 3) {
+    const v = [at(k), at(k + 1), at(k + 2)]; if (!v.some((i) => bad.has(i))) continue;
+    a.fromBufferAttribute(pos, v[0]); b.fromBufferAttribute(pos, v[1]); c.fromBufferAttribute(pos, v[2]);
+    c.sub(b); a.sub(b); c.cross(a); if (!(c.lengthSq() > 1e-12)) continue; c.normalize();
+    for (const i of v) if (bad.delete(i)) n.setXYZ(i, c.x, c.y, c.z);
+  }
+  for (const i of bad) n.setXYZ(i, 0, 1, 0); // only on degenerate triangles
+  n.needsUpdate = true;
+}
 // soft fresnel rim so generated characters read against any ground colour (like the toon heroes' rim)
 function addRimLight(m, k) {
   m.onBeforeCompile = (sh) => {
@@ -193,6 +209,7 @@ const AssetLibrary = {
     if (id.startsWith('hero.') && !def.measuredHand && !/hero\.(arrow)$/.test(id)) def.fist = findFist(scene); // Measured rigs keep their reviewed hand anchors.
     const meshes = []; scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
     for (const o of meshes) {
+      fixZeroNormals(o.geometry);
       o.castShadow = true;
       const m = o.material; m.envMap = this.env; m.envMapIntensity = 1.0;
       m.roughness = Math.max(def.style === 'painted-v3' ? 0.7 : 0.35, m.roughness);

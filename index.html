@@ -7622,6 +7622,22 @@ function heldWeaponAsset(cls) {
   const id = SIGNATURE_WEAPON[cls] || 'weapon.' + cls;
   return ASSET_MANIFEST[id] ? id : null;
 }
+// a few generated models carry vertices with a zero-length normal (rift_gate, upside_tower, sky_altar). Lit on a phone GPU
+// they give NaN pixels that the bloom blur spreads into black flashes, so point each one along a face it belongs to.
+function fixZeroNormals(g) {
+  const n = g.attributes.normal, pos = g.attributes.position; if (!n || !pos || g.userData.normalsChecked) return; g.userData.normalsChecked = true;
+  const bad = new Set(); for (let i = 0; i < n.count; i++) { const x = n.getX(i), y = n.getY(i), z = n.getZ(i); if (!(x * x + y * y + z * z > 1e-4)) bad.add(i); }
+  if (!bad.size) return;
+  const idx = g.index, tris = idx ? idx.count : pos.count, at = (k) => (idx ? idx.getX(k) : k), a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  for (let k = 0; k + 2 < tris && bad.size; k += 3) {
+    const v = [at(k), at(k + 1), at(k + 2)]; if (!v.some((i) => bad.has(i))) continue;
+    a.fromBufferAttribute(pos, v[0]); b.fromBufferAttribute(pos, v[1]); c.fromBufferAttribute(pos, v[2]);
+    c.sub(b); a.sub(b); c.cross(a); if (!(c.lengthSq() > 1e-12)) continue; c.normalize();
+    for (const i of v) if (bad.delete(i)) n.setXYZ(i, c.x, c.y, c.z);
+  }
+  for (const i of bad) n.setXYZ(i, 0, 1, 0); // only on degenerate triangles
+  n.needsUpdate = true;
+}
 // soft fresnel rim so generated characters read against any ground colour (like the toon heroes' rim)
 function addRimLight(m, k) {
   m.onBeforeCompile = (sh) => {
@@ -7733,6 +7749,7 @@ const AssetLibrary = {
     if (id.startsWith('hero.') && !def.measuredHand && !/hero\.(arrow)$/.test(id)) def.fist = findFist(scene); // Measured rigs keep their reviewed hand anchors.
     const meshes = []; scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
     for (const o of meshes) {
+      fixZeroNormals(o.geometry);
       o.castShadow = true;
       const m = o.material; m.envMap = this.env; m.envMapIntensity = 1.0;
       m.roughness = Math.max(def.style === 'painted-v3' ? 0.7 : 0.35, m.roughness);
@@ -9813,9 +9830,12 @@ const Post = {
     this.main = rt(2, 2, { depthBuffer: true, samples: DEVICE.touch ? 2 : 4 });
     this.a = [rt(2, 2), rt(2, 2)]; this.b = [rt(2, 2), rt(2, 2)];
     const vs = 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
-    const quad = (fs, u) => new THREE.ShaderMaterial({ uniforms: u, vertexShader: vs, fragmentShader: fs, depthTest: false, depthWrite: false });
+    // one NaN or overflowed pixel (a bad normal, a shader edge case on some phone GPUs) would be blurred into a black
+    // patch over the screen, so any such sample is read as black before it reaches the blur or the final picture
+    const ok = 'vec3 okc(vec3 c) { uvec3 e = floatBitsToUint(c) & 0x7f800000u; return any(equal(e, uvec3(0x7f800000u))) ? vec3(0.0) : c; }\n';
+    const quad = (fs, u) => new THREE.ShaderMaterial({ uniforms: u, vertexShader: vs, fragmentShader: ok + fs, depthTest: false, depthWrite: false });
     this.bright = quad(`uniform sampler2D t; uniform float thr; uniform vec2 tx; varying vec2 vUv;
-      void main() { vec3 c = (texture2D(t, vUv + tx * vec2(-1.,-1.)).rgb + texture2D(t, vUv + tx * vec2(1.,-1.)).rgb + texture2D(t, vUv + tx * vec2(-1.,1.)).rgb + texture2D(t, vUv + tx * vec2(1.,1.)).rgb) * .25;
+      void main() { vec3 c = (okc(texture2D(t, vUv + tx * vec2(-1.,-1.)).rgb) + okc(texture2D(t, vUv + tx * vec2(1.,-1.)).rgb) + okc(texture2D(t, vUv + tx * vec2(-1.,1.)).rgb) + okc(texture2D(t, vUv + tx * vec2(1.,1.)).rgb)) * .25;
         float l = max(c.r, max(c.g, c.b)); gl_FragColor = vec4(c * smoothstep(thr, thr + 0.6, l), 1.0); }`, { t: { value: null }, thr: { value: 0.78 }, tx: { value: new THREE.Vector2() } });
     this.blur = quad(`uniform sampler2D t; uniform vec2 dir; varying vec2 vUv;
       void main() { vec3 c = texture2D(t, vUv).rgb * .227027;
@@ -9824,7 +9844,7 @@ const Post = {
         gl_FragColor = vec4(c, 1.0); }`, { t: { value: null }, dir: { value: new THREE.Vector2() } });
     this.final = quad(`uniform sampler2D t; uniform sampler2D b1; uniform sampler2D b2; uniform float bloom; uniform float dark; varying vec2 vUv;
       void main() {
-        vec3 c = texture2D(t, vUv).rgb + (texture2D(b1, vUv).rgb * .65 + texture2D(b2, vUv).rgb * .55) * bloom;
+        vec3 c = okc(texture2D(t, vUv).rgb) + okc(texture2D(b1, vUv).rgb * .65 + texture2D(b2, vUv).rgb * .55) * bloom;
         float l = dot(c, vec3(.2126, .7152, .0722));
         c = mix(c * vec3(.94, .98, 1.06), c * vec3(1.05, 1.0, .93), smoothstep(.05, .7, l)); // cool shade, warm light
         c = mix(vec3(l), c, 1.08);                                                           // a touch more colour
