@@ -1,5 +1,3 @@
-# Claude Code
+# Rules for Claude
 
-All rules, style, game info, vision and the 3D model guide are in [`README.md`](README.md). Read the whole README before changing anything, then the top of `docs/UNFINISHED.md`.
-
-@README.md
+- Before making any changes in this project, read `README.md` in the repository root first.
