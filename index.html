@@ -3367,12 +3367,12 @@ function defaultProfile() {
   const gear = {};
   for (const s of CFG.gear.slots) gear[s] = makeItem(s, 'common', 1, 'Worn ' + ITEM_NAMES[s][0]);
   const prof = {
-    v: 2, level: 1, xp: 0, prestige: 0, gold: 0, trophies: 0, bestTrophies: 0, cls: STARTER_HERO, starterBrawler: STARTER_HERO, mergeVersion: 1, artVersion: 1, gear, bag: [],
+    v: 2, level: 1, xp: 0, prestige: 0, gold: 0, trophies: 0, bestTrophies: 0, cls: STARTER_HERO, starterBrawler: STARTER_HERO, mergeVersion: 1, artVersion: 1, hzVersion: 2, gear, bag: [],
     treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
-    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, fort: { pads: [], stones: 0 }, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
-    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, hz120: true, volMaster: 80, volMusic: 60, volSfx: 80, volUi: 70 },
+    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
+    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, fps60: false, volMaster: 80, volMusic: 60, volSfx: 80, volUi: 70 },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
   if (TEST_MODE) prof.playtest = TEST_PROFILE_TAG;
@@ -3410,7 +3410,9 @@ function sanitizeProfile(p) {
   out.starterBrawler = CFG.brawlerOrder.includes(p.starterBrawler) ? p.starterBrawler : out.cls;
   if (out.starterBrawler !== oldFirst && out.mastery && out.mastery['w:' + oldFirst]) out.mastery = Object.assign({}, out.mastery, { ['w:' + out.starterBrawler]: Math.max(out.mastery['w:' + out.starterBrawler] || 0, out.mastery['w:' + oldFirst]) });
   if (!p.npcVersion) { out.settings.npcs = true; out.npcVersion = 1; } // townsfolk are 3D models now: show them once for every save (still a switch in Options)
-  if (!p.hzVersion) { out.settings.hz120 = true; out.hzVersion = 1; } // 120 Hz became the default: switch it on once for every save (still a switch in Options)
+  // 120 Hz is the standard; the Options switch is now "60 FPS". A player who turned 120 Hz off after it became the default keeps 60
+  if ((p.hzVersion | 0) < 2) { out.settings.fps60 = !!(p.hzVersion && p.settings && p.settings.hz120 === false); out.hzVersion = 2; }
+  delete out.settings.hz120;
   if (!p.mergeVersion) { out.settings.autoSalvage = 0; out.mergeVersion = 1; }
   if (!out.brawlers || typeof out.brawlers !== 'object') out.brawlers = {};
   if (!out.brawlers[out.cls]) out.brawlers[out.cls] = newBrawlerState();
@@ -12135,12 +12137,13 @@ function openSaveCode() {
     <h4 class="sub">Load a code</h4><textarea id="codeIn" class="code" rows="3" placeholder="Paste a code that starts with AA8:"></textarea>
     <div class="row end"><button class="ghost" data-act="openSettings">Back</button><button class="warn" data-act="loadCode">Load and replace this hero</button></div>`);
 }
-// when 120 Hz is on but the browser only refreshes the page 60 times a second, say where the limit is (a page can't lift it)
+// the game runs at 120 Hz; when the phone (or Safari) only refreshes it 60 times a second, say where the limit is (the game can't lift it)
 const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-function hz120Hint(s) {
-  if (!s.hz120 || Q.hz > 75) return 'Smoother motion on 120 Hz screens. Uses more battery. Turn off to save battery. No change on 60 Hz screens';
-  return IS_IOS ? 'Safari limits web pages to 60 Hz. To unlock 120: iPhone Settings › Apps › Safari › Advanced › Feature Flags, turn off "Prefer Page Rendering Updates near 60fps", then reload'
-    : 'Your browser or phone gives this page only 60 Hz. Check battery saver and the display refresh-rate setting';
+function fps60Hint(s) {
+  if (s.fps60 || Q.hz > 75) return 'Play at 60 frames a second instead of 120. Saves battery';
+  if (IS_IOS) return window.Capacitor?.isNativePlatform?.() ? 'Your iPhone gives the game only 60 Hz. Turn off Low Power Mode and Settings › Accessibility › Motion › Limit Frame Rate'
+    : 'Safari limits web pages to 60 Hz: play the app for 120, or turn off Settings › Apps › Safari › Advanced › Feature Flags › "Prefer Page Rendering Updates near 60fps"';
+  return 'Your phone gives the game only 60 Hz. Check battery saver and the display refresh-rate setting';
 }
 function openSettings() {
   UI.current = 'settings';
@@ -12165,7 +12168,7 @@ function openSettings() {
       <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
     ${tg('fx', 'Cinematic effects', 'Bloom on crystals, lava, torches and magic, soft shadows and colour grading (with High graphics)')}
-    ${tg('hz120', '120 Hz', hz120Hint(s))}
+    ${tg('fps60', '60 FPS', fps60Hint(s))}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
@@ -14731,9 +14734,9 @@ const FRAME_MS = 1000 / 60, FRAME_MS_120 = 1000 / 120;
 let lastFrame = performance.now(), nextFrameAt = lastFrame, simAcc = 0, saveT = 0, achT = 0;
 function frame(now) {
   requestAnimationFrame(frame);
-  // Keep a 60 Hz cadence even on 90/120/144 Hz screens (up to 120 with the 120 Hz option). Accumulate elapsed
+  // Cap at 120 Hz (60 Hz with the 60 FPS option) even on faster screens. Accumulate elapsed
   // time between processed frames so simulation stays at its existing fixed timestep.
-  const hz120 = !!(G.profile && G.profile.settings.hz120), ms = hz120 ? FRAME_MS_120 : FRAME_MS;
+  const hz120 = !(G.profile && G.profile.settings.fps60), ms = hz120 ? FRAME_MS_120 : FRAME_MS;
   Q.raf++;
   if (now < nextFrameAt - (hz120 ? 1 : 0.5)) return;
   nextFrameAt = now < nextFrameAt ? nextFrameAt + ms : now + ms - ((now - nextFrameAt) % ms); // an early frame keeps the grid

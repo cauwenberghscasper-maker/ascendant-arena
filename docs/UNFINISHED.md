@@ -8,6 +8,19 @@
   `arena_tower` as the ballista turret); a 32x32 pixel icon for Bastion Stones (shown as text now); a "New" pulse for the
   Bastion house at level 20; balance over many waves is not playtested (`CFG.siege`: tower `dmg`/`cost`/`stones`,
   `lvlBase`/`lvlPer`, objective `mult`); warriors use the Smith Garo townsfolk model until a soldier model exists.
+
+# The game is an app (18 Oct 2026, on `main`)
+Casper: the game is meant as an app, not a browser game; README 1.2 now says so. iPhone 120 Hz in the app needs
+`CADisableMinimumFrameDurationOnPhone` in Info.plist (README 6, step 3); there is no `ios/` project in the repo yet, so
+it isn't set. Open: after `npx cap add ios`, add the key and check Show FPS reads "screen 120 Hz" on a ProMotion iPhone.
+The 60 FPS hint now gives app advice (Low Power Mode, Limit Frame Rate) inside the app and Safari advice only in Safari.
+
+# 120 Hz standard, Options › 60 FPS (18 Oct 2026, on `main`)
+The 120 Hz switch is gone: the game always caps at 120, and Options › 60 FPS (`settings.fps60`) caps at 60 for battery.
+Migration `hzVersion` 2: a player who had turned 120 Hz off after it became the default keeps 60; everyone else gets 120.
+Fixed with it: new profiles start with `hzVersion` (brand-new saves skip `sanitizeProfile`, so the old marker never
+saved and the switch reset on every reload). The Safari 60 Hz hint now sits under 60 FPS (`fps60Hint`).
+
 # Audio (18 Oct 2026, branch `feat/audio`, PR #22 to main)
 Done (phase 1 of `docs/AUDIO_PLAN.md`): sound engine. Buses music / ambience / effects / menu, each with a volume
 slider in Settings › Sound (saved as `volMaster`, `volMusic`, `volSfx`, `volUi`, clamped in `sanitizeProfile`).
