@@ -240,7 +240,8 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
 - **Showdown arena:** 10 fighters vs bots, closing gas, power cubes, trophies. **The Rift.**
 - **Bastion Siege** (level 20, the Bastion house west of the plaza): endless waves from 1-4 random sides attack The
   Keep and two wagons. Build anywhere on a 2 m grid: walls and gates you draw as you walk (wood, stone, iron), archers,
-  cannons, ballistas, mage towers, barracks, stone mines and builder huts (one upgrade at a time per hut). Monsters walk
+  cannons, ballistas, mage towers, barracks, stone mines and builder huts (one upgrade at a time per hut), and traps
+  monsters walk over: spike plates, powder kegs (once per wave) and tar pits (slow and burn). Monsters walk
   around walls and break the cheapest piece when closed in. The land grows with your level to 500×500 m. A fallen
   Keep restarts the wave it fell on, never lower. Your fort is a shared world: friends join with its code, even while
   you are offline (saved on the server; the player in it longest runs the waves).

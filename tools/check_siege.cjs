@@ -23,7 +23,7 @@ for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions', 'hero
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') + 'const P = CFG.progression;' + section('const AC =', 'const G = {') +
   section('class Grid {', '// --- entities') + section('function patrolCountFor(', 'function rewardEnemyKill(') + section('const PELLET_COLORS', '// --- hub step') +
   section('function separate(', '// --- world boss') + section('function boundFighter(', '// --- progression') +
-  section('// Bastion fort: { wave, land', '// --- end Bastion fort save') + section('// --- Bastion Siege:', '// --- end siege') + '\nthis.CFG = CFG; this.Grid = Grid; this.SC = SC; this.SIEGE_TYPES = SIEGE_TYPES; this.siegeLevel = siegeLevel; this.siegeMen = siegeMen; this.siegeDefDmg = siegeDefDmg; this.FORT_TYPES = FORT_TYPES; this.landFor = landFor; this.siegeSides = siegeSides; this.fortLvl = fortLvl;', c);
+  section('// Bastion fort: { wave, land', '// --- end Bastion fort save') + section('// --- Bastion Siege:', '// --- end siege') + '\nthis.CFG = CFG; this.Grid = Grid; this.SC = SC; this.SIEGE_TYPES = SIEGE_TYPES; this.siegeLevel = siegeLevel; this.siegeMen = siegeMen; this.siegeDefDmg = siegeDefDmg; this.FORT_TYPES = FORT_TYPES; this.landFor = landFor; this.siegeSides = siegeSides; this.fortLvl = fortLvl; this.stepSiegeTraps = stepSiegeTraps;', c);
 const S0 = c.CFG.siege, T0 = S0.towers;
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }
 function reset(level = 40, gold = 1e12, stones = 0) {
@@ -121,9 +121,23 @@ check('walls: monsters walk around an open wall, and break the cheapest piece of
   c.siegeHitBuilding(hit, hit.hp + 1); assert(!hit.alive); assert(at(hit.b.x, hit.b.z) < 30, 'the broken piece opens the way');
   void F; c.endSiege('leave');
 });
+check('traps: monsters walk over them; spikes hit and reset, a keg blows once per wave and comes back, tar slows and burns', () => {
+  reset(40, 1e12, 1e6); assert(c.startSiege()); const S = c.G.siege, F = c.fortState();
+  const free = (() => { if (S.flowDirty) c.siegeFlow(); return S.dist[c.siegeIdx(0, 12)]; })();
+  for (const [t, x] of [['spike', -1], ['bomb', 0], ['tar', 1]]) assert.equal(c.fortDo({ o: 'add', t, x, z: 12 }), '', t);
+  if (S.flowDirty) c.siegeFlow(); assert.equal(S.dist[c.siegeIdx(0, 12)], free, 'a trap costs no detour');
+  assert(!c.G.obstacles.list.some((o) => S.units.some((u) => c.CFG.siege.towers[u.b.t].trap && o.x === u.x && o.z === u.z)), 'traps are not solid');
+  const at = (t) => S.units.find((u) => u.b.t === t), mob = (u) => { const e = c.spawnSiegeMob({ type: c.CFG.world.zones[1].enemy, zi: 1 }); e.x = u.x; e.z = u.z; e.hp = e.maxHp = 1e15; return e; };
+  const sp = at('spike'), e1 = mob(sp); sp.cd = 0; c.stepSiegeTraps(0.05); assert(e1.hp < 1e15, 'spikes hit'); assert(sp.cd > 1, 'and reset');
+  const kg = at('bomb'), e2 = mob(kg); kg.cd = 0; c.stepSiegeTraps(0.05); assert(kg.spent, 'the keg is used up'); assert(events.some((e) => e.t === 'fortTrap' && e.type === 'bomb'));
+  const tr = at('tar'), e3 = mob(tr); e3.slowT = 0; tr.cd = 0; c.stepSiegeTraps(0.05); assert(e3.slowT > 0, 'tar slows'); assert(e3.hp < 1e15, 'tar burns');
+  c.siegeWaveClear(); assert(!kg.spent, 'a new keg for the next wave');
+  assert.equal(c.fortDo({ o: 'up', k: F.b.indexOf(sp.b) }), '', 'traps upgrade'); void F;
+  c.endSiege('leave');
+});
 check('a full fort holds wave 1: towers shoot, warriors man their posts, the wave pays gold and stones, the next start never goes lower', () => {
   reset(40, 1e12, 1e6); assert(c.startSiege());
-  const spots = [[-8, 6], [5, 6], [-8, -3], [5, -4], [-7, 1], [9, 0], [-3, 9], [1, 9]], types = ['archer', 'cannon', 'ballista', 'warrior', 'mage', 'archer', 'cannon', 'warrior'];
+  const spots = [[-8, 6], [5, 6], [-8, -3], [5, -4], [-7, 1], [3, -10], [-3, 9], [1, 9]], types = ['archer', 'cannon', 'ballista', 'warrior', 'mage', 'archer', 'cannon', 'warrior'];
   spots.forEach(([x, z], i) => assert.equal(c.fortDo({ o: 'add', t: types[i], x, z }), '', types[i] + ' at ' + x + ',' + z));
   c.endSiege('leave'); c.G.siegeResult = null;
   const gold0 = c.G.profile.gold, stones0 = c.myFort().stones;

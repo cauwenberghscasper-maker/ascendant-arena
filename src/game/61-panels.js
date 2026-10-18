@@ -675,6 +675,9 @@ function fortStat(t, l) {
   if (t === 'mine') return `${T.rate * l} stones an hour, holds ${T.cap * l}`;
   if (t === 'hut') return 'One more upgrade at a time';
   if (T.wall) return `Monsters walk up to ${T.path + l} cells around it before breaking it`;
+  if (t === 'spike') return `${fmtK(siegeDefDmg(T, l))} dmg to every monster on it · resets in ${T.cd}s`;
+  if (t === 'bomb') return `${fmtK(siegeDefDmg(T, l))} dmg to all within ${T.aoe} m · once per wave`;
+  if (t === 'tar') return `Half speed · ${fmtK(refDmg(G.profile.level) * T.dps * siegeLvlMul(l))} dmg a second`;
   return `${fmtK(siegeDefDmg(T, l))} dmg · range ${T.range}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}`;
 }
 // the Build menu: pick what to place, then walk to where it goes (the ghost on the ground) and tap Place

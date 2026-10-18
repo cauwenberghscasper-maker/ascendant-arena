@@ -162,6 +162,9 @@ function processEvents() {
         if (!e.main) showBanner(`${e.name} destroyed`, 'Less gold per wave · keep the Keep standing', 'red'); break;
       case 'siegeEnd': enterSiegeView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); if (e.why === 'keep') { Sfx.play('lose'); showToast('The Keep has fallen', 'bad'); } break;
       case 'fortBuilt': if (e.type === 'wall' || e.type === 'gate') burst(e.x, 0.6, e.z, 8, 0xd8b07a, 3, 0.5, 0.25, 2, 0.8); else { SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); } if (e.done) showToast(`${CFG.siege.towers[e.type].name} reached level ${e.l}`, 'good'); break;
+      case 'fortTrap': if (e.type === 'bomb') { SpriteFX.play('explosion', 'fire', e.x, 0, e.z, e.r * 1.4); SpriteFX.play('ring', 'fire', e.x, 0, e.z, e.r * 2.4, { speed: 1.2 }); SpriteFX.play('dust', 'dust', e.x, 0, e.z, e.r, { delay: 0.1 }); if (near(e, 30)) { Sfx.play('boom'); Cam.shake = Math.max(Cam.shake, 0.5); } }
+        else { SpriteFX.play('slash', 'white', e.x, 0.6, e.z, 2.2); burst(e.x, 0.3, e.z, 10, 0xc8ccd4, 4, 0.4, 0.2, 3, 1.4); if (near(e, 22)) Sfx.play('melee', { gap: 0.1 }); }
+        break;
       case 'fortGone': burst(e.x, 0.8, e.z, 16, 0x8a7a6a, 4, 0.8, 0.4, 3, 1.2); break;
       case 'fortBroken': burst(e.x, 1, e.z, 26, 0x6a5a4a, 6, 1, 0.4, 3, 1.4); Sfx.play('boom', { gap: 0.3 }); break;
       case 'fortShot': { const y = e.y || 1.6, hear = near(e, 26);
