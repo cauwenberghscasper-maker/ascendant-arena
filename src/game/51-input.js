@@ -158,7 +158,9 @@ function buildPlayerIntent() {
   const it = f.intent;
   let sx = Input.move.sx, sy = Input.move.sy;
   if (Input.keys.has('a')) sx -= 1; if (Input.keys.has('d')) sx += 1; if (Input.keys.has('w')) sy += 1; if (Input.keys.has('s')) sy -= 1;
-  const frozen = !G.started || G.modal || (G.arena && G.arena.phase === 'countdown');
+  // Auto Hunt keeps fighting behind menus in the open world (the sim runs there and you are safe while one is open)
+  const menuAuto = !!G.modal && f === G.player && autoHuntOn();
+  const frozen = !G.started || (G.modal && !menuAuto) || (G.arena && G.arena.phase === 'countdown');
   if (frozen) { it.mx = it.mz = 0; it.aiming = false; it.fire = it.autoFire = false; return; }
   const [mx, mz] = stickToWorld(sx, sy);
   it.mx = mx; it.mz = mz;

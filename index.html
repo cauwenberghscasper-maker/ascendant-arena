@@ -9904,7 +9904,9 @@ function buildPlayerIntent() {
   const it = f.intent;
   let sx = Input.move.sx, sy = Input.move.sy;
   if (Input.keys.has('a')) sx -= 1; if (Input.keys.has('d')) sx += 1; if (Input.keys.has('w')) sy += 1; if (Input.keys.has('s')) sy -= 1;
-  const frozen = !G.started || G.modal || (G.arena && G.arena.phase === 'countdown');
+  // Auto Hunt keeps fighting behind menus in the open world (the sim runs there and you are safe while one is open)
+  const menuAuto = !!G.modal && f === G.player && autoHuntOn();
+  const frozen = !G.started || (G.modal && !menuAuto) || (G.arena && G.arena.phase === 'countdown');
   if (frozen) { it.mx = it.mz = 0; it.aiming = false; it.fire = it.autoFire = false; return; }
   const [mx, mz] = stickToWorld(sx, sy);
   it.mx = mx; it.mz = mz;
@@ -12937,7 +12939,20 @@ function claimExped(i) {
 const onExpedition = (p, b) => (p.exp || []).some((e) => e.b === b);
 
 // --- Auto Hunt: your hero fights on its own (walks to monsters at your level, shoots, dashes, supers) ---
-const AH = { tgt: null, node: null, mineT: 0, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1, lastDen: null };
+const AH = { tgt: null, node: null, mineT: 0, t: 0, manualT: 0, dashT: 0, lx: 0, lz: 0, stuckT: 0, side: 1, lastDen: null, curDen: null, detA: 0, detT: 0, escA: 0, escT: 0, stuckN: 0, detS: 0 };
+// steer around props: when the way ahead is blocked, take a detour heading and hold it for a moment so the hero does not jitter in front of a big model
+function ahSteer(f, tx, tz, dt) {
+  const len = Math.hypot(tx, tz); if (len < 1e-3) return [tx, tz];
+  const bx = tx / len, bz = tz / len, rot = (a) => { const c = Math.cos(a), sn = Math.sin(a); return [bx * c - bz * sn, bx * sn + bz * c]; };
+  const clear = (d) => [f.r + 1, f.r + 3, f.r + 5.5].every((k) => !pointBlocked(f.x + d[0] * k, f.z + d[1] * k, f.r * 0.5));
+  if (AH.escT > 0) { AH.escT -= dt; return rot(AH.escA); } // stuck for a while: walk sideways out of the pocket first
+  if (AH.detT > 0) { AH.detT -= dt; const d = rot(AH.detA); if (clear(d)) return d; AH.detT = 0; }
+  if (clear([bx, bz])) { AH.detS = 0; return [tx, tz]; }
+  // keep going round the same side until the way ahead opens up (no zig-zag along a long wall)
+  const first = AH.detS || AH.side;
+  for (const sg of [first, -first]) for (const a of [0.6, 1.1, 1.6, 2.2, 2.8]) { const d = rot(a * sg); if (clear(d)) { AH.detA = a * sg; AH.detS = sg; AH.detT = 1.2; return d; } }
+  return [tx, tz];
+}
 // the best open den for your level; the den you just emptied scores as if it were 300 m further away
 function autoHuntDen(f, level) {
   let D = null, bd = 1e9;
@@ -12962,7 +12977,7 @@ function autoHuntIntent(f, it, manual, dt) {
   const okZone = (zi) => p.level >= CFG.world.zones[zi].minLevel;
   if (AH.t <= 0 || !AH.tgt || !AH.tgt.alive) {
     AH.t = 0.4; let best = null, bd = 30;
-    for (const e of G.enemies) { if (!e.alive || e.rift || e.lvl > p.level + 3 || !okZone(e.zone)) continue; const d = Math.hypot(e.x - f.x, e.z - f.z); if (d < bd) { bd = d; best = e; } }
+    for (const e of G.enemies) { if (!e.alive || e.rift || e.lvl > p.level + 3 || !okZone(e.zone) || (e.ahSkip || 0) > G.time) continue; const d = Math.hypot(e.x - f.x, e.z - f.z); if (d < bd) { bd = d; best = e; } }
     AH.tgt = best;
   }
   let tx, tz;
@@ -12978,10 +12993,11 @@ function autoHuntIntent(f, it, manual, dt) {
     if (d <= CFG.mining.interactR - 0.8) { tx = tz = 0; if (AH.mineT <= 0) { mineNode(nd); AH.mineT = 0.5; AH.node = null; } }
     else { tx = dx / d; tz = dz / d; }
   } else if (e) {
-    const dx = e.x - f.x, dz = e.z - f.z, d = Math.hypot(dx, dz) || 1, want = range * 0.7;
-    if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * 0.7 * AH.side; tz = dx / d * 0.7 * AH.side; }
-    if (d < range + 1) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
-    if (f.superCharge >= 1 && d < range) it.super = true;
+    const dx = e.x - f.x, dz = e.z - f.z, d = Math.hypot(dx, dz) || 1, want = range * 0.7, los = !losBlocked(f.x, f.z, e.x, e.z);
+    if (!los) { tx = dx / d; tz = dz / d; } // a prop is in the way: walk round it instead of firing into it
+    else if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * 0.7 * AH.side; tz = dx / d * 0.7 * AH.side; }
+    if (d < range + 1 && los) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
+    if (f.superCharge >= 1 && d < range && los) it.super = true;
     if (f.hp < f.maxHp * 0.35 && d < 5 && AH.dashT <= 0) { it.dash = true; AH.dashT = 3; it.mx = -dx / d; it.mz = -dz / d; return; }
     if (f.hp < f.maxHp * 0.2) { tx = -dx / d; tz = -dz / d; }
   } else {
@@ -12989,11 +13005,21 @@ function autoHuntIntent(f, it, manual, dt) {
     let D = null, bd = 1e9;
     D = autoHuntDen(f, p.level);
     if (!D) return;
-    if (Math.hypot(D.x - f.x, D.z - f.z) < D.r) AH.lastDen = D; // emptied this den: head for the other one next
+    AH.curDen = D; if (Math.hypot(D.x - f.x, D.z - f.z) < D.r) AH.lastDen = D; // emptied this den: head for the other one next
     const dx = D.x - f.x, dz = D.z - f.z, d = Math.hypot(dx, dz) || 1; tx = dx / d; tz = dz / d;
   }
-  // unstick: if we barely moved for a while, sidestep
-  AH.stuckT += dt; if (AH.stuckT > 1.6) { if (Math.hypot(f.x - AH.lx, f.z - AH.lz) < 0.8) { AH.side = -AH.side; if (AH.node) AH.node.ahSkip = G.time + 25; } AH.stuckT = 0; AH.lx = f.x; AH.lz = f.z; }
+  // unstick: if we barely moved for a while, switch sides, give up on whatever we are walking to, and sidestep out of the pocket
+  AH.stuckT += dt;
+  if (AH.stuckT > 1.4) {
+    if (Math.hypot(f.x - AH.lx, f.z - AH.lz) < 0.8 && (tx || tz)) {
+      AH.side = -AH.side; AH.stuckN++; AH.escA = AH.side * 1.5; AH.escT = 0.9;
+      if (AH.node) AH.node.ahSkip = G.time + 25;
+      else if (e) { e.ahSkip = G.time + 15; AH.tgt = null; }
+      else if (AH.curDen && AH.stuckN >= 2) AH.lastDen = AH.curDen;
+    } else AH.stuckN = 0;
+    AH.stuckT = 0; AH.lx = f.x; AH.lz = f.z;
+  }
+  const st = ahSteer(f, tx || 0, tz || 0, dt); tx = st[0]; tz = st[1];
   it.mx = tx; it.mz = tz;
 }
 const powerOf = (f) => Math.round(Math.sqrt(Math.max(1, f.dmg) * Math.max(1, f.maxHp)));
@@ -13420,7 +13446,7 @@ function boot(hotData) {
     try { window.claude.hot.snapshot(() => ({ profile: G.profile })); } catch (e) { /* optional */ }
   }
   window.addEventListener('pagehide', () => saveNow(true));
-  if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
+  if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
   window.__gameBooted = true;
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});

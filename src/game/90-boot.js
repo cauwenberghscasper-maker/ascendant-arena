@@ -79,7 +79,7 @@ function boot(hotData) {
     try { window.claude.hot.snapshot(() => ({ profile: G.profile })); } catch (e) { /* optional */ }
   }
   window.addEventListener('pagehide', () => saveNow(true));
-  if (LOCAL_PREVIEW) window.__sim = { CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
+  if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
   window.__gameBooted = true;
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
