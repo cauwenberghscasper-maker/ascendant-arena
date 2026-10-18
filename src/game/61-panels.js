@@ -741,7 +741,8 @@ function openSettings() {
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
     ${tg('calm', 'Reduce flashing', 'No red hit flash or screen shake, and a fixed render scale')}
-    ${tg('mute', 'Mute sound', 'All sound is generated live, no downloads')}${tg('fps', 'Show FPS', 'Frame rate, draw calls and render scale')}
+    <div class="sndbox"><b>Sound</b>${[['volMaster', 'Master'], ['volMusic', 'Music'], ['volSfx', 'Effects'], ['volUi', 'Menu']].map(([k, l]) => `<label class="vol"><span>${l}</span><input type="range" min="0" max="100" step="5" data-vol="${k}" value="${s[k] | 0}" aria-label="${l} volume"><output id="out-${k}">${s[k] | 0}</output></label>`).join('')}</div>
+    ${tg('mute', 'Mute sound', 'Turns off music, effects and menu sounds')}${tg('fps', 'Show FPS', 'Frame rate, draw calls and render scale')}
     <div class="row"><button class="ghost sm" data-act="credits">Credits and licenses</button></div>
     <div class="danger"><button class="ghost" data-act="reset1" id="reset1">${TEST_MODE ? 'Reset test hero' : 'Reset progress'}</button><span id="resetConfirm" hidden>${TEST_MODE ? 'Erase this test hero only?' : 'Erase this hero everywhere?'} <button class="warn" data-act="reset2">Yes, erase</button></span></div>`);
 }
@@ -892,7 +893,15 @@ function handlePanelClick(e) {
     case 'reset2': Store.clear(); G.profile = defaultProfile(); saveNow(true); G.player.cls = 'novice'; refreshPlayerStats(true); G.player.x = CFG.world.spawn.x; G.player.z = CFG.world.spawn.z; UI.close(); toast('Progress erased. A new hero begins.'); Coach.render(); break;
   }
 }
+// volume sliders: live while dragging; on release a short sample of that bus plays
+function handleVolumeInput(e) {
+  const k = e.target.dataset.vol; if (!k) return;
+  G.profile.settings[k] = +e.target.value; G.dirty = true;
+  const o = $('out-' + k); if (o) o.textContent = e.target.value;
+  Sfx.init(); Sfx.applyVolumes();
+}
 function handleSettingChange(e) {
+  if (e.target.dataset.vol) { handleVolumeInput(e); Sfx.last = {}; Sfx.play(e.target.dataset.vol === 'volSfx' ? 'hit' : 'click'); return; }
   if (e.target.dataset.sel2 === 'tBrawler') { openSkills(e.target.value); return; }
   if (e.target.dataset.sel) { G.profile.settings[e.target.dataset.sel] = +e.target.value; G.dirty = true; if (e.target.dataset.sel === 'uiSize') { applyUiSize(); measureSheet(); } return; }
   const k = e.target.dataset.set; if (!k) return;

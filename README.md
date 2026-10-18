@@ -33,7 +33,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Panels, settings, button actions (`data-act`) | `src/game/61-panels.js` (`handlePanelClick`) |
 | Menus, skill-tree screen, credits | `src/game/63-menus.js` |
 | Effects for hits, kills and events | `src/game/62-events-fx.js` (`processEvents`); particles and sprite FX: `45-fx.js` |
-| Sound | `src/game/50-audio.js` |
+| Sound: engine, buses, music crossfade, synth fallback | `src/game/50-audio.js` (`Sfx`, `Music`); which sound files exist and their bus/volume/voice caps: `49-audio-data.js` (`AUDIO_MANIFEST`), files in `assets/audio/` |
 | Touch and keyboard controls | `src/game/51-input.js` |
 | Camera, adaptive quality, pixel-art pass | `src/game/46-camera-quality.js` |
 | Game loop, startup | `src/game/80-main-loop.js`, `90-boot.js` |
