@@ -1,3 +1,10 @@
+# 120 Hz option (18 Oct 2026, on `main`)
+Done: Options › 120 Hz (`settings.hz120`, off by default). The sim still steps at 60 Hz; at 120 Hz each frame draws heroes,
+monsters, bosses and projectiles part way between their last two steps (`Interp` in `80-main-loop.js`); teleports, respawns
+and new projectiles snap. Projectile trails and per-frame sparks scale with `fxK` so effects keep the same density.
+Open: test on a real 120 Hz phone. On 144 Hz+ screens the 120 cap can't divide the refresh rate, so motion is better than
+the 60 cap but not perfectly even.
+
 # Unfinished work (state at 17 Oct 2026, 17:20) — branch `wip/menus-v3`
 
 ## Menus & UI update (17 Oct, on `wip/menus-v3`, PR to main)
