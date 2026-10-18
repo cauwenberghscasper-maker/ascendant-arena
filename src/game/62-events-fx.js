@@ -144,11 +144,14 @@ function processEvents() {
       // party dungeons (36b-delve.js)
       case 'delveEvent': { const E = CFG.delve.events[e.k]; showBanner(E.name, E.d, 'gold'); ringFx(e.x, e.z, 5, 0xffd34a, 1.1); Sfx.play('horn'); break; }
       case 'delveMini': showBanner(escapeHTML(e.name), 'A champion of the dungeon guards this hall', 'red'); ringFx(e.x, e.z, 7, 0xff5d8f, 1.1); Sfx.play('horn'); break;
-      case 'delvePhase': showBanner(`Phase ${e.n} of ${e.of}`, e.rage ? `${escapeHTML(e.name)} is enraged: faster and harder hitting` : `${escapeHTML(e.name)} calls for help`, 'red'); ringFx(e.x, e.z, 6, e.rage ? 0xff3030 : 0xff5d8f, 1); Sfx.play('horn'); if (e.rage) burst(e.x, 1.5, e.z, 34, 0xff3030, 6, 0.9, 0.4, 3, 2); break;
-      case 'delvePuzzle': showBanner(escapeHTML(e.name), e.pips ? CFG.delve.puzzle.pipsHint : CFG.delve.puzzle.hint, 'gold'); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break;
-      case 'delvePzStep': showToast(`Seal ${e.n} of ${e.of} awake`, 'good'); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
-      case 'delvePzFail': showToast(e.spikes ? 'Wrong seal! The floor bites back' : 'Wrong seal! Something crawls out', 'bad'); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
+      case 'delvePhase': showBanner(`Phase ${e.n} of ${e.of}`, `${escapeHTML(e.name)}${e.rage ? ' is enraged' : ' calls for help'}${e.adds && e.adds.length ? ' · new: ' + e.adds.map(escapeHTML).join(', ') : ''}`, 'red'); ringFx(e.x, e.z, 6, e.rage ? 0xff3030 : 0xff5d8f, 1); Sfx.play('horn'); if (e.rage) burst(e.x, 1.5, e.z, 34, 0xff3030, 6, 0.9, 0.4, 3, 2); break;
+      case 'delvePuzzle': { const K = CFG.delve.puzzle.kinds[e.kind] || {}; showBanner(`${escapeHTML(e.name)} · ${K.name || ''}`, e.pips ? CFG.delve.puzzle.pipsHint : K.hint || CFG.delve.puzzle.hint, 'gold'); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break; }
+      case 'delvePzClock': showToast(`The race is on: ${e.secs} seconds!`, 'bad'); ringFx(e.x, e.z, 7, 0xffd34a, 0.8); Sfx.play('horn'); break;
+      case 'delvePzStep': showToast(e.flip ? `${e.n} of ${e.of} seals lit` : `Seal ${e.n} of ${e.of} awake`, 'good'); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
+      case 'delvePzFail': showToast(`${e.timed ? 'Too slow!' : 'Wrong seal!'} ${e.spikes ? 'The floor bites back' : 'Something crawls out'}`, 'bad'); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
       case 'delvePzDone': showBanner(`${escapeHTML(e.name)} solved`, 'The gate opens', 'gold'); burst(e.x, 1, e.z, 30, 0xffd34a, 6, 0.9, 0.4, 3, 2); Sfx.play('unlock'); break;
+      case 'delveBossCast': if (e.k === 'charge' || e.k === 'spiral' || e.k === 'meteors') Sfx.play('horn', { gap: 1 }); ringFx(e.x, e.z, 3, 0xff5d8f, 0.5); break;
+      case 'delveVein': if (e.lode) showBanner('Motherlode!', `+${e.n} ${escapeHTML(e.name)}`, 'gold'); else showToast(`+${e.n} ${escapeHTML(e.name)} · a rare dungeon treasure`, 'good'); burst(e.x, 1.2, e.z, e.lode ? 40 : 24, 0xffe27a, 5, 0.9, 0.4, 4, 2); Sfx.play(e.lode ? 'radiant' : 'unlock'); break;
       case 'delveWave': showToast(`Wave ${e.n + 1} of ${e.of}!`, 'bad'); ringFx(e.x, e.z, 6, 0xff5d8f, 0.9); break;
       case 'delveBonus': Feed.remove('dlvEvent'); showToast(e.why + ' · open the cache', 'good'); burst(e.x, 1, e.z, 26, 0xffd34a, 5, 0.9, 0.4, 4, 2); Sfx.play('unlock'); break;
       case 'delveEscape': Feed.remove('dlvEvent'); showToast('The goblin got away with its gold…', 'bad'); burst(e.x, 1, e.z, 18, 0xffd34a, 4, 0.6, 0.3, -2, 3); break;

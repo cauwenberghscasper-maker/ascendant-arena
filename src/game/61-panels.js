@@ -344,14 +344,15 @@ function invChestsHTML(p) {
     <p class="fine">Tap a chest to open it. Chests are earned in play and cannot be sold. Every chest shows its odds before you open it.</p>`;
 }
 // where each kind of material comes from, shown on its card
-const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses', rune: 'Elites, bosses, dungeons' };
+const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses', rune: 'Elites, bosses, dungeons', gem: 'Rare veins in Dungeon mode' };
 function invResourcesHTML(p) {
   const tile = (img, name, n, col, src) => `<div class="rtile${n ? '' : ' none'}" style="--rc:${col}" title="${name}${src ? ' · ' + src : ''}"><img src="${img}" alt=""><b class="rn">${fmtK(n)}</b><small>${name}</small></div>`;
   const mat = (id) => { const M = MATS[id]; return tile(matIcon(id), M.name, matCount(id, p), hex6(M.color), MAT_SRC[M.kind]); };
   const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(svg.includes('xmlns') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
   const money = `<div class="igrid rgrid">${tile(svgUrl(ICON.coin), 'Gold', p.gold, '#ffd23a')}${tile(svgUrl(ICON.ess), 'Gems', p.essence || 0, '#7fe3ff')}${mat(CFG.craft.titan.id)}${mat(CFG.craft.rune.id)}</div>`;
   const groups = CB.map((b, i) => biomeReached(i, p) ? `<h4 class="sub">${BIOMES[i].name}</h4><div class="igrid rgrid">${[b.ore, b.part, b.core].map(mat).join('')}</div>` : '').join('');
-  return `<div class="subRow"><h4 class="sub">Resources</h4></div><h4 class="sub first">Gold, gems, Titan Souls &amp; Rune Shards</h4>${money}${groups}
+  const rare = CFG.delve.dungeons.filter((d) => d.gem && (delveOpen(d) || matCount(d.gem.id, p))), rareHTML = rare.length ? `<h4 class="sub">Dungeon treasures</h4><div class="igrid rgrid">${rare.map((d) => mat(d.gem.id)).join('')}</div>` : '';
+  return `<div class="subRow"><h4 class="sub">Resources</h4></div><h4 class="sub first">Gold, gems, Titan Souls &amp; Rune Shards</h4>${money}${groups}${rareHTML}
     <p class="fine">Ore comes from Mining, parts from monsters, cores from dungeon chests, Titan Souls from world bosses, Rune Shards (for Enchanting) from elites, bosses, dungeon chests and now and then any monster. Spend them in the Forge. Biomes you have not reached stay hidden.</p>`;
 }
 // --- crafting tabs (src/game/39-crafting.js)

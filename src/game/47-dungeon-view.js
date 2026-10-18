@@ -95,7 +95,7 @@ function enterDungeonView(on) {
   if (on && G.dungeon) {
     buildDungeonView(G.dungeon);
     const pal = dungeonPalette(CFG.world.zones[G.dungeon.zone]);
-    scene.fog.color.copy(pal.fog); scene.fog.near = 22; scene.fog.far = 75; paintSky(pal.fog.clone().multiplyScalar(0.4), pal.fog);
+    scene.fog.color.copy(pal.fog); scene.fog.near = 70; scene.fog.far = 150; // starts past the camera (~35 m up): only far halls fade, the screen stays clear paintSky(pal.fog.clone().multiplyScalar(0.4), pal.fog);
   } else { disposeDungeonView(); scene.fog.near = 50; scene.fog.far = Q.lowTier ? 95 : 140; }
 }
 function updateDungeonView(dt) {

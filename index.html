@@ -5408,6 +5408,8 @@ function stepEnemy(e, dt) {
   const d = CFG.enemies[e.type], pl = e.delve ? delveTarget(e) : G.player, Z = CFG.world.zones[e.zone]; // party dungeons: you or a bot
   if (e.rift && e.state !== 'chase') e.state = 'chase';
   const dp = Math.hypot(pl.x - e.x, pl.z - e.z);
+  // a party-dungeon boss (or mini-boss) casts its phase kit (36e-delve-boss.js); while casting it stands or charges
+  if (e.delveBoss && e.state === 'chase' && delveBossTick(e, dt, pl)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); trackVel(e, dt); collideObstacles(e); dungeonClamp(e, e.r); return; }
   // far-away monsters sleep (keeps big maps cheap on phones)
   if (e.state === 'idle' && dp > 64 && !(e.burnT > 0)) return;
   e.atkCd -= dt; e.flashT -= dt; e.slowT -= dt; e.wanderT -= dt; e.lungeT -= dt; e.lungeCd -= dt;
@@ -6645,23 +6647,23 @@ CFG.delve = {
   // blocked); raise powK toward 1 and floor toward 0.7 once parties are tested on real phones.
   powK: 0.05, floor: 0,
   dungeons: [
-    { id: 'crypt', puzzle: 'Root Seals', mini: 'The Rootbound Gravekeeper', name: 'Rootbound Crypt', biome: 0, boss: 'The Hollow Warden', blurb: 'Roots have split the tombs of the first foresters. Something old keeps the keys.',
+    { id: 'crypt', gem: { id: 'rootamber', name: 'Rootbound Amber', color: 0xe09a2a }, puzzle: 'Root Seals', mini: 'The Rootbound Gravekeeper', name: 'Rootbound Crypt', biome: 0, boss: 'The Hollow Warden', blurb: 'Roots have split the tombs of the first foresters. Something old keeps the keys.',
       set: { name: 'Rootwarden', b2: { hp: 0.08, armor: 0.05 }, b4: { lifesteal: 0.05, dmg: 0.08 } } },
-    { id: 'frostvault', puzzle: 'Frost Runes', mini: 'Rime Huntsman Ulfa', name: 'Frostvault', biome: 1, boss: 'Queen Rime', blurb: 'A vault cut into the glacier, where the mountain clans buried their winters.',
+    { id: 'frostvault', gem: { id: 'rimeglass', name: 'Rimeglass', color: 0x9fe0ff }, puzzle: 'Frost Runes', mini: 'Rime Huntsman Ulfa', name: 'Frostvault', biome: 1, boss: 'Queen Rime', blurb: 'A vault cut into the glacier, where the mountain clans buried their winters.',
       set: { name: 'Rimebound', b2: { armor: 0.08, hp: 0.06 }, b4: { critDmg: 0.25, superGain: 0.08 } } },
-    { id: 'cinder', puzzle: 'Forge Valves', mini: 'The Slag Overseer', name: 'Cinder Halls', biome: 2, boss: 'Forgemaw', blurb: 'The dwarf-forges under the volcano still burn, and so does whatever stokes them.',
+    { id: 'cinder', gem: { id: 'emberheart', name: 'Forgeheart Ember', color: 0xff6a2a }, puzzle: 'Forge Valves', mini: 'The Slag Overseer', name: 'Cinder Halls', biome: 2, boss: 'Forgemaw', blurb: 'The dwarf-forges under the volcano still burn, and so does whatever stokes them.',
       set: { name: 'Cinderborn', b2: { dmg: 0.08, atkSpeed: 0.05 }, b4: { crit: 0.06, critDmg: 0.3 } } },
-    { id: 'archive', puzzle: 'The Lost Index', mini: 'The Inkbound Scribe', name: 'Sunken Archive', biome: 3, boss: 'The Last Librarian', blurb: 'A library that fell through the floor of the world. The books read you back.',
+    { id: 'archive', gem: { id: 'inkpearl', name: 'Ink Pearl', color: 0x8a6ad8 }, puzzle: 'The Lost Index', mini: 'The Inkbound Scribe', name: 'Sunken Archive', biome: 3, boss: 'The Last Librarian', blurb: 'A library that fell through the floor of the world. The books read you back.',
       set: { name: 'Archivist', b2: { cdr: 0.06, superGain: 0.08 }, b4: { dmg: 0.1, cdr: 0.06 } } },
-    { id: 'grotto', puzzle: 'Tide Shells', mini: 'The Brine Knight', name: 'Abyssal Grotto', biome: 4, boss: 'Mother of Tides', blurb: 'Below the reef the sea keeps a cathedral of its own, and a mother who guards it.',
+    { id: 'grotto', gem: { id: 'tidestone', name: 'Tidestone', color: 0x2fb5a8 }, puzzle: 'Tide Shells', mini: 'The Brine Knight', name: 'Abyssal Grotto', biome: 4, boss: 'Mother of Tides', blurb: 'Below the reef the sea keeps a cathedral of its own, and a mother who guards it.',
       set: { name: 'Tidewrought', b2: { move: 0.06, hp: 0.06 }, b4: { lifesteal: 0.06, atkSpeed: 0.08 } } },
-    { id: 'starfall', puzzle: 'Star Sigils', mini: 'The Fallen Acolyte', name: 'Starfall Sanctum', biome: 5, boss: 'The Fallen Seraph', blurb: 'Where a star came down, a temple grew around it. Its guardian never forgave the sky.',
+    { id: 'starfall', gem: { id: 'starshard', name: 'Starshard', color: 0xffd84a }, puzzle: 'Star Sigils', mini: 'The Fallen Acolyte', name: 'Starfall Sanctum', biome: 5, boss: 'The Fallen Seraph', blurb: 'Where a star came down, a temple grew around it. Its guardian never forgave the sky.',
       set: { name: 'Starsworn', b2: { crit: 0.05, dmg: 0.08 }, b4: { critDmg: 0.35, superGain: 0.1 } } },
   ],
   // named difficulties; past the last one Ascendant ranks go on forever (diffDef)
   diffs: [
-    { name: 'Normal', lvl: 2, hp: 1, dmg: 1, pow: 0.8, rooms: [6, 6], events: 2, puzzles: 1, items: 2, floor: 'rare', unique: 0.05, col: '#7bd35a' },
-    { name: 'Hard', lvl: 8, hp: 1.15, dmg: 1.1, pow: 1.0, rooms: [6, 7], events: 2, puzzles: 1, items: 3, floor: 'epic', unique: 0.08, col: '#58b4ff' },
+    { name: 'Normal', lvl: 2, hp: 1, dmg: 1, pow: 0.8, rooms: [7, 7], events: 2, puzzles: 2, items: 2, floor: 'rare', unique: 0.05, col: '#7bd35a' },
+    { name: 'Hard', lvl: 8, hp: 1.15, dmg: 1.1, pow: 1.0, rooms: [7, 8], events: 2, puzzles: 2, items: 3, floor: 'epic', unique: 0.08, col: '#58b4ff' },
     { name: 'Heroic', lvl: 16, hp: 1.3, dmg: 1.2, pow: 1.25, rooms: [7, 7], events: 3, puzzles: 2, items: 3, floor: 'epic', unique: 0.12, col: '#c77dff' },
     { name: 'Mythic', lvl: 28, hp: 1.5, dmg: 1.3, pow: 1.6, rooms: [7, 8], events: 3, puzzles: 2, items: 4, floor: 'legendary', unique: 0.16, col: '#ff9a3c' },
   ],
@@ -6670,13 +6672,20 @@ CFG.delve = {
   shapes: [{ n: 'cell', hx: 10, hz: 10, w: 2 }, { n: 'hall', hx: 15, hz: 15, w: 3 }, { n: 'gallery', hx: 22, hz: 12, w: 2 }, { n: 'longhall', hx: 12, hz: 22, w: 2 },
     { n: 'chamber', hx: 19, hz: 19, w: 2 }, { n: 'arena', hx: 28, hz: 28, w: 1 }],
   start: { n: 'hall', hx: 13, hz: 13 }, bossH: 32, corridor: 10, corW: 6,
-  // what a combat hall holds: packs of monsters (n per pack) that wake together, more packs in bigger halls (one per
-  // `packArea` m², at most `packs`); swarm halls send their packs in waves; events sit only in their own rooms
-  fights: [{ k: 'guard', w: 4, n: [3, 4] }, { k: 'swarm', w: 2, n: [3, 4], waves: 3 }, { k: 'elites', w: 2, n: [1, 2] }],
-  packArea: 320, packs: [1, 7], packR: 3.2,
+  // what a combat hall holds: few, tough monsters spread over the hall for tactics (Casper, 18 Oct: no more spam).
+  // One per `spread.area` m² (`spread.n` min-max), at least `gap` m apart, none within `entry` m of the way in;
+  // ranged ones stand at the back (behind pillars where there are some), melee ones in front. A monster wakes by
+  // itself (close by or hit) and calls only its neighbours within `alert` m: pull them one or two at a time.
+  // Swarm halls send waves; elite halls hold fewer, all elite; events sit only in their own rooms.
+  fights: [{ k: 'guard', w: 4 }, { k: 'swarm', w: 2, waves: 3 }, { k: 'elites', w: 2 }],
+  // rare veins: a run may hide one (sometimes two) glowing veins of the dungeon's own rare resource in its halls, from
+  // the seed so every phone shows the same; each hero mines their own share. Now and then a vein is a motherlode.
+  veins: { chance: 0.4, perDiff: 0.06, max: 0.85, second: 0.25, n: [1, 3], nDiff: 0.5, lode: 0.08, lodeN: [5, 8] },
+  spread: { area: 170, n: [3, 10], gap: 7, entry: 11, alert: 9, cover: 9 },
+  tough: { hp: 1.6, dmg: 1.2 },
   // halfway through, a hall holds the dungeon's mini-boss with guards; the boss fights in three phases (adds at 66% and
   // 33%, then it gets faster and hits harder)
-  mini: { hp: 0.55, guards: 2 }, boss: { hp: 2.4, phases: [0.66, 0.33], rage: { spd: 1.25, atk: 1.2 } },
+  mini: { hp: 0.55, guards: 3 }, boss: { hp: 2.4, phases: [0.66, 0.33], rage: { spd: 1.25, atk: 1.2 } },
   events: {
     vault: { name: 'Treasure Vault', d: 'A gold goblin! Catch it before it vanishes', time: 20 },
     altar: { name: 'Cursed Altar', d: 'Take the curse: less health for the rest of the run, better loot at the end', hpCap: 0.75, unique: 1.6, items: 1 },
@@ -6686,12 +6695,17 @@ CFG.delve = {
     mimic: { name: 'Lonely Chest', d: 'A chest in an empty room. Surely nothing is wrong', odds: 0.5 },
     fountain: { name: 'Moonwell', d: 'Drink once: full health and a moment of grace' },
   },
-  mods: { dark: 0.25, pillars: 0.35 },
+  mods: { dark: 0.25, pillars: 0.6 },
   // puzzle halls: seals (floor plates and lever stones) to wake in the order a mural by the entrance shows. Stand on or
   // by a seal for `hold` s. A wrong seal resets the lot and bites back: a spike burst, then a monster pack, in turn.
   // Easy runs sometimes number the seals with pips instead of runes. Bots pitch in once the first seal is right.
   puzzle: { switches: [4, 5], hold: 0.6, r: 1.7, failCd: 2.5, spike: 0.18, pack: 3, botWait: 2,
-    hint: 'Wake the seals in the order the mural shows', pipsHint: 'Wake the seals in the order of their marks' },
+    hint: 'Wake the seals in the order the mural shows', pipsHint: 'Wake the seals in the order of their marks',
+    // four kinds, never the same twice in a run: the mural order, a light show to repeat, a race against the clock
+    // (its time comes from the walk between the seals), and lights-out (a seal flips itself and both neighbours)
+    kinds: { order: { name: 'The Mural' }, memory: { name: 'The Echo', hint: 'Watch the seals light up, then wake them in the same order', show: 0.9 },
+      timed: { name: 'The Race', hint: 'Wake every seal before the light fades: the first one starts the clock', walk: 5, slack: 3 },
+      toggle: { name: 'The Balance', hint: 'Each seal flips itself and both its neighbours: light them all' } } },
   chest: { xpFrac: 0.5, gold: [60, 10], gems: [8, 14], shards: [3, 6], ilvlAdd: 4, caseChance: 0.15 },
   bonus: { gold: 0.4, items: 1 },
   reviveT: 3, reviveR: 2.6, wipeT: 2,
@@ -6703,6 +6717,12 @@ function diffDef(i) {
   return { i, name: `Ascendant ${r}`, lvl: 40 + 10 * r, hp: 1.6 * Math.pow(1.08, r - 1), dmg: 1.35 * Math.pow(1.05, r - 1), pow: 2 * Math.pow(1.12, r - 1), rooms: [8, 8], events: 4, puzzles: 2,
     items: Math.min(6, 4 + Math.floor(r / 3)), floor: r >= 6 ? 'ancient' : 'mythic', unique: Math.min(0.35, 0.18 + 0.02 * r), col: '#ffe27a', asc: r };
 }
+// RULE: a party dungeon must come out the same on every phone in the run (README 1.1). Everything that shapes the map,
+// its rooms, monsters, puzzles and veins comes from the leader's seed. Never Math.random there, and never
+// Array.sort with a random comparator: Safari and Chrome sort it differently, so iPhones and Androids got other maps.
+function seededShuffle(arr, rng) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; }
+// code shared with the open world rolls Math.random (champion modifiers, facing, wander timers): run it on a seeded stream
+function withSeed(seed, fn) { const R = Math.random; Math.random = mulberry32(seed >>> 0); try { return fn(); } finally { Math.random = R; } }
 const delveDef = (id) => DV.dungeons.find((d) => d.id === id) || DV.dungeons[0];
 const biomeZones = (bi) => CFG.world.zones.map((z, i) => ({ z, i })).filter((o) => !o.z.safe && o.z.biome === bi);
 // a dungeon opens once you reach its biome; its level is the biome's top level plus the difficulty's
@@ -6741,14 +6761,17 @@ function delveLayout(seed, def, di) {
     const boss = i === n, sh = boss ? { n: 'throne', hx: C.bossH, hz: C.bossH } : i === 0 ? C.start : wpick(C.shapes);
     const mk = (x, z) => Object.assign(rect(x, z, sh.hx, sh.hz), { x, z, hx: sh.hx, hz: sh.hz, h: Math.min(sh.hx, sh.hz), i, boss, shape: sh.n });
     if (!i) { rooms.push(mk(DC.x, DC.z)); continue; }
-    const a = rooms[i - 1], dirs = [[0, 1], [1, 0], [-1, 0]].sort(() => rng() - 0.5);
+    const a = rooms[i - 1], dirs = seededShuffle([[0, 1], [1, 0], [-1, 0]], rng);
+    // the next hall goes north, east or west; when none fits, the corridor grows until one does (never through a hall
+    // or another corridor). North always frees up in the end: the layout only ever grows north.
     let nr = null, dir = [0, 1];
-    for (const d of dirs) {
-      const x = a.x + d[0] * (a.hx + C.corridor + sh.hx), z = a.z + d[1] * (a.hz + C.corridor + sh.hz), r = rect(x, z, sh.hx, sh.hz);
-      if (rooms.some((o) => r.x0 < o.x1 + 3 && r.x1 > o.x0 - 3 && r.z0 < o.z1 + 3 && r.z1 > o.z0 - 3)) continue;
+    const hit = (r, m, skip) => rooms.some((o) => o !== skip && r.x0 < o.x1 + m && r.x1 > o.x0 - m && r.z0 < o.z1 + m && r.z1 > o.z0 - m) || cors.some((c) => r.x0 < c.x1 + m && r.x1 > c.x0 - m && r.z0 < c.z1 + m && r.z1 > c.z0 - m);
+    for (let extra = 0; !nr && extra <= 600; extra += 12) for (const d of extra > 72 ? [[0, 1]] : dirs) {
+      const L = C.corridor + extra, x = a.x + d[0] * (a.hx + L + sh.hx), z = a.z + d[1] * (a.hz + L + sh.hz), r = rect(x, z, sh.hx, sh.hz), w = C.corW / 2;
+      const c = d[1] ? { x0: a.x - w, x1: a.x + w, z0: a.z1, z1: r.z0 } : { x0: d[0] > 0 ? a.x1 : r.x1, x1: d[0] > 0 ? r.x0 : a.x0, z0: a.z - w, z1: a.z + w };
+      if (hit(r, 3) || hit(c, 0.5, a)) continue;
       nr = mk(x, z); dir = d; break;
     }
-    if (!nr) nr = mk(a.x, a.z + a.hz + C.corridor + sh.hz);
     rooms.push(nr);
     const w = C.corW / 2;
     cors.push(dir[1] ? { x0: a.x - w, x1: a.x + w, z0: a.z1, z1: nr.z0, ax: 'z' } : { x0: dir[0] > 0 ? a.x1 : nr.x1, x1: dir[0] > 0 ? nr.x0 : a.x0, z0: a.z - w, z1: a.z + w, ax: 'x' });
@@ -6770,50 +6793,70 @@ function delveLayout(seed, def, di) {
   for (const c of cors) { if (c.ax === 'z') { seg(c.x0, c.z0, c.x0, c.z1); seg(c.x1, c.z0, c.x1, c.z1); } else { seg(c.x0, c.z0, c.x1, c.z0); seg(c.x0, c.z1, c.x1, c.z1); } }
   // the mini-boss hall sits halfway; events go in the other middle rooms (never the start or boss hall), no type twice
   const mi = n >= 3 ? Math.floor(n / 2) : -1;
-  const mids = rooms.slice(1, n).map((m) => m.i).filter((i) => i !== mi).sort(() => rng() - 0.5), evKeys = Object.keys(C.events).sort(() => rng() - 0.5);
-  const nev = Math.min(D.events, mids.length - 1 > 0 ? mids.length - 1 : mids.length);
+  const mids = seededShuffle(rooms.slice(1, n).map((m) => m.i).filter((i) => i !== mi), rng), evKeys = seededShuffle(Object.keys(C.events), rng);
+  // puzzle halls first (two a run), then events, always leaving one plain fight hall
+  const npz = clamp(Math.min(D.puzzles || 1, mids.length - 1), 0, 2), nev = Math.max(0, Math.min(D.events, mids.length - npz - 1));
   for (let k = 0; k < nev; k++) rooms[mids[k]].event = evKeys[k];
-  // puzzle halls take the next middle rooms, always leaving one plain fight hall
-  const npz = clamp(Math.min(D.puzzles || 1, mids.length - nev - 1), 0, 2);
   for (let k = 0; k < npz; k++) rooms[mids[nev + k]].puzzle = true;
+  const pzKinds = seededShuffle(Object.keys(C.puzzle.kinds), rng); let pzAt = 0;
   for (const m of rooms) {
     if (m.boss) { m.fight = 'boss'; continue; }
-    const packs = clamp(Math.round(4 * m.hx * m.hz / C.packArea), C.packs[0], C.packs[1]);
-    if (m.puzzle) { m.fight = 'puzzle'; m.per = 0; m.packs = 0; m.waves = 1; }
-    else if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.per = 3; m.packs = C.mini.guards; m.waves = 1; }
-    else if (!m.event) { const f = wpick(C.fights); m.fight = f.k; m.per = ri(f.n[0], f.n[1]); m.waves = f.waves || 1; m.packs = f.k === 'guard' ? packs : Math.ceil(packs / 2); }
-    else { m.fight = m.event === 'traps' ? 'guard' : 'none'; m.per = m.event === 'traps' ? 3 : 0; m.packs = m.event === 'traps' ? Math.ceil(packs / 2) : 0; m.waves = 1; }
-    m.count = m.per * m.packs;
+    const SP = C.spread, full = clamp(Math.round(4 * m.hx * m.hz / SP.area), SP.n[0], SP.n[1]);
+    if (m.puzzle) { m.fight = 'puzzle'; m.count = 0; m.waves = 1; }
+    else if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.count = C.mini.guards; m.waves = 1; }
+    else if (!m.event) { const f = wpick(C.fights); m.fight = f.k; m.waves = f.waves || 1; m.count = f.k === 'guard' ? full : Math.max(2, Math.ceil(full / 2)); }
+    else { m.fight = m.event === 'traps' ? 'guard' : 'none'; m.count = m.event === 'traps' ? Math.ceil(full / 2) : 0; m.waves = 1; }
     m.dark = m.i > 0 && rng() < C.mods.dark;
     // pillars: cover in the big halls (more in the arenas), kept clear of the doors' lanes
     if (!m.event && m.i > 0 && m.hx >= 15 && m.hz >= 15 && rng() < C.mods.pillars) {
       m.pillars = true; const at = [[0.45, 0.45]]; if (m.hx >= 24) at.push([0.22, 0.65], [0.65, 0.22]);
       for (const [ax, az] of at) for (const sx of [-1, 1]) for (const sz of [-1, 1]) props.push({ x: m.x + sx * m.hx * ax, z: m.z + sz * m.hz * az, r: 0.9, room: m.i });
     }
-    // fixed spawn spots, pack by pack: the run's slots (room × 100 + k) match in every party member's game; the start
-    // hall keeps its southern half free (you arrive there)
-    m.spots = []; const R = C.packR, mx = m.hx - R - 3, mz = m.hz - R - 3;
-    for (let w = 0; w < m.waves; w++) for (let p = 0; p < m.packs; p++) {
-      const cx = m.x + (rng() * 2 - 1) * mx, cz = m.i ? m.z + (rng() * 2 - 1) * mz : m.z + 3 + rng() * (mz - 3);
-      for (let k = 0; k < m.per; k++) { const a = rng() * Math.PI * 2, r = R * Math.sqrt(rng()); m.spots.push({ x: cx + Math.sin(a) * r, z: cz + Math.cos(a) * r, e: rng(), p }); }
+    // fixed spawn spots, spread over the hall: the run's slots (room × 100 + k) match in every party member's game.
+    // `d` is the distance from the way in (the start hall's way in is the south wall, where you arrive)
+    const pv = m.i ? rooms[m.i - 1] : null, ex = pv ? Math.sign(Math.round(pv.x - m.x)) : 0, ez = pv ? Math.sign(Math.round(pv.z - m.z)) : -1;
+    m.entry = { x: m.x + ex * m.hx, z: m.z + ez * m.hz }; m.spots = [];
+    for (let w = 0; w < m.waves; w++) {
+      const pts = [];
+      for (const gap of [SP.gap, SP.gap * 0.7, SP.gap * 0.45, 0]) for (let t = 0; t < 300 && pts.length < m.count; t++) {
+        const x = m.x + (rng() * 2 - 1) * (m.hx - 3), z = m.z + (rng() * 2 - 1) * (m.hz - 3), d = Math.hypot(x - m.entry.x, z - m.entry.z);
+        if (d < Math.min(SP.entry, Math.max(m.hx, m.hz)) || pts.some((q) => Math.hypot(q.x - x, q.z - z) < gap) || props.some((q) => q.room === m.i && Math.hypot(q.x - x, q.z - z) < 2)) continue;
+        pts.push({ x, z, d, e: rng() });
+      }
+      m.spots.push(...pts);
     }
-    for (let k = 0; k < 8; k++) m.spots.push({ x: m.x + (rng() * 2 - 1) * (m.hx - 3), z: m.z + (rng() * 2 - 1) * (m.hz - 3), e: rng(), p: -1 });
     if (m.event === 'plates') m.plates = [[-1, -1], [1, 1], [-1, 1], [1, -1]].map(([a, b]) => ({ x: m.x + a * m.hx * 0.5, z: m.z + b * m.hz * 0.5 }));
     if (m.event === 'mimic') m.mimic = rng() < C.events.mimic.odds;
-    if (m.puzzle) { m.pz = delvePuzzleMake(rng, m, rooms[m.i - 1], di); for (const q of m.pz.sw) if (q.lever) props.push({ x: q.x, z: q.z, r: 0.55, room: m.i, kind: 'lever' }); }
+    if (m.puzzle) { m.pz = delvePuzzleMake(rng, m, rooms[m.i - 1], di, pzKinds[pzAt++ % pzKinds.length]); for (const q of m.pz.sw) if (q.lever) props.push({ x: q.x, z: q.z, r: 0.55, room: m.i, kind: 'lever' }); }
+  }
+  // rare veins, tucked toward a hall's corner (clear of the walls, braziers, doors and pillars)
+  const veins = [], V = C.veins, okRoom = rooms.filter((m) => m.i > 0 && !m.boss && !m.pz);
+  for (const want of [Math.min(V.max, V.chance + V.perDiff * di), V.second]) {
+    if (rng() >= want || !okRoom.length) break;
+    const m = okRoom.splice(Math.floor(rng() * okRoom.length), 1)[0], sx = rng() < 0.5 ? -1 : 1, sz = rng() < 0.5 ? -1 : 1;
+    veins.push({ room: m.i, x: m.x + sx * m.hx * 0.78, z: m.z + sz * m.hz * 0.78, lode: rng() < V.lode });
   }
   const r0 = rooms[0], b = rooms[n], span = Math.max(...rooms.map((m) => Math.hypot(Math.max(Math.abs(m.x0 - DC.x), Math.abs(m.x1 - DC.x)), Math.max(Math.abs(m.z0 - DC.z), Math.abs(m.z1 - DC.z))))) + 40;
-  return { rooms, cors, walls, doors, props, span, start: { x: r0.x, z: r0.z0 + 4 }, exit: { x: r0.x - 4, z: r0.z0 + 2.2 }, chest: { x: b.x, z: b.z }, exit2: { x: b.x, z: b.z + 5 } };
+  return { rooms, cors, walls, doors, props, veins, span, start: { x: r0.x, z: r0.z0 + 4 }, exit: { x: r0.x - 4, z: r0.z0 + 2.2 }, chest: { x: b.x, z: b.z }, exit2: { x: b.x, z: b.z + 5 } };
 }
 // a puzzle hall's seals round the room (clear of the door lanes), their order, and the mural by the entrance
-function delvePuzzleMake(rng, m, prev, di) {
-  const P = DV.puzzle, K = di >= 2 ? P.switches[1] : P.switches[0], rot = rng() * Math.PI * 2, glyphs = [0, 1, 2, 3, 4, 5, 6, 7].sort(() => rng() - 0.5), sw = [];
+function delvePuzzleMake(rng, m, prev, di, kind) {
+  const P = DV.puzzle, K = di >= 2 ? P.switches[1] : P.switches[0], rot = rng() * Math.PI * 2, glyphs = seededShuffle([0, 1, 2, 3, 4, 5, 6, 7], rng), sw = [];
   for (let k = 0; k < K; k++) { const a = rot + (k + 0.5) / K * Math.PI * 2 + (rng() - 0.5) * 0.4; sw.push({ x: m.x + Math.sin(a) * m.hx * 0.58, z: m.z + Math.cos(a) * m.hz * 0.58, lever: rng() < 0.5, g: glyphs[k] }); }
-  const order = sw.map((_, k) => k).sort(() => rng() - 0.5), dx = Math.sign(Math.round(m.x - prev.x)), dz = Math.sign(Math.round(m.z - prev.z)), half = K * 0.85;
+  const order = seededShuffle(sw.map((_, k) => k), rng), dx = Math.sign(Math.round(m.x - prev.x)), dz = Math.sign(Math.round(m.z - prev.z)), half = K * 0.85;
   // the mural: a strip of tiles (read left to right on screen) by the entry wall, beside the door lane
   const clue = dz ? { x: m.x - (4 + half), z: m.z - dz * (m.hz - 3) } : { x: m.x - dx * (m.hx - 2.5 - half), z: m.z + 6 };
-  return { sw, order, clue, pips: di <= 1 && rng() < 0.5 };
+  const pz = { kind, sw, order, clue, pips: kind === 'order' && di <= 1 && rng() < 0.5, all: (1 << K) - 1 };
+  if (kind === 'timed') { // the clock: the walk round the seals plus a moment on each, a little slack
+    let path = 0, gap = 0; for (let k = 0; k < K; k++) { const a = sw[k], b = sw[(k + 1) % K], d = Math.hypot(a.x - b.x, a.z - b.z); path += d; gap = Math.max(gap, d); }
+    const T = DV.puzzle.kinds.timed; pz.clock = Math.round((path - gap) / T.walk + K * DV.puzzle.hold + T.slack);
+  }
+  if (kind === 'toggle') { // scrambled from all lit by two presses, so it can always be solved
+    const a = Math.floor(rng() * K), b = (a + 1 + Math.floor(rng() * (K - 1))) % K; pz.start = pz.all ^ delvePzMask(K, a) ^ delvePzMask(K, b);
+  }
+  return pz;
 }
+const delvePzMask = (K, j) => (1 << j) | (1 << ((j + 1) % K)) | (1 << ((j + K - 1) % K));
 // --- run
 const delveOn = () => !!(G.dungeon && G.dungeon.delve);
 function delveRoster(def) { const out = []; for (const { z } of biomeZones(def.biome)) for (const t of [z.enemy, z.alt]) if (t && CFG.enemies[t] && !out.includes(t)) out.push(t); return out.length ? out : ['thistlehare']; }
@@ -6821,19 +6864,31 @@ function delveRoster(def) { const out = []; for (const { z } of biomeZones(def.b
 function delveMob(D, room, k, o) {
   const X = D.delve, slot = room * 100 + k; if (X.slots.has(slot)) return X.slots.get(slot);
   const type = o.type || X.roster[Math.floor((o.pick != null ? o.pick : 0) * X.roster.length) % X.roster.length];
-  const e = dungeonMob(D, type, o.lvl || D.lvl, room, o);
+  const e = withSeed(X.seed ^ Math.imul(slot + 1, 2654435761), () => dungeonMob(D, type, o.lvl || D.lvl, room, o));
   e.delve = true; e.slot = slot; e.own = null;
   const m = X.diff, hp = DV.hpParty[clamp(X.n, 1, 4) - 1] * m.hp;
-  e.maxHp = Math.round(e.maxHp * hp); e.hp = e.maxHp; e.atk *= m.dmg;
+  const T = o.boss ? { hp: 1, dmg: 1 } : DV.tough; // fewer monsters, each one tougher
+  e.maxHp = Math.round(e.maxHp * hp * T.hp); e.hp = e.maxHp; e.atk *= m.dmg * T.dmg;
   if (o.goblin) { e.goblin = true; e.flee = true; e.atkCd = 1e9; e.maxHp = e.hp = Math.round(e.maxHp * 0.6); }
   if (o.name) e.champName = o.name;
   X.slots.set(slot, e); return e;
 }
 function spawnRoomWave(D, m, w) {
   const X = D.delve, el = m.fight === 'elites';
-  for (let k = 0; k < m.count; k++) { const s = m.spots[w * m.count + k], e = delveMob(D, m.i, w * m.count + k, { x: s.x, z: s.z, pick: s.e, elite: el || s.e < 0.12 + X.diff.i * 0.03, chase: w > 0 }); e.pack = s.p; m.mobs.push(e); }
+  // roles: ranged monsters take the spots furthest from the way in (tucked behind a pillar when one is near), melee ones
+  // the nearer spots; all of it from the seed, so every game puts every monster in the same place
+  const spots = m.spots.slice(w * m.count, (w + 1) * m.count), SP = DV.spread;
+  const type = (s) => X.roster[Math.floor(s.e * X.roster.length) % X.roster.length], ranged = (s) => (CFG.enemies[type(s)] || {}).attack !== 'touch';
+  const where = spots.slice().sort((a, b) => b.d - a.d);
+  const place = spots.map((s) => (ranged(s) ? where.shift() : where.pop()));
+  for (let k = 0; k < spots.length; k++) {
+    const s = spots[k]; let { x, z } = place[k];
+    if (ranged(s)) { const pil = D.props.find((q) => q.room === m.i && !q.kind && Math.hypot(q.x - x, q.z - z) < SP.cover);
+      if (pil) { const dx = pil.x - m.entry.x, dz = pil.z - m.entry.z, dd = Math.hypot(dx, dz) || 1; x = pil.x + dx / dd * 2.2; z = pil.z + dz / dd * 2.2; } }
+    const e = delveMob(D, m.i, w * m.count + k, { x, z, pick: s.e, elite: el || s.e < 0.12 + X.diff.i * 0.03, chase: w > 0 }); m.mobs.push(e);
+  }
   // the mini-boss stands in the middle of its hall, its guards round it
-  if (m.mini && !w) { const e = delveMob(D, m.i, 90, { boss: true, pick: 0.7, lvl: D.lvl + 1, x: m.x, z: m.z, name: X.def.mini }); e.maxHp = e.hp = Math.round(e.maxHp * DV.mini.hp); e.pack = 0; e.mini = true; m.mobs.push(e); }
+  if (m.mini && !w) { const e = delveMob(D, m.i, 90, { boss: true, pick: 0.7, lvl: D.lvl + 1, x: m.x, z: m.z, name: X.def.mini }); e.maxHp = e.hp = Math.round(e.maxHp * DV.mini.hp); e.mini = true; e.delveBoss = true; m.mobs.push(e); }
   m.wave = w;
 }
 // diff: difficulty index; n: party size at the start (sets monster HP); seed: the leader's run seed
@@ -6848,7 +6903,7 @@ function startDelve(id, di, seed, n, lead = true) {
   const D = G.dungeon = Object.assign(L, { id: poi.id, poi, zone: zi, variant: { name: def.name, counts: [], par: 600, hp: 14, mods: diff.i >= 3 ? 4 : 3, trial: false }, key: null, lvl, t0: G.time, clearT: 0, newKey: null,
     room: 0, mobs: [], boss: null, bossDead: false, chestOpen: false, addsDone: false, enterPos: { x: pl.x, z: pl.z } });
   const humans = clamp(n | 0 || 1, 1, DV.maxParty);
-  D.delve = { def, diff, di, seed, humans, n: DV.bots && DV.bots.on ? DV.maxParty : humans, bots: [], roster: delveRoster(def), slots: new Map(), cursed: false, bonus: {}, used: {}, downT: 0, wipeT: 0, revive: null, plates: {}, ev: {}, pz: {} };
+  D.delve = { def, diff, di, seed, humans, n: DV.bots && DV.bots.on ? DV.maxParty : humans, bots: [], roster: delveRoster(def), slots: new Map(), cursed: false, bonus: {}, used: {}, downT: 0, wipeT: 0, revive: null, plates: {}, ev: {}, pz: {}, emit: [], mined: {} };
   dungeonGrid(D); clearProjectiles();
   pl.x = D.start.x; pl.z = D.start.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
   if (lead && D.delve.n > humans) delveBotsMake(D, humans); // computer heroes fill the empty places (36d-delve-bots.js)
@@ -6856,7 +6911,7 @@ function startDelve(id, di, seed, n, lead = true) {
   D.rooms.forEach((m) => { m.mobs = []; m.cleared = false; m.wave = -1; m.seen = false; if (!m.boss && m.count) spawnRoomWave(D, m, 0); });
   const b = D.rooms.at(-1);
   D.boss = delveMob(D, b.i, 0, { type: D.delve.roster[D.delve.roster.length - 1], boss: true, lvl: lvl + CFG.dungeon.boss.lvlAdd, x: b.x, z: b.z + 4, name: def.boss });
-  D.boss.maxHp = D.boss.hp = Math.round(D.boss.maxHp * DV.boss.hp); b.mobs = [D.boss]; D.phase = 0;
+  D.boss.maxHp = D.boss.hp = Math.round(D.boss.maxHp * DV.boss.hp); D.boss.delveBoss = true; b.mobs = [D.boss]; D.phase = 0;
   ev({ t: 'dungeonStart', name: def.name, lvl, key: 0, x: pl.x, z: pl.z, delve: true, diff: diff.name, n: D.delve.n }); return true;
 }
 // who of the party is in this run with us (peers in the same run seed); always includes the local player
@@ -6888,11 +6943,14 @@ function stepDelve(dt) {
   if (X.cursed && pl.alive && pl.hp > pl.maxHp * E.altar.hpCap) pl.hp = pl.maxHp * E.altar.hpCap;
   stepDelveRevive(dt, party);
   stepDelveBots(dt);
+  stepDelveEmit(dt);
   for (const m of D.rooms) {
     if (m.boss) continue;
-    const seen = m.seen || anyoneIn(m); if (seen && !m.seen) { m.seen = true; if (m.event) ev({ t: 'delveEvent', k: m.event, x: m.x, z: m.z }); if (m.mini) ev({ t: 'delveMini', name: X.def.mini, x: m.x, z: m.z }); if (m.pz) ev({ t: 'delvePuzzle', name: X.def.puzzle, pips: m.pz.pips, x: m.x, z: m.z }); }
-    // a pack wakes together: one of them hunting wakes the rest of its pack
-    for (const e of m.mobs) if (e.alive && e.state === 'chase' && e.pack >= 0 && !e.own) for (const o of m.mobs) if (o !== e && o.alive && o.pack === e.pack && o.state === 'idle' && !o.own) o.state = 'chase';
+    const seen = m.seen || anyoneIn(m); if (seen && !m.seen) { m.seen = true; if (m.event) ev({ t: 'delveEvent', k: m.event, x: m.x, z: m.z }); if (m.mini) ev({ t: 'delveMini', name: X.def.mini, x: m.x, z: m.z }); if (m.pz) ev({ t: 'delvePuzzle', name: X.def.puzzle, kind: m.pz.kind, pips: m.pz.pips, x: m.x, z: m.z }); }
+    // a monster that wakes by itself calls its close neighbours; those don't call further (no chain through the hall)
+    for (const e of m.mobs) if (e.alive && e.state === 'chase' && !e.alerted && !e.own) {
+      e.alerted = true; for (const o of m.mobs) if (o !== e && o.alive && o.state === 'idle' && !o.own && Math.hypot(o.x - e.x, o.z - e.z) < DV.spread.alert) { o.state = 'chase'; o.alerted = true; }
+    }
     // swarm waves: the next wave comes when the last one is down
     if (m.waves > 1 && m.wave < m.waves - 1 && m.seen && m.mobs.length && !m.mobs.some((e) => e.alive)) { spawnRoomWave(D, m, m.wave + 1); ev({ t: 'delveWave', n: m.wave + 1, of: m.waves, x: m.x, z: m.z }); }
     if (m.event && m.seen) stepDelveEvent(D, m, dt);
@@ -6911,7 +6969,7 @@ function stepDelve(dt) {
     const ph = D.phase = (D.phase | 0) + 1, bm = D.rooms.at(-1), last = ph === PH.length; D.addsDone = true;
     for (let k = 0; k < 2 + Math.min(2, X.n - 1); k++) { const a = (k / 4) * Math.PI * 2; bm.mobs.push(delveMob(D, bm.i, ph * 10 + k, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, pick: k / 4, chase: true, elite: X.diff.i >= 2 || last })); }
     if (last) { b.spd = (b.spd || 1) * DV.boss.rage.spd; b.atk *= DV.boss.rage.atk; b.raged = true; }
-    ev({ t: 'dungeonAdds', x: b.x, z: b.z }); ev({ t: 'delvePhase', n: ph + 1, of: PH.length + 1, rage: last, name: X.def.boss, x: b.x, z: b.z });
+    ev({ t: 'dungeonAdds', x: b.x, z: b.z }); ev({ t: 'delvePhase', n: ph + 1, of: PH.length + 1, rage: last, name: X.def.boss, adds: (CFG.delve.bossKit.unlock[ph] || []).map((k) => CFG.delve.bossKit.names[k]), x: b.x, z: b.z });
   }
   if (!b.alive && !D.bossDead) { D.bossDead = D.rooms.at(-1).cleared = true; D.clearT = G.time - D.t0; ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: X.def.name, secs: Math.round(D.clearT), par: 0, key: 0, up: 0, delve: true }); }
 }
@@ -6934,44 +6992,60 @@ function delveDoorRecv(P) {
     delveDoorOpen(D, k, false);
   }
 }
-// --- puzzles: the state every game keeps per puzzle hall; `step` seals are awake (order[0..step-1])
-const delvePz = (D, m) => D.delve.pz[m.i] || (D.delve.pz[m.i] = { step: 0, fails: 0, hold: m.pz.sw.map(() => 0), cd: 0, done: false, flash: 0 });
+// --- puzzles: the state every game keeps per puzzle hall. `v` counts changes (the newest wins, ties go to the lower
+// session id), `step` = seals awake in order (mural, echo), `bits` = which seals are lit (race, balance)
+const delvePz = (D, m) => D.delve.pz[m.i] || (D.delve.pz[m.i] = { v: 0, step: 0, bits: m.pz.kind === 'toggle' ? m.pz.start : 0, fails: 0, hold: m.pz.sw.map(() => 0), cd: 0, done: false, flash: 0, t: 0, show: 0 });
+const pzOrdered = (pz) => pz.kind === 'order' || pz.kind === 'memory';
+function delvePzLit(m, S, j) { return S.done || (pzOrdered(m.pz) ? m.pz.order.indexOf(j) < S.step : !!((S.bits >> j) & 1)); }
 function stepDelvePuzzle(D, m, dt) {
-  const P = DV.puzzle, S = delvePz(D, m), pz = m.pz; S.flash = Math.max(0, S.flash - dt);
+  const P = DV.puzzle, S = delvePz(D, m), pz = m.pz; S.flash = Math.max(0, S.flash - dt); S.show += dt;
   if (S.done) return; if (S.cd > 0) { S.cd -= dt; return; }
+  // the race: the clock runs out with seals still dark
+  if (pz.kind === 'timed' && S.bits && (S.t -= dt) <= 0) { delvePzApply(D, m, { v: S.v + 1, s: 0, b: 0, f: S.fails + 1 }, true); return; }
   const next = pz.order[S.step], party = delveParty().filter((f) => f.alive !== false);
   pz.sw.forEach((q, j) => {
-    if (pz.order.indexOf(j) < S.step) return; // already awake
-    // heroes count on any seal; a bot only on the right one (it never guesses)
-    const on = party.some((f) => (!f.delveBot || j === next) && Math.hypot(f.x - q.x, f.z - q.z) < P.r);
-    if (!on) { S.hold[j] = 0; return; } if (S.hold[j] < 0) return; // still standing there since the last reset: step off first
+    if (pz.kind !== 'toggle' && delvePzLit(m, S, j)) return; // already awake
+    // heroes count on any seal; a bot only where it can't be wrong (the next seal in order, any dark seal in a race)
+    const botOk = pzOrdered(pz) ? j === next : pz.kind === 'timed';
+    const on = party.some((f) => (!f.delveBot || botOk) && Math.hypot(f.x - q.x, f.z - q.z) < P.r);
+    if (!on) { S.hold[j] = 0; return; } if (S.hold[j] < 0) return; // still standing there since the last change: step off first
     if ((S.hold[j] += dt) < P.hold) return;
-    if (j === next) { S.hold[j] = 0; delvePzSet(D, m, S.step + 1, S.fails, true); }
-    else delvePzSet(D, m, 0, S.fails + 1, true);
+    S.hold[j] = pz.kind === 'toggle' ? -1 : 0;
+    const st = { v: S.v + 1, s: S.step, b: S.bits, f: S.fails };
+    if (pzOrdered(pz)) { if (j === next) st.s++; else { st.s = 0; st.f++; } }
+    else if (pz.kind === 'timed') st.b |= 1 << j;
+    else st.b ^= delvePzMask(pz.sw.length, j);
+    delvePzApply(D, m, st, true);
   });
 }
-// apply a puzzle state (ours or a party member's 'dpz'): a new fail resets and punishes, a later step wakes seals
-function delvePzSet(D, m, step, fails, mine) {
-  const S = delvePz(D, m), P = DV.puzzle, K = m.pz.sw.length, X = D.delve;
-  if (S.done || fails < S.fails || (fails === S.fails && step <= S.step)) return;
-  if (fails > S.fails) {
-    S.fails = fails; S.step = 0; S.cd = P.failCd; S.flash = 0.8; S.hold = S.hold.map(() => -1);
-    if (fails % 2) { // spike burst under every hero this game runs in the hall
+// apply a puzzle state (ours, or a party member's 'dpz'): a new fail resets and punishes, woken seals light up
+function delvePzApply(D, m, st, mine, sid) {
+  const S = delvePz(D, m), P = DV.puzzle, pz = m.pz, K = pz.sw.length, X = D.delve;
+  if (S.done || st.v < S.v || (st.v === S.v && (mine || !sid || !(sid < MP.sid)))) return;
+  if (!mine && st.v === S.v && st.s === S.step && st.b === S.bits && st.f === S.fails) return;
+  const lit0 = pzOrdered(pz) ? S.step : popcount(S.bits);
+  if (st.f > S.fails) {
+    S.cd = P.failCd; S.flash = 0.8; S.hold = S.hold.map(() => -1); S.show = 0;
+    if (st.f % 2) { // spike burst under every hero this game runs in the hall
       for (const f of [G.player, ...(X.bots || [])]) if (f.alive !== false && inRoom(m, f.x, f.z)) G.pendingAoE.push({ x: f.x, z: f.z, r: 2.4, t: 0.9, max: 0.9, dmg: f.maxHp * P.spike * X.diff.dmg, team: 'mob', owner: 0, kind: 'slam', pal: areaFx(D.zone) });
     } else for (let k = 0; k < P.pack; k++) { // a pack crawls out of the floor, the same slots in every game
-      const a = k / P.pack * Math.PI * 2, e = delveMob(D, m.i, 50 + (fails % 40) * 5 + k, { x: m.x + Math.sin(a) * 2.5, z: m.z + Math.cos(a) * 2.5, pick: (fails + k) / 7 % 1, chase: true });
+      const a = k / P.pack * Math.PI * 2, e = delveMob(D, m.i, 50 + (st.f % 40) * 5 + k, { x: m.x + Math.sin(a) * 2.5, z: m.z + Math.cos(a) * 2.5, pick: (st.f + k) / 7 % 1, chase: true });
       if (!m.mobs.includes(e)) m.mobs.push(e);
     }
-    ev({ t: 'delvePzFail', spikes: !!(fails % 2), x: m.x, z: m.z });
+    ev({ t: 'delvePzFail', spikes: !!(st.f % 2), timed: pz.kind === 'timed', x: m.x, z: m.z });
   }
-  if (step > S.step) { S.step = step; ev({ t: 'delvePzStep', n: step, of: K, x: m.pz.sw[m.pz.order[step - 1]].x, z: m.pz.sw[m.pz.order[step - 1]].z }); }
-  if (S.step >= K) { S.done = true; ev({ t: 'delvePzDone', name: X.def.puzzle, x: m.x, z: m.z }); }
-  if (mine && typeof partySend === 'function') partySend('dpz', { dr: X.seed, r: m.i, s: S.step, f: S.fails });
+  if (pz.kind === 'timed' && !S.bits && st.b) { S.t = pz.clock; ev({ t: 'delvePzClock', secs: pz.clock, x: m.x, z: m.z }); }
+  S.v = st.v; S.step = st.s; S.bits = st.b; S.fails = st.f;
+  const lit = pzOrdered(pz) ? S.step : popcount(S.bits);
+  if (lit > lit0 || pz.kind === 'toggle') ev({ t: 'delvePzStep', n: lit, of: K, flip: pz.kind === 'toggle', x: m.x, z: m.z });
+  if (pzOrdered(pz) ? S.step >= K : S.bits === pz.all) { S.done = true; ev({ t: 'delvePzDone', name: X.def.puzzle, x: m.x, z: m.z }); }
+  if (mine && typeof partySend === 'function') partySend('dpz', { dr: X.seed, r: m.i, v: S.v, s: S.step, b: S.bits, f: S.fails });
 }
+function popcount(b) { let n = 0; for (; b; b &= b - 1) n++; return n; }
 function delvePzRecv(P) {
   if (!delveOn() || mpNum(P.dr, -1) >>> 0 !== G.dungeon.delve.seed) return;
-  const D = G.dungeon, m = D.rooms[mpNum(P.r, -1) | 0]; if (!m || !m.pz) return;
-  delvePzSet(D, m, clamp(mpNum(P.s, 0) | 0, 0, m.pz.sw.length), clamp(mpNum(P.f, 0) | 0, 0, 999), false);
+  const D = G.dungeon, m = D.rooms[mpNum(P.r, -1) | 0]; if (!m || !m.pz) return; const K = m.pz.sw.length;
+  delvePzApply(D, m, { v: clamp(mpNum(P.v, 0) | 0, 0, 1e6), s: clamp(mpNum(P.s, 0) | 0, 0, K), b: (mpNum(P.b, 0) | 0) & m.pz.all, f: clamp(mpNum(P.f, 0) | 0, 0, 999) }, false, typeof P.sid === 'string' ? P.sid : '');
 }
 // an event room lets you on once its own fight is done (the echo and a woken mimic must fall; the rest never block)
 function roomDoorFree(D, m) { const s = D.delve.ev[m.i] || {}; if (m.pz && !delvePz(D, m).done) return false; return !(m.event === 'echo' && !s.done) && !(m.event === 'vault' && s.t != null && !s.done); }
@@ -7045,10 +7119,16 @@ function delveInteract(pl) {
     if (m.event === 'altar' && !X.used.altar && near(m)) return { kind: 'delveAltar', label: 'Take the Curse' };
     if (m.event === 'fountain' && !X.used.fountain && near(m)) return { kind: 'delveFountain', label: 'Drink' };
   }
+  for (let i = 0; i < (D.veins || []).length; i++) { const v = D.veins[i]; if (!X.mined[i] && near(v)) return { kind: 'delveVein', room: i, label: v.lode ? 'Mine the Motherlode' : 'Mine Rare Vein' }; }
   return null;
 }
 function delveUse(kind, room) {
   const D = G.dungeon; if (!delveOn()) return null; const X = D.delve, pl = G.player;
+  if (kind === 'delveVein') { // your own share of a rare vein (each hero mines their own)
+    const v = (D.veins || [])[room | 0], V = DV.veins, gem = X.def.gem; if (!v || X.mined[room | 0] || !gem) return null;
+    X.mined[room | 0] = true; const n = v.lode ? randInt(V.lodeN[0], V.lodeN[1]) : randInt(V.n[0], V.n[1]) + Math.floor(X.diff.i * V.nDiff);
+    addMats([[gem.id, n]], true); ev({ t: 'delveVein', name: gem.name, n, lode: v.lode, x: v.x, z: v.z }); return true;
+  }
   if (kind === 'delveAltar' && !X.used.altar) { X.used.altar = X.cursed = true; pl.hp = Math.min(pl.hp, pl.maxHp * DV.events.altar.hpCap); ev({ t: 'delveCurse', x: pl.x, z: pl.z }); return true; }
   if (kind === 'delveFountain' && !X.used.fountain) { X.used.fountain = true; pl.hp = X.cursed ? pl.maxHp * DV.events.altar.hpCap : pl.maxHp; pl.invulnT = 3; pl.ammo = pl.ammoMax; ev({ t: 'delveHeal', x: pl.x, z: pl.z }); return true; }
   if (kind === 'delveBonus' && X.bonus[room] === 1) { X.bonus[room] = 2; return claimDelveLoot(false); }
@@ -7730,11 +7810,16 @@ function delveBotThink(b, dt) {
   // 2. pressure plates in a quiet room: each bot takes the plate after the humans' ones
   const s = myRoom && myRoom.event === 'plates' ? X.ev[myRoom.i] || {} : null;
   const plate = s && !s.done && myRoom.seen && !myRoom.mobs.some((e) => e.alive) ? myRoom.plates[humans.length + X.bots.indexOf(b)] : null;
-  // 3. a puzzle hall: once the first seal is right, the first bot walks to the next one after a short think
-  let seal = null; const pzS = myRoom && myRoom.pz && !myRoom.mobs.some((e) => e.alive) ? delvePz(D, myRoom) : null;
-  if (pzS && !pzS.done && pzS.step >= 1 && pzS.cd <= 0 && X.bots.indexOf(b) === 0) {
-    if (ai.pzStep !== pzS.step) { ai.pzStep = pzS.step; ai.pzT = 0; }
-    if ((ai.pzT += dt) >= DV.puzzle.botWait) seal = myRoom.pz.sw[myRoom.pz.order[pzS.step]];
+  // 3. a puzzle hall: in an ordered one (mural, echo) the first bot walks to the next seal after a short think, once the
+  // first seal is right; in a race every bot runs for its own dark seal once the clock runs; the balance is yours alone
+  let seal = null; const pz = myRoom && myRoom.pz, pzS = pz && !myRoom.mobs.some((e) => e.alive) ? delvePz(D, myRoom) : null;
+  if (pzS && !pzS.done && pzS.cd <= 0) {
+    if (pzOrdered(pz) && pzS.step >= 1 && X.bots.indexOf(b) === 0) {
+      if (ai.pzStep !== pzS.step) { ai.pzStep = pzS.step; ai.pzT = 0; }
+      if ((ai.pzT += dt) >= DV.puzzle.botWait) seal = pz.sw[pz.order[pzS.step]];
+    } else if (pz.kind === 'timed' && pzS.bits) {
+      const dark = pz.sw.filter((_, j) => !((pzS.bits >> j) & 1)); seal = dark.length ? dark[X.bots.indexOf(b) % dark.length] : null;
+    }
   }
   if (down) { tx = down.x; tz = down.z; stop = DV.reviveR * 0.5; }
   else if (plate) { tx = plate.x; tz = plate.z; stop = 0.3; }
@@ -7817,6 +7902,95 @@ function delveBotsRecv(sid, P) {
   if (added) mpRebuild();
 }
 // --- end dungeon bots
+// ---------------------------------------------------------------------
+// Dungeon bosses fight with a kit that grows each phase (Casper, 18 Oct: intense, three phases, every phase more
+// attacks and patterns). Phase 1: Volley and Ground Slam. Phase 2 adds Nova Ring and Charge. Phase 3 adds Death Spiral
+// and Falling Stones, and every attack comes faster. Mini-bosses use the phase 1 kit.
+// The game that runs the boss (its shared-monster owner) picks each attack and sends it ('dbs'); every game in the
+// run plays the same cast from the same numbers, and each one deals the damage to its own heroes (you and your bots).
+// ---------------------------------------------------------------------
+CFG.delve.bossKit = {
+  unlock: [['volley', 'slam'], ['ring', 'charge'], ['spiral', 'meteors']],
+  cd: [2.8, 2.1, 1.4], miniCd: 3.4, first: 1.6,
+  names: { volley: 'Volley', slam: 'Ground Slam', ring: 'Nova Ring', charge: 'Charge', spiral: 'Death Spiral', meteors: 'Falling Stones' },
+  // damage per hit, times the boss's own hit
+  dmg: { volley: 0.7, slam: 1.5, ring: 0.6, charge: 1.8, spiral: 0.4, meteors: 1.3 },
+  shot: 13, slamR: 3.4, slamT: 1.1, charge: { len: 15, warn: 0.9, speed: 22, r: 2.3 }, spiral: { time: 3, every: 0.12, arms: 3, turn: 2.4 },
+  meteors: { n: 9, r: 3, warn: 1.3, spread: 20 }, ring: { n: 18, gap: 0.5 },
+};
+const BK = CFG.delve.bossKit, BOSS_KINDS = Object.keys(BK.dmg);
+const delveBossPhase = (e) => (e.mini ? 0 : clamp(G.dungeon.phase | 0, 0, 2));
+// the attacks open to this boss right now, in the order it cycles through them
+function delveBossPool(e) { const out = []; for (let p = 0; p <= delveBossPhase(e); p++) out.push(...BK.unlock[p]); return out; }
+// called from stepEnemy for a party-dungeon boss this game runs; true while it is busy casting (it stands or charges)
+function delveBossTick(e, dt, tgt) {
+  const k = e.bk || (e.bk = { cd: BK.first, i: 0, busy: 0, dash: null });
+  k.cd -= dt; // the next attack's timer runs during a cast too, so phase 3 chains them
+  if (k.dash) { // charging along its warned line
+    const d = k.dash, dx = d.x - e.x, dz = d.z - e.z, dd = Math.hypot(dx, dz), step = BK.charge.speed * dt;
+    if ((d.wait -= dt) > 0) return true;
+    if (dd <= step) { e.x = d.x; e.z = d.z; k.dash = null; } else { e.x += dx / dd * step; e.z += dz / dd * step; }
+    e.facing = Math.atan2(dx, dz); e.moveAmt = 1; return true;
+  }
+  if (k.busy > 0) { k.busy -= dt; e.moveAmt = Math.max(0, (e.moveAmt || 0) - dt * 4); return true; }
+  if (k.cd > 0 || !tgt || tgt.alive === false) return false;
+  const pool = delveBossPool(e), kind = pool[k.i++ % pool.length], ph = delveBossPhase(e);
+  k.cd = e.mini ? BK.miniCd : BK.cd[ph];
+  const heroes = delveParty().filter((f) => f.alive !== false && Math.hypot(f.x - e.x, f.z - e.z) < 40).slice(0, 4);
+  const c = { k: kind, x: Math.round(e.x * 10) / 10, z: Math.round(e.z * 10) / 10, tx: Math.round(tgt.x * 10) / 10, tz: Math.round(tgt.z * 10) / 10,
+    p: heroes.map((f) => [Math.round(f.x * 10) / 10, Math.round(f.z * 10) / 10]), s: (Math.random() * 1e9) >>> 0, mini: e.mini ? 1 : 0 };
+  delveBossCast(c);
+  if (typeof partySend === 'function') partySend('dbs', Object.assign({ dr: G.dungeon.delve.seed }, c));
+  return true;
+}
+// play one cast in this game: warnings, bolts and the damage to the heroes this game runs
+function delveBossCast(c) {
+  const D = G.dungeon, X = D && D.delve; if (!X) return;
+  const e = c.mini ? D.rooms.flatMap((m) => m.mobs).find((o) => o.mini && o.alive) : D.boss; if (!e || !e.alive) return;
+  const pal = areaFx(D.zone), col = BIOMES[X.def.biome].coreColor, dmg = (k) => mobDmg(e, BK.dmg[k]);
+  const shot = (x, z, a, k, sp = BK.shot) => spawnProjectile({ x, z, vx: Math.sin(a) * sp, vz: Math.cos(a) * sp, life: 34 / sp, r: 0.55, dmg: dmg(k), team: 'mob', owner: e.id, kind: 'orb', color: col, y: 1.4 });
+  const ring = (x, z, r, t, k) => G.pendingAoE.push({ x, z, r, t, max: t, dmg: dmg(k), team: 'mob', owner: e.id, kind: 'slam', pal });
+  const later = (t, fn) => X.emit.push({ t, fn });
+  const a0 = Math.atan2(c.tx - c.x, c.tz - c.z);
+  e.facing = a0; e.attackAnim = 1;
+  if (e.bk) e.bk.busy = 0.5;
+  switch (c.k) {
+    case 'volley': for (let i = 0; i < 5; i++) shot(c.x, c.z, a0 + (i / 4 - 0.5) * 0.6, 'volley'); break;
+    case 'slam': for (const [x, z] of c.p) ring(x, z, BK.slamR, BK.slamT, 'slam'); if (e.bk) e.bk.busy = BK.slamT; break;
+    case 'ring': for (let w = 0; w < 2; w++) later(w * BK.ring.gap, () => { for (let i = 0; i < BK.ring.n; i++) shot(e.x, e.z, (i + w * 0.5) / BK.ring.n * Math.PI * 2, 'ring', 10); }); break;
+    case 'charge': {
+      const C = BK.charge, ex = c.x + Math.sin(a0) * C.len, ez = c.z + Math.cos(a0) * C.len;
+      for (let d = 0; d <= C.len; d += 2.5) ring(c.x + Math.sin(a0) * d, c.z + Math.cos(a0) * d, C.r, C.warn + d / C.speed, 'charge');
+      ev({ t: 'telegraph', x: c.x, z: c.z, a: a0, len: C.len, w: C.r * 2 });
+      if (e.bk && !e.own) { const f = { x: ex, z: ez }; dungeonClamp(f, e.r); e.bk.dash = { x: f.x, z: f.z, wait: C.warn }; }
+      break;
+    }
+    case 'spiral': { const S = BK.spiral; for (let t = 0; t < S.time; t += S.every) later(t, () => { for (let i = 0; i < S.arms; i++) shot(e.x, e.z, a0 + t * S.turn + i / S.arms * Math.PI * 2, 'spiral', 9); }); if (e.bk) e.bk.busy = S.time; break; }
+    case 'meteors': {
+      const M = BK.meteors, rng = mulberry32(c.s), bm = D.rooms.find((m) => inRoom(m, c.x, c.z)) || D.rooms.at(-1);
+      for (let i = 0; i < M.n; i++) {
+        const x = clamp(c.x + (rng() * 2 - 1) * M.spread, bm.x0 + 2, bm.x1 - 2), z = clamp(c.z + (rng() * 2 - 1) * M.spread, bm.z0 + 2, bm.z1 - 2);
+        later(rng() * 0.8, () => ring(x, z, M.r, M.warn, 'meteors'));
+      }
+      // one always lands on the target, so standing still is never safe
+      later(0.4, () => ring(c.tx, c.tz, M.r, M.warn, 'meteors'));
+      break;
+    }
+  }
+  ev({ t: 'delveBossCast', k: c.k, x: c.x, z: c.z });
+}
+// a cast from the game that runs the boss
+function delveBossRecv(P) {
+  if (!delveOn() || mpNum(P.dr, -1) >>> 0 !== G.dungeon.delve.seed || !BOSS_KINDS.includes(P.k)) return;
+  const n = (v) => clamp(mpNum(v, 0), -1e5, 1e5);
+  delveBossCast({ k: P.k, x: n(P.x), z: n(P.z), tx: n(P.tx), tz: n(P.tz), p: (Array.isArray(P.p) ? P.p : []).slice(0, 4).map((q) => [n(q && q[0]), n(q && q[1])]), s: mpNum(P.s, 1) >>> 0, mini: P.mini ? 1 : 0 });
+}
+// delayed parts of casts (ring waves, the spiral, staggered stones)
+function stepDelveEmit(dt) {
+  const X = G.dungeon.delve; if (!X.emit) X.emit = [];
+  for (let i = X.emit.length - 1; i >= 0; i--) { const q = X.emit[i]; if ((q.t -= dt) <= 0) { X.emit.splice(i, 1); q.fn(); } }
+}
+// --- end delve boss
 // --- Mining: four ore veins per combat area (POIs kind 'node'; n 3 is the rare glowing vein). Tap a ready vein to
 // mine it: Ore (spent on pickaxe levels), a Geode roll per ore (a case opened on the reel that also fills the Museum)
 // and a 1 in 10,000 pet. Veins regrow on a timer; 1% regrow as rich veins that pay triple. Expeditions mine too.
@@ -7964,7 +8138,9 @@ const CB = CFG.craft.biomes;
 // every material by id -> { name, biome, kind, color }
 const MATS = (() => { const o = {}; CB.forEach((b, i) => { o[b.ore] = { name: b.oreN, biome: i, kind: 'ore', color: b.color }; o[b.part] = { name: b.partN, biome: i, kind: 'part', color: b.color }; o[b.core] = { name: b.coreN, biome: i, kind: 'core', color: b.color }; });
   o[CFG.craft.titan.id] = { name: CFG.craft.titan.name, biome: -1, kind: 'soul', color: CFG.craft.titan.color };
-  o[CFG.craft.rune.id] = { name: CFG.craft.rune.name, biome: -1, kind: 'rune', color: CFG.craft.rune.color }; return o; })();
+  o[CFG.craft.rune.id] = { name: CFG.craft.rune.name, biome: -1, kind: 'rune', color: CFG.craft.rune.color };
+  for (const d of CFG.delve.dungeons) if (d.gem) o[d.gem.id] = { name: d.gem.name, biome: d.biome, kind: 'gem', color: d.gem.color, dungeon: d.id }; // rare veins in Dungeon mode
+  return o; })();
 // dungeon-only heroes: their Level Road unlock is replaced by sigils from that biome's dungeons
 CB.forEach((b, i) => { if (CFG.attacks[b.hero]) CFG.attacks[b.hero].unlock = { sigils: i }; });
 function craftState(p) {
@@ -8150,6 +8326,25 @@ const MAT_ART = (() => {
   const gloss = (g) => free(g, [[5, 3], [6, 3], [5, 4]], 'w');
   const orb = (g) => { poly(g, [[3, 14], [5, 11], [11, 11], [13, 14]], 'p'); ell(g, 8, 7, 5.3, 5.3); };
   const D = {
+    // ---- rare dungeon treasures (Dungeon mode veins) ----
+    rootamber: { b: '#e09a2a', a: '#7fc65a', c: '#fff0b0',
+      body: (g) => { ell(g, 8, 9.5, 5, 5); poly(g, [[5, 7], [8, 1.5], [11, 7]]); },
+      detail: (g) => { on(g, [[8, 9], [7, 10], [9, 10], [8, 11]], 'a'); on(g, [[6, 7], [7, 6], [6, 8]], 'c'); } },
+    rimeglass: { b: '#9fe0ff', a: '#ffffff', c: '#dff6ff',
+      body: (g) => { poly(g, [[4, 15], [3.5, 7], [6.5, 1], [9, 7], [8.5, 15]]); poly(g, [[8.5, 15], [9.5, 8], [12, 4.5], [13.5, 9], [12.5, 15]]); },
+      detail: (g) => { line(g, 6, 3, 6, 12, 'a'); on(g, [[11, 7], [12, 9]], 'c'); star(g, 14, 2, 'w'); } },
+    emberheart: { b: '#ff6a2a', a: '#ffd27a', c: '#fff3c0',
+      body: (g) => poly(g, [[8, 1.5], [13.5, 7], [8, 14.5], [2.5, 7]]),
+      detail: (g) => { line(g, 3, 7, 13, 7, 'a'); line(g, 8, 2, 5, 7, 'a'); line(g, 8, 2, 11, 7, 'a'); on(g, [[7, 4], [6, 5]], 'c'); } },
+    inkpearl: { b: '#8a6ad8', a: '#c9b8ff', c: '#ffffff',
+      body: (g) => ell(g, 8, 8.5, 5.5, 5.5),
+      detail: (g) => { on(g, [[6, 6], [7, 6], [6, 7]], 'c'); on(g, [[10, 11], [11, 10], [9, 12]], 'a'); free(g, [[13, 3]], 'w'); } },
+    tidestone: { b: '#2fb5a8', a: '#c8fff4', c: '#ffffff',
+      body: (g) => poly(g, [[4, 3], [12, 3], [14.5, 8], [12, 13.5], [4, 13.5], [1.5, 8]]),
+      detail: (g) => { line(g, 4, 9, 6, 7, 'a'); line(g, 6, 7, 8, 9, 'a'); line(g, 8, 9, 10, 7, 'a'); line(g, 10, 7, 12, 9, 'a'); on(g, [[5, 4], [6, 4]], 'c'); } },
+    starshard: { b: '#ffd84a', a: '#fff7c0', c: '#ffffff',
+      body: (g) => poly(g, [[8, 0.5], [10, 6], [15.5, 8], [10, 10], [8, 15.5], [6, 10], [0.5, 8], [6, 6]]),
+      detail: (g) => { on(g, [[8, 4], [8, 5], [7, 7], [8, 7]], 'a'); on(g, [[8, 8]], 'c'); star(g, 13, 2, 'w'); } },
     // ---- ores ----
     copper: { b: '#c8793a', a: '#6fc08a', c: '#ffd9a0',
       body: (g) => { ell(g, 5.5, 10.5, 4, 3.2); ell(g, 10.5, 9.5, 4, 4); ell(g, 8, 5.5, 3.2, 3); },
@@ -10986,7 +11181,7 @@ function enterDungeonView(on) {
   if (on && G.dungeon) {
     buildDungeonView(G.dungeon);
     const pal = dungeonPalette(CFG.world.zones[G.dungeon.zone]);
-    scene.fog.color.copy(pal.fog); scene.fog.near = 22; scene.fog.far = 75; paintSky(pal.fog.clone().multiplyScalar(0.4), pal.fog);
+    scene.fog.color.copy(pal.fog); scene.fog.near = 70; scene.fog.far = 150; // starts past the camera (~35 m up): only far halls fade, the screen stays clear paintSky(pal.fog.clone().multiplyScalar(0.4), pal.fog);
   } else { disposeDungeonView(); scene.fog.near = 50; scene.fog.far = Q.lowTier ? 95 : 140; }
 }
 function updateDungeonView(dt) {
@@ -11007,8 +11202,8 @@ function updateDungeonView(dt) {
 }
 // --- party-dungeon view: event-room set pieces on top of the hall builder (47-dungeon-view.js). Generated models
 // (delve_altar, delve_moonwell, delve_echo, delve_hoard, delve_throne) plus existing ones (chest, pillar); code geometry
-// here is only VFX: rune rings, glows, the moonwell shimmer and the pressure-plate floor sigils. Dark halls pull the fog in.
-const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [], seals: [], tex: [] };
+// here is only VFX: rune rings, glows, the moonwell shimmer and the pressure-plate floor sigils.
+const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [], seals: [], tex: [], veins: [] };
 // --- puzzle halls: pixel runes (7×7, bone white with an ink outline) floating over each seal; a floor mural shows the
 // order. Pips (1-5 dots) stand in for runes on the easy runs that number their seals.
 const PZ_GLYPHS = ['0011100,0100010,1000001,1111111,1000001,0100010,0011100', '1000001,0100010,0010100,0001000,0010100,0100010,1000001', '0001000,0011100,0101010,1001001,0001000,0001000,0011100',
@@ -11045,7 +11240,8 @@ function buildDelvePuzzles(D, tint) {
       sp.position.set(q.x, lever ? 3.6 : 2.2, q.z); sp.scale.setScalar(1.25);
       delveParts.seals.push({ room: m.i, j, ring, disc, sp, base: sp.position.y });
     });
-    // the mural: the runes in their order (or the pips counting up), between two standing stones
+    // the mural (only the ordered puzzle has one): the runes in their order (or the pips counting up), between two standing stones
+    if (pz.kind !== 'order') continue;
     const seq = pz.order.map((j, k) => ({ g: pz.sw[j].g, pip: pz.pips ? k : null })), w = K * 1.7, tex = pzTexture(seq, true);
     const mural = add(new THREE.Mesh(new THREE.PlaneGeometry(w + (K - 1) * 0.85, 1.7).rotateX(-Math.PI / 2).rotateY(Math.PI), new THREE.MeshBasicMaterial({ map: tex, color: tint, transparent: true, depthWrite: false })));
     mural.position.set(pz.clue.x, 0.05, pz.clue.z); mural.material.color.lerp(new THREE.Color(0xffffff), 0.55);
@@ -11059,10 +11255,14 @@ function buildDelvePuzzles(D, tint) {
 function updateDelvePuzzles(D, t) {
   const tint = BIOMES[D.delve.def.biome].coreColor;
   for (const q of delveParts.seals) {
-    const m = D.rooms[q.room], S = D.delve.pz[q.room], at = m.pz.order.indexOf(q.j), awake = !!S && (S.done || at < S.step), red = S && S.flash > 0 && Math.sin(t * 30) > 0;
+    const m = D.rooms[q.room], S = D.delve.pz[q.room], awake = !!S && delvePzLit(m, S, q.j), red = S && S.flash > 0 && Math.sin(t * 30) > 0;
+    // the echo shows its order: one seal after the other flashes white while nothing is awake yet
+    const K = m.pz.sw.length, sh = DV.puzzle.kinds.memory.show, ph = S ? S.show % (K * sh + 2.5) : 0, showing = m.pz.kind === 'memory' && S && !S.done && !S.step && S.cd <= 0 && ph < K * sh && m.pz.order[Math.floor(ph / sh)] === q.j && ph % sh < sh * 0.7;
+    // the race: dark seals pulse faster while the clock runs
+    const racing = m.pz.kind === 'timed' && S && S.bits && !S.done;
     const hold = S && S.hold[q.j] > 0 ? S.hold[q.j] / DV.puzzle.hold : 0;
-    q.sp.material.color.setHex(red ? 0xff4040 : awake ? tint : hold > 0 ? 0xffffff : 0x8a8590);
-    q.ring.material.color.setHex(red ? 0xff3030 : tint); q.ring.material.opacity = awake ? 0.95 : 0.3 + hold * 0.5 + Math.sin(t * 3 + q.j) * 0.08;
+    q.sp.material.color.setHex(red ? 0xff4040 : showing ? 0xffffff : awake ? tint : hold > 0 ? 0xffffff : 0x8a8590);
+    q.ring.material.color.setHex(red ? 0xff3030 : showing ? 0xffffff : tint); q.ring.material.opacity = awake || showing ? 0.95 : 0.3 + hold * 0.5 + Math.sin(t * (racing ? 12 : 3) + q.j) * (racing ? 0.2 : 0.08);
     q.sp.position.y = q.base + (awake ? 0.5 : 0) + Math.sin(t * 2 + q.j) * 0.08;
     if (q.disc) q.disc.material.color.setHex(awake ? tint : 0x5a5060);
   }
@@ -11074,6 +11274,13 @@ function buildDelveProps(D) {
   const cover = D.props.filter((q) => !q.kind); // lever stones are placed with their puzzle below
   if (cover.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', cover.map((q, k) => ({ x: q.x, z: q.z, ry: k * 1.3, s: 3.4 }))));
   buildDelvePuzzles(D, tint);
+  // rare veins: the existing crystal model in the dungeon's treasure colour, a soft glow under it; gone once you mined it
+  delveParts.veins = (D.veins || []).map((v, i) => {
+    const col = X.def.gem ? X.def.gem.color : tint, item = { x: v.x, z: v.z, ry: i * 2.1, s: v.lode ? 3.6 : 2.8 };
+    const set = WorldModels.place(dungeonGroup, 'crystal', [item], { glow: col, glowK: v.lode ? 0.75 : 0.6 }); dungeonParts.sets.push(set);
+    const ring = add(new THREE.Mesh(new THREE.RingGeometry(1.6, 2.5, 32).rotateX(-Math.PI / 2), glow(col, 0.5))); ring.position.set(v.x, 0.04, v.z);
+    return { i, item, set, ring };
+  });
   const echo = [];
   for (const m of D.rooms) {
     if (!m.event) continue;
@@ -11117,6 +11324,7 @@ function buildDelveProps(D) {
 function updateDelveView(dt, t) {
   const D = G.dungeon, X = D.delve;
   updateDelvePuzzles(D, t);
+  for (const v of delveParts.veins) { const gone = !!X.mined[v.i]; if (v.item.hidden !== gone) { v.item.hidden = gone; v.set.dirty = true; v.ring.visible = !gone; } v.ring.material.opacity = 0.25 + Math.sin(t * 2.5 + v.i) * 0.15; }
   for (const c of delveParts.caches) {
     const b = X.bonus[c.room] | 0, [cc, co] = c.items, hc = b !== 1, ho = b !== 2;
     if (cc.hidden !== hc || co.hidden !== ho) { cc.hidden = hc; co.hidden = ho; for (const h of c.sets) h.dirty = true; if (b === 1) burst(cc.x, 1, cc.z, 20, 0xffd34a, 4, 0.8, 0.4, 6, 3); }
@@ -11127,8 +11335,7 @@ function updateDelveView(dt, t) {
   if (delveParts.altar) { const A = delveParts.altar; A.orb.position.y = 2.2 + Math.sin(t * 2) * 0.12; A.rune.rotation.y = t * 0.4; A.rune.material.opacity = X.used.altar ? 0.2 : 0.7; }
   if (delveParts.well) { delveParts.well.water.rotation.y = -t * 0.5; delveParts.well.water.material.opacity = X.used.fountain ? 0.25 : 0.8; }
   for (const r of delveParts.glows) r.material.opacity = 0.14 + Math.sin(t * 1.7 + r.position.x) * 0.05;
-  // dark halls: the fog closes in while you are inside one
-  const m = D.rooms[D.room], far = m && m.dark ? 34 : 75; scene.fog.far += (far - scene.fog.far) * Math.min(1, dt * 2); scene.fog.near = Math.min(22, scene.fog.far * 0.4);
+
 }
 // --- Bastion Siege view: the fort's land, built on entry and disposed on exit. Everything standing is a generated world
 // model (keep, wagons, the siege_* buildings and walls, flags); code geometry is only ground, the land's edge, the
@@ -12605,14 +12812,15 @@ function invChestsHTML(p) {
     <p class="fine">Tap a chest to open it. Chests are earned in play and cannot be sold. Every chest shows its odds before you open it.</p>`;
 }
 // where each kind of material comes from, shown on its card
-const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses', rune: 'Elites, bosses, dungeons' };
+const MAT_SRC = { ore: 'Mining', part: 'Monster kills', core: 'Dungeon chests', soul: 'World bosses', rune: 'Elites, bosses, dungeons', gem: 'Rare veins in Dungeon mode' };
 function invResourcesHTML(p) {
   const tile = (img, name, n, col, src) => `<div class="rtile${n ? '' : ' none'}" style="--rc:${col}" title="${name}${src ? ' · ' + src : ''}"><img src="${img}" alt=""><b class="rn">${fmtK(n)}</b><small>${name}</small></div>`;
   const mat = (id) => { const M = MATS[id]; return tile(matIcon(id), M.name, matCount(id, p), hex6(M.color), MAT_SRC[M.kind]); };
   const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(svg.includes('xmlns') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
   const money = `<div class="igrid rgrid">${tile(svgUrl(ICON.coin), 'Gold', p.gold, '#ffd23a')}${tile(svgUrl(ICON.ess), 'Gems', p.essence || 0, '#7fe3ff')}${mat(CFG.craft.titan.id)}${mat(CFG.craft.rune.id)}</div>`;
   const groups = CB.map((b, i) => biomeReached(i, p) ? `<h4 class="sub">${BIOMES[i].name}</h4><div class="igrid rgrid">${[b.ore, b.part, b.core].map(mat).join('')}</div>` : '').join('');
-  return `<div class="subRow"><h4 class="sub">Resources</h4></div><h4 class="sub first">Gold, gems, Titan Souls &amp; Rune Shards</h4>${money}${groups}
+  const rare = CFG.delve.dungeons.filter((d) => d.gem && (delveOpen(d) || matCount(d.gem.id, p))), rareHTML = rare.length ? `<h4 class="sub">Dungeon treasures</h4><div class="igrid rgrid">${rare.map((d) => mat(d.gem.id)).join('')}</div>` : '';
+  return `<div class="subRow"><h4 class="sub">Resources</h4></div><h4 class="sub first">Gold, gems, Titan Souls &amp; Rune Shards</h4>${money}${groups}${rareHTML}
     <p class="fine">Ore comes from Mining, parts from monsters, cores from dungeon chests, Titan Souls from world bosses, Rune Shards (for Enchanting) from elites, bosses, dungeon chests and now and then any monster. Spend them in the Forge. Biomes you have not reached stay hidden.</p>`;
 }
 // --- crafting tabs (src/game/39-crafting.js)
@@ -13401,11 +13609,14 @@ function processEvents() {
       // party dungeons (36b-delve.js)
       case 'delveEvent': { const E = CFG.delve.events[e.k]; showBanner(E.name, E.d, 'gold'); ringFx(e.x, e.z, 5, 0xffd34a, 1.1); Sfx.play('horn'); break; }
       case 'delveMini': showBanner(escapeHTML(e.name), 'A champion of the dungeon guards this hall', 'red'); ringFx(e.x, e.z, 7, 0xff5d8f, 1.1); Sfx.play('horn'); break;
-      case 'delvePhase': showBanner(`Phase ${e.n} of ${e.of}`, e.rage ? `${escapeHTML(e.name)} is enraged: faster and harder hitting` : `${escapeHTML(e.name)} calls for help`, 'red'); ringFx(e.x, e.z, 6, e.rage ? 0xff3030 : 0xff5d8f, 1); Sfx.play('horn'); if (e.rage) burst(e.x, 1.5, e.z, 34, 0xff3030, 6, 0.9, 0.4, 3, 2); break;
-      case 'delvePuzzle': showBanner(escapeHTML(e.name), e.pips ? CFG.delve.puzzle.pipsHint : CFG.delve.puzzle.hint, 'gold'); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break;
-      case 'delvePzStep': showToast(`Seal ${e.n} of ${e.of} awake`, 'good'); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
-      case 'delvePzFail': showToast(e.spikes ? 'Wrong seal! The floor bites back' : 'Wrong seal! Something crawls out', 'bad'); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
+      case 'delvePhase': showBanner(`Phase ${e.n} of ${e.of}`, `${escapeHTML(e.name)}${e.rage ? ' is enraged' : ' calls for help'}${e.adds && e.adds.length ? ' · new: ' + e.adds.map(escapeHTML).join(', ') : ''}`, 'red'); ringFx(e.x, e.z, 6, e.rage ? 0xff3030 : 0xff5d8f, 1); Sfx.play('horn'); if (e.rage) burst(e.x, 1.5, e.z, 34, 0xff3030, 6, 0.9, 0.4, 3, 2); break;
+      case 'delvePuzzle': { const K = CFG.delve.puzzle.kinds[e.kind] || {}; showBanner(`${escapeHTML(e.name)} · ${K.name || ''}`, e.pips ? CFG.delve.puzzle.pipsHint : K.hint || CFG.delve.puzzle.hint, 'gold'); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break; }
+      case 'delvePzClock': showToast(`The race is on: ${e.secs} seconds!`, 'bad'); ringFx(e.x, e.z, 7, 0xffd34a, 0.8); Sfx.play('horn'); break;
+      case 'delvePzStep': showToast(e.flip ? `${e.n} of ${e.of} seals lit` : `Seal ${e.n} of ${e.of} awake`, 'good'); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
+      case 'delvePzFail': showToast(`${e.timed ? 'Too slow!' : 'Wrong seal!'} ${e.spikes ? 'The floor bites back' : 'Something crawls out'}`, 'bad'); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
       case 'delvePzDone': showBanner(`${escapeHTML(e.name)} solved`, 'The gate opens', 'gold'); burst(e.x, 1, e.z, 30, 0xffd34a, 6, 0.9, 0.4, 3, 2); Sfx.play('unlock'); break;
+      case 'delveBossCast': if (e.k === 'charge' || e.k === 'spiral' || e.k === 'meteors') Sfx.play('horn', { gap: 1 }); ringFx(e.x, e.z, 3, 0xff5d8f, 0.5); break;
+      case 'delveVein': if (e.lode) showBanner('Motherlode!', `+${e.n} ${escapeHTML(e.name)}`, 'gold'); else showToast(`+${e.n} ${escapeHTML(e.name)} · a rare dungeon treasure`, 'good'); burst(e.x, 1.2, e.z, e.lode ? 40 : 24, 0xffe27a, 5, 0.9, 0.4, 4, 2); Sfx.play(e.lode ? 'radiant' : 'unlock'); break;
       case 'delveWave': showToast(`Wave ${e.n + 1} of ${e.of}!`, 'bad'); ringFx(e.x, e.z, 6, 0xff5d8f, 0.9); break;
       case 'delveBonus': Feed.remove('dlvEvent'); showToast(e.why + ' · open the cache', 'good'); burst(e.x, 1, e.z, 26, 0xffd34a, 5, 0.9, 0.4, 4, 2); Sfx.play('unlock'); break;
       case 'delveEscape': Feed.remove('dlvEvent'); showToast('The goblin got away with its gold…', 'bad'); burst(e.x, 1, e.z, 18, 0xffd34a, 4, 0.6, 0.3, -2, 3); break;
@@ -14678,7 +14889,7 @@ function rtMessage(d) {
       if (P.event === 'hit' && P.payload && P.payload.to === MP.sid) { mobHitRecv(P.payload); break; }
       if (P.event === 'phit' && P.payload && P.payload.to === MP.sid) { pvpRecv(P.payload); break; }
       if (P.event === 'pdie' && P.payload && P.payload.to === MP.sid) { pvpDieRecv(P.payload); break; }
-      if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull|dbot|dask|dans|ddoor|dpz)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
+      if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull|dbot|dask|dans|ddoor|dpz|dbs)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^f[a-z]+$/.test(P.event) && typeof siegeMpRecv === 'function') { siegeMpRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^b/.test(P.event)) { bossRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
@@ -15526,6 +15737,7 @@ function partyRecv(event, sid, P) {
   if (event === 'dbot') { delveBotsRecv(sid, P); return; }
   if (event === 'ddoor') { delveDoorRecv(P); return; }
   if (event === 'dpz') { delvePzRecv(P); return; }
+  if (event === 'dbs') { delveBossRecv(P); return; }
   if (event === 'dask') { // the leader asks to play (again): only my party's leader, and only while I'm not already in
     const L = partyLeader(); if (!PARTY.code || !L || L.me || L.key !== sid || delveOn()) return;
     PARTY.dg = delveDef(P.dg).id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999); PARTY.ready = false;
@@ -15688,7 +15900,7 @@ function openDelveChest(r) {
 // a cache or an event: the interact button inside a party dungeon
 function delveAct(n) {
   if (n.kind === 'delveBonus') { const r = delveUse('delveBonus', n.room); if (r) openDelveChest(r); return; }
-  delveUse(n.kind);
+  delveUse(n.kind, n.room);
 }
 // HUD inside a party dungeon: the room line, the event line and a revive ring
 function delveHud() {

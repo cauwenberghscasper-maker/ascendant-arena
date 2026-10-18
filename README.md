@@ -57,7 +57,12 @@ the code disagree, check `git log` and fix this file in the same commit.
    (`#bMelee { display: none }`), held weapons on heroes, worn gear pieces and gear sparkle on heroes, painted menu
    emblems, hero overlays (ascended crown, wings, aura, trail), emoji glyphs in the UI, the XP feed and tutorial text on
    the HUD.
-8. **Never commit secrets.** No tokens, API keys or passwords in code, docs or commit messages. The Supabase anon key
+8. **Party dungeons are the same on every phone.** Everything that shapes a run (halls, corridors, events, puzzles,
+   monsters, their stats and modifiers, bosses, veins) comes from the leader's seed in `src/game/36b-delve.js`: use the
+   seeded `rng`, `seededShuffle` and `withSeed`, never `Math.random`, and never `Array.sort` with a random comparator
+   (Safari and Chrome order it differently, so iPhones and Androids got different maps). Anything that changes during
+   the run (gates, puzzle steps, boss attacks, kills) is sent to the party. `tools/check_delve.cjs` guards this.
+9. **Never commit secrets.** No tokens, API keys or passwords in code, docs or commit messages. The Supabase anon key
    in the client is public by design; nothing else is.
 
 ### 1.2 Phone first
@@ -247,10 +252,14 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
   Keep restarts the wave it fell on, never lower. Your fort is a shared world: friends join with its code, even while
   you are offline (saved on the server; the player in it longest runs the waves).
 - **Dungeon mode** (party dungeons, level 12, 1-4 heroes, bots fill the empty places): six dungeons, one per biome,
-  each with its own boss, mini-boss and 5-piece set. A run is 6-8 halls of mixed sizes (20 m cells to 56 m arenas, a
-  64 m boss hall) with monster packs that wake together, event rooms, a mini-boss halfway and a three-phase boss
-  (adds at 66% and 33%, then enraged), aimed at about 5 minutes. Puzzle halls (1-2 per run): wake the seals (floor plates
-  and lever stones) in the order the mural by the entrance shows; a wrong seal resets them and bites back. Difficulties Normal → Mythic → Ascendant 1, 2, …
+  each with its own boss, mini-boss, 5-piece set and rare treasure. A run is 7-8 halls of mixed sizes (20 m cells to
+  56 m arenas, a 64 m boss hall) with few, tough monsters spread over each hall (ranged ones at the back behind pillars;
+  a wake calls only close neighbours, so you can pull them), event rooms, a mini-boss halfway and a three-phase boss
+  whose kit grows each phase (Volley and Ground Slam, then Nova Ring and Charge, then Death Spiral and Falling Stones,
+  plus adds and an enrage). Two puzzle halls per run, never the same kind: the mural order, the echo (repeat a light
+  show), the race (every seal before the clock runs out) and the balance (lights-out). Some runs hide a rare vein of
+  the dungeon's own treasure (Rootbound Amber, Rimeglass, Forgeheart Ember, Ink Pearl, Tidestone, Starshard), each
+  hero mines their own. Every phone in a party sees the same run (rule 8). Difficulties Normal → Mythic → Ascendant 1, 2, …
 - **Dungeons** with Dungeon Keys (tier + affixes, par time) and **Legendary Trials** (sigils, Radiant 1/500 drops).
 - **Mining:** ore, pickaxe, geodes for the Museum, a 1/10,000 pet.
 - **Daily:** 7-day calendar that never resets, weekly Colossus chest.
@@ -401,7 +410,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Cloud save (Supabase) | `src/game/81-cloud-save.js` |
 | Combat, projectiles, damage | `src/game/31-combat.js` |
 | Arena (Showdown), Rift | `src/game/34-arena.js`, `33-world-sim.js` |
-| Dungeon mode (party dungeons): dungeons, difficulties, power gate, rooms, events, loot, set bonuses | `src/game/36b-delve.js` (`CFG.delve`); event-room props: `47b-delve-view.js`; parties, random match, the Dungeons panel and HUD: `73-party.js`; bots that fill a party up to four: `36d-delve-bots.js` (`CFG.delve.bots`); banners `assets/ui/delve/`, set pieces `assets/world/delve_*` |
+| Dungeon mode (party dungeons): dungeons, difficulties, power gate, rooms, events, loot, set bonuses | `src/game/36b-delve.js` (`CFG.delve`); event-room props: `47b-delve-view.js`; parties, random match, the Dungeons panel and HUD: `73-party.js`; bots that fill a party up to four: `36d-delve-bots.js` (`CFG.delve.bots`); boss attack kits per phase: `36e-delve-boss.js` (`CFG.delve.bossKit`); banners `assets/ui/delve/`, set pieces `assets/world/delve_*` |
 | Bastion Siege (tower defense from the Bastion house in town): the grid, building, walls and pathing, waves and sides, objectives, builders, the permanent fort save | `src/game/36c-siege.js` (`CFG.siege`); looks: `47c-siege-view.js`; builder mode: `75-siege-builder.js`; menu pictures: `tools/fort_icons.mjs` + `.py` → `assets/ui/fort/`; save: `profile.fort` via `sanitizeFort` in `22-profile.js`; shared worlds (codes, host, sync): `74-siege-mp.js` + `supabase/bastion_worlds.sql`; checks: `tools/check_siege.cjs` |
 | Multiplayer lobby (Supabase Realtime), future partitioning (`mpRoomKey`) | `src/game/70-multiplayer.js`; notes in `docs/UNFINISHED.md` |
 | HUD | `src/game/60-hud.js` |
