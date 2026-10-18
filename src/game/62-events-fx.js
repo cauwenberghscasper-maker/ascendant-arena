@@ -164,7 +164,12 @@ function processEvents() {
       case 'fortBuilt': if (e.type === 'wall' || e.type === 'gate') burst(e.x, 0.6, e.z, 8, 0xd8b07a, 3, 0.5, 0.25, 2, 0.8); else { SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); } if (e.done) showToast(`${CFG.siege.towers[e.type].name} reached level ${e.l}`, 'good'); break;
       case 'fortGone': burst(e.x, 0.8, e.z, 16, 0x8a7a6a, 4, 0.8, 0.4, 3, 1.2); break;
       case 'fortBroken': burst(e.x, 1, e.z, 26, 0x6a5a4a, 6, 1, 0.4, 3, 1.4); Sfx.play('boom', { gap: 0.3 }); break;
-      case 'fortShot': if (e.type === 'cannon') burst(e.x, 1.6, e.z, 6, 0xdddddd, 3, 0.4, 0.25, 2, 0.6); break;
+      case 'fortShot': { const y = e.y || 1.6, hear = near(e, 26);
+        if (e.type === 'cannon') { SpriteFX.play('explosion', 'fire', e.x, y, e.z, 1.5); burst(e.x, y, e.z, 12, 0xcfcac2, 3, 0.7, 0.35, -0.6, 0.8); if (hear) { Sfx.play('boom', { gap: 0.2 }); if (near(e, 12)) Cam.shake = Math.max(Cam.shake, 0.15); } }
+        else if (e.type === 'ballista') { burst(e.x, y, e.z, 8, 0xd8b07a, 4, 0.35, 0.22, 2, 0.4); if (hear) Sfx.play('bounce', { gap: 0.15 }); }
+        else if (e.type === 'mage') { SpriteFX.play('nova', 'arcane', e.x, y, e.z, 1.4); burst(e.x, y, e.z, 10, 0xc58cff, 4, 0.45, 0.25, 0, 0.5); if (hear) Sfx.play('zap', { gap: 0.15 }); }
+        else { burst(e.x, y, e.z, 5, 0xffe08a, 3, 0.3, 0.18, 1, 0.3); if (hear) Sfx.play('pellet', { gap: 0.1 }); }
+        break; }
       case 'riftEnd': enterRiftView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); break;
       case 'teleport': burst(e.x, 1, e.z, 30, 0x9fe8ff, 6, 0.8, 0.3, 2, 1.5); SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 5.5); Sfx.play('super'); Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; showToast(e.name); break;
       case 'proc': burst(e.x, 1.2, e.z, 8, e.kind === 'grasp' ? 0x8dff6a : e.kind === 'kraken' ? 0x5dd6ff : 0xffe066, 4, 0.4, 0.22, 4); SpriteFX.play(e.kind === 'kraken' ? 'zap' : 'impact', e.kind === 'grasp' ? 'venom' : e.kind === 'kraken' ? 'storm' : 'gold', e.x, 1.3, e.z, 1.9); break;

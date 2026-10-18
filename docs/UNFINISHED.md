@@ -22,6 +22,10 @@ Built from `docs/BASTION_PLAN.md` phases 1-3:
   `siege_ballista`, `siege_mage`, `siege_barracks`, `siege_mine`, `siege_hut`, `siege_wall_wood/stone/iron`, `siege_gate`
   (1.2-4k tris, 512 textures). Barracks and builder hut came out with streaky textures and roof holes: regenerate them.
   Stone/iron walls are long models squeezed into 2 m cells (narrow crenels); a 2:1 wall piece would look better.
+- **Firing animations** (`animateSiegeDefenders` in `47c-siege-view.js`, Clash of Clans style): each defender winds up before a
+  shot (cannon leans back, ballista draws, the mage orb swells), kicks when it fires (recoil along the aim, squash and
+  bounce; archer tower bounces with each volley), turns to its target, and shots leave from the model (`SIEGE_MUZZLE`:
+  platform, muzzle, rail, orb) with a muzzle effect and sound (`fortShot`). Guests see the same (their towers fire ghost shots).
 - **Open:** test on two real phones; the soldier still uses the Smith Garo model (needs a rigged soldier); anyone with a code can build in (or wreck) that fort; balance of costs
   and build times is not playtested; moving a building is not possible (tear down and rebuild).
 

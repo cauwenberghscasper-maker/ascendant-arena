@@ -49,6 +49,8 @@ CFG.siege = {
 };
 const SIEGE_TYPES = ['archer', 'cannon', 'ballista', 'mage', 'warrior', 'mine', 'hut', 'wall', 'gate'];
 const SIEGE_SHOOTERS = { archer: 1, cannon: 1, ballista: 1, mage: 1 };
+// where shots leave each defender (f: metres ahead of its centre toward the target, y: height) and how long it winds up first
+const SIEGE_MUZZLE = { archer: { f: 0.9, y: 4.4, wind: 0.25 }, cannon: { f: 1.9, y: 1.3, wind: 0.5 }, ballista: { f: 1.5, y: 1.9, wind: 0.6 }, mage: { f: 0.4, y: 6.2, wind: 0.7 } };
 const siegeLvlMul = (l) => 1 + 0.3 * (l - 1);
 const siegeMen = (l) => Math.min(4, CFG.siege.towers.warrior.men + Math.floor(l / 5));
 // one wave's gold at hero level L: the price unit for building
@@ -384,17 +386,18 @@ function stepSiegeDefenders(dt, ghost) {
     const T = CFG.siege.towers[t]; if ((u.cd -= dt) > 0) continue;
     const e = siegeNearestMob(u.x, u.z, T.range); if (!e) { u.cd = 0.15; continue; }
     u.cd = T.cd; u.aim = Math.atan2(e.x - u.x, e.z - u.z); u.fireT = G.time;
-    const dmg = ghost ? 0 : siegeDefDmg(T, l), sx = Math.sin(u.aim), sz = Math.cos(u.aim), ox = u.x + sx * 1.6, oz = u.z + sz * 1.6, team = ghost ? 'ghost' : 'ally';
+    // shots leave from the model: the archers' platform, the cannon's muzzle, the ballista's rail, the mage tower's orb
+    const M = SIEGE_MUZZLE[t], dmg = ghost ? 0 : siegeDefDmg(T, l), sx = Math.sin(u.aim), sz = Math.cos(u.aim), ox = u.x + sx * M.f, oz = u.z + sz * M.f, team = ghost ? 'ghost' : 'ally';
     if (t === 'cannon') {
       // a lobbed shell lands where the target will be
       const tx = e.x + (e.vx || 0) * T.fly, tz = e.z + (e.vz || 0) * T.fly;
-      spawnProjectile({ x: ox, z: oz, vx: (tx - ox) / T.fly, vz: (tz - oz) / T.fly, life: T.fly, r: 0.45, dmg, team, owner: u.id, kind: 'shell', color: T.color, y: 1.4, lob: true, lobH: 2.4, aoe: T.aoe, aoeMult: 1, knock: 4, ghost });
+      spawnProjectile({ x: ox, z: oz, vx: (tx - ox) / T.fly, vz: (tz - oz) / T.fly, life: T.fly, r: 0.45, dmg, team, owner: u.id, kind: 'shell', color: T.color, y: M.y, lob: true, lobH: 2.4, aoe: T.aoe, aoeMult: 1, knock: 4, ghost });
     } else {
       const tt = Math.hypot(e.x - ox, e.z - oz) / T.speed, a = Math.atan2(e.x + (e.vx || 0) * tt - ox, e.z + (e.vz || 0) * tt - oz);
       spawnProjectile({ x: ox, z: oz, vx: Math.sin(a) * T.speed, vz: Math.cos(a) * T.speed, life: (T.range + 3) / T.speed, r: t === 'archer' ? 0.3 : 0.5, dmg, team, owner: u.id,
-        kind: t === 'ballista' ? 'rail' : t === 'mage' ? 'orb' : 'arrow', color: T.color, y: t === 'archer' ? 3.2 : 2.6, pierce: T.pierce || 0, aoe: T.aoe || 0, aoeMult: T.aoe ? 0.6 : 0, knock: t === 'ballista' ? 5 : 1.5, ghost });
+        kind: t === 'ballista' ? 'rail' : t === 'mage' ? 'orb' : 'arrow', color: T.color, y: M.y, pierce: T.pierce || 0, aoe: T.aoe || 0, aoeMult: T.aoe ? 0.6 : 0, knock: t === 'ballista' ? 5 : 1.5, ghost });
     }
-    ev({ t: 'fortShot', type: t, x: ox, z: oz });
+    ev({ t: 'fortShot', type: t, x: ox, z: oz, y: M.y, a: u.aim });
   }
   const W = CFG.siege.towers.warrior;
   for (const s of S.soldiers) {

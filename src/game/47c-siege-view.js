@@ -50,6 +50,8 @@ function buildSiegeView() {
 const SIEGE_MODEL = { archer: ['siege_archer', 6.2], cannon: ['siege_cannon', 2.3], ballista: ['siege_ballista', 2.4], mage: ['siege_mage', 6.6],
   warrior: ['siege_barracks', 2.6], mine: ['siege_mine', 3.2], hut: ['siege_hut', 3.1], gate: ['siege_gate', 2.1] };
 const SIEGE_TURN = { cannon: 1, ballista: 1, mage: 1 };
+// how a defender fires (Clash of Clans style): it winds up before the shot (cannon leans back, ballista draws, the mage
+// orb swells) and kicks when it fires (recoil back along the aim, a squash and bounce); see animateSiegeDefenders
 function buildSiegeBuildings() {
   const g = siegeParts.bGroup, S = G.siege, cs = CFG.siege.cell, now = fortNow();
   for (const h of siegeParts.bSets) WorldModels.dispose(h);
@@ -69,12 +71,30 @@ function buildSiegeBuildings() {
     const [name, h] = SIEGE_MODEL[b.t];
     if (b.t === 'gate') { add(name, { x, z, ry: wallAt(b.x + 1, b.z) || wallAt(b.x - 1, b.z) ? 0 : Math.PI / 2, s: h }); continue; }
     const it = { x, z, ry, s: h * k }; add(name, it);
-    if (SIEGE_TURN[b.t]) aims.push({ it, u, name });
+    if (SIEGE_SHOOTERS[b.t]) aims.push({ it, u, name, bx: x, bz: z });
     add('banner_pole', { x: x - 1.6, z: z - 1.6, ry: 0, s: 2.4 + Math.min(15, b.l) * 0.14, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] });
   }
   const hs = {};
   for (const name in L) { const h = WorldModels.place(g, name, L[name], name === 'siege_mage' ? { glow: 0xb98cff, glowK: 0.12 } : {}); siegeParts.bSets.push(h); hs[name] = h; }
   siegeParts.aims = aims.map((a) => Object.assign(a, { h: hs[a.name] }));
+}
+function animateSiegeDefenders(dt) {
+  for (const a of siegeParts.aims) {
+    const u = a.u, it = a.it, t = u.b.t, M = SIEGE_MUZZLE[t]; if (!a.h) continue;
+    // cannons, ballistas and mage towers swing to their target
+    if (SIEGE_TURN[t] && u.aim != null) { const d = angDiff(it.ry, u.aim); if (Math.abs(d) > 0.02) { it.ry += d * (1 - Math.exp(-dt * 10)); a.h.dirty = true; } }
+    const since = G.time - (u.fireT ?? -9), kick = since < 0.32 ? Math.pow(1 - since / 0.32, 2) : 0;
+    const busy = since < CFG.siege.towers[t].cd + 0.6, wind = busy && u.cd > 0 && u.cd < M.wind ? 1 - u.cd / M.wind : 0;
+    if (!kick && !wind && !a.moving) continue;
+    a.moving = kick > 0 || wind > 0;
+    const ax = Math.sin(it.ry), az = Math.cos(it.ry);
+    let back = 0, sy = 1, sw = 1;
+    if (t === 'cannon') { back = kick * 0.6 + wind * 0.12; sy = 1 - kick * 0.14; sw = 1 + kick * 0.06; }
+    else if (t === 'ballista') { back = kick * 0.4; sy = 1 + wind * 0.05 - kick * 0.08; sw = 1 - wind * 0.04 + kick * 0.05; }
+    else if (t === 'mage') { sy = 1 + wind * 0.07 - kick * 0.06; sw = 1 + wind * 0.05 + kick * 0.03; }
+    else { sy = 1 - kick * 0.07; sw = 1 + kick * 0.05; } // archer tower: a bounce as the volley goes
+    it.x = a.bx - ax * back; it.z = a.bz - az * back; it.sy = sy; it.sx = it.sz = sw; a.h.dirty = true;
+  }
 }
 function disposeSiegeView() {
   for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h);
@@ -96,8 +116,7 @@ function updateSiegeView(dt) {
   const t = (siegeParts.t += dt), now = fortNow();
   const sig = S.units.map((u) => `${u.b.t}${u.b.x},${u.b.z},${u.b.l}${u.b.d > now ? 'u' : ''}${u.alive ? '' : 'x'}`).join('|');
   if (sig !== siegeParts.sig) { if (siegeParts.sig) buildSiegeBuildings(); siegeParts.sig = sig; }
-  // cannons, ballistas and mage towers swing to their last target
-  for (const a of siegeParts.aims) { const u = a.u; if (u.aim == null || !a.h) continue; const d = angDiff(a.it.ry, u.aim); if (Math.abs(d) > 0.02) { a.it.ry += d * (1 - Math.exp(-dt * 10)); a.h.dirty = true; } }
+  animateSiegeDefenders(dt);
   // the placing ghost
   const gh = siegeParts.ghost, q = fortGhost();
   if (gh) { gh.visible = !!q; if (q) { const s = FORT_TYPES[q.t], cs = CFG.siege.cell; gh.scale.set(s * cs * 0.96, 1, s * cs * 0.96); gh.position.set(SC.x + (q.x + s / 2) * cs, 0.07, SC.z + (q.z + s / 2) * cs); gh.material.color.set(q.ok ? 0x58e08a : 0xff5d6c); gh.material.opacity = 0.35 + Math.sin(t * 6) * 0.12; } }
