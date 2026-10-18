@@ -1,232 +1,1304 @@
 {
- "batch": "delve-props-crypt-3d",
+ "batch": "pixel-fx-a",
  "jobs": [
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_sarcophagus",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_wrenna",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_sarcophagus_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a curling ghostly tidal wave of teal seawater with white foam crest and drowned rooftops inside, teal and foam white, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_tombslab",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_hob",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_tombslab_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a huge ghostly cracked bronze church bell ringing with a golden sound shockwave ring, bronze and gold, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_rootpillar",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_corrin",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_rootpillar_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a spectral apple tree with pink blossom canopy bursting up with apples falling, pink and leaf green, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_warden_statue",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_mott",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_warden_statue_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a floating ring of wax candles with warm flames and red wax seals, warm amber, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_ossuary",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_nyssa",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_ossuary_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a pale glowing ghost river with a small spectral ferry boat and ghostly hands rising from the water, silver blue, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_bonepile",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_pyrrhos",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_bonepile_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a huge rolling bronze boulder crashing through a shallow glowing sea pool, bronze and sea green, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_mushrooms",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_moss",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_mushrooms_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a circular maze of mossy stone walls seen from above with a red thread winding through its paths, moss green and thread red, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_reliquary",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_ione",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_reliquary_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a rolling bank of sea fog with warm golden lanterns floating in it and rings of song, misty blue and gold, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_urns",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_fenwick",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_urns_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a huge spectral silver wolf head howling with three glowing claw slashes, silver and midnight blue, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_runestone",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_thimble",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_runestone_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a spiralling column of green and gold fairy sparkles with pale moths, green and gold, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_rootarch",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_unwritten",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_rootarch_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a giant glowing magic rune circle drawn in chalk gold strokes on the ground, top-down, chalk gold, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crypt_brazier",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_lysandra",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/delve-props-crypt/crypt_brazier_concept.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 2048,
-    "seed": 7
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a spreading ring of white marble cracking across the ground with marble spikes, marble white, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_kallix",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a blazing white-gold star spark with a corona of red flame and small flames spiralling out, white gold and red, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_oko",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a colossal cone of warm lighthouse light beaming out of a round brass lens, warm yellow white, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_ysolt",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: spectral iron chains with hooks shooting out of an open floating ledger book with glowing green pages, iron grey and ghost green, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_halven",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a long golden scroll unrolling in the air above a golden crown of light with a red wax seal, gold and crimson, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_sena",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: giant golden shears snapping shut on a single glowing red thread rising into the sky, gold and red, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_jory",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a dome of frozen floating sand grains with soul-blue lanterns hanging inside and clock rings on the ground, sand gold and soul blue, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_sleeper",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a swirling whirlpool of deep teal sea water seen from above with sunken rooftops under the surface, deep teal, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_camedown",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a spiral staircase of floating white marble steps rising into the sky with gold veins, marble white and sky blue, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_vell",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a swirling vortex of lost things, keys gloves letters umbrellas, spinning around lilac pocket openings, lilac, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_hespera",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a falling cracked charcoal rock sun with molten orange light pouring from its cracks on a ghostly chain, molten orange, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_kerberon",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: two huge spectral hound heads of underworld embers snapping their jaws, ember orange and ghost purple, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_ophira",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a ring of tall cracked silver mirrors in tarnished bronze frames, silver and bronze, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_tychon",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a huge tumbling golden die with violet pips and a burst of luck sparks, gold and violet, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_aurvan",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a glowing cream white moon with craters and silver tide waves spiralling around it, cream white and silver, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "super_ourax",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite spell effect: a massive slab of pale blue sky with drifting clouds and faint stars pressing down from above, pale sky blue, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_wrenna",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a corked glass vial of green seawater with a small paper label, teal glass and brass cork, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_hob",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a thin bronze sound ring flecked with green verdigris, bronze, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_corrin",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a glossy red-gold apple with one green leaf, glowing core, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_mott",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: three red wax seal droplets stamped with a cross, wax red, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_nyssa",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a spinning tarnished bronze coin with a ferry stamp and green verdigris rim, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_pyrrhos",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a bronze sword swing arc with three fading ghost copies, bronze, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_moss",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a fist-sized ball of red thread unspooling, red, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_ione",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a brass music box tine wrapped in a glowing music note on a wisp of sea fog, brass and pale blue, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_fenwick",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: three pale moon-silver claw slash ribbons, silver, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_thimble",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a mismatched wooden sweater button trailing a strand of mustard yarn, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_unwritten",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a glowing chalk letter glyph flying off a clay fist, chalk gold and clay brown, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_lysandra",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a white marble fist punch with flying stone chips, marble white, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_kallix",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a sharp teardrop flame with a white-hot core and a soot halo, orange and white, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_oko",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a narrow warm white beam of lighthouse light, warm white, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_ysolt",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a heavy leather ledger book on an iron chain flinging red ink, leather brown and ink red, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_halven",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: an iron lantern cage with a glowing flame inside, iron and gold, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_sena",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a fine glowing red thread with a tiny glowing knot at its tip, red and gold, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_jory",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: an iron key ring with five bone-handled keys spinning flat like a saw blade, iron and bone, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_sleeper",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a basalt stone palm splashing dark teal seawater, basalt grey and teal, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_camedown",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a white marble stair step with gold veins, marble white and gold, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_vell",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small brass pocket watch with a lilac glint, brass and lilac, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_hespera",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a cracked charcoal lump of rock glowing orange through its cracks, charcoal and orange, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_kerberon",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a running spectral ghost hound of grey smoke with ember eyes, grey and ember orange, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_ophira",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a thin sharp sliver of silver mirror glass, silver, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_tychon",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a single ivory die with violet pips glowing at the edges, ivory and violet, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_aurvan",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a cone of silver moonlight frost with tiny crescent shapes and star motes, silver and pale blue, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_ourax",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a fan of flying soil and grass clods with tiny wildflowers, earth brown and green, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_wrenna",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a crown splash of teal seawater with white salt foam, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_hob",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a puff of bronze dust with a ring-shaped ripple, bronze, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_corrin",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a burst of apple pulp and pink petals, red and pink, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_mott",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a small spatter of red wax with a warm glow, wax red, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_nyssa",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a burst of pale mist with a bright coin glint star, silver, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_pyrrhos",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a spray of bronze sparks and sea salt dust, bronze, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_moss",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a puff of red fibres, red, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_ione",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a burst of cold fog with a cracked music note, pale blue, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_fenwick",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: three glowing parallel claw scratch marks, silver, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_thimble",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a tiny pop of mustard yarn fluff, mustard yellow, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_unwritten",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a cloud of chalk dust with clay crumbs, chalk white and clay, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_lysandra",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a scatter of white marble chips with a dust puff, marble white, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_kallix",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a small ember burst with a soot puff, orange, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_oko",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a bright white starburst with heat shimmer, warm white, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_ysolt",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a splatter of red ink, red, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_halven",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a burst of lantern sparks with an iron clang star, gold, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_sena",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a small glowing red knot burst with gold thread sparks, red, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_jory",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a soul-blue spark burst, soul blue, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_sleeper",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a splash of dark teal seawater, teal, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_camedown",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a burst of gold dust with marble shards, gold and white, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_vell",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a lilac glint sparkle burst, lilac, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_hespera",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a small cracking orange cinder burst, orange, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_kerberon",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a snap of spectral jaws with a puff of grey smoke, grey and ember, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_ophira",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a spray of tiny silver mirror glitter flakes, silver, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_tychon",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a flash of violet dice pips bursting outward, violet, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_aurvan",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: hoarfrost crescents bursting in a cold mist, pale blue, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "hit_ourax",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite hit effect burst: a crescent of torn turf and clods with dust, earth brown and green, glowing, centered, isolated on a pure black background, no text, no letters, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_copper",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a raw copper ore chunk with green patina.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_iron",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a raw iron ore chunk with frosty blue-grey crystals.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_obsidian",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a glossy shard of black obsidian with orange glowing edges.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_mithril",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a raw mithril ore chunk with glowing violet veins.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_abyssal",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a raw abyssal ore chunk crusted with teal barnacles and glowing teal veins.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_starsteel",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a raw starsteel ore chunk with glowing golden star flecks.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_thornhide",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a rolled thorny green-brown monster hide pelt tied with cord.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_frostfang",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a large curved icy blue monster fang.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_emberscale",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a single glowing orange-red dragon scale.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_arcdust",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a small corked glass vial of glowing violet arcane dust.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_pearl",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a large glowing teal pearl in an open clam shell.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_starfeather",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a single golden glowing star feather.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_verdant",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a glowing green crystal core wrapped in roots.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_glacial",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a glowing pale blue ice crystal core.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_magma",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a glowing molten orange core in cracked black rock.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_void",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a glowing violet void crystal core with orbiting shards.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_tidal",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a glowing teal water orb core in a shell cage.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_solar",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a glowing golden sun crystal core with rays.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mat_titansoul",
+   "args": {
+    "prompt": "Stylized 3D game asset render, hand-painted textures, chunky readable shapes, classic fantasy MMORPG crafting material in the style of World of Warcraft and RuneScape, isolated single object, three-quarter view from slightly above, plain light grey studio background, soft even light, no ground, no text. a large glowing white-gold soul gem with a swirling spirit inside, in a stone setting.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 11,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   }
  ]
