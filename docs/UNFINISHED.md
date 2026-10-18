@@ -2,11 +2,15 @@
 Casper: make the Dungeon mode playable without 4 friends. `36d-delve-bots.js`: a run with fewer than 4 heroes gets bots
 up to 4 (`CFG.delve.bots`; the party size, and so monster HP and the plate count, is always 4 with bots on). The game that
 starts the run (`startDelve(..., lead)`: you alone, the party leader, or whoever formed a random match) runs them; in a
-party it sends them as 'dbot' and the others show them like players (`e.bot`, never shared-monster owners). Bots follow
-the leader, shoot what they can see (`rayLen`), take the plate after the humans' ones, revive anyone down (you, a bot,
-or a friend via 'drev'), and step back in beside the leader when stuck or 24 m behind. Monsters target the nearest
+party it sends them as 'dbot' and the others show them like players (`e.bot`, never shared-monster owners). Bots roam
+the room the party is in and pick their own fights (each its own spot on a ring round its monster), shoot what they can
+see (`rayLen`), take the plate after the humans' ones, revive anyone down (you, a bot, or a friend via 'drev'), and step
+in beside the leader when stuck 3 times or 34 m away. Their level and stats follow the real heroes' average level
+(`delveBotScale`, every 3 s). Fixed: friends never got the bots ('dbot' was missing from the party-message filter in
+`70-multiplayer.js`). Monsters target the nearest
 hero this game runs (`delveTarget` in `stepEnemy`), monster shots/slams hit bots (`forEachTarget`), bots' hits give you
-kill credit. Bots have 90% of your HP and 75% of your damage (at least their own level's), take no loot.
+kill credit. Bots have 90% of your HP and 75% of your damage, moved along the level curve to the party's average level (at least
+their own level's stats), take no loot.
 Tested in the browser solo (follow, fight, room cleared, revive in 2.9 s). Open: a real party with friends (the leader's
 bots on the other phones); smarter paths through doors (today: catch-up teleport); bot supers are on, watch them.
 
