@@ -45,9 +45,16 @@ CFG.siege = {
       blurb: 'Draw walls as you walk. Wood, stone from level 6, iron from level 11.' },
     gate: { name: 'Gate', short: 'Gate', icon: 'm_portal', cost: 0.3, stones: 1, hp: 5, path: 6, wall: true,
       blurb: 'A wall heroes walk through and monsters have to break.' },
+    // traps: monsters walk over them (they never block a path); r: reach from the trap's centre
+    spike: { name: 'Spike Trap', short: 'Spikes', icon: 'a_reaper', trap: true, r: 1.5, cd: 2.2, dmg: 1.4, cost: 0.4, stones: 1.5, hp: 1,
+      blurb: 'Spikes shoot up under every monster on it, then reset after a moment.' },
+    bomb: { name: 'Powder Keg', short: 'Keg', icon: 'b_cluster', trap: true, r: 1.2, aoe: 3.6, dmg: 5, cost: 0.6, stones: 2, hp: 1,
+      blurb: 'Blows up a whole group once per wave. A new keg is in place for the next wave.' },
+    tar: { name: 'Tar Pit', short: 'Tar', icon: 'k_grasp', trap: true, r: 1.7, slow: 0.4, dps: 0.25, cost: 0.4, stones: 1.5, hp: 1,
+      blurb: 'Sticky tar: monsters crossing it move at half speed and slowly burn. Combine it with towers.' },
   },
 };
-const SIEGE_TYPES = ['archer', 'cannon', 'ballista', 'mage', 'warrior', 'mine', 'hut', 'wall', 'gate'];
+const SIEGE_TYPES = ['archer', 'cannon', 'ballista', 'mage', 'warrior', 'mine', 'hut', 'wall', 'gate', 'spike', 'bomb', 'tar'];
 const SIEGE_SHOOTERS = { archer: 1, cannon: 1, ballista: 1, mage: 1 };
 // where shots leave each defender (f: metres ahead of its centre toward the target, y: height) and how long it winds up first
 const SIEGE_MUZZLE = { archer: { f: 0.9, y: 4.4, wind: 0.25 }, cannon: { f: 1.9, y: 1.3, wind: 0.5 }, ballista: { f: 1.5, y: 1.9, wind: 0.6 }, mage: { f: 0.4, y: 6.2, wind: 0.7 } };
@@ -108,12 +115,12 @@ function siegeLayout() {
 function siegeGrid() {
   const S = G.siege, a = new Grid(6), m = new Grid(6);
   for (const o of S.objs) if (o.alive) { const c = { x: o.x, z: o.z, r: o.r }; a.add(c); m.add(c); }
-  for (const u of S.units) if (u.alive) { const c = { x: u.x, z: u.z, r: u.r }; m.add(c); if (u.b.t !== 'gate') a.add(c); }
+  for (const u of S.units) if (u.alive && !CFG.siege.towers[u.b.t].trap) { const c = { x: u.x, z: u.z, r: u.r }; m.add(c); if (u.b.t !== 'gate') a.add(c); }
   S.mobGrid = m; G.siegeObstacles = a; G.obstacles = a; return a;
 }
 // the monsters' map: walking cost from every cell to the nearest living objective. A building costs its path value to
 // cross (monsters break it), so they walk around walls while that is cheaper and break the cheapest one when it is not.
-function siegeCellCost(k) { const S = G.siege, o = S.occ[k]; if (o === -1) return Infinity; if (o <= 0) return 1; const u = S.units[o - 1]; if (!u.alive) return 1; const T = CFG.siege.towers[u.b.t]; return T.path ? T.path + fortLvl(u.b) : 30; }
+function siegeCellCost(k) { const S = G.siege, o = S.occ[k]; if (o === -1) return Infinity; if (o <= 0) return 1; const u = S.units[o - 1]; if (!u.alive) return 1; const T = CFG.siege.towers[u.b.t]; return T.trap ? 1 : T.path ? T.path + fortLvl(u.b) : 30; }
 // recomputed only when a monster needs it after a change (drawing a long wall costs one pass, not one per piece)
 function siegeFlow() {
   G.siege.flowDirty = false;
@@ -157,7 +164,7 @@ function siegeFlowStep(e) {
     best = S.dist[k2]; bk = k2;
   }
   if (bk < 0) return null; // next to an objective
-  const o = S.occ[bk]; if (o > 0 && S.units[o - 1].alive) return S.units[o - 1];
+  const o = S.occ[bk]; if (o > 0 && S.units[o - 1].alive && !CFG.siege.towers[S.units[o - 1].b.t].trap) return S.units[o - 1];
   const bi = bk % n - S.h, bj = (bk - bk % n) / n - S.h;
   return { x: SC.x + (bi + 0.5) * cs, z: SC.z + (bj + 0.5) * cs, far: S.dist[k] > 30 };
 }
@@ -269,7 +276,7 @@ function startSiege(world) {
   const F = fortState(), own = !world || world.fort === myFort();
   if (own) F.land = Math.max(F.land || 0, landFor(p.level)); // your land grows with you; guests walk the owner's land
   const S = G.siege = { wave: F.wave || 1, phase: 'build', t: C.firstBuild, tMax: C.firstBuild, queue: [], spawnT: 0, mobs: [], soldiers: [], units: [], lvl: 0, code: world ? world.code : null,
-    half: Math.max(C.land[0], F.land || 0), sides: [], gold: 0, stones: 0, items: 0, cleared: 0, startWave: F.wave || 1, kills: 0, enterPos: { x: pl.x, z: pl.z },
+    half: Math.max(C.land[0], F.land || 0), sides: [], sideI: 0, gold: 0, stones: 0, items: 0, cleared: 0, startWave: F.wave || 1, kills: 0, enterPos: { x: pl.x, z: pl.z },
     objs: C.objs.map((d) => ({ def: d, kind: 'objective', name: d.name, x: SC.x + d.x, z: SC.z + d.z, r: d.r, alive: true, hp: 1, maxHp: 0, flashT: 0, hurtT: 0 })) };
   S.lvl = siegeLevel(S.wave); siegeLayout(); siegeScaleObjs(S.lvl); S.sides = siegeSides(S.wave);
   if (S.code && typeof siegeMpStart === 'function') siegeMpStart();
@@ -350,7 +357,7 @@ function siegeWaveClear() {
   if (typeof siegeMpCleared === 'function') siegeMpCleared(n, S.lvl, wagons, S.mini);
   for (const o of S.objs) if (o.alive) o.hp = Math.min(o.maxHp, Math.round(o.hp + o.maxHp * C.heal));
   // fallen buildings stand again for the next wave; the fort never goes back below a wave it held
-  let fell = false; for (const u of S.units) { if (!u.alive) fell = true; u.alive = true; u.hp = u.maxHp; }
+  let fell = false; for (const u of S.units) { if (!u.alive) fell = true; u.alive = true; u.hp = u.maxHp; u.spent = false; } // fallen buildings stand again, kegs are refilled
   if (fell) { siegeGrid(); S.flowDirty = true; }
   F.wave = Math.max(F.wave || 1, n + 1); fortChanged(F);
 }
@@ -402,6 +409,7 @@ function stepSiegeDefenders(dt, ghost) {
     }
     ev({ t: 'fortShot', type: t, x: ox, z: oz, y: M.y, a: u.aim });
   }
+  stepSiegeTraps(dt, ghost);
   const W = CFG.siege.towers.warrior;
   for (const s of S.soldiers) {
     s.flashT -= dt; s.attackAnim = Math.max(0, s.attackAnim - dt * 3);
@@ -417,6 +425,30 @@ function stepSiegeDefenders(dt, ghost) {
     }
     s.moveAmt = lerp(s.moveAmt, sp > 0 ? 1 : 0, 1 - Math.exp(-dt * 10));
     collideObstacles(s); siegeClamp(s, s.r);
+  }
+}
+// traps: spikes hit everything on them and reset; a keg blows once per wave (u.spent until the wave is held); tar slows
+function stepSiegeTraps(dt, ghost) {
+  const S = G.siege;
+  for (const u of S.units) {
+    const T = CFG.siege.towers[u.b.t]; if (!T.trap || !u.alive || u.spent) continue;
+    if (u.b.t === 'tar') { // slows everything in it; burns a little every half second, more with each level
+      const tick = (u.cd -= dt) <= 0; if (tick) u.cd = 0.5;
+      for (const e of S.mobs) if (e.alive && Math.hypot(e.x - u.x, e.z - u.z) < T.r + e.r * 0.5) { e.slowT = Math.max(e.slowT || 0, T.slow); u.busy = G.time; if (tick && !ghost) dealDamage(e, refDmg(G.profile.level) * T.dps * 0.5 * siegeLvlMul(Math.max(1, fortLvl(u.b))), u.id, { knock: 0 }); }
+      continue; }
+    if ((u.cd -= dt) > 0) continue;
+    const on = S.mobs.filter((e) => e.alive && Math.hypot(e.x - u.x, e.z - u.z) < T.r + e.r * 0.5); if (!on.length) { u.cd = 0.1; continue; }
+    const l = Math.max(1, fortLvl(u.b)), dmg = ghost ? 0 : refDmg(G.profile.level) * T.dmg * siegeLvlMul(l);
+    u.fireT = G.time;
+    if (u.b.t === 'bomb') {
+      u.spent = true;
+      if (!ghost) for (const e of S.mobs) if (e.alive && Math.hypot(e.x - u.x, e.z - u.z) < T.aoe) dealDamage(e, dmg * (1 - 0.4 * Math.hypot(e.x - u.x, e.z - u.z) / T.aoe), u.id, { knockX: e.x - u.x, knockZ: e.z - u.z, knock: 7 });
+      ev({ t: 'fortTrap', type: 'bomb', x: u.x, z: u.z, r: T.aoe });
+    } else {
+      u.cd = T.cd;
+      if (!ghost) for (const e of on) dealDamage(e, dmg, u.id, { knock: 0 });
+      ev({ t: 'fortTrap', type: 'spike', x: u.x, z: u.z });
+    }
   }
 }
 function siegeHitSoldier(s, amt) {

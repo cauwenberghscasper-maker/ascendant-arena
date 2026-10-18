@@ -9,6 +9,10 @@ Casper (phone screenshot): the fort was an empty green plane and the buildings w
 - **Buildings:** bigger (archer/mage 7.4-7.6 m, cannon 3 m, ballista 3.3 m...), brighter (`bright: 1.3`), and each stands on
   a stone tile with a rim in its colour (instanced decals). Landscape sets are created last so the Keep and buildings
   stream in first (WorldModels builds 2 sets per frame).
+- **Traps** (`stepSiegeTraps`): spike plate (hits all on it, resets in 2.2 s, pops up), powder keg (blows a group once per
+  wave, refilled when the wave is held), tar pit (half speed + a slow burn, bubbles). Walkable: no path cost, not solid,
+  never targeted. Upgrade like walls. TRELLIS.2 models `siege_trap_spike/bomb/tar` (relay `bastion-traps`). Check added.
+- **Fun:** pollen and fireflies drift around the camera (additive points).
 - **Open:** Casper's phone showed 30 FPS with "screen 30 Hz" (likely Low Power Mode); check FPS in the fort on a phone
   with a large land; the barracks and builder hut models still need a better generation.
 

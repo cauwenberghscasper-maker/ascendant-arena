@@ -60,6 +60,12 @@ function siegeLandscape(H, rng) {
     const x = (rng() * 2 - 1) * R, z = (rng() * 2 - 1) * R; if (Math.abs(x) < 19 && Math.abs(z) < 21) continue;
     const r = rng(); (r < 0.7 ? deco.tuft : r < 0.93 ? deco.flower : deco.mushrooms).push({ x: SC.x + x, z: SC.z + z, ry: rng() * 6.28, s: r < 0.7 ? 1.2 + rng() : 0.9 + rng() * 0.6 });
   }
+  // pollen and fireflies drifting around the camera (VFX): the meadow feels alive
+  { const N = 150, pos = new Float32Array(N * 3), seed = []; for (let i = 0; i < N; i++) seed.push([rng() * 70, rng() * 70, 0.6 + rng() * 3.2, rng() * 6.28, 0.3 + rng() * 0.7]);
+    const cv = document.createElement('canvas'); cv.width = cv.height = 16; const x = cv.getContext('2d'), gr = x.createRadialGradient(8, 8, 0, 8, 8, 8); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,240,170,0.7)'); gr.addColorStop(1, 'rgba(255,220,120,0)'); x.fillStyle = gr; x.fillRect(0, 0, 16, 16);
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const pts = new THREE.Points(g, new THREE.PointsMaterial({ size: 0.32, map: new THREE.CanvasTexture(cv), color: 0xfff0b0, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
+    pts.frustumCulled = false; siegeGroup.add(pts); siegeParts.motes = { pts, seed }; }
   siegeParts.deco = Object.entries(deco).map(([n, items]) => { const h = WorldModels.place(siegeGroup, n, items); siegeParts.sets.push(h); return { h, items }; });
 }
 // flowers and tufts never poke through a building
@@ -114,7 +120,8 @@ function buildSiegeView() {
 // their target. A banner in the building's colour grows with its level. Walls: wood to level 5, stone to 10, iron
 // after; each cell draws a half piece toward every wall or gate next to it, so lines, corners and crossings join up.
 const SIEGE_MODEL = { archer: ['siege_archer', 7.4], cannon: ['siege_cannon', 3.0], ballista: ['siege_ballista', 3.3], mage: ['siege_mage', 7.6],
-  warrior: ['siege_barracks', 3.3], mine: ['siege_mine', 3.9], hut: ['siege_hut', 3.6], gate: ['siege_gate', 2.1] };
+  warrior: ['siege_barracks', 3.3], mine: ['siege_mine', 3.9], hut: ['siege_hut', 3.6], gate: ['siege_gate', 2.1],
+  spike: ['siege_trap_spike', 0.34], bomb: ['siege_trap_bomb', 1.3], tar: ['siege_trap_tar', 0.36] };
 // every building stands on a stone tile with a rim in its colour (decals), Clash of Clans style, so it reads from far
 let siegeTileTex = null;
 function siegeTileTextures() {
@@ -148,12 +155,15 @@ function buildSiegeBuildings() {
     }
     const [name, h] = SIEGE_MODEL[b.t];
     if (b.t === 'gate') { add(name, { x, z, ry: wallAt(b.x + 1, b.z) || wallAt(b.x - 1, b.z) ? 0 : Math.PI / 2, s: h }); continue; }
+    if (CFG.siege.towers[b.t].trap) { // traps lie flat on their cell; a spent keg is gone until the next wave
+      if (u.spent) continue;
+      const it = { x, z, ry: 0, s: h }; add(name, it); if (b.t === 'spike') aims.push({ it, u, name, bx: x, bz: z }); continue; }
     const it = { x, z, ry, s: h * k }; add(name, it);
     if (SIEGE_SHOOTERS[b.t]) aims.push({ it, u, name, bx: x, bz: z });
     add('banner_pole', { x: x - u.size * cs / 2 + 0.3, z: z - u.size * cs / 2 + 0.3, ry: 0, s: 2.4 + Math.min(15, b.l) * 0.14, color: b.d > now ? 0xffe9a8 : SIEGE_PAD_COL[b.t] });
   }
   // the tiles under the buildings: one instanced slab and one instanced rim (tinted per building) for the whole fort
-  const tiles = S.units.filter((u) => u.alive && !CFG.siege.towers[u.b.t].wall);
+  const tiles = S.units.filter((u) => u.alive && !CFG.siege.towers[u.b.t].wall && !CFG.siege.towers[u.b.t].trap);
   if (tiles.length) {
     const T = siegeTileTextures(), geo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), m4 = new THREE.Matrix4();
     const slab = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ map: T.slab, polygonOffset: true, polygonOffsetFactor: -3 }), tiles.length);
@@ -169,6 +179,7 @@ function buildSiegeBuildings() {
 function animateSiegeDefenders(dt) {
   for (const a of siegeParts.aims) {
     const u = a.u, it = a.it, t = u.b.t, M = SIEGE_MUZZLE[t]; if (!a.h) continue;
+    if (t === 'spike') { const since = G.time - (u.fireT ?? -9), k = since < 0.5 ? Math.sin(Math.min(1, since / 0.5) * Math.PI) : 0; if (k || a.moving) { a.moving = k > 0; it.sy = 1 + k * 1.8; a.h.dirty = true; } continue; } // the spikes shoot up
     // cannons, ballistas and mage towers swing to their target
     if (SIEGE_TURN[t] && u.aim != null) { const d = angDiff(it.ry, u.aim); if (Math.abs(d) > 0.02) { it.ry += d * (1 - Math.exp(-dt * 10)); a.h.dirty = true; } }
     const since = G.time - (u.fireT ?? -9), kick = since < 0.32 ? Math.pow(1 - since / 0.32, 2) : 0;
@@ -189,7 +200,7 @@ function disposeSiegeView() {
   const geos = new Set(), mats = new Set();
   siegeGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matVC && o.material !== matDungeonFloor) mats.add(o.material); });
   geos.forEach((g) => g.dispose()); mats.forEach((m) => m.dispose());
-  siegeGroup.clear(); Object.assign(siegeParts, { sets: [], bSets: [], bGroup: null, aims: [], objItems: [], objSets: [], portal: null, flame: null, ghost: null, gates: null, gateGlow: null, deco: null, sig: '' });
+  siegeGroup.clear(); Object.assign(siegeParts, { sets: [], bSets: [], bGroup: null, aims: [], objItems: [], objSets: [], portal: null, flame: null, ghost: null, gates: null, gateGlow: null, deco: null, motes: null, sig: '' });
 }
 function enterSiegeView(on) {
   hubGroup.visible = !on; riftGroup.visible = false; siegeGroup.visible = on;
@@ -202,7 +213,7 @@ function updateSiegeView(dt) {
   const S = G.siege; if (!S || !siegeGroup.visible) return;
   hubGroup.visible = false; // the showcase restores the hub on close; the fort keeps it hidden
   const t = (siegeParts.t += dt), now = fortNow();
-  const sig = S.units.map((u) => `${u.b.t}${u.b.x},${u.b.z},${u.b.l}${u.b.d > now ? 'u' : ''}${u.alive ? '' : 'x'}`).join('|');
+  const sig = S.units.map((u) => `${u.b.t}${u.b.x},${u.b.z},${u.b.l}${u.b.d > now ? 'u' : ''}${u.alive ? '' : 'x'}${u.spent ? 's' : ''}`).join('|');
   if (sig !== siegeParts.sig) { if (siegeParts.sig) buildSiegeBuildings(); siegeParts.sig = sig; }
   animateSiegeDefenders(dt);
   // the placing ghost
@@ -212,6 +223,13 @@ function updateSiegeView(dt) {
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });
   if (siegeParts.flame) siegeParts.flame.material.opacity = 0.75 + Math.sin(t * 13) * 0.08 + Math.sin(t * 7.3) * 0.08;
   if (siegeParts.portal) siegeParts.portal.rotation.y = t * 0.8;
+  // the motes wander in a 70 m box that follows the camera (wrapped, so none ever pop in front of it)
+  if (siegeParts.motes) { const M = siegeParts.motes, a = M.pts.geometry.attributes.position, cx = Cam.look.x, cz = Cam.look.z;
+    M.seed.forEach((q, i) => { const x = ((q[0] + t * 0.6 * q[4] + Math.sin(t * 0.4 + q[3]) * 2 - cx) % 70 + 70) % 70 - 35 + cx, z = ((q[1] + t * 0.35 * q[4] - cz) % 70 + 70) % 70 - 35 + cz;
+      a.setXYZ(i, x, q[2] + Math.sin(t * 1.3 * q[4] + q[3]) * 0.4, z); });
+    a.needsUpdate = true; M.pts.material.opacity = 0.65 + Math.sin(t * 2.1) * 0.15; }
+  // tar bubbles while monsters wade through it
+  if ((siegeParts.bubT = (siegeParts.bubT || 0) - dt) <= 0) { siegeParts.bubT = 0.35; for (const u of S.units) if (u.b.t === 'tar' && G.time - (u.busy ?? -9) < 0.5) burst(u.x + rand(-0.6, 0.6), 0.3, u.z + rand(-0.6, 0.6), 3, 0x1a1612, 1.2, 0.5, 0.22, -1, 0.6); }
   if (siegeParts.gateGlow) siegeParts.gateGlow.forEach((m, i) => { m.material.opacity = S.sides.includes(i) ? (S.phase === 'fight' ? 0.45 : 0.25 + Math.sin(t * 4) * 0.15) : 0; });
   WorldModels.update();
 }
