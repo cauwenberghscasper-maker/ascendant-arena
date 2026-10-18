@@ -71,9 +71,9 @@ function siegeLandscape(H, rng) {
 // flowers and tufts never poke through a building
 function siegeDecorHide() {
   const S = G.siege; if (!siegeParts.deco || !S.occ) return;
-  for (const d of siegeParts.deco) { let ch = false; for (const it of d.items) { const k = siegeIdx(cellAt(it.x - SC.x), cellAt(it.z - SC.z)), hide = k >= 0 && S.occ[k] > 0; if (!!it.hidden !== hide) { it.hidden = hide; ch = true; } } if (ch) d.h.dirty = true; }
+  for (const d of siegeParts.deco) { let ch = false; for (const it of d.items) { const k = siegeIdx(cellAt(it.x - SC.x), cellAt(it.z - SC.z)), hide = k >= 0 && S.occ[k] > 0; if (!!it.hidden !== hide) { it.hidden = hide; ch = true; } } if (ch) for (const x of d.h.multi || [d.h]) x.dirty = true; }
 }
-const SIEGE_PAD_COL = { archer: 0x58e08a, cannon: 0xff7a4a, ballista: 0x5dd6ff, mage: 0xb98cff, warrior: 0xffc94a, mine: 0x9fe8ff, hut: 0xd8b07a };
+const SIEGE_PAD_COL = { archer: 0x58e08a, cannon: 0xff7a4a, ballista: 0x5dd6ff, mage: 0xb98cff, warrior: 0xffc94a, mine: 0x9fe8ff, hut: 0xd8b07a, wall: 0xcfc6b8, gate: 0xcfc6b8, spike: 0xc8ccd4, bomb: 0xff9a3d, tar: 0x5a4a3a };
 // a flat ground plane (terrain); vertex colours feed the flagstone shader
 function siegeGround(w, d, color, mat, y) {
   const g = new THREE.PlaneGeometry(w, d, 1, 1).rotateX(-Math.PI / 2), n = g.attributes.position.count, col = new Float32Array(n * 3);

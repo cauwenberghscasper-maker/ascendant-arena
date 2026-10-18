@@ -120,6 +120,7 @@ const WorldModels = {
   // free a handle's instance buffers and materials (the model's geometry and textures stay cached)
   dispose(h) {
     if (!h) return; h.dead = true;
+    if (h.multi) { for (const x of h.multi) this.dispose(x); return; } // a base name with variants: one handle per variant
     for (const im of h.meshes) { im.removeFromParent(); im.dispose(); }
     for (const m of h.mats) m.dispose();
     h.meshes = []; h.mats = []; this.sets = this.sets.filter((x) => x !== h);
