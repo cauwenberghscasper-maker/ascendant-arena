@@ -55,6 +55,9 @@ function buildDungeonView(D) {
     const corners = [[m.x0 + ins, m.z0 + ins], [m.x1 - ins, m.z1 - ins], [m.x0 + ins, m.z1 - ins], [m.x1 - ins, m.z0 + ins]];
     corners.slice(0, boss ? 4 : 2).forEach(([x, z]) => braz.push({ x, z, ry: rng() * 6.28, s: 1.7 }));
     if (!boss && i > 0) { const [x, z] = corners[2 + (i % 2)]; clutter.push({ x, z, ry: rng() * 6.28, s: 1.5 }); }
+    // the big party-dungeon halls: braziers at the quarter points of every wall (doors sit at the middle, so they stay free)
+    if (D.delve && (m.hx >= 15 || boss)) for (const f of [-0.5, 0.5]) braz.push({ x: m.x + f * m.hx, z: m.z1 - ins, ry: rng() * 6.28, s: 1.7 }, { x: m.x + f * m.hx, z: m.z0 + ins, ry: rng() * 6.28, s: 1.7 },
+      { x: m.x0 + ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 });
   });
   dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz), WorldModels.place(dungeonGroup, 'clutter', clutter));
   // brazier flames share one additive mesh so the flicker is a single opacity change

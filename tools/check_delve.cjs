@@ -104,6 +104,30 @@ check('rooms: doors open as rooms clear, swarm rooms send waves, the boss calls 
     c.endDungeon('leave');
   }
 });
+check('makeover: mixed hall sizes up to a giant boss hall, a mini-boss halfway, packs that wake together, a three-phase boss', () => {
+  const sizes = new Set();
+  for (let s = 1; s <= 60; s++) {
+    reset(); const def = defs[s % 6], di = s % 5; assert(c.startDelve(def.id, di, s * 6151, 1)); const D = c.G.dungeon, n = D.rooms.length - 1;
+    D.rooms.forEach((m) => sizes.add(m.hx >= 24 ? 'huge' : m.hx >= 15 || m.hz >= 15 ? 'big' : 'small'));
+    assert.equal(D.rooms[n].hx, DV.bossH); assert(n >= 6, 'six rooms or more before the boss');
+    const mini = D.rooms.filter((m) => m.mini); assert.equal(mini.length, 1); assert.equal(mini[0].i, Math.floor(n / 2)); assert(!mini[0].event);
+    const mb = mini[0].mobs.find((e) => e.mini); assert(mb && mb.champName === def.mini && mb.alive, 'the mini-boss waits in its hall');
+    for (const m of D.rooms) if (!m.boss) for (const e of m.mobs) assert(c.inRoom(m, e.x, e.z), 'monsters spawn inside their hall');
+    assert(D.span > 100 && Math.hypot(D.rooms[n].x - c.DC.x, D.rooms[n].z - c.DC.z) < D.span, 'the run area covers the boss hall');
+    c.endDungeon('leave');
+  }
+  assert(['small', 'big', 'huge'].every((k) => sizes.has(k)), 'small, big and huge halls all show up: ' + [...sizes]);
+  // a pack wakes together
+  reset(); c.startDelve(defs[0].id, 0, 4242, 1); let D = c.G.dungeon; const m = D.rooms.find((r) => r.i > 0 && r.fight === 'guard' && r.per > 1);
+  Object.assign(c.G.player, { x: D.rooms[0].x, z: D.rooms[0].z }); const pk = m.mobs.filter((e) => e.pack === 0); assert(pk.length > 1);
+  pk.forEach((e) => { e.state = 'idle'; }); pk[0].state = 'chase'; m.seen = true; c.stepDungeon(1 / 60); assert(pk.every((e) => e.state === 'chase'), 'its pack follows');
+  assert(m.mobs.filter((e) => e.pack !== 0).every((e) => e.state !== 'chase'), 'other packs keep sleeping'); c.endDungeon('leave');
+  // the boss: adds at 66% and 33%, then enraged
+  reset(); c.startDelve(defs[1].id, 0, 777, 1); D = c.G.dungeon; const b = D.boss, atk = b.atk, bm = D.rooms.at(-1);
+  b.hp = b.maxHp * 0.6; c.stepDungeon(1 / 60); assert.equal(D.phase, 1); assert(!b.raged); const adds1 = bm.mobs.length;
+  b.hp = b.maxHp * 0.3; c.stepDungeon(1 / 60); assert.equal(D.phase, 2); assert(b.raged && b.atk > atk && b.spd > 1 && bm.mobs.length > adds1, 'enraged with fresh adds');
+  assert(events.some((e) => e.t === 'delvePhase' && e.rage)); c.stepDungeon(1 / 60); assert.equal(D.phase, 2, 'no more phases'); c.endDungeon('leave');
+});
 check('gates: the first game to see a room done tells the party, and every game opens that gate at once', () => {
   const sent = []; c.partySend = (event, P) => sent.push([event, P]); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d);
   reset(); c.startDelve(defs[0].id, 1, 4242, 2); const D = c.G.dungeon, pl = c.G.player, m = D.rooms[0];
