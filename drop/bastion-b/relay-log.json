@@ -1,0 +1,54 @@
+{
+ "batch": "bastion-b",
+ "files": [
+  {
+   "name": "siege_barracks.glb",
+   "ok": true,
+   "bytes": 5153556,
+   "sha256": "7d70be764c8070c9e6af002b7aaa9008e5ac24f08f28cbdb75f26bf6e55d5ced",
+   "error": null
+  },
+  {
+   "name": "siege_mine.glb",
+   "ok": true,
+   "bytes": 3897116,
+   "sha256": "10dfd041124eb00b68449589883303b14b957b3967fc48bbba6a17c4185a73e1",
+   "error": null
+  },
+  {
+   "name": "siege_hut.glb",
+   "ok": true,
+   "bytes": 4499772,
+   "sha256": "04df38f1f5c138c1a7ac4cc59d98069e25ab7874f09096b0893674a4e071df25",
+   "error": null
+  },
+  {
+   "name": "siege_wall_wood.glb",
+   "ok": true,
+   "bytes": 4933904,
+   "sha256": "b36bf9415f071e69dcd503720bf9cb45279d0a06511472a2213b284a783df9c3",
+   "error": null
+  },
+  {
+   "name": "siege_wall_stone.glb",
+   "ok": true,
+   "bytes": 3177720,
+   "sha256": "99ee4f717d23f97c77ba00b30405b1e9ca68a331a22162a65bdb57c07f749d56",
+   "error": null
+  },
+  {
+   "name": "siege_wall_iron.glb",
+   "ok": true,
+   "bytes": 4255116,
+   "sha256": "6bcb1ea20a9d2f4a42d94e98ca119d7d86d98e6aa3e1cddb89d17fa053c515b3",
+   "error": null
+  },
+  {
+   "name": "siege_gate.glb",
+   "ok": true,
+   "bytes": 4127292,
+   "sha256": "cd3bf9e86a35559b3a7f94969f1e26e0b84f5dbf0bc24916d3c9727985f26b98",
+   "error": null
+  }
+ ]
+}
