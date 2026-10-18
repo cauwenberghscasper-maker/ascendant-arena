@@ -6,7 +6,7 @@ const RC = { x: 0, z: -1400 }; // rift sanctum centre
 CFG.rift = { gate: { x: -9, z: -44 }, unlock: 15, r: 22, time: 70, intro: 2.4, clear: 2.8, lvlBase: 4, lvlPer: 2.5, bossEvery: 5 };
 const G = {
   mode: 'hub', started: false, time: 0, paused: false, modal: false,
-  profile: null, player: null, hubFighters: [], enemies: [], npcs: [], berries: [], dungeon: null, nodes: [], nodesDirty: true, chain: { type: null, zone: -1, n: 0 }, slowT: 0,
+  profile: null, player: null, hubFighters: [], enemies: [], npcs: [], berries: [], dungeon: null, siege: null, nodes: [], nodesDirty: true, chain: { type: null, zone: -1, n: 0 }, slowT: 0,
   boss: null, bossTimer: CFG.boss.firstSpawn, bossWarned: false, bossLair: 1,
   arena: null, pendingAoE: [], clouds: [], events: [], ents: new Map(), pellets: [], pelletsDirty: true, shrines: [],
   lastCombat: -99, zoneIdx: 0, interact: null, respawnT: 0, gateToastT: 0, dirty: false,

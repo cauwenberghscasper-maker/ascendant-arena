@@ -339,6 +339,25 @@ textarea.code { width: 100%; box-sizing: border-box; font: 12px/1.35 ui-monospac
 .tag.mob.orange .tn { color: #ffb347; } .tag.mob.red .tn { color: #ff6b6b; } .tag.mob.grey .tn { color: #a9adc8; opacity: .8; }
 .tag.den .tn { font: 14px/1 var(--display); color: #fff; background: rgba(160, 30, 45, .82); padding: 4px 8px; border-radius: 8px; text-shadow: none; }
 .tag.wp .tn { font: 700 11px/1 var(--body); color: #0e2a36; background: #9fe8ff; padding: 3px 7px; border-radius: 7px; text-shadow: none; }
+/* Bastion Siege: big objective bars (flash red under attack), warrior bars, the fort panels */
+.tag.obj .tn { font: 13px/1 var(--display); color: #fff; letter-spacing: .02em; }
+.tag.obj .tb { width: 96px; height: 10px; border: 2px solid rgba(0,0,0,.7); } .tag.obj .tb i { background: linear-gradient(90deg, #3fcf6c, #9cff9c); transition: width .15s; }
+.tag.obj.main .tn { font-size: 16px; color: #ffe08a; } .tag.obj.main .tb { width: 150px; height: 13px; } .tag.obj.main .tb i { background: linear-gradient(90deg, #ffb02e, #ffe08a); }
+.tag.obj.hurt .tb { animation: objHurt .5s ease-in-out infinite alternate; } .tag.obj.hurt .tn { color: #ff8a8a; }
+.tag.obj.down .tn { color: #a9adc8; text-decoration: line-through; opacity: .8; }
+@keyframes objHurt { from { box-shadow: 0 0 0 rgba(255,59,59,0); } to { box-shadow: 0 0 10px 3px rgba(255,59,59,.85); } }
+.tag.ally .tb { width: 34px; height: 5px; } .tag.ally .tb i { background: #5dd6ff; }
+b.stones { color: #e8d9b5; }
+.fortPads { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
+.fortPadBtn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px !important; min-width: 0; font-size: 12px; }
+.fortPadBtn .gi { width: 22px; height: 22px; } .fortPadBtn small { font-size: 11px; opacity: .85; }
+.fortPadBtn.archer { border-color: #58e08a !important; } .fortPadBtn.cannon { border-color: #ff7a4a !important; } .fortPadBtn.ballista { border-color: #5dd6ff !important; } .fortPadBtn.warrior { border-color: #ffc94a !important; }
+.fortCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 8px 0; }
+.fortCard { background: rgba(255,255,255,.05); border: 2px solid var(--line); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.fortCard.mine { border-color: var(--gold); background: rgba(255,201,74,.08); }
+.fortCard p { margin: 0; font-size: 12px; line-height: 1.35; } .fortCard button { margin-top: auto; }
+.fcHead { display: flex; align-items: center; gap: 6px; } .fcHead .gi { width: 22px; height: 22px; flex: none; } .fcHead .cnt { margin-left: auto; }
+@media (max-width: 420px) { .fortCards { grid-template-columns: 1fr; } .fortPads { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .dmg.kxp { color: #c9b8ff; font-size: 13px; }
 .dmg.heal { color: #8dff8d; font-size: 14px; }
 .toast.mastery { border-color: #8fe3a0; } .toast.ess { border-color: #c77dff; } .toast.legendary { border-color: #ffb347; } .toast.uncommon { border-color: #7fd17f; }
@@ -3290,7 +3309,7 @@ function defaultProfile() {
     treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
-    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
+    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, fort: { pads: [], stones: 0 }, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
     job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0 },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
@@ -3376,6 +3395,10 @@ function sanitizeProfile(p) {
   // Dungeon Keys (CFG.dungeon loads later; the cap of 12 matches CFG.dungeon.keys.max)
   out.keys = (Array.isArray(out.keys) ? out.keys : []).filter((k) => k && k.t >= 1 && Array.isArray(k.a)).slice(0, 12)
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));
+  // Bastion Siege fort: eight pads, each empty or { t: type, l: 1-15 } (CFG.siege loads later; the lists match it)
+  { const f = out.fort && typeof out.fort === 'object' && !Array.isArray(out.fort) ? out.fort : {}, T = ['archer', 'cannon', 'ballista', 'warrior'];
+    out.fort = { stones: Math.max(0, Math.floor(+f.stones || 0)), pads: Array.from({ length: 8 }, (_, i) => { const q = Array.isArray(f.pads) ? f.pads[i] : null;
+      return q && T.includes(q.t) && q.l >= 1 ? { t: q.t, l: Math.min(15, q.l | 0) } : null; }) }; }
   if (CFG.world && CFG.world.waypoints) out.waypoints = out.waypoints.filter((i) => Number.isInteger(i) && i >= 0 && i < CFG.world.waypoints.length);
   { const m = out.mine && typeof out.mine === 'object' ? out.mine : {}; out.mine = { ore: Math.max(0, +m.ore || 0), pick: Math.max(0, Math.min(20, m.pick | 0)), mined: Math.max(0, m.mined | 0), museum: m.museum && typeof m.museum === 'object' && !Array.isArray(m.museum) ? m.museum : {} }; }
   { const c = out.craft && typeof out.craft === 'object' && !Array.isArray(out.craft) ? out.craft : {}, obj = (o) => (o && typeof o === 'object' && !Array.isArray(o) ? o : {}), num = (o) => { const r = {}; for (const k in obj(o)) { const v = +o[k]; if (v > 0 && isFinite(v)) r[k] = Math.floor(v); } return r; };
@@ -3497,7 +3520,7 @@ const RC = { x: 0, z: -1400 }; // rift sanctum centre
 CFG.rift = { gate: { x: -9, z: -44 }, unlock: 15, r: 22, time: 70, intro: 2.4, clear: 2.8, lvlBase: 4, lvlPer: 2.5, bossEvery: 5 };
 const G = {
   mode: 'hub', started: false, time: 0, paused: false, modal: false,
-  profile: null, player: null, hubFighters: [], enemies: [], npcs: [], berries: [], dungeon: null, nodes: [], nodesDirty: true, chain: { type: null, zone: -1, n: 0 }, slowT: 0,
+  profile: null, player: null, hubFighters: [], enemies: [], npcs: [], berries: [], dungeon: null, siege: null, nodes: [], nodesDirty: true, chain: { type: null, zone: -1, n: 0 }, slowT: 0,
   boss: null, bossTimer: CFG.boss.firstSpawn, bossWarned: false, bossLair: 1,
   arena: null, pendingAoE: [], clouds: [], events: [], ents: new Map(), pellets: [], pelletsDirty: true, shrines: [],
   lastCombat: -99, zoneIdx: 0, interact: null, respawnT: 0, gateToastT: 0, dirty: false,
@@ -4035,7 +4058,7 @@ function killEntity(t, src, pet = false) {
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
-    else if (t.isPlayer) { if (typeof pvpOnDeath === 'function') pvpOnDeath(); G.respawnT = CFG.player.respawn; toast('You were knocked out. Respawning in town…', 'bad'); }
+    else if (t.isPlayer) { if (typeof pvpOnDeath === 'function') pvpOnDeath(); G.respawnT = CFG.player.respawn; toast(G.siege ? 'You were knocked out. Back at the Keep in a moment…' : 'You were knocked out. Respawning in town…', 'bad'); }
   } else if (t.kind === 'enemy') {
     t.respawnT = t.temp ? 1e9 : t.elite ? CFG.world.eliteRespawn : t.den != null ? CFG.world.denRespawn : CFG.world.enemyRespawn;
     ev({ t: 'die', x: t.x, z: t.z, kind: t.type, elite: !!t.elite });
@@ -4375,6 +4398,7 @@ function stepFighter(f, dt, ctx) {
 function boundFighter(f, ctx) {
   if (G.rift && f.isPlayer) { riftClamp(f, f.r); return; }
   if (G.dungeon && f.isPlayer) { dungeonClamp(f, f.r); return; }
+  if (G.siege && f.isPlayer) { siegeClamp(f, f.r); return; }
   if (ctx === 'arena') {
     const h = CFG.arena.half - f.r;
     f.x = clamp(f.x, AC.x - h, AC.x + h); f.z = clamp(f.z, AC.z - h, AC.z + h);
@@ -4740,6 +4764,7 @@ function enemySpawnClear(e, x, z, respawning) {
 const PATROL_LANES = [-0.8, -0.5, -0.17, 0.17, 0.5, 0.8]; // × maxX
 function enemySpot(e, respawning = false) {
   const W = CFG.world;
+  if (e.siege) return { x: SC.x, z: SC.z }; // placed at a gate by spawnSiegeMob
   if (e.rift) {
     const pl = G.player;
     for (let i = 0; i < 30; i++) { const a = rand(0, Math.PI * 2), r = rand(7, CFG.rift.r - 2.5), x = RC.x + Math.sin(a) * r, z = RC.z + Math.cos(a) * r; if (!pointBlocked(x, z, 1.2) && Math.hypot(x - pl.x, z - pl.z) > 8) return { x, z }; }
@@ -4823,7 +4848,7 @@ function refHp(L) { const P = CFG.progression; return P.hpBase * Math.pow(P.hpGr
 function refDmg(L) { const P = CFG.progression; return P.atkBase * Math.pow(P.atkGrowth, L - 1) * lerpTable(CFG.enemies.refDmgMult, L); }
 // hits depend on the monster's level only, so more HP from gear really makes you tankier
 function mobDmg(e, mult) { return e.atk * (mult == null ? 1 : mult); }
-function inInstance() { return !!(G.rift || G.dungeon); }
+function inInstance() { return !!(G.rift || G.dungeon || G.siege); }
 // hits scale with the reference hero's HP, health with its damage: equal-level fights feel the same at 1 and 210
 function setEnemyLevel(e, lvl) {
   const d = CFG.enemies[e.type], E = CFG.enemies;
@@ -5122,6 +5147,7 @@ function stepHub(dt) {
   // zone change
   if (G.rift) stepRift(dt);
   if (G.dungeon) stepDungeon(dt);
+  if (G.siege) stepSiege(dt);
   const zi = inInstance() ? G.zoneIdx : zoneAt(pl.z);
   if (zi !== G.zoneIdx) { G.zoneIdx = zi; ev({ t: 'zone', name: W.zones[zi].name, town: false }); if (zi > G.profile.stats.zone) { G.profile.stats.zone = zi; checkAchievements(); } }
   // bots
@@ -5159,9 +5185,11 @@ function stepHub(dt) {
   G.interact = null;
   if (G.rift) { if (pl.alive) G.interact = { kind: 'riftLeave' }; }
   else if (G.dungeon) { if (pl.alive) G.interact = dungeonInteract(pl); }
+  else if (G.siege) { if (pl.alive) G.interact = siegeInteract(pl); }
   else if (pl.alive) {
     let best = 3.6;
     { const RG = CFG.rift.gate, d = Math.hypot(pl.x - RG.x, pl.z - RG.z); if (d < best) { best = d; G.interact = { kind: 'rift' }; } }
+    { const SG = CFG.siege.gate, d = Math.hypot(pl.x - SG.x, pl.z - SG.z); if (d < best) { best = d; G.interact = { kind: 'siege', label: 'Bastion Siege' }; } }
     for (const po of dungeonPois()) { const d = Math.hypot(pl.x - po.x, pl.z - po.z); if (d < best) { best = d; G.interact = { kind: 'dungeon', poi: po, label: 'Enter ' + po.name }; } }
     for (const n of shownNpcs()) { const d = Math.hypot(pl.x - n.x, pl.z - n.z); if (d < best) { best = d; G.interact = n; } }
     CFG.world.waypoints.forEach((w, i) => { const d = Math.hypot(pl.x - w.x, pl.z - w.z); if (d < best) { best = d; G.interact = { kind: 'waypoint', i, def: w }; } });
@@ -5240,6 +5268,7 @@ function separate(a, b) {
 }
 const bodyMass = (e) => { const M = CFG.enemies.mass; return e.kind === 'enemy' ? (M[(CFG.enemies[e.type] || {}).kit || 'legacy'] || 1) * (e.elite ? M.elite : 1) : M.player; };
 function stepEnemy(e, dt) {
+  if (e.siege) { stepSiegeEnemy(e, dt); return; } // Bastion Siege monsters go for the fort (36b-siege.js)
   if ((e.mirror || e.hidden) && moveUpkeep(e, dt)) return;
   if (!e.alive) { if (e.rift || e.dungeon) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
   if (HeroSupers.tickStatus(e, dt)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); e.moveAmt = 0; return; } // stunned / banished by a hero super
@@ -6462,6 +6491,304 @@ function endDungeon(why) {
   ev({ t: 'dungeonEnd', why, name: D.poi.name, cleared: D.bossDead, x: pl.x, z: pl.z });
 }
 // --- end dungeons
+// --- Bastion Siege: a walled fort entered through the Bastion house in town. Endless waves pour in through three gates and
+// go for the Keep and two supply wagons (each with its own health bar); you fight with your hero while the archers,
+// cannons, ballistas and warriors you build on eight stone pads hold the line. Like the Rift it stays in G.mode 'hub'
+// (G.siege set). The fort is permanent: what you build and upgrade lives in profile.fort and returns every run.
+const SC = { x: 0, z: -2200 }; // siege fort centre (arena −1000, rift −1400, dungeon −1800)
+CFG.siege = {
+  // gate: the door of the Bastion house on the west side of the town plaza (house: where the building stands)
+  unlock: 20, gate: { x: -21.4, z: -56 }, house: { x: -25.2, z: -56 }, half: 24, interactR: 3.2, padR: 2.8, bossBlock: 30,
+  firstBuild: 25, build: 30, clear: 2.5, spawnGap: 0.55, bossEvery: 5, lvlBase: 18, lvlPer: 1.5, maxLvl: 15,
+  // objectives: HP = reference hero HP at the wave level × mult (kept as a fraction between waves); the Keep ends the run
+  objs: [
+    { id: 'keep', name: 'The Keep', x: 0, z: 2, r: 4.1, h: 7.2, mult: 30, main: true },
+    { id: 'wagonW', name: 'West Wagon', x: -12, z: -13, r: 1.8, h: 3.6, mult: 12 },
+    { id: 'wagonE', name: 'East Wagon', x: 12, z: -13, r: 1.8, h: 3.6, mult: 12 },
+  ],
+  heal: 0.25, wagonBonus: 0.25, // objectives mend a quarter between waves; every wagon still standing adds 25% gold
+  gates: [{ x: 0, z: 22, a: Math.PI }, { x: 22, z: 0, a: -Math.PI / 2 }, { x: -22, z: 0, a: Math.PI / 2 }],
+  pads: [{ x: -5, z: 13 }, { x: 5, z: 13 }, { x: -13, z: 6 }, { x: 13, z: 6 }, { x: -13, z: -5 }, { x: 13, z: -5 }, { x: -5, z: -8 }, { x: 5, z: -8 }],
+  spawn: { x: 0, z: -17 }, exit: { x: 0, z: -21 },
+  // defenders: dmg × the reference hero's hit at your level, +30% per level. cost: gold in wave payouts at your level, stones for the first level
+  towers: {
+    archer: { name: 'Archer Tower', short: 'Archer', icon: 'b_arrow', range: 16, cd: 0.8, dmg: 0.55, speed: 30, color: 0xffe08a, cost: 2, stones: 4,
+      blurb: 'Fast arrows at one target. Cheap and steady.' },
+    cannon: { name: 'Cannon', short: 'Cannon', icon: 'a_bigshot', range: 13, cd: 2.4, dmg: 1.2, aoe: 2.8, fly: 0.9, color: 0x3a3a44, cost: 3, stones: 6,
+      blurb: 'Slow shells that blast a whole group.' },
+    ballista: { name: 'Ballista', short: 'Ballista', icon: 'n_pierce', range: 22, cd: 2.8, dmg: 2.4, pierce: 3, speed: 40, color: 0xbfe9ff, cost: 3, stones: 6,
+      blurb: 'Huge bolts from far away that pierce through a line of monsters.' },
+    warrior: { name: 'Barracks', short: 'Warriors', icon: 'b_wave', range: 6, cd: 1.0, dmg: 0.7, hp: 0.9, men: 2, respawn: 8, cost: 2.5, stones: 5,
+      blurb: 'Warriors that block the path and fight monsters near their post.' },
+  },
+};
+const SIEGE_TYPES = ['archer', 'cannon', 'ballista', 'warrior'];
+const siegeLvlMul = (l) => 1 + 0.3 * (l - 1);
+const siegeMen = (l) => Math.min(4, CFG.siege.towers.warrior.men + Math.floor(l / 5));
+// one wave's gold at hero level L: the price unit for building
+const siegeGoldUnit = (L) => Math.round((20 + 6 * L) * Math.pow(CFG.enemies.goldGrowth, L - 1));
+function fortState() { const p = G.profile, F = p.fort || (p.fort = { pads: [], stones: 0 }); while (F.pads.length < CFG.siege.pads.length) F.pads.push(null); return F; }
+// the price of the next step on a pad for type t: build at level 1, or the next upgrade if the pad already holds t
+function padCost(i, t) {
+  const pad = fortState().pads[i], T = CFG.siege.towers[t], l = pad && pad.t === t ? pad.l : 0;
+  return { lvl: l + 1, gold: Math.round(siegeGoldUnit(G.profile.level) * T.cost * (1 + l * 0.8)), stones: Math.round(T.stones * Math.pow(l + 1, 1.35)) };
+}
+// stones spent on a pad so far: half comes back when you swap it for another type
+function padStonesSpent(pad) { if (!pad) return 0; let n = 0; for (let k = 1; k <= pad.l; k++) n += Math.round(CFG.siege.towers[pad.t].stones * Math.pow(k, 1.35)); return n; }
+function buyPad(i, t) {
+  const F = fortState(), p = G.profile, pad = F.pads[i], T = CFG.siege.towers[t];
+  if (!T || i < 0 || i >= CFG.siege.pads.length) return false;
+  if (pad && pad.t === t && pad.l >= CFG.siege.maxLvl) return false;
+  const c = padCost(i, t); if (p.gold < c.gold || F.stones < c.stones) return false;
+  p.gold -= c.gold; F.stones -= c.stones;
+  if (pad && pad.t !== t) F.stones += Math.floor(padStonesSpent(pad) / 2);
+  F.pads[i] = { t, l: c.lvl }; G.dirty = true;
+  if (G.siege) siegeRefreshPad(i);
+  ev({ t: 'fortBuilt', i, type: t, l: c.lvl, x: SC.x + CFG.siege.pads[i].x, z: SC.z + CFG.siege.pads[i].z });
+  return true;
+}
+const siegeLevel = (n) => Math.max(G.profile.level - 2, CFG.siege.lvlBase + Math.round(CFG.siege.lvlPer * n)) + tierAdd();
+const siegeDefDmg = (T, l) => refDmg(G.profile.level) * T.dmg * siegeLvlMul(l);
+function siegeClamp(f, r) { const h = CFG.siege.half - 0.8 - r; f.x = clamp(f.x, SC.x - h, SC.x + h); f.z = clamp(f.z, SC.z - h, SC.z + h); }
+// keep, wagons and the eight pads are solid; rebuilt as a whole (the Grid has no remove)
+function siegeGrid() {
+  const g = new Grid(6), S = CFG.siege;
+  for (const o of G.siege.objs) if (o.alive) g.add({ x: o.x, z: o.z, r: o.r });
+  for (const q of S.pads) g.add({ x: SC.x + q.x, z: SC.z + q.z, r: 1.1 });
+  G.siegeObstacles = g; G.obstacles = g; return g;
+}
+function siegeScaleObjs(lvl) {
+  for (const o of G.siege.objs) { const k = o.maxHp ? o.hp / o.maxHp : 1; o.maxHp = Math.round(refHp(lvl) * o.def.mult); o.hp = o.alive ? Math.max(1, Math.round(k * o.maxHp)) : 0; }
+}
+// pad runtime: fire cooldown, and the warriors of a barracks (spawned at their post, back after a while when they fall)
+function siegeRefreshPad(i) {
+  const S = G.siege, pad = fortState().pads[i], q = CFG.siege.pads[i], P = S.pads[i] || (S.pads[i] = { i, id: nextId++, cd: rand(0, 1), x: SC.x + q.x, z: SC.z + q.z });
+  S.soldiers = S.soldiers.filter((s) => s.pad !== i);
+  if (!pad || pad.t !== 'warrior') return;
+  const T = CFG.siege.towers.warrior;
+  for (let k = 0, n = siegeMen(pad.l); k < n; k++) {
+    const a = (k / n) * Math.PI * 2, hx = P.x + Math.sin(a) * 2.2, hz = P.z + Math.cos(a) * 2.2;
+    const s = { id: nextId++, kind: 'soldier', pad: i, team: 'ally', x: hx, z: hz, hx, hz, r: 0.55, facing: 0, moveAmt: 0, attackAnim: 0, flashT: 0, alive: true, atkCd: rand(0, T.cd), respawnT: 0 };
+    s.maxHp = s.hp = Math.round(refHp(G.profile.level) * T.hp * siegeLvlMul(pad.l));
+    S.soldiers.push(s);
+  }
+}
+function startSiege() {
+  const p = G.profile, pl = G.player, C = CFG.siege;
+  if (inInstance() || G.mode !== 'hub' || p.level < C.unlock || activeShrine() || !pl.alive) return false;
+  if (G.boss && Math.hypot(G.boss.x - pl.x, G.boss.z - pl.z) < C.bossBlock) return false;
+  const S = G.siege = { wave: 1, phase: 'build', t: C.firstBuild, tMax: C.firstBuild, queue: [], spawnT: 0, mobs: [], soldiers: [], pads: [], lvl: 0,
+    gold: 0, stones: 0, items: 0, cleared: 0, kills: 0, enterPos: { x: pl.x, z: pl.z },
+    objs: C.objs.map((d) => ({ def: d, kind: 'objective', name: d.name, x: SC.x + d.x, z: SC.z + d.z, r: d.r, alive: true, hp: 1, maxHp: 0, flashT: 0, hurtT: 0 })) };
+  S.lvl = siegeLevel(1); siegeScaleObjs(S.lvl);
+  for (let i = 0; i < C.pads.length; i++) siegeRefreshPad(i);
+  siegeGrid(); clearProjectiles();
+  pl.x = SC.x + C.spawn.x; pl.z = SC.z + C.spawn.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
+  ev({ t: 'siegeStart', x: pl.x, z: pl.z, best: p.records.bestSiege || 0 }); return true;
+}
+function siegeComposition(n) {
+  const boss = n % CFG.siege.bossEvery === 0, count = Math.min(28, 5 + Math.round(n * 1.6)), elites = Math.min(6, Math.floor(n / 3));
+  return { boss, count: boss ? Math.ceil(count * 0.6) : count, elites };
+}
+// fill the spawn queue; monsters walk in one by one through the three gates
+function startSiegeWave() {
+  const S = G.siege; if (!S || S.phase !== 'build') return false;
+  const n = S.wave, Zs = CFG.world.zones, zi = 1 + (n - 1) % (Zs.length - 1), Z = Zs[zi], C = siegeComposition(n);
+  S.lvl = siegeLevel(n); siegeScaleObjs(S.lvl);
+  S.queue = [];
+  for (let k = 0; k < C.count; k++) S.queue.push({ type: Math.random() < 0.5 ? Z.enemy : (Z.alt || Z.enemy), zi, elite: k < C.elites });
+  S.queue.sort(() => Math.random() - 0.5);
+  if (C.boss) S.queue.push({ type: Z.enemy, zi, boss: true });
+  S.phase = 'fight'; S.spawnT = 0.4; S.gateI = randInt(0, 2);
+  ev({ t: 'siegeWave', wave: n, lvl: S.lvl, boss: C.boss, count: S.queue.length, theme: Z.name });
+  return true;
+}
+function spawnSiegeMob(q) {
+  const S = G.siege, gt = CFG.siege.gates[S.gateI = (S.gateI + 1) % 3], side = rand(-3, 3);
+  const x = SC.x + gt.x + Math.cos(gt.a) * side, z = SC.z + gt.z - Math.sin(gt.a) * side;
+  let e;
+  if (q.boss) { e = makeChampion(q.type, q.zi, S.lvl + 2, Math.min(3, 1 + Math.floor(S.wave / 15)), true); delete e.rift; delete e.riftLvl; e.bossName = 'Siege Lord'; }
+  else e = makeEnemy(q.type, q.zi, { elite: q.elite });
+  e.siege = true; e.temp = true; e.state = 'chase'; e.tgt = null; e.tgtT = 0;
+  setEnemyLevel(e, q.boss ? S.lvl + 2 : S.lvl);
+  e.x = e.hx = e.wx = x; e.z = e.hz = e.wz = z; e.facing = gt.a;
+  G.enemies.push(e); S.mobs.push(e);
+  ev({ t: 'spawn', x, z, elite: e.elite });
+}
+function clearSiegeMobs() {
+  const S = G.siege; if (!S) return;
+  const ids = new Set(S.mobs.map((e) => e.id));
+  G.enemies = G.enemies.filter((e) => !ids.has(e.id)); for (const id of ids) G.ents.delete(id);
+  S.mobs = [];
+}
+function siegeWaveClear() {
+  const S = G.siege, p = G.profile, n = S.wave, lvl = S.lvl, C = CFG.siege;
+  const wagons = S.objs.filter((o) => !o.def.main && o.alive).length, boss = n % C.bossEvery === 0;
+  const gold = Math.round((20 + 6 * lvl) * Math.pow(CFG.enemies.goldGrowth, lvl - 1) * tierMul(curTier()).gold * (1 + C.wagonBonus * wagons)); addGold(gold, true); S.gold += gold;
+  const stones = 3 + Math.floor(n / 2) + (boss ? 5 : 0); fortState().stones += stones; S.stones += stones;
+  if (p.level < P.cap) addXp(Math.round(xpToNext(p.level) * Math.min(0.2, 0.05 * (1 + n / 10))), 'dungeon');
+  let item = null;
+  if (boss) { item = makeItem(pick(CFG.gear.slots), riftRarity(n), lvl); grantItem(item, 'shrine'); S.items++; addEssence(2 + Math.floor(n / 5)); }
+  for (const o of S.objs) if (o.alive) o.hp = Math.min(o.maxHp, Math.round(o.hp + o.maxHp * C.heal));
+  if (n > (p.records.bestSiege || 0)) p.records.bestSiege = n;
+  S.cleared = n; addMastery('w:' + G.player.attackId, 15 + n * 3);
+  checkAchievements(); G.dirty = true;
+  ev({ t: 'siegeClear', wave: n, gold, stones, item: !!item, wagons });
+}
+function stepSiege(dt) {
+  const S = G.siege, pl = G.player, C = CFG.siege;
+  // carried out of the fort by anything else (waypoint travel): close it where you stand
+  if (Math.hypot(pl.x - SC.x, pl.z - SC.z) > 200) { endSiege('away'); return; }
+  if (!pl.alive) G.respawnAt = { x: SC.x + C.spawn.x, z: SC.z + C.spawn.z }; // a fall costs a few seconds, not the run
+  if (G.modal) return; // the fort holds still while you are in a menu
+  for (const o of S.objs) { o.flashT -= dt; o.hurtT -= dt; }
+  stepSiegeDefenders(dt);
+  if (S.phase === 'build') { S.t -= dt; if (S.t <= 0) startSiegeWave(); }
+  else if (S.phase === 'fight') {
+    if (S.queue.length && (S.spawnT -= dt) <= 0) { S.spawnT = C.spawnGap; spawnSiegeMob(S.queue.shift()); }
+    if (!S.queue.length && !S.mobs.some((e) => e.alive)) { siegeWaveClear(); S.phase = 'clear'; S.t = S.tMax = C.clear; }
+  } else if (S.phase === 'clear' && (S.t -= dt) <= 0) { clearSiegeMobs(); S.wave++; S.phase = 'build'; S.t = S.tMax = C.build; }
+}
+// --- defenders: towers pick the nearest monster in range; warriors hold a ring around their post
+function siegeNearestMob(x, z, range) {
+  let best = null, bd = range;
+  for (const e of G.siege.mobs) if (e.alive && !e.hidden) { const d = Math.hypot(e.x - x, e.z - z); if (d < bd) { bd = d; best = e; } }
+  return best;
+}
+function stepSiegeDefenders(dt) {
+  const S = G.siege, F = fortState();
+  S.pads.forEach((P, i) => {
+    const pad = F.pads[i]; if (!pad || pad.t === 'warrior') return;
+    const T = CFG.siege.towers[pad.t]; if ((P.cd -= dt) > 0) return;
+    const e = siegeNearestMob(P.x, P.z, T.range); if (!e) { P.cd = 0.15; return; }
+    P.cd = T.cd; P.aim = Math.atan2(e.x - P.x, e.z - P.z); P.fireT = G.time;
+    const dmg = siegeDefDmg(T, pad.l), sx = Math.sin(P.aim), sz = Math.cos(P.aim), ox = P.x + sx * 1.6, oz = P.z + sz * 1.6;
+    if (pad.t === 'cannon') {
+      // a lobbed shell lands where the target will be
+      const tx = e.x + (e.vx || 0) * T.fly, tz = e.z + (e.vz || 0) * T.fly;
+      spawnProjectile({ x: ox, z: oz, vx: (tx - ox) / T.fly, vz: (tz - oz) / T.fly, life: T.fly, r: 0.45, dmg, team: 'ally', owner: P.id, kind: 'shell', color: T.color, y: 1.4, lob: true, lobH: 2.4, aoe: T.aoe, aoeMult: 1, knock: 4 });
+    } else {
+      const t = Math.hypot(e.x - ox, e.z - oz) / T.speed, a = Math.atan2(e.x + (e.vx || 0) * t - ox, e.z + (e.vz || 0) * t - oz);
+      spawnProjectile({ x: ox, z: oz, vx: Math.sin(a) * T.speed, vz: Math.cos(a) * T.speed, life: (T.range + 3) / T.speed, r: pad.t === 'ballista' ? 0.5 : 0.3, dmg, team: 'ally', owner: P.id,
+        kind: pad.t === 'ballista' ? 'rail' : 'arrow', color: T.color, y: pad.t === 'ballista' ? 1.5 : 3.2, pierce: T.pierce || 0, knock: pad.t === 'ballista' ? 5 : 1.5 });
+    }
+    ev({ t: 'fortShot', type: pad.t, x: ox, z: oz });
+  });
+  const W = CFG.siege.towers.warrior;
+  for (const s of S.soldiers) {
+    s.flashT -= dt; s.attackAnim = Math.max(0, s.attackAnim - dt * 3);
+    if (!s.alive) { if ((s.respawnT -= dt) <= 0) { s.alive = true; s.hp = s.maxHp; s.x = s.hx; s.z = s.hz; } continue; }
+    const pad = F.pads[s.pad], e = siegeNearestMob(s.hx, s.hz, W.range);
+    let tx = s.hx, tz = s.hz, sp = 0;
+    if (e) { tx = e.x; tz = e.z; s.atkCd -= dt; }
+    const dx = tx - s.x, dz = tz - s.z, d = Math.hypot(dx, dz), reach = e ? s.r + e.r + 0.3 : 0.3;
+    if (d > reach) { sp = 6; s.x += dx / d * sp * dt; s.z += dz / d * sp * dt; s.facing = Math.atan2(dx, dz); }
+    else if (e) {
+      s.facing = Math.atan2(dx, dz);
+      if (s.atkCd <= 0) { s.atkCd = W.cd; s.attackAnim = 1; dealDamage(e, siegeDefDmg(W, pad.l), s.id, { knockX: dx, knockZ: dz, knock: 2 }); }
+    }
+    s.moveAmt = lerp(s.moveAmt, sp > 0 ? 1 : 0, 1 - Math.exp(-dt * 10));
+    collideObstacles(s); siegeClamp(s, s.r);
+  }
+}
+function siegeHitSoldier(s, amt) {
+  s.hp -= amt; s.flashT = CFG.combat.hitFlash;
+  ev({ t: 'hit', x: s.x, z: s.z, y: 2.1, amt: Math.round(amt), crit: false, toPlayer: false, byPlayer: false });
+  if (s.hp <= 0) { s.alive = false; s.hp = 0; s.respawnT = CFG.siege.towers.warrior.respawn; ev({ t: 'die', x: s.x, z: s.z, kind: 'soldier' }); }
+}
+function siegeHitObjective(o, amt) {
+  if (!o.alive) return;
+  o.hp -= amt; o.flashT = 0.12;
+  if (o.hurtT <= 0) ev({ t: 'objectiveHit', name: o.name, x: o.x, z: o.z, main: !!o.def.main });
+  o.hurtT = 1.2;
+  if (o.hp > 0) return;
+  o.hp = 0; o.alive = false; siegeGrid();
+  ev({ t: 'objectiveDown', name: o.name, main: !!o.def.main, x: o.x, z: o.z });
+  if (o.def.main) endSiege('keep');
+}
+// --- siege monsters: march on the nearest objective; warriors in the way and a hero close by draw them off
+function siegeTarget(e) {
+  const S = G.siege, pl = G.player;
+  let best = null, bd = 5;
+  for (const s of S.soldiers) if (s.alive) { const d = Math.hypot(s.x - e.x, s.z - e.z); if (d < bd) { bd = d; best = s; } }
+  if (best) return best;
+  if (pl.alive && G.menuSafe <= 0 && Math.hypot(pl.x - e.x, pl.z - e.z) < (e.lastHurt > G.time - 2 ? 9 : 6)) return pl;
+  bd = Infinity;
+  for (const o of S.objs) if (o.alive) { const d = Math.hypot(o.x - e.x, o.z - e.z) - o.r; if (d < bd) { bd = d; best = o; } }
+  return best;
+}
+function stepSiegeEnemy(e, dt) {
+  const S = G.siege;
+  if (!e.alive || !S) return;
+  if (G.modal || G.menuSafe > 0) { e.moveAmt = Math.max(0, (e.moveAmt || 0) - dt * 3); return; }
+  if (HeroSupers.tickStatus(e, dt)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); e.moveAmt = 0; return; }
+  const d = CFG.enemies[e.type], pl = G.player;
+  e.atkCd -= dt; e.flashT -= dt; e.slowT -= dt; e.lungeT -= dt; e.lungeCd -= dt;
+  tickBurn(e, dt); if (!e.alive) return;
+  if ((e.tgtT -= dt) <= 0 || !e.tgt || !e.tgt.alive) { e.tgt = siegeTarget(e); e.tgtT = 0.5; }
+  const t = e.tgt; if (!t) { e.moveAmt = 0; return; }
+  const dx = t.x - e.x, dz = t.z - e.z, dd = Math.hypot(dx, dz) || 1, edge = dd - (t.r || 0.5) - e.r, slow = e.slowT > 0 ? 0.5 : 1;
+  let mx = 0, mz = 0, sp = 0;
+  // against the hero, monsters fight as they do everywhere else: telegraphed moves and champion affixes
+  if (t === pl && ((e.champ && champTick(e, dt, pl, dd)) || (d.moves && !e.champ && enemyMove(e, dt, pl, dd)))) { trackVel(e, dt); collideObstacles(e); siegeClamp(e, e.r); return; }
+  markCombat();
+  const hit = (mult) => {
+    const amt = mobDmg(e, mult);
+    if (t === pl) dealDamage(pl, amt, e.id, { knockX: dx, knockZ: dz, knock: d.heavy ? 12 : 4 });
+    else if (t.kind === 'soldier') siegeHitSoldier(t, amt);
+    else siegeHitObjective(t, amt);
+  };
+  if (d.attack === 'touch') {
+    mx = dx / dd; mz = dz / dd; sp = edge > 0.15 ? d.speed : 0;
+    if (edge < 0.45 && e.atkCd <= 0) { e.atkCd = d.cd; e.attackAnim = 1; hit(d.heavy ? CFG.enemies.heavyMult : 1); if (d.heavy) ev({ t: 'boom', x: t.x, z: t.z, r: 1.6, color: 0xdfeaf4 }); }
+  } else {
+    sp = d.speed;
+    if (edge > d.keep + 1.5) { mx = dx / dd; mz = dz / dd; } else if (edge < d.keep - 3) { mx = -dx / dd; mz = -dz / dd; } else sp = 0;
+    if (e.atkCd <= 0 && edge < d.keep + 3) {
+      e.atkCd = d.cd * rand(0.85, 1.2); e.attackAnim = 1;
+      const a0 = Math.atan2(dx, dz), n = (d.shots || 1) + (e.elite ? 2 : 0), spr = d.spread || 0.35;
+      for (let k = 0; k < n; k++) {
+        const a = n > 1 ? a0 + (k / (n - 1) - 0.5) * spr : a0;
+        // shots at the hero can be dodged; shots at the fort land (the bolt is drawn, the damage applied once below)
+        spawnProjectile({ x: e.x, z: e.z, vx: Math.sin(a) * d.shotSpeed, vz: Math.cos(a) * d.shotSpeed, life: t === pl ? (d.keep + 8) / d.shotSpeed : Math.max(0.1, edge / d.shotSpeed), r: 0.4,
+          dmg: mobDmg(e, 1), team: 'mob', owner: e.id, kind: 'orb', color: d.shotColor || 0x7fe3ff, y: 1.4, ghost: t !== pl });
+      }
+      if (t !== pl) hit(n > 1 ? 0.6 * n : 1);
+      ev({ t: 'shoot', kind: 'enemy', x: e.x, z: e.z });
+    }
+  }
+  e.facing = Math.atan2(dx, dz);
+  e.x += mx * sp * slow * (e.spd || 1) * dt; e.z += mz * sp * slow * (e.spd || 1) * dt;
+  e.moveAmt = lerp(e.moveAmt || 0, sp > 0 ? 1 : 0, 1 - Math.exp(-dt * 10));
+  e.attackAnim = Math.max(0, (e.attackAnim || 0) - dt * 3);
+  trackVel(e, dt);
+  if (pl.alive) separate(e, pl);
+  for (const o of S.mobs) if (o !== e && o.alive) separate(e, o);
+  collideObstacles(e); siegeClamp(e, e.r);
+}
+function siegeInteract(pl) {
+  const S = G.siege, C = CFG.siege, near = (q, r) => Math.hypot(pl.x - SC.x - q.x, pl.z - SC.z - q.z) < r;
+  if (near(C.exit, C.interactR)) return { kind: 'siegeLeave', label: 'Leave Fort' };
+  let best = C.padR, hit = null;
+  C.pads.forEach((q, i) => { const d = Math.hypot(pl.x - SC.x - q.x, pl.z - SC.z - q.z); if (d < best) { best = d; hit = i; } });
+  if (hit != null) { const pad = fortState().pads[hit]; return { kind: 'fortPad', i: hit, label: pad ? `${C.towers[pad.t].short} Lv ${pad.l}` : 'Build' }; }
+  if (S.phase === 'build') return { kind: 'siegeWave', label: `Start Wave ${S.wave}` };
+  return null;
+}
+function siegeLeft() { const S = G.siege; return S ? S.queue.length + S.mobs.filter((e) => e.alive).length : 0; }
+function endSiege(why) {
+  const S = G.siege; if (!S) return;
+  clearSiegeMobs(); clearProjectiles();
+  G.siege = null; G.siegeObstacles = null; G.obstacles = G.hubObstacles;
+  const pl = G.player, p = G.profile, C = CFG.siege, out = { x: C.gate.x + 2, z: C.gate.z };
+  if (why !== 'away') { pl.x = out.x; pl.z = out.z; }
+  if (pl.alive) { pl.invulnT = 1; pl.hp = pl.maxHp; } else G.respawnAt = { x: pl.x, z: pl.z };
+  G.zoneIdx = zoneAt(pl.z);
+  const res = { why, wave: S.wave, cleared: S.cleared, gold: S.gold, stones: S.stones, items: S.items, best: p.records.bestSiege || 0, x: pl.x, z: pl.z };
+  G.siegeResult = res; G.dirty = true;
+  ev(Object.assign({ t: 'siegeEnd' }, res));
+}
+// --- end siege
 // --- Mining: four ore veins per combat area (POIs kind 'node'; n 3 is the rare glowing vein). Tap a ready vein to
 // mine it: Ore (spent on pickaxe levels), a Geode roll per ore (a case opened on the reel that also fills the Museum)
 // and a 1 in 10,000 pet. Veins regrow on a timer; 1% regrow as rich veins that pay triple. Expeditions mine too.
@@ -6911,6 +7238,7 @@ const hubGroup = new THREE.Group(), arenaGroup = new THREE.Group(), dynGroup = n
 scene.add(hubGroup, arenaGroup, dynGroup, riftGroup);
 arenaGroup.visible = false; riftGroup.visible = false;
 const dungeonGroup = new THREE.Group(); scene.add(dungeonGroup); dungeonGroup.visible = false; // filled on dungeon entry (47)
+const siegeGroup = new THREE.Group(); scene.add(siegeGroup); siegeGroup.visible = false; // the Bastion fort, built on entry (47b)
 // soft procedural textures (swirl for portals, vertical fade for auras)
 let _swirl = null, _fade = null;
 function swirlTex() {
@@ -8058,6 +8386,11 @@ function buildHub() {
     tParts.push(part(GEO.box, 0x2a1f3d, [RG.x - 1.9, 1.7, RG.z], [0, 0, 0.12], [0.6, 3.4, 0.6])); tParts.push(part(GEO.box, 0x2a1f3d, [RG.x + 1.9, 1.7, RG.z], [0, 0, -0.12], [0.6, 3.4, 0.6]));
     tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x - 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4])); tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x + 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4])); }
     grid.add({ x: RG.x - 1.9, z: RG.z, r: 0.5 }); grid.add({ x: RG.x + 1.9, z: RG.z, r: 0.5 }); }
+  // Bastion house: an extra cottage on the west side of the plaza, banners by its door, the way into Bastion Siege
+  { const SH = CFG.siege.house, SG = CFG.siege.gate;
+    WorldModels.place(hubGroup, 'house_b', [{ x: SH.x, z: SH.z, ry: Math.PI / 2, s: 6 }]); grid.add({ x: SH.x, z: SH.z, r: 3 });
+    WorldModels.place(hubGroup, 'banner_pole', [-1, 1].map((k) => ({ x: SG.x - 0.6, z: SG.z + k * 2.4, ry: Math.PI / 2, s: 3.8 })));
+    for (const k of [-1, 1]) grid.add({ x: SG.x - 0.6, z: SG.z + k * 2.4, r: 0.35 }); }
   // lair standing stones (one ring per zone)
   const lairStones = [];
   W.lairList.forEach((l) => {
@@ -8170,6 +8503,10 @@ function buildHub() {
     const rd = new THREE.Mesh(new THREE.CircleGeometry(1.55, 32), new THREE.MeshBasicMaterial({ map: swirlTex(), color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
     rd.position.set(RG.x, 1.75, RG.z); hubGroup.add(rd); hubParts.riftDisc = rd;
     const rr = new THREE.Mesh(new THREE.TorusGeometry(1.62, 0.1, 6, 32), new THREE.MeshBasicMaterial({ color: 0xff5d8f })); rr.position.copy(rd.position); hubGroup.add(rr); hubParts.riftRing = rr; }
+  { const SG = CFG.siege.gate; // a gold glow on the ground before the Bastion house door
+    const sr = new THREE.Mesh(new THREE.RingGeometry(1.15, 1.45, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffc94a, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const sd = new THREE.Mesh(new THREE.CircleGeometry(1.15, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: swirlTex(), color: 0xffd98a, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false }));
+    sr.position.set(SG.x, 0.06, SG.z); sd.position.set(SG.x, 0.05, SG.z); hubGroup.add(sr, sd); hubParts.siegeRing = sr; hubParts.siegeDisc = sd; }
   // vegetation and props, built per zone
   function placeOk(x, z, pad) {
     if (Math.hypot(x - T.x, z - T.z) < T.r + 5) return false;
@@ -8179,6 +8516,7 @@ function buildHub() {
     for (const D of W.dens) if (Math.hypot(x - D.x, z - D.z) < D.r + 3) return false;
     for (const w of W.waypoints) if (Math.hypot(x - w.x, z - w.z) < 4) return false;
     if (Math.hypot(x - CFG.rift.gate.x, z - CFG.rift.gate.z) < 5) return false;
+    if (Math.hypot(x - CFG.siege.house.x, z - CFG.siege.house.z) < 7) return false;
     for (const sp of CFG.shrines.list) if (Math.hypot(x - sp.x, z - sp.z) < 8) return false;
     // POIs keep a ring of open ground; secret pockets get extra so nothing plugs the gap from outside
     for (const q of W.pois) { const r = q.r + (q.kind === 'secret' ? 5 : 2); if (Math.abs(z - q.z) < r && Math.hypot(x - q.x, z - q.z) < r) return false; }
@@ -8436,6 +8774,7 @@ const _fogA = new THREE.Color(), _skyTop = new THREE.Color(), _skyHor = new THRE
 const ZoneMood = { fog: new THREE.Color(PALETTE.fog), top: new THREE.Color(PALETTE.skyTop), hor: new THREE.Color(PALETTE.skyHorizon), t: 0 };
 function updateZoneMood(dt) {
   if (G.dungeon) { updateDungeonView(dt); return; } // the dungeon owns fog and sky while inside
+  if (G.siege) { updateSiegeView(dt); return; } // so does the fort
   if (G.mode !== 'hub' || !G.player || G.rift) return;
   const W = CFG.world, z = G.player.z, zi = zoneAt(z), zn = W.zones[zi];
   // blend toward the next zone near its border
@@ -9065,6 +9404,7 @@ function viewFor(e) {
   } else if (e.kind === 'enemy') v = AssetSlots.create('enemy', { type: e.type, elite: e.elite });
   else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone });
   else if (e.kind === 'npc') v = AssetSlots.create('npc', { id: e.def.id });
+  else if (e.kind === 'soldier') v = AssetSlots.create('character', { model: 'npc.garo' }); // Bastion Siege warriors
   dynGroup.add(v.root); views.set(e, v);
   return v;
 }
@@ -9105,6 +9445,7 @@ function syncViews(dt, t) {
     for (const e of G.enemies) handle(e);
     for (const e of mpVisible()) handle(e);
     for (const n of shownNpcs()) handle(n);
+    if (G.siege) for (const s of G.siege.soldiers) handle(s);
     if (G.boss) handle(G.boss);
   }
   for (const [e, v] of views) if (!seen.has(e)) { dynGroup.remove(v.root); v.dispose(); views.delete(e); }
@@ -9548,6 +9889,118 @@ function updateDungeonView(dt) {
   WorldModels.update();
   for (const L of dungeonParts.lights) L.intensity = 16 + Math.sin(t * 11 + L.position.x) * 2.5;
   dungeonParts.portals.forEach((g, i) => { g.visible = i === 0 || D.bossDead; g.rotation.y = t * (i ? -0.8 : 0.8); });
+}
+// --- Bastion Siege view: the walled fort, built on entry and disposed on exit. The defenders on the eight pads are
+// rebuilt whenever the fort changes (build, upgrade, swap); cannon and ballista tops are their own meshes so they can aim.
+const siegeParts = { sets: [], padSets: [], padGroup: null, tops: [], objItems: [], objSets: [], portal: null, flame: null, sig: '', t: 0 };
+const SIEGE_PAD_COL = { archer: 0x58e08a, cannon: 0xff7a4a, ballista: 0x5dd6ff, warrior: 0xffc94a };
+function buildSiegeView() {
+  disposeSiegeView();
+  const C = CFG.siege, H = C.half, rng = mulberry32(0xba5710), parts = [];
+  const at = (q) => ({ x: SC.x + q.x, z: SC.z + q.z });
+  // courtyard: 3 m flagstones (the dungeon floor shader), meadow outside the walls
+  for (let x = -H; x < H; x += 3) for (let z = -H; z < H; z += 3) {
+    const c = (Math.floor(x / 3) + Math.floor(z / 3)) & 1 ? 0x8a7a66 : 0x7a6c5c;
+    parts.push(part(GEO.box, c, [SC.x + x + 1.5, -0.06 - rng() * 0.03, SC.z + z + 1.5], null, [2.94, 0.12, 2.94]));
+  }
+  const yard = new THREE.Mesh(mergeParts(parts), matDungeonFloor); yard.receiveShadow = true; siegeGroup.add(yard);
+  const out = [part(GEO.box, 0x3d5a2a, [SC.x, -0.3, SC.z], null, [H * 2 + 70, 0.4, H * 2 + 70]), part(GEO.box, 0x5b4d3e, [SC.x, -0.2, SC.z], null, [H * 2 + 3, 0.3, H * 2 + 3])];
+  // dirt roads from the three gates out into the meadow
+  for (const g of C.gates) { const ox = Math.sign(g.x) * (H + 12), oz = Math.sign(g.z) * (H + 12); out.push(part(GEO.box, 0x6b5a44, [SC.x + ox, -0.11, SC.z + oz], null, g.z ? [5, 0.06, 24] : [24, 0.06, 5])); }
+  siegeGroup.add(new THREE.Mesh(mergeParts(out), matVC));
+  // walls: stone sections along every side, open where a gatehouse stands
+  const walls = [], S = 3.4, tile = 2.24 * S, gap = 4.6;
+  const side = (x0, z0, x1, z1) => { const len = Math.hypot(x1 - x0, z1 - z0), a = Math.atan2(x1 - x0, z1 - z0), n = Math.max(1, Math.round(len / tile)), sx = len / (n * tile);
+    for (let k = 0; k < n; k++) { const f = (k + 0.5) / n; walls.push({ x: SC.x + lerp(x0, x1, f), z: SC.z + lerp(z0, z1, f), ry: a + Math.PI / 2, s: S, sx, sz: 0.9 }); } };
+  side(-H, -H, H, -H); // south: solid, the hero's own entrance is a portal
+  side(-H, H, -gap, H); side(gap, H, H, H);
+  side(H, -H, H, -gap); side(H, gap, H, H);
+  side(-H, -H, -H, -gap); side(-H, gap, -H, H);
+  siegeParts.sets.push(WorldModels.place(siegeGroup, 'dwall', walls, { bright: 1.2 }));
+  siegeParts.sets.push(WorldModels.place(siegeGroup, 'gatehouse', C.gates.map((g) => ({ x: SC.x + Math.sign(g.x) * H, z: SC.z + Math.sign(g.z) * H, ry: g.a, s: 7.4 }))));
+  siegeParts.sets.push(WorldModels.place(siegeGroup, 'tower', [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => ({ x: SC.x + a * H, z: SC.z + b * H, ry: rng() * 6.28, s: 9 }))));
+  // objectives: the Keep and two supply wagons (hidden when destroyed)
+  siegeParts.objItems = C.objs.map((d) => { const p = at(d); return d.main ? { x: p.x, z: p.z, ry: 0, s: 7.6 } : { x: p.x, z: p.z, ry: d.x < 0 ? 0.3 : -0.3, s: 1.5 }; });
+  siegeParts.objSets = C.objs.map((d, i) => WorldModels.place(siegeGroup, d.main ? 'keep' : 'wagon', [siegeParts.objItems[i]], d.main ? { glow: 0xffc94a, glowK: 0.06 } : {}));
+  siegeParts.sets.push(...siegeParts.objSets);
+  // dressing: braziers at the gates, banners around the keep, supplies by the wagons
+  const braz = [], banners = [], crates = [], barrels = [];
+  for (const g of C.gates) { const ox = Math.cos(g.a) * 4.2, oz = -Math.sin(g.a) * 4.2; for (const k of [-1, 1]) braz.push({ x: SC.x + g.x * 0.86 + ox * k, z: SC.z + g.z * 0.86 + oz * k, ry: 0, s: 1.6 }); }
+  for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, k = at(C.objs[0]); banners.push({ x: k.x + Math.sin(a) * 6, z: k.z + Math.cos(a) * 6, ry: a, s: 4.2 }); }
+  for (const d of C.objs.slice(1)) { const p = at(d), sx = Math.sign(d.x); crates.push({ x: p.x + sx * 2.6, z: p.z - 1.4, ry: rng() * 6, s: 1.1 }, { x: p.x + sx * 2.9, z: p.z + 0.2, ry: rng() * 6, s: 0.9 }); barrels.push({ x: p.x - sx * 2.4, z: p.z - 1.8, ry: 0, s: 1.0 }); }
+  siegeParts.sets.push(WorldModels.place(siegeGroup, 'brazier', braz), WorldModels.place(siegeGroup, 'banner_pole', banners), WorldModels.place(siegeGroup, 'crate_1', crates), WorldModels.place(siegeGroup, 'barrel_1', barrels));
+  const fp = braz.map((b) => part(GEO.ico0, 0xffa040, [b.x, b.s * 0.98, b.z], null, [0.32, 0.5, 0.32]));
+  siegeParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); siegeGroup.add(siegeParts.flame);
+  // stone plinths for all eight pads
+  const pl = [];
+  for (const q of C.pads) { const p = at(q); pl.push(part(GEO.cyl8, 0x6f6658, [p.x, 0.15, p.z], null, [1.35, 0.3, 1.35]), part(GEO.cyl8, 0x8d8372, [p.x, 0.33, p.z], null, [1.2, 0.08, 1.2])); }
+  const plinths = new THREE.Mesh(mergeParts(pl), matVC); plinths.receiveShadow = true; siegeGroup.add(plinths);
+  // the way home: a portal by the south wall
+  { const e = at(C.exit), g = new THREE.Group(), ring = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.4, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(1.1, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: swirlTex(), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
+    ring.position.y = 0.05; disc.position.y = 0.04; g.add(ring, disc); g.position.set(e.x, 0, e.z); siegeGroup.add(g); siegeParts.portal = g; }
+  siegeParts.padGroup = new THREE.Group(); siegeGroup.add(siegeParts.padGroup); siegeParts.sig = '';
+  buildSiegePads();
+}
+// defenders: archer = generated tower, warriors = a war tent, cannon and ballista from primitives; a flag in the
+// pad's colour grows with the level, and an empty pad glows so you can see where to build
+function buildSiegePads() {
+  const g = siegeParts.padGroup, C = CFG.siege, F = fortState();
+  for (const h of siegeParts.padSets) WorldModels.dispose(h);
+  g.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material !== matVC) o.material.dispose(); });
+  g.clear(); siegeParts.padSets = []; siegeParts.tops = [];
+  const towers = [], tents = [], racks = [], base = [];
+  C.pads.forEach((q, i) => {
+    const x = SC.x + q.x, z = SC.z + q.z, pad = F.pads[i];
+    if (!pad) {
+      const m = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.15, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffe9a8, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }));
+      m.position.set(x, 0.42, z); m.userData.empty = true; g.add(m); return;
+    }
+    const k = 1 + (pad.l - 1) * 0.03, col = SIEGE_PAD_COL[pad.t], ry = Math.atan2(-q.x, -q.z);
+    if (pad.t === 'archer') towers.push({ x, z, y: 0.35, ry, s: 4.6 * k });
+    else if (pad.t === 'warrior') { tents.push({ x: x - 0.3, z: z - 0.2, y: 0.35, ry, s: 2.2 * k }); racks.push({ x: x + 0.9, z: z + 0.7, y: 0.35, ry: ry + 0.6, s: 1.1 }); }
+    else {
+      // a wooden carriage on the plinth, and a turning top: iron barrel or a crossbow arm with its bolt
+      base.push(part(GEO.box, 0x6b4a2e, [x, 0.65, z], null, [1.5 * k, 0.5, 1.5 * k]), part(GEO.cyl8, 0x3b2c20, [x - 0.8 * k, 0.6, z], [0, 0, Math.PI / 2], [0.4, 0.15, 0.4]), part(GEO.cyl8, 0x3b2c20, [x + 0.8 * k, 0.6, z], [0, 0, Math.PI / 2], [0.4, 0.15, 0.4]));
+      const tp = pad.t === 'cannon'
+        ? [part(GEO.cyl8, 0x2f3038, [0, 0, 0.35], [Math.PI / 2 - 0.2, 0, 0], [0.42 * k, 1.9 * k, 0.42 * k]), part(GEO.cyl8, 0x1c1d22, [0, 0.18, 1.25 * k], [Math.PI / 2 - 0.2, 0, 0], [0.5 * k, 0.22, 0.5 * k]), part(GEO.box, 0x4a3524, [0, -0.25, -0.2], null, [0.9, 0.35, 1.1])]
+        : [part(GEO.box, 0x7a5434, [0, 0, 0], null, [0.32, 0.3, 2.4 * k]), part(GEO.box, 0x5a3c24, [0, 0.05, 0.75 * k], [0, 0, 0], [2.6 * k, 0.18, 0.22]), part(GEO.box, 0xcfd6dc, [0, 0.22, 0.2], null, [0.1, 0.1, 2.3 * k]), part(GEO.cone4, 0xcfd6dc, [0, 0.22, 1.42 * k], [Math.PI / 2, 0, 0], [0.16, 0.36, 0.16])];
+      const top = new THREE.Mesh(mergeParts(tp), matVC); top.position.set(x, 1.2, z); top.rotation.y = ry; top.castShadow = true; top.userData.pad = i; g.add(top); siegeParts.tops.push(top);
+    }
+    // level flag: a pole with a pennant in the defender's colour, longer at higher levels
+    const fh = 2.2 + Math.min(15, pad.l) * 0.12;
+    base.push(part(GEO.box, 0x4a3a2a, [x - 1.05, 0.35 + fh / 2, z - 1.05], null, [0.08, fh, 0.08]), part(GEO.box, col, [x - 1.05, 0.35 + fh - 0.25, z - 0.75], null, [0.04, 0.4, 0.6]));
+  });
+  if (base.length) { const m = new THREE.Mesh(mergeParts(base), matVC); m.castShadow = true; g.add(m); }
+  siegeParts.padSets.push(WorldModels.place(g, 'tower', towers), WorldModels.place(g, 'war_tent', tents), WorldModels.place(g, 'weapon_rack', racks));
+}
+function disposeSiegeView() {
+  for (const h of siegeParts.sets.concat(siegeParts.padSets)) WorldModels.dispose(h);
+  const geos = new Set(), mats = new Set();
+  siegeGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matVC && o.material !== matDungeonFloor) mats.add(o.material); });
+  geos.forEach((g) => g.dispose()); mats.forEach((m) => m.dispose());
+  siegeGroup.clear(); Object.assign(siegeParts, { sets: [], padSets: [], padGroup: null, tops: [], objItems: [], objSets: [], portal: null, flame: null, sig: '' });
+}
+function enterSiegeView(on) {
+  hubGroup.visible = !on; riftGroup.visible = false; siegeGroup.visible = on;
+  if (on) {
+    buildSiegeView();
+    scene.fog.color.set(0x8a6f58); scene.fog.near = 45; scene.fog.far = 120; paintSky(new THREE.Color(0x3a4a78), new THREE.Color(0xf0a868)); // late afternoon over the walls
+  } else { disposeSiegeView(); scene.fog.near = 50; scene.fog.far = Q.lowTier ? 95 : 140; }
+}
+function updateSiegeView(dt) {
+  const S = G.siege; if (!S || !siegeGroup.visible) return;
+  hubGroup.visible = false; // the showcase restores the hub on close; the fort keeps it hidden
+  const t = (siegeParts.t += dt), sig = JSON.stringify(fortState().pads);
+  if (sig !== siegeParts.sig) { if (siegeParts.sig) buildSiegePads(); siegeParts.sig = sig; }
+  // turrets swing to their last target; empty pads pulse
+  for (const top of siegeParts.tops) { const P = S.pads[top.userData.pad]; if (P && P.aim != null) top.rotation.y += angDiff(top.rotation.y, P.aim) * (1 - Math.exp(-dt * 10)); }
+  for (const m of siegeParts.padGroup.children) if (m.userData.empty) m.material.opacity = 0.35 + Math.sin(t * 3) * 0.25;
+  // a fallen objective disappears in smoke
+  S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });
+  if (siegeParts.flame) siegeParts.flame.material.opacity = 0.75 + Math.sin(t * 13) * 0.08 + Math.sin(t * 7.3) * 0.08;
+  if (siegeParts.portal) siegeParts.portal.rotation.y = t * 0.8;
+  WorldModels.update();
 }
 // --- world models: generated 3D buildings, caves, ore, dungeon pieces and world bosses --------------------------
 // Each model is a TRELLIS.2 mesh from a Z-Image Turbo concept (tools/v10_prop.cjs + tools/v4_pack.py --static),
@@ -10015,6 +10468,11 @@ function updateTags() {
     for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; if (near(b, 30)) put(b.x, 2.45 * growthScale(b), b.z, `${b.name} · ${b.level}`, null, 'bot'); }
     for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.pvp ? 'PvP · ' : ''}${e.nick} · ${e.level}`, e.hp, e.pvp ? 'peer pvp' : 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');
+    if (G.siege) {
+      // fort objectives: always shown, big bars that flash while under attack
+      for (const o of G.siege.objs) put(o.x, o.def.h, o.z, o.alive ? `${o.name} · ${Math.ceil(clamp(o.hp / o.maxHp, 0, 1) * 100)}%` : `${o.name} · destroyed`, o.alive ? o.hp / o.maxHp : 0, `obj${o.def.main ? ' main' : ''}${o.hurtT > 0 ? ' hurt' : ''}${o.alive ? '' : ' down'}`);
+      for (const s of G.siege.soldiers) if (s.alive && s.hp < s.maxHp && near(s, 26)) put(s.x, 2.4, s.z, '', s.hp / s.maxHp, 'ally');
+    }
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
       const diff = e.lvl - G.profile.level, lvlCls = diff >= 5 ? ' red' : diff >= 2 ? ' orange' : diff <= -6 ? ' grey' : '';
@@ -10024,6 +10482,7 @@ function updateTags() {
     for (const dl of hubParts.denLabels) { const D = CFG.world.dens[dl.den]; if (Math.hypot(dl.x - cx, dl.z - cz) < 55) put(dl.x, dl.y, dl.z, `${D.name} · Lv ${areaLevel(D.zone, D.z) + CFG.world.denLevelBonus + tierAdd()}`, null, 'den'); }
     for (const q of CFG.world.pois) if (q.major && !CFG.world.zones[q.zone].safe && Math.hypot(q.x - cx, q.z - cz) < 40) put(q.x, 6.5, q.z, trialOpen(q.zone) ? `${q.name} · Legendary Trial` : `${q.name} · ${runesLit(q.zone)}/${CFG.dungeon.trial.runes} runestones`, null, 'wp');
     for (const q of dungeonPois()) if (Math.hypot(q.x - cx, q.z - cz) < 90) put(q.x, 7.2, q.z, G.profile.level >= dungeonReq(q) ? `${q.name} · Dungeon` : `${q.name} · Level ${dungeonReq(q)}`, null, 'den');
+    { const SG = CFG.siege.gate; if (!G.siege && Math.hypot(SG.x - cx, SG.z - cz) < 30) put(CFG.siege.house.x + 1, 7.4, SG.z, G.profile.level >= CFG.siege.unlock ? `Bastion Siege · best wave ${G.profile.records.bestSiege || 0}` : `Bastion Siege · Level ${CFG.siege.unlock}`, null, 'wp'); }
     { const RG = CFG.rift.gate; if (Math.hypot(RG.x - cx, RG.z - cz) < 30) put(RG.x, 4.4, RG.z, G.profile.level >= CFG.rift.unlock ? `The Rift · best floor ${G.profile.records.bestRift || 0}` : `The Rift · Level ${CFG.rift.unlock}`, null, 'wp'); }
     CFG.world.waypoints.forEach((w, i) => { if (Math.hypot(w.x - cx, w.z - cz) < 30) put(w.x, 4.4, w.z, G.profile.waypoints.includes(i) ? 'Waypoint' : 'Waypoint · touch to unlock', null, 'wp'); });
     for (const gl of hubParts.gateLabels) { const zn = CFG.world.zones[gl.zone]; if (G.profile.level < zn.minLevel && Math.hypot(gl.x - cx, gl.z - cz) < 60) put(gl.x, gl.y, gl.z, `${zn.name} · Level ${zn.minLevel}`, null, 'gate'); }
@@ -10093,6 +10552,7 @@ function updateHUD(dt) {
     const zi = zoneAt(G.player.z), zn = CFG.world.zones[zi], town = distToTown(G.player.x, G.player.z) < CFG.world.town.r + 2;
     const ct = curTier(), al = areaLevel(zi, G.player.z) + tierAdd(), ts = ct ? ` · ${tierDef(ct).short}` : '';
     if (G.rift) setText('zoneChip', `Rift · Floor ${G.rift.floor} · Lv ${riftWaveLevel(G.rift.floor)}`);
+    else if (G.siege) setText('zoneChip', `Bastion Siege · Wave ${G.siege.wave} · Lv ${G.siege.lvl}`);
     else setText('zoneChip', town || zn.safe ? `Willowcross Base Camp · safe${ts}` : `${zn.name} · Lv ${al}${ts}`);
     setStyle('zoneChip', '--zc', al > p.level + 4 ? '#ff5d6c' : al > p.level + 1 ? '#ffb347' : '#8fe3a0');
   }
@@ -10100,8 +10560,8 @@ function updateHUD(dt) {
   if (G.started && !inArena) {
     const nc = G.profile.cases.length; setHidden('caseChip', !nc); if (nc) setText('caseChip', String(nc));
     UI.caseFlash = Math.max(0, (UI.caseFlash || 0) - dt); $('caseChip').classList.toggle('flash', UI.caseFlash > 0);
-    setHidden('autoChip', G.mode !== 'hub' || !!G.rift); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
-    setHidden('pvpChip', G.mode !== 'hub' || !!G.rift || !!G.dungeon); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
+    setHidden('autoChip', G.mode !== 'hub' || !!G.rift || !!G.siege); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
+    setHidden('pvpChip', G.mode !== 'hub' || inInstance()); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
   } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); }
   $('bMenu').classList.toggle('newU', G.started && Object.keys(UNLOCK_AT).some(unlockNew)); // the menu button glows while something new is unopened
   { const n = mpCount(), on = G.started && !inArena; setHidden('mpChip', !on || !n); if (on && n) setText('mpChip', String(n + 1)); }
@@ -10182,6 +10642,8 @@ function updateObjective() {
   if (G.mode === 'arena') { setHidden('objective', true); return; }
   const shr = activeShrine();
   if (G.rift) { const r = G.rift; text = r.phase === 'intro' ? `Rift floor ${r.floor} · get ready` : r.phase === 'clear' ? `Floor ${r.floor} cleared! Next floor…` : `Rift floor ${r.floor} · ${riftLeft()} left · ${Math.ceil(r.t)}s`; }
+  else if (G.siege) { const S = G.siege, k = S.objs[0];
+    text = S.phase === 'build' ? `Wave ${S.wave} in ${Math.ceil(S.t)}s · build on the pads` : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }
   else if (shr) { text = `Shrine challenge: ${shr.wave.filter((e) => e.alive).length} left · ${Math.ceil(shr.t)}s`; tx = shr.x; tz = shr.z; }
   else if (p.job) {
     const j = p.job, npc = NPC_DEFS.find((n) => n.id === j.npc);
@@ -10220,6 +10682,10 @@ function interact() {
   if (n.kind === 'mine') return mineNode(n.st);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
   if (n.kind === 'dungeonChest') return openDungeonChest();
+  if (n.kind === 'siege') return openSiegePanel();
+  if (n.kind === 'siegeLeave') return endSiege('leave');
+  if (n.kind === 'siegeWave') return startSiegeWave();
+  if (n.kind === 'fortPad') return openFortPadPanel(n.i);
   const d = n.def;
   if (d.role === 'smith') return openSmith();
   if (d.role === 'arena') return openArenaPanel();
@@ -10854,6 +11320,48 @@ function openRiftPanel() {
     <p class="fine">Checkpoints every 5 floors. If you fall or the time runs out, the run ends and you keep everything you earned.</p></div>
     <div class="row end"><button class="ghost" data-act="riftGo" data-f="1">Start at floor 1</button>${cp > 1 ? `<button class="primary big" data-act="riftGo" data-f="${cp}">Start at floor ${cp}</button>` : '<button class="primary big" data-act="riftGo" data-f="1">Enter the Rift</button>'}</div>`);
 }
+// Bastion Siege: the house in town shows your fort (eight pads, built and upgraded for good) and lets you in
+const fortStones = (n) => `<b class="stones">${fmt(n)}</b> Bastion Stones`;
+function fortPadRows() {
+  const F = fortState(), T = CFG.siege.towers;
+  return CFG.siege.pads.map((_, i) => { const pad = F.pads[i];
+    return `<button class="ghost fortPadBtn${pad ? ' on ' + pad.t : ''}" data-act="fortPad" data-i="${i}">${pad ? `${gi(T[pad.t].icon)} ${T[pad.t].short} <small>Lv ${pad.l}</small>` : `<small>Pad ${i + 1} · empty</small>`}</button>`; }).join('');
+}
+function openSiegePanel() {
+  UI.current = 'siege';
+  const p = G.profile, C = CFG.siege, F = fortState(), best = p.records.bestSiege || 0;
+  if (p.level < C.unlock) { openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Bastion Siege</h3></div><p class="say">The captain only lets heroes of level ${C.unlock} or higher defend the fort. Come back stronger.</p>`); return; }
+  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Bastion Siege</h3><span class="cnt">Best wave ${best}</span></div>
+    <div class="riftCard"><p>Monsters storm the fort through three gates, wave after wave, and go for <b>The Keep</b> and the two <b>supply wagons</b>. Watch their health bars: if the Keep falls, the siege is over. Fight with your hero and build defenders on the eight stone pads: <b>archers</b>, <b>cannons</b>, <b>ballistas</b> and <b>warriors</b>.</p>
+    <p>Every wave pays gold and ${fortStones(3)} or more; every ${C.bossEvery}th wave a <b>Siege Lord</b> drops an item. Every wagon still standing adds ${C.wagonBonus * 100}% gold. Your fort stays built: what you buy and upgrade is there next time.</p>
+    <p class="fine">You have ${fortStones(F.stones)} and ${ICON.coin}${fmtK(p.gold)} gold. Waves start at level ${siegeLevel(1)}. Falling only costs a few seconds; leave through the portal by the south wall.</p></div>
+    <h4>Your fort</h4><div class="fortPads">${fortPadRows()}</div>
+    <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="siegeGo">Defend the fort</button></div>`);
+}
+function openFortPadPanel(i) {
+  UI.current = 'fortPad';
+  const p = G.profile, C = CFG.siege, F = fortState(), pad = F.pads[i];
+  const cards = SIEGE_TYPES.map((t) => {
+    const T = C.towers[t], mine = pad && pad.t === t, max = mine && pad.l >= C.maxLvl, c = padCost(i, t), ok = p.gold >= c.gold && F.stones >= c.stones;
+    const stat = t === 'warrior' ? `${siegeMen(mine ? pad.l : 1)} warriors · ${fmtK(siegeDefDmg(T, mine ? pad.l : 1))} dmg` : `${fmtK(siegeDefDmg(T, mine ? pad.l : 1))} dmg · range ${T.range}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}`;
+    const lbl = max ? 'Max level' : mine ? `Upgrade to Lv ${c.lvl}` : pad ? 'Replace' : 'Build';
+    return `<div class="fortCard${mine ? ' mine' : ''}"><div class="fcHead">${gi(T.icon)}<b>${T.name}</b>${mine ? `<span class="cnt">Lv ${pad.l}</span>` : ''}</div><p>${T.blurb}</p><p class="fine">${stat}</p>
+      ${max ? '' : `<p class="fine">${ICON.coin}${fmtK(c.gold)} · ${fortStones(c.stones)}</p>`}<button class="${mine ? 'primary' : 'ghost'}" data-act="fortBuy" data-i="${i}" data-t="${t}"${max || !ok ? ' aria-disabled="true"' : ''}>${lbl}</button></div>`;
+  }).join('');
+  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Pad ${i + 1}</h3><span class="cnt">${pad ? `${C.towers[pad.t].short} Lv ${pad.l}` : 'empty'}</span></div>
+    <p class="fine">You have ${ICON.coin}${fmtK(p.gold)} gold and ${fortStones(F.stones)}. Every level adds 30% damage${pad && pad.t === 'warrior' ? ' and HP; every 5th level one more warrior' : ''}. Replacing a defender returns half the stones it cost.</p>
+    <div class="fortCards">${cards}</div>
+    <div class="row end"><button class="ghost" data-act="fortBack">${G.siege ? 'Back to the fight' : 'Back'}</button></div>`);
+}
+function openSiegeResult(r) {
+  UI.current = 'siegeResult';
+  const why = r.why === 'keep' ? 'The Keep has fallen' : 'You left the fort';
+  openModal(`<div class="center"><div class="eyebrow">${why}</div><h2>Bastion Siege · ${r.cleared ? `${r.cleared} wave${r.cleared > 1 ? 's' : ''} held` : 'no wave held'}</h2></div>
+    <div class="stats3"><div><b>${r.cleared}</b><span>Waves held</span></div><div><b>${ICON.coin}${fmtK(r.gold)}</b><span>Gold</span></div><div><b class="stones">${fmt(r.stones)}</b><span>Bastion Stones</span></div></div>
+    <div class="stats3"><div><b>${r.items}</b><span>Siege Lord items</span></div><div><b>${r.best}</b><span>Best wave</span></div><div><b class="stones">${fmt(fortState().stones)}</b><span>Stones to spend</span></div></div>
+    <p class="fine center">Spend your stones and gold on the pads in the Bastion house, then try to hold out longer.</p>
+    <div class="row end"><button class="ghost" data-act="close">Later</button><button class="primary big" data-act="fortBack">Upgrade the fort</button></div>`);
+}
 // Dungeons: a sealed instance per POI. Pick a plain run or one of your Dungeon Keys (it is used up on entry).
 function openDungeonPanel(poi) {
   UI.current = 'dungeon';
@@ -11090,6 +11598,10 @@ function handlePanelClick(e) {
     case 'travel': UI.close(); travelTo(+b.dataset.i); break;
     case 'tier': if (setWorldTier(+b.dataset.t)) openWaypoints(); break;
     case 'riftGo': UI.close(); startRift(+b.dataset.f); break;
+    case 'siegeGo': UI.close(); if (!startSiege()) toast('Finish your challenge first', 'bad'); break;
+    case 'fortPad': openFortPadPanel(+b.dataset.i); break;
+    case 'fortBuy': { const i = +b.dataset.i; if (buyPad(i, b.dataset.t)) { Sfx.play('unlock'); toast(`${CFG.siege.towers[b.dataset.t].name} · level ${fortState().pads[i].l}`, 'good'); } else toast('Not enough gold or Bastion Stones', 'bad'); openFortPadPanel(i); break; }
+    case 'fortBack': if (G.siege) UI.close(); else openSiegePanel(); break;
     case 'trialGo': { UI.close(); if (!startDungeon(trialPoi(+b.dataset.z))) toast('Finish your challenge first', 'bad'); break; }
     case 'trialForge': { const it = forgeTrialRelic(+b.dataset.z); if (it) { toast(`Forged ${it.name}!`, 'good'); Sfx.play('win'); } openTrialPanel(+b.dataset.z); break; }
     case 'dungeonGo': { UI.close(); const po = dungeonPois().find((x) => x.id === b.dataset.id); if (!startDungeon(po, b.dataset.key != null ? +b.dataset.key : null)) toast('Finish your challenge first', 'bad'); break; }
@@ -11262,6 +11774,15 @@ function processEvents() {
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
       case 'dungeonBoss': Feed.remove('dungeon'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
       case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); if (e.why === 'down') showToast(`${e.name} resets · you fell`, 'bad'); break;
+      case 'siegeStart': enterSiegeView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 6); Sfx.play('super'); showBanner('Bastion Siege', 'Protect the Keep and the wagons · build on the stone pads', 'gold'); break;
+      case 'siegeWave': if (e.boss) { showBanner(`Wave ${e.wave} · Siege Lord!`, `${e.count} monsters · Lv ${e.lvl}`, 'red'); Sfx.play('horn'); } else { showBanner(`Wave ${e.wave}`, `${e.count} monsters · ${e.theme} · Lv ${e.lvl}`, 'red'); Sfx.play('tick'); } break;
+      case 'siegeClear': Feed.add(`${gi('m_hero')} Wave <b>${e.wave}</b> held · +${fmtK(e.gold)} gold · +${e.stones} Bastion Stones${e.item ? ' · Siege Lord item!' : ''}`, 'rift'); Sfx.play('job'); burst(G.player.x, 1, G.player.z, 24, 0xffc94a, 6, 0.8, 0.25, 3, 1.3); break;
+      case 'objectiveHit': if (e.main) { showToast(`${e.name} is under attack!`, 'bad'); Sfx.play('hurt', { gap: 0.5 }); } ringFx(e.x, e.z, 3, 0xff3b3b, 0.5); break;
+      case 'objectiveDown': burst(e.x, 2, e.z, 50, 0xff7a3d, 9, 1.2, 0.4, 4, 2); SpriteFX.play('explosion', 'fire', e.x, 0, e.z, 8); Cam.shake = Math.max(Cam.shake, 0.8); Sfx.play('boom');
+        if (!e.main) showBanner(`${e.name} destroyed`, 'Less gold per wave · keep the Keep standing', 'red'); break;
+      case 'siegeEnd': enterSiegeView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); if (e.why === 'keep') { Sfx.play('lose'); showToast('The Keep has fallen', 'bad'); } break;
+      case 'fortBuilt': SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); break;
+      case 'fortShot': if (e.type === 'cannon') burst(e.x, 1.6, e.z, 6, 0xdddddd, 3, 0.4, 0.25, 2, 0.6); break;
       case 'riftEnd': enterRiftView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); break;
       case 'teleport': burst(e.x, 1, e.z, 30, 0x9fe8ff, 6, 0.8, 0.3, 2, 1.5); SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 5.5); Sfx.play('super'); Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; showToast(e.name); break;
       case 'proc': burst(e.x, 1.2, e.z, 8, e.kind === 'grasp' ? 0x8dff6a : e.kind === 'kraken' ? 0x5dd6ff : 0xffe066, 4, 0.4, 0.22, 4); SpriteFX.play(e.kind === 'kraken' ? 'zap' : 'impact', e.kind === 'grasp' ? 'venom' : e.kind === 'kraken' ? 'storm' : 'gold', e.x, 1.3, e.z, 1.9); break;
@@ -11434,6 +11955,7 @@ function updateHubProps(t) {
   const topR = CFG.gear.slots.reduce((m, s) => Math.max(m, p.gear[s] ? rarIdx(p.gear[s].rarity) : 0), 0);
   if (HERO_OVERLAYS && sparkleT <= 0 && G.player.alive && topR >= 4) { sparkleT = topR >= 6 ? 0.08 : topR >= 5 ? 0.12 : 0.18; burst(G.player.x + (Math.random() - 0.5), 1 + Math.random() * 1.2, G.player.z + (Math.random() - 0.5), 1, RAR_HEX[RARITIES[topR]], 0.8, 0.7, 0.16, -1, 1); }
   for (const b of hubParts.barriers) { const locked = p.level < CFG.world.zones[b.zone].minLevel; b.mesh.visible = locked; b.mesh.material.opacity = 0.16 + Math.sin(t * 2) * 0.06; }
+  if (hubParts.siegeDisc) { hubParts.siegeDisc.rotation.y = t * 0.9; hubParts.siegeRing.material.opacity = 0.55 + Math.sin(t * 3) * 0.2; }
   if (hubParts.riftDisc) { hubParts.riftDisc.rotation.z = -t * 1.1; hubParts.riftRing.rotation.z = t * 0.5; hubParts.riftRing.scale.setScalar(1 + Math.sin(t * 3) * 0.04); }
   // ascended (level 200): a golden trail while you move
   if (HERO_OVERLAYS && ascTier(p.level) >= 3 && G.player.alive && (G.player.moveAmt || 0) > 0.3 && Math.random() < 0.5) burst(G.player.x, 0.5 + Math.random(), G.player.z, 1, Math.random() < 0.5 ? 0xffd36b : 0xfff3c4, 0.6, 0.9, 0.2, -0.5, 1);
@@ -11516,6 +12038,17 @@ function drawMinimap() {
     g.save(); g.beginPath(); g.rect(0, 0, W2, H2); g.arc(cx, cy, ar.gasR * s, 0, Math.PI * 2, true); g.fillStyle = 'rgba(86,227,107,.45)'; g.fill('evenodd'); g.restore();
     g.fillStyle = '#6cff8a'; for (const c of ar.cubes) if (c.active) g.fillRect(ax(c.x) - 2 * dpr, ay(c.z) - 2 * dpr, 4 * dpr, 4 * dpr);
     const f = ar.fighters[0]; if (f.alive) { g.fillStyle = '#3fa9ff'; g.beginPath(); g.arc(ax(f.x), ay(f.z), 4 * dpr, 0, Math.PI * 2); g.fill(); }
+    return;
+  }
+  if (G.siege) {
+    // the fort from above: walls, objectives with their health, defenders, monsters and you
+    const S = G.siege, C = CFG.siege, s = W2 / (C.half * 2.3), cx = W2 / 2, cy = H2 / 2, ax = (x) => cx - (x - SC.x) * s, ay = (z) => cy - (z - SC.z) * s, dot = (x, z, r, c) => { g.fillStyle = c; g.beginPath(); g.arc(ax(x), ay(z), r * dpr, 0, Math.PI * 2); g.fill(); };
+    g.fillStyle = '#7a6c5c'; g.fillRect(cx - C.half * s, cy - C.half * s, C.half * 2 * s, C.half * 2 * s);
+    g.strokeStyle = '#3b3128'; g.lineWidth = 3 * dpr; g.strokeRect(cx - C.half * s, cy - C.half * s, C.half * 2 * s, C.half * 2 * s);
+    for (const o of S.objs) if (o.alive) { const k = clamp(o.hp / o.maxHp, 0, 1); dot(o.x, o.z, o.def.main ? 6 : 4, k > 0.5 ? '#58e08a' : k > 0.25 ? '#ffb347' : '#ff5d6c'); }
+    const F = fortState(); C.pads.forEach((q, i) => { const pad = F.pads[i]; g.fillStyle = pad ? '#' + SIEGE_PAD_COL[pad.t].toString(16).padStart(6, '0') : 'rgba(255,233,168,.5)'; g.fillRect(ax(SC.x + q.x) - 2.5 * dpr, ay(SC.z + q.z) - 2.5 * dpr, 5 * dpr, 5 * dpr); });
+    for (const e of S.mobs) if (e.alive) dot(e.x, e.z, e.guardian ? 4 : 2.5, e.guardian ? '#ffc94a' : '#ff5d6c');
+    dot(G.player.x, G.player.z, 4, '#3fa9ff');
     return;
   }
   if (G.rift) {
@@ -11958,7 +12491,7 @@ function openDaily() {
 
 // --- Prestige: reviewed reset, permanent companion and bounded world bonuses ---------------------------
 function prestigeBlocked() {
-  return prestigeBlock(G.profile,{mode:G.mode,rift:!!G.rift,shrine:!!activeShrine(),alive:G.player.alive,inCombat:G.time-G.lastCombat<8,inTown:inTown()});
+  return prestigeBlock(G.profile,{mode:G.mode,rift:!!(G.rift||G.siege),shrine:!!activeShrine(),alive:G.player.alive,inCombat:G.time-G.lastCombat<8,inTown:inTown()});
 }
 const petPercent = n => (n*100).toFixed(2).replace(/\.00$/,'')+'%';
 function prestigeBadge(p) { return `<span class="prestigeBadge">Prestige ${prestigeCount(p)}</span>`; }
@@ -12167,6 +12700,7 @@ function openProgress(tab) {
       const ai = P.ascendAt.indexOf(L); if (ai >= 0) r.push(`<span class="rw asc">${gi('m_asc')} Ascended: ${['golden aura', 'wings + super power', 'crown + trail'][ai]}</span>`);
       for (let t = 1; t <= maxTier(L) + 1; t++) if (tierDef(t).req === L) r.push(`<span class="rw tier">${gi('m_tier')} World Tier ${tierDef(t).name}</span>`);
       if (L === CFG.rift.unlock) r.push(`<span class="rw zone">${gi('m_rift')} The Rift opens</span>`);
+      if (L === CFG.siege.unlock) r.push(`<span class="rw zone">${gi('m_hero')} Bastion Siege opens</span>`);
       for (const id of CFG.brawlerOrder) { const a = CFG.attacks[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw atk">${gi('b_' + id)} ${CFG.brawlers[id].name}</span>`); }
       for (const id in CFG.artifacts) { const a = CFG.artifacts[id]; if (a.unlock && a.unlock.level === L) r.push(`<span class="rw art">${gi('a_' + id)} ${a.name}</span>`); }
       r.push(`<span class="rw key">+${2 + (L % 10 === 0 ? 5 : 0)} talent points</span>`);
@@ -12751,12 +13285,12 @@ function mpGhostShot(e) {
   e.facing = base; e.attackAnim = 1;
 }
 // visible peers: in the open world, while you are too
-function mpVisible() { return G.mode === 'hub' && !G.rift ? MP.list.filter((e) => e.md === 'hub') : []; }
+function mpVisible() { return G.mode === 'hub' && !G.rift && !G.siege ? MP.list.filter((e) => e.md === 'hub') : []; }
 function mpOnShot(f, dx, dz) { if (f.isPlayer && G.mode === 'hub') { MP.seq++; MP.aim = Math.atan2(dx, dz); } }
 function mpState() {
   const p = G.profile, pl = G.player, r1 = (v) => Math.round(v * 10) / 10;
   return { v: 8, sid: MP.sid, n: mpNick(p), c: p.cls, l: p.level, x: r1(pl.x), z: r1(pl.z), f: Math.round(pl.facing * 100) / 100, m: r1(pl.moveAmt || 0), s: MP.seq, a: Math.round(MP.aim * 100) / 100,
-    h: Math.round(clamp(pl.hp / pl.maxHp, 0, 1) * 100) / 100, al: pl.alive ? 1 : 0, md: G.rift ? 'rift' : G.dungeon ? 'dungeon' : G.mode, pv: typeof pvpOn === 'function' && pvpOn() ? 1 : 0 };
+    h: Math.round(clamp(pl.hp / pl.maxHp, 0, 1) * 100) / 100, al: pl.alive ? 1 : 0, md: G.rift ? 'rift' : G.dungeon ? 'dungeon' : G.siege ? 'siege' : G.mode, pv: typeof pvpOn === 'function' && pvpOn() ? 1 : 0 };
 }
 function mpUpdate(dt) {
   // smooth other players toward where they said they are
@@ -12988,7 +13522,7 @@ function autoHuntNode(f, level, maxD) {
   }
   return best;
 }
-function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && G.started); }
+function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && !G.siege && G.started); }
 function autoHuntIntent(f, it, manual, dt) {
   if (manual) { AH.manualT = 1.5; return; }
   if ((AH.manualT -= dt) > 0 || !f.alive) return;
@@ -13210,7 +13744,7 @@ function idleAlert() { const p = G.profile, now = Date.now(); return vaultState(
 CFG.pvp = { range: 24, flush: 0.2, dmgMul: 0.35, hitCap: 0.15, secCap: 0.4, goldDrop: 0.1, goldFloor: 100, cooldown: 600, lastHitWindow: 5 };
 const PVP = { win: 0, winT: 0, last: null, killedBy: {}, tT: -1, tList: [], out: new Map(), outT: 0 };
 const pvpOn = () => !!(G.profile && G.profile.settings.pvp) && typeof MP !== 'undefined' && MP.state === 'on';
-const pvpZoneOk = (x, z) => G.mode === 'hub' && !G.rift && !G.dungeon && distToTown(x, z) > CFG.world.town.r + 4;
+const pvpZoneOk = (x, z) => G.mode === 'hub' && !inInstance() && distToTown(x, z) > CFG.world.town.r + 4;
 // peers you may hit right now (used by forEachTarget)
 // cached once per sim step: forEachTarget runs for every bullet every frame, so no new arrays per call
 function pvpTargets() {
@@ -13289,6 +13823,7 @@ function frame(now) {
     else if (G.mode === 'hub' && G.lootQueue.length) openLoot(G.lootQueue.shift());
     else if (G.mode === 'hub' && G.started && !UI.dailyShown && G.profile.tut >= 3 && loginReady(Date.now())) { UI.dailyShown = true; openDaily(); }
     else if (G.mode === 'hub' && G.riftResult) { const rr = G.riftResult; G.riftResult = null; openRiftResult(rr); }
+    else if (G.mode === 'hub' && G.siegeResult) { const sr = G.siegeResult; G.siegeResult = null; openSiegeResult(sr); }
   }
   const t = now / 1000;
   syncViews(dt, t);
@@ -13466,7 +14001,7 @@ function boot(hotData) {
     try { window.claude.hot.snapshot(() => ({ profile: G.profile })); } catch (e) { /* optional */ }
   }
   window.addEventListener('pagehide', () => saveNow(true));
-  if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
+  if (LOCAL_PREVIEW) window.__sim = { autoHuntIntent, autoHuntOn, AH, CFG, P, makeItem, refreshPlayerStats, weaponOf, simStep, masteryLevel, xpToNext, killXpAt, areaLevel, rollLoot, grantItem, spawnBoss, endBoss, startRift, endRift, stepRift, riftLevel, startSiege, endSiege, startSiegeWave, buyPad, fortState, SC, tierDef, maxTier, curTier, tierAdd, ascTier, milestoneAt, addXp, RC, addCase, caseOdds, openCase, vaultState, collectVault, startExped, claimExped, autoHuntOn, initHubWorld, enemySpawnClear, stepEnemy, setEnemyLevel, dealDamage, startDungeon, endDungeon, claimDungeonChest, openDungeonPanel, addKey, makeKey, trialPoi, mineNode, nodeStates, openIdle, openDaily, openMenu };
   window.__gameBooted = true;
   // public site: keep models and textures on the phone between visits (sw.js); never inside the Claude artifact
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});

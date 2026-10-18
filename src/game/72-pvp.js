@@ -7,7 +7,7 @@
 CFG.pvp = { range: 24, flush: 0.2, dmgMul: 0.35, hitCap: 0.15, secCap: 0.4, goldDrop: 0.1, goldFloor: 100, cooldown: 600, lastHitWindow: 5 };
 const PVP = { win: 0, winT: 0, last: null, killedBy: {}, tT: -1, tList: [], out: new Map(), outT: 0 };
 const pvpOn = () => !!(G.profile && G.profile.settings.pvp) && typeof MP !== 'undefined' && MP.state === 'on';
-const pvpZoneOk = (x, z) => G.mode === 'hub' && !G.rift && !G.dungeon && distToTown(x, z) > CFG.world.town.r + 4;
+const pvpZoneOk = (x, z) => G.mode === 'hub' && !inInstance() && distToTown(x, z) > CFG.world.town.r + 4;
 // peers you may hit right now (used by forEachTarget)
 // cached once per sim step: forEachTarget runs for every bullet every frame, so no new arrays per call
 function pvpTargets() {

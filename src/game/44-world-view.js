@@ -195,6 +195,11 @@ function buildHub() {
     tParts.push(part(GEO.box, 0x2a1f3d, [RG.x - 1.9, 1.7, RG.z], [0, 0, 0.12], [0.6, 3.4, 0.6])); tParts.push(part(GEO.box, 0x2a1f3d, [RG.x + 1.9, 1.7, RG.z], [0, 0, -0.12], [0.6, 3.4, 0.6]));
     tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x - 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4])); tParts.push(part(GEO.cone4, 0xff3d6e, [RG.x + 1.95, 3.6, RG.z], null, [0.4, 0.7, 0.4])); }
     grid.add({ x: RG.x - 1.9, z: RG.z, r: 0.5 }); grid.add({ x: RG.x + 1.9, z: RG.z, r: 0.5 }); }
+  // Bastion house: an extra cottage on the west side of the plaza, banners by its door, the way into Bastion Siege
+  { const SH = CFG.siege.house, SG = CFG.siege.gate;
+    WorldModels.place(hubGroup, 'house_b', [{ x: SH.x, z: SH.z, ry: Math.PI / 2, s: 6 }]); grid.add({ x: SH.x, z: SH.z, r: 3 });
+    WorldModels.place(hubGroup, 'banner_pole', [-1, 1].map((k) => ({ x: SG.x - 0.6, z: SG.z + k * 2.4, ry: Math.PI / 2, s: 3.8 })));
+    for (const k of [-1, 1]) grid.add({ x: SG.x - 0.6, z: SG.z + k * 2.4, r: 0.35 }); }
   // lair standing stones (one ring per zone)
   const lairStones = [];
   W.lairList.forEach((l) => {
@@ -307,6 +312,10 @@ function buildHub() {
     const rd = new THREE.Mesh(new THREE.CircleGeometry(1.55, 32), new THREE.MeshBasicMaterial({ map: swirlTex(), color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
     rd.position.set(RG.x, 1.75, RG.z); hubGroup.add(rd); hubParts.riftDisc = rd;
     const rr = new THREE.Mesh(new THREE.TorusGeometry(1.62, 0.1, 6, 32), new THREE.MeshBasicMaterial({ color: 0xff5d8f })); rr.position.copy(rd.position); hubGroup.add(rr); hubParts.riftRing = rr; }
+  { const SG = CFG.siege.gate; // a gold glow on the ground before the Bastion house door
+    const sr = new THREE.Mesh(new THREE.RingGeometry(1.15, 1.45, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffc94a, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const sd = new THREE.Mesh(new THREE.CircleGeometry(1.15, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: swirlTex(), color: 0xffd98a, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false }));
+    sr.position.set(SG.x, 0.06, SG.z); sd.position.set(SG.x, 0.05, SG.z); hubGroup.add(sr, sd); hubParts.siegeRing = sr; hubParts.siegeDisc = sd; }
   // vegetation and props, built per zone
   function placeOk(x, z, pad) {
     if (Math.hypot(x - T.x, z - T.z) < T.r + 5) return false;
@@ -316,6 +325,7 @@ function buildHub() {
     for (const D of W.dens) if (Math.hypot(x - D.x, z - D.z) < D.r + 3) return false;
     for (const w of W.waypoints) if (Math.hypot(x - w.x, z - w.z) < 4) return false;
     if (Math.hypot(x - CFG.rift.gate.x, z - CFG.rift.gate.z) < 5) return false;
+    if (Math.hypot(x - CFG.siege.house.x, z - CFG.siege.house.z) < 7) return false;
     for (const sp of CFG.shrines.list) if (Math.hypot(x - sp.x, z - sp.z) < 8) return false;
     // POIs keep a ring of open ground; secret pockets get extra so nothing plugs the gap from outside
     for (const q of W.pois) { const r = q.r + (q.kind === 'secret' ? 5 : 2); if (Math.abs(z - q.z) < r && Math.hypot(x - q.x, z - q.z) < r) return false; }
@@ -573,6 +583,7 @@ const _fogA = new THREE.Color(), _skyTop = new THREE.Color(), _skyHor = new THRE
 const ZoneMood = { fog: new THREE.Color(PALETTE.fog), top: new THREE.Color(PALETTE.skyTop), hor: new THREE.Color(PALETTE.skyHorizon), t: 0 };
 function updateZoneMood(dt) {
   if (G.dungeon) { updateDungeonView(dt); return; } // the dungeon owns fog and sky while inside
+  if (G.siege) { updateSiegeView(dt); return; } // so does the fort
   if (G.mode !== 'hub' || !G.player || G.rift) return;
   const W = CFG.world, z = G.player.z, zi = zoneAt(z), zn = W.zones[zi];
   // blend toward the next zone near its border

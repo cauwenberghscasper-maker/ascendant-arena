@@ -294,7 +294,7 @@ function killEntity(t, src, pet = false) {
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
-    else if (t.isPlayer) { if (typeof pvpOnDeath === 'function') pvpOnDeath(); G.respawnT = CFG.player.respawn; toast('You were knocked out. Respawning in town…', 'bad'); }
+    else if (t.isPlayer) { if (typeof pvpOnDeath === 'function') pvpOnDeath(); G.respawnT = CFG.player.respawn; toast(G.siege ? 'You were knocked out. Back at the Keep in a moment…' : 'You were knocked out. Respawning in town…', 'bad'); }
   } else if (t.kind === 'enemy') {
     t.respawnT = t.temp ? 1e9 : t.elite ? CFG.world.eliteRespawn : t.den != null ? CFG.world.denRespawn : CFG.world.enemyRespawn;
     ev({ t: 'die', x: t.x, z: t.z, kind: t.type, elite: !!t.elite });
@@ -634,6 +634,7 @@ function stepFighter(f, dt, ctx) {
 function boundFighter(f, ctx) {
   if (G.rift && f.isPlayer) { riftClamp(f, f.r); return; }
   if (G.dungeon && f.isPlayer) { dungeonClamp(f, f.r); return; }
+  if (G.siege && f.isPlayer) { siegeClamp(f, f.r); return; }
   if (ctx === 'arena') {
     const h = CFG.arena.half - f.r;
     f.x = clamp(f.x, AC.x - h, AC.x + h); f.z = clamp(f.z, AC.z - h, AC.z + h);

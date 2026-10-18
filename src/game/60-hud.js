@@ -78,6 +78,11 @@ function updateTags() {
     for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; if (near(b, 30)) put(b.x, 2.45 * growthScale(b), b.z, `${b.name} · ${b.level}`, null, 'bot'); }
     for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.pvp ? 'PvP · ' : ''}${e.nick} · ${e.level}`, e.hp, e.pvp ? 'peer pvp' : 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');
+    if (G.siege) {
+      // fort objectives: always shown, big bars that flash while under attack
+      for (const o of G.siege.objs) put(o.x, o.def.h, o.z, o.alive ? `${o.name} · ${Math.ceil(clamp(o.hp / o.maxHp, 0, 1) * 100)}%` : `${o.name} · destroyed`, o.alive ? o.hp / o.maxHp : 0, `obj${o.def.main ? ' main' : ''}${o.hurtT > 0 ? ' hurt' : ''}${o.alive ? '' : ' down'}`);
+      for (const s of G.siege.soldiers) if (s.alive && s.hp < s.maxHp && near(s, 26)) put(s.x, 2.4, s.z, '', s.hp / s.maxHp, 'ally');
+    }
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
       const diff = e.lvl - G.profile.level, lvlCls = diff >= 5 ? ' red' : diff >= 2 ? ' orange' : diff <= -6 ? ' grey' : '';
@@ -87,6 +92,7 @@ function updateTags() {
     for (const dl of hubParts.denLabels) { const D = CFG.world.dens[dl.den]; if (Math.hypot(dl.x - cx, dl.z - cz) < 55) put(dl.x, dl.y, dl.z, `${D.name} · Lv ${areaLevel(D.zone, D.z) + CFG.world.denLevelBonus + tierAdd()}`, null, 'den'); }
     for (const q of CFG.world.pois) if (q.major && !CFG.world.zones[q.zone].safe && Math.hypot(q.x - cx, q.z - cz) < 40) put(q.x, 6.5, q.z, trialOpen(q.zone) ? `${q.name} · Legendary Trial` : `${q.name} · ${runesLit(q.zone)}/${CFG.dungeon.trial.runes} runestones`, null, 'wp');
     for (const q of dungeonPois()) if (Math.hypot(q.x - cx, q.z - cz) < 90) put(q.x, 7.2, q.z, G.profile.level >= dungeonReq(q) ? `${q.name} · Dungeon` : `${q.name} · Level ${dungeonReq(q)}`, null, 'den');
+    { const SG = CFG.siege.gate; if (!G.siege && Math.hypot(SG.x - cx, SG.z - cz) < 30) put(CFG.siege.house.x + 1, 7.4, SG.z, G.profile.level >= CFG.siege.unlock ? `Bastion Siege · best wave ${G.profile.records.bestSiege || 0}` : `Bastion Siege · Level ${CFG.siege.unlock}`, null, 'wp'); }
     { const RG = CFG.rift.gate; if (Math.hypot(RG.x - cx, RG.z - cz) < 30) put(RG.x, 4.4, RG.z, G.profile.level >= CFG.rift.unlock ? `The Rift · best floor ${G.profile.records.bestRift || 0}` : `The Rift · Level ${CFG.rift.unlock}`, null, 'wp'); }
     CFG.world.waypoints.forEach((w, i) => { if (Math.hypot(w.x - cx, w.z - cz) < 30) put(w.x, 4.4, w.z, G.profile.waypoints.includes(i) ? 'Waypoint' : 'Waypoint · touch to unlock', null, 'wp'); });
     for (const gl of hubParts.gateLabels) { const zn = CFG.world.zones[gl.zone]; if (G.profile.level < zn.minLevel && Math.hypot(gl.x - cx, gl.z - cz) < 60) put(gl.x, gl.y, gl.z, `${zn.name} · Level ${zn.minLevel}`, null, 'gate'); }
@@ -156,6 +162,7 @@ function updateHUD(dt) {
     const zi = zoneAt(G.player.z), zn = CFG.world.zones[zi], town = distToTown(G.player.x, G.player.z) < CFG.world.town.r + 2;
     const ct = curTier(), al = areaLevel(zi, G.player.z) + tierAdd(), ts = ct ? ` · ${tierDef(ct).short}` : '';
     if (G.rift) setText('zoneChip', `Rift · Floor ${G.rift.floor} · Lv ${riftWaveLevel(G.rift.floor)}`);
+    else if (G.siege) setText('zoneChip', `Bastion Siege · Wave ${G.siege.wave} · Lv ${G.siege.lvl}`);
     else setText('zoneChip', town || zn.safe ? `Willowcross Base Camp · safe${ts}` : `${zn.name} · Lv ${al}${ts}`);
     setStyle('zoneChip', '--zc', al > p.level + 4 ? '#ff5d6c' : al > p.level + 1 ? '#ffb347' : '#8fe3a0');
   }
@@ -163,8 +170,8 @@ function updateHUD(dt) {
   if (G.started && !inArena) {
     const nc = G.profile.cases.length; setHidden('caseChip', !nc); if (nc) setText('caseChip', String(nc));
     UI.caseFlash = Math.max(0, (UI.caseFlash || 0) - dt); $('caseChip').classList.toggle('flash', UI.caseFlash > 0);
-    setHidden('autoChip', G.mode !== 'hub' || !!G.rift); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
-    setHidden('pvpChip', G.mode !== 'hub' || !!G.rift || !!G.dungeon); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
+    setHidden('autoChip', G.mode !== 'hub' || !!G.rift || !!G.siege); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
+    setHidden('pvpChip', G.mode !== 'hub' || inInstance()); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
   } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); }
   $('bMenu').classList.toggle('newU', G.started && Object.keys(UNLOCK_AT).some(unlockNew)); // the menu button glows while something new is unopened
   { const n = mpCount(), on = G.started && !inArena; setHidden('mpChip', !on || !n); if (on && n) setText('mpChip', String(n + 1)); }
@@ -245,6 +252,8 @@ function updateObjective() {
   if (G.mode === 'arena') { setHidden('objective', true); return; }
   const shr = activeShrine();
   if (G.rift) { const r = G.rift; text = r.phase === 'intro' ? `Rift floor ${r.floor} · get ready` : r.phase === 'clear' ? `Floor ${r.floor} cleared! Next floor…` : `Rift floor ${r.floor} · ${riftLeft()} left · ${Math.ceil(r.t)}s`; }
+  else if (G.siege) { const S = G.siege, k = S.objs[0];
+    text = S.phase === 'build' ? `Wave ${S.wave} in ${Math.ceil(S.t)}s · build on the pads` : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }
   else if (shr) { text = `Shrine challenge: ${shr.wave.filter((e) => e.alive).length} left · ${Math.ceil(shr.t)}s`; tx = shr.x; tz = shr.z; }
   else if (p.job) {
     const j = p.job, npc = NPC_DEFS.find((n) => n.id === j.npc);

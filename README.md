@@ -28,6 +28,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Cloud save (Supabase) | `src/game/81-cloud-save.js` |
 | Combat, projectiles, damage | `src/game/31-combat.js` |
 | Arena (Showdown), Rift | `src/game/34-arena.js`, `33-world-sim.js` |
+| Bastion Siege (tower defense: fort, waves, objectives, archers/cannons/ballistas/warriors, the Bastion house in town) | `src/game/36b-siege.js` (`CFG.siege`); looks: `47b-siege-view.js`; fort save: `profile.fort` in `22-profile.js` |
 | Multiplayer lobby (Supabase Realtime), future partitioning (`mpRoomKey`) | `src/game/70-multiplayer.js`; notes in `docs/UNFINISHED.md` |
 | HUD | `src/game/60-hud.js` |
 | Panels, settings, button actions (`data-act`) | `src/game/61-panels.js` (`handlePanelClick`) |

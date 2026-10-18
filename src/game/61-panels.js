@@ -10,6 +10,10 @@ function interact() {
   if (n.kind === 'mine') return mineNode(n.st);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
   if (n.kind === 'dungeonChest') return openDungeonChest();
+  if (n.kind === 'siege') return openSiegePanel();
+  if (n.kind === 'siegeLeave') return endSiege('leave');
+  if (n.kind === 'siegeWave') return startSiegeWave();
+  if (n.kind === 'fortPad') return openFortPadPanel(n.i);
   const d = n.def;
   if (d.role === 'smith') return openSmith();
   if (d.role === 'arena') return openArenaPanel();
@@ -644,6 +648,48 @@ function openRiftPanel() {
     <p class="fine">Checkpoints every 5 floors. If you fall or the time runs out, the run ends and you keep everything you earned.</p></div>
     <div class="row end"><button class="ghost" data-act="riftGo" data-f="1">Start at floor 1</button>${cp > 1 ? `<button class="primary big" data-act="riftGo" data-f="${cp}">Start at floor ${cp}</button>` : '<button class="primary big" data-act="riftGo" data-f="1">Enter the Rift</button>'}</div>`);
 }
+// Bastion Siege: the house in town shows your fort (eight pads, built and upgraded for good) and lets you in
+const fortStones = (n) => `<b class="stones">${fmt(n)}</b> Bastion Stones`;
+function fortPadRows() {
+  const F = fortState(), T = CFG.siege.towers;
+  return CFG.siege.pads.map((_, i) => { const pad = F.pads[i];
+    return `<button class="ghost fortPadBtn${pad ? ' on ' + pad.t : ''}" data-act="fortPad" data-i="${i}">${pad ? `${gi(T[pad.t].icon)} ${T[pad.t].short} <small>Lv ${pad.l}</small>` : `<small>Pad ${i + 1} · empty</small>`}</button>`; }).join('');
+}
+function openSiegePanel() {
+  UI.current = 'siege';
+  const p = G.profile, C = CFG.siege, F = fortState(), best = p.records.bestSiege || 0;
+  if (p.level < C.unlock) { openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Bastion Siege</h3></div><p class="say">The captain only lets heroes of level ${C.unlock} or higher defend the fort. Come back stronger.</p>`); return; }
+  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Bastion Siege</h3><span class="cnt">Best wave ${best}</span></div>
+    <div class="riftCard"><p>Monsters storm the fort through three gates, wave after wave, and go for <b>The Keep</b> and the two <b>supply wagons</b>. Watch their health bars: if the Keep falls, the siege is over. Fight with your hero and build defenders on the eight stone pads: <b>archers</b>, <b>cannons</b>, <b>ballistas</b> and <b>warriors</b>.</p>
+    <p>Every wave pays gold and ${fortStones(3)} or more; every ${C.bossEvery}th wave a <b>Siege Lord</b> drops an item. Every wagon still standing adds ${C.wagonBonus * 100}% gold. Your fort stays built: what you buy and upgrade is there next time.</p>
+    <p class="fine">You have ${fortStones(F.stones)} and ${ICON.coin}${fmtK(p.gold)} gold. Waves start at level ${siegeLevel(1)}. Falling only costs a few seconds; leave through the portal by the south wall.</p></div>
+    <h4>Your fort</h4><div class="fortPads">${fortPadRows()}</div>
+    <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="siegeGo">Defend the fort</button></div>`);
+}
+function openFortPadPanel(i) {
+  UI.current = 'fortPad';
+  const p = G.profile, C = CFG.siege, F = fortState(), pad = F.pads[i];
+  const cards = SIEGE_TYPES.map((t) => {
+    const T = C.towers[t], mine = pad && pad.t === t, max = mine && pad.l >= C.maxLvl, c = padCost(i, t), ok = p.gold >= c.gold && F.stones >= c.stones;
+    const stat = t === 'warrior' ? `${siegeMen(mine ? pad.l : 1)} warriors · ${fmtK(siegeDefDmg(T, mine ? pad.l : 1))} dmg` : `${fmtK(siegeDefDmg(T, mine ? pad.l : 1))} dmg · range ${T.range}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}`;
+    const lbl = max ? 'Max level' : mine ? `Upgrade to Lv ${c.lvl}` : pad ? 'Replace' : 'Build';
+    return `<div class="fortCard${mine ? ' mine' : ''}"><div class="fcHead">${gi(T.icon)}<b>${T.name}</b>${mine ? `<span class="cnt">Lv ${pad.l}</span>` : ''}</div><p>${T.blurb}</p><p class="fine">${stat}</p>
+      ${max ? '' : `<p class="fine">${ICON.coin}${fmtK(c.gold)} · ${fortStones(c.stones)}</p>`}<button class="${mine ? 'primary' : 'ghost'}" data-act="fortBuy" data-i="${i}" data-t="${t}"${max || !ok ? ' aria-disabled="true"' : ''}>${lbl}</button></div>`;
+  }).join('');
+  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Pad ${i + 1}</h3><span class="cnt">${pad ? `${C.towers[pad.t].short} Lv ${pad.l}` : 'empty'}</span></div>
+    <p class="fine">You have ${ICON.coin}${fmtK(p.gold)} gold and ${fortStones(F.stones)}. Every level adds 30% damage${pad && pad.t === 'warrior' ? ' and HP; every 5th level one more warrior' : ''}. Replacing a defender returns half the stones it cost.</p>
+    <div class="fortCards">${cards}</div>
+    <div class="row end"><button class="ghost" data-act="fortBack">${G.siege ? 'Back to the fight' : 'Back'}</button></div>`);
+}
+function openSiegeResult(r) {
+  UI.current = 'siegeResult';
+  const why = r.why === 'keep' ? 'The Keep has fallen' : 'You left the fort';
+  openModal(`<div class="center"><div class="eyebrow">${why}</div><h2>Bastion Siege · ${r.cleared ? `${r.cleared} wave${r.cleared > 1 ? 's' : ''} held` : 'no wave held'}</h2></div>
+    <div class="stats3"><div><b>${r.cleared}</b><span>Waves held</span></div><div><b>${ICON.coin}${fmtK(r.gold)}</b><span>Gold</span></div><div><b class="stones">${fmt(r.stones)}</b><span>Bastion Stones</span></div></div>
+    <div class="stats3"><div><b>${r.items}</b><span>Siege Lord items</span></div><div><b>${r.best}</b><span>Best wave</span></div><div><b class="stones">${fmt(fortState().stones)}</b><span>Stones to spend</span></div></div>
+    <p class="fine center">Spend your stones and gold on the pads in the Bastion house, then try to hold out longer.</p>
+    <div class="row end"><button class="ghost" data-act="close">Later</button><button class="primary big" data-act="fortBack">Upgrade the fort</button></div>`);
+}
 // Dungeons: a sealed instance per POI. Pick a plain run or one of your Dungeon Keys (it is used up on entry).
 function openDungeonPanel(poi) {
   UI.current = 'dungeon';
@@ -880,6 +926,10 @@ function handlePanelClick(e) {
     case 'travel': UI.close(); travelTo(+b.dataset.i); break;
     case 'tier': if (setWorldTier(+b.dataset.t)) openWaypoints(); break;
     case 'riftGo': UI.close(); startRift(+b.dataset.f); break;
+    case 'siegeGo': UI.close(); if (!startSiege()) toast('Finish your challenge first', 'bad'); break;
+    case 'fortPad': openFortPadPanel(+b.dataset.i); break;
+    case 'fortBuy': { const i = +b.dataset.i; if (buyPad(i, b.dataset.t)) { Sfx.play('unlock'); toast(`${CFG.siege.towers[b.dataset.t].name} · level ${fortState().pads[i].l}`, 'good'); } else toast('Not enough gold or Bastion Stones', 'bad'); openFortPadPanel(i); break; }
+    case 'fortBack': if (G.siege) UI.close(); else openSiegePanel(); break;
     case 'trialGo': { UI.close(); if (!startDungeon(trialPoi(+b.dataset.z))) toast('Finish your challenge first', 'bad'); break; }
     case 'trialForge': { const it = forgeTrialRelic(+b.dataset.z); if (it) { toast(`Forged ${it.name}!`, 'good'); Sfx.play('win'); } openTrialPanel(+b.dataset.z); break; }
     case 'dungeonGo': { UI.close(); const po = dungeonPois().find((x) => x.id === b.dataset.id); if (!startDungeon(po, b.dataset.key != null ? +b.dataset.key : null)) toast('Finish your challenge first', 'bad'); break; }

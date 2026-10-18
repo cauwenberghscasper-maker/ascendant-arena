@@ -144,6 +144,15 @@ function processEvents() {
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
       case 'dungeonBoss': Feed.remove('dungeon'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
       case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); if (e.why === 'down') showToast(`${e.name} resets · you fell`, 'bad'); break;
+      case 'siegeStart': enterSiegeView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 6); Sfx.play('super'); showBanner('Bastion Siege', 'Protect the Keep and the wagons · build on the stone pads', 'gold'); break;
+      case 'siegeWave': if (e.boss) { showBanner(`Wave ${e.wave} · Siege Lord!`, `${e.count} monsters · Lv ${e.lvl}`, 'red'); Sfx.play('horn'); } else { showBanner(`Wave ${e.wave}`, `${e.count} monsters · ${e.theme} · Lv ${e.lvl}`, 'red'); Sfx.play('tick'); } break;
+      case 'siegeClear': Feed.add(`${gi('m_hero')} Wave <b>${e.wave}</b> held · +${fmtK(e.gold)} gold · +${e.stones} Bastion Stones${e.item ? ' · Siege Lord item!' : ''}`, 'rift'); Sfx.play('job'); burst(G.player.x, 1, G.player.z, 24, 0xffc94a, 6, 0.8, 0.25, 3, 1.3); break;
+      case 'objectiveHit': if (e.main) { showToast(`${e.name} is under attack!`, 'bad'); Sfx.play('hurt', { gap: 0.5 }); } ringFx(e.x, e.z, 3, 0xff3b3b, 0.5); break;
+      case 'objectiveDown': burst(e.x, 2, e.z, 50, 0xff7a3d, 9, 1.2, 0.4, 4, 2); SpriteFX.play('explosion', 'fire', e.x, 0, e.z, 8); Cam.shake = Math.max(Cam.shake, 0.8); Sfx.play('boom');
+        if (!e.main) showBanner(`${e.name} destroyed`, 'Less gold per wave · keep the Keep standing', 'red'); break;
+      case 'siegeEnd': enterSiegeView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); if (e.why === 'keep') { Sfx.play('lose'); showToast('The Keep has fallen', 'bad'); } break;
+      case 'fortBuilt': SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 4); burst(e.x, 1, e.z, 20, 0xffd34a, 5, 0.7, 0.3, 3, 1.2); break;
+      case 'fortShot': if (e.type === 'cannon') burst(e.x, 1.6, e.z, 6, 0xdddddd, 3, 0.4, 0.25, 2, 0.6); break;
       case 'riftEnd': enterRiftView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); break;
       case 'teleport': burst(e.x, 1, e.z, 30, 0x9fe8ff, 6, 0.8, 0.3, 2, 1.5); SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 5.5); Sfx.play('super'); Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; showToast(e.name); break;
       case 'proc': burst(e.x, 1.2, e.z, 8, e.kind === 'grasp' ? 0x8dff6a : e.kind === 'kraken' ? 0x5dd6ff : 0xffe066, 4, 0.4, 0.22, 4); SpriteFX.play(e.kind === 'kraken' ? 'zap' : 'impact', e.kind === 'grasp' ? 'venom' : e.kind === 'kraken' ? 'storm' : 'gold', e.x, 1.3, e.z, 1.9); break;
@@ -316,6 +325,7 @@ function updateHubProps(t) {
   const topR = CFG.gear.slots.reduce((m, s) => Math.max(m, p.gear[s] ? rarIdx(p.gear[s].rarity) : 0), 0);
   if (HERO_OVERLAYS && sparkleT <= 0 && G.player.alive && topR >= 4) { sparkleT = topR >= 6 ? 0.08 : topR >= 5 ? 0.12 : 0.18; burst(G.player.x + (Math.random() - 0.5), 1 + Math.random() * 1.2, G.player.z + (Math.random() - 0.5), 1, RAR_HEX[RARITIES[topR]], 0.8, 0.7, 0.16, -1, 1); }
   for (const b of hubParts.barriers) { const locked = p.level < CFG.world.zones[b.zone].minLevel; b.mesh.visible = locked; b.mesh.material.opacity = 0.16 + Math.sin(t * 2) * 0.06; }
+  if (hubParts.siegeDisc) { hubParts.siegeDisc.rotation.y = t * 0.9; hubParts.siegeRing.material.opacity = 0.55 + Math.sin(t * 3) * 0.2; }
   if (hubParts.riftDisc) { hubParts.riftDisc.rotation.z = -t * 1.1; hubParts.riftRing.rotation.z = t * 0.5; hubParts.riftRing.scale.setScalar(1 + Math.sin(t * 3) * 0.04); }
   // ascended (level 200): a golden trail while you move
   if (HERO_OVERLAYS && ascTier(p.level) >= 3 && G.player.alive && (G.player.moveAmt || 0) > 0.3 && Math.random() < 0.5) burst(G.player.x, 0.5 + Math.random(), G.player.z, 1, Math.random() < 0.5 ? 0xffd36b : 0xfff3c4, 0.6, 0.9, 0.2, -0.5, 1);
@@ -398,6 +408,17 @@ function drawMinimap() {
     g.save(); g.beginPath(); g.rect(0, 0, W2, H2); g.arc(cx, cy, ar.gasR * s, 0, Math.PI * 2, true); g.fillStyle = 'rgba(86,227,107,.45)'; g.fill('evenodd'); g.restore();
     g.fillStyle = '#6cff8a'; for (const c of ar.cubes) if (c.active) g.fillRect(ax(c.x) - 2 * dpr, ay(c.z) - 2 * dpr, 4 * dpr, 4 * dpr);
     const f = ar.fighters[0]; if (f.alive) { g.fillStyle = '#3fa9ff'; g.beginPath(); g.arc(ax(f.x), ay(f.z), 4 * dpr, 0, Math.PI * 2); g.fill(); }
+    return;
+  }
+  if (G.siege) {
+    // the fort from above: walls, objectives with their health, defenders, monsters and you
+    const S = G.siege, C = CFG.siege, s = W2 / (C.half * 2.3), cx = W2 / 2, cy = H2 / 2, ax = (x) => cx - (x - SC.x) * s, ay = (z) => cy - (z - SC.z) * s, dot = (x, z, r, c) => { g.fillStyle = c; g.beginPath(); g.arc(ax(x), ay(z), r * dpr, 0, Math.PI * 2); g.fill(); };
+    g.fillStyle = '#7a6c5c'; g.fillRect(cx - C.half * s, cy - C.half * s, C.half * 2 * s, C.half * 2 * s);
+    g.strokeStyle = '#3b3128'; g.lineWidth = 3 * dpr; g.strokeRect(cx - C.half * s, cy - C.half * s, C.half * 2 * s, C.half * 2 * s);
+    for (const o of S.objs) if (o.alive) { const k = clamp(o.hp / o.maxHp, 0, 1); dot(o.x, o.z, o.def.main ? 6 : 4, k > 0.5 ? '#58e08a' : k > 0.25 ? '#ffb347' : '#ff5d6c'); }
+    const F = fortState(); C.pads.forEach((q, i) => { const pad = F.pads[i]; g.fillStyle = pad ? '#' + SIEGE_PAD_COL[pad.t].toString(16).padStart(6, '0') : 'rgba(255,233,168,.5)'; g.fillRect(ax(SC.x + q.x) - 2.5 * dpr, ay(SC.z + q.z) - 2.5 * dpr, 5 * dpr, 5 * dpr); });
+    for (const e of S.mobs) if (e.alive) dot(e.x, e.z, e.guardian ? 4 : 2.5, e.guardian ? '#ffc94a' : '#ff5d6c');
+    dot(G.player.x, G.player.z, 4, '#3fa9ff');
     return;
   }
   if (G.rift) {

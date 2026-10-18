@@ -42,6 +42,7 @@ const hubGroup = new THREE.Group(), arenaGroup = new THREE.Group(), dynGroup = n
 scene.add(hubGroup, arenaGroup, dynGroup, riftGroup);
 arenaGroup.visible = false; riftGroup.visible = false;
 const dungeonGroup = new THREE.Group(); scene.add(dungeonGroup); dungeonGroup.visible = false; // filled on dungeon entry (47)
+const siegeGroup = new THREE.Group(); scene.add(siegeGroup); siegeGroup.visible = false; // the Bastion fort, built on entry (47b)
 // soft procedural textures (swirl for portals, vertical fade for auras)
 let _swirl = null, _fade = null;
 function swirlTex() {
