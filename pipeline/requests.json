@@ -1,6 +1,9 @@
-{"batch": "bastion-a", "files": [
- {"name": "siege_archer.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/95028594598bd640bcb146f5b6f1b17826f137616dd8fb3986fa05a70c23aae5/trellis_output_2026-10-18T180453.glb"},
- {"name": "siege_cannon.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/6df8d0d64c8100c173a8554d6954e62131621096abe5baf27160ea557b388f9d/trellis_output_2026-10-18T180642.glb"},
- {"name": "siege_ballista.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/eb7637312ee81a78acf9578b597b0b104b60b05d2045e37f28e18a2d2bdc955e/trellis_output_2026-10-18T180737.glb"},
- {"name": "siege_mage.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/470eededcac68087c2597e938114bec57519a0dfc59b5e761a0fceb8188b3172/trellis_output_2026-10-18T180829.glb"}
+{"batch": "bastion-b", "files": [
+ {"name": "siege_barracks.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/0fe867c906695662ae5cd48b3d52157edd8fbdad4698819cf1fbf058409b817a/trellis_output_2026-10-18T180951.glb"},
+ {"name": "siege_mine.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/ae172f69e6a35346d0de2e725b87c442d808ba9dfe573ffdbaba06db3c7d0186/trellis_output_2026-10-18T181044.glb"},
+ {"name": "siege_hut.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/48dd602e821a0a61cad5d0770a55bdc6cbb75839279d12d6c7b2bbd49a6fe003/trellis_output_2026-10-18T181158.glb"},
+ {"name": "siege_wall_wood.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/3c03a0ba6f9d21315dc2a90adfd88a50dd2b101ea942d04c7db7af11316a9d03/trellis_output_2026-10-18T181251.glb"},
+ {"name": "siege_wall_stone.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/e7072e5fd93c5700b9d0ac540adb2957e2454a7132999b0dec64533668593d4f/trellis_output_2026-10-18T181338.glb"},
+ {"name": "siege_wall_iron.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/84b4dba26256eb5969a1e7371963ed9929f8f843956edd98a2e6408ace8f9f8f/trellis_output_2026-10-18T181414.glb"},
+ {"name": "siege_gate.glb", "url": "https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/hx7dv/gradio_api/file=/tmp/gradio/7e4e017c3fb4768b83ba0dd04d069adeb918da0b82248b4fd12ef2433c4ae2f7/trellis_output_2026-10-18T181456.glb"}
 ]}
