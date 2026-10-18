@@ -228,7 +228,7 @@ function updateCompanion(dt,t) {
 // --- adaptive quality ----------------------------------------------------------------------------
 // Render scale: pick once, then only ever step DOWN after sustained slowness.
 // Every scale change reallocates the canvas, which shows as a flash on phones, so changes are rare.
-const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.quality.cullFar, lowTier: false, noPost: false, lastChange: 0, locked: false };
+const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.quality.cullFar, lowTier: false, noPost: false, lastChange: 0, locked: false, raf: 0, hz: 60 };
 // phones and small devices start lighter: a lower pixel-ratio cap, a smaller shadow map, fewer parallel downloads,
 // and on weak ones no cinematic post pass at all (the adaptive steps below can still go further)
 const DEVICE = (() => { const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches, mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8;
@@ -239,7 +239,7 @@ function setDpr(d) { Q.dpr = clamp(d, CFG.quality.minDpr, Math.min(window.device
 function qualityTick(dt) {
   Q.frames++; Q.acc += dt;
   if (Q.acc < CFG.quality.sampleSec) return;
-  Q.fps = Q.frames / Q.acc; Q.frames = 0; Q.acc = 0;
+  Q.fps = Q.frames / Q.acc; Q.hz = Q.raf / Q.acc; Q.frames = 0; Q.raf = 0; Q.acc = 0;
   if (Q.locked || document.hidden || G.modal) { Q.slowWindows = 0; return; }
   if (Q.fps < CFG.quality.downFps) Q.slowWindows++; else Q.slowWindows = 0;
   if (Q.slowWindows >= 3 && performance.now() - Q.lastChange > 10000) {

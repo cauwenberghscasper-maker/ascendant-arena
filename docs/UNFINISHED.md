@@ -1,3 +1,12 @@
+# 120 Hz by default, frame-rate work (18 Oct 2026, on `main`)
+Done: 120 Hz is on by default (old saves switched on once via `hzVersion`, still a switch in Options). Shader error checks only
+run on localhost (`renderer.debug.checkShaderErrors`): reading the compile log stalled the frame whenever a new model or effect
+appeared. 120 Hz pacing tolerates 1 ms of timestamp jitter and keeps its grid. Show FPS now also prints "screen N Hz", the
+refresh rate the browser actually gives the page. Measured load (town, 390x844): ~58 draw calls, ~380k triangles incl. the
+1024 shadow map, game JS ~2-3 ms per frame, so a high-end phone is not GPU/CPU bound at 120.
+Open: if "screen" reads 60 the browser caps the page (iPhone Safari limits web pages to 60; Android battery saver does too).
+The store apps would need native settings for ProMotion (iOS `CADisableMinimumFrameDurationOnPhone`); not set up yet.
+
 # Black screen flashes (18 Oct 2026, on `main`)
 Done: the bloom pass (Cinematic effects) turned a single NaN/overflowed pixel into a black patch or a black screen.
 `Post` now reads any such sample as black (`okc` in `46-camera-quality.js`). Three world models had zero-length normals
