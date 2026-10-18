@@ -93,6 +93,9 @@ function sanitizeProfile(p) {
     out.worldVersion = 10;
   }
   for (const k of ['secrets', 'pois', 'dungeons', 'runes', 'trials', 'petFinds']) if (!out[k] || typeof out[k] !== 'object' || Array.isArray(out[k])) out[k] = {};
+  // party dungeons: clears and best difficulty per dungeon, this week's first clears, set pieces found
+  { const o = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {}), d = o(out.delve);
+    out.delve = { clears: o(d.clears), best: o(d.best), wk: { w: +o(d.wk).w || 0, done: o(o(d.wk).done) }, pieces: o(d.pieces) }; }
   // Dungeon Keys (CFG.dungeon loads later; the cap of 12 matches CFG.dungeon.keys.max)
   out.keys = (Array.isArray(out.keys) ? out.keys : []).filter((k) => k && k.t >= 1 && Array.isArray(k.a)).slice(0, 12)
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));

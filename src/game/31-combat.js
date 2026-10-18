@@ -287,6 +287,7 @@ function killEntity(t, src, pet = false) {
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
+    else if (t.isPlayer && delveOn()) { G.respawnT = 1e9; toast(delveParty().length > 1 ? 'You are down! A teammate can pull you back up' : 'You fell…', 'bad'); }
     else if (t.isPlayer) { if (typeof pvpOnDeath === 'function') pvpOnDeath(); G.respawnT = CFG.player.respawn; toast('You were knocked out. Respawning in town…', 'bad'); }
   } else if (t.kind === 'enemy') {
     t.respawnT = t.temp ? 1e9 : t.elite ? CFG.world.eliteRespawn : t.den != null ? CFG.world.denRespawn : CFG.world.enemyRespawn;

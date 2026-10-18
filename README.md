@@ -28,6 +28,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Cloud save (Supabase) | `src/game/81-cloud-save.js` |
 | Combat, projectiles, damage | `src/game/31-combat.js` |
 | Arena (Showdown), Rift | `src/game/34-arena.js`, `33-world-sim.js` |
+| Dungeon mode (party dungeons): dungeons, difficulties, power gate, rooms, events, loot, set bonuses | `src/game/36b-delve.js` (`CFG.delve`); event-room props: `47b-delve-view.js`; parties, random match, the Dungeons panel and HUD: `73-party.js`; banners `assets/ui/delve/`, set pieces `assets/world/delve_*` |
 | Multiplayer lobby (Supabase Realtime), future partitioning (`mpRoomKey`) | `src/game/70-multiplayer.js`; notes in `docs/UNFINISHED.md` |
 | HUD | `src/game/60-hud.js` |
 | Panels, settings, button actions (`data-act`) | `src/game/61-panels.js` (`handlePanelClick`) |
