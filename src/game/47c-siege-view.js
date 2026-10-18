@@ -195,8 +195,25 @@ function animateSiegeDefenders(dt) {
     it.x = a.bx - ax * back; it.z = a.bz - az * back; it.sy = sy; it.sx = it.sz = sw; a.h.dirty = true;
   }
 }
+function siegePreview(q) {
+  const P = siegeParts.preview, cs = CFG.siege.cell;
+  if (!q) { if (P) { WorldModels.dispose(P.h); siegeParts.preview = null; } return; }
+  const wall = CFG.siege.towers[q.t].wall && q.t === 'wall', name = wall ? 'siege_wall_wood' : SIEGE_MODEL[q.t][0];
+  const s = FORT_TYPES[q.t], x = SC.x + (q.x + s / 2) * cs, z = SC.z + (q.z + s / 2) * cs;
+  let pv = P;
+  if (!pv || pv.name !== name) { // placed where it stands (the streamer loads a set by its distance to the camera)
+    if (P) WorldModels.dispose(P.h);
+    const it = { x, z, ry: 0, s: 1 }; pv = siegeParts.preview = { name, it, h: WorldModels.place(siegeGroup, name, [it], { ghost: true, far: 999 }) };
+  }
+  const it = pv.it;
+  it.x = x; it.z = z; it.ry = CFG.siege.towers[q.t].trap || q.t === 'gate' || wall ? 0 : Math.atan2(SC.x - x, SC.z - z);
+  if (wall) { it.s = 1.8; it.sx = cs / ((WORLD_MODEL_BOX[name] || [2])[0] * 1.8); } else it.s = SIEGE_MODEL[q.t][1];
+  pv.h.dirty = true;
+  for (const m of pv.h.mats) { m.emissive.setHex(q.ok ? 0x58e08a : 0xff5d6c); m.opacity = 0.45 + Math.sin(siegeParts.t * 5) * 0.08; }
+}
 function disposeSiegeView() {
   for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h);
+  if (siegeParts.preview) { WorldModels.dispose(siegeParts.preview.h); siegeParts.preview = null; }
   const geos = new Set(), mats = new Set();
   siegeGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matVC && o.material !== matDungeonFloor) mats.add(o.material); });
   geos.forEach((g) => g.dispose()); mats.forEach((m) => m.dispose());
@@ -216,8 +233,9 @@ function updateSiegeView(dt) {
   const sig = S.units.map((u) => `${u.b.t}${u.b.x},${u.b.z},${u.b.l}${u.b.d > now ? 'u' : ''}${u.alive ? '' : 'x'}${u.spent ? 's' : ''}`).join('|');
   if (sig !== siegeParts.sig) { if (siegeParts.sig) buildSiegeBuildings(); siegeParts.sig = sig; }
   animateSiegeDefenders(dt);
-  // the placing ghost
+  // the placing ghost: the footprint square plus a see-through copy of the building, green where it fits, red where not
   const gh = siegeParts.ghost, q = fortGhost();
+  siegePreview(q);
   if (gh) { gh.visible = !!q; if (q) { const s = FORT_TYPES[q.t], cs = CFG.siege.cell; gh.scale.set(s * cs * 0.96, 1, s * cs * 0.96); gh.position.set(SC.x + (q.x + s / 2) * cs, 0.07, SC.z + (q.z + s / 2) * cs); gh.material.color.set(q.ok ? 0x58e08a : 0xff5d6c); gh.material.opacity = 0.35 + Math.sin(t * 6) * 0.12; } }
   // a fallen objective disappears in smoke
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });
