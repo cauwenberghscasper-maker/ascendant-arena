@@ -737,6 +737,7 @@ function openSettings() {
       <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
     ${tg('fx', 'Cinematic effects', 'Bloom on crystals, lava, torches and magic, soft shadows and colour grading (with High graphics)')}
+    ${tg('hz120', '120 Hz', 'Smoother motion on 120 Hz screens. Uses more battery. No change on 60 Hz screens')}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>

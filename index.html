@@ -3291,7 +3291,7 @@ function defaultProfile() {
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
     essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
-    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0 },
+    job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, hz120: false },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
   if (TEST_MODE) prof.playtest = TEST_PROFILE_TAG;
@@ -3750,7 +3750,7 @@ function spawnProjectile(o) {
   for (let n = 0; n < PROJ_MAX; n++) {
     const p = projectiles[projCursor]; projCursor = (projCursor + 1) % PROJ_MAX;
     if (!p.active) {
-      p.active = true; p.x = o.x; p.z = o.z; p.vx = o.vx; p.vz = o.vz; p.life = o.life; p.total = o.life; p.r = o.r; p.dmg = o.dmg;
+      p.active = true; p.iStep = -1; p.x = o.x; p.z = o.z; p.vx = o.vx; p.vz = o.vz; p.life = o.life; p.total = o.life; p.r = o.r; p.dmg = o.dmg;
       p.team = o.team; p.owner = o.owner; p.pet = !!o.pet; p.kind = o.kind; p.aoe = o.aoe || 0; p.aoeMult = o.aoeMult || 0;
       p.slow = o.slow || 0; p.charge = o.charge || 0; p.color = o.color; p.y = o.y || 1.0; p.burn = o.burn || 0; p.burnT = o.burnT || 0;
       p.homing = o.homing || 0; p.pierce = o.pierce || 0; p.hits.length = 0; p.bounce = o.bounce || 0; p.split = o.split || null;
@@ -7743,7 +7743,7 @@ AssetSlots.register('enemy', (o) => {
       if (e.windK && e.windT > 0) {
         const wp = clamp(1 - e.windT / (e.windMax || 1), 0, 1), ez = wp * wp * (3 - 2 * wp), P = MOVE_POSE[e.windK] || MOVE_POSE.slam;
         pivot.rotation.x += P[0] * ez; pivot.position.y += P[1] * ez; pivot.rotation.y += P[2] * ez; pivot.scale.y *= 1 + P[3] * ez; pivot.scale.x *= 1 - P[3] * 0.5 * ez; pivot.scale.z *= 1 - P[3] * 0.5 * ez;
-        if (Math.random() < 0.25 * wp) burst(e.x + (Math.random() - 0.5) * e.r * 2, 0.15, e.z + (Math.random() - 0.5) * e.r * 2, 1, BIOME_TINT[areaBiome(e.zone)] || 0xffffff, 1.2, 0.35, 0.2, -0.4, 1.4);
+        if (Math.random() < 0.25 * wp * fxK) burst(e.x + (Math.random() - 0.5) * e.r * 2, 0.15, e.z + (Math.random() - 0.5) * e.r * 2, 1, BIOME_TINT[areaBiome(e.zone)] || 0xffffff, 1.2, 0.35, 0.2, -0.4, 1.4);
       }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
@@ -7755,7 +7755,7 @@ AssetSlots.register('enemy', (o) => {
       const pop = popT > 0 && popT < 1 ? 0.6 + 0.4 * (1 - Math.pow(1 - popT, 3)) : 1;
       if (!e.alive) { deadT += dt; const k = Math.max(0, 1 - deadT * 3); root.scale.setScalar(s * k); root.visible = k > 0; }
       else { deadT = 0; root.scale.setScalar(s * pop); root.visible = !e.hidden; } // hidden: burrowed (a burrow move's marker shows where it is)
-      if (e.hidden && Math.random() < 0.3) burst(e.x + (Math.random() - 0.5), 0.2, e.z + (Math.random() - 0.5), 1, 0x9a8a6a, 1.2, 0.4, 0.25, 6, 2);
+      if (e.hidden && Math.random() < 0.3 * fxK) burst(e.x + (Math.random() - 0.5), 0.2, e.z + (Math.random() - 0.5), 1, 0x9a8a6a, 1.2, 0.4, 0.25, 6, 2);
     },
     dispose() { AssetLibrary.disposeInstance(model); mat.dispose(); if (aura) aura.material.dispose(); },
   };
@@ -8767,11 +8767,11 @@ const HeroFX = createHeroFX({ scene: dynGroup, camera, fxPal: (c) => fxPal(c), g
   toast: (t) => showToast(t), healNumber: (e) => { if (e.amt >= 1) dmgNumber(e.x, 2.2, e.z, '+' + fmtK(e.amt), 'heal'); } });
 heroApi.fx = HeroFX; HeroFXRef = HeroFX;
 const LONG_KINDS = { arrow: [1, 1, 1], ice: [1, 1, 1], tracer: [0.55, 0.55, 0.7], rail: [1.1, 1.1, 3.4], missile: [1.7, 1.7, 0.62], spark: [0.8, 0.8, 0.9] };
-let trailTick = 0;
-function updateProjectileMeshes() {
+let trailAcc = 0, fxK = 1; // fxK: share of a 60 Hz frame this frame covers, so per-frame sparks stay as dense at 120 Hz
+function updateProjectileMeshes(dt) {
   let no = 0, na = 0, nd = 0, ng = 0;
   HeroFX.ammoBegin();
-  trailTick = (trailTick + 1) % 2;
+  trailAcc += dt; const trailOn = trailAcc >= 1 / 30 - 1e-4; if (trailOn) trailAcc = Math.min(trailAcc - 1 / 30, 1 / 30); // trail puffs 30 times a second
   const glowOn = hqOn();
   for (let i = 0; i < PROJ_MAX; i++) {
     const p = projectiles[i]; if (!p.active) continue;
@@ -8795,8 +8795,8 @@ function updateProjectileMeshes() {
       if (p.kind === 'wave') _s3.set(2.4 * 2.2, 0.6, 0.35); else { const k = LONG_KINDS[p.kind]; _s3.set(k[0], k[1], k[2]); }
       _m4.compose(_v3.set(p.x, p.y, p.z), _q, _s3);
       arrowIM.setMatrixAt(na, _m4); arrowIM.setColorAt(na, _col.set(p.color)); na++;
-      if (p.kind === 'rail' && trailTick === 0) burst(p.x, p.y, p.z, 1, 0xe8fbff, 0.4, 0.3, 0.22, 0, 0.1);
-      if (p.kind === 'missile' && Math.random() < 0.7) burst(p.x - p.vx * 0.03, p.y, p.z - p.vz * 0.03, 1, Math.random() < 0.5 ? 0xbfbfbf : 0xffb347, 0.6, 0.45, 0.28, -1.5, 0.4);
+      if (p.kind === 'rail' && trailOn) burst(p.x, p.y, p.z, 1, 0xe8fbff, 0.4, 0.3, 0.22, 0, 0.1);
+      if (p.kind === 'missile' && Math.random() < 0.7 * fxK) burst(p.x - p.vx * 0.03, p.y, p.z - p.vz * 0.03, 1, Math.random() < 0.5 ? 0xbfbfbf : 0xffb347, 0.6, 0.45, 0.28, -1.5, 0.4);
     } else if (p.kind === 'disc' || p.kind === 'chakram') {
       if (nd >= 120) continue;
       _e.set(0, G.time * (p.kind === 'chakram' ? 22 : 14) + i, 0); _q.setFromEuler(_e);
@@ -8808,7 +8808,7 @@ function updateProjectileMeshes() {
       _e.set(G.time * 6 + i, G.time * 4, 0); _q.setFromEuler(_e);
       _m4.compose(_v3.set(p.x, p.y, p.z), _q, _s3.set(s, s, s));
       orbIM.setMatrixAt(no, _m4); orbIM.setColorAt(no, _col.set(p.color)); no++;
-      if ((p.kind === 'lob' || p.kind === 'shell') && trailTick === 0) burst(p.x, p.y, p.z, 1, p.color, 0.3, 0.35, 0.2, 0, 0.1);
+      if ((p.kind === 'lob' || p.kind === 'shell') && trailOn) burst(p.x, p.y, p.z, 1, p.color, 0.3, 0.35, 0.2, 0, 0.1);
     }
   }
   orbIM.count = no; arrowIM.count = na; discIM.count = nd; glowIM.count = ng; HeroFX.ammoEnd();
@@ -8860,7 +8860,7 @@ function updateRings(dt) {
     s.ring.visible = s.disc.visible = true;
     s.ring.position.set(W.pl[i][0], 0.1, W.pl[i][1]); s.ring.scale.setScalar(W.r); s.ring.material.opacity = 0.9; s.ring.material.color.setHex(on ? 0xffffff : W.col);
     s.disc.position.set(W.pl[i][0], 0.09, W.pl[i][1]); s.disc.scale.setScalar(W.r * (0.35 + 0.65 * prog)); s.disc.material.opacity = 0.25 + 0.3 * pulse; s.disc.material.color.setHex(on ? 0xfff2b0 : W.col);
-    if (Math.random() < 0.5) burst(W.pl[i][0] + (Math.random() - 0.5) * W.r, 0.2, W.pl[i][1] + (Math.random() - 0.5) * W.r, 1, W.col, 0.6, 0.8, 0.25, -1.2, 2.2);
+    if (Math.random() < 0.5 * fxK) burst(W.pl[i][0] + (Math.random() - 0.5) * W.r, 0.2, W.pl[i][1] + (Math.random() - 0.5) * W.r, 1, W.col, 0.6, 0.8, 0.25, -1.2, 2.2);
   }
   for (const c of G.clouds) {
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
@@ -8869,8 +8869,8 @@ function updateRings(dt) {
     s.ring.position.set(c.x, 0.08, c.z); s.ring.scale.setScalar(c.r); s.ring.material.opacity = 0.7 * fade; s.ring.material.color.setHex(c.team === 'mob' ? TELE_MOB : 0x8dff6a);
     s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * (c.pull ? 14 : 6)) * 0.05) * fade; s.disc.material.color.setHex(tint);
     // a vortex sheds sparks from its rim; other clouds bubble anywhere
-    if (c.pull) { if (Math.random() < 0.7) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
-    else if (Math.random() < 0.5) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
+    if (c.pull) { if (Math.random() < 0.7 * fxK) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
+    else if (Math.random() < 0.5 * fxK) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
   }
   for (let i = 0; i < RING_MAX - used; i++) {
     const s = rings[i];
@@ -10947,6 +10947,7 @@ function openSettings() {
       <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
     ${tg('fx', 'Cinematic effects', 'Bloom on crystals, lava, torches and magic, soft shadows and colour grading (with High graphics)')}
+    ${tg('hz120', '120 Hz', 'Smoother motion on 120 Hz screens. Uses more battery. No change on 60 Hz screens')}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
@@ -11436,7 +11437,7 @@ function updateHubProps(t) {
   for (const b of hubParts.barriers) { const locked = p.level < CFG.world.zones[b.zone].minLevel; b.mesh.visible = locked; b.mesh.material.opacity = 0.16 + Math.sin(t * 2) * 0.06; }
   if (hubParts.riftDisc) { hubParts.riftDisc.rotation.z = -t * 1.1; hubParts.riftRing.rotation.z = t * 0.5; hubParts.riftRing.scale.setScalar(1 + Math.sin(t * 3) * 0.04); }
   // ascended (level 200): a golden trail while you move
-  if (HERO_OVERLAYS && ascTier(p.level) >= 3 && G.player.alive && (G.player.moveAmt || 0) > 0.3 && Math.random() < 0.5) burst(G.player.x, 0.5 + Math.random(), G.player.z, 1, Math.random() < 0.5 ? 0xffd36b : 0xfff3c4, 0.6, 0.9, 0.2, -0.5, 1);
+  if (HERO_OVERLAYS && ascTier(p.level) >= 3 && G.player.alive && (G.player.moveAmt || 0) > 0.3 && Math.random() < 0.5 * fxK) burst(G.player.x, 0.5 + Math.random(), G.player.z, 1, Math.random() < 0.5 ? 0xffd36b : 0xfff3c4, 0.6, 0.9, 0.2, -0.5, 1);
   hubParts.portalDisc.rotation.z = t * 0.6; hubParts.portalDisc.material.opacity = 0.6 + Math.sin(t * 3) * 0.15; hubParts.portalRing.rotation.z = -t * 0.4;
   const bim = hubParts.berryIM;
   G.berries.forEach((b, i) => {
@@ -13262,23 +13263,25 @@ function pvpDieRecv(d) {
 // ---------------------------------------------------------------------
 // 10. MAIN LOOP — fixed-timestep simulation, render separate
 // ---------------------------------------------------------------------
-const FRAME_MS = 1000 / 60;
+const FRAME_MS = 1000 / 60, FRAME_MS_120 = 1000 / 120;
 let lastFrame = performance.now(), nextFrameAt = lastFrame, simAcc = 0, saveT = 0, achT = 0;
 function frame(now) {
   requestAnimationFrame(frame);
-  // Keep a 60 Hz cadence even on 90/120/144 Hz screens. Accumulate elapsed time
-  // between processed frames so simulation stays at its existing fixed timestep.
+  // Keep a 60 Hz cadence even on 90/120/144 Hz screens (up to 120 with the 120 Hz option). Accumulate elapsed
+  // time between processed frames so simulation stays at its existing fixed timestep.
+  const hz120 = !!(G.profile && G.profile.settings.hz120), ms = hz120 ? FRAME_MS_120 : FRAME_MS;
   if (now < nextFrameAt - 0.5) return;
-  nextFrameAt = now + FRAME_MS - (Math.max(0, now - nextFrameAt) % FRAME_MS);
+  nextFrameAt = now + ms - (Math.max(0, now - nextFrameAt) % ms);
   let dt = (now - lastFrame) / 1000; lastFrame = now;
   if (dt > 0.1) dt = 0.1;
+  fxK = hz120 ? Math.min(1, dt * 60) : 1;
   if (G.paused) return;
   buildPlayerIntent();
   // the open world keeps running behind menus (you are safe while one is open); Showdown pauses
   if (!G.modal || (G.mode === 'hub' && G.started)) {
     simAcc += G.slowT > 0 ? dt * 0.3 : dt; G.slowT -= dt; // a Radiant drop slows the world for a moment
     let n = 0;
-    while (simAcc >= CFG.sim.step && n < CFG.sim.maxSteps) { simStep(CFG.sim.step); simAcc -= CFG.sim.step; n++; }
+    while (simAcc >= CFG.sim.step && n < CFG.sim.maxSteps) { if (hz120) Interp.snap(); simStep(CFG.sim.step); simAcc -= CFG.sim.step; n++; }
     if (n === CFG.sim.maxSteps) simAcc = 0;
   }
   processEvents();
@@ -13291,20 +13294,48 @@ function frame(now) {
     else if (G.mode === 'hub' && G.riftResult) { const rr = G.riftResult; G.riftResult = null; openRiftResult(rr); }
   }
   const t = now / 1000;
-  syncViews(dt, t);
   mpUpdate(dt);
-  updateGearAura(dt); updateProjectileMeshes(); HeroFX.update(dt, HeroSupers.marked); updateParticles(dt); updateRings(dt); updateAim(dt);
+  if (hz120) Interp.apply(simAcc / CFG.sim.step);
+  syncViews(dt, t);
+  updateGearAura(dt); updateProjectileMeshes(dt); HeroFX.update(dt, HeroSupers.marked); updateParticles(dt); updateRings(dt); updateAim(dt);
   if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
   updateCamera(dt);
   updateCompanion(dt,t);
   Pixel.render();
-  updateTags(); updateDmgNumbers(dt); updateHUD(dt);
+  updateTags(); updateDmgNumbers(dt);
+  Interp.restore();
+  updateHUD(dt);
   updateDoll();
   qualityTick(dt);
   achT += dt; if (achT > 1) { achT = 0; if (G.started) checkAchievements(); }
   saveT += dt; if (saveT > 4 && G.dirty) { saveT = 0; G.dirty = false; saveNow(false); }
 }
 
+
+// --- 120 Hz: draw between simulation steps -------------------------------------------------------
+// The simulation always steps at 60 Hz. Drawn at 120 Hz, every other frame would show the same positions
+// while the camera keeps gliding, which reads as jitter. So each frame draws the movers part way from their
+// previous step to their latest one, then puts the real positions back before anything else reads them.
+const Interp = {
+  steps: 0, saved: [],
+  bodies(fn) {
+    if (G.mode === 'arena' && G.arena) { for (const f of G.arena.fighters) fn(f); }
+    else { for (const f of G.hubFighters) fn(f); for (const e of G.enemies) fn(e); if (G.boss) fn(G.boss); }
+    for (let i = 0; i < PROJ_MAX; i++) { const p = projectiles[i]; if (p && p.active) fn(p); }
+  },
+  snap() { const s = ++this.steps; this.bodies((b) => { b.ix = b.x; b.iy = b.y; b.iz = b.z; b.iStep = s; }); },
+  apply(k) {
+    k = clamp(k, 0, 1); const s = this.steps, out = this.saved;
+    this.bodies((b) => {
+      // only bodies that existed before the latest step and moved a walkable distance (respawns and teleports snap)
+      if (b.iStep !== s || Math.abs(b.x - b.ix) + Math.abs(b.z - b.iz) > 3) return;
+      out.push(b, b.x, b.y, b.z);
+      b.x = b.ix + (b.x - b.ix) * k; b.z = b.iz + (b.z - b.iz) * k;
+      if (typeof b.y === 'number' && typeof b.iy === 'number') b.y = b.iy + (b.y - b.iy) * k;
+    });
+  },
+  restore() { const o = this.saved; for (let i = 0; i < o.length; i += 4) { const b = o[i]; b.x = o[i + 1]; if (o[i + 2] !== undefined) b.y = o[i + 2]; b.z = o[i + 3]; } o.length = 0; },
+};
 // --- cloud save: a private copy of your progress in this artifact's database ---
 // Lives under data/users/<your id>/save (only you can read it). Local storage stays as a fast cache.
 const Cloud = { doc: null, state: 'connecting', lastPush: 0, pushing: false, pending: false, kind: '' };
