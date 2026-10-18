@@ -1,3 +1,28 @@
+# Dungeon makeover phase 2: lever and plate puzzles (18 Oct 2026, branch `claude/dungeon-puzzles`, PR to main)
+Phase 1 (bigger halls) is merged. Phase 2 (`36b-delve.js` `delvePuzzleMake`/`stepDelvePuzzle`/`delvePzSet`, `CFG.delve.puzzle`;
+looks in `47b-delve-view.js` `buildDelvePuzzles`):
+- **Puzzle halls:** 1 per run on Normal/Hard, up to 2 from Heroic (always one plain fight hall left). 4 seals (5 from
+  Heroic) round the hall, a mix of floor plates and lever stones (`rune_obelisk` model, solid). Each seal floats its own
+  pixel rune; a floor mural between two standing stones by the entrance shows the runes in order with arrows. Normal and
+  Hard sometimes number the seals with pips (1-5 dots) instead. Every dungeon names its puzzle (Root Seals, Frost Runes,
+  Forge Valves, The Lost Index, Tide Shells, Star Sigils).
+- **Play:** stand on or by a seal for 0.6 s to wake it (no extra button). The right one glows in the dungeon's colour and
+  its rune rises; a wrong one resets the lot, flashes the hall red and bites back: a spike burst under the heroes, next
+  time a pack of three crawls out (in turn). After a reset you must step off a seal before it counts again. The gate opens
+  only when every seal is awake.
+- **Bots:** they never wake a wrong seal; once a hero woke the first one right, the first bot walks to the next seal
+  after 2 s each (`botWait`). Solo: you find the first, the bots finish it (~10 s in the browser test).
+- **Party:** every game watches every hero on the seals; steps and fails also go out as 'dpz' (first game wins, never
+  backwards), so the seals and punishments match on all phones.
+- Checks: `tools/check_delve.cjs` (order, wrong seal resets with spikes then a pack, no repeat while standing, gate
+  waits, 'dpz' sync). Browser: frost puzzle solved with bots, no errors.
+- **Dungeons menu scroll fixed:** the panel redrew itself every second, which stopped a swipe on phones and threw the
+  difficulty strip back to the start. Now it only redraws when something on it changed, never within 1.5 s of a touch or
+  scroll, and keeps the strip's position (`openDelvePanel`, `partyUpdate` in `73-party.js`).
+- **Open:** try on a phone (are the runes readable at phone size? the mural is ~1.7 m tiles); a dungeon-specific seal
+  look (today one rune set tinted by biome); maybe make bots wait longer on harder difficulties. Next: phase 3 (enrage
+  over time + smarter attack patterns).
+
 # Dungeon makeover phase 1: bigger halls, longer runs (18 Oct 2026, branch `claude/dungeon-makeover`, PR to main)
 Casper: the halls were too small for four heroes and runs too short (goal about 5 minutes). Plan agreed in chat, six
 phases (1 sizes + run length, 2 lever/plate puzzles, 3 enrage + smart patterns, 4 three new monsters per dungeon,
