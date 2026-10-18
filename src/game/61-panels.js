@@ -15,6 +15,7 @@ function interact() {
   if (n.kind === 'siegeLeave') return endSiege('leave');
   if (n.kind === 'fortBuild') return openBuilder();
   if (n.kind === 'fortB') return openFortBPanel(n.k);
+  if (n.kind === 'fortKeep') return openFortKeepPanel();
   const d = n.def;
   if (d.role === 'smith') return openSmith();
   if (d.role === 'arena') return openArenaPanel();
@@ -652,7 +653,11 @@ function openRiftPanel() {
 }
 // Bastion Siege: the house in town opens your fort (and other players' forts by their code); inside, you build with the
 // Build button, and walk up to a building to upgrade, empty or tear it down
-const fortStones = (n) => `<b class="stones">${fmt(n)}</b> Bastion Stones`;
+// wood, stone and iron as icon chips; with M, what you lack shows red
+function fortResHTML(pr, M) {
+  return CFG.siege.res.filter((q) => (pr[q] || 0) > 0).map((q) => `<span class="fres${M && (M[q] || 0) < pr[q] ? ' miss' : ''}">${ICON[q === 'stones' ? 'stone' : q]}<b>${fmtK(pr[q])}</b></span>`).join(' ') || 'free';
+}
+const fortHave = (M) => CFG.siege.res.map((q) => `<span class="fres">${ICON[q === 'stones' ? 'stone' : q]}<b>${fmtK(M[q] || 0)}</b></span>`).join(' ');
 // the building's picture, rendered from its 3D model (tools/fort_icons.mjs)
 const fortPic = (t, cls) => `<img class="fortPic${cls ? ' ' + cls : ''}" src="assets/ui/fort/${t}.webp" alt="" draggable="false">`;
 const fortDur = (s) => (s < 60 ? `${Math.ceil(s)}s` : s < 3600 ? `${Math.ceil(s / 60)} min` : `${Math.floor(s / 3600)} h ${Math.ceil((s % 3600) / 60)} min`);
@@ -663,45 +668,67 @@ function openSiegePanel() {
   const n = (t) => M.b.filter((b) => b.t === t).length, shared = fortOnline() || LOCAL_PREVIEW || TEST_MODE;
   const recent = (M.recent || []).map((c) => `<button class="ghost" data-act="siegeJoin" data-c="${c}">${c}</button>`).join('');
   openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Bastion Siege</h3><span class="cnt">Wave ${M.wave || 1}</span></div>
-    <div class="riftCard"><p>Monsters come for <b>The Keep</b> and the two <b>supply wagons</b> from one to four sides of your land. Build anywhere: <b>walls</b> and <b>gates</b> you draw as you walk, <b>archers</b>, <b>cannons</b>, <b>ballistas</b>, <b>mage towers</b>, <b>barracks</b>, <b>mines</b> and <b>builder huts</b>. Monsters walk around walls and break through when every way is closed.</p>
-    <p>If the Keep falls you start again at the wave you fell on, never lower. Every ${C.bossEvery}th wave a <b>Siege Lord</b> drops an item. Your land grows with your level, up to 500 by 500 metres.</p>
-    <p class="fine">Your fort: ${M.b.length} building${M.b.length === 1 ? "" : "s"} · ${n('wall') + n('gate')} wall pieces · ${n('hut')} builder${n('hut') === 1 ? '' : 's'} · best wave ${best}. You have ${fortStones(M.stones)} and ${ICON.coin}${fmtK(p.gold)} gold.</p></div>
+    <div class="riftCard"><p>Monsters come for <b>The Keep</b> and the two <b>supply wagons</b> from one to four sides of your land. Build anywhere: <b>walls</b> and <b>gates</b> you drag in straight lines, <b>towers</b>, <b>barracks</b>, <b>traps</b> and <b>builder huts</b>. Monsters walk around walls and break through when every way is closed.</p>
+    <p>Your camp pays for itself: <b>lumber mills</b>, <b>stone mines</b> and <b>iron mines</b> fill up even while you are away, and every wave held pays some too. The <b>Keep's level</b> decides how many of each building you may have. Once started, waves keep coming with a ${C.build} s break; pause them any time.</p>
+    <p>From level ${C.pathAt} a tower picks one of two paths. Later waves bring <b>armoured</b> monsters (light arrows and orbs barely scratch them) and <b>flyers</b> that cross your walls. If the Keep falls you start again at the wave you fell on, never lower.</p>
+    <p class="fine">Your fort: Keep level ${M.keep || 1} · ${M.b.length} building${M.b.length === 1 ? '' : 's'} · ${n('wall') + n('gate')} wall pieces · ${n('hut')} builder${n('hut') === 1 ? '' : 's'} · best wave ${best}. You have ${fortHave(M)}.</p></div>
     ${shared ? `<h4>Play together</h4><p class="fine">${M.code ? `Your fort code is <b class="fortCode">${M.code}</b>. Friends type it below to join, even when you are away. Anyone with the code can build in your fort.` : 'Your fort gets a code the first time you defend it. Friends use it to join you.'}</p>
     <div class="row dlvJoin"><input id="fortCode" maxlength="12" placeholder="FORT CODE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="ghost" data-act="siegeJoin">Join</button>${M.code ? `<button class="ghost" data-act="siegeCopy">Copy my code</button>` : ''}</div>
     ${recent ? `<div class="row fortRecent"><small>Recent forts</small>${recent}</div>` : ''}` : ''}
     <div class="row end"><button class="ghost" data-act="close">Not now</button><button class="primary big" data-act="siegeGo">Defend your fort</button></div>`);
 }
-function fortStat(t, l) {
-  const T = CFG.siege.towers[t];
-  if (t === 'warrior') return `${siegeMen(l)} warriors · ${fmtK(siegeDefDmg(T, l))} dmg`;
-  if (t === 'mine') return `${T.rate * l} stones an hour, holds ${T.cap * l}`;
+function fortStat(t, l, b) {
+  const T = b && b.p && CFG.siege.paths[t] && l >= CFG.siege.pathAt ? siegeStats(Object.assign({}, b, { l, d: 0 })) : CFG.siege.towers[t];
+  if (t === 'warrior') return `${siegeMen(l, b && l >= CFG.siege.pathAt ? b : null)} warriors · ${fmtK(siegeDefDmg(T, l))} dmg${T.light ? '' : ' · cuts armour'}`;
+  if (T.make) return `${T.rate * l} ${CFG.siege.resName[T.make].toLowerCase()} an hour, holds ${T.cap * l}`;
   if (t === 'hut') return 'One more upgrade at a time';
   if (T.wall) return `Monsters walk up to ${T.path + l} cells around it before breaking it`;
   if (t === 'spike') return `${fmtK(siegeDefDmg(T, l))} dmg to every monster on it · resets in ${T.cd}s`;
   if (t === 'bomb') return `${fmtK(siegeDefDmg(T, l))} dmg to all within ${T.aoe} m · once per wave`;
   if (t === 'tar') return `Half speed · ${fmtK(refDmg(G.profile.level) * T.dps * siegeLvlMul(l))} dmg a second`;
-  return `${fmtK(siegeDefDmg(T, l))} dmg · range ${T.range}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}`;
+  return `${fmtK(siegeDefDmg(T, l))} dmg · range ${Math.round(T.range)}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}${T.multi ? ` · ${T.multi} targets` : ''}${T.chain ? ` · chains ${T.chain}` : ''}${T.slow ? ' · slows' : ''}${T.burn ? ' · burns' : ''}${T.air ? ' · hits flyers' : ''}${T.light ? '' : ' · cracks armour'}`;
 }
-// one building: upgrade (takes a builder and some time from level 2), empty a mine, tear it down for half its stones
+// one building: upgrade (takes a builder and some time from level 2; at level 5 a tower picks a path), collect a mill or
+// mine, move it (builder mode), tear it down for half of what it cost
 function openFortBPanel(k) {
   const S = G.siege, u = S && S.units[k]; if (!u) return UI.close();
   UI.current = 'fortB'; UI.fortK = k;
-  const p = G.profile, F = fortState(), M = myFort(), b = u.b, T = CFG.siege.towers[b.t], fi = F.b.indexOf(b), max = b.l >= fortMaxLvl(b.t), now = fortNow();
-  const c = max ? null : fortCost(b.t, b.l + 1), busy = b.d > now, why = max ? '' : fortCheck({ o: 'up', k: fi }), ok = !why && p.gold >= c.gold && M.stones >= c.stones;
-  const mine = b.t === 'mine' ? fortMineStones(b) : 0;
-  openModal(`<div class="npcHead">${fortPic(b.t, 'big')}<h3>${T.name}</h3><span class="cnt">${T.maxLvl === 1 ? '' : 'Lv ' + b.l}</span></div>
-    <p>${T.blurb}</p><p class="fine">${fortStat(b.t, Math.max(1, fortLvl(b)))}${busy ? ` · upgrading to level ${b.l}, ${fortDur((b.d - now) / 1000)} left` : ''}</p>
-    ${b.t === 'mine' ? `<div class="row"><button class="${mine > 0 ? 'primary' : 'ghost'}" data-act="fortCol" data-k="${fi}"${mine > 0 ? '' : ' aria-disabled="true"'}>Take ${fortStones(mine)}</button></div>` : ''}
-    ${max ? '<p class="fine">Max level.</p>' : `<p class="fine">Level ${b.l + 1}: ${fortStat(b.t, b.l + 1)}<br>${ICON.coin}${fmtK(c.gold)} · ${fortStones(c.stones)}${c.time ? ` · ${fortDur(c.time)} with a builder` : ''}${why ? ` · ${why}` : ''}</p>`}
-    <div class="row end">${G.builder ? `<button class="ghost" data-act="fortMove" data-k="${fi}">Move</button>` : ''}<button class="warn" data-act="fortDel" data-k="${fi}">Tear down (+${fmt(Math.floor(fortStonesSpent(b) / 2))} stones)</button><button class="ghost" data-act="close">Back</button>${max ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortUp" data-k="${fi}"${ok ? '' : ' aria-disabled="true"'}>Upgrade</button>`}</div>`);
+  const C = CFG.siege, F = fortState(), M = myFort(), b = u.b, T = C.towers[b.t], fi = F.b.indexOf(b), top = b.l >= (T.maxLvl || C.maxLvl), now = fortNow();
+  const c = top ? null : fortCost(b.t, b.l + 1), busy = b.d > now, fork = !top && fortNeedsPath(b), P = C.paths[b.t];
+  const why = top ? '' : fortCheck({ o: 'up', k: fi, p: fork ? 1 : 0 }), ok = !why && fortHas(c, M), made = fortMade(b), path = b.p && P ? P[b.p - 1] : null;
+  const back = fortSpent(b); for (const q in back) back[q] = Math.floor(back[q] / 2);
+  const upBtns = top ? '' : fork
+    ? P.map((q, i) => `<button class="${ok ? 'primary' : 'ghost'} fortPath" data-act="fortUp" data-k="${fi}" data-p="${i + 1}"${ok ? '' : ' aria-disabled="true"'}><b>${q.name}</b><small>${q.blurb}</small></button>`).join('')
+    : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortUp" data-k="${fi}"${ok ? '' : ' aria-disabled="true"'}>Upgrade</button>`;
+  openModal(`<div class="npcHead">${fortPic(b.t, 'big')}<h3>${path ? path.name : T.name}</h3><span class="cnt">${T.maxLvl === 1 ? '' : 'Lv ' + b.l}</span></div>
+    <p>${path ? path.blurb : T.blurb}</p><p class="fine">${fortStat(b.t, Math.max(1, fortLvl(b)), b)}${busy ? ` · upgrading to level ${b.l}, ${fortDur((b.d - now) / 1000)} left` : ''}</p>
+    ${T.make ? `<div class="row"><button class="${made > 0 ? 'primary' : 'ghost'}" data-act="fortCol" data-k="${fi}"${made > 0 ? '' : ' aria-disabled="true"'}>Collect ${fortResHTML({ [T.make]: Math.max(made, 0) }).replace('free', '0')}</button></div>` : ''}
+    ${top ? '<p class="fine">Max level.</p>' : `<p class="fine">${fork ? `Level ${b.l + 1}: pick a path (it stays)` : `Level ${b.l + 1}: ${fortStat(b.t, b.l + 1, b)}`}<br>${fortResHTML(c, M)}${c.time ? ` · ${fortDur(c.time)} with a builder` : ''}${why && why !== 'Pick a path' ? ` · ${why}` : ''}</p>`}
+    ${fork ? `<div class="row fortPaths">${upBtns}</div>` : ''}
+    <div class="row end">${G.builder ? `<button class="ghost" data-act="fortMove" data-k="${fi}">Move</button>` : ''}<button class="warn" data-act="fortDel" data-k="${fi}">Tear down (+${fortResHTML(back)})</button><button class="ghost" data-act="close">Back</button>${fork ? '' : upBtns}</div>`);
+}
+// the Keep: its level sets how many of each building you may have and how high they go
+function openFortKeepPanel() {
+  const S = G.siege; if (!S) return UI.close();
+  UI.current = 'fortKeep';
+  const C = CFG.siege, F = fortState(), M = myFort(), k = F.keep || 1, eff = fortKeep(F), now = fortNow(), top = k >= C.keep.max;
+  const c = top ? null : C.keep.cost(k + 1), why = top ? '' : fortCheck({ o: 'keep' }), ok = !why && fortHas(c, M);
+  const rows = SIEGE_TYPES.filter((t) => C.towers[t].lim).map((t) => { const L = C.towers[t].lim, n = fortCount(t, F), now1 = L[eff - 1], nx = top ? null : L[k];
+    return `<div class="row"><b>${C.towers[t].short}</b><small>${n}/${now1}${nx != null && nx > now1 ? ` → ${nx}` : ''}</small></div>`; }).join('');
+  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>The Keep</h3><span class="cnt">Level ${k}</span></div>
+    <p>The Keep's level decides how many of each building your camp may have, and how high they can be upgraded (now level ${C.keep.lvl[eff - 1]}). Every level also makes the Keep and the wagons sturdier.</p>
+    ${F.kd > now ? `<p class="fine">Upgrading to level ${k}, ${fortDur((F.kd - now) / 1000)} left (one builder).</p>` : ''}
+    <div class="list fortLimits">${rows}</div>
+    ${top ? '<p class="fine">Max level.</p>' : `<p class="fine">Level ${k + 1}: buildings up to level ${C.keep.lvl[k]}<br>${fortResHTML(c, M)} · ${fortDur(C.keep.time(k + 1))} with a builder${why ? ` · ${why}` : ''}</p>`}
+    <div class="row end"><button class="ghost" data-act="close">Back</button>${top ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortKeep"${ok ? '' : ' aria-disabled="true"'}>Upgrade the Keep</button>`}</div>`);
 }
 function openSiegeResult(r) {
   UI.current = 'siegeResult';
   const why = r.why === 'keep' ? 'The Keep has fallen' : 'You left the fort';
   openModal(`<div class="center"><div class="eyebrow">${why}</div><h2>Bastion Siege · ${r.held ? `${r.held} wave${r.held > 1 ? 's' : ''} held` : 'no wave held'}</h2></div>
-    <div class="stats3"><div><b>${r.held}</b><span>Waves held</span></div><div><b>${ICON.coin}${fmtK(r.gold)}</b><span>Gold</span></div><div><b class="stones">${fmt(r.stones)}</b><span>Bastion Stones</span></div></div>
+    <div class="stats3"><div><b>${r.held}</b><span>Waves held</span></div><div><b>${ICON.coin}${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${fortResHTML(r)}</b><span>Camp resources</span></div></div>
     <div class="stats3"><div><b>${r.items}</b><span>Siege Lord items</span></div><div><b>${r.best}</b><span>Best wave</span></div><div><b>${r.next}</b><span>Next start</span></div></div>
-    <p class="fine center">Next time the fort starts at wave ${r.next}. Spend your stones and gold on new buildings and upgrades, then hold out longer.</p>
+    <p class="fine center">Next time the fort starts at wave ${r.next}. Collect your mills and mines, build and upgrade, then hold out longer.</p>
     <div class="row end"><button class="ghost" data-act="close">Later</button><button class="primary big" data-act="fortBack">Back to the Bastion</button></div>`);
 }
 // Dungeons: a sealed instance per POI. Pick a plain run or one of your Dungeon Keys (it is used up on entry).
@@ -957,7 +984,8 @@ function handlePanelClick(e) {
     case 'siegeCopy': { const c = myFort().code; try { navigator.clipboard.writeText(c).then(() => toast(`Copied ${c}`, 'good'), () => toast(c)); } catch (e) { toast(c); } break; }
     case 'fortWave': UI.close(); startSiegeWave(); break;
     case 'fortMove': { const fb = fortState().b[+b.dataset.k]; UI.close(); if (fb) builderMove(fb); break; }
-    case 'fortUp': case 'fortDel': case 'fortCol': { const why = fortDo({ o: act === 'fortUp' ? 'up' : act === 'fortDel' ? 'del' : 'col', k: +b.dataset.k });
+    case 'fortKeep': { const why = fortDo({ o: 'keep' }); if (why) toast(why, 'bad'); else Sfx.play('unlock'); openFortKeepPanel(); break; }
+    case 'fortUp': case 'fortDel': case 'fortCol': { const why = fortDo({ o: act === 'fortUp' ? 'up' : act === 'fortDel' ? 'del' : 'col', k: +b.dataset.k, p: +b.dataset.p || 0 });
       if (why) toast(why, 'bad'); else Sfx.play('unlock');
       if (act === 'fortDel' || why) UI.close(); else openFortBPanel(UI.fortK); break; }
     case 'fortBack': if (G.siege) UI.close(); else openSiegePanel(); break;

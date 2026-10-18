@@ -185,6 +185,7 @@ function dealDamage(t, amount, srcId, o) {
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
   if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot && !t.delveBot) return 0; // hub bots are bystanders (dungeon bots fight)
+  if (G.siege && (t.siegeArmor || t.flying)) { const k = siegeDmgMul(t, srcId); if (!k) return 0; amount *= k; } // fort armour and flyers (36c-siege.js)
   const src = G.ents.get(srcId);
   let amt = amount * (1 + (Math.random() * 2 - 1) * CFG.combat.variance);
   let crit = false;

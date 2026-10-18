@@ -21,6 +21,66 @@ Casper: too spammy, one boring puzzle, bosses not intense, add rare resources, f
 - **Open:** the treasures have no recipe yet (next: dungeon crafting / secret weapons); balance of the tougher monsters and
   the boss kit on a real phone; boss attacks are generic shapes tinted per dungeon (a themed kit per boss later).
 
+# New monster bodies, monster strikes, dungeon dressing, new barracks (18 Oct 2026, branch `claude/hf-models-a`, PR to main)
+Casper: a Hugging Face session for attack animations, new mobs and props for dungeons and the world, more unique Bastion art.
+Made with the HF MCP tools (Z-Image Turbo concept → TRELLIS.2 1024, seed 7), relayed to `asset-drop` (`drop/mobs-a`,
+`drop/props-a`); intermediates in `tools/.gen/mobs-a`, `tools/.gen/props-a`.
+- **10 new monster bodies** (`assets/enemy/`, ~9k tris, 1024 textures, 530-880 KB; hornet 512): toad, bat, hornet,
+  scorpion, viper, myconid, crab, jelly, wyvern, glassbull. Now on their own body: Fume-Toad, Echo-Bat, Sun-Drunk Hornet,
+  Scoria-Scorpion, Bark-Scale Viper, Myconid Spore-Tosser, Boil-Crab, Nebula-Jellyfish, Flame-Wyrm, Glass-Minotaur (a
+  crystal bull); retinted: Lightning-Wyvern, Spore-Urchin (myconid), Pitfall-Wurm (viper), Crag-Goat (glassbull).
+  `tintK` per species (low = keeps its painted colours). Each new body has its own idle/walk motion in `43-enemies-view.js`.
+- **Monster strikes** (`43-enemies-view.js`, all 24 bodies): after the wind-up pose the body now strikes when the move
+  goes off (and on every plain attack): slams drop and squash with a dust burst, pounces/bites lunge, sweeps/cleaves swing
+  through, shots and breath kick back or thrust, novas pulse, burrowers burst up (`STRIKE_OF`). The old lean-back on
+  attack is gone. Heroes already play the KayKit attack clips; their attacks were not changed.
+- **Dungeon dressing** (`DUNGEON_THEME_PROP` in `47-dungeon-view.js`): every hall but the first and the boss's gets its
+  dungeon's prop along the walls (2, or 4 in big party halls): root-split sarcophagus (Crypt), glacier coffin
+  (Frostvault), slag cart (Cinder), bookshelf (Archive), coral shrine (Grotto), fallen star (Starfall). 6-9k tris each.
+  Same per biome for the old world dungeons.
+- **Bastion:** new barracks model (whole roof, no streaks; 9.9k tris) and its menu picture.
+- **Learned:** the permissive simplify (`PERM=1`) and `v12_simplify_packed` below ~9k smear TRELLIS textures on
+  buildings (the old streaky barracks); keep buildings near 9-10k. The PRO ZeroGPU quota ran out after 17 models
+  (about 30 s GPU each) and the error said it comes back in ~19.5 h, so it is not a fixed 22:45 reset.
+- **Queued (no GPU left):** cut-out concepts on `asset-drop` `drop/queue-b-concepts/` (feed the raw.githubusercontent
+  URL to `generate_3d`): new builder hut, Siege Lord (armoured ogre with a battering ram) and Siege Captain (goblin on a
+  war boar) as unique siege boss bodies (set the body in `spawnSiegeMob`, `36c-siege.js`), a supply cart and a fort
+  banner for the fort dressing, and three world props (mountain totem, arcane lectern, celestial sun lantern).
+- **Open:** look at the new bodies on a phone (sizes in `ASSET_MANIFEST` `size`); Kelpie, Dust-Harpy, Shaft-Vulture,
+  Pressure-Squid and Grotto-Angler still borrow bodies (next batch: horse, harpy, vulture, squid, angler).
+# Bastion: Clash of Clans + Balloons TD (18 Oct 2026, branch `claude/bastion-coc`)
+Casper: shop didn't scroll, drag should show the building on the board, limits per tower kind, camp resources, straight
+wall lines, auto waves after the first start with time to upgrade, smaller models with looks per level and animations,
+a CoC + Balloons TD mix. Agreed: only camp resources, ~20 s break with a pause, 7 looks, plus Balloons TD paths/monsters.
+- **Builder (`75-siege-builder.js`):** the shop has tabs by kind (`BD_CATS`: Defences, Resources, Walls, Traps, each with
+  built/allowed); its strip (`#bdList`) is scrolled by hand (the builder layer has `touch-action: none`, which
+  killed native scrolling), with a glide. Drag an item up out of the strip: the preview stands just above the finger
+  and is built on release where it fits (red stays to be dragged; Place). A press on the preview drags it. Walls/gates:
+  drag a line, it locks to a row or column, shows count and price, builds on release (`builderLinePlan`). Tapping a
+  mill/mine with something in it collects; tapping the Keep opens its panel. Fixed: the preview set was registered at
+  the origin, so it never streamed in.
+- **Resources (`CFG.siege.res`, `fortCost/fortPrice/fortPay`):** wood/stone/iron in `profile.fort`; no hero gold for
+  building. Producers `mill` (new), `mine`, `iron` (new, Keep 4): `make/rate/cap`, `fortMade`. Iron from building level 6.
+  Waves pay `CFG.siege.pay(n)`. Bubbles over full producers (HUD tags). Pixel icons `ICON.wood/stone/iron`.
+- **Keep levels (`CFG.siege.keep`):** 10 levels, limits `towers[t].lim`, max building level `keep.lvl`, upgrade op
+  `{ o: 'keep' }` (builder + time), sturdier Keep/wagons. Panel `openFortKeepPanel`.
+- **Auto waves:** `F.go` once wave 1 was started, then 20 s breaks; `F.hold` pauses (op `{ o: 'hold' }`, builder buttons
+  and the `#fortChip` HUD chip). Builder mode no longer freezes the fort; it stays open during waves.
+- **Balloons TD:** paths at level 5 (`CFG.siege.paths`, `b.p`, `siegeStats`): Volley/Longbow, Mortar/Fire Cannon,
+  Repeater/Sky Piercer, Frost/Storm, Shield Wall/Berserkers. Armoured monsters from wave 6 and flyers from wave 8
+  (`siegeComposition`, `siegeDmgMul` hooked into `dealDamage`): light shots ×0.2 on armour; flyers skip walls,
+  warriors and traps, only `air` towers hit them; mirrored to guests (flags 8/16 in 'fst').
+- **Save:** `sanitizeFort` keeps everything; old forts get the lowest Keep level that holds what they built
+  (`fortKeepFor`), a stock of wood, `go` if they held waves. Shared worlds carry keep/kd/go/hold and paths.
+- **Looks and animations (`47c-siege-view.js`):** buildings at 0.75 size; 7 looks at levels 1/3/5/7/9/11/13
+  (`siegeModelName`): uses `siege_<kind>_t2..t7` when that model exists, else the best lower one tinted toward the
+  look. Idle life per kind (`animateSiegeIdle`): banners flutter, saw strokes + sawdust, mine dust / iron sparks, mage
+  motes, huts hammer while a builder works, idle cannons/ballistas scan and smoke, scaffold dust while upgrading.
+- **Open:** the 56 TRELLIS models in `tools/bastion_tiers.json` (6 looks × 9 kinds + base mill and iron mine) are not
+  made yet: Casper's ZeroGPU quota was used up today. Until then mills use the hut model and iron mines the mine model
+  (tinted), and the shop pictures `mill.webp`/`iron.webp` are tinted copies. Once made: pack, `v10_boxes.cjs`, rerun
+  `tools/fort_icons.mjs`; nothing else changes. Balance (costs, rates, limits) is not playtested; try drag and pinch on
+  a real phone.
 # Dungeon makeover phase 2: lever and plate puzzles (18 Oct 2026, branch `claude/dungeon-puzzles`, PR to main)
 Phase 1 (bigger halls) is merged. Phase 2 (`36b-delve.js` `delvePuzzleMake`/`stepDelvePuzzle`/`delvePzSet`, `CFG.delve.puzzle`;
 looks in `47b-delve-view.js` `buildDelvePuzzles`):

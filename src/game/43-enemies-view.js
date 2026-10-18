@@ -17,6 +17,12 @@ const POSE_REAR = [-0.45, 0.35, 0, 0.1], POSE_LEAN = [-0.4, 0.25, 0, 0.14], POSE
 const MOVE_POSE = { slam: POSE_REAR, quake: POSE_REAR, ripple: POSE_REAR, cross: [-0.35, 0.3, 0, 0.12], cleave: [-0.2, 0.1, 0.9, 0.05], flurry: [-0.15, 0.1, 1.1, 0.04], sweep: [-0.1, 0.05, -1.5, 0.03],
   pounce: POSE_COIL, ambush: [0.3, -0.25, 0, -0.35], burrow: [0.1, -0.8, 0, -0.3], beam: POSE_LEAN, snipe: POSE_LEAN, fan: POSE_LEAN, boomerang: [-0.3, 0.2, 0.7, 0.08], nova: [-0.1, 0.4, 0, 0.18], spiral: [-0.1, 0.35, 0.6, 0.12],
   rain: [-0.5, 0.45, 0, 0.12], mortar: POSE_LEAN, breath: [-0.5, 0.2, 0, 0.16], zap: POSE_LEAN, vortex: [-0.3, 0.4, 0, 0.1], trap: POSE_LEAN, pool: [0.15, 0, 0, -0.1] };
+// the strike that follows the wind-up (and every plain attack): slams drop and squash, pounces and bites lunge,
+// sweeps swing through, shots kick back, novas pulse, burrowers burst up
+const STRIKE_OF = { slam: 'slam', quake: 'slam', ripple: 'slam', cross: 'slam', spikes: 'slam', trample: 'slam', cleave: 'swing', flurry: 'swing', sweep: 'swing',
+  pounce: 'lunge', ambush: 'lunge', burrow: 'burst', beam: 'recoil', snipe: 'recoil', fan: 'recoil', boomerang: 'swing', mortar: 'recoil', rain: 'recoil', zap: 'recoil', trap: 'recoil',
+  breath: 'breath', nova: 'pulse', spiral: 'pulse', vortex: 'pulse', pool: 'slam' };
+const SHOOTER_KIT = { shooter: 1, spray: 1, turret: 1 };
 AssetSlots.register('enemy', (o) => {
   const root = new THREE.Group();
   const ED = CFG.enemies[o.type] || {}, bt = enemyBase(o.type), tint = ED.tint != null ? new THREE.Color(ED.tint) : null, esz = ED.scale || 1;
@@ -43,7 +49,7 @@ AssetSlots.register('enemy', (o) => {
   if (o.elite) {
     aura = pxRingMesh(0.88, 1.05, { color: 0xffc94a, transparent: true, opacity: 0.6, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -40 }, 8, 0.62); aura.position.y = 0.25; root.add(aura);
   }
-  let phase = Math.random() * 6, deadT = 0;
+  let phase = Math.random() * 6, deadT = 0, relK = null, struck = false;
   return {
     root,
     update(e, dt, t) {
@@ -54,24 +60,47 @@ AssetSlots.register('enemy', (o) => {
       phase += dt * (2 + (e.moveAmt || 0) * 8);
       pivot.rotation.set(0, 0, 0); pivot.scale.set(1, 1, 1); // the move pose below adds to (and stretches) whatever the body animation sets, so both reset every frame
       if (bt === 'slime') { const b = Math.abs(Math.sin(phase)); pivot.scale.set(1 + (1 - b) * 0.18, 0.8 + b * 0.3, 1 + (1 - b) * 0.18); pivot.position.y = b * 0.25 * (e.moveAmt || 0.2); }
-      else if (bt === 'wolf') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.12 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'wolf') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.12 * (e.moveAmt || 0); }
       else if (bt === 'beetle') { pivot.position.y = Math.abs(Math.sin(phase * 2)) * 0.05 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.25 + Math.sin(t * 40) * 0.05 : 0; pivot.rotation.z = Math.sin(phase * 2) * 0.04 * (e.moveAmt || 0); }
-      else if (bt === 'wraith') { pivot.position.y = Math.sin(t * 2.2 + phase) * 0.25 + 0.35; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'wraith') { pivot.position.y = Math.sin(t * 2.2 + phase) * 0.25 + 0.35; pivot.rotation.x = 0.1; }
       else if (bt === 'boar') { pivot.position.y = Math.abs(Math.sin(phase * 1.5)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.2 + Math.sin(t * 40) * 0.04 : 0; }
       else if (bt === 'spider') { pivot.position.y = Math.abs(Math.sin(phase * 2.5)) * 0.05; pivot.rotation.z = Math.sin(phase * 2.5) * 0.06 * (e.moveAmt || 0); }
-      else if (bt === 'yeti') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.15 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.35; pivot.rotation.z = Math.sin(phase * 0.8) * 0.06 * (e.moveAmt || 0); }
-      else if (bt === 'crawler') { pivot.position.y = Math.abs(Math.sin(phase * 3)) * 0.04; pivot.rotation.z = Math.sin(phase * 3) * 0.08 * (e.moveAmt || 0); pivot.rotation.x = (e.attackAnim || 0) * -0.25; }
-      else if (bt === 'drowned') { pivot.position.y = Math.sin(t * 1.9 + phase) * 0.22 + 0.3; pivot.rotation.z = Math.sin(t * 1.3 + phase) * 0.1; pivot.rotation.x = 0.1 + (e.attackAnim || 0) * -0.3; }
-      else if (bt === 'seraph') { pivot.position.y = Math.sin(t * 2.4 + phase) * 0.25 + 0.35; pivot.rotation.x = (e.attackAnim || 0) * -0.3; }
-      else if (bt === 'warden') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.22 + Math.sin(t * 40) * 0.04 : (e.attackAnim || 0) * -0.3; }
+      else if (bt === 'yeti') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.15 * (e.moveAmt || 0); pivot.rotation.z = Math.sin(phase * 0.8) * 0.06 * (e.moveAmt || 0); }
+      else if (bt === 'crawler') { pivot.position.y = Math.abs(Math.sin(phase * 3)) * 0.04; pivot.rotation.z = Math.sin(phase * 3) * 0.08 * (e.moveAmt || 0); }
+      else if (bt === 'drowned') { pivot.position.y = Math.sin(t * 1.9 + phase) * 0.22 + 0.3; pivot.rotation.z = Math.sin(t * 1.3 + phase) * 0.1; pivot.rotation.x = 0.1; }
+      else if (bt === 'seraph') { pivot.position.y = Math.sin(t * 2.4 + phase) * 0.25 + 0.35; }
+      else if (bt === 'warden') { pivot.position.y = Math.abs(Math.sin(phase * 0.8)) * 0.1 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.22 + Math.sin(t * 40) * 0.04 : 0; }
       else if (bt === 'sentinel') { pivot.position.y = Math.sin(t * 1.6 + phase) * 0.2 + 0.25; pivot.rotation.y = t * 0.8; }
+      else if (bt === 'toad') { const h = Math.max(0, Math.sin(phase * 0.9)); pivot.position.y = h * 0.35 * (e.moveAmt || 0); pivot.scale.set(1 + (1 - h) * 0.08, 0.92 + h * 0.14, 1 + (1 - h) * 0.08); pivot.rotation.x = -h * 0.12 * (e.moveAmt || 0); }
+      else if (bt === 'bat') { const f = Math.sin(t * 9 + phase); pivot.position.y = 0.55 + f * 0.12; pivot.scale.x = 1 + f * 0.12; pivot.rotation.x = 0.15; }
+      else if (bt === 'hornet') { pivot.position.y = 0.5 + Math.sin(t * 5 + phase) * 0.12 + Math.sin(t * 61) * 0.015; pivot.rotation.z = Math.sin(t * 3.1 + phase) * 0.12; pivot.rotation.x = 0.12; }
+      else if (bt === 'jelly') { const b = Math.sin(t * 2.2 + phase); pivot.position.y = 0.45 + b * 0.22; pivot.scale.set(1 - b * 0.07, 1 + b * 0.1, 1 - b * 0.07); }
+      else if (bt === 'wyvern') { pivot.position.y = Math.abs(Math.sin(phase * 0.9)) * 0.12 * (e.moveAmt || 0) + Math.sin(t * 2 + phase) * 0.04; pivot.rotation.z = Math.sin(phase * 0.9) * 0.06 * (e.moveAmt || 0); }
+      else if (bt === 'viper') { pivot.rotation.z = Math.sin(phase * 1.6) * 0.1; pivot.rotation.y = Math.sin(phase * 0.8) * 0.18; pivot.scale.y = 1 + Math.sin(t * 2 + phase) * 0.03; }
+      else if (bt === 'scorpion' || bt === 'crab') { pivot.position.y = Math.abs(Math.sin(phase * 2.6)) * 0.04; pivot.rotation.z = Math.sin(phase * 2.6) * 0.07 * (e.moveAmt || 0); }
+      else if (bt === 'myconid') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.08 * (e.moveAmt || 0); pivot.rotation.z = Math.sin(phase) * 0.1 * (e.moveAmt || 0); pivot.scale.y = 1 + Math.sin(t * 1.7 + phase) * 0.025; }
+      else if (bt === 'glassbull') { pivot.position.y = Math.abs(Math.sin(phase * 1.3)) * 0.09 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.2 + Math.sin(t * 40) * 0.04 : 0; }
       else { pivot.position.y = Math.sin(t * 3 + phase) * 0.2 + 0.2; pivot.rotation.z = Math.sin(t * 2 + phase) * 0.08; }
       // wind-up poses: each move has its own telegraph in the body (rear up, coil, lean back, wind the arms), eased in as the marker fills
+      if (e.windK && e.windT > 0) relK = e.windK;
       if (e.windK && e.windT > 0) {
         const wp = clamp(1 - e.windT / (e.windMax || 1), 0, 1), ez = wp * wp * (3 - 2 * wp), P = MOVE_POSE[e.windK] || MOVE_POSE.slam;
         pivot.rotation.x += P[0] * ez; pivot.position.y += P[1] * ez; pivot.rotation.y += P[2] * ez; pivot.scale.y *= 1 + P[3] * ez; pivot.scale.x *= 1 - P[3] * 0.5 * ez; pivot.scale.z *= 1 - P[3] * 0.5 * ez;
         if (Math.random() < 0.25 * wp * fxK) burst(e.x + (Math.random() - 0.5) * e.r * 2, 0.15, e.z + (Math.random() - 0.5) * e.r * 2, 1, BIOME_TINT[areaBiome(e.zone)] || 0xffffff, 1.2, 0.35, 0.2, -0.4, 1.4);
       }
+      // the strike: attackAnim jumps to 1 when a move or a plain attack goes off and fades in a third of a second
+      const a = e.attackAnim || 0;
+      if (a > 0.02 && !(e.windT > 0)) {
+        const k = STRIKE_OF[relK] || (SHOOTER_KIT[ED.kit] ? 'recoil' : 'lunge'), v = a * a, ez = 1 - Math.pow(1 - a, 3);
+        if (k === 'slam') { pivot.position.y -= 0.12 * v; pivot.rotation.x += 0.4 * ez; pivot.scale.y *= 1 - 0.28 * v; pivot.scale.x *= 1 + 0.18 * v; pivot.scale.z *= 1 + 0.18 * v; }
+        else if (k === 'lunge') { pivot.position.z += 0.55 * Math.sin(a * Math.PI); pivot.rotation.x += 0.3 * ez; pivot.scale.z *= 1 + 0.12 * v; }
+        else if (k === 'swing') { const P = MOVE_POSE[relK] || MOVE_POSE.cleave; pivot.rotation.y -= P[2] * 1.3 * Math.sin(a * Math.PI * 0.5); pivot.position.z += 0.2 * v; }
+        else if (k === 'recoil') { pivot.position.z -= 0.22 * v; pivot.rotation.x -= 0.22 * v; pivot.scale.z *= 1 - 0.08 * v; }
+        else if (k === 'breath') { pivot.rotation.x += 0.35 * ez; pivot.position.z += 0.18 * ez; pivot.scale.z *= 1 + 0.1 * ez; }
+        else if (k === 'pulse') { const g = 1 + 0.22 * v; pivot.scale.multiplyScalar(g); pivot.position.y += 0.1 * v; }
+        else if (k === 'burst') { pivot.position.y += 0.6 * Math.sin(a * Math.PI); pivot.rotation.x -= 0.3 * v; }
+        if (!struck && a > 0.85) { struck = true; if (k === 'slam' && fxK > 0) burst(e.x, 0.1, e.z, Math.round(10 * fxK), BIOME_TINT[areaBiome(e.zone)] || 0xc8b89a, 4.5, 0.45, 0.32, -2, 0.6); }
+      } else { struck = false; if (!(e.windT > 0)) relK = null; }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
       else if (e.invulnT > 0) mat.emissive.setRGB(0.15 + f, 0.55 + f, 0.85 + f);

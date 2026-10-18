@@ -23,12 +23,12 @@ for (const f of ['test-mode', 'loot-collection', 'prestige', 'companions', 'hero
 vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp =', '// 3. DATA') + 'const P = CFG.progression;' + section('const AC =', 'const G = {') +
   section('class Grid {', '// --- entities') + section('function patrolCountFor(', 'function rewardEnemyKill(') + section('const PELLET_COLORS', '// --- hub step') +
   section('function separate(', '// --- world boss') + section('function boundFighter(', '// --- progression') +
-  section('// Bastion fort: { wave, land', '// --- end Bastion fort save') + section('// --- Bastion Siege:', '// --- end siege') + '\nthis.CFG = CFG; this.Grid = Grid; this.SC = SC; this.SIEGE_TYPES = SIEGE_TYPES; this.siegeLevel = siegeLevel; this.siegeMen = siegeMen; this.siegeDefDmg = siegeDefDmg; this.FORT_TYPES = FORT_TYPES; this.landFor = landFor; this.siegeSides = siegeSides; this.fortLvl = fortLvl; this.stepSiegeTraps = stepSiegeTraps;', c);
+  section('// Bastion fort: { wave, land', '// --- end Bastion fort save') + section('// --- Bastion Siege:', '// --- end siege') + '\nthis.CFG = CFG; this.Grid = Grid; this.SC = SC; this.SIEGE_TYPES = SIEGE_TYPES; this.siegeLevel = siegeLevel; this.siegeMen = siegeMen; this.siegeDefDmg = siegeDefDmg; this.FORT_TYPES = FORT_TYPES; this.landFor = landFor; this.siegeSides = siegeSides; this.fortLvl = fortLvl; this.stepSiegeTraps = stepSiegeTraps; this.fortKeep = fortKeep; this.fortCount = fortCount;', c);
 const S0 = c.CFG.siege, T0 = S0.towers;
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }
-function reset(level = 40, gold = 1e12, stones = 0) {
+function reset(level = 40, gold = 1e12, stones = 0, keep = 10) {
   const hub = new c.Grid(6); hub.add({ x: 500, z: 500, r: 1 });
-  Object.assign(c.G, { mode: 'hub', started: true, modal: false, profile: { level, gold, worldTier: 0, records: {}, fort: c.sanitizeFort({ pads: [], stones }, true) }, chain: { type: null, zone: -1, n: 0 }, enemies: [], ents: new Map(), time: 0, menuSafe: 0,
+  Object.assign(c.G, { mode: 'hub', started: true, modal: false, profile: { level, gold, worldTier: 0, records: {}, fort: c.sanitizeFort({ pads: [], stones, wood: stones, iron: stones, keep }, true) }, chain: { type: null, zone: -1, n: 0 }, enemies: [], ents: new Map(), time: 0, menuSafe: 0,
     rift: null, dungeon: null, siege: null, shrines: [], hubObstacles: hub, obstacles: hub, bossTimer: 100, respawnAt: null, pendingAoE: [], siegeResult: null });
   c.G.player = { id: 0, alive: true, x: S0.gate.x, z: S0.gate.z, r: 0.55, hp: 100, maxHp: 100, ammo: 0, ammoMax: 3, speed: 6.4, intent: {}, isPlayer: true, facing: 0, invulnT: 0, attackId: 'bolt' };
   events.length = 0; shots.length = 0; grants.items = []; grants.gems = grants.xp = grants.gold = 0;
@@ -48,6 +48,8 @@ check('the Bastion house opens at level 20 and only from the hub with no other c
 check('old saves: the eight pads move onto the grid, a builder hut is added, the wave restarts one past the best', () => {
   const f = c.sanitizeFort({ stones: 9, pads: [{ t: 'archer', l: 4 }, null, { t: 'warrior', l: 2 }, null, null, null, null, { t: 'cannon', l: 15 }] }, true);
   assert.equal(f.stones, 9); assert.equal(f.b.map((b) => b.t).join(), 'archer,warrior,cannon,hut'); assert.equal(f.b[0].l, 4); assert.equal(f.b[2].l, 15);
+  assert.equal(f.keep, 10, 'the lowest Keep level that holds a level-15 cannon'); assert.equal(f.wood, 60 + (4 + 2 + 15 + 1) * 4, 'a stock of wood for the camp'); assert.equal(f.iron, 0);
+  assert.equal(c.sanitizeFort({ b: [], keep: 3, wood: 5 }, true).keep, 3, 'a known Keep level stays'); assert.equal(c.sanitizeFort({ b: [], wave: 4 }, true).go, 1, 'a fort that held waves runs them by itself');
   assert.equal(c.sanitizeFort(f, true).b.length, 4, 'a second pass keeps them');
   const g = c.sanitizeFort({ b: [{ t: 'wall', x: 3, z: 3, l: 1 }, { t: 'wall', x: 3, z: 3, l: 2 }, { t: 'laser', x: 0, z: 0 }, { t: 'archer', x: 9e9, z: 1, l: 99 }] }, false);
   assert.equal(g.b.length, 2, 'one building per cell, real types only'); assert.equal(g.b[1].x, 124); assert.equal(g.b[1].l, 15); assert.equal(g.stones, undefined, 'a shared world carries no stones');
@@ -55,10 +57,10 @@ check('old saves: the eight pads move onto the grid, a builder hut is added, the
   for (const u of S.units) assert(!c.FORT_TYPES[u.b.t] || u.x > c.SC.x - S.half && u.x < c.SC.x + S.half);
   c.endSiege('leave');
 });
-check('building anywhere on the grid: no overlaps, not on the Keep or outside the land, gold and stones paid, half the stones back', () => {
-  reset(40, 1e12, 1e6); assert(c.startSiege()); const S = c.G.siege, F = c.fortState(), M = c.myFort(), g0 = c.G.profile.gold, s0 = M.stones;
-  const pr = c.fortCost('archer', 1); assert.equal(c.fortDo({ o: 'add', t: 'archer', x: -10, z: 0 }), '');
-  assert.equal(c.G.profile.gold, g0 - pr.gold); assert.equal(M.stones, s0 - pr.stones);
+check('building anywhere on the grid: no overlaps, not on the Keep or outside the land, paid in wood and stone (no gold), half back', () => {
+  reset(40, 1e12, 1e6); assert(c.startSiege()); const S = c.G.siege, F = c.fortState(), M = c.myFort(), g0 = c.G.profile.gold, s0 = M.stones, w0 = M.wood;
+  const pr = c.fortCost('archer', 1); assert(pr.wood > 0 && pr.stones > 0 && !pr.iron && pr.gold === undefined); assert.equal(c.fortDo({ o: 'add', t: 'archer', x: -10, z: 0 }), '');
+  assert.equal(c.G.profile.gold, g0, 'hero gold is not spent'); assert.equal(M.stones, s0 - pr.stones); assert.equal(M.wood, w0 - pr.wood);
   assert.equal(c.fortDo({ o: 'add', t: 'cannon', x: -9, z: 1 }), 'Something is in the way', 'no overlap');
   assert.equal(c.fortDo({ o: 'add', t: 'wall', x: 0, z: 1 }), 'Something is in the way', 'not on the Keep');
   assert.equal(c.fortDo({ o: 'add', t: 'wall', x: 200, z: 0 }), 'Outside your land');
@@ -69,7 +71,7 @@ check('building anywhere on the grid: no overlaps, not on the Keep or outside th
   const k2 = F.b.length; assert.equal(c.fortDo({ o: 'add', t: 'mage', x: 10, z: 10 }), ''); assert.equal(c.fortDo({ o: 'up', k: k2 }), 'All builders are busy');
   assert.equal(c.fortDo({ o: 'add', t: 'hut', x: -10, z: 8 }), ''); assert.equal(c.fortDo({ o: 'up', k: k2 }), '', 'a second hut, a second builder');
   F.b[k].d = Date.now() - 1; run(0.1); assert(!F.b[k].d && c.fortLvl(F.b[k]) === 2, 'the upgrade finishes');
-  const spent = c.fortStonesSpent(F.b[k]), before = M.stones; assert.equal(c.fortDo({ o: 'del', k }), ''); assert.equal(M.stones, before + Math.floor(spent / 2));
+  const spent = c.fortSpent(F.b[k]), before = M.stones, wb = M.wood; assert.equal(c.fortDo({ o: 'del', k }), ''); assert.equal(M.stones, before + Math.floor(spent.stones / 2)); assert.equal(M.wood, wb + Math.floor(spent.wood / 2));
   assert(!S.units.some((q) => q.b.t === 'archer' && q.b.x === -10));
   assert.equal(c.fortDo({ o: 'del', k: F.b.findIndex((b) => b.t === 'hut') }), '', 'one of two huts may go'); assert.equal(c.fortDo({ o: 'del', k: F.b.findIndex((b) => b.t === 'hut') }), 'Your last builder stays');
   // moving (builder mode): free, onto free cells only, and the old cells open up
@@ -78,9 +80,10 @@ check('building anywhere on the grid: no overlaps, not on the Keep or outside th
   assert.equal(c.fortDo({ o: 'move', k: km, x: 11, z: 10 }), '', 'one cell over, partly on its own cells'); assert.equal(mb.x, 11); assert.equal(c.G.profile.gold, gm, 'moving is free');
   assert.equal(c.fortDo({ o: 'add', t: 'wall', x: 10, z: 10 }), '', 'its old cell is free again');
   // the builder's ghost: the picked cell, checked as it would be built
-  c.G.builder = { sel: 'archer', cell: [0, 1] }; assert.equal(c.fortGhost().ok, false, 'red on the Keep');
-  c.G.builder.cell = [-14, 4]; assert.equal(c.fortGhost().ok, true, 'green on free ground');
-  c.G.builder = { sel: 'mage', move: mb, cell: [11, 10] }; assert.equal(c.fortGhost().ok, true, 'a moved building may stay where it is'); c.G.builder = null;
+  c.G.builder = { sel: 'archer', cell: [0, 1] }; assert.equal(c.fortGhosts()[0].ok, false, 'red on the Keep');
+  c.G.builder.cell = [-14, 4]; assert.equal(c.fortGhosts()[0].ok, true, 'green on free ground');
+  c.G.builder = { sel: 'mage', move: mb, cell: [11, 10] }; assert.equal(c.fortGhosts()[0].ok, true, 'a moved building may stay where it is');
+  c.G.builder = { sel: 'wall', line: { plan: [{ t: 'wall', x: 1, z: 1, ok: true }, { t: 'wall', x: 2, z: 1, ok: false }] } }; assert.equal(c.fortGhosts().length, 2, 'a wall line shows every piece'); c.G.builder = null;
   c.endSiege('leave');
 });
 check('waves: level never far below the hero and climbs, more monsters each wave, a Siege Lord every 10th wave', () => {
@@ -161,11 +164,79 @@ check('a full fort holds wave 1: towers shoot, warriors man their posts, the wav
   c.G.player.alive = true; assert(c.startSiege()); assert.equal(c.G.siege.wave, 2, 'a new run starts at the wave reached'); c.endSiege('leave');
 });
 check('the fort waits while a menu is open, and walking off (waypoint travel) closes it', () => {
-  reset(30); assert(c.startSiege()); const S = c.G.siege, t0 = S.t; c.G.modal = true; run(3); assert.equal(S.t, t0); c.G.modal = false; run(1); assert(S.t < t0);
+  reset(30); c.myFort().go = 1; assert(c.startSiege()); const S = c.G.siege, t0 = S.t; c.G.modal = true; run(3); assert.equal(S.t, t0); c.G.modal = false; run(1); assert(S.t < t0);
   c.G.player.x += 900; run(0.1); assert(!c.G.siege); assert.equal(events.find((e) => e.t === 'siegeEnd').why, 'away');
 });
 check('a fallen hero respawns at the Keep instead of in town', () => {
   reset(30); assert(c.startSiege()); c.G.player.alive = false; run(0.1);
   assert.deepEqual({ ...c.G.respawnAt }, { x: c.SC.x + S0.spawn.x, z: c.SC.z + S0.spawn.z }); c.endSiege('leave');
+});
+check('the Keep level sets how many of each building you may have and how high they go; upgrading it takes a builder', () => {
+  reset(40, 1e12, 1e6, 1); assert(c.startSiege()); const F = c.fortState(), M = c.myFort(), C = c.CFG.siege; assert.equal(F.keep, 1);
+  assert.equal(c.fortDo({ o: 'add', t: 'archer', x: -10, z: 0 }), ''); assert.equal(c.fortDo({ o: 'add', t: 'archer', x: -10, z: 4 }), '');
+  assert.equal(c.fortDo({ o: 'add', t: 'archer', x: -10, z: 8 }), 'Keep level 2 allows more', 'two archers at Keep 1');
+  assert.equal(c.fortDo({ o: 'add', t: 'ballista', x: 10, z: 8 }), 'Keep level 2 allows this'); assert.equal(c.fortDo({ o: 'add', t: 'iron', x: 10, z: 8 }), 'Keep level 4 allows this');
+  const k = F.b.findIndex((b) => b.t === 'archer'); for (let l = 1; l < C.keep.lvl[0]; l++) { assert.equal(c.fortDo({ o: 'up', k }), ''); F.b[k].d = 0; }
+  assert(c.fortDo({ o: 'up', k }).startsWith('Upgrade the Keep first'), 'level 3 is the most at Keep 1');
+  const w0 = M.wood, kc = C.keep.cost(2); assert.equal(c.fortDo({ o: 'keep' }), ''); assert.equal(F.keep, 2); assert(F.kd > Date.now()); assert.equal(M.wood, w0 - kc.wood);
+  assert.equal(c.fortKeep(F), 1, 'the new limits count once it is done'); assert.equal(c.fortDo({ o: 'add', t: 'archer', x: -10, z: 8 }), 'Keep level 2 allows more');
+  assert.equal(c.fortDo({ o: 'up', k }), 'Upgrade the Keep first (level 4 needs Keep 2)'); assert.equal(c.fortDo({ o: 'keep' }), 'Already upgrading');
+  const hp0 = c.G.siege.objs[0].maxHp; F.kd = Date.now() - 1; run(0.1); assert(!F.kd); assert.equal(c.fortKeep(F), 2); assert(c.G.siege.objs[0].maxHp > hp0, 'a higher Keep is sturdier');
+  assert(events.some((e) => e.t === 'fortBuilt' && e.type === 'keep' && e.done));
+  assert.equal(c.fortDo({ o: 'add', t: 'archer', x: -10, z: 8 }), '', 'Keep 2: a third archer'); assert.equal(c.fortDo({ o: 'up', k }), '');
+  c.endSiege('leave');
+});
+check('the camp pays for itself: mills, stone and iron mines fill while away and are collected; iron from level 6; waves pay all three', () => {
+  reset(40, 1e12, 1e6); assert(c.startSiege()); const F = c.fortState(), M = c.myFort(), C = c.CFG.siege;
+  for (const [t, x] of [['mill', -12], ['mine', -8], ['iron', 8]]) assert.equal(c.fortDo({ o: 'add', t, x, z: 10 }), '', t);
+  for (const t of ['mill', 'mine', 'iron']) { const b = F.b.find((q) => q.t === t); b.c = Date.now() - 2 * 3600e3; const n = c.fortMade(b), q = C.towers[t].make, before = M[q];
+    assert.equal(n, Math.min(C.towers[t].cap, 2 * C.towers[t].rate), t + ' fills by the hour'); assert.equal(c.fortDo({ o: 'col', k: F.b.indexOf(b) }), ''); assert.equal(M[q], before + n); assert.equal(c.fortMade(b), 0, 'emptied'); }
+  const bm = F.b.find((q) => q.t === 'mine'); bm.c = Date.now() - 1e9; assert.equal(c.fortMade(bm), C.towers.mine.cap, 'it holds only so much');
+  assert.equal(c.fortCost('archer', 5).iron, 0); assert(c.fortCost('archer', 6).iron > 0, 'iron from level 6');
+  M.wood = 0; assert.equal(c.fortDo({ o: 'add', t: 'archer', x: -12, z: -6 }), 'Not enough wood');
+  const p1 = C.pay(1), p12 = C.pay(12, false, false), p20 = C.pay(20, true); assert(p1.wood > 0 && p1.stones > 0 && !p1.iron); assert(p12.iron > 0 && p20.wood > p12.wood && p20.iron > p12.iron);
+  c.endSiege('leave');
+});
+check('waves: the first one waits for Start, then each next one comes after a 20 s break unless paused', () => {
+  reset(30); assert(c.startSiege()); const S = c.G.siege, F = c.fortState(); assert(!F.go); run(25); assert.equal(S.phase, 'build', 'a new fort waits');
+  c.startSiegeWave(); assert.equal(F.go, 1); for (const e of S.mobs) e.alive = false; S.queue = []; run(0.2); assert.equal(S.phase, 'clear'); run(c.CFG.siege.clear + 0.2);
+  assert.equal(S.phase, 'build'); assert(S.t > 19 && S.t <= 20, 'a 20 s break'); assert.equal(c.CFG.siege.build, 20);
+  c.G.builder = { sel: null }; run(5); assert(S.t < 16, 'building does not stop the clock'); c.G.builder = null;
+  assert.equal(c.fortDo({ o: 'hold', v: 1 }), ''); const t1 = S.t; run(30); assert.equal(S.t, t1, 'paused'); assert.equal(S.phase, 'build');
+  assert.equal(c.fortDo({ o: 'hold', v: 0 }), ''); run(t1 + 0.2); assert.equal(S.phase, 'fight', 'resumed: the wave comes');
+  c.endSiege('leave'); c.G.siegeResult = null; assert(c.startSiege()); assert(c.fortState().go, 'the next visit runs by itself'); c.endSiege('leave');
+});
+check('paths: a tower picks one of two at level 5 and it changes how it fights', () => {
+  reset(40, 1e12, 1e6); assert(c.startSiege()); const F = c.fortState(), S = c.G.siege, C = c.CFG.siege;
+  for (let i = 0; i < 4; i++) c.fortDo({ o: 'add', t: 'hut', x: -20 + i * 3, z: -10 });
+  assert.equal(c.fortDo({ o: 'add', t: 'archer', x: -10, z: 0 }), ''); assert.equal(c.fortDo({ o: 'add', t: 'mage', x: 10, z: 0 }), '');
+  const ka = F.b.findIndex((q) => q.t === 'archer'), km = F.b.findIndex((q) => q.t === 'mage');
+  for (const k of [ka, km]) for (let l = 1; l < 4; l++) { assert.equal(c.fortDo({ o: 'up', k }), ''); F.b[k].d = 0; }
+  assert.equal(c.fortDo({ o: 'up', k: ka }), 'Pick a path'); assert.equal(c.fortDo({ o: 'up', k: ka, p: 1 }), ''); assert.equal(F.b[ka].p, 1);
+  assert.equal(c.fortDo({ o: 'up', k: km, p: 2 }), ''); F.b[ka].d = F.b[km].d = Date.now() - 1; run(0.1);
+  const ua = S.units.find((u) => u.b === F.b[ka]), um = S.units.find((u) => u.b === F.b[km]);
+  assert.equal(ua.st.multi, 3, 'a volley tower'); assert.equal(um.st.chain, 3); assert.equal(um.st.light, false, 'storm cuts armour');
+  for (let i = 0; i < 3; i++) { const e = c.spawnSiegeMob({ type: c.CFG.world.zones[1].enemy, zi: 1 }); e.x = ua.x + 4 + i; e.z = ua.z; e.hp = e.maxHp = 1e15; }
+  shots.length = 0; ua.cd = 0; c.stepSiegeDefenders(0.05); assert.equal(shots.filter((o) => o.owner === ua.id).length, 3, 'three arrows at once');
+  um.cd = 0; const e = S.mobs[0]; e.x = um.x + 4; e.z = um.z; c.stepSiegeDefenders(0.05); assert(shots.some((o) => o.owner === um.id && o.chain === 3));
+  assert.equal(c.sanitizeFort(F, false).b.find((q) => q.t === 'archer').p, 1, 'the path is saved');
+  c.endSiege('leave');
+});
+check('armour and flyers: light shots barely scratch armour, flyers cross walls and only towers with air reach them', () => {
+  reset(40, 1e12, 1e6); assert(c.startSiege()); const S = c.G.siege, C = c.CFG.siege;
+  const comp = c.siegeComposition(20); assert(comp.armored > 0 && comp.flyers > 0); assert(!c.siegeComposition(3).armored && !c.siegeComposition(5).flyers);
+  for (const [t, x] of [['archer', -10], ['cannon', 10]]) assert.equal(c.fortDo({ o: 'add', t, x, z: 0 }), '');
+  const ar = S.units.find((u) => u.b.t === 'archer'), ca = S.units.find((u) => u.b.t === 'cannon');
+  const tank = c.spawnSiegeMob({ type: c.CFG.world.zones[1].enemy, zi: 1, armor: true }), bird = c.spawnSiegeMob({ type: C.flyers[0], zi: 1, fly: true });
+  assert(tank.siegeArmor && bird.flying);
+  assert.equal(c.siegeDmgMul(tank, ar.id), C.armor); assert.equal(c.siegeDmgMul(tank, ca.id), 1); assert.equal(c.siegeDmgMul(bird, ca.id), 0, 'cannons cannot hit flyers'); assert.equal(c.siegeDmgMul(bird, ar.id), 1);
+  assert.equal(c.siegeDmgMul(tank, c.G.player.id), 1, 'heroes hit everything');
+  bird.x = ca.x + 3; bird.z = ca.z; tank.x = c.SC.x + 400; ca.cd = 0; shots.length = 0; c.stepSiegeDefenders(0.05); assert(!shots.some((o) => o.owner === ca.id), 'the cannon does not aim at a flyer');
+  // a closed ring of walls: walkers must break through, a flyer flies straight over
+  for (let i = -6; i <= 5; i++) for (const j of [-6, 5]) c.fortDo({ o: 'add', t: 'wall', x: i, z: j });
+  for (let j = -5; j <= 4; j++) for (const i of [-6, 5]) c.fortDo({ o: 'add', t: 'wall', x: i, z: j });
+  bird.x = c.SC.x; bird.z = c.SC.z + 30; c.G.player.alive = false; for (let n = 0; n < 300 && bird.alive && Math.hypot(bird.x - S.objs[0].x, bird.z - S.objs[0].z) > S.objs[0].r + 2; n++) { c.G.time += 1 / 30; c.stepEnemy(bird, 1 / 30); }
+  assert(Math.hypot(bird.x - S.objs[0].x, bird.z - S.objs[0].z) <= S.objs[0].r + 2, 'the flyer reached the Keep over the walls');
+  c.endSiege('leave');
 });
 console.log(`${passed} siege checks passed.`);
