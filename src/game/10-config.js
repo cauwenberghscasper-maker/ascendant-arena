@@ -216,7 +216,9 @@ const CFG = {
       { x: -40, z: 770 }, { x: 42, z: 880 }, { x: -36, z: 935 }, { x: 40, z: 1040 }],
     r: 3.5, wave: 6, time: 45, cooldownWin: 120, cooldownFail: 30, leash: 26, xpFrac: 0.5, goldBase: 40, goldPerLevel: 10,
   },
-  forge: { base: 120, perLevel: 30, growth: 1.045, weaponMult: 1.2 },
+  forge: { base: 120, perLevel: 30, growth: 1.045, weaponMult: 1.2,
+    // the shop's rarity grows with your level (first row whose level you have reached, from the top); price scales with the rarity's stat multiplier
+    rarityAt: [[300, 'divine'], [180, 'ancient'], [120, 'mythic'], [70, 'legendary'], [30, 'epic'], [1, 'rare']] },
   // Main attacks (the Attack slot). Damage = hero damage x mult per bullet. Brawl Stars style variety.
   attacks: {
     smg: { name: 'Rapid Fire', role: 'SMG', desc: 'Each shot sprays 6 fast bullets', kind: 'tracer', count: 1, burst: 6, burstGap: 0.05, jitter: 0.11, speed: 30, range: 11, radius: 0.2, mult: 0.2, ammo: 3, reload: 1.0, cd: 0.42, color: 0xffe066, unlock: { level: 2 } },

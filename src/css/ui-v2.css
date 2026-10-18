@@ -628,3 +628,16 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .sellBtn .sp { display: inline-flex; align-items: center; gap: 3px; } .sellBtn .sp svg { width: 16px; height: 16px; }
 .sellBtn.armed { background: linear-gradient(#ff8a8a, #d23a3a); color: #fff; }
 .sellLine small { color: #9aa0b8; }
+/* Enchant: worn pieces side by side, the picked one opens its page below */
+.etiles { display: flex; gap: 8px; margin: 4px 0 10px; } .etiles .igt { flex: 1 1 0; min-width: 0; max-width: 84px; aspect-ratio: 1; }
+.etiles .eslot { position: absolute; left: 0; right: 0; top: 100%; margin-top: 2px; text-align: center; font: 600 10px/1.1 var(--body); color: #c9cde0; }
+.etiles { margin-bottom: 24px; }
+/* Enchant: rarity colours the tiles, the page and the item name; the Rune Shard bar says what each action costs */
+.etiles .igt { box-shadow: inset 0 0 0 2px var(--rc), 0 0 10px color-mix(in srgb, var(--rc) 55%, transparent) !important; }
+.etiles .igt.sel { outline: 2px solid #fff !important; outline-offset: 2px; }
+.etiles .igt .eslot { color: var(--rc); font-weight: 700; }
+.ecard { border: 2px solid var(--rc) !important; box-shadow: 0 0 16px color-mix(in srgb, var(--rc) 45%, transparent), inset 0 0 0 1px #000 !important; }
+.ecard .ehead { background: linear-gradient(90deg, color-mix(in srgb, var(--rc) 30%, transparent), transparent); } .ecard .ehead b { color: var(--rc); text-shadow: 0 1px 0 #000; }
+.enchNeed { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 6px 8px; border: 1px solid #000; background: rgba(176,107,255,.16); color: #e9dcff; font: 600 12px/1.25 var(--body); }
+.enchNeed img { width: 26px; height: 26px; image-rendering: pixelated; flex: none; } .enchNeed b { color: #fff; } .enchNeed.short { background: rgba(255,93,108,.16); color: #ffc9c9; }
+.arow button small img.mi { width: 14px; height: 14px; vertical-align: -2px; }

@@ -19,6 +19,8 @@ CFG.craft = {
       hero: 'aurvan', relic: { name: 'Halo of the First Dawn', slot: 'accessory', rarity: 'ancient', aff: { crit: 0.12, critDmg: 0.45, dmg: 0.16 } } },
   ],
   titan: { id: 'titansoul', name: 'Titan Soul', color: 0xff5d8f },
+  // Rune Shards: the semi-rare resource every Enchant reroll and boost costs. Chance per normal kill / den kill / elite kill, per world boss, plus dungeon chests by variant.
+  rune: { id: 'runeshard', name: 'Rune Shard', color: 0xb06bff, kill: 0.025, den: 0.05, elite: 0.4, boss: [3, 5], chest: [1, 1, 2, 3] },
   // monster parts: chance per normal kill, guaranteed range for elites (guardians double), per world-boss kill
   part: { chance: 0.07, den: 0.1, elite: [1, 3], boss: [6, 10] },
   // dungeon chests: cores by variant (Caves, Warrens, Sanctum, Trial) + 1 per 4 key tiers; first clear +2
@@ -43,7 +45,8 @@ CFG.craft = {
 const CB = CFG.craft.biomes;
 // every material by id -> { name, biome, kind, color }
 const MATS = (() => { const o = {}; CB.forEach((b, i) => { o[b.ore] = { name: b.oreN, biome: i, kind: 'ore', color: b.color }; o[b.part] = { name: b.partN, biome: i, kind: 'part', color: b.color }; o[b.core] = { name: b.coreN, biome: i, kind: 'core', color: b.color }; });
-  o[CFG.craft.titan.id] = { name: CFG.craft.titan.name, biome: -1, kind: 'soul', color: CFG.craft.titan.color }; return o; })();
+  o[CFG.craft.titan.id] = { name: CFG.craft.titan.name, biome: -1, kind: 'soul', color: CFG.craft.titan.color };
+  o[CFG.craft.rune.id] = { name: CFG.craft.rune.name, biome: -1, kind: 'rune', color: CFG.craft.rune.color }; return o; })();
 // dungeon-only heroes: their Level Road unlock is replaced by sigils from that biome's dungeons
 CB.forEach((b, i) => { if (CFG.attacks[b.hero]) CFG.attacks[b.hero].unlock = { sigils: i }; });
 function craftState(p) {
@@ -68,6 +71,7 @@ const findMul = () => 1 + craftBonuses(G.profile).find;
 // kills: the area's monster part (normal kills sometimes, elites always)
 function craftKillDrop(e) {
   if (!e || e.zone == null || e.rift) return;
+  { const R = CFG.craft.rune; if (Math.random() < (e.elite ? R.elite : e.den != null ? R.den : R.kill) * findMul()) addMats([[R.id, 1]]); }
   const P2 = CFG.craft.part, b = CB[zoneBiome(e.zone)]; if (!b) return;
   let n = 0;
   if (e.elite) n = randInt(P2.elite[0], P2.elite[1]) * (e.guardian ? 2 : 1);
@@ -77,7 +81,7 @@ function craftKillDrop(e) {
 // world boss: parts and a core of its biome, ore, and a Titan Soul
 function craftBossDrop(zone) {
   const b = CB[zoneBiome(zone)], P2 = CFG.craft.part; if (!b) return [];
-  return addMats([[b.part, randInt(P2.boss[0], P2.boss[1]) * findMul()], [b.core, 1], [b.ore, 10 * findMul()], [CFG.craft.titan.id, 1]]);
+  return addMats([[b.part, randInt(P2.boss[0], P2.boss[1]) * findMul()], [b.core, 1], [b.ore, 10 * findMul()], [CFG.craft.titan.id, 1], [CFG.craft.rune.id, randInt(CFG.craft.rune.boss[0], CFG.craft.rune.boss[1])]]);
 }
 // mining: the vein's ore as a crafting material (alongside the pickaxe ore counter)
 function craftMineDrop(q, ore) { const b = CB[zoneBiome(q.zone)]; if (b) addMats([[b.ore, ore * findMul()]], true); }
@@ -86,7 +90,7 @@ function craftDungeonLoot(D, first) {
   const C = CFG.craft, b = CB[zoneBiome(D.zone)], c = craftState(), p = G.profile; if (!b) return {};
   const vi = Math.max(0, CFG.dungeon.variants.indexOf(D.variant)), t = D.key ? D.key.t : 0;
   const cores = (C.core.variant[vi] || 1) + Math.floor(t / C.core.perTiers) + (first ? C.core.first : 0);
-  const out = { biome: zoneBiome(D.zone), mats: addMats([[b.core, cores], [b.part, randInt(C.core.parts[0], C.core.parts[1]) * findMul()]], true) };
+  const out = { biome: zoneBiome(D.zone), mats: addMats([[b.core, cores], [b.part, randInt(C.core.parts[0], C.core.parts[1]) * findMul()], [C.rune.id, (C.rune.chest[vi] || 1) + (first ? 1 : 0)]], true) };
   // hero sigil (until the hero is yours)
   const hid = b.hero, owned = p.unlocked.attacks.includes(hid) || hid === STARTER_HERO;
   if (CFG.brawlers[hid] && !owned && (c.sig[hid] | 0) < C.sigil.need && Math.random() < (C.sigil.chance[vi] || 0.14) + C.sigil.perTier * t) {

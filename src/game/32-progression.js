@@ -183,19 +183,21 @@ const affScale = (it) => 1 + 0.1 * rarIdx(it.rarity);
 const affCap = (k, it) => Math.round(CFG.affixes[k].max * affScale(it) * 100) / 100;
 const enchantCost = (it) => Math.round(rerollCost(it) * 0.5);
 const empowerGems = (it) => 2 + 2 * rarIdx(it.rarity);
+const enchantRunes = (it) => 1 + Math.floor(rarIdx(it.rarity) / 2); // Rune Shards per reroll or boost: 1 common/uncommon, 2 rare/epic, 3 legendary/mythic, 4 ancient/divine
+const runeId = () => CFG.craft.rune.id;
 function rerollAffix(slot, k) {
   const p = G.profile, it = p.gear[slot]; if (!it || !it.aff || it.aff[k] == null) return false;
-  const c = enchantCost(it); if (p.gold < c) return false;
+  const c = enchantCost(it), rn = enchantRunes(it); if (p.gold < c || matCount(runeId(), p) < rn) return false;
   const free = Object.keys(CFG.affixes).filter((x) => x === k || it.aff[x] == null), nk = free[Math.floor(Math.random() * free.length)], A = CFG.affixes[nk];
   delete it.aff[k]; it.aff[nk] = Math.round(rand(A.min, A.max) * affScale(it) * 100) / 100;
-  p.gold -= c; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
+  p.gold -= c; craftState(p).mats[runeId()] -= rn; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
 }
 function empowerAffix(slot, k) {
   const p = G.profile, it = p.gear[slot]; if (!it || !it.aff || it.aff[k] == null) return false;
-  const cap = affCap(k, it), g = empowerGems(it); if (it.aff[k] >= cap || p.essence < g) return false;
+  const cap = affCap(k, it), g = empowerGems(it), rn = enchantRunes(it); if (it.aff[k] >= cap || p.essence < g || matCount(runeId(), p) < rn) return false;
   const A = CFG.affixes[k], step = Math.max(0.01, (A.max - A.min) * affScale(it) / 4); // four boosts take a low roll to the cap
   it.aff[k] = Math.min(cap, Math.round((it.aff[k] + step) * 100) / 100);
-  p.essence -= g; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
+  p.essence -= g; craftState(p).mats[runeId()] -= rn; refreshPlayerStats(false); G.dirty = true; ev({ t: 'reroll', name: it.name }); return true;
 }
 function salvageAllWorse() {
   const p = G.profile; let n = 0;
@@ -207,7 +209,7 @@ function buyForge(slot) {
   if (p.gold < o.price) return false;
   if (p.gear[slot] && p.bag.length >= CFG.gear.bagMax) { toast('Make room in your bag before forging. Your equipped gear will be kept.', 'bad'); return false; }
   p.gold -= o.price;
-  const it = makeItem(slot, 'rare', o.item.ilvl, o.item.name, { aff: Object.assign({}, o.item.aff), elem: o.item.elem, noun: o.item.noun });
+  const it = makeItem(slot, o.item.rarity, o.item.ilvl, o.item.name, { aff: Object.assign({}, o.item.aff), elem: o.item.elem, noun: o.item.noun });
   const old = p.gear[slot]; p.gear[slot] = it;
   if (old) { if (p.bag.length < CFG.gear.bagMax) p.bag.push(old); else { addGold(salvageValue(old)); addEssence(salvageEssence(old)); } }
   refreshPlayerStats(false); checkAchievements(); G.dirty = true;

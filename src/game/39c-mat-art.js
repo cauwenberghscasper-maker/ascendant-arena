@@ -80,6 +80,10 @@ const MAT_ART = (() => {
       detail: (g) => { gloss(g); for (let x = 4; x <= 11; x++) { put(g, x, 6 + (x % 4 < 2 ? 0 : 1), 'a', true); put(g, x, 9 + (x % 4 < 2 ? 1 : 0), 'a', true); } } },
     solar: { b: '#ffb93a', a: '#ffffff', c: '#fffbe0', p: '#6d6a78', body: orb,
       detail: (g) => { gloss(g); ell(g, 8, 7, 1.9, 1.9, 'c'); on(g, [[8, 3], [8, 11], [4, 7], [12, 7], [5, 4], [11, 4], [5, 10], [11, 10]], 'a'); } },
+    // ---- Rune Shard: a violet crystal slab with a glowing rune ----
+    runeshard: { b: '#8a4fe0', a: '#f0dcff', c: '#ffffff',
+      body: (g) => poly(g, [[8, 1], [12, 4], [12, 11], [8, 14], [4, 11], [4, 4]]),
+      detail: (g) => { line(g, 8, 4, 8, 11, 'a'); line(g, 6, 6, 8, 8, 'a'); line(g, 10, 6, 8, 8, 'a'); on(g, [[8, 4]], 'c'); free(g, [[2, 3], [14, 10], [13, 2]], 'a'); } },
     // ---- Titan Soul: a pink wisp with a hollow face ----
     titansoul: { b: '#ff5d8f', a: '#ffffff', c: '#ffd1e0', p: '#ffd1e0',
       body: (g) => { poly(g, [[8, 1], [11, 5], [13, 9], [11, 13], [8, 14], [5, 13], [3, 9], [5, 5]]); ell(g, 8, 10, 2.8, 3.2, 'p'); },
