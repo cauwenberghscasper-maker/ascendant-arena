@@ -122,7 +122,7 @@ function processEvents() {
       case 'champBlink': ringFx(e.x, e.z, 2.4, e.out ? 0xa36bff : 0xff3b3b, e.out ? 0.5 : 0.8); if (e.out) { burst(e.x, 1, e.z, 16, 0xa36bff, 5, 0.6, 0.25, 2, 1.2); SpriteFX.play('poof', 'arcane', e.x, 0, e.z, 3); } break;
       case 'riftWave': if (e.guard) { showBanner(`Floor ${e.floor} · Rift Lord!`, `Read the red warnings · dash through attacks`, 'red'); Sfx.play('horn'); } else if (e.champs) { Feed.add(`${gi('m_floor')} Floor <b>${e.floor}</b> · ${e.champs} champion${e.champs > 1 ? 's' : ''} · Lv ${e.lvl}`, 'rift'); } else Feed.add(`${gi('m_floor')} Floor <b>${e.floor}</b> · ${e.theme} · Lv ${e.lvl}`, 'rift'); break;
       case 'riftClear': Feed.add(`${gi('m_rift')} <b class="grade g${e.grade}">${e.grade}</b> Floor ${e.floor}${e.grade === 'S' ? ' · flawless ×2' : e.grade === 'A' ? ' · ×1.5' : ''} · +${e.gems} gems · +${fmtK(e.gold)} gold${e.item ? ' · guardian item!' : ''}`, 'rift'); Sfx.play('job'); burst(G.player.x, 1, G.player.z, 24, 0xff7ab8, 6, 0.8, 0.25, 3, 1.3); SpriteFX.play('nova', e.grade === 'S' ? 'gold' : 'arcane', G.player.x, 1.2, G.player.z, 5); break;
-      case 'dungeonStart': enterDungeonView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(e.name, `${e.key ? `Tier ${e.key} key · ` : ''}Monsters Lv ${e.lvl} · clear each hall to open its door`, 'red'); break;
+      case 'dungeonStart': enterDungeonView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(e.name, e.delve ? `${e.diff} · Monsters Lv ${e.lvl}${e.n > 1 ? ` · party of ${e.n}` : ''} · no PvP inside` : `${e.key ? `Tier ${e.key} key · ` : ''}Monsters Lv ${e.lvl} · clear each hall to open its door`, 'red'); break;
       case 'dungeonRoom': Feed.add(`${gi('m_portal')} Hall ${e.i}/${e.n} cleared · ${e.boss ? 'the boss awaits' : 'the next door opens'}`, 'rift'); Sfx.play('unlock'); break;
       case 'rune': SpriteFX.play('pillar', 'arcane', e.x, 0, e.z, 8); Sfx.play('unlock');
         if (e.n >= e.of) { const tp = trialPoi(e.zone); showBanner('Legendary Trial unlocked', `${tp.landmark} hums with power · go there to begin`, 'gold'); }
@@ -141,9 +141,19 @@ function processEvents() {
       case 'minePet': G.slowT = 1.4; Sfx.play('radiant'); SpriteFX.play('pillar', 'venom', G.player.x, 0, G.player.z, 18);
         showBanner(e.had ? 'Pet found again!' : 'A pet in the rock!', e.had ? `+${CFG.mining.petGems} gems` : `${PET_DEFS[e.id].name} joins you · 1 in ${fmt(CFG.mining.pet)}`, 'gold');
         Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
+      // party dungeons (36b-delve.js)
+      case 'delveEvent': { const E = CFG.delve.events[e.k]; showBanner(E.name, E.d, 'gold'); ringFx(e.x, e.z, 5, 0xffd34a, 1.1); Sfx.play('horn'); break; }
+      case 'delveWave': showToast(`Wave ${e.n + 1} of ${e.of}!`, 'bad'); ringFx(e.x, e.z, 6, 0xff5d8f, 0.9); break;
+      case 'delveBonus': Feed.remove('dlvEvent'); showToast(e.why + ' · open the cache', 'good'); burst(e.x, 1, e.z, 26, 0xffd34a, 5, 0.9, 0.4, 4, 2); Sfx.play('unlock'); break;
+      case 'delveEscape': Feed.remove('dlvEvent'); showToast('The goblin got away with its gold…', 'bad'); burst(e.x, 1, e.z, 18, 0xffd34a, 4, 0.6, 0.3, -2, 3); break;
+      case 'delveMimic': showBanner('MIMIC!', 'The chest has teeth', 'red'); ringFx(e.x, e.z, 3, 0xff3344, 0.8); Sfx.play('horn'); break;
+      case 'delveCurse': showToast('Cursed: your health is capped, the final chest is richer', 'bad'); burst(e.x, 1, e.z, 30, 0x9b3dff, 4, 0.9, 0.4, -1, 2); Sfx.play('lose'); break;
+      case 'delveHeal': showToast('The moonwell restores you', 'good'); burst(e.x, 1, e.z, 30, 0x9fe8ff, 4, 0.9, 0.4, -1, 2); Sfx.play('level'); break;
+      case 'delveRevived': showToast(`You pulled ${e.who || 'your ally'} back up!`, 'good'); ringFx(e.x, e.z, 2.5, 0x6cff8a, 0.8); break;
+      case 'delveSet': G.slowT = 1; Sfx.play('radiant'); showBanner('Set piece!', `${escapeHTML(e.name)} · ${escapeHTML(e.set)} set`, 'gold'); break;
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
-      case 'dungeonBoss': Feed.remove('dungeon'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
-      case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); if (e.why === 'down') showToast(`${e.name} resets · you fell`, 'bad'); break;
+      case 'dungeonBoss': Feed.remove('dungeon'); Feed.remove('dlvEvent'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
+      case 'dungeonEnd': enterDungeonView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('dungeon'); Feed.remove('dlvEvent'); if (e.why === 'down') showToast(e.delve ? `Your party fell in ${e.name}` : `${e.name} resets · you fell`, 'bad'); if (e.delve && typeof openDelvePanel === 'function' && e.why !== 'away') setTimeout(() => { if (!G.modal && G.mode === 'hub' && !inInstance()) openDelvePanel(); }, 900); break;
       case 'riftEnd': enterRiftView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('rift'); break;
       case 'teleport': burst(e.x, 1, e.z, 30, 0x9fe8ff, 6, 0.8, 0.3, 2, 1.5); SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 5.5); Sfx.play('super'); Cam.pos.set(e.x, 30, e.z - 14); Cam.fx = e.x; Cam.fz = e.z + 1.5; showToast(e.name); break;
       case 'proc': burst(e.x, 1.2, e.z, 8, e.kind === 'grasp' ? 0x8dff6a : e.kind === 'kraken' ? 0x5dd6ff : 0xffe066, 4, 0.4, 0.22, 4); SpriteFX.play(e.kind === 'kraken' ? 'zap' : 'impact', e.kind === 'grasp' ? 'venom' : e.kind === 'kraken' ? 'storm' : 'gold', e.x, 1.3, e.z, 1.9); break;
@@ -220,7 +230,8 @@ function processEvents() {
     }
   }
   evs.length = 0;
-  if (G.dungeon) dungeonHud();
+  if (G.dungeon) { if (G.dungeon.delve) delveHud(); else dungeonHud(); }
+  else if ($('partyBar') && !$('partyBar').hidden) $('partyBar').hidden = true;
 }
 // dungeon HUD: a live feed line with hall x/3 or the boss's health
 function dungeonHud() {
