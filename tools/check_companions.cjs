@@ -46,7 +46,7 @@ Object.assign(c,{TEST_MODE:false,G:{profile:profile(1),player,mode:'hub',started
   inTown:()=>town,rayLen:(x,z,a,d)=>({d:blocked?0:d}),ev:e=>events.push(e),markCombat(){},refreshPlayerStats(){refreshes++;},
   rewardEnemyKill(){rewards++;c.awardPetCombatXp(50);},endBoss(){ended++;c.G.boss=null;},angDiff:(a,b)=>b-a,clamp:(n,a,b)=>Math.min(b,Math.max(a,n)),
   obstacleAt:()=>null,AC:{x:0,z:0},onHitProcs(){throw Error('Pet triggered hero gear procs');},artVal(){throw Error('Pet triggered hero artifacts');},slayerBonus(){throw Error('Pet triggered hero mastery');}});
-vm.runInContext(section('const PROJ_MAX =','function obstacleAt(')+section('function forEachTarget(fn) {','function projColor(')+
+vm.runInContext(section('const PROJ_MAX =','function obstacleAt(')+section('function forEachTarget(fn, team) {','function projColor(')+
   section('function stepProjectiles(dt) {','function chainFrom(')+section('function expireProjectile(p,','function aoeDamage(')+
   section('function dealDamage(t,','// keystone and artifact')+section('function killEntity(t,','// --- fighter step')+
   section('const PetCombat =','// --- testing tools')+'\nthis.pool=projectiles;this.petRuntime=PetCombat;',c);

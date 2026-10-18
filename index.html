@@ -3773,7 +3773,9 @@ const heroApi = { G, forEachTarget, dealDamage, spawnProjectile, ev, nearestFoe:
 const HeroSupers = createHeroSupers(heroApi);
 let HeroFXRef = null;
 
-function forEachTarget(fn) {
+// team 'mob' (monster and boss attacks) in the open world can only hurt your own hero: skip the scan over every monster
+function forEachTarget(fn, team) {
+  if (team === 'mob' && G.mode !== 'arena') { fn(G.player); return; }
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
   fn(G.player);
   for (let i = 0; i < G.enemies.length; i++) if (!G.enemies[i].hidden) fn(G.enemies[i]); // burrowed monsters can't be hit or aimed at
@@ -3848,7 +3850,7 @@ function stepProjectiles(dt) {
       if (t.kind === 'fighter' && t.invulnT > 0) return; // dodged!
       const dx = t.x - p.x, dz = t.z - p.z, rr = t.r + p.r;
       if (dx * dx + dz * dz < rr * rr) hitT = t;
-    });
+    }, p.team);
     if (hitT) {
       const amt = dealDamage(hitT, p.dmg, p.owner, { pet:p.pet, proc:p.pet, vamp: p.vamp, charge: p.charge, canCrit: !p.pet, slow: p.slow, knockX: p.vx, knockZ: p.vz, knock: p.knock || 1.5, stun: p.stun, primary: p.charge > 0, burn: p.burn, burnT: p.burnT, pk: p.kind, pc: p.color });
       if (p.hx) { HeroSupers.onBulletHit(p, hitT, amt || 0); if (!p.aoe) ev({ t: 'heroImpact', hid: p.hx, x: hitT.x, z: hitT.z, r: 0.9, hv: p.hv }); }
@@ -3909,12 +3911,17 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
     if (dx * dx + dz * dz <= (r + t.r) * (r + t.r)) {
       dealDamage(t, dmg, owner, { charge: o.charge || 0, canCrit: false, slow: o.slow || 0, knockX: dx, knockZ: dz, knock: o.knock || 0, burn: o.burn || 0, burnT: o.burnT || 0, proc: !!o.proc });
     }
-  });
+  }, team);
 }
 
 function dealDamage(t, amount, srcId, o) {
   if (!t || !t.alive) return 0;
-  if (t.isPeer) return srcId === G.player.id ? pvpHit(t, amount) : 0; // only your own shots, the victim decides
+  if (t.isPeer) { // only your own shots, the victim decides; your hits on players still fill your super
+    if (srcId !== G.player.id) return 0;
+    const dealt = pvpHit(t, amount), s = G.player;
+    if (dealt > 0 && o && o.charge) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
+    return dealt;
+  }
   if (t.invulnT > 0) return 0;
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
@@ -5724,7 +5731,7 @@ function stepPendingAoE(dt) {
       else forEachTarget((t) => {
         if (!t.alive || t.team === a.team || (t.kind === 'fighter' && t.invulnT > 0) || !aoeHits(a, t)) return;
         dealDamage(t, a.dmg, a.owner, { charge: 0, canCrit: false, slow: a.slow || 0, knockX: t.x - a.x, knockZ: t.z - a.z, knock: 6, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
-      });
+      }, a.team);
       if (a.kind === 'zap') ev({ t: 'bolt', x: a.x, z: a.z });
       const C = a.cone, bx = C ? a.x + Math.sin(C.a) * a.r * 0.55 : a.x, bz = C ? a.z + Math.cos(C.a) * a.r * 0.55 : a.z;
       ev({ t: 'boom', x: bx, z: bz, r: C ? a.r * 0.45 : a.r, color: a.kind === 'meteor' || a.kind === 'breath' ? 0xff7b2e : a.kind === 'comet' || a.kind === 'zap' || a.kind === 'trap' ? 0x9fb8ff : a.kind === 'vortex' ? 0xb36bff : 0xc9a16b, big: a.kind !== 'comet' && a.kind !== 'spike' && a.kind !== 'zap' });
@@ -11154,7 +11161,9 @@ function dieFx(e) {
 }
 
 // --- event consumer: sim events -> sound, particles, UI ---
+let fxBudget = 6;
 function processEvents() {
+  fxBudget = 6;
   const evs = G.events;
   for (let i = 0; i < evs.length; i++) {
     const e = evs[i];
@@ -11309,7 +11318,7 @@ function processEvents() {
       case 'telegraph': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w || 1.4, 0xff4d4d, 0.6); break;
       case 'moveTele': if (e.len) laneFx(e.x, e.z, e.a, e.len, e.w, TELE_MOB, e.life); else ringFx(e.x, e.z, e.r, e.color || TELE_MOB, e.life, !e.color); break; // monster moves: red lane or filling ring
       case 'windFx': if (near(e, 28)) windupFx(e); break;
-      case 'aoeFx': if (near(e, 32)) aoeImpactFx(e); break;
+      case 'aoeFx': if (near(e, 32) && fxBudget-- > 0) aoeImpactFx(e); break; // at most a few big impacts a frame: a 16-spike cross no longer spawns 16 sprites
       case 'bossCall': bossCallFx(e); break;
       case 'bossPhase': bossPhaseFx(e); break;
       case 'wardBreak': wardBreakFx(e, true); break;
@@ -12481,7 +12490,8 @@ function rtMessage(d) {
 // presence holds the slow-changing card (nick, hero, level, mode); it is re-sent only when one of those changes
 function rtTrack() {
   const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al, s.pv].join('|'); if (card === RT.tracked) return;
-  RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
+  const now = performance.now(); if (now - (RT.trackAt || 0) < 1000) return; // the server limits presence updates per client
+  RT.trackAt = now; RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
 }
 function rtUpdate(dt) {
   if (RT.state === 'off' || RT.state === 'none') return;
@@ -12491,6 +12501,7 @@ function rtUpdate(dt) {
   if (RT.state !== 'on' || !G.started) return;
   if (mpRoomKey() !== RT.key) { rtJoin(mpRoomKey()); return; } // partition change: move to the new room
   if ((MOB.t -= dt) <= 0) { MOB.t = 0.25; mobOwnership(); mobSend(); bossSend(); }
+  if ((HITQ.t -= dt) <= 0) hitFlush();
   RT.sendT -= dt; RT.beatT -= dt;
   if (RT.sendT > 0) return;
   RT.sendT = 0.12; rtTrack();
@@ -12526,7 +12537,7 @@ function mobOwnership() {
   }
 }
 function mobHandover(e, own) {
-  if (own) { e.sx = e.x; e.sz = e.z; e.sf = e.facing; }
+  if (own) { e.sx = e.x; e.sz = e.z; e.sf = e.facing; if (e.mv && (e.mv.k || e.hidden || e.windT > 0)) moveEnd(e); e.hidden = false; }
   else if (!e.alive) e.respawnT = Math.min(e.respawnT || 0, CFG.world.enemyRespawn);
   e.own = own;
 }
@@ -12578,10 +12589,19 @@ function mobRemoteStep(e, dt) {
   if (e.sf != null) e.facing += angDiff(e.facing, e.sf) * k;
 }
 // our hit on a monster another player runs (called from dealDamage after the hit landed here)
+const HITQ = { mob: new Map(), boss: 0, bossTo: null, t: 0 };
 function mpMobHit(t, amt) {
   if (!mobSyncable(t) || !t.own) return;
   t.myHitT = G.time; if (t.hp <= 0) t.myKillT = G.time;
-  if (rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'hit', payload: { sid: MP.sid, to: t.own, i: t.slot, f: Math.round(Math.min(1, amt / t.maxHp) * 10000) / 10000 } })) MOB.hits++;
+  const k = t.own + '|' + t.slot; HITQ.mob.set(k, (HITQ.mob.get(k) || 0) + amt / t.maxHp);
+  if (t.hp <= 0) hitFlush(); // a kill goes out at once
+}
+// sends what was hit since the last flush (same 'hit' / 'bhit' messages as before, so older games still read them)
+function hitFlush() {
+  for (const [k, f] of HITQ.mob) { const j = k.lastIndexOf('|'); if (rtSend(RT.topic, 'broadcast', { type: 'broadcast', event: 'hit', payload: { sid: MP.sid, to: k.slice(0, j), i: +k.slice(j + 1), f: Math.round(Math.min(1, f) * 10000) / 10000 } })) MOB.hits++; }
+  HITQ.mob.clear();
+  if (HITQ.boss > 0 && HITQ.bossTo) bossMsg('bhit', { to: HITQ.bossTo, f: Math.round(Math.min(1, HITQ.boss) * 10000) / 10000 });
+  HITQ.boss = 0; HITQ.t = 0.2;
 }
 // another player's hit on a monster we run
 function mobHitRecv(P) {
@@ -12620,7 +12640,7 @@ function bossSend() {
 function mpBossAttack(o) { if (bossLeading()) bossMsg('batk', o); }
 function mpBossEnd(killed) { const b = G.boss; if (b && b.uid) BOSS.ended.add(b.uid); if (bossLeading()) { if (b && !b.uid) b.uid = MP.sid + '-' + b.id; bossMsg('bend', { k: killed ? 1 : 0, u: b ? b.uid : '' }); } }
 // our hit on the boss the leader runs; a kill here shares loot by your damage over max HP
-function mpBossHit(b, amt) { b.myHitT = G.time; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); if (b.uid) BOSS.ended.add(b.uid); } bossMsg('bhit', { to: bossLeader(), f: Math.round(Math.min(1, amt / b.maxHp) * 10000) / 10000 }); }
+function mpBossHit(b, amt) { b.myHitT = G.time; const to = bossLeader(); if (HITQ.bossTo !== to) { hitFlush(); HITQ.bossTo = to; } HITQ.boss += amt / b.maxHp; if (b.hp <= 0) { BOSS.killedAt = G.time; b.total = Math.max(b.total, b.maxHp); if (b.uid) BOSS.ended.add(b.uid); hitFlush(); } }
 function bossRecv(event, sid, P) {
   if (!G.started || G.mode !== 'hub' || inInstance()) return;
   if (event === 'bhit') { // another player's hit on the boss we run
