@@ -1,3 +1,7 @@
+# Branch housekeeping (18 Oct 2026, on `main`)
+`asset-pipeline`/`asset-drop` are tool branches (own history) and are never merged into `main`; both READMEs now say so.
+`wip/enchant-forge` only holds d11b07a, a duplicate of 4815a7a already in `main`: safe to delete (left for Casper).
+
 # Black screen flashes (18 Oct 2026, on `main`)
 Done: the bloom pass (Cinematic effects) turned a single NaN/overflowed pixel into a black patch or a black screen.
 `Post` now reads any such sample as black (`okc` in `46-camera-quality.js`). Three world models had zero-length normals
