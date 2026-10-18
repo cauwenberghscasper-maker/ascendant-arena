@@ -1,3 +1,28 @@
+# Dungeon makeover phase 1: bigger halls, longer runs (18 Oct 2026, branch `claude/dungeon-makeover`, PR to main)
+Casper: the halls were too small for four heroes and runs too short (goal about 5 minutes). Plan agreed in chat, six
+phases (1 sizes + run length, 2 lever/plate puzzles, 3 enrage + smart patterns, 4 three new monsters per dungeon,
+5 hidden rooms + secret mini-boss, 6 dungeon ores + a quality-reel end chest). Phase 1 done (`36b-delve.js`, `CFG.delve`):
+- **Halls:** mixed sizes: cell 20 m, hall 30 m, gallery/long hall 44×24 m, chamber 38 m, arena 56 m; start hall 26 m;
+  boss hall 64 m; corridors 10 m long, 6 m wide. Runs have 6 (Normal) to 8 (Mythic, Ascendant) halls before the boss.
+  Bigger halls get braziers along every wall and more pillars as cover. The run area (`D.span`) follows the layout.
+- **Packs:** monsters stand in packs of 3-4 (elites 1-2) that wake together; one pack per 320 m² (`packArea`, 1-7 packs).
+  Party-dungeon monsters no longer give up the chase and heal back (no leash; the halls keep them in).
+- **Mini-boss** halfway (`m.mini`, name per dungeon in `CFG.delve.dungeons[].mini`, `CFG.delve.mini`) with two guard packs.
+- **Boss in three phases** (`CFG.delve.boss`): HP ×2.4, adds at 66% and 33%, the last phase is faster and hits harder,
+  with a "Phase n of 3" banner.
+- **Bots** stay within 12 m of the leader in the big halls, and never aim at monsters behind a shut gate (they used to
+  shoot the bars forever when a monster stood behind them; seen in the timing runs).
+- **Lighter models** (all dungeons, the fort and the town): `dwall` 9272 → 2600 triangles, `brazier` 4859 → 1600, `pillar`
+  6362 → 2980 (meshoptimizer, same vertices/UVs/textures). A big hall now draws ~0.9-1.1 M triangles (shadows and post
+  included) where the old small halls drew ~1.7-1.9 M.
+- **Pace:** a run now asks ~1.9× the monster health of the old one (the boss ~1.7×) over ~4× the floor, plus longer
+  walks. Measured headless with a reference hero (level = dungeon level, Rare gear, no talents) and 3 bots: that party
+  is far too weak for absolute times (on the live version too it needs >10 min and dies without help), so tune
+  `packArea`, `boss.hp` and `mini.hp` after Casper times a real run on his phone.
+- **Open:** time a run on a phone (goal ~5 min); a hero in plain Rare gear can't survive Normal (existing balance,
+  `CFG.dungeon.dmgMul` and the 4-hero HP of `hpParty`); the camera shows ~25 m, so the 56-64 m halls need the minimap
+  (it still shows the open world inside dungeons). Next: phase 2 (lever and plate puzzles).
+
 # Dungeon gates open for everyone at once (18 Oct 2026, on `main`)
 Casper: in a party the gates opened at different times per phone after a room was cleared. Each game decided by
 itself from its own copy of the monsters, and a death only reaches you when the monster's owner sends it (and only

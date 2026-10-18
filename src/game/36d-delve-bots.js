@@ -6,7 +6,7 @@
 // pressure plates, and pull fallen teammates back up; monsters fight them back. They take no loot. Their level and
 // stats follow the average level of the real heroes in the run (`delveBotScale`).
 // ---------------------------------------------------------------------
-CFG.delve.bots = { on: true, hp: 0.9, dmg: 0.75, aggro: 18, keep: 0.7, roam: [2, 4.5], lost: 34, stuck: 3, rescale: 3, send: 0.15 };
+CFG.delve.bots = { on: true, hp: 0.9, dmg: 0.75, aggro: 18, keep: 0.7, roam: [2, 4.5], near: 12, lost: 48, stuck: 3, rescale: 3, send: 0.15 };
 const delveBots = () => (delveOn() && G.dungeon.delve.bots) || [];
 // the real heroes' average level (you plus friends in the run; bots don't count)
 function delveHumanLevel() {
@@ -53,8 +53,9 @@ function delveBotThink(b, dt) {
   const myRoom = roomOf(D, b.x, b.z), leadRoom = roomOf(D, lead.x, lead.z) || myRoom;
   let tx = null, tz = null, stop = 1;
   // the nearest monster it can see
-  let foe = null, fd = K.aggro;
-  for (const e of G.enemies) { if (!e.delve || !e.alive || e.hidden) continue; const d = Math.hypot(e.x - b.x, e.z - b.z); if (d < fd && botSees(b, e)) { fd = d; foe = e; } }
+  // only monsters it can reach: none behind a gate that is still shut (it would shoot the bars all day)
+  let foe = null, fd = K.aggro; const shut = D.doors.findIndex((d) => !d.open);
+  for (const e of G.enemies) { if (!e.delve || !e.alive || e.hidden || (shut >= 0 && e.room > shut)) continue; const d = Math.hypot(e.x - b.x, e.z - b.z); if (d < fd && botSees(b, e)) { fd = d; foe = e; } }
   // 1. a fallen teammate with no monster right on them: go and pull them up
   const down = party.find((f) => f !== b && f.alive === false && !G.enemies.some((e) => e.delve && e.alive && Math.hypot(e.x - f.x, e.z - f.z) < 5));
   // 2. pressure plates in a quiet room: each bot takes the plate after the humans' ones
@@ -77,7 +78,7 @@ function delveBotThink(b, dt) {
     const R = leadRoom || myRoom;
     if ((ai.roamT -= dt) <= 0 || Math.hypot(ai.rx - b.x, ai.rz - b.z) < 1 || (R && !inRoom(R, ai.rx, ai.rz))) {
       ai.roamT = rand(K.roam[0], K.roam[1]);
-      if (R && myRoom === R) { ai.rx = rand(R.x0 + 2, R.x1 - 2); ai.rz = rand(R.z0 + 2, R.z1 - 2); }
+      if (R && myRoom === R) { ai.rx = clamp(lead.x + rand(-K.near, K.near), R.x0 + 2, R.x1 - 2); ai.rz = clamp(lead.z + rand(-K.near, K.near), R.z0 + 2, R.z1 - 2); } // stay near the leader in the big halls
       else { ai.rx = lead.x + rand(-2.5, 2.5); ai.rz = lead.z + rand(-2.5, 2.5); }
     }
     tx = ai.rx; tz = ai.rz; stop = 0.8;

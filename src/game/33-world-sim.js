@@ -562,7 +562,7 @@ function stepEnemy(e, dt) {
     if (dd > 0.5) { mx = dx / dd; mz = dz / dd; sp = d.speed * 0.35; }
     if (!plSafe && (dp < d.aggro || (e.lastHurt > G.time - 1 && dp < d.aggro * 2))) e.state = 'chase';
   } else if (e.state === 'chase') {
-    if (!e.rift && (plSafe || homeD > d.leash)) { e.state = 'return'; }
+    if (!e.rift && (plSafe || (homeD > d.leash && !e.delve))) { e.state = 'return'; } // party-dungeon monsters chase across their big halls
     else {
       markCombat();
       const dx = pl.x - e.x, dz = pl.z - e.z, dd = dp || 1;

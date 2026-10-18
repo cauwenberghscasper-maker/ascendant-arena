@@ -15,31 +15,38 @@ CFG.delve = {
   // blocked); raise powK toward 1 and floor toward 0.7 once parties are tested on real phones.
   powK: 0.05, floor: 0,
   dungeons: [
-    { id: 'crypt', name: 'Rootbound Crypt', biome: 0, boss: 'The Hollow Warden', blurb: 'Roots have split the tombs of the first foresters. Something old keeps the keys.',
+    { id: 'crypt', mini: 'The Rootbound Gravekeeper', name: 'Rootbound Crypt', biome: 0, boss: 'The Hollow Warden', blurb: 'Roots have split the tombs of the first foresters. Something old keeps the keys.',
       set: { name: 'Rootwarden', b2: { hp: 0.08, armor: 0.05 }, b4: { lifesteal: 0.05, dmg: 0.08 } } },
-    { id: 'frostvault', name: 'Frostvault', biome: 1, boss: 'Queen Rime', blurb: 'A vault cut into the glacier, where the mountain clans buried their winters.',
+    { id: 'frostvault', mini: 'Rime Huntsman Ulfa', name: 'Frostvault', biome: 1, boss: 'Queen Rime', blurb: 'A vault cut into the glacier, where the mountain clans buried their winters.',
       set: { name: 'Rimebound', b2: { armor: 0.08, hp: 0.06 }, b4: { critDmg: 0.25, superGain: 0.08 } } },
-    { id: 'cinder', name: 'Cinder Halls', biome: 2, boss: 'Forgemaw', blurb: 'The dwarf-forges under the volcano still burn, and so does whatever stokes them.',
+    { id: 'cinder', mini: 'The Slag Overseer', name: 'Cinder Halls', biome: 2, boss: 'Forgemaw', blurb: 'The dwarf-forges under the volcano still burn, and so does whatever stokes them.',
       set: { name: 'Cinderborn', b2: { dmg: 0.08, atkSpeed: 0.05 }, b4: { crit: 0.06, critDmg: 0.3 } } },
-    { id: 'archive', name: 'Sunken Archive', biome: 3, boss: 'The Last Librarian', blurb: 'A library that fell through the floor of the world. The books read you back.',
+    { id: 'archive', mini: 'The Inkbound Scribe', name: 'Sunken Archive', biome: 3, boss: 'The Last Librarian', blurb: 'A library that fell through the floor of the world. The books read you back.',
       set: { name: 'Archivist', b2: { cdr: 0.06, superGain: 0.08 }, b4: { dmg: 0.1, cdr: 0.06 } } },
-    { id: 'grotto', name: 'Abyssal Grotto', biome: 4, boss: 'Mother of Tides', blurb: 'Below the reef the sea keeps a cathedral of its own, and a mother who guards it.',
+    { id: 'grotto', mini: 'The Brine Knight', name: 'Abyssal Grotto', biome: 4, boss: 'Mother of Tides', blurb: 'Below the reef the sea keeps a cathedral of its own, and a mother who guards it.',
       set: { name: 'Tidewrought', b2: { move: 0.06, hp: 0.06 }, b4: { lifesteal: 0.06, atkSpeed: 0.08 } } },
-    { id: 'starfall', name: 'Starfall Sanctum', biome: 5, boss: 'The Fallen Seraph', blurb: 'Where a star came down, a temple grew around it. Its guardian never forgave the sky.',
+    { id: 'starfall', mini: 'The Fallen Acolyte', name: 'Starfall Sanctum', biome: 5, boss: 'The Fallen Seraph', blurb: 'Where a star came down, a temple grew around it. Its guardian never forgave the sky.',
       set: { name: 'Starsworn', b2: { crit: 0.05, dmg: 0.08 }, b4: { critDmg: 0.35, superGain: 0.1 } } },
   ],
   // named difficulties; past the last one Ascendant ranks go on forever (diffDef)
   diffs: [
-    { name: 'Normal', lvl: 2, hp: 1, dmg: 1, pow: 0.8, rooms: [4, 5], events: 2, items: 2, floor: 'rare', unique: 0.05, col: '#7bd35a' },
-    { name: 'Hard', lvl: 8, hp: 1.15, dmg: 1.1, pow: 1.0, rooms: [5, 6], events: 2, items: 3, floor: 'epic', unique: 0.08, col: '#58b4ff' },
-    { name: 'Heroic', lvl: 16, hp: 1.3, dmg: 1.2, pow: 1.25, rooms: [5, 6], events: 3, items: 3, floor: 'epic', unique: 0.12, col: '#c77dff' },
-    { name: 'Mythic', lvl: 28, hp: 1.5, dmg: 1.3, pow: 1.6, rooms: [6, 7], events: 3, items: 4, floor: 'legendary', unique: 0.16, col: '#ff9a3c' },
+    { name: 'Normal', lvl: 2, hp: 1, dmg: 1, pow: 0.8, rooms: [6, 6], events: 2, items: 2, floor: 'rare', unique: 0.05, col: '#7bd35a' },
+    { name: 'Hard', lvl: 8, hp: 1.15, dmg: 1.1, pow: 1.0, rooms: [6, 7], events: 2, items: 3, floor: 'epic', unique: 0.08, col: '#58b4ff' },
+    { name: 'Heroic', lvl: 16, hp: 1.3, dmg: 1.2, pow: 1.25, rooms: [7, 7], events: 3, items: 3, floor: 'epic', unique: 0.12, col: '#c77dff' },
+    { name: 'Mythic', lvl: 28, hp: 1.5, dmg: 1.3, pow: 1.6, rooms: [7, 8], events: 3, items: 4, floor: 'legendary', unique: 0.16, col: '#ff9a3c' },
   ],
-  // room shapes: half sizes (x, z) of a hall; the boss hall is always the big square
-  shapes: [{ n: 'hall', hx: 9, hz: 9, w: 4 }, { n: 'gallery', hx: 13, hz: 6, w: 2 }, { n: 'longhall', hx: 6, hz: 12, w: 2 }, { n: 'chamber', hx: 11, hz: 11, w: 2 }, { n: 'cell', hx: 7, hz: 7, w: 2 }],
-  bossH: 16, corridor: 8, corW: 5,
-  // what a combat hall holds; events sit only in their own rooms
-  fights: [{ k: 'guard', w: 4, n: [6, 8] }, { k: 'swarm', w: 2, n: [4, 5], waves: 3 }, { k: 'elites', w: 2, n: [2, 3] }],
+  // room shapes: half sizes (x, z) of a hall, from tight cells (20 m) to huge arenas (56 m); the boss hall is always the
+  // giant square (64 m). Big enough for a party of four to spread out (Casper, 18 Oct: the old halls were too small).
+  shapes: [{ n: 'cell', hx: 10, hz: 10, w: 2 }, { n: 'hall', hx: 15, hz: 15, w: 3 }, { n: 'gallery', hx: 22, hz: 12, w: 2 }, { n: 'longhall', hx: 12, hz: 22, w: 2 },
+    { n: 'chamber', hx: 19, hz: 19, w: 2 }, { n: 'arena', hx: 28, hz: 28, w: 1 }],
+  start: { n: 'hall', hx: 13, hz: 13 }, bossH: 32, corridor: 10, corW: 6,
+  // what a combat hall holds: packs of monsters (n per pack) that wake together, more packs in bigger halls (one per
+  // `packArea` m², at most `packs`); swarm halls send their packs in waves; events sit only in their own rooms
+  fights: [{ k: 'guard', w: 4, n: [3, 4] }, { k: 'swarm', w: 2, n: [3, 4], waves: 3 }, { k: 'elites', w: 2, n: [1, 2] }],
+  packArea: 320, packs: [1, 7], packR: 3.2,
+  // halfway through, a hall holds the dungeon's mini-boss with guards; the boss fights in three phases (adds at 66% and
+  // 33%, then it gets faster and hits harder)
+  mini: { hp: 0.55, guards: 2 }, boss: { hp: 2.4, phases: [0.66, 0.33], rage: { spd: 1.25, atk: 1.2 } },
   events: {
     vault: { name: 'Treasure Vault', d: 'A gold goblin! Catch it before it vanishes', time: 20 },
     altar: { name: 'Cursed Altar', d: 'Take the curse: less health for the rest of the run, better loot at the end', hpCap: 0.75, unique: 1.6, items: 1 },
@@ -58,7 +65,7 @@ const DV = CFG.delve, DV_RAR = ['rare', 'epic', 'legendary', 'mythic', 'ancient'
 function diffDef(i) {
   i = Math.max(0, i | 0); if (i < DV.diffs.length) return Object.assign({ i }, DV.diffs[i]);
   const r = i - DV.diffs.length + 1; // Ascendant rank
-  return { i, name: `Ascendant ${r}`, lvl: 40 + 10 * r, hp: 1.6 * Math.pow(1.08, r - 1), dmg: 1.35 * Math.pow(1.05, r - 1), pow: 2 * Math.pow(1.12, r - 1), rooms: [6, 7], events: 4,
+  return { i, name: `Ascendant ${r}`, lvl: 40 + 10 * r, hp: 1.6 * Math.pow(1.08, r - 1), dmg: 1.35 * Math.pow(1.05, r - 1), pow: 2 * Math.pow(1.12, r - 1), rooms: [8, 8], events: 4,
     items: Math.min(6, 4 + Math.floor(r / 3)), floor: r >= 6 ? 'ancient' : 'mythic', unique: Math.min(0.35, 0.18 + 0.02 * r), col: '#ffe27a', asc: r };
 }
 const delveDef = (id) => DV.dungeons.find((d) => d.id === id) || DV.dungeons[0];
@@ -96,7 +103,7 @@ function delveLayout(seed, def, di) {
   const n = ri(D.rooms[0], D.rooms[1]), rooms = [], cors = [], walls = [], doors = [], props = [];
   const rect = (x, z, hx, hz) => ({ x0: x - hx, x1: x + hx, z0: z - hz, z1: z + hz });
   for (let i = 0; i <= n; i++) {
-    const boss = i === n, sh = boss ? { n: 'throne', hx: C.bossH, hz: C.bossH } : i === 0 ? C.shapes[0] : wpick(C.shapes);
+    const boss = i === n, sh = boss ? { n: 'throne', hx: C.bossH, hz: C.bossH } : i === 0 ? C.start : wpick(C.shapes);
     const mk = (x, z) => Object.assign(rect(x, z, sh.hx, sh.hz), { x, z, hx: sh.hx, hz: sh.hz, h: Math.min(sh.hx, sh.hz), i, boss, shape: sh.n });
     if (!i) { rooms.push(mk(DC.x, DC.z)); continue; }
     const a = rooms[i - 1], dirs = [[0, 1], [1, 0], [-1, 0]].sort(() => rng() - 0.5);
@@ -126,25 +133,37 @@ function delveLayout(seed, def, di) {
   };
   for (const r of rooms) { edge(r.x0, r.z0, r.x1, r.z0); edge(r.x0, r.z1, r.x1, r.z1); edge(r.x0, r.z0, r.x0, r.z1); edge(r.x1, r.z0, r.x1, r.z1); }
   for (const c of cors) { if (c.ax === 'z') { seg(c.x0, c.z0, c.x0, c.z1); seg(c.x1, c.z0, c.x1, c.z1); } else { seg(c.x0, c.z0, c.x1, c.z0); seg(c.x0, c.z1, c.x1, c.z1); } }
-  // events in the middle rooms (never the start hall or the boss hall), no type twice in a run
-  const mids = rooms.slice(1, n).map((m) => m.i).sort(() => rng() - 0.5), evKeys = Object.keys(C.events).sort(() => rng() - 0.5);
+  // the mini-boss hall sits halfway; events go in the other middle rooms (never the start or boss hall), no type twice
+  const mi = n >= 3 ? Math.floor(n / 2) : -1;
+  const mids = rooms.slice(1, n).map((m) => m.i).filter((i) => i !== mi).sort(() => rng() - 0.5), evKeys = Object.keys(C.events).sort(() => rng() - 0.5);
   const nev = Math.min(D.events, mids.length - 1 > 0 ? mids.length - 1 : mids.length);
   for (let k = 0; k < nev; k++) rooms[mids[k]].event = evKeys[k];
   for (const m of rooms) {
     if (m.boss) { m.fight = 'boss'; continue; }
-    if (!m.event) { const f = wpick(C.fights); m.fight = f.k; m.count = ri(f.n[0], f.n[1]); m.waves = f.waves || 1; }
-    else m.fight = m.event === 'traps' ? 'guard' : 'none', m.count = m.event === 'traps' ? 3 : 0, m.waves = 1;
+    const packs = clamp(Math.round(4 * m.hx * m.hz / C.packArea), C.packs[0], C.packs[1]);
+    if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.per = 3; m.packs = C.mini.guards; m.waves = 1; }
+    else if (!m.event) { const f = wpick(C.fights); m.fight = f.k; m.per = ri(f.n[0], f.n[1]); m.waves = f.waves || 1; m.packs = f.k === 'guard' ? packs : Math.ceil(packs / 2); }
+    else { m.fight = m.event === 'traps' ? 'guard' : 'none'; m.per = m.event === 'traps' ? 3 : 0; m.packs = m.event === 'traps' ? Math.ceil(packs / 2) : 0; m.waves = 1; }
+    m.count = m.per * m.packs;
     m.dark = m.i > 0 && rng() < C.mods.dark;
-    // pillars: cover in the big halls, kept clear of the doors' lanes
-    if (!m.event && m.i > 0 && m.hx >= 9 && m.hz >= 9 && rng() < C.mods.pillars) { m.pillars = true; for (const sx of [-1, 1]) for (const sz of [-1, 1]) props.push({ x: m.x + sx * m.hx * 0.45, z: m.z + sz * m.hz * 0.45, r: 0.9, room: m.i }); }
-    // fixed spawn spots: the run's slots (room × 100 + k) match in every party member's game
-    m.spots = []; const tot = (m.count || 0) * (m.waves || 1) + 8;
-    for (let k = 0; k < tot; k++) m.spots.push({ x: m.x + (rng() * 2 - 1) * (m.hx - 3), z: m.i ? m.z + (rng() * 2 - 1) * (m.hz - 3) : m.z + 1 + rng() * (m.hz - 4), e: rng() });
+    // pillars: cover in the big halls (more in the arenas), kept clear of the doors' lanes
+    if (!m.event && m.i > 0 && m.hx >= 15 && m.hz >= 15 && rng() < C.mods.pillars) {
+      m.pillars = true; const at = [[0.45, 0.45]]; if (m.hx >= 24) at.push([0.22, 0.65], [0.65, 0.22]);
+      for (const [ax, az] of at) for (const sx of [-1, 1]) for (const sz of [-1, 1]) props.push({ x: m.x + sx * m.hx * ax, z: m.z + sz * m.hz * az, r: 0.9, room: m.i });
+    }
+    // fixed spawn spots, pack by pack: the run's slots (room × 100 + k) match in every party member's game; the start
+    // hall keeps its southern half free (you arrive there)
+    m.spots = []; const R = C.packR, mx = m.hx - R - 3, mz = m.hz - R - 3;
+    for (let w = 0; w < m.waves; w++) for (let p = 0; p < m.packs; p++) {
+      const cx = m.x + (rng() * 2 - 1) * mx, cz = m.i ? m.z + (rng() * 2 - 1) * mz : m.z + 3 + rng() * (mz - 3);
+      for (let k = 0; k < m.per; k++) { const a = rng() * Math.PI * 2, r = R * Math.sqrt(rng()); m.spots.push({ x: cx + Math.sin(a) * r, z: cz + Math.cos(a) * r, e: rng(), p }); }
+    }
+    for (let k = 0; k < 8; k++) m.spots.push({ x: m.x + (rng() * 2 - 1) * (m.hx - 3), z: m.z + (rng() * 2 - 1) * (m.hz - 3), e: rng(), p: -1 });
     if (m.event === 'plates') m.plates = [[-1, -1], [1, 1], [-1, 1], [1, -1]].map(([a, b]) => ({ x: m.x + a * m.hx * 0.5, z: m.z + b * m.hz * 0.5 }));
     if (m.event === 'mimic') m.mimic = rng() < C.events.mimic.odds;
   }
-  const r0 = rooms[0], b = rooms[n];
-  return { rooms, cors, walls, doors, props, start: { x: r0.x, z: r0.z0 + 4 }, exit: { x: r0.x - 4, z: r0.z0 + 2.2 }, chest: { x: b.x, z: b.z }, exit2: { x: b.x, z: b.z + 5 } };
+  const r0 = rooms[0], b = rooms[n], span = Math.max(...rooms.map((m) => Math.hypot(Math.max(Math.abs(m.x0 - DC.x), Math.abs(m.x1 - DC.x)), Math.max(Math.abs(m.z0 - DC.z), Math.abs(m.z1 - DC.z))))) + 40;
+  return { rooms, cors, walls, doors, props, span, start: { x: r0.x, z: r0.z0 + 4 }, exit: { x: r0.x - 4, z: r0.z0 + 2.2 }, chest: { x: b.x, z: b.z }, exit2: { x: b.x, z: b.z + 5 } };
 }
 // --- run
 const delveOn = () => !!(G.dungeon && G.dungeon.delve);
@@ -163,7 +182,9 @@ function delveMob(D, room, k, o) {
 }
 function spawnRoomWave(D, m, w) {
   const X = D.delve, el = m.fight === 'elites';
-  for (let k = 0; k < m.count; k++) { const s = m.spots[w * m.count + k]; m.mobs.push(delveMob(D, m.i, w * m.count + k, { x: s.x, z: s.z, pick: s.e, elite: el || s.e < 0.12 + X.diff.i * 0.03, chase: w > 0 })); }
+  for (let k = 0; k < m.count; k++) { const s = m.spots[w * m.count + k], e = delveMob(D, m.i, w * m.count + k, { x: s.x, z: s.z, pick: s.e, elite: el || s.e < 0.12 + X.diff.i * 0.03, chase: w > 0 }); e.pack = s.p; m.mobs.push(e); }
+  // the mini-boss stands in the middle of its hall, its guards round it
+  if (m.mini && !w) { const e = delveMob(D, m.i, 90, { boss: true, pick: 0.7, lvl: D.lvl + 1, x: m.x, z: m.z, name: X.def.mini }); e.maxHp = e.hp = Math.round(e.maxHp * DV.mini.hp); e.pack = 0; e.mini = true; m.mobs.push(e); }
   m.wave = w;
 }
 // diff: difficulty index; n: party size at the start (sets monster HP); seed: the leader's run seed
@@ -186,7 +207,7 @@ function startDelve(id, di, seed, n, lead = true) {
   D.rooms.forEach((m) => { m.mobs = []; m.cleared = false; m.wave = -1; m.seen = false; if (!m.boss && m.count) spawnRoomWave(D, m, 0); });
   const b = D.rooms.at(-1);
   D.boss = delveMob(D, b.i, 0, { type: D.delve.roster[D.delve.roster.length - 1], boss: true, lvl: lvl + CFG.dungeon.boss.lvlAdd, x: b.x, z: b.z + 4, name: def.boss });
-  D.boss.maxHp = D.boss.hp = Math.round(D.boss.maxHp * 1.4); b.mobs = [D.boss];
+  D.boss.maxHp = D.boss.hp = Math.round(D.boss.maxHp * DV.boss.hp); b.mobs = [D.boss]; D.phase = 0;
   ev({ t: 'dungeonStart', name: def.name, lvl, key: 0, x: pl.x, z: pl.z, delve: true, diff: diff.name, n: D.delve.n }); return true;
 }
 // who of the party is in this run with us (peers in the same run seed); always includes the local player
@@ -207,7 +228,7 @@ function fleeStep(e, dt) {
 }
 function stepDelve(dt) {
   const D = G.dungeon, X = D.delve, pl = G.player, E = DV.events;
-  if (Math.hypot(pl.x - DC.x, pl.z - DC.z) > 260) { endDungeon('away'); return; }
+  if (Math.hypot(pl.x - DC.x, pl.z - DC.z) > (D.span || 260)) { endDungeon('away'); return; }
   D.rooms.forEach((m, i) => { if (pl.alive && inRoom(m, pl.x, pl.z)) D.room = i; });
   // a fall: wait for a teammate; when everyone is down the run fails
   const party = delveParty(), up = party.filter((f) => f.alive !== false);
@@ -220,7 +241,9 @@ function stepDelve(dt) {
   stepDelveBots(dt);
   for (const m of D.rooms) {
     if (m.boss) continue;
-    const seen = m.seen || anyoneIn(m); if (seen && !m.seen) { m.seen = true; if (m.event) ev({ t: 'delveEvent', k: m.event, x: m.x, z: m.z }); }
+    const seen = m.seen || anyoneIn(m); if (seen && !m.seen) { m.seen = true; if (m.event) ev({ t: 'delveEvent', k: m.event, x: m.x, z: m.z }); if (m.mini) ev({ t: 'delveMini', name: X.def.mini, x: m.x, z: m.z }); }
+    // a pack wakes together: one of them hunting wakes the rest of its pack
+    for (const e of m.mobs) if (e.alive && e.state === 'chase' && e.pack >= 0 && !e.own) for (const o of m.mobs) if (o !== e && o.alive && o.pack === e.pack && o.state === 'idle' && !o.own) o.state = 'chase';
     // swarm waves: the next wave comes when the last one is down
     if (m.waves > 1 && m.wave < m.waves - 1 && m.seen && m.mobs.length && !m.mobs.some((e) => e.alive)) { spawnRoomWave(D, m, m.wave + 1); ev({ t: 'delveWave', n: m.wave + 1, of: m.waves, x: m.x, z: m.z }); }
     if (m.event && m.seen) stepDelveEvent(D, m, dt);
@@ -232,10 +255,13 @@ function stepDelve(dt) {
     delveDoorOpen(D, k, true);
   }
   const b = D.boss;
-  if (b.alive && !D.addsDone && b.hp < b.maxHp * 0.5) {
-    D.addsDone = true; const bm = D.rooms.at(-1);
-    for (let k = 0; k < 2 + Math.min(2, X.n - 1); k++) { const a = (k / 4) * Math.PI * 2; bm.mobs.push(delveMob(D, bm.i, 10 + k, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, pick: k / 4, chase: true, elite: X.diff.i >= 2 })); }
-    ev({ t: 'dungeonAdds', x: b.x, z: b.z });
+  // boss phases: adds at each step down; the last phase also makes it faster and harder hitting
+  const PH = DV.boss.phases;
+  if (b.alive && (D.phase | 0) < PH.length && b.hp < b.maxHp * PH[D.phase | 0]) {
+    const ph = D.phase = (D.phase | 0) + 1, bm = D.rooms.at(-1), last = ph === PH.length; D.addsDone = true;
+    for (let k = 0; k < 2 + Math.min(2, X.n - 1); k++) { const a = (k / 4) * Math.PI * 2; bm.mobs.push(delveMob(D, bm.i, ph * 10 + k, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, pick: k / 4, chase: true, elite: X.diff.i >= 2 || last })); }
+    if (last) { b.spd = (b.spd || 1) * DV.boss.rage.spd; b.atk *= DV.boss.rage.atk; b.raged = true; }
+    ev({ t: 'dungeonAdds', x: b.x, z: b.z }); ev({ t: 'delvePhase', n: ph + 1, of: PH.length + 1, rage: last, name: X.def.boss, x: b.x, z: b.z });
   }
   if (!b.alive && !D.bossDead) { D.bossDead = D.rooms.at(-1).cleared = true; D.clearT = G.time - D.t0; ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: X.def.name, secs: Math.round(D.clearT), par: 0, key: 0, up: 0, delve: true }); }
 }

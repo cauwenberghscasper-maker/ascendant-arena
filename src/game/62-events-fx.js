@@ -143,6 +143,8 @@ function processEvents() {
         Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
       // party dungeons (36b-delve.js)
       case 'delveEvent': { const E = CFG.delve.events[e.k]; showBanner(E.name, E.d, 'gold'); ringFx(e.x, e.z, 5, 0xffd34a, 1.1); Sfx.play('horn'); break; }
+      case 'delveMini': showBanner(escapeHTML(e.name), 'A champion of the dungeon guards this hall', 'red'); ringFx(e.x, e.z, 7, 0xff5d8f, 1.1); Sfx.play('horn'); break;
+      case 'delvePhase': showBanner(`Phase ${e.n} of ${e.of}`, e.rage ? `${escapeHTML(e.name)} is enraged: faster and harder hitting` : `${escapeHTML(e.name)} calls for help`, 'red'); ringFx(e.x, e.z, 6, e.rage ? 0xff3030 : 0xff5d8f, 1); Sfx.play('horn'); if (e.rage) burst(e.x, 1.5, e.z, 34, 0xff3030, 6, 0.9, 0.4, 3, 2); break;
       case 'delveWave': showToast(`Wave ${e.n + 1} of ${e.of}!`, 'bad'); ringFx(e.x, e.z, 6, 0xff5d8f, 0.9); break;
       case 'delveBonus': Feed.remove('dlvEvent'); showToast(e.why + ' · open the cache', 'good'); burst(e.x, 1, e.z, 26, 0xffd34a, 5, 0.9, 0.4, 4, 2); Sfx.play('unlock'); break;
       case 'delveEscape': Feed.remove('dlvEvent'); showToast('The goblin got away with its gold…', 'bad'); burst(e.x, 1, e.z, 18, 0xffd34a, 4, 0.6, 0.3, -2, 3); break;
