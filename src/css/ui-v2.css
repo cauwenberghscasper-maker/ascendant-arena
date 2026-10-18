@@ -641,3 +641,4 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .enchNeed { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 6px 8px; border: 1px solid #000; background: rgba(176,107,255,.16); color: #e9dcff; font: 600 12px/1.25 var(--body); }
 .enchNeed img { width: 26px; height: 26px; image-rendering: pixelated; flex: none; } .enchNeed b { color: #fff; } .enchNeed.short { background: rgba(255,93,108,.16); color: #ffc9c9; }
 .arow button small img.mi { width: 14px; height: 14px; vertical-align: -2px; }
+#invSecRes { min-height: 75vh; } #invSecChests, #invSecGear { scroll-margin-top: 4px; }
