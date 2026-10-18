@@ -1,3 +1,26 @@
+# Dungeons: tactics, puzzles, boss kits, rare veins, same map on every phone (18 Oct 2026, branch `claude/dungeon-tactics`, PR to main)
+Casper: too spammy, one boring puzzle, bosses not intense, add rare resources, friends saw different maps, green smoke.
+- **Same run on every phone (README rule 8):** the layout shuffled with `Array.sort(() => rng() - 0.5)`, which Safari and
+  Chrome order differently, so iPhones and Androids got other maps; boss/champion modifiers used `Math.random`. Now
+  `seededShuffle` and `withSeed` (`36b-delve.js`); every monster is rolled on a seeded stream. Also fixed: a hall that fit
+  nowhere was dropped north on top of others; corridors now grow until it fits. Check: two games with different random
+  streams build the same run.
+- **Green smoke gone:** dungeon fog now starts at 70 m (the camera is ~35 m up) and dark halls no longer pull it in.
+- **Tactics:** one monster per 170 m² (3-10 a hall) with 1.6× HP and 1.2× damage, at least 7 m apart, none at the way in;
+  ranged ones at the back (behind a pillar when near), melee in front; a monster that wakes calls only neighbours within
+  9 m (`CFG.delve.spread`, `tough`). Pillars more often (60%).
+- **Puzzles:** four kinds, two per run, never the same twice (`CFG.delve.puzzle.kinds`): mural order, echo (light show to
+  repeat), race (clock from the walk between the seals; bots run to dark seals), balance (lights-out, no punishment).
+  Sync: versioned 'dpz' (newest wins, ties to the lower session id).
+- **Boss kit** (`36e-delve-boss.js`, `CFG.delve.bossKit`): phase 1 Volley + Ground Slam, phase 2 adds Nova Ring + Charge,
+  phase 3 adds Death Spiral + Falling Stones and casts every 1.4 s; mini-bosses use the phase 1 kit. The game running the
+  boss picks each cast and sends it ('dbs'); every game plays it identically and damages its own heroes.
+- **Rare veins:** each dungeon has its own treasure (craft material kind `gem`, pixel icons in `39c-mat-art.js`, shown in
+  Inventory › Dungeon treasures). 40% (+6%/difficulty) of runs hide a vein, sometimes two, rarely a motherlode; the
+  existing `crystal` model in the treasure colour. Each hero mines their own share. No save change needed (craft.mats).
+- **Open:** the treasures have no recipe yet (next: dungeon crafting / secret weapons); balance of the tougher monsters and
+  the boss kit on a real phone; boss attacks are generic shapes tinted per dungeon (a themed kit per boss later).
+
 # New monster bodies, monster strikes, dungeon dressing, new barracks (18 Oct 2026, branch `claude/hf-models-a`, PR to main)
 Casper: a Hugging Face session for attack animations, new mobs and props for dungeons and the world, more unique Bastion art.
 Made with the HF MCP tools (Z-Image Turbo concept → TRELLIS.2 1024, seed 7), relayed to `asset-drop` (`drop/mobs-a`,
