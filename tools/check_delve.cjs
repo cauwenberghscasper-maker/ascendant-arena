@@ -18,7 +18,7 @@ vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp ='
   section('class Grid {', '// --- entities') + section('function patrolCountFor(', 'function rewardEnemyKill(') + section('const PELLET_COLORS', '// --- hub step') +
   section('function separate(', '// --- world boss') + section('// --- world boss', 'function spawnBoss(') + section('function boundFighter(', '// --- progression') +
   section('// --- Dungeons:', '// --- end dungeons') + section('// --- Dungeon mode', '// --- end dungeon mode') + section('// Dungeon bots:', '// --- end dungeon bots') +
-  '\nthis.CFG = CFG; this.Grid = Grid; this.DC = DC; this.DV = DV; this.SET_SLOTS = SET_SLOTS; Object.assign(this, { delveOpen, delveTop, delveOn, delveDef, inInstance });', c);
+  '\nthis.CFG = CFG; this.Grid = Grid; this.DC = DC; this.DV = DV; this.SET_SLOTS = SET_SLOTS; Object.assign(this, { delveOpen, delveTop, delveOn, delveDef, inInstance, delvePzRecv });', c);
 const DV = c.DV, defs = DV.dungeons;
 DV.bots.on = false; // these checks run real-player parties; the bots (36d-delve-bots.js) need the full fighter code and are checked in the browser
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }
@@ -37,6 +37,8 @@ function reach(D) {
   return (p) => seen.has(k(Math.round(p.x / s) * s, Math.round(p.z / s) * s));
 }
 const killAll = (D) => { for (const e of D.mobs) e.alive = false; };
+// walk the hero onto each seal in the given order (the right one unless told otherwise), stepping off in between
+function walkSeals(D, m, order) { const pl = c.G.player; for (const j of order) { Object.assign(pl, m.pz.sw[j]); for (let k = 0; k < 45; k++) c.stepDungeon(1 / 60); Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); } }
 
 check('layouts: same seed same dungeon, mixed hall shapes, no overlaps, events only in middle rooms and never twice', () => {
   const shapes = new Set(), evs = new Set();
@@ -92,6 +94,7 @@ check('rooms: doors open as rooms clear, swarm rooms send waves, the boss calls 
         for (const e of m.mobs) e.alive = false;
         if (m.event === 'mimic') Object.assign(pl, { x: m.x, z: m.z });
         if (m.event === 'vault' && X.ev[m.i] && X.ev[m.i].mob) X.ev[m.i].mob.alive = false;
+        if (m.pz && !(X.pz[m.i] || {}).done) walkSeals(D, m, m.pz.order);
         c.stepDungeon(1 / 60); c.stepDungeon(1 / 60);
       }
       assert(D.doors[i].open, `door ${i} (${m.event || m.fight}) opens`);
@@ -118,7 +121,7 @@ check('makeover: mixed hall sizes up to a giant boss hall, a mini-boss halfway, 
   }
   assert(['small', 'big', 'huge'].every((k) => sizes.has(k)), 'small, big and huge halls all show up: ' + [...sizes]);
   // a pack wakes together
-  reset(); c.startDelve(defs[0].id, 0, 4242, 1); let D = c.G.dungeon; const m = D.rooms.find((r) => r.i > 0 && r.fight === 'guard' && r.per > 1);
+  let D, m; for (let sd = 4242; !m; sd++) { reset(); c.startDelve(defs[0].id, 0, sd, 1); D = c.G.dungeon; m = D.rooms.find((r) => r.i > 0 && r.fight === 'guard' && r.per > 1); if (!m) c.endDungeon('leave'); }
   Object.assign(c.G.player, { x: D.rooms[0].x, z: D.rooms[0].z }); const pk = m.mobs.filter((e) => e.pack === 0); assert(pk.length > 1);
   pk.forEach((e) => { e.state = 'idle'; }); pk[0].state = 'chase'; m.seen = true; c.stepDungeon(1 / 60); assert(pk.every((e) => e.state === 'chase'), 'its pack follows');
   assert(m.mobs.filter((e) => e.pack !== 0).every((e) => e.state !== 'chase'), 'other packs keep sleeping'); c.endDungeon('leave');
@@ -127,6 +130,41 @@ check('makeover: mixed hall sizes up to a giant boss hall, a mini-boss halfway, 
   b.hp = b.maxHp * 0.6; c.stepDungeon(1 / 60); assert.equal(D.phase, 1); assert(!b.raged); const adds1 = bm.mobs.length;
   b.hp = b.maxHp * 0.3; c.stepDungeon(1 / 60); assert.equal(D.phase, 2); assert(b.raged && b.atk > atk && b.spd > 1 && bm.mobs.length > adds1, 'enraged with fresh adds');
   assert(events.some((e) => e.t === 'delvePhase' && e.rage)); c.stepDungeon(1 / 60); assert.equal(D.phase, 2, 'no more phases'); c.endDungeon('leave');
+});
+check('puzzles: seals wake only in the mural order, a wrong one resets and bites back (spikes, then a pack), the gate waits, the party stays in step', () => {
+  let found = 0;
+  for (let sd = 1; sd < 400 && found < 6; sd++) {
+    reset(); const def = defs[sd % 6], di = sd % 5; c.startDelve(def.id, di, sd * 977, 1); const D = c.G.dungeon, X = D.delve, pl = c.G.player;
+    const m = D.rooms.find((r) => r.pz); if (!m) { c.endDungeon('leave'); continue; } found++;
+    const pz = m.pz, K = pz.sw.length; assert.equal(K, di >= 2 ? 5 : 4); assert.equal(new Set(pz.sw.map((q) => q.g)).size, K, 'every seal its own rune');
+    assert(!m.event && !m.mini && m.fight === 'puzzle' && c.inRoom(m, pz.clue.x, pz.clue.z), 'the mural lies in its hall');
+    for (const q of pz.sw) { assert(c.inRoom(m, q.x, q.z)); if (q.lever) assert(D.props.some((p) => p.kind === 'lever' && p.x === q.x)); }
+    for (const d of D.doors.slice(0, m.i)) d.open = true; c.dungeonGrid(D); killAll(D); X.slots.forEach((e) => { e.alive = false; });
+    Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); assert(events.some((e) => e.t === 'delvePuzzle' && e.name === def.puzzle));
+    const S = () => X.pz[m.i];
+    walkSeals(D, m, [pz.order[0]]); assert.equal(S().step, 1, 'the first seal wakes');
+    // wrong seal: reset, spikes under the hero
+    const aoe = c.G.pendingAoE.length; walkSeals(D, m, [pz.order[2]]); assert.equal(S().step, 0); assert.equal(S().fails, 1); assert(c.G.pendingAoE.length > aoe, 'spikes');
+    for (let k = 0; k < 200; k++) c.stepDungeon(1 / 60);
+    // standing on a wrong seal through the reset does not count again until you step off
+    Object.assign(pl, pz.sw[pz.order[3]]); for (let k = 0; k < 60; k++) c.stepDungeon(1 / 60); assert.equal(S().fails, 2, 'second mistake');
+    assert(m.mobs.some((e) => e.alive), 'a pack crawls out'); const pack = m.mobs.filter((e) => e.alive).length;
+    for (let k = 0; k < 400; k++) c.stepDungeon(1 / 60); assert.equal(S().fails, 2, 'no repeat while still standing there');
+    for (const e of m.mobs) e.alive = false; for (let k = 0; k < 200; k++) c.stepDungeon(1 / 60);
+    assert(!D.doors[m.i].open, 'the gate waits for the puzzle');
+    walkSeals(D, m, pz.order); assert(S().done && S().step === K, 'solved in order'); c.stepDungeon(1 / 60); c.stepDungeon(1 / 60);
+    assert(D.doors[m.i].open, 'the gate opens'); assert(pack === DV.puzzle.pack);
+    c.endDungeon('leave');
+    // a party member's 'dpz': steps and fails arrive the same way in another game
+    const sent = []; c.partySend = (e, P) => sent.push([e, P]); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d);
+    reset(); c.startDelve(def.id, di, sd * 977, 1); const D2 = c.G.dungeon, m2 = D2.rooms[m.i];
+    c.delvePzRecv({ dr: D2.delve.seed, r: m.i, s: 2, f: 0 }); assert.equal(D2.delve.pz[m.i].step, 2);
+    c.delvePzRecv({ dr: D2.delve.seed, r: m.i, s: 1, f: 0 }); assert.equal(D2.delve.pz[m.i].step, 2, 'never backwards');
+    c.delvePzRecv({ dr: D2.delve.seed, r: m.i, s: 0, f: 2 }); assert(D2.delve.pz[m.i].step === 0 && D2.delve.pz[m.i].fails === 2 && m2.mobs.some((e) => e.alive), 'a fail from a friend punishes here too');
+    c.delvePzRecv({ dr: D2.delve.seed, r: m.i, s: K, f: 2 }); assert(D2.delve.pz[m.i].done); assert(!sent.length, 'received states are not echoed');
+    delete c.partySend; c.endDungeon('leave');
+  }
+  assert(found >= 6, 'puzzle halls show up');
 });
 check('gates: the first game to see a room done tells the party, and every game opens that gate at once', () => {
   const sent = []; c.partySend = (event, P) => sent.push([event, P]); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d);

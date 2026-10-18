@@ -61,8 +61,15 @@ function delveBotThink(b, dt) {
   // 2. pressure plates in a quiet room: each bot takes the plate after the humans' ones
   const s = myRoom && myRoom.event === 'plates' ? X.ev[myRoom.i] || {} : null;
   const plate = s && !s.done && myRoom.seen && !myRoom.mobs.some((e) => e.alive) ? myRoom.plates[humans.length + X.bots.indexOf(b)] : null;
+  // 3. a puzzle hall: once the first seal is right, the first bot walks to the next one after a short think
+  let seal = null; const pzS = myRoom && myRoom.pz && !myRoom.mobs.some((e) => e.alive) ? delvePz(D, myRoom) : null;
+  if (pzS && !pzS.done && pzS.step >= 1 && pzS.cd <= 0 && X.bots.indexOf(b) === 0) {
+    if (ai.pzStep !== pzS.step) { ai.pzStep = pzS.step; ai.pzT = 0; }
+    if ((ai.pzT += dt) >= DV.puzzle.botWait) seal = myRoom.pz.sw[myRoom.pz.order[pzS.step]];
+  }
   if (down) { tx = down.x; tz = down.z; stop = DV.reviveR * 0.5; }
   else if (plate) { tx = plate.x; tz = plate.z; stop = 0.3; }
+  else if (seal) { tx = seal.x; tz = seal.z; stop = 0.3; }
   if (foe) {
     const w = weaponOf(b), range = w.range || 10, keep = range * K.keep;
     it.ax = (foe.x - b.x) / fd; it.az = (foe.z - b.z) / fd; it.aiming = true; it.fire = fd <= range;

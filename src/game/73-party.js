@@ -52,6 +52,7 @@ function partyRecv(event, sid, P) {
   if (event === 'drev') { const by = cleanNick(P.by) || 'A teammate'; if (P.to === MP.sid) delveReviveMe(by); else delveBotRevive(delveBots().find((b) => b.key === P.to), by); return; }
   if (event === 'dbot') { delveBotsRecv(sid, P); return; }
   if (event === 'ddoor') { delveDoorRecv(P); return; }
+  if (event === 'dpz') { delvePzRecv(P); return; }
   if (event === 'dask') { // the leader asks to play (again): only my party's leader, and only while I'm not already in
     const L = partyLeader(); if (!PARTY.code || !L || L.me || L.key !== sid || delveOn()) return;
     PARTY.dg = delveDef(P.dg).id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999); PARTY.ready = false;
@@ -131,11 +132,16 @@ function partyUpdate(dt) {
     }
   }
   // keep the panel live (not while typing a code)
-  if (UI.current === 'delve' && G.modal && (PARTY.uiT -= dt) <= 0) { PARTY.uiT = 1; const a = document.activeElement; if (!a || a.id !== 'dlvCode') openDelvePanel(); }
+  // (not while typing a code, and not while a finger scrolls it: a redraw mid-swipe stops the scroll on phones)
+  if (UI.current === 'delve' && G.modal && (PARTY.uiT -= dt) <= 0) { PARTY.uiT = 1; const a = document.activeElement; if ((!a || a.id !== 'dlvCode') && performance.now() - (PARTY.scrollT || 0) > 1500) openDelvePanel(); }
 }
 // --- the Dungeons panel ------------------------------------------------------------------------------------------
 function openDelvePanel() {
-  UI.current = 'delve';
+  const live = UI.current === 'delve' && G.modal && !$('modal').hidden; UI.current = 'delve';
+  if (!PARTY.scrollHook) { // remember when the panel (or its difficulty strip) was last touched or scrolled
+    PARTY.scrollHook = true; const mark = () => { if (UI.current === 'delve') PARTY.scrollT = performance.now(); };
+    for (const k of ['scroll', 'touchstart', 'touchmove', 'wheel']) $('panel').addEventListener(k, mark, { capture: true, passive: true });
+  }
   const p = G.profile, R = delveRec(), def = delveDef(PARTY.dg), top = delveTop(def), di = Math.min(PARTY.df, top), lead = iLead();
   if (di !== PARTY.df) PARTY.df = di;
   const M = partyMembers(), g = delveGate(def, di, M.map((m) => m.pw)), diff = diffDef(di), myPw = Math.round(playerPower());
@@ -162,7 +168,7 @@ function openDelvePanel() {
   else buttons = `<div class="row dlvJoin"><input id="dlvCode" maxlength="5" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" ${online ? '' : 'disabled'}><button class="ghost" data-act="dlvJoin" ${online ? '' : 'aria-disabled="true"'}>Join</button><button class="ghost" data-act="dlvCreate" ${online ? '' : 'aria-disabled="true"'}>Create party</button></div>
     <div class="row end"><button class="ghost" data-act="dlvQueue" ${online ? '' : 'aria-disabled="true"'}>Random match</button><button class="${g.ok ? 'primary' : 'disabled'} big" data-act="dlvSolo">Enter alone</button></div>
     ${online ? '' : `<p class="fine">${TEST_MODE ? 'Test mode plays alone.' : 'Parties and random match work on the public site and in the app.'}</p>`}`;
-  openModal(`<div class="npcHead">${gi('m_portal', 'hd')}<h3>Dungeons</h3><span class="cnt">Your Power ${fmtK(myPw)}</span></div>
+  const html = `<div class="npcHead">${gi('m_portal', 'hd')}<h3>Dungeons</h3><span class="cnt">Your Power ${fmtK(myPw)}</span></div>
     <div class="dlvCards">${cards}</div>
     <div class="riftCard dlvInfo"><div class="dlvArt" style="--art:url(assets/ui/delve/${def.id}.webp);--bc:${hex6(BIOMES[def.biome].coreColor)}"><b>${escapeHTML(def.name)}</b><small>Lv ${fmt(delveLevel(def, di))} · ${escapeHTML(diff.name)} · Boss: ${escapeHTML(def.boss)}</small></div><p>${escapeHTML(def.blurb)}</p>
       <p>Each run builds new halls, and some rooms hold an <b>event</b>: a gold goblin, a cursed altar, pressure plates, a spike hall, an echo shrine, a lonely chest or a moonwell. No PvP inside.</p>
@@ -170,8 +176,12 @@ function openDelvePanel() {
     <div class="dlvDiffs">${diffs}</div>
     <div class="dlvGate ${g.ok ? 'ok' : 'bad'}">Team power <b>${fmtK(g.avg)}</b> / ${fmtK(g.req)} needed${g.weak ? ` · ${g.weak} hero${g.weak > 1 ? 'es' : ''} below ${fmtK(g.min)}` : ''} · ${diff.items} items, ${escapeHTML(CFG.gear.rarity[diff.floor].name)} or better</div>
     <div class="dlvParty">${slots}</div>
-    ${buttons}`);
+    ${buttons}`;
+  if (live && html === PARTY.uiHtml) return; // nothing changed: leave the page (and its scroll) alone
+  const strip = $('panel').querySelector('.dlvDiffs'), left = live && strip ? strip.scrollLeft : 0;
+  PARTY.uiHtml = html; openModal(html);
   $('panel').classList.add('menuPanel');
+  const ns = $('panel').querySelector('.dlvDiffs'); if (ns && left) ns.scrollLeft = left; // keep the difficulty strip where it was
 }
 function partyAction(act, b) {
   switch (act) {

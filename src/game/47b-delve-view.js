@@ -1,12 +1,72 @@
 // --- party-dungeon view: event-room set pieces on top of the hall builder (47-dungeon-view.js). Generated models
 // (delve_altar, delve_moonwell, delve_echo, delve_hoard, delve_throne) plus existing ones (chest, pillar); code geometry
 // here is only VFX: rune rings, glows, the moonwell shimmer and the pressure-plate floor sigils. Dark halls pull the fog in.
-const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [] };
+const delveParts = { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [], seals: [], tex: [] };
+// --- puzzle halls: pixel runes (7×7, bone white with an ink outline) floating over each seal; a floor mural shows the
+// order. Pips (1-5 dots) stand in for runes on the easy runs that number their seals.
+const PZ_GLYPHS = ['0011100,0100010,1000001,1111111,1000001,0100010,0011100', '1000001,0100010,0010100,0001000,0010100,0100010,1000001', '0001000,0011100,0101010,1001001,0001000,0001000,0011100',
+  '1111111,1000000,1011110,1010010,1011110,1000000,1111111', '0001000,0010100,0100010,1000001,0100010,0010100,0001000', '1110111,1000001,1001001,0011100,1001001,1000001,1110111',
+  '0100010,0100010,1111111,0100010,0100010,1111111,0100010', '0010000,0011000,0010100,0010010,0010100,0011000,0010000'];
+const PZ_PIPS = [[[3, 3]], [[1, 1], [5, 5]], [[1, 1], [3, 3], [5, 5]], [[1, 1], [5, 1], [1, 5], [5, 5]], [[1, 1], [5, 1], [3, 3], [1, 5], [5, 5]]];
+function pzCells(g, pip) { const out = []; if (pip != null) for (const [x, y] of PZ_PIPS[pip]) out.push([x, y]); else PZ_GLYPHS[g].split(',').forEach((row, y) => [...row].forEach((c, x) => { if (c === '1') out.push([x, y]); })); return out; }
+// draws glyphs (or pips) side by side with arrows between: one tile per entry, each 9×9 pixels of 8 px
+function pzTexture(items, arrows) {
+  const T = 72, gap = arrows ? 36 : 0, cv = document.createElement('canvas'); cv.width = items.length * T + (items.length - 1) * gap; cv.height = T;
+  const g = cv.getContext('2d'), px = 8;
+  items.forEach((it, k) => {
+    const ox = k * (T + gap), cells = pzCells(it.g, it.pip);
+    g.fillStyle = '#16121c'; for (const [x, y] of cells) g.fillRect(ox + x * px, y * px, px * 3, px * 3); // ink outline round every stroke
+    g.fillStyle = '#efe6d2'; for (const [x, y] of cells) g.fillRect(ox + (x + 1) * px, (y + 1) * px, px, px);
+    if (arrows && k < items.length - 1) { g.fillStyle = '#efe6d2'; for (let i = 0; i < 3; i++) g.fillRect(ox + T + 8 + i * 6, T / 2 - 12 + i * 6, 6, 24 - i * 12); }
+  });
+  const tx = new THREE.CanvasTexture(cv); tx.magFilter = tx.minFilter = THREE.NearestFilter; tx.generateMipmaps = false; tx.colorSpace = THREE.SRGBColorSpace;
+  delveParts.tex.push(tx); return tx;
+}
+function buildDelvePuzzles(D, tint) {
+  for (const t of delveParts.tex) t.dispose(); delveParts.tex = []; delveParts.seals = [];
+  const add = (o) => { dungeonGroup.add(o); return o; }, levers = [], stones = [];
+  for (const m of D.rooms) {
+    if (!m.pz) continue; const pz = m.pz, K = pz.sw.length;
+    pz.sw.forEach((q, j) => {
+      const at = pz.order.indexOf(j), lever = q.lever;
+      if (lever) levers.push({ x: q.x, z: q.z, ry: j * 1.7, s: 2.6 });
+      // the seal: a ring on the floor (a plate also gets a dim stone disc), its rune floating above
+      const ring = add(new THREE.Mesh(new THREE.RingGeometry(1.35, 1.7, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: tint, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false }))); ring.position.set(q.x, 0.04, q.z);
+      const disc = lever ? null : add(new THREE.Mesh(new THREE.CircleGeometry(1.3, 8).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x5a5060, transparent: true, opacity: 0.55, depthWrite: false })));
+      if (disc) disc.position.set(q.x, 0.03, q.z);
+      const sp = add(new THREE.Sprite(new THREE.SpriteMaterial({ map: pzTexture([{ g: q.g, pip: pz.pips ? at : null }]), color: 0x8a8590, transparent: true, depthWrite: false })));
+      sp.position.set(q.x, lever ? 3.6 : 2.2, q.z); sp.scale.setScalar(1.25);
+      delveParts.seals.push({ room: m.i, j, ring, disc, sp, base: sp.position.y });
+    });
+    // the mural: the runes in their order (or the pips counting up), between two standing stones
+    const seq = pz.order.map((j, k) => ({ g: pz.sw[j].g, pip: pz.pips ? k : null })), w = K * 1.7, tex = pzTexture(seq, true);
+    const mural = add(new THREE.Mesh(new THREE.PlaneGeometry(w + (K - 1) * 0.85, 1.7).rotateX(-Math.PI / 2).rotateY(Math.PI), new THREE.MeshBasicMaterial({ map: tex, color: tint, transparent: true, depthWrite: false })));
+    mural.position.set(pz.clue.x, 0.05, pz.clue.z); mural.material.color.lerp(new THREE.Color(0xffffff), 0.55);
+    const slab = add(new THREE.Mesh(new THREE.PlaneGeometry(w + (K - 1) * 0.85 + 0.8, 2.3).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x14101c, transparent: true, opacity: 0.6, depthWrite: false }))); slab.position.set(pz.clue.x, 0.04, pz.clue.z);
+    const ex = (w + (K - 1) * 0.85) / 2 + 1.1; stones.push({ x: pz.clue.x - ex, z: pz.clue.z + 0.3, ry: 0.3, s: 2.2 }, { x: pz.clue.x + ex, z: pz.clue.z + 0.3, ry: 2.8, s: 2.2 });
+  }
+  if (levers.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'rune_obelisk', levers, { glow: tint, glowK: 0.12 }));
+  if (stones.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'standing_stone', stones));
+}
+// awake seals glow in the dungeon's colour and their rune rises; a wrong seal flashes the whole hall red
+function updateDelvePuzzles(D, t) {
+  const tint = BIOMES[D.delve.def.biome].coreColor;
+  for (const q of delveParts.seals) {
+    const m = D.rooms[q.room], S = D.delve.pz[q.room], at = m.pz.order.indexOf(q.j), awake = !!S && (S.done || at < S.step), red = S && S.flash > 0 && Math.sin(t * 30) > 0;
+    const hold = S && S.hold[q.j] > 0 ? S.hold[q.j] / DV.puzzle.hold : 0;
+    q.sp.material.color.setHex(red ? 0xff4040 : awake ? tint : hold > 0 ? 0xffffff : 0x8a8590);
+    q.ring.material.color.setHex(red ? 0xff3030 : tint); q.ring.material.opacity = awake ? 0.95 : 0.3 + hold * 0.5 + Math.sin(t * 3 + q.j) * 0.08;
+    q.sp.position.y = q.base + (awake ? 0.5 : 0) + Math.sin(t * 2 + q.j) * 0.08;
+    if (q.disc) q.disc.material.color.setHex(awake ? tint : 0x5a5060);
+  }
+}
 function buildDelveProps(D) {
   const X = D.delve, add = (o) => { dungeonGroup.add(o); return o; }, tint = BIOMES[X.def.biome].coreColor;
   const glow = (col, op) => new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
   Object.assign(delveParts, { plates: [], caches: [], cacheSets: [], mimic: null, altar: null, well: null, glows: [] });
-  if (D.props.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', D.props.map((q, k) => ({ x: q.x, z: q.z, ry: k * 1.3, s: 3.4 }))));
+  const cover = D.props.filter((q) => !q.kind); // lever stones are placed with their puzzle below
+  if (cover.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', cover.map((q, k) => ({ x: q.x, z: q.z, ry: k * 1.3, s: 3.4 }))));
+  buildDelvePuzzles(D, tint);
   const echo = [];
   for (const m of D.rooms) {
     if (!m.event) continue;
@@ -49,6 +109,7 @@ function buildDelveProps(D) {
 }
 function updateDelveView(dt, t) {
   const D = G.dungeon, X = D.delve;
+  updateDelvePuzzles(D, t);
   for (const c of delveParts.caches) {
     const b = X.bonus[c.room] | 0, [cc, co] = c.items, hc = b !== 1, ho = b !== 2;
     if (cc.hidden !== hc || co.hidden !== ho) { cc.hidden = hc; co.hidden = ho; for (const h of c.sets) h.dirty = true; if (b === 1) burst(cc.x, 1, cc.z, 20, 0xffd34a, 4, 0.8, 0.4, 6, 3); }

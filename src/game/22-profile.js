@@ -119,11 +119,12 @@ function sanitizeProfile(p) {
   if (TEST_MODE) { out.playtest = TEST_PROFILE_TAG; out.settings.fastXp = false; }
   return out;
 }
-// Bastion fort: { wave, land, b: buildings }, plus what only this player owns (stones, code of their world, recent worlds).
-// A building is { t, x, z, l } on 2 m cells (x, z = its lowest corner around the Keep); d = when an upgrade finishes (ms),
-// c = when a mine was last emptied. Old saves had eight fixed pads: each defender moves to the cell under its pad.
+// Bastion fort: { wave, land, b: buildings, keep, kd, go, hold }, plus what only this player owns (wood, stones, iron, code
+// of their world, recent worlds). keep: the Keep's level (kd = when its upgrade finishes), go: the waves run by themselves,
+// hold: paused. A building is { t, x, z, l } on 2 m cells (x, z = its lowest corner around the Keep); d = when an upgrade
+// finishes (ms), c = when a mill or mine was last emptied, p = the path a tower took at level 5 (1 or 2). Old saves had eight fixed pads: each defender moves to the cell under its pad.
 // (CFG.siege loads later; the lists here match it.) Shared worlds from the server go through here too (mine = false).
-const FORT_TYPES = { archer: 2, cannon: 2, ballista: 2, warrior: 2, mage: 2, mine: 2, hut: 2, wall: 1, gate: 1, spike: 1, bomb: 1, tar: 1 };
+const FORT_TYPES = { archer: 2, cannon: 2, ballista: 2, warrior: 2, mage: 2, mine: 2, hut: 2, wall: 1, gate: 1, spike: 1, bomb: 1, tar: 1, mill: 2, iron: 2 };
 const FORT_OLD_PADS = [[-5, 13], [5, 13], [-13, 6], [13, 6], [-13, -5], [13, -5], [-5, -8], [5, -8]];
 function sanitizeFort(f, mine) {
   f = f && typeof f === 'object' && !Array.isArray(f) ? f : {};
@@ -140,16 +141,30 @@ function sanitizeFort(f, mine) {
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) cells.push((n.x + i) * 1000 + n.z + j);
     if (cells.some((c) => used.has(c))) continue; // two buildings on one cell: the first one stays
     cells.forEach((c) => used.add(c));
-    if (+q.d > 0) n.d = Math.floor(+q.d); if (q.t === 'mine') n.c = Math.max(0, Math.floor(+q.c || 0));
+    if (+q.d > 0) n.d = Math.floor(+q.d); if (q.t === 'mine' || q.t === 'mill' || q.t === 'iron') n.c = Math.max(0, Math.floor(+q.c || 0));
+    if (q.p === 1 || q.p === 2) n.p = q.p; // the path a tower took at level 5
     out.push(n);
   }
   const r = { wave: int(f.wave, 1, 1e6), land: int(f.land, 0, 250), b: out };
+  // the Keep's level: forts from before Keep levels get the lowest one that fits what they already built (nothing is lost)
+  r.keep = f.keep != null ? int(f.keep, 1, 10) : fortKeepFor(out);
+  if (+f.kd > 0) r.kd = Math.floor(+f.kd);
+  if (f.go || r.wave > 1) r.go = 1; if (f.hold) r.hold = 1; // go: waves come by themselves; hold: paused by the player
   if (mine) {
     r.stones = int(f.stones, 0, 1e12);
+    // wood and iron came with the camp's own resources; older forts start with a stock of wood (building used to cost gold)
+    r.wood = f.wood != null ? int(f.wood, 0, 1e12) : 60 + out.reduce((n, q) => n + q.l * 4, 0); r.iron = int(f.iron, 0, 1e12);
     if (typeof f.code === 'string' && /^[A-Z0-9-]{4,12}$/.test(f.code)) r.code = f.code;
     r.recent = (Array.isArray(f.recent) ? f.recent : []).filter((c) => typeof c === 'string' && /^[A-Z0-9-]{4,12}$/.test(c)).slice(0, 5);
   }
   return r;
+}
+// the lowest Keep level whose limits hold every building of a fort (old forts, before the Keep had levels)
+function fortKeepFor(b) {
+  const T = typeof CFG !== 'undefined' && CFG.siege && CFG.siege.towers; if (!T) return 1;
+  const n = {}; let top = 1; for (const q of b) { n[q.t] = (n[q.t] || 0) + 1; if (q.t !== 'hut') top = Math.max(top, q.l); }
+  for (let k = 1; k <= 10; k++) if (CFG.siege.keep.lvl[k - 1] >= top && Object.keys(n).every((t) => !T[t] || !T[t].lim || T[t].lim[k - 1] >= n[t])) return k;
+  return 10;
 }
 // --- end Bastion fort save
 const Store = {
