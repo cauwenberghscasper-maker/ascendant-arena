@@ -393,7 +393,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Sound | `src/game/50-audio.js` |
 | Touch and keyboard controls | `src/game/51-input.js` |
 | Camera, adaptive quality, pixel-art pass | `src/game/46-camera-quality.js` |
-| Game loop, startup, 60/120 Hz frame cap (the 120 Hz option draws between the 60 Hz sim steps: `Interp`) | `src/game/80-main-loop.js`, `90-boot.js` |
+| Game loop, startup, 120 Hz frame cap (standard; Options › 60 FPS caps at 60). Frames between the 60 Hz sim steps are interpolated: `Interp` | `src/game/80-main-loop.js`, `90-boot.js` |
 | Page markup, head, styles | `src/index.html`, `src/css/main.css`, `src/css/panels.css`; the current menu look and the Menu size zoom: `src/css/ui-v2.css` (loaded last) |
 
 After editing: `node tools/build.cjs`, then run the checks.

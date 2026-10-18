@@ -715,10 +715,10 @@ function openSaveCode() {
     <h4 class="sub">Load a code</h4><textarea id="codeIn" class="code" rows="3" placeholder="Paste a code that starts with AA8:"></textarea>
     <div class="row end"><button class="ghost" data-act="openSettings">Back</button><button class="warn" data-act="loadCode">Load and replace this hero</button></div>`);
 }
-// when 120 Hz is on but the browser only refreshes the page 60 times a second, say where the limit is (a page can't lift it)
+// the game runs at 120 Hz; when the browser only refreshes the page 60 times a second, say where the limit is (a page can't lift it)
 const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-function hz120Hint(s) {
-  if (!s.hz120 || Q.hz > 75) return 'Smoother motion on 120 Hz screens. Uses more battery. Turn off to save battery. No change on 60 Hz screens';
+function fps60Hint(s) {
+  if (s.fps60 || Q.hz > 75) return 'Play at 60 frames a second instead of 120. Saves battery';
   return IS_IOS ? 'Safari limits web pages to 60 Hz. To unlock 120: iPhone Settings › Apps › Safari › Advanced › Feature Flags, turn off "Prefer Page Rendering Updates near 60fps", then reload'
     : 'Your browser or phone gives this page only 60 Hz. Check battery saver and the display refresh-rate setting';
 }
@@ -745,7 +745,7 @@ function openSettings() {
       <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
     ${tg('fx', 'Cinematic effects', 'Bloom on crystals, lava, torches and magic, soft shadows and colour grading (with High graphics)')}
-    ${tg('hz120', '120 Hz', hz120Hint(s))}
+    ${tg('fps60', '60 FPS', fps60Hint(s))}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>

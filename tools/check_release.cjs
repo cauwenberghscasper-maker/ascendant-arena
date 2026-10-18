@@ -186,10 +186,12 @@ check('old saves retain current hero and inventory; auto salvage migration happe
   p.settings.autoSalvage=2;assert.equal(ctx.sanitizeProfile(p).settings.autoSalvage,2);
   assert.doesNotThrow(()=>ctx.sanitizeProfile({v:2,gear:null,brawlers:{hob:null}}));
 });
-check('120 Hz is on for new and older saves once, then keeps the player\'s choice',()=>{
-  assert.equal(ctx.sanitizeProfile(fresh()).settings.hz120,true);
-  const old=fresh();old.settings.hz120=false;delete old.hzVersion;const p=ctx.sanitizeProfile(old);assert.equal(p.settings.hz120,true);
-  p.settings.hz120=false;assert.equal(ctx.sanitizeProfile(JSON.parse(JSON.stringify(p))).settings.hz120,false);
+check('120 Hz is standard; the 60 FPS switch keeps a player\'s earlier choice',()=>{
+  const n=ctx.sanitizeProfile(fresh());assert.equal(n.settings.fps60,false);assert(!('hz120' in n.settings));
+  const pre=fresh();pre.settings.hz120=false;delete pre.hzVersion;assert.equal(ctx.sanitizeProfile(pre).settings.fps60,false); // off from before 120 Hz was the default: now 120
+  const chose=fresh();chose.settings.hz120=false;chose.hzVersion=1;assert.equal(ctx.sanitizeProfile(chose).settings.fps60,true); // turned 120 Hz off on purpose: keeps 60
+  const p=ctx.sanitizeProfile(fresh());p.settings.fps60=true;assert.equal(ctx.sanitizeProfile(JSON.parse(JSON.stringify(p))).settings.fps60,true);
+  const d=ctx.defaultProfile();d.settings.fps60=true;assert.equal(ctx.sanitizeProfile(JSON.parse(JSON.stringify(d))).settings.fps60,true); // a brand-new save (never sanitized) keeps 60 FPS too
 });
 check('60 Hz and 120 Hz schedulers preserve cadence on 60/90/120/144/165 Hz displays',()=>{
   const prefix=section('  if (now < nextFrameAt','  let dt =');

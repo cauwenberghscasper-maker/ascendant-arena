@@ -5,9 +5,9 @@ const FRAME_MS = 1000 / 60, FRAME_MS_120 = 1000 / 120;
 let lastFrame = performance.now(), nextFrameAt = lastFrame, simAcc = 0, saveT = 0, achT = 0;
 function frame(now) {
   requestAnimationFrame(frame);
-  // Keep a 60 Hz cadence even on 90/120/144 Hz screens (up to 120 with the 120 Hz option). Accumulate elapsed
+  // Cap at 120 Hz (60 Hz with the 60 FPS option) even on faster screens. Accumulate elapsed
   // time between processed frames so simulation stays at its existing fixed timestep.
-  const hz120 = !!(G.profile && G.profile.settings.hz120), ms = hz120 ? FRAME_MS_120 : FRAME_MS;
+  const hz120 = !(G.profile && G.profile.settings.fps60), ms = hz120 ? FRAME_MS_120 : FRAME_MS;
   Q.raf++;
   if (now < nextFrameAt - (hz120 ? 1 : 0.5)) return;
   nextFrameAt = now < nextFrameAt ? nextFrameAt + ms : now + ms - ((now - nextFrameAt) % ms); // an early frame keeps the grid

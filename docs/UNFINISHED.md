@@ -1,3 +1,9 @@
+# 120 Hz standard, Options › 60 FPS (18 Oct 2026, on `main`)
+The 120 Hz switch is gone: the game always caps at 120, and Options › 60 FPS (`settings.fps60`) caps at 60 for battery.
+Migration `hzVersion` 2: a player who had turned 120 Hz off after it became the default keeps 60; everyone else gets 120.
+Fixed with it: new profiles start with `hzVersion` (brand-new saves skip `sanitizeProfile`, so the old marker never
+saved and the switch reset on every reload). The Safari 60 Hz hint now sits under 60 FPS (`fps60Hint`).
+
 # Safari 60 Hz hint (18 Oct 2026, on `main`)
 iPhone Safari limits web pages to 60 Hz (feature flag "Prefer Page Rendering Updates near 60fps"); a page can't lift it.
 Options › 120 Hz now says how to turn that flag off when 120 Hz is on but the browser refreshes the page at 60 (`hz120Hint`).
