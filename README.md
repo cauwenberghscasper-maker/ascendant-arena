@@ -241,6 +241,9 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
 - **Gear:** weapon, helmet, chest, boots, accessory. Rarities common → uncommon → rare → epic → legendary → mythic →
   ancient → divine. Reforge/merge with weaker same-slot pieces plus gold/gems (review before spending), protect flag,
   enchant (reroll or boost an affix), sell, salvage, bag of 50. Epic+ loot arrives as a chest opened on a reel.
+  Every chest also holds gold, biome materials, Bastion wood/stone(/iron) once the fort is open, gems from the bigger
+  chests and a tiny hero chance; better chests roll higher rarities and more named items, low-level chests roll lower
+  (`CFG.cases` in `71-cases-idle.js`). Open 5 opens five of the selected kind only.
 - **Forge (Garo):** Reforge, Masterwork ranks, Craft (biome ore + monster parts + dungeon cores + Titan Souls;
   5-piece sets with glowing set auras), Forge shop, Enchant.
 - **Showdown arena:** 10 fighters vs bots, closing gas, power cubes, trophies. **The Rift.**
