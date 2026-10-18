@@ -226,11 +226,10 @@ function stepDelve(dt) {
     if (m.event && m.seen) stepDelveEvent(D, m, dt);
   }
   // doors open in order: a room's door needs every door before it open (and its own room done)
-  for (const d of D.doors) {
-    const m = D.rooms[d.room]; if (d.open) continue;
+  for (let k = 0; k < D.doors.length; k++) {
+    const d = D.doors[k], m = D.rooms[d.room]; if (d.open) continue;
     if (m.mobs.some((e) => e.alive) || (m.waves > 1 && m.wave < m.waves - 1) || !roomDoorFree(D, m)) break;
-    d.open = m.cleared = true; dungeonGrid(D);
-    ev({ t: 'dungeonRoom', i: d.room + 1, n: D.rooms.length - 1, boss: d.room + 1 === D.rooms.length - 1 });
+    delveDoorOpen(D, k, true);
   }
   const b = D.boss;
   if (b.alive && !D.addsDone && b.hp < b.maxHp * 0.5) {
@@ -239,6 +238,25 @@ function stepDelve(dt) {
     ev({ t: 'dungeonAdds', x: b.x, z: b.z });
   }
   if (!b.alive && !D.bossDead) { D.bossDead = D.rooms.at(-1).cleared = true; D.clearT = G.time - D.t0; ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: X.def.name, secs: Math.round(D.clearT), par: 0, key: 0, up: 0, delve: true }); }
+}
+// the first game that sees a room done opens its door and tells the party ('ddoor'), so the gate opens on every
+// phone at the same moment instead of whenever each one hears the last monster fall
+function delveDoorOpen(D, k, send) {
+  const d = D.doors[k], m = D.rooms[d.room]; d.open = m.cleared = true; dungeonGrid(D);
+  ev({ t: 'dungeonRoom', i: d.room + 1, n: D.rooms.length - 1, boss: d.room + 1 === D.rooms.length - 1 });
+  if (send && typeof partySend === 'function') partySend('ddoor', { dr: D.delve.seed, i: k });
+}
+function delveDoorRecv(P) {
+  if (!delveOn() || mpNum(P.dr, -1) >>> 0 !== G.dungeon.delve.seed) return;
+  const D = G.dungeon, n = Math.min(mpNum(P.i, -1) | 0, D.doors.length - 1);
+  for (let k = 0; k <= n; k++) {
+    if (D.doors[k].open) continue;
+    // what is still standing here is already down on the sender's game; event monsters keep syncing on their own
+    const m = D.rooms[D.doors[k].room], s = D.delve.ev[m.i];
+    for (const e of m.mobs) if (e.alive && !(s && e === s.mob)) { e.alive = false; e.hp = 0; e.respawnT = 1e9; ev({ t: 'die', x: e.x, z: e.z, kind: e.type, elite: !!e.elite }); }
+    if (m.waves > 1) m.wave = m.waves - 1;
+    delveDoorOpen(D, k, false);
+  }
 }
 // an event room lets you on once its own fight is done (the echo and a woken mimic must fall; the rest never block)
 function roomDoorFree(D, m) { const s = D.delve.ev[m.i] || {}; return !(m.event === 'echo' && !s.done) && !(m.event === 'vault' && s.t != null && !s.done); }

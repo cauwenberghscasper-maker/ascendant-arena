@@ -104,6 +104,21 @@ check('rooms: doors open as rooms clear, swarm rooms send waves, the boss calls 
     c.endDungeon('leave');
   }
 });
+check('gates: the first game to see a room done tells the party, and every game opens that gate at once', () => {
+  const sent = []; c.partySend = (event, P) => sent.push([event, P]); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d);
+  reset(); c.startDelve(defs[0].id, 1, 4242, 2); const D = c.G.dungeon, pl = c.G.player, m = D.rooms[0];
+  Object.assign(pl, { x: m.x, z: m.z }); for (const e of m.mobs) e.alive = false; c.stepDungeon(1 / 60); c.stepDungeon(1 / 60);
+  if (m.waves > 1) for (let k = 0; k < m.waves; k++) { for (const e of m.mobs) e.alive = false; c.stepDungeon(1 / 60); }
+  assert(D.doors[0].open); const msg = sent.find(([e]) => e === 'ddoor'); assert(msg && msg[1].i === 0 && msg[1].dr === D.delve.seed, 'sends ddoor');
+  c.endDungeon('leave');
+  // the other phone: its copies of the monsters still stand (their deaths have not come in yet)
+  reset(); c.startDelve(defs[0].id, 1, 4242, 2); const D2 = c.G.dungeon, m2 = D2.rooms[0]; sent.length = 0;
+  c.delveDoorRecv({ dr: D2.delve.seed + 1, i: 0 }); assert(!D2.doors[0].open, 'another run is ignored');
+  c.delveDoorRecv(msg[1]); assert(D2.doors[0].open && m2.cleared && m2.mobs.every((e) => !e.alive), 'gate opens, stale monsters go');
+  c.stepDungeon(1 / 60); assert(!m2.mobs.some((e) => e.alive), 'no new wave after a remote open'); assert(!sent.some(([e]) => e === 'ddoor'), 'no echo back');
+  c.delveDoorRecv({ dr: D2.delve.seed, i: 1 }); assert(D2.doors[1].open); c.delveDoorRecv({ dr: D2.delve.seed, i: 999 }); assert(D2.doors.every((d) => d.open), 'a late message opens every gate before it');
+  delete c.partySend; c.endDungeon('leave');
+});
 check('events: goblin escapes on time, plates need every hero, altar curse caps health, moonwell heals once, caches pay once', () => {
   const find = (k) => { for (let s = 1; s < 500; s++) { const def = defs[s % 6], L = c.delveLayout(s * 7, def, 4); const m = L.rooms.find((r) => r.event === k); if (m) return { def, s: s * 7, i: m.i }; } };
   // vault

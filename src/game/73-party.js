@@ -51,6 +51,7 @@ function partyRecv(event, sid, P) {
   if (!G.started) return;
   if (event === 'drev') { const by = cleanNick(P.by) || 'A teammate'; if (P.to === MP.sid) delveReviveMe(by); else delveBotRevive(delveBots().find((b) => b.key === P.to), by); return; }
   if (event === 'dbot') { delveBotsRecv(sid, P); return; }
+  if (event === 'ddoor') { delveDoorRecv(P); return; }
   if (event === 'dask') { // the leader asks to play (again): only my party's leader, and only while I'm not already in
     const L = partyLeader(); if (!PARTY.code || !L || L.me || L.key !== sid || delveOn()) return;
     PARTY.dg = delveDef(P.dg).id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999); PARTY.ready = false;

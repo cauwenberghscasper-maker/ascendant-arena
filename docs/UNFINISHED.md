@@ -1,3 +1,11 @@
+# Dungeon gates open for everyone at once (18 Oct 2026, on `main`)
+Casper: in a party the gates opened at different times per phone after a room was cleared. Each game decided by
+itself from its own copy of the monsters, and a death only reaches you when the monster's owner sends it (and only
+while you stand near). Now the first game that sees a room done opens the gate and sends 'ddoor' (`delveDoorOpen` in
+`36b-delve.js`); the others open that gate (and any before it) right away, drop the monsters still standing there and
+skip the leftover swarm waves (`delveDoorRecv`; event monsters keep syncing themselves). Check added in
+`tools/check_delve.cjs`. Open: try it on two phones.
+
 # Dungeons: play again needs a yes (18 Oct 2026, branch `claude/dungeon-again`, PR to main)
 Casper: after a run the leader could pull the party straight back in. Now going into a run uses up a member's Ready
 (`dgo`/`mmgo` set `PARTY.ready = false`). When someone hasn't said yes, the leader's button is "Ask the party to play"
