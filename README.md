@@ -2,6 +2,7 @@
 
 Mobile 3D brawler (Three.js, single page). Play: https://cauwenberghscasper-maker.github.io/ascendant-arena/
 
+- **Working on the game? Read [AGENTS.md](AGENTS.md) first** (rules, style, how to work together), then [docs/VISION.md](docs/VISION.md) and [docs/3D-MODELS.md](docs/3D-MODELS.md).
 - `src/`: the game's source. `index.html` is generated from it (see below), so never edit `index.html` directly.
 - `assets/`: generated 3D models (TRELLIS.2, MIT) from Z-Image-Turbo concepts (Apache-2.0), UI art, fonts. `vendor/three`: the bundled three.js r186, so the game runs offline.
 - Saves: on this site progress goes to the game's Supabase project (device id + secret, the server stores only a hash). Inside Claude the artifact's own database is used.
