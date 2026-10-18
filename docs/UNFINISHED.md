@@ -1,3 +1,6 @@
+# Dungeon team power set very low (18 Oct 2026, on `main`)
+Casper's party couldn't enter: `CFG.delve.powK` 1 → 0.05 and the per-hero floor 0.7 → 0 (`src/game/36b-delve.js`); a teammate whose Power hasn't arrived yet no longer counts as 0. Raise them again once parties work on real phones.
+
 # Branch housekeeping (18 Oct 2026, on `main`)
 `asset-pipeline`/`asset-drop` are tool branches (own history) and are never merged into `main`; both READMEs now say so.
 `wip/enchant-forge` only holds d11b07a, a duplicate of 4815a7a already in `main`: safe to delete (left for Casper).

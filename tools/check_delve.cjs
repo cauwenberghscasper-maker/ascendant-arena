@@ -65,7 +65,8 @@ check('power gate: team average vs requirement, a per-hero floor, harder = highe
   assert.equal(c.diffDef(4).name, 'Ascendant 1'); assert.equal(c.diffDef(9).name, 'Ascendant 6'); assert.equal(c.diffDef(10).floor, 'ancient');
   const req = c.delveReq(def, 1), g = (p) => c.delveGate(def, 1, p);
   assert(g([req]).ok && !g([req - 1]).ok); assert(g([req * 2, req * 0.8, req * 1.2]).ok, 'a strong friend lifts the average');
-  assert(!g([req * 3, req * 0.5]).ok && g([req * 3, req * 0.5]).weak === 1, 'nobody below the floor');
+  if (DV.floor > 0) assert(!g([req * 3, req * DV.floor * 0.5]).ok && g([req * 3, req * DV.floor * 0.5]).weak === 1, 'nobody below the floor');
+  assert(g([req, 0]).ok, 'a teammate with no Power yet does not block the team');
 });
 check('unlocks: a dungeon opens at its biome, the next difficulty after a clear; entry is refused above it', () => {
   reset(1); assert(!c.delveOpen(defs[0]), 'not before level 12'); assert(!c.startDelve(defs[0].id, 0, 1, 1));
