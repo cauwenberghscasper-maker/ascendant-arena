@@ -382,7 +382,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | To change… | Edit |
 |---|---|
 | Balance: stats, timings, economy, quality tiers | `src/game/10-config.js` (`CFG`) |
-| World map, areas, biomes, zone levels | `src/game/11-world-data.js`; how the world looks: `44-world-view.js` |
+| World map, areas, biomes, zone levels | `src/game/11-world-data.js`; how the world looks: `44-world-view.js` (the ground shader `matGround`: zone floor styles, painted tiles from `assets/world/_ground/` loaded by `loadGroundTiles`, cloud shadows, grass wind, frost twinkle, lava pulse, seabed light) |
 | Townsfolk models, buildings, caves, ore, dungeon pieces, world bosses (generated 3D, instanced) | `src/game/48-world-models.js` (`WORLD_MODEL_BOX`), `assets/npc/`, `assets/world/`; placement: `44-world-view.js`, `47-dungeon-view.js`; prep: `tools/v10_prop.cjs` + `tools/v4_pack.py --static` |
 | Bloom, grading and soft shadows (High graphics + Cinematic effects) | `src/game/46-camera-quality.js` (`Post`) |
 | Monsters (stats, drops, which body they use) | `src/game/12-monsters.js`; behavior: `33-world-sim.js`; looks: `43-enemies-view.js` |

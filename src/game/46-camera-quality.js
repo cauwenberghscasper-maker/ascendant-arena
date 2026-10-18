@@ -329,6 +329,7 @@ const Pixel = {
   },
   render() {
     renderer.info.autoReset = false; renderer.info.reset(); // count both world and pixel post passes
+    matGround.userData.u.uTime.value = performance.now() / 1000 % 3600; // the ground's clouds, wind and lava (44-world-view.js)
     if (!this.active) { if (Post.on()) Post.render(); else renderer.render(scene, camera); return; }
     this.mat.uniforms.near.value = camera.near; this.mat.uniforms.far.value = camera.far;
     renderer.setRenderTarget(this.rt); renderer.render(scene, camera);
