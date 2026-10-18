@@ -239,7 +239,8 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
   5-piece sets with glowing set auras), Forge shop, Enchant.
 - **Showdown arena:** 10 fighters vs bots, closing gas, power cubes, trophies. **The Rift.**
 - **Bastion Siege** (level 20, the Bastion house west of the plaza): endless waves from 1-4 random sides attack The
-  Keep and two wagons. Build anywhere on a 2 m grid: walls and gates you draw as you walk (wood, stone, iron), archers,
+  Keep and two wagons. Build in builder mode (the Build button: the field from above with its grid, pan and pinch-zoom, a shop strip with a
+  picture of every building, a see-through preview, drag to draw walls, move buildings): walls and gates (wood, stone, iron), archers,
   cannons, ballistas, mage towers, barracks, stone mines and builder huts (one upgrade at a time per hut), and traps
   monsters walk over: spike plates, powder kegs (once per wave) and tar pits (slow and burn). Monsters walk
   around walls and break the cheapest piece when closed in. The land grows with your level to 500×500 m. A fallen
@@ -396,7 +397,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Combat, projectiles, damage | `src/game/31-combat.js` |
 | Arena (Showdown), Rift | `src/game/34-arena.js`, `33-world-sim.js` |
 | Dungeon mode (party dungeons): dungeons, difficulties, power gate, rooms, events, loot, set bonuses | `src/game/36b-delve.js` (`CFG.delve`); event-room props: `47b-delve-view.js`; parties, random match, the Dungeons panel and HUD: `73-party.js`; banners `assets/ui/delve/`, set pieces `assets/world/delve_*` |
-| Bastion Siege (tower defense from the Bastion house in town): the grid, building, walls and pathing, waves and sides, objectives, builders, the permanent fort save | `src/game/36c-siege.js` (`CFG.siege`); looks: `47c-siege-view.js`; save: `profile.fort` via `sanitizeFort` in `22-profile.js`; shared worlds (codes, host, sync): `74-siege-mp.js` + `supabase/bastion_worlds.sql`; checks: `tools/check_siege.cjs` |
+| Bastion Siege (tower defense from the Bastion house in town): the grid, building, walls and pathing, waves and sides, objectives, builders, the permanent fort save | `src/game/36c-siege.js` (`CFG.siege`); looks: `47c-siege-view.js`; builder mode: `75-siege-builder.js`; menu pictures: `tools/fort_icons.mjs` + `.py` → `assets/ui/fort/`; save: `profile.fort` via `sanitizeFort` in `22-profile.js`; shared worlds (codes, host, sync): `74-siege-mp.js` + `supabase/bastion_worlds.sql`; checks: `tools/check_siege.cjs` |
 | Multiplayer lobby (Supabase Realtime), future partitioning (`mpRoomKey`) | `src/game/70-multiplayer.js`; notes in `docs/UNFINISHED.md` |
 | HUD | `src/game/60-hud.js` |
 | Panels, settings, button actions (`data-act`) | `src/game/61-panels.js` (`handlePanelClick`) |

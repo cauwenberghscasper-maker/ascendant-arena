@@ -195,6 +195,21 @@ function animateSiegeDefenders(dt) {
     it.x = a.bx - ax * back; it.z = a.bz - az * back; it.sy = sy; it.sx = it.sz = sw; a.h.dirty = true;
   }
 }
+// builder mode: the field's grid over the land, Clash of Clans style (a checkered tint, thin lines, a stronger line every 5 cells)
+function siegeGridOverlay(on) {
+  const S = G.siege;
+  if (siegeParts.grid) { siegeParts.grid.geometry.dispose(); siegeParts.grid.material.dispose(); siegeParts.grid.removeFromParent(); siegeParts.grid = null; }
+  if (!on || !S || !siegeGroup.visible) return;
+  const H = S.half, mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uC: { value: new THREE.Vector2(SC.x, SC.z) }, uCs: { value: CFG.siege.cell } },
+    vertexShader: 'varying vec2 vW; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `varying vec2 vW; uniform vec2 uC; uniform float uCs;
+      void main() { vec2 c = (vW - uC) / uCs, f = fract(c), d = min(f, 1.0 - f); float line = 1.0 - smoothstep(0.0, 0.05, min(d.x, d.y));
+        vec2 big = fract(c / 5.0), db = min(big, 1.0 - big); float major = 1.0 - smoothstep(0.0, 0.012, min(db.x, db.y));
+        float chk = mod(floor(c.x) + floor(c.y), 2.0);
+        gl_FragColor = vec4(mix(vec3(1.0, 1.0, 0.85), vec3(0.08, 0.16, 0.05), max(line, major)), chk * 0.07 + line * 0.22 + major * 0.3); }` });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(H * 2, H * 2).rotateX(-Math.PI / 2), mat); m.position.set(SC.x, 0.06, SC.z); m.renderOrder = 1;
+  siegeGroup.add(m); siegeParts.grid = m;
+}
 function siegePreview(q) {
   const P = siegeParts.preview, cs = CFG.siege.cell;
   if (!q) { if (P) { WorldModels.dispose(P.h); siegeParts.preview = null; } return; }
@@ -214,6 +229,7 @@ function siegePreview(q) {
 function disposeSiegeView() {
   for (const h of siegeParts.sets.concat(siegeParts.bSets)) WorldModels.dispose(h);
   if (siegeParts.preview) { WorldModels.dispose(siegeParts.preview.h); siegeParts.preview = null; }
+  siegeParts.grid = null;
   const geos = new Set(), mats = new Set();
   siegeGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matVC && o.material !== matDungeonFloor) mats.add(o.material); });
   geos.forEach((g) => g.dispose()); mats.forEach((m) => m.dispose());

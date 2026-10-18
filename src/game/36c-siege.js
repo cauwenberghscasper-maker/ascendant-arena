@@ -102,7 +102,8 @@ function siegeLayout() {
     const s = FORT_TYPES[b.t], ks = [];
     for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) ks.push(siegeIdx(b.x + i, b.z + j));
     if (ks.some((k) => k < 0 || occ[k] !== 0)) continue; // outside the land or on the Keep (a shrunk or edited world): not built here
-    const u = old.get(b) || siegeUnit(b); u.k = S.units.length; S.units.push(u); ks.forEach((k) => { occ[k] = u.k + 1; });
+    let u = old.get(b); if (u && (u.bx !== b.x || u.bz !== b.z)) u = null; // moved: a new unit where it stands now
+    if (!u) { u = siegeUnit(b); u.bx = b.x; u.bz = b.z; } u.k = S.units.length; S.units.push(u); ks.forEach((k) => { occ[k] = u.k + 1; });
     if (!u.maxHp) siegeUnitHp(u);
   }
   // the monster gate on each side (a gatehouse, 47c-siege-view.js): kept clear of new buildings
@@ -170,7 +171,7 @@ function siegeFlowStep(e) {
 }
 
 // --- building: the same checks and changes for your own fort and for a shared world's host (op from fortDo or a guest)
-// op: { o: 'add', t, x, z } | { o: 'up', k } | { o: 'del', k } | { o: 'col', k } (k = index in the fort's building list)
+// op: { o: 'add', t, x, z } | { o: 'up', k } | { o: 'del', k } | { o: 'col', k } | { o: 'move', k, x, z } (k = index in the fort's building list)
 function fortCheck(op, F = fortState()) {
   const S = G.siege; if (!S || !S.occ) return 'Only inside the fort';
   const C = CFG.siege, now = fortNow();
@@ -183,6 +184,11 @@ function fortCheck(op, F = fortState()) {
     return '';
   }
   const b = F.b[op.k]; if (!b) return 'Gone';
+  if (op.o === 'move') { // its own cells count as free
+    const s = FORT_TYPES[b.t], u = S.units.find((q) => q.b === b), own = u ? u.k + 1 : -9;
+    for (let i = 0; i < s; i++) for (let j = 0; j < s; j++) { const k = siegeIdx(op.x + i, op.z + j); if (k < 0) return 'Outside your land'; if (S.occ[k] !== 0 && S.occ[k] !== own) return 'Something is in the way'; }
+    return '';
+  }
   if (op.o === 'up') { if (b.l >= fortMaxLvl(b.t)) return 'Max level'; if (b.d > now) return 'Already upgrading'; if (C.buildTime(b.l + 1) > 0 && fortJobs(F) >= fortBuilders(F)) return 'All builders are busy'; }
   if (op.o === 'del' && b.t === 'hut' && fortBuilders(F) <= 1) return 'Your last builder stays';
   if (op.o === 'col' && b.t !== 'mine') return 'Not a mine';
@@ -194,6 +200,7 @@ function fortPrice(op, F = fortState()) {
   const b = F.b[op.k];
   if (op.o === 'up') { const c = fortCost(b.t, b.l + 1, F); return { gold: c.gold, stones: c.stones }; }
   if (op.o === 'del') return { gold: 0, stones: -Math.floor(fortStonesSpent(b) / 2) };
+  if (op.o === 'move') return { gold: 0, stones: 0 };
   return { gold: 0, stones: -fortMineStones(b) };
 }
 function fortPay(pr, sign = 1) { const p = G.profile, M = myFort(); p.gold -= sign * pr.gold; M.stones = Math.max(0, M.stones - sign * pr.stones); G.dirty = true; }
@@ -205,6 +212,7 @@ function fortApply(op, F = fortState()) {
   if (op.o === 'add') { b = { t: op.t, x: op.x, z: op.z, l: 1 }; if (op.t === 'mine') b.c = now; F.b.push(b); }
   else if (op.o === 'up') { b = F.b[op.k]; b.l++; const t = C.buildTime(b.l); if (t > 0) b.d = now + t * 1000; }
   else if (op.o === 'del') { b = F.b.splice(op.k, 1)[0]; }
+  else if (op.o === 'move') { b = F.b[op.k]; b.x = op.x; b.z = op.z; }
   else { b = F.b[op.k]; b.c = now; }
   if (op.o !== 'col') {
     siegeLayout(); const u = G.siege.units.find((q) => q.b === b); if (u) siegeUnitHp(u);
@@ -222,35 +230,12 @@ function fortDo(op) {
   if (typeof siegeFollowing === 'function' && siegeFollowing()) { fortPay(pr); siegeMpAsk(op, pr); return ''; }
   const r = fortApply(op, F); if (!r) fortPay(pr); return r;
 }
-// placing: a ghost one cell ahead of the hero (or, while drawing walls, on the cell just walked off)
+// the ghost while building: the cell picked in builder mode (75-siege-builder.js), checked as it would be placed or moved
 function fortGhost() {
-  const P = G.fortPlace, pl = G.player, S = G.siege; if (!P || !S) return null;
-  const s = FORT_TYPES[P.t], cs = CFG.siege.cell;
-  if (P.draw) return P.trail != null ? { t: P.t, x: P.trail[0], z: P.trail[1], ok: !fortCheck({ o: 'add', t: P.t, x: P.trail[0], z: P.trail[1] }) } : null;
-  const a = pl.facing || 0, d = s === 1 ? 2.2 : 3.6, x = cellAt(pl.x - SC.x + Math.sin(a) * d - (s - 1) * cs / 2), z = cellAt(pl.z - SC.z + Math.cos(a) * d - (s - 1) * cs / 2);
-  return { t: P.t, x, z, ok: !fortCheck({ o: 'add', t: P.t, x, z }) && !siegeOnHero(P.t, x, z) };
+  const B = G.builder, S = G.siege; if (!B || !S || !B.sel || !B.cell) return null;
+  const F = fortState(), op = B.move ? { o: 'move', k: F.b.indexOf(B.move), x: B.cell[0], z: B.cell[1] } : { o: 'add', t: B.sel, x: B.cell[0], z: B.cell[1] };
+  return { t: B.sel, x: op.x, z: op.z, ok: !fortCheck(op, F), op };
 }
-function siegeOnHero(t, x, z) { const pl = G.player, s = FORT_TYPES[t], cs = CFG.siege.cell; return Math.abs(pl.x - SC.x - (x + s / 2) * cs) < s + 0.6 && Math.abs(pl.z - SC.z - (z + s / 2) * cs) < s + 0.6; }
-function fortPlaceNow() {
-  const P = G.fortPlace; if (!P) return;
-  if (CFG.siege.towers[P.t].wall) { P.draw = !P.draw; P.trail = null; P.cell = null; return; }
-  const g = fortGhost(); if (!g) return;
-  const why = g.ok ? fortDo({ o: 'add', t: g.t, x: g.x, z: g.z }) : siegeOnHero(g.t, g.x, g.z) ? 'Step back to place it' : fortCheck({ o: 'add', t: g.t, x: g.x, z: g.z });
-  if (why) toast(why, 'bad'); else { Sfx.play('unlock'); G.fortPlace = null; }
-}
-// drawing walls: each cell the hero walks off (and is clear of) gets a segment
-function stepFortDraw() {
-  const P = G.fortPlace, pl = G.player; if (!P || !P.draw || !pl.alive) return;
-  const cs = CFG.siege.cell, c = [cellAt(pl.x - SC.x), cellAt(pl.z - SC.z)];
-  if (!P.cell) { P.cell = c; return; }
-  if (c[0] !== P.cell[0] || c[1] !== P.cell[1]) { P.trail = P.cell; P.cell = c; }
-  const q = P.trail; if (!q || Math.hypot(pl.x - SC.x - (q[0] + 0.5) * cs, pl.z - SC.z - (q[1] + 0.5) * cs) < 1.75) return;
-  P.trail = null;
-  if (fortCheck({ o: 'add', t: P.t, x: q[0], z: q[1] })) return; // something there already: draw on past it
-  const why = fortDo({ o: 'add', t: P.t, x: q[0], z: q[1] });
-  if (why) { toast(why, 'bad'); P.draw = false; }
-}
-
 // --- runtime
 // warriors of a barracks: spawned around their post, back after a while when they fall
 function siegeMuster(u) {
@@ -280,7 +265,7 @@ function startSiege(world) {
     objs: C.objs.map((d) => ({ def: d, kind: 'objective', name: d.name, x: SC.x + d.x, z: SC.z + d.z, r: d.r, alive: true, hp: 1, maxHp: 0, flashT: 0, hurtT: 0 })) };
   S.lvl = siegeLevel(S.wave); siegeLayout(); siegeScaleObjs(S.lvl); S.sides = siegeSides(S.wave);
   if (S.code && typeof siegeMpStart === 'function') siegeMpStart();
-  clearProjectiles(); G.fortPlace = null;
+  clearProjectiles();
   pl.x = SC.x + C.spawn.x; pl.z = SC.z + C.spawn.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
   ev({ t: 'siegeStart', x: pl.x, z: pl.z, best: p.records.bestSiege || 0, wave: S.wave }); return true;
 }
@@ -306,7 +291,8 @@ function startSiegeWave() {
   S.mini = !C.boss && n >= CFG.siege.miniFrom && Math.random() < CFG.siege.miniChance;
   if (S.mini) S.queue.splice(Math.floor(S.queue.length / 2), 0, { type: Z.alt || Z.enemy, zi, mini: true });
   if (C.boss) S.queue.push({ type: Z.enemy, zi, boss: true });
-  S.phase = 'fight'; S.spawnT = 0.4; S.sideI = 0; G.fortPlace = G.fortPlace && G.fortPlace.draw ? G.fortPlace : null;
+  S.phase = 'fight'; S.spawnT = 0.4; S.sideI = 0;
+  if (G.builder && typeof closeBuilder === 'function') closeBuilder(); // the wave is coming: back to the hero
   ev({ t: 'siegeWave', wave: n, lvl: S.lvl, boss: C.boss, mini: S.mini, count: S.queue.length, theme: Z.name, sides: siegeSideNames(S.sides) });
   return true;
 }
@@ -361,18 +347,18 @@ function siegeWaveClear() {
   if (fell) { siegeGrid(); S.flowDirty = true; }
   F.wave = Math.max(F.wave || 1, n + 1); fortChanged(F);
 }
+const siegeAlone = () => !G.siege.code || typeof siegeMpPeers !== 'function' || !siegeMpPeers().length;
 function stepSiege(dt) {
   const S = G.siege, pl = G.player, C = CFG.siege;
   // carried out of the fort by anything else (waypoint travel): close it where you stand
   if (Math.hypot(pl.x - SC.x, pl.z - SC.z) > S.half * 1.5 + 60) { endSiege('away'); return; }
   if (!pl.alive) G.respawnAt = { x: SC.x + C.spawn.x, z: SC.z + C.spawn.z }; // a fall costs a few seconds, not the run
-  stepFortDraw();
   // upgrades finishing: the building's stats and the monsters' paths follow
   const now = fortNow(); let done = false;
   for (const u of S.units) if (u.b.d && u.b.d <= now) { delete u.b.d; siegeUnitHp(u); if (u.b.t === 'warrior') siegeMuster(u); done = true; ev({ t: 'fortBuilt', type: u.b.t, l: u.b.l, x: u.x, z: u.z, done: true }); }
   if (done) { S.flowDirty = true; fortChanged(fortState()); }
   if (typeof siegeMpStep === 'function' && siegeMpStep(dt)) return; // a guest mirrors the host's fort
-  if (G.modal && !S.code) return; // your own fort holds still while you are in a menu (a shared one runs on)
+  if ((G.modal || G.builder) && siegeAlone()) return; // the fort holds still in a menu or builder mode while nobody else is in it
   for (const o of S.objs) { o.flashT -= dt; o.hurtT -= dt; }
   stepSiegeDefenders(dt);
   if (S.phase === 'build') { S.t -= dt; if (S.t <= 0) startSiegeWave(); }
@@ -493,7 +479,7 @@ function stepSiegeEnemy(e, dt) {
   const S = G.siege;
   if (!e.alive || !S) return;
   if (e.mirror) { mobRemoteStep(e, dt); return; } // a shared world's monster, run by the host
-  if ((G.modal && !S.code) || G.menuSafe > 0) { e.moveAmt = Math.max(0, (e.moveAmt || 0) - dt * 3); return; }
+  if ((G.modal && siegeAlone()) || G.menuSafe > 0) { e.moveAmt = Math.max(0, (e.moveAmt || 0) - dt * 3); return; }
   if (HeroSupers.tickStatus(e, dt)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); e.moveAmt = 0; return; }
   const d = CFG.enemies[e.type], pl = G.player;
   e.atkCd -= dt; e.flashT -= dt; e.slowT -= dt; e.lungeT -= dt; e.lungeCd -= dt;
@@ -555,7 +541,6 @@ function stepSiegeEnemy(e, dt) {
 }
 function siegeInteract(pl) {
   const S = G.siege, C = CFG.siege, near = (q, r) => Math.hypot(pl.x - SC.x - q.x, pl.z - SC.z - q.z) < r;
-  if (G.fortPlace) { const P = G.fortPlace, T = C.towers[P.t]; return { kind: 'fortPlace', label: T.wall ? (P.draw ? `Stop drawing` : `Draw ${T.short.toLowerCase()}s`) : `Place ${T.short}` }; }
   if (near(C.exit, C.interactR)) return { kind: 'siegeLeave', label: 'Leave Fort' };
   let best = 1.4, hit = null;
   for (const u of S.units) { const d = Math.hypot(pl.x - u.x, pl.z - u.z) - u.r; if (d < best) { best = d; hit = u; } }
@@ -568,7 +553,8 @@ function endSiege(why) {
   const S = G.siege; if (!S) return;
   if (typeof siegeMpEnd === 'function') siegeMpEnd(why);
   clearSiegeMobs(); clearProjectiles();
-  G.siege = null; G.siegeObstacles = null; G.obstacles = G.hubObstacles; G.fortPlace = null;
+  G.siege = null; G.siegeObstacles = null; G.obstacles = G.hubObstacles;
+  if (G.builder && typeof closeBuilder === 'function') closeBuilder();
   const F = fortState(); G.siegeWorld = null;
   const pl = G.player, p = G.profile, C = CFG.siege, out = { x: C.gate.x + 2, z: C.gate.z };
   if (why !== 'away') { pl.x = out.x; pl.z = out.z; }

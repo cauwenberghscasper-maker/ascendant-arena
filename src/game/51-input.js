@@ -128,7 +128,6 @@ function setupInput() {
   };
   aimBtn('bSuper', 'super'); aimBtn('bSpecial', 'special');
   $('bAct').addEventListener('click', (e) => { e.preventDefault(); if (!G.modal) interact(); });
-  $('bAct2').addEventListener('click', (e) => { e.preventDefault(); G.fortPlace = null; }); // stop placing in the fort
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return; const k = e.key.toLowerCase(); Input.keys.add(k);

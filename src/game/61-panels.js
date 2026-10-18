@@ -13,9 +13,8 @@ function interact() {
   if (/^delve/.test(n.kind)) return delveAct(n);
   if (n.kind === 'siege') return openSiegePanel();
   if (n.kind === 'siegeLeave') return endSiege('leave');
-  if (n.kind === 'fortBuild') return openFortBuildPanel();
+  if (n.kind === 'fortBuild') return openBuilder();
   if (n.kind === 'fortB') return openFortBPanel(n.k);
-  if (n.kind === 'fortPlace') return fortPlaceNow();
   const d = n.def;
   if (d.role === 'smith') return openSmith();
   if (d.role === 'arena') return openArenaPanel();
@@ -682,21 +681,6 @@ function fortStat(t, l) {
   if (t === 'tar') return `Half speed · ${fmtK(refDmg(G.profile.level) * T.dps * siegeLvlMul(l))} dmg a second`;
   return `${fmtK(siegeDefDmg(T, l))} dmg · range ${T.range}${T.aoe ? ' · splash' : ''}${T.pierce ? ' · pierce ' + T.pierce : ''}`;
 }
-// the Build menu: pick what to place, then walk to where it goes (the ghost on the ground) and tap Place
-function openFortBuildPanel() {
-  UI.current = 'fortBuild';
-  const p = G.profile, S = G.siege, F = fortState(), M = myFort();
-  const cards = SIEGE_TYPES.map((t) => {
-    const T = CFG.siege.towers[t], c = fortCost(t, 1), have = F.b.filter((b) => b.t === t).length, full = T.max && have >= T.max, ok = !full && p.gold >= c.gold && M.stones >= c.stones;
-    return `<div class="fortCard"><div class="fcHead">${fortPic(t)}<b>${T.name}</b>${T.max ? `<span class="cnt">${have}/${T.max}</span>` : ''}</div><p>${T.blurb}</p><p class="fine">${fortStat(t, 1)}</p>
-      <p class="fine">${ICON.coin}${fmtK(c.gold)}${c.stones ? ' · ' + fortStones(c.stones) : ''}${T.wall ? ' each' : ''}</p><button class="${ok ? 'primary' : 'ghost'}" data-act="fortPick" data-t="${t}"${ok ? '' : ' aria-disabled="true"'}>${full ? 'Max built' : T.wall ? 'Draw' : 'Place'}</button></div>`;
-  }).join('');
-  openModal(`<div class="npcHead">${gi('m_hero', 'hd')}<h3>Build</h3><span class="cnt">${fortJobs(F)}/${fortBuilders(F)} builders busy</span></div>
-    <p class="fine">You have ${ICON.coin}${fmtK(p.gold)} gold and ${fortStones(M.stones)}. Walls and gates: tap Draw, walk, and a piece goes down on every cell you leave. Next wave from ${siegeSideNames(S.sides)}.</p>
-    ${S.phase === 'build' ? `<div class="row end"><button class="primary" data-act="fortWave">Start wave ${S.wave} now</button></div>` : ''}
-    <div class="fortCards">${cards}</div>
-    <div class="row end"><button class="ghost" data-act="close">Back</button></div>`);
-}
 // one building: upgrade (takes a builder and some time from level 2), empty a mine, tear it down for half its stones
 function openFortBPanel(k) {
   const S = G.siege, u = S && S.units[k]; if (!u) return UI.close();
@@ -708,7 +692,7 @@ function openFortBPanel(k) {
     <p>${T.blurb}</p><p class="fine">${fortStat(b.t, Math.max(1, fortLvl(b)))}${busy ? ` · upgrading to level ${b.l}, ${fortDur((b.d - now) / 1000)} left` : ''}</p>
     ${b.t === 'mine' ? `<div class="row"><button class="${mine > 0 ? 'primary' : 'ghost'}" data-act="fortCol" data-k="${fi}"${mine > 0 ? '' : ' aria-disabled="true"'}>Take ${fortStones(mine)}</button></div>` : ''}
     ${max ? '<p class="fine">Max level.</p>' : `<p class="fine">Level ${b.l + 1}: ${fortStat(b.t, b.l + 1)}<br>${ICON.coin}${fmtK(c.gold)} · ${fortStones(c.stones)}${c.time ? ` · ${fortDur(c.time)} with a builder` : ''}${why ? ` · ${why}` : ''}</p>`}
-    <div class="row end"><button class="warn" data-act="fortDel" data-k="${fi}">Tear down (+${fmt(Math.floor(fortStonesSpent(b) / 2))} stones)</button><button class="ghost" data-act="close">Back</button>${max ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortUp" data-k="${fi}"${ok ? '' : ' aria-disabled="true"'}>Upgrade</button>`}</div>`);
+    <div class="row end">${G.builder ? `<button class="ghost" data-act="fortMove" data-k="${fi}">Move</button>` : ''}<button class="warn" data-act="fortDel" data-k="${fi}">Tear down (+${fmt(Math.floor(fortStonesSpent(b) / 2))} stones)</button><button class="ghost" data-act="close">Back</button>${max ? '' : `<button class="${ok ? 'primary' : 'ghost'}" data-act="fortUp" data-k="${fi}"${ok ? '' : ' aria-disabled="true"'}>Upgrade</button>`}</div>`);
 }
 function openSiegeResult(r) {
   UI.current = 'siegeResult';
@@ -971,7 +955,7 @@ function handlePanelClick(e) {
     case 'siegeJoin': { const c = b.dataset.c || ($('fortCode') || {}).value; UI.close(); siegeJoin(c); break; }
     case 'siegeCopy': { const c = myFort().code; try { navigator.clipboard.writeText(c).then(() => toast(`Copied ${c}`, 'good'), () => toast(c)); } catch (e) { toast(c); } break; }
     case 'fortWave': UI.close(); startSiegeWave(); break;
-    case 'fortPick': UI.close(); G.fortPlace = { t: b.dataset.t, draw: false }; if (CFG.siege.towers[b.dataset.t].wall) toast('Tap Draw, then walk: walls go down behind you', 'good'); break;
+    case 'fortMove': { const fb = fortState().b[+b.dataset.k]; UI.close(); if (fb) builderMove(fb); break; }
     case 'fortUp': case 'fortDel': case 'fortCol': { const why = fortDo({ o: act === 'fortUp' ? 'up' : act === 'fortDel' ? 'del' : 'col', k: +b.dataset.k });
       if (why) toast(why, 'bad'); else Sfx.play('unlock');
       if (act === 'fortDel' || why) UI.close(); else openFortBPanel(UI.fortK); break; }
