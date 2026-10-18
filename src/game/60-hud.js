@@ -6,6 +6,10 @@ const ICON = {
   trophy: '<svg viewBox="0 0 20 20" class="ic"><path d="M5 3h10v4a5 5 0 0 1-10 0z" fill="#ffd34a" stroke="#a8781a" stroke-width="1.5"/><path d="M5 5H2.5a2.5 2.5 0 0 0 3 3.5M15 5h2.5a2.5 2.5 0 0 1-3 3.5" fill="none" stroke="#a8781a" stroke-width="1.5"/><rect x="8.5" y="11" width="3" height="4" fill="#a8781a"/><rect x="6" y="15" width="8" height="2.5" rx="1" fill="#a8781a"/></svg>',
 };
 ICON.ess = '<svg viewBox="0 0 20 20" class="ic"><path d="M10 1.5l6 7-6 10-6-10z" fill="#c77dff" stroke="#6b2fa8" stroke-width="1.5"/><path d="M10 1.5v17M4 8.5h12" stroke="#f0d9ff" stroke-width="1" opacity=".7"/></svg>';
+// Bastion camp resources: pixel icons (crisp squares, ink outline) for wood, stone and iron
+ICON.wood = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="2" y="6" width="16" height="9" fill="#2a1608"/><rect x="3" y="7" width="14" height="7" fill="#9a6232"/><rect x="3" y="7" width="14" height="2" fill="#c8884a"/><rect x="13" y="7" width="4" height="7" fill="#e8c08a"/><rect x="14" y="9" width="2" height="3" fill="#b07a42"/></svg>';
+ICON.stone = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="3" y="5" width="14" height="11" fill="#1e1a16"/><rect x="4" y="6" width="12" height="9" fill="#9a958c"/><rect x="4" y="6" width="12" height="3" fill="#cfcac0"/><rect x="5" y="12" width="5" height="2" fill="#6e6a62"/><rect x="11" y="10" width="4" height="2" fill="#6e6a62"/></svg>';
+ICON.iron = '<svg viewBox="0 0 20 20" class="ic" shape-rendering="crispEdges"><rect x="2" y="7" width="16" height="8" fill="#12161c"/><rect x="3" y="8" width="14" height="6" fill="#5e6e80"/><rect x="5" y="8" width="10" height="2" fill="#b8c8da"/><rect x="3" y="12" width="14" height="2" fill="#3a4654"/></svg>';
 const UI = { closable: true, current: null, menuSection: 'upgrades', hud: {} };
 function costHTML(gold, ess) { return `${ICON.coin}${fmtK(gold)}${ess ? ` <span class="essc">${ICON.ess}${fmtK(ess)}</span>` : ''}`; }
 
@@ -84,7 +88,9 @@ function updateTags() {
       // fort objectives: always shown, big bars that flash while under attack
       for (const o of G.siege.objs) put(o.x, o.def.h, o.z, o.alive ? `${o.name} · ${Math.ceil(clamp(o.hp / o.maxHp, 0, 1) * 100)}%` : `${o.name} · destroyed`, o.alive ? o.hp / o.maxHp : 0, `obj${o.def.main ? ' main' : ''}${o.hurtT > 0 ? ' hurt' : ''}${o.alive ? '' : ' down'}`);
       for (const s of G.siege.soldiers) if (s.alive && s.hp < s.maxHp && near(s, 26)) put(s.x, 2.4, s.z, '', s.hp / s.maxHp, 'ally');
-      for (const u of G.siege.units) if (u.alive && u.hp < u.maxHp && near(u, 26)) put(u.x, u.size === 1 ? 2.2 : 4.6, u.z, '', u.hp / u.maxHp, 'ally');
+      for (const u of G.siege.units) if (u.alive && u.hp < u.maxHp && near(u, 26)) put(u.x, u.size === 1 ? 2.2 : 3.6, u.z, '', u.hp / u.maxHp, 'ally');
+      // a full-enough mill or mine shows what it holds (tap it in builder mode, or walk up, to collect)
+      for (const u of G.siege.units) { const T = CFG.siege.towers[u.b.t]; if (T.make && u.alive) { const n = fortMade(u.b); if (n >= Math.max(1, T.rate * u.b.l * 0.25)) put(u.x, 4.4, u.z, `+${fmtK(n)} ${CFG.siege.resName[T.make]}`, null, `fortRes ${T.make}${n >= T.cap * u.b.l ? ' full' : ''}`); } }
     }
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
@@ -174,8 +180,9 @@ function updateHUD(dt) {
     const nc = G.profile.cases.length; setHidden('caseChip', !nc); if (nc) setText('caseChip', String(nc));
     UI.caseFlash = Math.max(0, (UI.caseFlash || 0) - dt); $('caseChip').classList.toggle('flash', UI.caseFlash > 0);
     setHidden('autoChip', G.mode !== 'hub' || !!G.rift || !!G.siege); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
+    { const F = G.siege && fortState(); setHidden('fortChip', !F || !F.go); if (F && F.go) { setText('fortChip', F.hold ? 'WAVES PAUSED' : 'AUTO WAVES'); $('fortChip').classList.toggle('on', !F.hold); } }
     setHidden('pvpChip', G.mode !== 'hub' || inInstance()); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
-  } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); }
+  } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); setHidden('fortChip', true); }
   $('bMenu').classList.toggle('newU', G.started && Object.keys(UNLOCK_AT).some(unlockNew)); // the menu button glows while something new is unopened
   { const n = mpCount(), on = G.started && !inArena; setHidden('mpChip', !on || !n); if (on && n) setText('mpChip', String(n + 1)); }
   const stk = G.streak >= 3 && !inArena;
@@ -257,7 +264,8 @@ function updateObjective() {
   const shr = activeShrine();
   if (G.rift) { const r = G.rift; text = r.phase === 'intro' ? `Rift floor ${r.floor} · get ready` : r.phase === 'clear' ? `Floor ${r.floor} cleared! Next floor…` : `Rift floor ${r.floor} · ${riftLeft()} left · ${Math.ceil(r.t)}s`; }
   else if (G.siege) { const S = G.siege, k = S.objs[0];
-    text = S.phase === 'build' ? `Wave ${S.wave} in ${Math.ceil(S.t)}s · from ${siegeSideNames(S.sides)}` : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }
+    const F = fortState();
+    text = S.phase === 'build' ? (!F.go ? `Wave ${S.wave} · press Start when ready` : F.hold ? `Paused · wave ${S.wave} from ${siegeSideNames(S.sides)}` : `Wave ${S.wave} in ${Math.ceil(S.t)}s · from ${siegeSideNames(S.sides)}`) : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }
   else if (shr) { text = `Shrine challenge: ${shr.wave.filter((e) => e.alive).length} left · ${Math.ceil(shr.t)}s`; tx = shr.x; tz = shr.z; }
   else if (p.job) {
     const j = p.job, npc = NPC_DEFS.find((n) => n.id === j.npc);
