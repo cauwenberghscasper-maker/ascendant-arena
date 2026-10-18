@@ -22,6 +22,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'hi
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 // neutral tone mapping keeps the saturated toy colours but rolls off blown highlights (gold, white hair, sand)
 renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.debug.checkShaderErrors = LOCAL_PREVIEW; // reading the compile log waits for the GPU to finish compiling (a hitch whenever a new model or effect appears)
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = true;
 renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); G.paused = true; }, false);
 renderer.domElement.addEventListener('webglcontextrestored', () => { G.paused = false; }, false);

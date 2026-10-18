@@ -9,7 +9,8 @@ function interact() {
   if (n.kind === 'trial') return openTrialPanel(n.zone);
   if (n.kind === 'mine') return mineNode(n.st);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
-  if (n.kind === 'dungeonChest') return openDungeonChest();
+  if (n.kind === 'dungeonChest') return delveOn() ? openDelveChest(claimDelveChest()) : openDungeonChest();
+  if (/^delve/.test(n.kind)) return delveAct(n);
   if (n.kind === 'siege') return openSiegePanel();
   if (n.kind === 'siegeLeave') return endSiege('leave');
   if (n.kind === 'siegeWave') return startSiegeWave();
@@ -20,9 +21,9 @@ function interact() {
   openNpc(d);
 }
 // Systems open slowly with level: a locked button shows its level; a newly opened one glows until you tap it
-const UNLOCK_AT = { mArtifacts: 2, mDaily: 2, mSmith: 3, mCollection: 4, mSkills: 5, Forge: 6, mIdle: 8, mBrawlers: 9, Masterwork: 10, mArena: 10, Enchant: 12, Craft: 15 };
+const UNLOCK_AT = { mArtifacts: 2, mDaily: 2, mSmith: 3, mCollection: 4, mSkills: 5, Forge: 6, mIdle: 8, mBrawlers: 9, Masterwork: 10, mArena: 10, Enchant: 12, mDelve: CFG.delve.unlock, Craft: 15 };
 const UNLOCK_NAME = { mArtifacts: 'Relics', mDaily: 'Daily rewards', mSmith: 'Forge', mCollection: 'Collection Log', mSkills: 'Talents', Forge: 'Forge › Buy gear', mIdle: 'Bank & Camp',
-  mBrawlers: 'Heroes', Masterwork: 'Forge › Masterwork', mArena: 'Showdown', Enchant: 'Forge › Enchant', Craft: 'Forge › Craft' };
+  mBrawlers: 'Heroes', Masterwork: 'Forge › Masterwork', mArena: 'Showdown', mDelve: 'Dungeons', Enchant: 'Forge › Enchant', Craft: 'Forge › Craft' };
 const unlockOpen = (k) => !G.profile || G.profile.level >= (UNLOCK_AT[k] || 0);
 const unlockNew = (k) => !!UNLOCK_AT[k] && unlockOpen(k) && !(G.profile.uiSeen || {})[k];
 function unlockSeen(k) { if (!unlockNew(k)) return; (G.profile.uiSeen || (G.profile.uiSeen = {}))[k] = true; G.dirty = true; }
@@ -760,6 +761,13 @@ function openSaveCode() {
     <h4 class="sub">Load a code</h4><textarea id="codeIn" class="code" rows="3" placeholder="Paste a code that starts with AA8:"></textarea>
     <div class="row end"><button class="ghost" data-act="openSettings">Back</button><button class="warn" data-act="loadCode">Load and replace this hero</button></div>`);
 }
+// when 120 Hz is on but the browser only refreshes the page 60 times a second, say where the limit is (a page can't lift it)
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function hz120Hint(s) {
+  if (!s.hz120 || Q.hz > 75) return 'Smoother motion on 120 Hz screens. Uses more battery. Turn off to save battery. No change on 60 Hz screens';
+  return IS_IOS ? 'Safari limits web pages to 60 Hz. To unlock 120: iPhone Settings › Apps › Safari › Advanced › Feature Flags, turn off "Prefer Page Rendering Updates near 60fps", then reload'
+    : 'Your browser or phone gives this page only 60 Hz. Check battery saver and the display refresh-rate setting';
+}
 function openSettings() {
   UI.current = 'settings';
   const s = G.profile.settings;
@@ -783,11 +791,12 @@ function openSettings() {
       <select data-sel="uiSize">${UI_SIZES.map((z, i) => `<option value="${i}" ${(s.uiSize | 0) === i ? 'selected' : ''}>${z.name}</option>`).join('')}</select></label>
     ${tg('hq', 'High graphics', 'Shadows, outlines and glowing bullets. Turns off by itself if the frame rate drops')}
     ${tg('fx', 'Cinematic effects', 'Bloom on crystals, lava, torches and magic, soft shadows and colour grading (with High graphics)')}
+    ${tg('hz120', '120 Hz', hz120Hint(s))}
     ${tg('pixel', 'Pixel art', 'Draw the world as crisp pixel art. Turn off for smooth 3D')}
     <label class="tgl sel"><span><b>Auto-salvage</b><small>Turns drops that are not upgrades into gold and gems</small></span>
       <select data-sel="autoSalvage">${['Off', 'Common', 'Uncommon and below', 'Rare and below'].map((t, i) => `<option value="${i}" ${(s.autoSalvage | 0) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
     ${tg('calm', 'Reduce flashing', 'No red hit flash or screen shake, and a fixed render scale')}
-    ${tg('mute', 'Mute sound', 'All sound is generated live, no downloads')}${tg('fps', 'Show FPS', 'Frame rate, draw calls and render scale')}
+    ${tg('mute', 'Mute sound', 'All sound is generated live, no downloads')}${tg('fps', 'Show FPS', 'Frame rate, the refresh rate your browser gives the game, draw calls and render scale')}
     <div class="row"><button class="ghost sm" data-act="credits">Credits and licenses</button></div>
     <div class="danger"><button class="ghost" data-act="reset1" id="reset1">${TEST_MODE ? 'Reset test hero' : 'Reset progress'}</button><span id="resetConfirm" hidden>${TEST_MODE ? 'Erase this test hero only?' : 'Erase this hero everywhere?'} <button class="warn" data-act="reset2">Yes, erase</button></span></div>`);
 }
@@ -799,7 +808,9 @@ function handlePanelClick(e) {
   const act = b.dataset.act; Sfx.play('click');
   unlockSeen(act);
   if (!LOCAL_PREVIEW && !TEST_MODE && ['tLevel', 't5', 't100', 'tGold', 'tEss', 'tShards', 'tBoss', 'tUnlock', 'tLegend', 'tFocus'].includes(act)) return;
+  if (/^dlv/.test(act)) return partyAction(act, b);
   switch (act) {
+    case 'mDelve': openDelvePanel(); break;
     case 'testMode': saveNow(true); location.assign(testModeUrl(location.href, !TEST_MODE)); break;
     case 'close': UI.close(); break;
     case 'tZoom': treeZoom(b.dataset.z); break;

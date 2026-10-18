@@ -98,6 +98,7 @@ function dungeonLayout(id) {
 function dungeonGrid(D) {
   const C = CFG.dungeon, g = new Grid(6), r = C.wallR;
   for (const w of D.walls) { const n = Math.max(1, Math.ceil(Math.hypot(w.x1 - w.x0, w.z1 - w.z0) / (r * 1.6))); for (let k = 0; k <= n; k++) g.add({ x: lerp(w.x0, w.x1, k / n), z: lerp(w.z0, w.z1, k / n), r }); }
+  for (const q of D.props || []) g.add({ x: q.x, z: q.z, r: q.r }); // pillars in party-dungeon halls
   for (const d of D.doors) if (!d.open) for (let k = -3; k <= 3; k++) { const o = (k / 3) * d.w; g.add(d.ax === 'x' ? { x: d.x + o, z: d.z, r: 0.6 } : { x: d.x, z: d.z + o, r: 0.6 }); }
   G.dungeonObstacles = g; if (G.dungeon === D) G.obstacles = g;
   return g;
@@ -161,6 +162,7 @@ function startDungeon(poi, keyIdx) {
 }
 function stepDungeon(dt) {
   const D = G.dungeon, pl = G.player, C = CFG.dungeon;
+  if (D.delve) { stepDelve(dt); return; } // party dungeons (36b-delve.js)
   if (!pl.alive) { endDungeon('down'); return; }
   // carried out of the instance by anything else (waypoint travel): close it where you stand
   if (Math.hypot(pl.x - DC.x, pl.z - DC.z) > 260) { endDungeon('away'); return; }
@@ -187,6 +189,7 @@ function stepDungeon(dt) {
 }
 function dungeonInteract(pl) {
   const D = G.dungeon, R = CFG.dungeon.interactR, near = (q) => Math.hypot(pl.x - q.x, pl.z - q.z) < R;
+  if (D.delve) return delveInteract(pl);
   if (D.bossDead && !D.chestOpen && near(D.chest)) return { kind: 'dungeonChest', label: 'Open Chest' };
   if (near(D.exit) || (D.bossDead && near(D.exit2))) return { kind: 'dungeonLeave', label: 'Leave Dungeon' };
   return null;
@@ -236,8 +239,8 @@ function endDungeon(why) {
   const pl = G.player;
   if (why !== 'away') { pl.x = D.enterPos.x; pl.z = D.enterPos.z; }
   // a fall sends you back to the entrance after the normal respawn delay
-  if (pl.alive) { pl.invulnT = 1; pl.hp = pl.maxHp; } else G.respawnAt = { x: pl.x, z: pl.z };
+  if (pl.alive) { pl.invulnT = 1; pl.hp = pl.maxHp; } else { G.respawnAt = { x: pl.x, z: pl.z }; if (D.delve) G.respawnT = CFG.player.respawn; }
   G.zoneIdx = zoneAt(pl.z);
-  ev({ t: 'dungeonEnd', why, name: D.poi.name, cleared: D.bossDead, x: pl.x, z: pl.z });
+  ev({ t: 'dungeonEnd', why, name: D.poi.name, cleared: D.bossDead, x: pl.x, z: pl.z, delve: !!D.delve });
 }
 // --- end dungeons

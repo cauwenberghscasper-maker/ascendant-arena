@@ -1,21 +1,22 @@
-// --- Bastion Siege view: the walled fort, built on entry and disposed on exit. The defenders on the eight pads are
-// rebuilt whenever the fort changes (build, upgrade, swap); cannon and ballista tops are their own meshes so they can aim.
-const siegeParts = { sets: [], padSets: [], padGroup: null, tops: [], objItems: [], objSets: [], portal: null, flame: null, sig: '', t: 0 };
+// --- Bastion Siege view: the walled fort, built on entry and disposed on exit. Everything standing is a generated
+// world model (walls, gatehouses, keep, wagons, defenders, plinths, flags); code geometry is only ground and VFX.
+// The defenders on the eight pads are rebuilt whenever the fort changes; cannons and ballistas turn to their target.
+const siegeParts = { sets: [], padSets: [], padGroup: null, aims: [], objItems: [], objSets: [], portal: null, flame: null, sig: '', t: 0 };
 const SIEGE_PAD_COL = { archer: 0x58e08a, cannon: 0xff7a4a, ballista: 0x5dd6ff, warrior: 0xffc94a };
+// a flat ground plane (terrain); vertex colours feed the flagstone shader
+function siegeGround(w, d, color, mat, y) {
+  const g = new THREE.PlaneGeometry(w, d, 1, 1).rotateX(-Math.PI / 2), n = g.attributes.position.count, col = new Float32Array(n * 3);
+  _col.set(color); for (let i = 0; i < n; i++) col.set([_col.r, _col.g, _col.b], i * 3);
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const m = new THREE.Mesh(g, mat); m.position.set(SC.x, y, SC.z); m.receiveShadow = true; siegeGroup.add(m); return m;
+}
 function buildSiegeView() {
   disposeSiegeView();
-  const C = CFG.siege, H = C.half, rng = mulberry32(0xba5710), parts = [];
+  const C = CFG.siege, H = C.half, rng = mulberry32(0xba5710);
   const at = (q) => ({ x: SC.x + q.x, z: SC.z + q.z });
-  // courtyard: 3 m flagstones (the dungeon floor shader), meadow outside the walls
-  for (let x = -H; x < H; x += 3) for (let z = -H; z < H; z += 3) {
-    const c = (Math.floor(x / 3) + Math.floor(z / 3)) & 1 ? 0x8a7a66 : 0x7a6c5c;
-    parts.push(part(GEO.box, c, [SC.x + x + 1.5, -0.06 - rng() * 0.03, SC.z + z + 1.5], null, [2.94, 0.12, 2.94]));
-  }
-  const yard = new THREE.Mesh(mergeParts(parts), matDungeonFloor); yard.receiveShadow = true; siegeGroup.add(yard);
-  const out = [part(GEO.box, 0x3d5a2a, [SC.x, -0.3, SC.z], null, [H * 2 + 70, 0.4, H * 2 + 70]), part(GEO.box, 0x5b4d3e, [SC.x, -0.2, SC.z], null, [H * 2 + 3, 0.3, H * 2 + 3])];
-  // dirt roads from the three gates out into the meadow
-  for (const g of C.gates) { const ox = Math.sign(g.x) * (H + 12), oz = Math.sign(g.z) * (H + 12); out.push(part(GEO.box, 0x6b5a44, [SC.x + ox, -0.11, SC.z + oz], null, g.z ? [5, 0.06, 24] : [24, 0.06, 5])); }
-  siegeGroup.add(new THREE.Mesh(mergeParts(out), matVC));
+  // courtyard flagstones (the dungeon floor shader) inside the walls, meadow outside
+  siegeGround(H * 2 + 2, H * 2 + 2, 0x857563, matDungeonFloor, 0);
+  siegeGround(H * 2 + 90, H * 2 + 90, 0x3d5a2a, new THREE.MeshLambertMaterial({ vertexColors: true }), -0.05);
   // walls: stone sections along every side, open where a gatehouse stands
   const walls = [], S = 3.4, tile = 2.24 * S, gap = 4.6;
   const side = (x0, z0, x1, z1) => { const len = Math.hypot(x1 - x0, z1 - z0), a = Math.atan2(x1 - x0, z1 - z0), n = Math.max(1, Math.round(len / tile)), sx = len / (n * tile);
@@ -37,57 +38,49 @@ function buildSiegeView() {
   for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, k = at(C.objs[0]); banners.push({ x: k.x + Math.sin(a) * 6, z: k.z + Math.cos(a) * 6, ry: a, s: 4.2 }); }
   for (const d of C.objs.slice(1)) { const p = at(d), sx = Math.sign(d.x); crates.push({ x: p.x + sx * 2.6, z: p.z - 1.4, ry: rng() * 6, s: 1.1 }, { x: p.x + sx * 2.9, z: p.z + 0.2, ry: rng() * 6, s: 0.9 }); barrels.push({ x: p.x - sx * 2.4, z: p.z - 1.8, ry: 0, s: 1.0 }); }
   siegeParts.sets.push(WorldModels.place(siegeGroup, 'brazier', braz), WorldModels.place(siegeGroup, 'banner_pole', banners), WorldModels.place(siegeGroup, 'crate_1', crates), WorldModels.place(siegeGroup, 'barrel_1', barrels));
+  // brazier flames (VFX) share one additive mesh so the flicker is a single opacity change
   const fp = braz.map((b) => part(GEO.ico0, 0xffa040, [b.x, b.s * 0.98, b.z], null, [0.32, 0.5, 0.32]));
   siegeParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); siegeGroup.add(siegeParts.flame);
-  // stone plinths for all eight pads
-  const pl = [];
-  for (const q of C.pads) { const p = at(q); pl.push(part(GEO.cyl8, 0x6f6658, [p.x, 0.15, p.z], null, [1.35, 0.3, 1.35]), part(GEO.cyl8, 0x8d8372, [p.x, 0.33, p.z], null, [1.2, 0.08, 1.2])); }
-  const plinths = new THREE.Mesh(mergeParts(pl), matVC); plinths.receiveShadow = true; siegeGroup.add(plinths);
-  // the way home: a portal by the south wall
+  // stone plinths for all eight pads: low, wide ruin blocks
+  siegeParts.sets.push(WorldModels.place(siegeGroup, 'ruin_block', C.pads.map((q) => { const p = at(q); return { x: p.x, z: p.z, ry: rng() * 0.4 - 0.2, s: 2.4, sy: 0.16 }; })));
+  // the way home: a portal by the south wall (VFX)
   { const e = at(C.exit), g = new THREE.Group(), ring = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.4, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
     const disc = new THREE.Mesh(new THREE.CircleGeometry(1.1, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: swirlTex(), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
     ring.position.y = 0.05; disc.position.y = 0.04; g.add(ring, disc); g.position.set(e.x, 0, e.z); siegeGroup.add(g); siegeParts.portal = g; }
   siegeParts.padGroup = new THREE.Group(); siegeGroup.add(siegeParts.padGroup); siegeParts.sig = '';
   buildSiegePads();
 }
-// defenders: archer = generated tower, warriors = a war tent, cannon and ballista from primitives; a flag in the
-// pad's colour grows with the level, and an empty pad glows so you can see where to build
+// defenders: archer = stone tower, cannon = iron mortar pot, ballista = the siege turret, warriors = tent and weapon
+// rack; a banner in the defender's colour grows with the level, and an empty pad glows so you can see where to build
 function buildSiegePads() {
-  const g = siegeParts.padGroup, C = CFG.siege, F = fortState();
+  const g = siegeParts.padGroup, C = CFG.siege, F = fortState(), top = 0.38;
   for (const h of siegeParts.padSets) WorldModels.dispose(h);
-  g.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material !== matVC) o.material.dispose(); });
-  g.clear(); siegeParts.padSets = []; siegeParts.tops = [];
-  const towers = [], tents = [], racks = [], base = [];
+  g.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+  g.clear(); siegeParts.padSets = []; siegeParts.aims = [];
+  const L = { archer: [], cannon: [], ballista: [], war_tent: [], weapon_rack: [], banner_pole: [] }, aims = [];
   C.pads.forEach((q, i) => {
     const x = SC.x + q.x, z = SC.z + q.z, pad = F.pads[i];
     if (!pad) {
       const m = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.15, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffe9a8, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }));
-      m.position.set(x, 0.42, z); m.userData.empty = true; g.add(m); return;
+      m.position.set(x, top + 0.14, z); m.userData.empty = true; g.add(m); return;
     }
-    const k = 1 + (pad.l - 1) * 0.03, col = SIEGE_PAD_COL[pad.t], ry = Math.atan2(-q.x, -q.z);
-    if (pad.t === 'archer') towers.push({ x, z, y: 0.35, ry, s: 4.6 * k });
-    else if (pad.t === 'warrior') { tents.push({ x: x - 0.3, z: z - 0.2, y: 0.35, ry, s: 2.2 * k }); racks.push({ x: x + 0.9, z: z + 0.7, y: 0.35, ry: ry + 0.6, s: 1.1 }); }
-    else {
-      // a wooden carriage on the plinth, and a turning top: iron barrel or a crossbow arm with its bolt
-      base.push(part(GEO.box, 0x6b4a2e, [x, 0.65, z], null, [1.5 * k, 0.5, 1.5 * k]), part(GEO.cyl8, 0x3b2c20, [x - 0.8 * k, 0.6, z], [0, 0, Math.PI / 2], [0.4, 0.15, 0.4]), part(GEO.cyl8, 0x3b2c20, [x + 0.8 * k, 0.6, z], [0, 0, Math.PI / 2], [0.4, 0.15, 0.4]));
-      const tp = pad.t === 'cannon'
-        ? [part(GEO.cyl8, 0x2f3038, [0, 0, 0.35], [Math.PI / 2 - 0.2, 0, 0], [0.42 * k, 1.9 * k, 0.42 * k]), part(GEO.cyl8, 0x1c1d22, [0, 0.18, 1.25 * k], [Math.PI / 2 - 0.2, 0, 0], [0.5 * k, 0.22, 0.5 * k]), part(GEO.box, 0x4a3524, [0, -0.25, -0.2], null, [0.9, 0.35, 1.1])]
-        : [part(GEO.box, 0x7a5434, [0, 0, 0], null, [0.32, 0.3, 2.4 * k]), part(GEO.box, 0x5a3c24, [0, 0.05, 0.75 * k], [0, 0, 0], [2.6 * k, 0.18, 0.22]), part(GEO.box, 0xcfd6dc, [0, 0.22, 0.2], null, [0.1, 0.1, 2.3 * k]), part(GEO.cone4, 0xcfd6dc, [0, 0.22, 1.42 * k], [Math.PI / 2, 0, 0], [0.16, 0.36, 0.16])];
-      const top = new THREE.Mesh(mergeParts(tp), matVC); top.position.set(x, 1.2, z); top.rotation.y = ry; top.castShadow = true; top.userData.pad = i; g.add(top); siegeParts.tops.push(top);
-    }
-    // level flag: a pole with a pennant in the defender's colour, longer at higher levels
-    const fh = 2.2 + Math.min(15, pad.l) * 0.12;
-    base.push(part(GEO.box, 0x4a3a2a, [x - 1.05, 0.35 + fh / 2, z - 1.05], null, [0.08, fh, 0.08]), part(GEO.box, col, [x - 1.05, 0.35 + fh - 0.25, z - 0.75], null, [0.04, 0.4, 0.6]));
+    const k = 1 + (pad.l - 1) * 0.03, ry = Math.atan2(-q.x, -q.z);
+    if (pad.t === 'archer') L.archer.push({ x, z, y: top, ry, s: 4.6 * k });
+    else if (pad.t === 'warrior') { L.war_tent.push({ x: x - 0.3, z: z - 0.2, y: top, ry, s: 2.2 * k }); L.weapon_rack.push({ x: x + 0.9, z: z + 0.7, y: top, ry: ry + 0.6, s: 1.1 }); }
+    else { const it = pad.t === 'cannon' ? { x, z, y: top, ry, s: 1.7 * k, color: 0x6a6a78 } : { x, z, y: top, ry, s: 3.0 * k }; L[pad.t].push(it); aims.push({ it, pad: i, t: pad.t }); }
+    L.banner_pole.push({ x: x - 1.05, z: z - 1.05, y: top, ry: 0, s: 2.4 + Math.min(15, pad.l) * 0.14, color: SIEGE_PAD_COL[pad.t] });
   });
-  if (base.length) { const m = new THREE.Mesh(mergeParts(base), matVC); m.castShadow = true; g.add(m); }
-  siegeParts.padSets.push(WorldModels.place(g, 'tower', towers), WorldModels.place(g, 'war_tent', tents), WorldModels.place(g, 'weapon_rack', racks));
+  const set = (name, list, o) => { const h = WorldModels.place(g, name, list, o); siegeParts.padSets.push(h); return h; };
+  set('tower', L.archer); set('war_tent', L.war_tent); set('weapon_rack', L.weapon_rack); set('banner_pole', L.banner_pole);
+  const hs = { cannon: set('kettle', L.cannon), ballista: set('arena_tower', L.ballista) };
+  siegeParts.aims = aims.map((a) => Object.assign(a, { h: hs[a.t] }));
 }
 function disposeSiegeView() {
   for (const h of siegeParts.sets.concat(siegeParts.padSets)) WorldModels.dispose(h);
   const geos = new Set(), mats = new Set();
   siegeGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matVC && o.material !== matDungeonFloor) mats.add(o.material); });
   geos.forEach((g) => g.dispose()); mats.forEach((m) => m.dispose());
-  siegeGroup.clear(); Object.assign(siegeParts, { sets: [], padSets: [], padGroup: null, tops: [], objItems: [], objSets: [], portal: null, flame: null, sig: '' });
+  siegeGroup.clear(); Object.assign(siegeParts, { sets: [], padSets: [], padGroup: null, aims: [], objItems: [], objSets: [], portal: null, flame: null, sig: '' });
 }
 function enterSiegeView(on) {
   hubGroup.visible = !on; riftGroup.visible = false; siegeGroup.visible = on;
@@ -101,8 +94,8 @@ function updateSiegeView(dt) {
   hubGroup.visible = false; // the showcase restores the hub on close; the fort keeps it hidden
   const t = (siegeParts.t += dt), sig = JSON.stringify(fortState().pads);
   if (sig !== siegeParts.sig) { if (siegeParts.sig) buildSiegePads(); siegeParts.sig = sig; }
-  // turrets swing to their last target; empty pads pulse
-  for (const top of siegeParts.tops) { const P = S.pads[top.userData.pad]; if (P && P.aim != null) top.rotation.y += angDiff(top.rotation.y, P.aim) * (1 - Math.exp(-dt * 10)); }
+  // cannons and ballistas swing to their last target; empty pads pulse
+  for (const a of siegeParts.aims) { const P = S.pads[a.pad]; if (!P || P.aim == null) continue; const d = angDiff(a.it.ry, P.aim); if (Math.abs(d) > 0.02) { a.it.ry += d * (1 - Math.exp(-dt * 10)); a.h.dirty = true; } }
   for (const m of siegeParts.padGroup.children) if (m.userData.empty) m.material.opacity = 0.35 + Math.sin(t * 3) * 0.25;
   // a fallen objective disappears in smoke
   S.objs.forEach((o, i) => { const it = siegeParts.objItems[i]; if (it && !o.alive && !it.hidden) { it.hidden = true; siegeParts.objSets[i].dirty = true; burst(o.x, 2, o.z, 40, 0x6a5a4a, 7, 1.2, 0.5, 3, 2); } });

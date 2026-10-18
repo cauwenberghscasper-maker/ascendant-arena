@@ -76,6 +76,7 @@ function buildDungeonView(D) {
     const disc = new THREE.Mesh(new THREE.CircleGeometry(1.1, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: swirlTex(), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
     ring.position.y = 0.05; disc.position.y = 0.04; g.add(ring, disc); g.position.set(q.x, 0, q.z); g.visible = i === 0; dungeonGroup.add(g); return g;
   });
+  if (D.delve) buildDelveProps(D); // party-dungeon event rooms (47b-delve-view.js)
 }
 function disposeDungeonView() {
   // generated models first: their geometry and textures belong to the asset cache and must survive
@@ -105,6 +106,7 @@ function updateDungeonView(dt) {
   const [cc, co] = dungeonParts.chestItems;
   if (cc) { const hc = !D.bossDead || !!D.chestOpen, ho = !D.chestOpen;
     if (cc.hidden !== hc || co.hidden !== ho) { cc.hidden = hc; co.hidden = ho; for (const h of dungeonParts.chestSets) h.dirty = true; if (D.chestOpen) burst(co.x, 1.2, co.z, 24, 0xffd34a, 4, 0.9, 0.5, 10, 3); } }
+  if (D.delve) updateDelveView(dt, t);
   WorldModels.update();
   for (const L of dungeonParts.lights) L.intensity = 16 + Math.sin(t * 11 + L.position.x) * 2.5;
   dungeonParts.portals.forEach((g, i) => { g.visible = i === 0 || D.bossDead; g.rotation.y = t * (i ? -0.8 : 0.8); });

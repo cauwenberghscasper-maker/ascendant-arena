@@ -9,7 +9,7 @@ function spawnProjectile(o) {
   for (let n = 0; n < PROJ_MAX; n++) {
     const p = projectiles[projCursor]; projCursor = (projCursor + 1) % PROJ_MAX;
     if (!p.active) {
-      p.active = true; p.x = o.x; p.z = o.z; p.vx = o.vx; p.vz = o.vz; p.life = o.life; p.total = o.life; p.r = o.r; p.dmg = o.dmg;
+      p.active = true; p.iStep = -1; p.x = o.x; p.z = o.z; p.vx = o.vx; p.vz = o.vz; p.life = o.life; p.total = o.life; p.r = o.r; p.dmg = o.dmg;
       p.team = o.team; p.owner = o.owner; p.pet = !!o.pet; p.kind = o.kind; p.aoe = o.aoe || 0; p.aoeMult = o.aoeMult || 0;
       p.slow = o.slow || 0; p.charge = o.charge || 0; p.color = o.color; p.y = o.y || 1.0; p.burn = o.burn || 0; p.burnT = o.burnT || 0;
       p.homing = o.homing || 0; p.pierce = o.pierce || 0; p.hits.length = 0; p.bounce = o.bounce || 0; p.split = o.split || null;
@@ -294,6 +294,7 @@ function killEntity(t, src, pet = false) {
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
+    else if (t.isPlayer && delveOn()) { G.respawnT = 1e9; toast(delveParty().length > 1 ? 'You are down! A teammate can pull you back up' : 'You fell…', 'bad'); }
     else if (t.isPlayer) { if (typeof pvpOnDeath === 'function') pvpOnDeath(); G.respawnT = CFG.player.respawn; toast(G.siege ? 'You were knocked out. Back at the Keep in a moment…' : 'You were knocked out. Respawning in town…', 'bad'); }
   } else if (t.kind === 'enemy') {
     t.respawnT = t.temp ? 1e9 : t.elite ? CFG.world.eliteRespawn : t.den != null ? CFG.world.denRespawn : CFG.world.enemyRespawn;

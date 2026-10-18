@@ -177,7 +177,7 @@ function stepSiegeDefenders(dt) {
     } else {
       const t = Math.hypot(e.x - ox, e.z - oz) / T.speed, a = Math.atan2(e.x + (e.vx || 0) * t - ox, e.z + (e.vz || 0) * t - oz);
       spawnProjectile({ x: ox, z: oz, vx: Math.sin(a) * T.speed, vz: Math.cos(a) * T.speed, life: (T.range + 3) / T.speed, r: pad.t === 'ballista' ? 0.5 : 0.3, dmg, team: 'ally', owner: P.id,
-        kind: pad.t === 'ballista' ? 'rail' : 'arrow', color: T.color, y: pad.t === 'ballista' ? 1.5 : 3.2, pierce: T.pierce || 0, knock: pad.t === 'ballista' ? 5 : 1.5 });
+        kind: pad.t === 'ballista' ? 'rail' : 'arrow', color: T.color, y: pad.t === 'ballista' ? 2.6 : 3.2, pierce: T.pierce || 0, knock: pad.t === 'ballista' ? 5 : 1.5 });
     }
     ev({ t: 'fortShot', type: pad.t, x: ox, z: oz });
   });

@@ -171,6 +171,7 @@ function openMenu() {
     ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
     ${big('mGear', 'm_case', 'Inventory', p.cases.length ? `${p.cases.length} chest${p.cases.length > 1 ? 's' : ''} to open` : `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
     ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()))}
+    ${big('mDelve', 'm_portal', 'Dungeons', PARTY.code ? `Party ${PARTY.code} · ${partyMembers().length}/${CFG.delve.maxParty}` : PARTY.q ? 'Looking for heroes…' : 'Party up · loot & sets', false).replace('class="hubTile', 'class="hubTile wide')}
   </div>`);
 }
 function openJournal() {
@@ -184,6 +185,7 @@ function openJournal() {
     tile('mIdle', 'm_idle', 'Bank & Camp', 'Coffers & expeditions', idleAlert()),
     tile('mPlayers', 'm_players', 'Fellow Adventurers', mpSummary()),
     tile('mArena', 'm_arena', 'Showdown', 'Duel 9 rival champions', false),
+    tile('mDelve', 'm_portal', 'Dungeons', 'Party dungeons, sets & loot', false),
   ];
   openModal(`<div class="mtiles">${adventure.join('')}</div>${comingUpHtml(3)}`);
   $('panel').classList.add('menuPanel');
