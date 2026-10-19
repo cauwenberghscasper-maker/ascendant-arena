@@ -492,7 +492,7 @@ function delvePzApply(D, m, st, mine, sid) {
   } else if (st.f > S.fails) {
     S.cd = P.failCd; S.flash = 0.8; S.hold = S.hold.map(() => -1); S.show = 0;
     if (st.f % 2) { // spike burst under every hero this game runs in the hall
-      for (const f of [G.player, ...(X.bots || [])]) if (f.alive !== false && inRoom(m, f.x, f.z)) G.pendingAoE.push({ x: f.x, z: f.z, r: 2.4, t: 0.9, max: 0.9, dmg: f.maxHp * P.spike * X.diff.dmg, team: 'mob', owner: 0, kind: 'slam', pal: areaFx(D.zone) });
+      for (const f of [G.player, ...(X.bots || [])]) if (f.alive !== false && inRoom(m, f.x, f.z)) G.pendingAoE.push({ x: f.x, z: f.z, r: 2.4, t: 0.9, max: 0.9, dmg: f.maxHp * P.spike * X.diff.dmg, pct: P.spike * X.diff.dmg, team: 'mob', owner: 0, kind: 'slam', pal: areaFx(D.zone) });
     } else for (let k = 0, n = Math.min(P.packMax, P.pack + Math.floor(X.di * P.packDiff)); k < n; k++) { // a pack crawls out of the floor, the same slots in every game
       // slots 50-85 of this hall, reused once their monster is down (they used to run past 99 into the next hall's
       // slots: the hall then waited on a monster behind its own closed gate, which never opened)
@@ -543,11 +543,13 @@ function stepDelveEvent(D, m, dt) {
       // half the room's tiles (a checkerboard that flips every strike) warn, then bite; only a hero inside matters
       if (!inRoom(m, pl.x, pl.z) || !pl.alive) break;
       s.t = (s.t || 0) - dt; if (s.t > 0) break; s.t = E.traps.every; s.flip = !s.flip;
-      const dmg = pl.maxHp * E.traps.hit * X.diff.dmg;
+      // each hero loses the same share of its own health (a bot used to take a share of the player's, which could be
+      // more than its whole bar on hard difficulties)
+      const dmg = pl.maxHp * E.traps.hit * X.diff.dmg, pct = E.traps.hit * X.diff.dmg;
       for (let x = m.x0 + 1.5; x < m.x1; x += 3) for (let z = m.z0 + 1.5; z < m.z1; z += 3) {
         if (((Math.floor((x - m.x0) / 3) + Math.floor((z - m.z0) / 3)) & 1) !== (s.flip ? 1 : 0)) continue;
         if (Math.hypot(x - pl.x, z - pl.z) > 9) continue;
-        G.pendingAoE.push({ x, z, r: 1.45, t: E.traps.warn, max: E.traps.warn, dmg, team: 'mob', owner: 0, kind: 'slam', pal: areaFx(D.zone) });
+        G.pendingAoE.push({ x, z, r: 1.45, t: E.traps.warn, max: E.traps.warn, dmg, pct, team: 'mob', owner: 0, kind: 'slam', pal: areaFx(D.zone) });
       }
       break;
     }

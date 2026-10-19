@@ -1,3 +1,13 @@
+# Dungeon bots no longer die in the first halls on hard difficulties (19 Oct 2026, branch `claude/dungeon-bots-hard`, PR to main)
+Casper: bots still died in the first room on higher difficulties. A full-hall fight test (hero not attacking) showed
+bots holding Mythic → Ascendant 5 halls fine, so the killer was elsewhere: the **spike hall** and **puzzle fail
+spikes** dealt a share of the *player's* max HP (× difficulty damage) to every hero in the marked circle, and bots
+never stepped out. With a geared hero at 4× a bot's HP, bots went down 4-7 times in 30 s in a spike hall (Ascendant 5).
+Fixed: marked areas can carry `pct` (share of each target's own max HP; `stepPendingAoE`), used by both hazards; bots
+step out of marked circles and mob clouds (dash if the hit is < 0.45 s away), back off toward the leader below 35% HP,
+copy your armour (≤ 50%) and lifesteal, and survive at least 30 average hits (was 18). Bot names/heroes use a shuffle,
+not a random sort (rule 8). Measured after: 0 downs, 0% HP lost to the floor in the same test. Open: real runs.
+
 # Dungeons: puzzle info stays longer, fuller and better spread halls (19 Oct 2026, branch `claude/dungeon-fill`, PR to main)
 Casper: puzzle info should stay longer; more monsters per room, spread over the room.
 - **Puzzle info:** the puzzle banner shows 7 s (was 2.6), event banners 6 s, "solved" 4.5 s, puzzle step/fail toasts 4 s

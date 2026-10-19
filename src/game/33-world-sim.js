@@ -1043,11 +1043,12 @@ function stepPendingAoE(dt) {
     if (a.t <= 0) {
       if (a.quiet) { G.pendingAoE.splice(i, 1); continue; } // a drawn-only warning (a fan of bolts follows it)
       if (a.soak || a.spread) { bossTeamHit(a); a.t = -1; if (a.pal) ev({ t: 'aoeFx', x: a.x, z: a.z, r: a.r, kind: a.kind, pal: a.pal, ca: null, col: a.col }); G.pendingAoE.splice(i, 1); continue; }
-      // plain circles keep aoeDamage; cones, donuts and one-hit volleys filter targets through aoeHits first
-      if (!a.inner && !a.cone && !a.grp) aoeDamage(a.x, a.z, a.r, a.dmg, a.team, a.owner, { knock: 6, charge: 0, slow: a.slow || 0, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
+      // plain circles keep aoeDamage; cones, donuts, one-hit volleys and share-of-health hazards (`pct`) filter targets
+      // through aoeHits first
+      if (!a.inner && !a.cone && !a.grp && !a.pct) aoeDamage(a.x, a.z, a.r, a.dmg, a.team, a.owner, { knock: 6, charge: 0, slow: a.slow || 0, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
       else forEachTarget((t) => {
         if (!t.alive || t.team === a.team || (t.kind === 'fighter' && t.invulnT > 0) || !aoeHits(a, t)) return;
-        dealDamage(t, a.dmg, a.owner, { charge: 0, canCrit: false, slow: a.slow || 0, knockX: t.x - a.x, knockZ: t.z - a.z, knock: 6, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
+        dealDamage(t, a.pct ? t.maxHp * a.pct : a.dmg, a.owner, { charge: 0, canCrit: false, slow: a.slow || 0, knockX: t.x - a.x, knockZ: t.z - a.z, knock: 6, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
       }, a.team);
       if (a.kind === 'zap') ev({ t: 'bolt', x: a.x, z: a.z });
       const C = a.cone, bx = C ? a.x + Math.sin(C.a) * a.r * 0.55 : a.x, bz = C ? a.z + Math.cos(C.a) * a.r * 0.55 : a.z;
