@@ -2164,8 +2164,22 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .fortPath small { font-size: 11px; line-height: 1.25; color: inherit; opacity: .85; white-space: normal; } .fortPath.primary small { color: #2a1800; }
 @media (max-width: 360px) { .fortPaths { grid-template-columns: 1fr; } }
 .fortLimits .row { justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
-.tag.fortRes .tn { font: 12px/1 var(--body); color: #fff4d6; background: rgba(20,14,10,.8); border: 2px solid var(--og-ink, #120a03); padding: 3px 6px; border-radius: 6px; animation: fortBob 1.2s ease-in-out infinite alternate; }
-.tag.fortRes.wood .tn { color: #f0c890; } .tag.fortRes.iron .tn { color: #cfe0f4; } .tag.fortRes.full .tn { border-color: #ffe08a; }
+/* Bastion collect bubbles (60-hud.js updateFortBubbles): Clash of Clans style, tap to collect; above the builder layer */
+#fortBubs { position: absolute; inset: 0; z-index: 31; pointer-events: none; overflow: hidden; }
+.fbub { position: absolute; left: 0; top: 0; pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; will-change: transform;
+  min-width: 48px; min-height: 48px; padding: 0; background: none; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.fbub .fbIc { position: relative; width: 40px; height: 40px; display: grid; place-items: center; background: #f3ead2; border: 3px solid var(--og-ink, #120a03);
+  border-radius: 50% 50% 50% 50% / 46% 46% 54% 54%; box-shadow: inset 0 -4px 0 #cbbd98, inset 0 3px 0 #fffaf0, 0 3px 0 rgba(0,0,0,.35); animation: fortBob 0.9s ease-in-out infinite alternate; }
+.fbub .fbIc::after { content: ''; position: absolute; left: 50%; bottom: -9px; width: 10px; height: 10px; margin-left: -5px; background: #cbbd98;
+  border-right: 3px solid var(--og-ink, #120a03); border-bottom: 3px solid var(--og-ink, #120a03); transform: rotate(45deg); z-index: -1; }
+.fbub .fbIc .ic { width: 26px; height: 26px; image-rendering: pixelated; }
+.fbub b { margin-top: 7px; font: 12px/1 var(--body); color: #fff4d6; background: rgba(20,14,10,.85); border: 2px solid var(--og-ink, #120a03); padding: 2px 5px; border-radius: 5px; white-space: nowrap; }
+.fbub.wood .fbIc { background: #f6e3c2; } .fbub.iron .fbIc { background: #e2ebf4; box-shadow: inset 0 -4px 0 #a9b9c9, inset 0 3px 0 #ffffff, 0 3px 0 rgba(0,0,0,.35); }
+.fbub.iron .fbIc::after { background: #a9b9c9; } .fbub.wood .fbIc::after { background: #d9bf94; }
+.fbub.full .fbIc { border-color: #5a3a00; box-shadow: inset 0 -4px 0 #cbbd98, inset 0 3px 0 #fffaf0, 0 0 0 2px #ffe08a, 0 0 14px rgba(255,214,90,.85); animation: fortBob 0.9s ease-in-out infinite alternate, fbubGlow 0.9s ease-in-out infinite alternate; }
+.fbub.full b { color: #ffe08a; }
+.fbub:active .fbIc, .fbub.pop .fbIc { transform: scale(1.18); animation: none; }
+@keyframes fbubGlow { from { filter: brightness(1); } to { filter: brightness(1.15); } }
 @keyframes fortBob { from { transform: translateY(0); } to { transform: translateY(-4px); } }
 #fortChip { color: #c9cbe8; letter-spacing: .06em; } #fortChip.on { color: #1b1300; background: linear-gradient(180deg,#9fe0a0,#4aa860); }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
@@ -2316,6 +2330,7 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
     <div id="arenaHud" hidden><div id="aLeft">10 left</div><div id="aGas">Showdown</div></div>
     <div id="countdown" hidden></div>
     <div id="coach" hidden><span id="coachText"></span><button id="coachX" aria-label="Hide tips">×</button></div>
+    <div id="fortBubs"></div>
     <div id="builder" hidden>
       <div id="bdTop"><button id="bdDone">Done</button><span id="bdWaveInfo"></span><button id="bdHold" hidden>Pause waves</button><button id="bdWave">Start wave</button><span id="bdInfo"></span></div>
       <div id="bdHint"></div>
@@ -7301,9 +7316,9 @@ CFG.siege = {
     hut: { name: "Builder's Hut", short: 'Builder', icon: 'm_smith', maxLvl: 1, each: true, c: [12, 8], hp: 8,
       lim: [2, 2, 3, 3, 3, 4, 4, 5, 5, 5], blurb: 'One builder each. More huts, more upgrades at the same time.' },
     wall: { name: 'Wall', short: 'Wall', icon: 'n_armor', c: [1, 0], hp: 5, path: 6, wall: true,
-      lim: [30, 50, 75, 100, 130, 160, 200, 250, 300, 400], blurb: 'Drag a straight line of walls. Wood, stone from level 6, iron from level 11.' },
+      lim: [30, 50, 75, 100, 130, 160, 200, 250, 300, 400], blurb: 'Drag a straight line of walls. Monsters must go round or break them; your heroes step over. Wood, stone from level 6, iron from level 11.' },
     gate: { name: 'Gate', short: 'Gate', icon: 'm_portal', c: [3, 1], hp: 5, path: 6, wall: true,
-      lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'A wall heroes walk through and monsters have to break.' },
+      lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'A sturdy door in your wall line that monsters have to break.' },
     // traps: monsters walk over them (they never block a path, flyers pass over); r: reach from the trap's centre
     spike: { name: 'Spike Trap', short: 'Spikes', icon: 'a_reaper', trap: true, r: 1.5, cd: 2.2, dmg: 1.4, c: [2, 2], hp: 1,
       lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'Spikes shoot up under every monster on it, then reset after a moment.' },
@@ -7414,11 +7429,12 @@ function siegeLayout() {
   for (const q of S.soldiers) S.src.set(q.id, q.u.st);
   siegeGrid(); S.flowDirty = true;
 }
-// keep, wagons and living buildings are solid; gates only for monsters (rebuilt as a whole: the Grid has no remove)
+// keep, wagons and living buildings are solid; walls and gates only for monsters, so heroes never get boxed in by their
+// own walls and shoot over them (rebuilt as a whole: the Grid has no remove)
 function siegeGrid() {
   const S = G.siege, a = new Grid(6), m = new Grid(6);
   for (const o of S.objs) if (o.alive) { const c = { x: o.x, z: o.z, r: o.r }; a.add(c); m.add(c); }
-  for (const u of S.units) if (u.alive && !CFG.siege.towers[u.b.t].trap) { const c = { x: u.x, z: u.z, r: u.r }; m.add(c); if (u.b.t !== 'gate') a.add(c); }
+  for (const u of S.units) if (u.alive && !CFG.siege.towers[u.b.t].trap) { const c = { x: u.x, z: u.z, r: u.r }; m.add(c); if (!CFG.siege.towers[u.b.t].wall) a.add(c); }
   S.mobGrid = m; G.siegeObstacles = a; G.obstacles = a; return a;
 }
 // the monsters' map: walking cost from every cell to the nearest living objective. A building costs its path value to
@@ -11155,7 +11171,7 @@ function resize() {
 // from the depth buffer, quantizes the colours and draws it to a small canvas that the browser
 // scales up by a whole number of device pixels with hard edges. Cheaper than full-res rendering too.
 const Pixel = {
-  rt: null, mat: null, scene: null, cam: null, w: 2, h: 2, scale: 1, active: false,
+  rt: null, mat: null, scene: null, cam: null, w: 2, h: 2, scale: 1, active: false, fine: false,
   enabled() { return !(G.profile && G.profile.settings.pixel === false); },
   init() {
     if (this.mat) return;
@@ -11203,7 +11219,9 @@ const Pixel = {
     this.init();
     const dpr = window.devicePixelRatio || 1, wd = Math.round(w * dpr), hd = Math.round(h * dpr);
     // whole-number scale in device pixels so every art pixel is the same size
-    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr); // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
+    // the fort shows a wide field of small buildings from far up: about 1.6x the art pixels there, so it stays readable
+    this.fine = typeof G !== 'undefined' && !!G.siege;
+    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr) * (this.fine ? 1.6 : 1); // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
     this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target));
     this.w = Math.ceil(wd / this.scale); this.h = Math.ceil(hd / this.scale);
     renderer.setPixelRatio(1); renderer.setSize(this.w, this.h, false);
@@ -11219,6 +11237,7 @@ const Pixel = {
     renderer.info.autoReset = false; renderer.info.reset(); // count both world and pixel post passes
     matGround.userData.u.uTime.value = performance.now() / 1000 % 3600; // the ground's clouds, wind and lava (44-world-view.js)
     if (!this.active) { if (Post.on()) Post.render(); else renderer.render(scene, camera); return; }
+    if (this.fine !== !!G.siege) resize(); // entering or leaving the fort
     this.mat.uniforms.near.value = camera.near; this.mat.uniforms.far.value = camera.far;
     renderer.setRenderTarget(this.rt); renderer.render(scene, camera);
     renderer.setRenderTarget(null); renderer.render(this.scene, this.cam);
@@ -12564,8 +12583,6 @@ function updateTags() {
       for (const o of G.siege.objs) put(o.x, o.def.h, o.z, o.alive ? `${o.name} · ${Math.ceil(clamp(o.hp / o.maxHp, 0, 1) * 100)}%` : `${o.name} · destroyed`, o.alive ? o.hp / o.maxHp : 0, `obj${o.def.main ? ' main' : ''}${o.hurtT > 0 ? ' hurt' : ''}${o.alive ? '' : ' down'}`);
       for (const s of G.siege.soldiers) if (s.alive && s.hp < s.maxHp && near(s, 26)) put(s.x, 2.4, s.z, '', s.hp / s.maxHp, 'ally');
       for (const u of G.siege.units) if (u.alive && u.hp < u.maxHp && near(u, 26)) put(u.x, u.size === 1 ? 2.2 : 3.6, u.z, '', u.hp / u.maxHp, 'ally');
-      // a full-enough mill or mine shows what it holds (tap it in builder mode, or walk up, to collect)
-      for (const u of G.siege.units) { const T = CFG.siege.towers[u.b.t]; if (T.make && u.alive) { const n = fortMade(u.b); if (n >= Math.max(1, T.rate * u.b.l * 0.25)) put(u.x, 4.4, u.z, `+${fmtK(n)} ${CFG.siege.resName[T.make]}`, null, `fortRes ${T.make}${n >= T.cap * u.b.l ? ' full' : ''}`); } }
     }
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
@@ -12582,6 +12599,46 @@ function updateTags() {
     for (const gl of hubParts.gateLabels) { const zn = CFG.world.zones[gl.zone]; if (G.profile.level < zn.minLevel && Math.hypot(gl.x - cx, gl.z - cz) < 60) put(gl.x, gl.y, gl.z, `${zn.name} · Level ${zn.minLevel}`, null, 'gate'); }
   }
   for (let i = n; i < TAG_MAX; i++) if (!tagPool[i].el.hidden) tagPool[i].el.hidden = true;
+  updateFortBubbles();
+}
+
+// --- Bastion: Clash of Clans collect bubbles ---
+// A mill or mine with a good amount in it (a quarter of what it holds) shows a bobbing bubble with its resource over the
+// building; one tap collects it, while walking around or in builder mode. Full ones glow.
+const FORT_BUB_MAX = 16, fortBubs = [];
+function fortCollectUnit(u) {
+  const T = CFG.siege.towers[u.b.t], n = fortMade(u.b); if (!T.make || n < 1) return false;
+  const why = fortDo({ o: 'col', k: fortState().b.indexOf(u.b) });
+  if (why) { toast(why, 'bad'); return false; }
+  Sfx.play('coin'); toast(`+${fmtK(n)} ${CFG.siege.resName[T.make].toLowerCase()}`, 'good');
+  burst(u.x, 2, u.z, 14, T.make === 'wood' ? 0xc8884a : T.make === 'iron' ? 0xb8c8da : 0xcfcac0, 4, 0.6, 0.25, 4, 1);
+  if (G.builder) { builderHud(); builderShop(); }
+  return true;
+}
+function fortBubbleAt(u) { const T = CFG.siege.towers[u.b.t]; if (!T.make || !u.alive) return 0; const n = fortMade(u.b); return n >= Math.max(1, T.rate * u.b.l * 0.25) ? n : 0; }
+function updateFortBubbles() {
+  const layer = $('fortBubs'); if (!layer) return;
+  let n = 0;
+  if (G.siege && G.started && !G.modal && !Showcase.on) for (const u of G.siege.units) {
+    if (n >= FORT_BUB_MAX) break;
+    const amt = fortBubbleAt(u); if (!amt) continue;
+    const s = project(u.x, u.size === 1 ? 3 : 4.6, u.z); if (!s || s[0] < -40 || s[0] > window.innerWidth + 40 || s[1] < -40 || s[1] > window.innerHeight + 40) continue;
+    let b = fortBubs[n];
+    if (!b) {
+      const el = document.createElement('button'); el.type = 'button'; el.className = 'fbub'; el.hidden = true;
+      el.innerHTML = '<span class="fbIc"></span><b></b>'; layer.appendChild(el);
+      b = fortBubs[n] = { el, ic: el.firstChild, txt: el.lastChild, u: null, res: '', amt: -1, full: null };
+      el.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); if (b.u && fortCollectUnit(b.u)) { el.classList.add('pop'); setTimeout(() => el.classList.remove('pop'), 260); } });
+    }
+    n++;
+    const T = CFG.siege.towers[u.b.t], full = amt >= T.cap * u.b.l;
+    b.u = u; b.el.hidden = false;
+    b.el.style.transform = `translate(${Math.round(s[0])}px, ${Math.round(s[1])}px) translate(-50%, -100%)`;
+    if (b.res !== T.make) { b.res = T.make; b.ic.innerHTML = ICON[T.make === 'stones' ? 'stone' : T.make]; b.el.className = 'fbub ' + T.make; b.full = null; }
+    if (b.full !== full) { b.full = full; b.el.classList.toggle('full', full); }
+    if (b.amt !== amt) { b.amt = amt; b.txt.textContent = fmtK(amt); b.el.setAttribute('aria-label', `Collect ${amt} ${CFG.siege.resName[T.make].toLowerCase()}`); }
+  }
+  for (let i = n; i < fortBubs.length; i++) if (!fortBubs[i].el.hidden) { fortBubs[i].el.hidden = true; fortBubs[i].u = null; }
 }
 
 // --- toasts / banners ---
@@ -16578,11 +16635,7 @@ function builderTap(x, y) {
   const k = CFG.siege.objs[0]; if (Math.hypot(g.x - SC.x - k.x, g.z - SC.z - k.z) < k.r) { openFortKeepPanel(); return; }
   const u = S.units.find((q) => Math.abs(q.x - g.x) < q.size + 0.2 && Math.abs(q.z - g.z) < q.size + 0.2); if (!u) return;
   const T = CFG.siege.towers[u.b.t];
-  if (T.make && fortMade(u.b) >= 1) { // Clash of Clans: a tap on a mill or mine with something in it collects it
-    const n = fortMade(u.b), why = fortDo({ o: 'col', k: fortState().b.indexOf(u.b) });
-    if (why) toast(why, 'bad'); else { Sfx.play('coin'); toast(`+${fmtK(n)} ${CFG.siege.resName[T.make].toLowerCase()}`, 'good'); burst(u.x, 2, u.z, 14, T.make === 'wood' ? 0xc8884a : T.make === 'iron' ? 0xb8c8da : 0xcfcac0, 4, 0.6, 0.25, 4, 1); builderHud(); builderShop(); }
-    return;
-  }
+  if (T.make && fortMade(u.b) >= 1) { fortCollectUnit(u); return; } // Clash of Clans: a tap on a mill or mine with something in it collects it
   openFortBPanel(S.units.indexOf(u));
 }
 // the shop strip (the open tab): a sideways swipe scrolls it, a drag up out of it carries the building onto the field

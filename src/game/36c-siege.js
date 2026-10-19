@@ -60,9 +60,9 @@ CFG.siege = {
     hut: { name: "Builder's Hut", short: 'Builder', icon: 'm_smith', maxLvl: 1, each: true, c: [12, 8], hp: 8,
       lim: [2, 2, 3, 3, 3, 4, 4, 5, 5, 5], blurb: 'One builder each. More huts, more upgrades at the same time.' },
     wall: { name: 'Wall', short: 'Wall', icon: 'n_armor', c: [1, 0], hp: 5, path: 6, wall: true,
-      lim: [30, 50, 75, 100, 130, 160, 200, 250, 300, 400], blurb: 'Drag a straight line of walls. Wood, stone from level 6, iron from level 11.' },
+      lim: [30, 50, 75, 100, 130, 160, 200, 250, 300, 400], blurb: 'Drag a straight line of walls. Monsters must go round or break them; your heroes step over. Wood, stone from level 6, iron from level 11.' },
     gate: { name: 'Gate', short: 'Gate', icon: 'm_portal', c: [3, 1], hp: 5, path: 6, wall: true,
-      lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'A wall heroes walk through and monsters have to break.' },
+      lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'A sturdy door in your wall line that monsters have to break.' },
     // traps: monsters walk over them (they never block a path, flyers pass over); r: reach from the trap's centre
     spike: { name: 'Spike Trap', short: 'Spikes', icon: 'a_reaper', trap: true, r: 1.5, cd: 2.2, dmg: 1.4, c: [2, 2], hp: 1,
       lim: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], blurb: 'Spikes shoot up under every monster on it, then reset after a moment.' },
@@ -173,11 +173,12 @@ function siegeLayout() {
   for (const q of S.soldiers) S.src.set(q.id, q.u.st);
   siegeGrid(); S.flowDirty = true;
 }
-// keep, wagons and living buildings are solid; gates only for monsters (rebuilt as a whole: the Grid has no remove)
+// keep, wagons and living buildings are solid; walls and gates only for monsters, so heroes never get boxed in by their
+// own walls and shoot over them (rebuilt as a whole: the Grid has no remove)
 function siegeGrid() {
   const S = G.siege, a = new Grid(6), m = new Grid(6);
   for (const o of S.objs) if (o.alive) { const c = { x: o.x, z: o.z, r: o.r }; a.add(c); m.add(c); }
-  for (const u of S.units) if (u.alive && !CFG.siege.towers[u.b.t].trap) { const c = { x: u.x, z: u.z, r: u.r }; m.add(c); if (u.b.t !== 'gate') a.add(c); }
+  for (const u of S.units) if (u.alive && !CFG.siege.towers[u.b.t].trap) { const c = { x: u.x, z: u.z, r: u.r }; m.add(c); if (!CFG.siege.towers[u.b.t].wall) a.add(c); }
   S.mobGrid = m; G.siegeObstacles = a; G.obstacles = a; return a;
 }
 // the monsters' map: walking cost from every cell to the nearest living objective. A building costs its path value to

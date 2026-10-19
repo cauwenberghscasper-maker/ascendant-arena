@@ -128,6 +128,16 @@ check('walls: monsters walk around an open wall, and break the cheapest piece of
   c.siegeHitBuilding(hit, hit.hp + 1); assert(!hit.alive); assert(at(hit.b.x, hit.b.z) < 30, 'the broken piece opens the way');
   void F; c.endSiege('leave');
 });
+check('walls and gates stop monsters, not heroes: a hero walks through a wall line, a monster is pushed back', () => {
+  reset(40, 1e12, 1e6); assert(c.startSiege()); const S = c.G.siege;
+  for (let x = -3; x <= 3; x++) assert.equal(c.fortDo({ o: 'add', t: 'wall', x, z: 10 }), '', 'wall ' + x);
+  const w = S.units.filter((u) => u.b.t === 'wall'); assert.equal(w.length, 7);
+  assert(!c.G.obstacles.list.some((o) => w.some((u) => o.x === u.x && o.z === u.z)), 'walls are not solid for heroes');
+  assert(S.mobGrid.list.some((o) => w.some((u) => o.x === u.x && o.z === u.z)), 'walls are solid for monsters');
+  const u = w[3], hero = { x: u.x, z: u.z + 0.2, r: 0.55 }; c.collideObstacles(hero); assert(Math.abs(hero.z - (u.z + 0.2)) < 1e-9, 'the hero stays where he stepped');
+  const mob = { x: u.x, z: u.z + 0.2, r: 0.55 }; c.siegeCollide(mob); assert(Math.hypot(mob.x - u.x, mob.z - u.z) >= u.r + 0.5, 'a monster is pushed out');
+  c.endSiege('leave');
+});
 check('traps: monsters walk over them; spikes hit and reset, a keg blows once per wave and comes back, tar slows and burns', () => {
   reset(40, 1e12, 1e6); assert(c.startSiege()); const S = c.G.siege, F = c.fortState();
   const free = (() => { if (S.flowDirty) c.siegeFlow(); return S.dist[c.siegeIdx(0, 12)]; })();

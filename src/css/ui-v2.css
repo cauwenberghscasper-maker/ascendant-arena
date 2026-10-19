@@ -761,7 +761,21 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .fortPath small { font-size: 11px; line-height: 1.25; color: inherit; opacity: .85; white-space: normal; } .fortPath.primary small { color: #2a1800; }
 @media (max-width: 360px) { .fortPaths { grid-template-columns: 1fr; } }
 .fortLimits .row { justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
-.tag.fortRes .tn { font: 12px/1 var(--body); color: #fff4d6; background: rgba(20,14,10,.8); border: 2px solid var(--og-ink, #120a03); padding: 3px 6px; border-radius: 6px; animation: fortBob 1.2s ease-in-out infinite alternate; }
-.tag.fortRes.wood .tn { color: #f0c890; } .tag.fortRes.iron .tn { color: #cfe0f4; } .tag.fortRes.full .tn { border-color: #ffe08a; }
+/* Bastion collect bubbles (60-hud.js updateFortBubbles): Clash of Clans style, tap to collect; above the builder layer */
+#fortBubs { position: absolute; inset: 0; z-index: 31; pointer-events: none; overflow: hidden; }
+.fbub { position: absolute; left: 0; top: 0; pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; will-change: transform;
+  min-width: 48px; min-height: 48px; padding: 0; background: none; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.fbub .fbIc { position: relative; width: 40px; height: 40px; display: grid; place-items: center; background: #f3ead2; border: 3px solid var(--og-ink, #120a03);
+  border-radius: 50% 50% 50% 50% / 46% 46% 54% 54%; box-shadow: inset 0 -4px 0 #cbbd98, inset 0 3px 0 #fffaf0, 0 3px 0 rgba(0,0,0,.35); animation: fortBob 0.9s ease-in-out infinite alternate; }
+.fbub .fbIc::after { content: ''; position: absolute; left: 50%; bottom: -9px; width: 10px; height: 10px; margin-left: -5px; background: #cbbd98;
+  border-right: 3px solid var(--og-ink, #120a03); border-bottom: 3px solid var(--og-ink, #120a03); transform: rotate(45deg); z-index: -1; }
+.fbub .fbIc .ic { width: 26px; height: 26px; image-rendering: pixelated; }
+.fbub b { margin-top: 7px; font: 12px/1 var(--body); color: #fff4d6; background: rgba(20,14,10,.85); border: 2px solid var(--og-ink, #120a03); padding: 2px 5px; border-radius: 5px; white-space: nowrap; }
+.fbub.wood .fbIc { background: #f6e3c2; } .fbub.iron .fbIc { background: #e2ebf4; box-shadow: inset 0 -4px 0 #a9b9c9, inset 0 3px 0 #ffffff, 0 3px 0 rgba(0,0,0,.35); }
+.fbub.iron .fbIc::after { background: #a9b9c9; } .fbub.wood .fbIc::after { background: #d9bf94; }
+.fbub.full .fbIc { border-color: #5a3a00; box-shadow: inset 0 -4px 0 #cbbd98, inset 0 3px 0 #fffaf0, 0 0 0 2px #ffe08a, 0 0 14px rgba(255,214,90,.85); animation: fortBob 0.9s ease-in-out infinite alternate, fbubGlow 0.9s ease-in-out infinite alternate; }
+.fbub.full b { color: #ffe08a; }
+.fbub:active .fbIc, .fbub.pop .fbIc { transform: scale(1.18); animation: none; }
+@keyframes fbubGlow { from { filter: brightness(1); } to { filter: brightness(1.15); } }
 @keyframes fortBob { from { transform: translateY(0); } to { transform: translateY(-4px); } }
 #fortChip { color: #c9cbe8; letter-spacing: .06em; } #fortChip.on { color: #1b1300; background: linear-gradient(180deg,#9fe0a0,#4aa860); }

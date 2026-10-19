@@ -89,8 +89,6 @@ function updateTags() {
       for (const o of G.siege.objs) put(o.x, o.def.h, o.z, o.alive ? `${o.name} · ${Math.ceil(clamp(o.hp / o.maxHp, 0, 1) * 100)}%` : `${o.name} · destroyed`, o.alive ? o.hp / o.maxHp : 0, `obj${o.def.main ? ' main' : ''}${o.hurtT > 0 ? ' hurt' : ''}${o.alive ? '' : ' down'}`);
       for (const s of G.siege.soldiers) if (s.alive && s.hp < s.maxHp && near(s, 26)) put(s.x, 2.4, s.z, '', s.hp / s.maxHp, 'ally');
       for (const u of G.siege.units) if (u.alive && u.hp < u.maxHp && near(u, 26)) put(u.x, u.size === 1 ? 2.2 : 3.6, u.z, '', u.hp / u.maxHp, 'ally');
-      // a full-enough mill or mine shows what it holds (tap it in builder mode, or walk up, to collect)
-      for (const u of G.siege.units) { const T = CFG.siege.towers[u.b.t]; if (T.make && u.alive) { const n = fortMade(u.b); if (n >= Math.max(1, T.rate * u.b.l * 0.25)) put(u.x, 4.4, u.z, `+${fmtK(n)} ${CFG.siege.resName[T.make]}`, null, `fortRes ${T.make}${n >= T.cap * u.b.l ? ' full' : ''}`); } }
     }
     for (const e of G.enemies) if (e.alive && !e.hidden && near(e, 26) && (e.state !== 'idle' || e.hp < e.maxHp || near(e, 14) || e.elite)) {
       const h = ({ imp: 2.6, fireimp: 2.6, wolf: 2.1, wraith: 3.0, beetle: 1.7, boar: 1.9, spider: 1.5, yeti: 3.0, sentinel: 3.2, crawler: 1.7, drowned: 3.0, seraph: 3.0, warden: 3.4 })[e.type] * (e.elite ? 1.45 : 1) || 1.8;
@@ -107,6 +105,46 @@ function updateTags() {
     for (const gl of hubParts.gateLabels) { const zn = CFG.world.zones[gl.zone]; if (G.profile.level < zn.minLevel && Math.hypot(gl.x - cx, gl.z - cz) < 60) put(gl.x, gl.y, gl.z, `${zn.name} · Level ${zn.minLevel}`, null, 'gate'); }
   }
   for (let i = n; i < TAG_MAX; i++) if (!tagPool[i].el.hidden) tagPool[i].el.hidden = true;
+  updateFortBubbles();
+}
+
+// --- Bastion: Clash of Clans collect bubbles ---
+// A mill or mine with a good amount in it (a quarter of what it holds) shows a bobbing bubble with its resource over the
+// building; one tap collects it, while walking around or in builder mode. Full ones glow.
+const FORT_BUB_MAX = 16, fortBubs = [];
+function fortCollectUnit(u) {
+  const T = CFG.siege.towers[u.b.t], n = fortMade(u.b); if (!T.make || n < 1) return false;
+  const why = fortDo({ o: 'col', k: fortState().b.indexOf(u.b) });
+  if (why) { toast(why, 'bad'); return false; }
+  Sfx.play('coin'); toast(`+${fmtK(n)} ${CFG.siege.resName[T.make].toLowerCase()}`, 'good');
+  burst(u.x, 2, u.z, 14, T.make === 'wood' ? 0xc8884a : T.make === 'iron' ? 0xb8c8da : 0xcfcac0, 4, 0.6, 0.25, 4, 1);
+  if (G.builder) { builderHud(); builderShop(); }
+  return true;
+}
+function fortBubbleAt(u) { const T = CFG.siege.towers[u.b.t]; if (!T.make || !u.alive) return 0; const n = fortMade(u.b); return n >= Math.max(1, T.rate * u.b.l * 0.25) ? n : 0; }
+function updateFortBubbles() {
+  const layer = $('fortBubs'); if (!layer) return;
+  let n = 0;
+  if (G.siege && G.started && !G.modal && !Showcase.on) for (const u of G.siege.units) {
+    if (n >= FORT_BUB_MAX) break;
+    const amt = fortBubbleAt(u); if (!amt) continue;
+    const s = project(u.x, u.size === 1 ? 3 : 4.6, u.z); if (!s || s[0] < -40 || s[0] > window.innerWidth + 40 || s[1] < -40 || s[1] > window.innerHeight + 40) continue;
+    let b = fortBubs[n];
+    if (!b) {
+      const el = document.createElement('button'); el.type = 'button'; el.className = 'fbub'; el.hidden = true;
+      el.innerHTML = '<span class="fbIc"></span><b></b>'; layer.appendChild(el);
+      b = fortBubs[n] = { el, ic: el.firstChild, txt: el.lastChild, u: null, res: '', amt: -1, full: null };
+      el.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); if (b.u && fortCollectUnit(b.u)) { el.classList.add('pop'); setTimeout(() => el.classList.remove('pop'), 260); } });
+    }
+    n++;
+    const T = CFG.siege.towers[u.b.t], full = amt >= T.cap * u.b.l;
+    b.u = u; b.el.hidden = false;
+    b.el.style.transform = `translate(${Math.round(s[0])}px, ${Math.round(s[1])}px) translate(-50%, -100%)`;
+    if (b.res !== T.make) { b.res = T.make; b.ic.innerHTML = ICON[T.make === 'stones' ? 'stone' : T.make]; b.el.className = 'fbub ' + T.make; b.full = null; }
+    if (b.full !== full) { b.full = full; b.el.classList.toggle('full', full); }
+    if (b.amt !== amt) { b.amt = amt; b.txt.textContent = fmtK(amt); b.el.setAttribute('aria-label', `Collect ${amt} ${CFG.siege.resName[T.make].toLowerCase()}`); }
+  }
+  for (let i = n; i < fortBubs.length; i++) if (!fortBubs[i].el.hidden) { fortBubs[i].el.hidden = true; fortBubs[i].u = null; }
 }
 
 // --- toasts / banners ---

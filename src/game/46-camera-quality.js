@@ -268,7 +268,7 @@ function resize() {
 // from the depth buffer, quantizes the colours and draws it to a small canvas that the browser
 // scales up by a whole number of device pixels with hard edges. Cheaper than full-res rendering too.
 const Pixel = {
-  rt: null, mat: null, scene: null, cam: null, w: 2, h: 2, scale: 1, active: false,
+  rt: null, mat: null, scene: null, cam: null, w: 2, h: 2, scale: 1, active: false, fine: false,
   enabled() { return !(G.profile && G.profile.settings.pixel === false); },
   init() {
     if (this.mat) return;
@@ -316,7 +316,9 @@ const Pixel = {
     this.init();
     const dpr = window.devicePixelRatio || 1, wd = Math.round(w * dpr), hd = Math.round(h * dpr);
     // whole-number scale in device pixels so every art pixel is the same size
-    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr); // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
+    // the fort shows a wide field of small buildings from far up: about 1.6x the art pixels there, so it stays readable
+    this.fine = typeof G !== 'undefined' && !!G.siege;
+    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr) * (this.fine ? 1.6 : 1); // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
     this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target));
     this.w = Math.ceil(wd / this.scale); this.h = Math.ceil(hd / this.scale);
     renderer.setPixelRatio(1); renderer.setSize(this.w, this.h, false);
@@ -332,6 +334,7 @@ const Pixel = {
     renderer.info.autoReset = false; renderer.info.reset(); // count both world and pixel post passes
     matGround.userData.u.uTime.value = performance.now() / 1000 % 3600; // the ground's clouds, wind and lava (44-world-view.js)
     if (!this.active) { if (Post.on()) Post.render(); else renderer.render(scene, camera); return; }
+    if (this.fine !== !!G.siege) resize(); // entering or leaving the fort
     this.mat.uniforms.near.value = camera.near; this.mat.uniforms.far.value = camera.far;
     renderer.setRenderTarget(this.rt); renderer.render(scene, camera);
     renderer.setRenderTarget(null); renderer.render(this.scene, this.cam);

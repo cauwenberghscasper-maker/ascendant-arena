@@ -1,3 +1,14 @@
+# Bastion: walk over your walls, sharper fort, tap-to-collect bubbles (19 Oct 2026, on `main`)
+Casper (phone screenshot): couldn't walk through walls placed next to each other; the fort looked too pixelated; resources
+gave no sign they could be collected; cannons and archer towers don't match the vibe.
+- **Walls:** walls (like gates already) only stop monsters now; heroes walk and shoot over them (`siegeGrid`). Check added.
+- **Sharper fort:** the pixel pass renders ~1.6x the art pixels while in the fort (`Pixel.fine`, 46-camera-quality.js;
+  iPhone 390 px wide: 585 art px instead of 390). Adaptive quality still lowers it on slow phones.
+- **Collect bubbles:** mills and mines holding a quarter of their cap show a Clash of Clans bubble (resource icon + amount,
+  bobbing, gold glow when full) over the building; one tap collects, while walking or in builder mode
+  (`updateFortBubbles`/`fortCollectUnit` in 60-hud.js, `#fortBubs` above the builder layer). Replaces the old text tags.
+- **Open:** new archer tower and cannon models in the camp's hand-painted look (see the next entry when done).
+
 # Dungeons: echo puzzle and stuck gate fixed, harder runs (19 Oct 2026, branch `claude/dungeon-puzzle-fixes`)
 Casper: the memorise puzzle was bugged; when solved it said the gate opened but it didn't; more enemies, more puzzles.
 - **Gate that never opened:** a wrong seal's pack used slots `50 + fails*5`, which ran past 99 into the next hall's

@@ -114,11 +114,7 @@ function builderTap(x, y) {
   const k = CFG.siege.objs[0]; if (Math.hypot(g.x - SC.x - k.x, g.z - SC.z - k.z) < k.r) { openFortKeepPanel(); return; }
   const u = S.units.find((q) => Math.abs(q.x - g.x) < q.size + 0.2 && Math.abs(q.z - g.z) < q.size + 0.2); if (!u) return;
   const T = CFG.siege.towers[u.b.t];
-  if (T.make && fortMade(u.b) >= 1) { // Clash of Clans: a tap on a mill or mine with something in it collects it
-    const n = fortMade(u.b), why = fortDo({ o: 'col', k: fortState().b.indexOf(u.b) });
-    if (why) toast(why, 'bad'); else { Sfx.play('coin'); toast(`+${fmtK(n)} ${CFG.siege.resName[T.make].toLowerCase()}`, 'good'); burst(u.x, 2, u.z, 14, T.make === 'wood' ? 0xc8884a : T.make === 'iron' ? 0xb8c8da : 0xcfcac0, 4, 0.6, 0.25, 4, 1); builderHud(); builderShop(); }
-    return;
-  }
+  if (T.make && fortMade(u.b) >= 1) { fortCollectUnit(u); return; } // Clash of Clans: a tap on a mill or mine with something in it collects it
   openFortBPanel(S.units.indexOf(u));
 }
 // the shop strip (the open tab): a sideways swipe scrolls it, a drag up out of it carries the building onto the field
