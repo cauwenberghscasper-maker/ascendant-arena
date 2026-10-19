@@ -1,3 +1,14 @@
+# Dungeon bots survive hard difficulties (19 Oct 2026, branch `claude/dungeon-bot-power`, PR to main)
+Casper: on higher difficulties the bots died very fast. Cause: monster damage grows with the dungeon's level (difficulty
+adds +2…+28 levels, Ascendant more) and the difficulty's damage multiplier, while bots only had the party's level, no
+gear and no difficulty bonus (Ascendant 2: a bot went down in ~6 average hits). `delveBotScale` now gives a bot the
+stats of a level-L hero in level-L Rare gear (L = the dungeon's level or the party's average if higher), HP × the
+difficulty's monster damage, damage × their HP, and two floors from the run's own average monster (`delveMobRef`):
+survive `hits` (18) of its hits, kill one in at most `shots` (25). The level shown stays the party's average; base
+stats are re-applied only when that level moves (keeps ammo). Bots are now made after the run's monsters spawn.
+Measured: Normal→Ascendant 2 a bot takes 5800→18 hits (was 3800→6). Tested on Ascendant 2: bots alive at 96-100% after
+12 s of fighting, revive works. Open: tune `hits`/`shots` from real play.
+
 # Bastion: no more stuck monsters, Remove mode, Build button (19 Oct 2026, on `main`)
 Casper (phone screenshot): open-world monsters wandered the fort and could not be killed; wants an easy edit mode to
 delete buildings (all at once) and easier access to building mode.
