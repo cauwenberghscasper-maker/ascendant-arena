@@ -1,3 +1,8 @@
+# Bastion: buildings blend into the ground (19 Oct 2026, on `main`)
+Casper: buildings should stand on a tile that blends in with the background. The hard square stone tile with a coloured
+rim under every building is now a soft patch of trodden earth with a few worn cobbles that fades into the meadow or the
+courtyard (`siegeTileTextures`, 47c-siege-view.js). Only a building under construction keeps a soft gold glow.
+
 # Dungeon bots no longer die in the first halls on hard difficulties (19 Oct 2026, branch `claude/dungeon-bots-hard`, PR to main)
 Casper: bots still died in the first room on higher difficulties. A full-hall fight test (hero not attacking) showed
 bots holding Mythic → Ascendant 5 halls fine, so the killer was elsewhere: the **spike hall** and **puzzle fail
