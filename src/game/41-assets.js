@@ -30,6 +30,8 @@ const GENERATED_ASSETS = {
   'enemy.wolf': {"dir": "assets/enemy/wolf/", "tris": 7139, "kb": 641, "size": 1.75, "glow": 1.0, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'enemy.wraith': {"dir": "assets/enemy/wraith/", "tris": 6997, "kb": 550, "size": 2.3, "glow": 1.5, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
   'enemy.yeti': {"dir": "assets/enemy/yeti/", "tris": 19788, "kb": 1135, "size": 2.6, "source": "TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 4 Oct 2026"},
+  'enemy.siegelord': {"dir": "assets/enemy/siegelord/", "tris": 10993, "kb": 936, "size": 2.6, "glow": 1.2, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 19 Oct 2026"},
+  'enemy.siegecaptain': {"dir": "assets/enemy/siegecaptain/", "tris": 10906, "kb": 836, "size": 2.1, "glow": 1.2, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 19 Oct 2026"},
   'enemy.toad': {"dir": "assets/enemy/toad/", "tris": 8999, "kb": 704, "size": 1.35, "glow": 1.3, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
   'enemy.bat': {"dir": "assets/enemy/bat/", "tris": 8910, "kb": 640, "size": 1.7, "glow": 1.4, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},
   'enemy.hornet': {"dir": "assets/enemy/hornet/", "tris": 8965, "kb": 604, "size": 1.45, "glow": 1.2, "source": "TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, 18 Oct 2026"},

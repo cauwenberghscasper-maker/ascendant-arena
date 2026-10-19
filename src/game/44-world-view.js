@@ -437,6 +437,8 @@ function buildHub() {
     { tree: 'blossom', trees: 150, rocks: 50, rockC: [0xf4efe2, 0xe3d8bd, 0xd8cfb8], tufts: 900, tuftC: [0xf7e7b5, 0xfff8e6], flowers: 200, flowerC: [0xffffff, 0xffd36b, 0xffb3c7], bushes: 160, logs: 8, fungi: 40, fungiC: [0xfff3c4], glowCaps: true, ruins: 5, flies: 70, ponds: 0 },
   ];
   const THEME_LEAF = [P2.roundLeaf, P2.pine, P2.snowPine, [0x3a2a24, 0x4a3328], [0x433d70, 0x534a86], [0x1f5a63, 0x2a7078], [0xd9c48f, 0xe8d3a3]];
+  // the landmark at the heart of a ruin circle: a clan totem in the snow, a reading lectern in the arcane ruins, a sun lantern on the celestial terraces
+  const RUIN_HEART = { 2: ['clan_totem', 4.6], 4: ['arcane_lectern', 2.3], 6: ['sun_lantern', 3.3] };
   const THEME_RUIN = [0x7d786c, 0x7d786c, 0xaab8c4, 0x4a3a34, 0x5b5390, 0x2f5560, 0xe3d8bd];
   const TREE_TOP = { round: 'roundLeaf', pine: 'pine', snowPine: 'snowPine', dead: 'deadTree', crystal: 'crystal', coral: 'coral', blossom: 'blossom' };
   const lava = [], WK = (W.maxX - W.minX) / 260 * 0.8; // counts were tuned for a 260 m wide map; v10 is a bit more open per m²
@@ -503,6 +505,7 @@ function buildHub() {
         else blocks.push({ x: x + rng() - 0.5, z: z + rng() - 0.5, s: 0.7 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
       }
       for (let q = 0; q < 4; q++) blocks.push({ x: c.x + (rng() - 0.5) * rad, z: c.z + (rng() - 0.5) * rad, s: 0.4 + rng() * 0.4, c: stoneC, ry: rng() * 6 });
+      const heart = RUIN_HEART[th]; if (heart && hasWM(heart[0])) { mput(heart[0], { x: c.x, z: c.z, ry: rng() * 6.283, s: heart[1] }); grid.add({ x: c.x, z: c.z, r: 0.9 }); }
     }
     const rot = (it) => (it.ry != null ? it.ry : hashf(it.x, it.z) * 6);
     if (hasWM('bush_a')) bushes.forEach((b, i) => mput(hasWM('bush_flower') && (th === 0 || th === 6) && i % 3 === 0 ? 'bush_flower' : 'bush_a', { x: b.x, z: b.z, ry: rot(b), s: 1.5 * b.s, color: soft(b.c, 0.35) }, { far: 100, shadow: false }));
