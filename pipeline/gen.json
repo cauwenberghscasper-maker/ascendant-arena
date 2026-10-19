@@ -1,5 +1,5 @@
 {
- "batch": "models-3d-b",
+ "batch": "models-3d-mats",
  "jobs": [
   {
    "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
@@ -15,7 +15,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_abyssal.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -34,7 +34,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_arcdust.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -53,7 +53,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_copper.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -72,7 +72,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_emberscale.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -91,7 +91,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_frostfang.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -110,7 +110,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_glacial.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -129,7 +129,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_iron.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -148,7 +148,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_magma.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -167,7 +167,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_mithril.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -186,7 +186,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_obsidian.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -205,7 +205,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_pearl.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -224,7 +224,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_solar.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -243,7 +243,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_starfeather.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -262,7 +262,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_starsteel.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -281,7 +281,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_thornhide.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -300,7 +300,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_tidal.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -319,7 +319,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_titansoul.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -338,7 +338,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_verdant.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
@@ -357,159 +357,7 @@
    "args": {
     "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_void.webp",
     "resolution": "1024",
-    "decimation_target": 30000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "siege_banner",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/queue-b-concepts/siege_banner.png",
-    "resolution": "1024",
-    "decimation_target": 60000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "siege_captain",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/queue-b-concepts/siege_captain.png",
-    "resolution": "1024",
-    "decimation_target": 60000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "siege_hut2",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/queue-b-concepts/siege_hut2.png",
-    "resolution": "1024",
-    "decimation_target": 60000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "siege_lord",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/queue-b-concepts/siege_lord.png",
-    "resolution": "1024",
-    "decimation_target": 60000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "siege_supplycart",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/queue-b-concepts/siege_supplycart.png",
-    "resolution": "1024",
-    "decimation_target": 60000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "world_lectern",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/queue-b-concepts/world_lectern.png",
-    "resolution": "1024",
-    "decimation_target": 60000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "world_sunlantern",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/queue-b-concepts/world_sunlantern.png",
-    "resolution": "1024",
-    "decimation_target": 60000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "world_totem",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/queue-b-concepts/world_totem.png",
-    "resolution": "1024",
-    "decimation_target": 60000,
+    "decimation_target": 50000,
     "texture_size": 1024,
     "seed": 7
    }
