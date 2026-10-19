@@ -99,7 +99,7 @@ function dungeonGrid(D) {
   const C = CFG.dungeon, g = new Grid(6), r = C.wallR;
   for (const w of D.walls) { const n = Math.max(1, Math.ceil(Math.hypot(w.x1 - w.x0, w.z1 - w.z0) / (r * 1.6))); for (let k = 0; k <= n; k++) g.add({ x: lerp(w.x0, w.x1, k / n), z: lerp(w.z0, w.z1, k / n), r }); }
   for (const q of D.props || []) g.add({ x: q.x, z: q.z, r: q.r }); // pillars in party-dungeon halls
-  for (const d of D.doors) if (!d.open) for (let k = -3; k <= 3; k++) { const o = (k / 3) * d.w; g.add(d.ax === 'x' ? { x: d.x + o, z: d.z, r: 0.6 } : { x: d.x, z: d.z + o, r: 0.6 }); }
+  for (const d of [...D.doors, ...(D.secrets || [])]) if (!d.open) for (let k = -3; k <= 3; k++) { /* gates and party-dungeon cracked walls */ const o = (k / 3) * d.w; g.add(d.ax === 'x' ? { x: d.x + o, z: d.z, r: 0.6 } : { x: d.x, z: d.z + o, r: 0.6 }); }
   G.dungeonObstacles = g; if (G.dungeon === D) G.obstacles = g;
   return g;
 }
@@ -113,7 +113,7 @@ function dungeonClamp(f, r) {
     if (d < bd) { bd = d; best = { x, z }; }
   };
   const p = CFG.dungeon.wallR;
-  for (const m of D.rooms) { test(m.x0 + r + p, m.x1 - r - p, m.z0 + r + p, m.z1 - r - p); if (bd === 0) return; }
+  for (const m of D.side ? [...D.rooms, ...D.side] : D.rooms) { test(m.x0 + r + p, m.x1 - r - p, m.z0 + r + p, m.z1 - r - p); if (bd === 0) return; }
   // corridors shrink only across their width and reach into both rooms, so junctions have no dead strip
   for (const c of D.cors) { if (c.ax === 'z') test(c.x0 + r + p, c.x1 - r - p, c.z0 - 2, c.z1 + 2); else test(c.x0 - 2, c.x1 + 2, c.z0 + r + p, c.z1 - r - p); if (bd === 0) return; }
   if (best) { f.x = best.x; f.z = best.z; }

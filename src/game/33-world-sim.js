@@ -559,7 +559,7 @@ function stepEnemy(e, dt) {
   const homeD = Math.hypot(e.x - e.hx, e.z - e.hz);
   let mx = 0, mz = 0, sp = 0;
   if (e.state === 'idle') {
-    if (e.wanderT <= 0) { const wr = e.den != null ? 3 : 6; e.wx = e.hx + rand(-wr, wr); e.wz = e.hz + rand(-wr, wr); e.wanderT = rand(2, 5); }
+    if (e.wanderT <= 0) { const wr = e.wr || (e.den != null ? 3 : 6); /* e.wr: a dungeon patroller's wide loop */ e.wx = e.hx + rand(-wr, wr); e.wz = e.hz + rand(-wr, wr); e.wanderT = rand(2, 5); }
     const dx = e.wx - e.x, dz = e.wz - e.z, dd = Math.hypot(dx, dz);
     if (dd > 0.5) { mx = dx / dd; mz = dz / dd; sp = d.speed * 0.35; }
     if (!plSafe && (dp < d.aggro || (e.lastHurt > G.time - 1 && dp < d.aggro * 2))) e.state = 'chase';

@@ -1,3 +1,24 @@
+# Dungeons: fuller halls, mid-late game, 7 puzzle kinds, side rooms (19 Oct 2026, branch `claude/dungeon-explore`, PR to main)
+Casper: still empty, enemies spawn close together, not enough enemies, dungeons should be mid-late game, more puzzles,
+extra rooms to explore.
+- **Clumps fixed:** ranged monsters near a pillar all snapped to the same spot behind it (stacked). Now one per pillar,
+  and only if the spot is free; the spacing fallback never goes below ~4.5 m (a full hall takes fewer). Check: no two
+  monsters start closer than 4.4 m in any hall.
+- **More monsters:** one per 95 m² (6-16 a hall); event halls are guarded too (they were empty: a third of a run had no
+  fight); a captain (elite) at the back of full halls; ~20% of melee monsters patrol a wide loop (`e.wr`, used by
+  `stepEnemy`'s wander). Event monsters (goblin, echo, mimic) moved to slots 95-97 so they never collide with guards.
+- **Mid-late game:** `CFG.delve.unlock` 60; each dungeon has its own level (`lvl`: 60/72/88/108/135/170), opens there.
+- **Puzzles:** 7 kinds now (`CFG.delve.puzzle.kinds`): + the twins (pairs, a miss only hides them again), the wisp
+  (catch it 3-4 times; it hops on a seeded path, faster each catch, clock restarts on each catch so phones resync),
+  the riddle (mural shows one rune a round; wrong = bite). Bots chase the wisp, help the riddle like the mural.
+- **Side rooms** (`CFG.delve.side`, `D.side`, `D.secrets`): 2-5 per run off middle halls (ids 100+, their monsters use
+  slots 100xx with `e.room` = the parent hall so bots treat them like it), 45% behind a cracked wall (an obstacle like
+  a gate; "Smash the Cracked Wall" opens it for the party via 'dsec'). Kinds: treasure (3 guards, your own bonus
+  chest), champion's den (elite champion + 2 guards, chest + gems), hidden vein (2 guards, a rare vein, 20% motherlode).
+- Checks: `tools/check_delve.cjs` now 19 (clumps, side rooms overlap/reach/secret/sync, twins/wisp/riddle rules).
+- **Open:** a full big hall draws ~1.5M triangles with the monster models (performance pass on monster LODs); balance
+  at the new levels on a phone; the side rooms could use their own props later.
+
 # Bastion: walk over your walls, sharper fort, tap-to-collect bubbles (19 Oct 2026, on `main`)
 Casper (phone screenshot): couldn't walk through walls placed next to each other; the fort looked too pixelated; resources
 gave no sign they could be collected; cannons and archer towers don't match the vibe.

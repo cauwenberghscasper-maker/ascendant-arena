@@ -18,7 +18,7 @@ vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp ='
   section('class Grid {', '// --- entities') + section('function patrolCountFor(', 'function rewardEnemyKill(') + section('const PELLET_COLORS', '// --- hub step') +
   section('function separate(', '// --- world boss') + section('// --- world boss', 'function spawnBoss(') + section('function boundFighter(', '// --- progression') +
   section('// --- Dungeons:', '// --- end dungeons') + section('// --- Dungeon mode', '// --- end dungeon mode') + section('// Dungeon bots:', '// --- end dungeon bots') + section('// Dungeon bosses fight with', '// --- end delve boss') +
-  '\nthis.CFG = CFG; this.Grid = Grid; this.DC = DC; this.DV = DV; this.SET_SLOTS = SET_SLOTS; Object.assign(this, { delveOpen, delveTop, delveOn, delveDef, inInstance, delveLayout, delveInteract, delveUse, delvePzRecv, delvePzMask, delveBossTick, delveBossRecv, delveBossPool, BK });', c);
+  '\nthis.CFG = CFG; this.Grid = Grid; this.DC = DC; this.DV = DV; this.SET_SLOTS = SET_SLOTS; Object.assign(this, { delveOpen, delveTop, delveOn, delveDef, inInstance, delveLayout, delveInteract, delveUse, delvePzRecv, delvePzMask, delvePzWisp, delveSecretRecv, delveBossTick, delveBossRecv, delveBossPool, BK });', c);
 const DV = c.DV, defs = DV.dungeons;
 DV.bots.on = false; // these checks run real-player parties; the bots (36d-delve-bots.js) need the full fighter code and are checked in the browser
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }
@@ -42,11 +42,16 @@ const killAll = (D) => { for (const e of D.mobs) e.alive = false; };
 // balance the set of seals whose flips turn the start into all lit (found by trying every set)
 function solution(m) {
   const pz = m.pz, K = pz.sw.length; if (pz.kind === 'order' || pz.kind === 'memory') return pz.order; if (pz.kind === 'timed') return pz.sw.map((_, j) => j);
+  if (pz.kind === 'match') return pz.order.slice(0, pz.need);
+  if (pz.kind === 'pairs') { const by = {}; pz.sw.forEach((q, j) => (by[q.g] = by[q.g] || []).push(j)); return Object.values(by).flat(); }
+  if (pz.kind === 'wisp') return 'wisp';
   for (let set = 0; set < 1 << K; set++) { let b = pz.start; for (let j = 0; j < K; j++) if ((set >> j) & 1) b ^= c.delvePzMask(K, j); if (b === pz.all) return pz.sw.map((_, j) => j).filter((j) => (set >> j) & 1); }
   throw Error('balance puzzle without a solution');
 }
 // a hero watches the echo's light show to the end before walking (the seals don't listen while it plays)
-function walkSeals(D, m, order) { const pl = c.G.player; for (let k = 0; k < 1200 && c.delvePzShow(m, D.delve.pz[m.i]) != null; k++) c.stepDungeon(1 / 60); for (const j of order) { Object.assign(pl, m.pz.sw[j]); for (let k = 0; k < 45; k++) c.stepDungeon(1 / 60); Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); } }
+function walkSeals(D, m, order) { const pl = c.G.player; for (let k = 0; k < 1200 && c.delvePzShow(m, D.delve.pz[m.i]) != null; k++) c.stepDungeon(1 / 60);
+  if (order === 'wisp') { for (let k = 0; k < 6000 && !(D.delve.pz[m.i] && D.delve.pz[m.i].done); k++) { const S = D.delve.pz[m.i]; if (S) Object.assign(pl, m.pz.sw[c.delvePzWisp(m, S)]); c.stepDungeon(1 / 60); } return; }
+  for (const j of order) { Object.assign(pl, m.pz.sw[j]); for (let k = 0; k < 45; k++) c.stepDungeon(1 / 60); Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); } }
 
 check('layouts: same seed same dungeon, mixed hall shapes, no overlaps, events only in middle rooms and never twice', () => {
   const shapes = new Set(), evs = new Set();
@@ -236,6 +241,13 @@ check('puzzle kinds: every run has two (three from Heroic) different ones; the e
         for (let i = 0; i < (m.pz.clock + 1) * 60; i++) c.stepDungeon(1 / 60); assert(S().bits === 0 && S().fails === 1, 'the clock runs out: reset and a bite');
         for (let i = 0; i < 200; i++) c.stepDungeon(1 / 60);
       }
+      if (k === 'pairs') { const by = {}; m.pz.sw.forEach((q, j) => (by[q.g] = by[q.g] || []).push(j)); assert(Object.values(by).every((v) => v.length === 2), 'every rune has one twin');
+        const g = Object.values(by), a0 = g[0][0], b0 = g[1][0]; walkSeals(D, m, [a0]); assert.equal(S().step, a0 + 1, 'the first seal opens');
+        walkSeals(D, m, [b0]); assert(S().step === 0 && S().bits === 0 && S().peek && S().fails === 1, 'not twins: both hide again'); assert(!m.mobs.some((e) => e.alive), 'a miss is never punished');
+        walkSeals(D, m, g[0]); assert.equal(S().bits, (1 << g[0][0]) | (1 << g[0][1]), 'twins stay lit'); }
+      if (k === 'wisp') { assert(m.pz.seq.every((j, i) => !i || j !== m.pz.seq[i - 1]), 'never the same seal twice'); const w0 = c.delvePzWisp(m, S()); const other = (w0 + 1) % K; walkSeals(D, m, [other]); assert.equal(S().step, 0, 'a seal without the wisp does nothing');
+        for (let i = 0; i < 400 && S().step < 1; i++) { Object.assign(pl, m.pz.sw[c.delvePzWisp(m, S())]); c.stepDungeon(1 / 60); } assert.equal(S().step, 1, 'caught once'); assert(S().t < 0.2, 'its clock restarts on a catch'); }
+      if (k === 'match') { const wrong = m.pz.order.find((j) => j !== m.pz.order[0]); walkSeals(D, m, [m.pz.order[0]]); assert.equal(S().step, 1, 'round 1 answered'); walkSeals(D, m, [m.pz.order[2] !== undefined ? m.pz.order[2] : wrong]); assert.equal(S().fails, 1, 'a wrong rune bites back'); for (let i = 0; i < 200; i++) c.stepDungeon(1 / 60); }
       if (k === 'toggle') { assert(S().bits !== m.pz.all, 'starts unsolved'); const b0 = S().bits; walkSeals(D, m, [0]); assert.equal(S().bits, b0 ^ c.delvePzMask(K, 0), 'a seal flips itself and both neighbours'); walkSeals(D, m, [0]); assert.equal(S().bits, b0); assert.equal(S().fails, 0, 'no wrong move here'); }
       walkSeals(D, m, solution(m)); assert(S().done, k + ' solved'); c.stepDungeon(1 / 60); c.stepDungeon(1 / 60); assert(D.doors[m.i].open, k + ' opens its gate');
       // another phone: the newest state wins, an equal one from a lower session id too
@@ -244,9 +256,9 @@ check('puzzle kinds: every run has two (three from Heroic) different ones; the e
       c.endDungeon('leave'); reset(); c.startDelve(def.id, di, sd * 3571, 1);
     }
     c.endDungeon('leave');
-    if (['order', 'memory', 'timed', 'toggle'].every((k) => seen[k] >= 2)) break;
+    if (Object.keys(DV.puzzle.kinds).every((k) => seen[k] >= 2)) break;
   }
-  assert(['order', 'memory', 'timed', 'toggle'].every((k) => seen[k] >= 1), 'all four kinds show up: ' + JSON.stringify(seen)); delete c.partySend;
+  assert(Object.keys(DV.puzzle.kinds).length === 7 && Object.keys(DV.puzzle.kinds).every((k) => seen[k] >= 1), 'all seven kinds show up: ' + JSON.stringify(seen)); delete c.partySend;
 });
 check('boss kit: each phase unlocks two more attacks, casts come faster; every phone plays the same cast', () => {
   const shots = []; const real = c.spawnProjectile; c.spawnProjectile = (o) => shots.push(o); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d);
@@ -273,14 +285,50 @@ check('rare veins: from the seed (same on every phone), never in the start, puzz
   for (let sd = 1; sd <= 200; sd++) {
     const di = sd % 5, L = c.delveLayout(sd * 911, defs[sd % 6], di), L2 = c.delveLayout(sd * 911, defs[sd % 6], di); runs++;
     assert.equal(JSON.stringify(L.veins), JSON.stringify(L2.veins));
-    if (L.veins.length) withVein++; for (const v of L.veins) { const m = L.rooms[v.room]; assert(m.i > 0 && !m.boss && !m.pz && c.inRoom(m, v.x, v.z)); if (v.lode) lodes++; }
+    const hv = L.veins.filter((v) => !v.side); if (hv.length) withVein++; for (const v of L.veins) { const m = v.side ? L.side.find((o) => o.i === v.room) : L.rooms[v.room]; assert(m && (m.side || (m.i > 0 && !m.boss && !m.pz)) && c.inRoom(m, v.x, v.z)); if (v.lode) lodes++; }
   }
   assert(withVein > runs * 0.3 && withVein < runs * 0.95, 'veins are a find, not a given: ' + withVein + '/' + runs);
-  let sd = 1; for (; !c.delveLayout(sd * 911, defs[0], 2).veins.length; sd++);
-  reset(); c.startDelve(defs[0].id, 2, sd * 911, 1); const D = c.G.dungeon, v = D.veins[0], pl = c.G.player;
+  let sd = 1; for (; !c.delveLayout(sd * 911, defs[0], 2).veins.some((v) => !v.side); sd++);
+  reset(); c.startDelve(defs[0].id, 2, sd * 911, 1); const D = c.G.dungeon, v = D.veins.find((q) => !q.side), pl = c.G.player;
   Object.assign(pl, { x: v.x, z: v.z }); const it = c.delveInteract(pl); assert.equal(it.kind, 'delveVein');
   assert(c.delveUse('delveVein', it.room)); assert.equal(got[0][0], defs[0].gem.id); assert(got[0][1] >= 1); assert.equal(c.delveUse('delveVein', it.room), null, 'once per hero');
   assert.notEqual((c.delveInteract(pl) || {}).kind, 'delveVein'); c.endDungeon('leave'); delete c.addMats;
+});
+check('no clumps: in every hall the monsters start at least 4.5 m apart (pillar cover too), full halls have a captain and patrols', () => {
+  let caps = 0, pats = 0, worst = 99;
+  for (let sd = 1; sd <= 60; sd++) {
+    reset(); c.startDelve(defs[sd % 6].id, sd % 5, sd * 2711, 1); const D = c.G.dungeon;
+    for (const m of D.rooms) { if (m.boss) continue; const ms = m.mobs.filter((e) => e.alive && !e.mini);
+      for (let i = 0; i < ms.length; i++) for (let j = i + 1; j < ms.length; j++) { const d = Math.hypot(ms[i].x - ms[j].x, ms[i].z - ms[j].z); worst = Math.min(worst, d); assert(d >= 4.4, `hall ${m.i} (${m.shape}) has two monsters ${d.toFixed(1)} m apart`); }
+      caps += ms.filter((e) => e.captain).length; pats += ms.filter((e) => e.wr).length; }
+    c.endDungeon('leave');
+  }
+  assert(caps > 20 && pats > 20, 'captains ' + caps + ', patrollers ' + pats);
+});
+check('side rooms: off middle halls, never overlapping, reachable (cracked walls smash open for the whole party), chests wait for their guards', () => {
+  const sent = []; c.partySend = (e, P) => sent.push([e, P]); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d); let total = 0, secret = 0; const kinds = {};
+  for (let sd = 1; sd <= 40; sd++) {
+    const di = sd % 5, L = c.delveLayout(sd * 4099, defs[sd % 6], di), all = [...L.rooms, ...L.side];
+    assert(L.side.length >= 1, 'side rooms in run ' + sd); total += L.side.length; secret += L.secrets.length;
+    for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) { const a = all[i], b = all[j]; assert(!(a.x0 < b.x1 && a.x1 > b.x0 && a.z0 < b.z1 && a.z1 > b.z0), 'side room overlaps a hall'); }
+    for (const m of L.side) { kinds[m.kind] = 1; const p = L.rooms[m.parent]; assert(p.i > 0 && !p.boss); }
+  }
+  assert(total > 80 && secret > 15 && secret < total, `side ${total}, secret ${secret}`); assert(kinds.treasure && kinds.den && kinds.vein);
+  // a run: walk in (all gates and cracked walls open) and reach every side room; a cracked wall blocks until smashed
+  let sd = 1; for (; !c.delveLayout(sd * 4099, defs[1], 2).secrets.length; sd++);
+  reset(); c.startDelve(defs[1].id, 2, sd * 4099, 1); const D = c.G.dungeon, X = D.delve, pl = c.G.player;
+  for (const d of D.doors) d.open = true; c.dungeonGrid(D); const shut = reach(D); const q = D.secrets[0], hid = D.side[q.side];
+  assert(!shut(hid), 'a cracked wall seals its room');
+  Object.assign(pl, { x: q.x - (q.ax === 'z' ? Math.sign(q.x - D.rooms[hid.parent].x) * 1.5 : 0), z: q.z - (q.ax === 'x' ? Math.sign(q.z - D.rooms[hid.parent].z) * 1.5 : 0) });
+  const it = c.delveInteract(pl); assert.equal(it.kind, 'delveSecret'); assert(c.delveUse('delveSecret', it.room)); assert(sent.some(([e, P]) => e === 'dsec' && P.i === it.room), 'the party hears it');
+  for (const k of D.secrets) k.open = true; c.dungeonGrid(D); const ok = reach(D); for (const m of D.side) assert(ok(m), 'side room ' + m.i + ' reachable');
+  // the treasure / den chest waits for its guards; then each hero opens their own once
+  const tm = D.side.find((m) => m.kind !== 'vein');
+  if (tm) { Object.assign(pl, { x: tm.x, z: tm.z }); assert.notEqual((c.delveInteract(pl) || {}).kind, 'delveTreasure', 'guards first');
+    for (const e of tm.mobs) e.alive = false; const t2 = c.delveInteract(pl); assert.equal(t2.kind, 'delveTreasure'); assert(c.delveUse('delveTreasure', t2.room)); assert.equal(c.delveUse('delveTreasure', t2.room), null); }
+  c.endDungeon('leave');
+  // another phone gets the wall open from the message
+  reset(); c.startDelve(defs[1].id, 2, sd * 4099, 1); c.delveSecretRecv({ dr: c.G.dungeon.delve.seed, i: 0 }); assert(c.G.dungeon.secrets[0].open); c.endDungeon('leave'); delete c.partySend;
 });
 check('gates: the first game to see a room done tells the party, and every game opens that gate at once', () => {
   const sent = []; c.partySend = (event, P) => sent.push([event, P]); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d);
@@ -293,7 +341,7 @@ check('gates: the first game to see a room done tells the party, and every game 
   reset(); c.startDelve(defs[0].id, 1, 4242, 2); const D2 = c.G.dungeon, m2 = D2.rooms[0]; sent.length = 0;
   c.delveDoorRecv({ dr: D2.delve.seed + 1, i: 0 }); assert(!D2.doors[0].open, 'another run is ignored');
   c.delveDoorRecv(msg[1]); assert(D2.doors[0].open && m2.cleared && m2.mobs.every((e) => !e.alive), 'gate opens, stale monsters go');
-  c.stepDungeon(1 / 60); assert(!m2.mobs.some((e) => e.alive), 'no new wave after a remote open'); assert(!sent.some(([e]) => e === 'ddoor'), 'no echo back');
+  c.stepDungeon(1 / 60); assert(!m2.mobs.some((e) => e.alive), 'no new wave after a remote open'); assert(!sent.some(([e, P]) => e === 'ddoor' && P.i === 0), 'no echo back of the gate it heard about');
   c.delveDoorRecv({ dr: D2.delve.seed, i: 1 }); assert(D2.doors[1].open); c.delveDoorRecv({ dr: D2.delve.seed, i: 999 }); assert(D2.doors.every((d) => d.open), 'a late message opens every gate before it');
   delete c.partySend; c.endDungeon('leave');
 });
