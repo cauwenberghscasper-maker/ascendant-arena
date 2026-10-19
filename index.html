@@ -2181,6 +2181,11 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .fbub:active .fbIc, .fbub.pop .fbIc { transform: scale(1.18); animation: none; }
 @keyframes fbubGlow { from { filter: brightness(1); } to { filter: brightness(1.15); } }
 @keyframes fortBob { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+/* the fort's Build button under the HUD chips, and the builder's Remove mode */
+#bdTop #bdHint { order: 4; position: static; transform: none; flex: 0 1 auto; margin: 0 auto; max-width: 100%; pointer-events: none; }
+#fortBuildBtn { min-height: 44px; padding: 0 16px; font: 15px/1 var(--body); letter-spacing: .06em; color: #2a1800; background: linear-gradient(#ffe08a, #c99a3a); border: 2px solid var(--og-ink, #120a03); border-radius: 8px; box-shadow: 0 2px 0 #120a03, 0 0 10px rgba(255,224,138,.35); margin-left: 6px; }
+#bdDel.on { background: linear-gradient(#e06a5a, #8a2418) !important; color: #fff4d6; box-shadow: 0 0 0 2px #ffb3a6, 0 2px 0 #120a03; }
+#bdAll { background: linear-gradient(#7a3a30, #401a14) !important; } #bdAll.arm { background: linear-gradient(#ff5a44, #a01c10) !important; color: #fff; animation: fbubGlow .5s ease-in-out infinite alternate; }
 #fortChip { color: #c9cbe8; letter-spacing: .06em; } #fortChip.on { color: #1b1300; background: linear-gradient(180deg,#9fe0a0,#4aa860); }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
@@ -2279,7 +2284,7 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
         <div class="chips"><span class="chip"><span id="hGoldIc"></span><span id="hGold">0</span></span><span class="chip"><span id="hEssIc"></span><span id="hEss">0</span></span><span class="chip"><span id="hTrophIc"></span><span id="hTroph">0</span></span></div>
         <div id="zoneChip" hidden></div>
         <div id="prestigeHud" class="prestigeBadge" hidden></div>
-        <div class="chipRow"><div id="mpChip" hidden></div><div id="caseChip" class="hchip" hidden></div><div id="autoChip" class="hchip" hidden></div><div id="pvpChip" class="hchip" hidden></div><div id="fortChip" class="hchip" hidden></div></div>
+        <div class="chipRow"><div id="mpChip" hidden></div><div id="caseChip" class="hchip" hidden></div><div id="autoChip" class="hchip" hidden></div><div id="pvpChip" class="hchip" hidden></div><div id="fortChip" class="hchip" hidden></div><button id="fortBuildBtn" class="hchip" hidden>BUILD</button></div>
       </div>
     </div>
     <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -2332,8 +2337,7 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
     <div id="coach" hidden><span id="coachText"></span><button id="coachX" aria-label="Hide tips">×</button></div>
     <div id="fortBubs"></div>
     <div id="builder" hidden>
-      <div id="bdTop"><button id="bdDone">Done</button><span id="bdWaveInfo"></span><button id="bdHold" hidden>Pause waves</button><button id="bdWave">Start wave</button><span id="bdInfo"></span></div>
-      <div id="bdHint"></div>
+      <div id="bdTop"><button id="bdDone">Done</button><button id="bdDel">Remove</button><button id="bdAll" hidden>Remove all</button><span id="bdWaveInfo"></span><button id="bdHold" hidden>Pause waves</button><button id="bdWave">Start wave</button><span id="bdInfo"></span><div id="bdHint"></div></div>
       <div id="bdPlace" hidden><button id="bdCancel">Cancel</button><button id="bdOk">Place</button></div>
       <div id="bdShop"><div id="bdTabs"></div><div id="bdList"></div></div>
     </div>
@@ -5454,6 +5458,8 @@ function separate(a, b) {
 const bodyMass = (e) => { const M = CFG.enemies.mass; return e.kind === 'enemy' ? (M[(CFG.enemies[e.type] || {}).kit || 'legacy'] || 1) * (e.elite ? M.elite : 1) : M.player; };
 function stepEnemy(e, dt) {
   if (e.siege) { stepSiegeEnemy(e, dt); return; } // Bastion Siege monsters go for the fort (36b-siege.js)
+  if (inInstance() && !e.rift && !e.dungeon && !e.delve && !e.own) { parkHubEnemy(e); return; } // open-world monsters wait at home while you are in the fort, Rift or a dungeon
+  e.parked = false;
   if ((e.mirror || e.hidden) && moveUpkeep(e, dt)) return;
   if (!e.alive) { if (e.rift || e.dungeon) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
   if (HeroSupers.tickStatus(e, dt)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); e.moveAmt = 0; return; } // stunned / banished by a hero super
@@ -5580,6 +5586,19 @@ function cloudPull(c, dt) {
 }
 const outOfTown = (e, x, z) => e.rift || inInstance() || distToTown(x, z) > CFG.world.town.r + 2;
 // a dropped or finished move: resurface a burrowed monster, stop a spiral
+// An open-world monster sent home while its hero is inside an instance (fort, Rift, dungeon). Before this, a monster mid-pounce
+// or mid-burrow (or a blinking elite) followed the hero's jump into the fort, then tried to walk ~2 km home while healing
+// 30% a second: it wandered the fort, towers ignored it and it could not be killed.
+function parkHubEnemy(e) {
+  if (e.parked) return;
+  e.parked = true;
+  if (e.mirror) { e.alive = false; G.enemies = G.enemies.filter((x) => x !== e); G.ents.delete(e.id); return; }
+  if (e.mv) moveEnd(e);
+  if (e.champ) { e.champ.cast = null; e.champ.castT = 0; e.champ.blink = null; }
+  e.hidden = false; e.invulnT = 0; e.windT = 0; e.lungeT = 0; e.burnT = 0; e.slowT = 0; e.state = 'idle'; e.moveAmt = 0;
+  if (e.hx != null) { e.x = e.hx; e.z = e.hz; }
+  if (e.alive) { e.hp = e.maxHp; e.tagged = false; }
+}
 function moveEnd(e) { const M = e.mv; M.k = null; M.spinT = 0; e.windT = 0; e.windK = null; if (e.hidden) { e.hidden = false; e.invulnT = 0; } }
 // mirror copies fade with their elite or after a while; a burrowed monster whose move stopped running resurfaces
 function moveUpkeep(e, dt) {
@@ -7989,7 +8008,8 @@ function siegeInteract(pl) {
   if (near(C.exit, C.interactR)) return { kind: 'siegeLeave', label: 'Leave Fort' };
   const kp = C.objs[0]; if (near(kp, kp.r + 1.6)) return { kind: 'fortKeep', label: `The Keep · Lv ${fortState().keep || 1}` };
   let best = 1.4, hit = null;
-  for (const u of S.units) { const d = Math.hypot(pl.x - u.x, pl.z - u.z) - u.r; if (d < best) { best = d; hit = u; } }
+  for (const u of S.units) { const T = C.towers[u.b.t]; if ((T.wall || T.trap) && !fortMade(u.b)) continue; // walls and traps you tweak in builder mode; walking past them keeps Build on the button
+    const d = Math.hypot(pl.x - u.x, pl.z - u.z) - u.r; if (d < best) { best = d; hit = u; } }
   if (hit) { const b = hit.b, T = C.towers[b.t], m = fortMade(b);
     return { kind: 'fortB', k: S.units.indexOf(hit), label: m > 0 ? `${T.short} · take ${m} ${C.resName[T.make].toLowerCase()}` : `${T.short}${T.maxLvl === 1 ? '' : ' Lv ' + b.l}${b.d > fortNow() ? ' · building' : ''}` }; }
   return { kind: 'fortBuild', label: 'Build' };
@@ -12830,9 +12850,10 @@ function updateHUD(dt) {
     const nc = G.profile.cases.length; setHidden('caseChip', !nc); if (nc) setText('caseChip', String(nc));
     UI.caseFlash = Math.max(0, (UI.caseFlash || 0) - dt); $('caseChip').classList.toggle('flash', UI.caseFlash > 0);
     setHidden('autoChip', G.mode !== 'hub' || !!G.rift || !!G.siege); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
+    setHidden('fortBuildBtn', !G.siege || !!G.builder);
     { const F = G.siege && fortState(); setHidden('fortChip', !F || !F.go); if (F && F.go) { setText('fortChip', F.hold ? 'WAVES PAUSED' : 'AUTO WAVES'); $('fortChip').classList.toggle('on', !F.hold); } }
     setHidden('pvpChip', G.mode !== 'hub' || inInstance()); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
-  } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); setHidden('fortChip', true); }
+  } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); setHidden('fortChip', true); setHidden('fortBuildBtn', true); }
   $('bMenu').classList.toggle('newU', G.started && Object.keys(UNLOCK_AT).some(unlockNew)); // the menu button glows while something new is unopened
   { const n = mpCount(), on = G.started && !inArena; setHidden('mpChip', !on || !n); if (on && n) setText('mpChip', String(n + 1)); }
   const stk = G.streak >= 3 && !inArena;
@@ -16661,10 +16682,10 @@ function openBuilder() {
   siegeGridOverlay(true); builderShop(); builderHud();
 }
 function closeBuilder() {
-  G.builder = null; BD.ptrs.clear(); BD.down = BD.pinch = BD.line = BD.shop = null; BD.ghost = false;
+  G.builder = null; BD.allT = 0; BD.ptrs.clear(); BD.down = BD.pinch = BD.line = BD.shop = null; BD.ghost = false;
   $('builder').hidden = true; document.body.classList.remove('builderOn'); siegeGridOverlay(false);
 }
-function builderSelect(t) { const B = G.builder; if (!B) return; B.move = null; B.line = null; B.sel = B.sel === t ? null : t; B.cell = null; builderShop(); builderHud(); }
+function builderSelect(t) { const B = G.builder; if (!B) return; B.del = false; BD.allT = 0; B.move = null; B.line = null; B.sel = B.sel === t ? null : t; B.cell = null; builderShop(); builderHud(); }
 // from a building's panel: pick it up and put it somewhere else (free)
 function builderMove(b) { if (!G.builder) openBuilder(); const B = G.builder; if (!B) return; B.move = b; B.sel = b.t; B.cat = bdCatOf(b.t); B.cell = [b.x, b.z]; B.line = null; builderShop(); builderHud(); }
 // the shop: what each costs, how many the Keep allows (3/5), and which Keep level unlocks one you cannot have yet
@@ -16685,10 +16706,13 @@ function builderHud() {
   const B = G.builder, S = G.siege; if (!B || !S) return;
   const F = fortState(), M = myFort(), T = B.sel ? CFG.siege.towers[B.sel] : null, L = B.line;
   $('bdInfo').innerHTML = `Keep ${F.keep || 1} · ${fortJobs(F)}/${fortBuilders(F)} builders · ${fortHave(M)}`;
-  $('bdHint').innerHTML = L ? `${L.cells.length} ${T.short.toLowerCase()}${L.cells.length === 1 ? '' : 's'} · ${fortResHTML(L.cost, M)} · let go to build`
+  $('bdDel').classList.toggle('on', !!B.del); $('bdAll').hidden = !B.del;
+  if (B.del) { const n = F.b.length; $('bdAll').textContent = BD.allT > performance.now() ? `Tap again: tear down ${n}` : 'Remove all'; $('bdAll').classList.toggle('arm', BD.allT > performance.now()); }
+  $('bdHint').innerHTML = B.del ? 'Tap or swipe buildings to tear them down (half back) · two fingers move'
+    : L ? `${L.cells.length} ${T.short.toLowerCase()}${L.cells.length === 1 ? '' : 's'} · ${fortResHTML(L.cost, M)} · let go to build`
     : B.move ? `Moving the ${T.short}: tap or drag where it goes` : !T ? 'Drag something up from the shop, or tap a building'
     : T.wall ? `Drag a straight line of ${T.short.toLowerCase()}s` : `Drag the ${T.short} where it goes, then Place`;
-  $('bdPlace').hidden = !(B.sel && B.cell && !(T && T.wall && !B.move));
+  $('bdPlace').hidden = !!B.del || !(B.sel && B.cell && !(T && T.wall && !B.move));
   // waves: the first one waits for Start; after that they come by themselves unless paused
   $('bdWave').textContent = !F.go ? `Start wave ${S.wave}` : 'Start now'; $('bdWave').hidden = S.phase !== 'build';
   $('bdHold').hidden = !F.go; $('bdHold').textContent = F.hold ? 'Resume waves' : 'Pause waves'; $('bdHold').classList.toggle('on', !!F.hold);
@@ -16753,6 +16777,7 @@ function builderTap(x, y) {
     if (B.cell && B.cell[0] === c[0] && B.cell[1] === c[1]) builderConfirm(); else { B.cell = c; builderHud(); }
     return;
   }
+  if (B.del) { builderRemoveAt(x, y); return; }
   const g = builderGround(x, y); if (!g) return;
   const k = CFG.siege.objs[0]; if (Math.hypot(g.x - SC.x - k.x, g.z - SC.z - k.z) < k.r) { openFortKeepPanel(); return; }
   const u = S.units.find((q) => Math.abs(q.x - g.x) < q.size + 0.2 && Math.abs(q.z - g.z) < q.size + 0.2); if (!u) return;
@@ -16771,7 +16796,7 @@ function builderShopMove(e) {
   const dx = e.clientX - P.x0, dy = e.clientY - P.y0, el = $('bdList');
   if (!P.mode) {
     if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) P.mode = 'scroll';
-    else if (dy < -14 && -dy > Math.abs(dx)) { P.mode = 'drag'; B.move = null; B.line = null; B.sel = P.t; B.cell = null; builderShop(); }
+    else if (dy < -14 && -dy > Math.abs(dx)) { P.mode = 'drag'; B.del = false; B.move = null; B.line = null; B.sel = P.t; B.cell = null; builderShop(); }
   }
   if (P.mode === 'scroll') { const now = performance.now(); P.vx = (e.clientX - P.lx) / Math.max(1, now - P.lt); P.lx = e.clientX; P.lt = now; el.scrollLeft = P.sl - dx; }
   else if (P.mode === 'drag') {
@@ -16794,14 +16819,33 @@ function builderShopUp(e) {
     else { const w = g && g.length ? fortCheck(g[0].op) || fortShortWhy(g[0].op) : ''; if (w) toast(w, 'bad'); builderHud(); } // the red preview stays to be moved
   }
 }
+// Remove mode: the building under the finger is torn down at once (half its cost back, like the panel's Tear down)
+function builderUnitAt(x, y) { const g = builderGround(x, y); if (!g) return null; return G.siege.units.find((q) => Math.abs(q.x - g.x) < q.size + 0.2 && Math.abs(q.z - g.z) < q.size + 0.2) || null; }
+function builderRemoveAt(x, y, quiet) {
+  const u = builderUnitAt(x, y); if (!u) return false;
+  const F = fortState(), k = F.b.indexOf(u.b); if (k < 0) return false;
+  const why = fortDo({ o: 'del', k });
+  if (why) { if (!quiet || why !== BD.lastWhy) toast(why, 'bad'); BD.lastWhy = why; return false; }
+  Sfx.play('click'); burst(u.x, 1, u.z, 10, 0xcfc4ae, 4, 0.5, 0.25, 3, 1); builderHud(); return true;
+}
+// Remove all: a second tap within 4 s tears down every building the rules allow (your last builder stays)
+function builderRemoveAll() {
+  const B = G.builder; if (!B) return;
+  if (!(BD.allT > performance.now())) { BD.allT = performance.now() + 4000; builderHud(); setTimeout(() => G.builder && builderHud(), 4100); return; }
+  BD.allT = 0; const F = fortState(); let n = 0, why = '';
+  for (let k = F.b.length - 1; k >= 0; k--) { const r = fortDo({ o: 'del', k }); if (r) why = r; else n++; } // from the end, so every index stays right
+  if (n) { Sfx.play('unlock'); showToast(`Tore down ${n} building${n === 1 ? '' : 's'} · half the cost back`); } else if (why) toast(why, 'bad');
+  builderShop(); builderHud();
+}
 function builderInit() {
   const el = $('builder'), ui = (e) => e.target.closest('#bdTop, #bdShop, #bdPlace');
   el.addEventListener('pointerdown', (e) => {
     if (!G.builder || G.modal || ui(e)) return;
     e.preventDefault(); el.setPointerCapture(e.pointerId); BD.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (BD.ptrs.size === 2) { const [a, b] = [...BD.ptrs.values()]; BD.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: G.builder.zoom }; BD.down = null; BD.line = null; G.builder.line = null; BD.ghost = false; return; }
+    if (BD.ptrs.size === 2) { const [a, b] = [...BD.ptrs.values()]; BD.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: G.builder.zoom, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; BD.down = null; BD.line = null; G.builder.line = null; BD.ghost = false; return; }
     BD.down = { x: e.clientX, y: e.clientY, moved: false };
     const B = G.builder, T = B.sel && CFG.siege.towers[B.sel];
+    if (B.del) { BD.lastWhy = ''; return; }
     if (T && T.wall && !B.move) { const c = builderCell(e.clientX, e.clientY, B.sel); if (c) { BD.line = { a: c, key: '' }; builderLineMove(e.clientX, e.clientY); } return; }
     // a press on the preview (or anywhere near it) drags the preview instead of the camera
     BD.ghost = false;
@@ -16810,11 +16854,17 @@ function builderInit() {
   el.addEventListener('pointermove', (e) => {
     const P = BD.ptrs.get(e.pointerId), B = G.builder; if (!P || !B) return;
     const px = P.x, py = P.y; P.x = e.clientX; P.y = e.clientY;
-    if (BD.pinch && BD.ptrs.size === 2) { const [a, b] = [...BD.ptrs.values()]; B.zoom = clamp(BD.pinch.z * BD.pinch.d / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y)), 0.9, 3.4); return; }
+    if (BD.pinch && BD.ptrs.size === 2) {
+      const [a, b] = [...BD.ptrs.values()], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2; B.zoom = clamp(BD.pinch.z * BD.pinch.d / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y)), 0.9, 3.4);
+      const g0 = builderGround(BD.pinch.mx, BD.pinch.my), g1 = builderGround(mx, my); BD.pinch.mx = mx; BD.pinch.my = my; // two fingers also move the map
+      if (g0 && g1) { const h = G.siege.half; B.cx = clamp(B.cx - (g1.x - g0.x), SC.x - h, SC.x + h); B.cz = clamp(B.cz - (g1.z - g0.z), SC.z - h, SC.z + h); }
+      return;
+    }
     if (!BD.down) return;
     if (BD.line) { builderLineMove(e.clientX, e.clientY); return; }
     if (!BD.down.moved && Math.hypot(e.clientX - BD.down.x, e.clientY - BD.down.y) < 9) return;
     BD.down.moved = true;
+    if (B.del) { builderRemoveAt(e.clientX, e.clientY, true); return; } // remove mode: one finger sweeps buildings away
     if (BD.ghost) { const c = builderCell(e.clientX, e.clientY, B.sel); if (c && (c[0] !== B.cell[0] || c[1] !== B.cell[1])) { B.cell = c; builderHud(); } return; }
     const g0 = builderGround(px, py), g1 = builderGround(e.clientX, e.clientY); if (!g0 || !g1) return;
     const h = G.siege.half; B.cx = clamp(B.cx - (g1.x - g0.x), SC.x - h, SC.x + h); B.cz = clamp(B.cz - (g1.z - g0.z), SC.z - h, SC.z + h);
@@ -16834,6 +16884,9 @@ function builderInit() {
   shop.addEventListener('pointerup', builderShopUp); shop.addEventListener('pointercancel', builderShopUp);
   shop.addEventListener('wheel', (e) => { shop.scrollLeft += e.deltaY + e.deltaX; e.preventDefault(); }, { passive: false });
   $('bdDone').addEventListener('click', () => { Sfx.play('click'); closeBuilder(); });
+  $('bdDel').addEventListener('click', () => { const B = G.builder; if (!B) return; Sfx.play('click'); B.del = !B.del; BD.allT = 0; B.sel = null; B.cell = null; B.move = null; B.line = null; builderShop(); builderHud(); });
+  $('bdAll').addEventListener('pointerdown', (e) => { e.preventDefault(); Sfx.play('click'); builderRemoveAll(); }); // pointerdown: a quick second tap is not eaten as a double-tap
+  $('fortBuildBtn').addEventListener('click', () => { if (G.siege && !G.modal && !G.builder) { Sfx.play('click'); openBuilder(); } });
   $('bdWave').addEventListener('click', () => { Sfx.play('click'); startSiegeWave(); builderHud(); });
   $('bdHold').addEventListener('click', () => { Sfx.play('click'); siegeToggleHold(); builderHud(); });
   $('fortChip').addEventListener('click', () => { if (G.siege && !G.modal) { Sfx.play('click'); siegeToggleHold(); } });

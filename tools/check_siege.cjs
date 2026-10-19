@@ -138,6 +138,14 @@ check('walls and gates stop monsters, not heroes: a hero walks through a wall li
   const mob = { x: u.x, z: u.z + 0.2, r: 0.55 }; c.siegeCollide(mob); assert(Math.hypot(mob.x - u.x, mob.z - u.z) >= u.r + 0.5, 'a monster is pushed out');
   c.endSiege('leave');
 });
+check('open-world monsters that followed you into the fort are sent home, healed and calm (no stuck, unkillable elites)', () => {
+  reset(40, 1e12, 1e6); assert(c.startSiege());
+  const e = { id: 9001, alive: true, x: c.SC.x + 2, z: c.SC.z + 6, hx: 120, hz: 340, hp: 3, maxHp: 50, state: 'return', hidden: true, invulnT: 1, windT: 0.4, type: c.CFG.world.zones[1].enemy, mv: { k: 'burrow', spinT: 0 } };
+  c.G.enemies.push(e); c.stepEnemy(e, 1 / 60);
+  assert.equal(e.x, 120); assert.equal(e.z, 340); assert.equal(e.hp, 50); assert.equal(e.state, 'idle'); assert(!e.hidden && !e.invulnT && e.mv.k === null, 'its move is cancelled');
+  c.stepEnemy(e, 1 / 60); assert.equal(e.x, 120, 'it waits at home while you are in the fort');
+  c.G.enemies = c.G.enemies.filter((x) => x !== e); c.endSiege('leave');
+});
 check('traps: monsters walk over them; spikes hit and reset, a keg blows once per wave and comes back, tar slows and burns', () => {
   reset(40, 1e12, 1e6); assert(c.startSiege()); const S = c.G.siege, F = c.fortState();
   const free = (() => { if (S.flowDirty) c.siegeFlow(); return S.dist[c.siegeIdx(0, 12)]; })();

@@ -778,4 +778,9 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .fbub:active .fbIc, .fbub.pop .fbIc { transform: scale(1.18); animation: none; }
 @keyframes fbubGlow { from { filter: brightness(1); } to { filter: brightness(1.15); } }
 @keyframes fortBob { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+/* the fort's Build button under the HUD chips, and the builder's Remove mode */
+#bdTop #bdHint { order: 4; position: static; transform: none; flex: 0 1 auto; margin: 0 auto; max-width: 100%; pointer-events: none; }
+#fortBuildBtn { min-height: 44px; padding: 0 16px; font: 15px/1 var(--body); letter-spacing: .06em; color: #2a1800; background: linear-gradient(#ffe08a, #c99a3a); border: 2px solid var(--og-ink, #120a03); border-radius: 8px; box-shadow: 0 2px 0 #120a03, 0 0 10px rgba(255,224,138,.35); margin-left: 6px; }
+#bdDel.on { background: linear-gradient(#e06a5a, #8a2418) !important; color: #fff4d6; box-shadow: 0 0 0 2px #ffb3a6, 0 2px 0 #120a03; }
+#bdAll { background: linear-gradient(#7a3a30, #401a14) !important; } #bdAll.arm { background: linear-gradient(#ff5a44, #a01c10) !important; color: #fff; animation: fbubGlow .5s ease-in-out infinite alternate; }
 #fortChip { color: #c9cbe8; letter-spacing: .06em; } #fortChip.on { color: #1b1300; background: linear-gradient(180deg,#9fe0a0,#4aa860); }

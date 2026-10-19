@@ -1,3 +1,15 @@
+# Bastion: no more stuck monsters, Remove mode, Build button (19 Oct 2026, on `main`)
+Casper (phone screenshot): open-world monsters wandered the fort and could not be killed; wants an easy edit mode to
+delete buildings (all at once) and easier access to building mode.
+- **Stuck monsters:** a monster mid-pounce/burrow (or a blinking elite) followed the hero's jump into the fort, Rift or a
+  dungeon, then walked ~2 km home healing 30%/s, so nothing killed it. Now open-world monsters are parked at home,
+  healed and calm while you are in any instance (`parkHubEnemy` in `stepEnemy`, 33-world-sim.js). Check added.
+- **Remove mode** in the builder (Remove button): tap or swipe a finger over buildings to tear them down (half back);
+  two fingers pan and zoom (pinch now pans too). **Remove all** tears down everything after a second tap within 4 s
+  (your last builder stays).
+- **Build button** under the HUD chips whenever you are in the fort; walls and traps no longer take over the action
+  button (it says Build unless you stand at a tower, producer, the Keep or the exit).
+- **Open:** archer tower + cannon remodel waits for the HF quota (~18:05 today).
 # Dungeons: fuller halls, mid-late game, 7 puzzle kinds, side rooms (19 Oct 2026, branch `claude/dungeon-explore`, PR to main)
 Casper: still empty, enemies spawn close together, not enough enemies, dungeons should be mid-late game, more puzzles,
 extra rooms to explore.

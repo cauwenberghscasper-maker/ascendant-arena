@@ -539,6 +539,8 @@ function separate(a, b) {
 const bodyMass = (e) => { const M = CFG.enemies.mass; return e.kind === 'enemy' ? (M[(CFG.enemies[e.type] || {}).kit || 'legacy'] || 1) * (e.elite ? M.elite : 1) : M.player; };
 function stepEnemy(e, dt) {
   if (e.siege) { stepSiegeEnemy(e, dt); return; } // Bastion Siege monsters go for the fort (36b-siege.js)
+  if (inInstance() && !e.rift && !e.dungeon && !e.delve && !e.own) { parkHubEnemy(e); return; } // open-world monsters wait at home while you are in the fort, Rift or a dungeon
+  e.parked = false;
   if ((e.mirror || e.hidden) && moveUpkeep(e, dt)) return;
   if (!e.alive) { if (e.rift || e.dungeon) return; e.respawnT -= dt; if (e.respawnT <= 0) respawnEnemy(e); return; }
   if (HeroSupers.tickStatus(e, dt)) { e.flashT -= dt; e.slowT -= dt; tickBurn(e, dt); e.moveAmt = 0; return; } // stunned / banished by a hero super
@@ -665,6 +667,19 @@ function cloudPull(c, dt) {
 }
 const outOfTown = (e, x, z) => e.rift || inInstance() || distToTown(x, z) > CFG.world.town.r + 2;
 // a dropped or finished move: resurface a burrowed monster, stop a spiral
+// An open-world monster sent home while its hero is inside an instance (fort, Rift, dungeon). Before this, a monster mid-pounce
+// or mid-burrow (or a blinking elite) followed the hero's jump into the fort, then tried to walk ~2 km home while healing
+// 30% a second: it wandered the fort, towers ignored it and it could not be killed.
+function parkHubEnemy(e) {
+  if (e.parked) return;
+  e.parked = true;
+  if (e.mirror) { e.alive = false; G.enemies = G.enemies.filter((x) => x !== e); G.ents.delete(e.id); return; }
+  if (e.mv) moveEnd(e);
+  if (e.champ) { e.champ.cast = null; e.champ.castT = 0; e.champ.blink = null; }
+  e.hidden = false; e.invulnT = 0; e.windT = 0; e.lungeT = 0; e.burnT = 0; e.slowT = 0; e.state = 'idle'; e.moveAmt = 0;
+  if (e.hx != null) { e.x = e.hx; e.z = e.hz; }
+  if (e.alive) { e.hp = e.maxHp; e.tagged = false; }
+}
 function moveEnd(e) { const M = e.mv; M.k = null; M.spinT = 0; e.windT = 0; e.windK = null; if (e.hidden) { e.hidden = false; e.invulnT = 0; } }
 // mirror copies fade with their elite or after a while; a burrowed monster whose move stopped running resurfaces
 function moveUpkeep(e, dt) {

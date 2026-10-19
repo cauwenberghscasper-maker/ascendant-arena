@@ -650,7 +650,8 @@ function siegeInteract(pl) {
   if (near(C.exit, C.interactR)) return { kind: 'siegeLeave', label: 'Leave Fort' };
   const kp = C.objs[0]; if (near(kp, kp.r + 1.6)) return { kind: 'fortKeep', label: `The Keep · Lv ${fortState().keep || 1}` };
   let best = 1.4, hit = null;
-  for (const u of S.units) { const d = Math.hypot(pl.x - u.x, pl.z - u.z) - u.r; if (d < best) { best = d; hit = u; } }
+  for (const u of S.units) { const T = C.towers[u.b.t]; if ((T.wall || T.trap) && !fortMade(u.b)) continue; // walls and traps you tweak in builder mode; walking past them keeps Build on the button
+    const d = Math.hypot(pl.x - u.x, pl.z - u.z) - u.r; if (d < best) { best = d; hit = u; } }
   if (hit) { const b = hit.b, T = C.towers[b.t], m = fortMade(b);
     return { kind: 'fortB', k: S.units.indexOf(hit), label: m > 0 ? `${T.short} · take ${m} ${C.resName[T.make].toLowerCase()}` : `${T.short}${T.maxLvl === 1 ? '' : ' Lv ' + b.l}${b.d > fortNow() ? ' · building' : ''}` }; }
   return { kind: 'fortBuild', label: 'Build' };

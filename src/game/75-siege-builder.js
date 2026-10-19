@@ -18,10 +18,10 @@ function openBuilder() {
   siegeGridOverlay(true); builderShop(); builderHud();
 }
 function closeBuilder() {
-  G.builder = null; BD.ptrs.clear(); BD.down = BD.pinch = BD.line = BD.shop = null; BD.ghost = false;
+  G.builder = null; BD.allT = 0; BD.ptrs.clear(); BD.down = BD.pinch = BD.line = BD.shop = null; BD.ghost = false;
   $('builder').hidden = true; document.body.classList.remove('builderOn'); siegeGridOverlay(false);
 }
-function builderSelect(t) { const B = G.builder; if (!B) return; B.move = null; B.line = null; B.sel = B.sel === t ? null : t; B.cell = null; builderShop(); builderHud(); }
+function builderSelect(t) { const B = G.builder; if (!B) return; B.del = false; BD.allT = 0; B.move = null; B.line = null; B.sel = B.sel === t ? null : t; B.cell = null; builderShop(); builderHud(); }
 // from a building's panel: pick it up and put it somewhere else (free)
 function builderMove(b) { if (!G.builder) openBuilder(); const B = G.builder; if (!B) return; B.move = b; B.sel = b.t; B.cat = bdCatOf(b.t); B.cell = [b.x, b.z]; B.line = null; builderShop(); builderHud(); }
 // the shop: what each costs, how many the Keep allows (3/5), and which Keep level unlocks one you cannot have yet
@@ -42,10 +42,13 @@ function builderHud() {
   const B = G.builder, S = G.siege; if (!B || !S) return;
   const F = fortState(), M = myFort(), T = B.sel ? CFG.siege.towers[B.sel] : null, L = B.line;
   $('bdInfo').innerHTML = `Keep ${F.keep || 1} · ${fortJobs(F)}/${fortBuilders(F)} builders · ${fortHave(M)}`;
-  $('bdHint').innerHTML = L ? `${L.cells.length} ${T.short.toLowerCase()}${L.cells.length === 1 ? '' : 's'} · ${fortResHTML(L.cost, M)} · let go to build`
+  $('bdDel').classList.toggle('on', !!B.del); $('bdAll').hidden = !B.del;
+  if (B.del) { const n = F.b.length; $('bdAll').textContent = BD.allT > performance.now() ? `Tap again: tear down ${n}` : 'Remove all'; $('bdAll').classList.toggle('arm', BD.allT > performance.now()); }
+  $('bdHint').innerHTML = B.del ? 'Tap or swipe buildings to tear them down (half back) · two fingers move'
+    : L ? `${L.cells.length} ${T.short.toLowerCase()}${L.cells.length === 1 ? '' : 's'} · ${fortResHTML(L.cost, M)} · let go to build`
     : B.move ? `Moving the ${T.short}: tap or drag where it goes` : !T ? 'Drag something up from the shop, or tap a building'
     : T.wall ? `Drag a straight line of ${T.short.toLowerCase()}s` : `Drag the ${T.short} where it goes, then Place`;
-  $('bdPlace').hidden = !(B.sel && B.cell && !(T && T.wall && !B.move));
+  $('bdPlace').hidden = !!B.del || !(B.sel && B.cell && !(T && T.wall && !B.move));
   // waves: the first one waits for Start; after that they come by themselves unless paused
   $('bdWave').textContent = !F.go ? `Start wave ${S.wave}` : 'Start now'; $('bdWave').hidden = S.phase !== 'build';
   $('bdHold').hidden = !F.go; $('bdHold').textContent = F.hold ? 'Resume waves' : 'Pause waves'; $('bdHold').classList.toggle('on', !!F.hold);
@@ -110,6 +113,7 @@ function builderTap(x, y) {
     if (B.cell && B.cell[0] === c[0] && B.cell[1] === c[1]) builderConfirm(); else { B.cell = c; builderHud(); }
     return;
   }
+  if (B.del) { builderRemoveAt(x, y); return; }
   const g = builderGround(x, y); if (!g) return;
   const k = CFG.siege.objs[0]; if (Math.hypot(g.x - SC.x - k.x, g.z - SC.z - k.z) < k.r) { openFortKeepPanel(); return; }
   const u = S.units.find((q) => Math.abs(q.x - g.x) < q.size + 0.2 && Math.abs(q.z - g.z) < q.size + 0.2); if (!u) return;
@@ -128,7 +132,7 @@ function builderShopMove(e) {
   const dx = e.clientX - P.x0, dy = e.clientY - P.y0, el = $('bdList');
   if (!P.mode) {
     if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) P.mode = 'scroll';
-    else if (dy < -14 && -dy > Math.abs(dx)) { P.mode = 'drag'; B.move = null; B.line = null; B.sel = P.t; B.cell = null; builderShop(); }
+    else if (dy < -14 && -dy > Math.abs(dx)) { P.mode = 'drag'; B.del = false; B.move = null; B.line = null; B.sel = P.t; B.cell = null; builderShop(); }
   }
   if (P.mode === 'scroll') { const now = performance.now(); P.vx = (e.clientX - P.lx) / Math.max(1, now - P.lt); P.lx = e.clientX; P.lt = now; el.scrollLeft = P.sl - dx; }
   else if (P.mode === 'drag') {
@@ -151,14 +155,33 @@ function builderShopUp(e) {
     else { const w = g && g.length ? fortCheck(g[0].op) || fortShortWhy(g[0].op) : ''; if (w) toast(w, 'bad'); builderHud(); } // the red preview stays to be moved
   }
 }
+// Remove mode: the building under the finger is torn down at once (half its cost back, like the panel's Tear down)
+function builderUnitAt(x, y) { const g = builderGround(x, y); if (!g) return null; return G.siege.units.find((q) => Math.abs(q.x - g.x) < q.size + 0.2 && Math.abs(q.z - g.z) < q.size + 0.2) || null; }
+function builderRemoveAt(x, y, quiet) {
+  const u = builderUnitAt(x, y); if (!u) return false;
+  const F = fortState(), k = F.b.indexOf(u.b); if (k < 0) return false;
+  const why = fortDo({ o: 'del', k });
+  if (why) { if (!quiet || why !== BD.lastWhy) toast(why, 'bad'); BD.lastWhy = why; return false; }
+  Sfx.play('click'); burst(u.x, 1, u.z, 10, 0xcfc4ae, 4, 0.5, 0.25, 3, 1); builderHud(); return true;
+}
+// Remove all: a second tap within 4 s tears down every building the rules allow (your last builder stays)
+function builderRemoveAll() {
+  const B = G.builder; if (!B) return;
+  if (!(BD.allT > performance.now())) { BD.allT = performance.now() + 4000; builderHud(); setTimeout(() => G.builder && builderHud(), 4100); return; }
+  BD.allT = 0; const F = fortState(); let n = 0, why = '';
+  for (let k = F.b.length - 1; k >= 0; k--) { const r = fortDo({ o: 'del', k }); if (r) why = r; else n++; } // from the end, so every index stays right
+  if (n) { Sfx.play('unlock'); showToast(`Tore down ${n} building${n === 1 ? '' : 's'} · half the cost back`); } else if (why) toast(why, 'bad');
+  builderShop(); builderHud();
+}
 function builderInit() {
   const el = $('builder'), ui = (e) => e.target.closest('#bdTop, #bdShop, #bdPlace');
   el.addEventListener('pointerdown', (e) => {
     if (!G.builder || G.modal || ui(e)) return;
     e.preventDefault(); el.setPointerCapture(e.pointerId); BD.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (BD.ptrs.size === 2) { const [a, b] = [...BD.ptrs.values()]; BD.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: G.builder.zoom }; BD.down = null; BD.line = null; G.builder.line = null; BD.ghost = false; return; }
+    if (BD.ptrs.size === 2) { const [a, b] = [...BD.ptrs.values()]; BD.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: G.builder.zoom, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; BD.down = null; BD.line = null; G.builder.line = null; BD.ghost = false; return; }
     BD.down = { x: e.clientX, y: e.clientY, moved: false };
     const B = G.builder, T = B.sel && CFG.siege.towers[B.sel];
+    if (B.del) { BD.lastWhy = ''; return; }
     if (T && T.wall && !B.move) { const c = builderCell(e.clientX, e.clientY, B.sel); if (c) { BD.line = { a: c, key: '' }; builderLineMove(e.clientX, e.clientY); } return; }
     // a press on the preview (or anywhere near it) drags the preview instead of the camera
     BD.ghost = false;
@@ -167,11 +190,17 @@ function builderInit() {
   el.addEventListener('pointermove', (e) => {
     const P = BD.ptrs.get(e.pointerId), B = G.builder; if (!P || !B) return;
     const px = P.x, py = P.y; P.x = e.clientX; P.y = e.clientY;
-    if (BD.pinch && BD.ptrs.size === 2) { const [a, b] = [...BD.ptrs.values()]; B.zoom = clamp(BD.pinch.z * BD.pinch.d / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y)), 0.9, 3.4); return; }
+    if (BD.pinch && BD.ptrs.size === 2) {
+      const [a, b] = [...BD.ptrs.values()], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2; B.zoom = clamp(BD.pinch.z * BD.pinch.d / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y)), 0.9, 3.4);
+      const g0 = builderGround(BD.pinch.mx, BD.pinch.my), g1 = builderGround(mx, my); BD.pinch.mx = mx; BD.pinch.my = my; // two fingers also move the map
+      if (g0 && g1) { const h = G.siege.half; B.cx = clamp(B.cx - (g1.x - g0.x), SC.x - h, SC.x + h); B.cz = clamp(B.cz - (g1.z - g0.z), SC.z - h, SC.z + h); }
+      return;
+    }
     if (!BD.down) return;
     if (BD.line) { builderLineMove(e.clientX, e.clientY); return; }
     if (!BD.down.moved && Math.hypot(e.clientX - BD.down.x, e.clientY - BD.down.y) < 9) return;
     BD.down.moved = true;
+    if (B.del) { builderRemoveAt(e.clientX, e.clientY, true); return; } // remove mode: one finger sweeps buildings away
     if (BD.ghost) { const c = builderCell(e.clientX, e.clientY, B.sel); if (c && (c[0] !== B.cell[0] || c[1] !== B.cell[1])) { B.cell = c; builderHud(); } return; }
     const g0 = builderGround(px, py), g1 = builderGround(e.clientX, e.clientY); if (!g0 || !g1) return;
     const h = G.siege.half; B.cx = clamp(B.cx - (g1.x - g0.x), SC.x - h, SC.x + h); B.cz = clamp(B.cz - (g1.z - g0.z), SC.z - h, SC.z + h);
@@ -191,6 +220,9 @@ function builderInit() {
   shop.addEventListener('pointerup', builderShopUp); shop.addEventListener('pointercancel', builderShopUp);
   shop.addEventListener('wheel', (e) => { shop.scrollLeft += e.deltaY + e.deltaX; e.preventDefault(); }, { passive: false });
   $('bdDone').addEventListener('click', () => { Sfx.play('click'); closeBuilder(); });
+  $('bdDel').addEventListener('click', () => { const B = G.builder; if (!B) return; Sfx.play('click'); B.del = !B.del; BD.allT = 0; B.sel = null; B.cell = null; B.move = null; B.line = null; builderShop(); builderHud(); });
+  $('bdAll').addEventListener('pointerdown', (e) => { e.preventDefault(); Sfx.play('click'); builderRemoveAll(); }); // pointerdown: a quick second tap is not eaten as a double-tap
+  $('fortBuildBtn').addEventListener('click', () => { if (G.siege && !G.modal && !G.builder) { Sfx.play('click'); openBuilder(); } });
   $('bdWave').addEventListener('click', () => { Sfx.play('click'); startSiegeWave(); builderHud(); });
   $('bdHold').addEventListener('click', () => { Sfx.play('click'); siegeToggleHold(); builderHud(); });
   $('fortChip').addEventListener('click', () => { if (G.siege && !G.modal) { Sfx.play('click'); siegeToggleHold(); } });
