@@ -6,7 +6,7 @@
 // pressure plates, and pull fallen teammates back up; monsters fight them back. They take no loot. Their level and
 // stats fit the run: the dungeon's level and difficulty, or the party's average level if higher (`delveBotScale`).
 // ---------------------------------------------------------------------
-CFG.delve.bots = { on: true, hp: 0.9, dmg: 0.75, fit: 1, hits: 18, shots: 25, aggro: 18, keep: 0.7, roam: [2, 4.5], near: 12, lost: 48, stuck: 3, rescale: 3, send: 0.15 };
+CFG.delve.bots = { on: true, hp: 0.9, dmg: 0.75, fit: 1, hits: 30, shots: 25, armor: 0.5, flee: 0.35, aggro: 18, keep: 0.7, roam: [2, 4.5], near: 12, lost: 48, stuck: 3, rescale: 3, send: 0.15 };
 const delveBots = () => (delveOn() && G.dungeon.delve.bots) || [];
 // the real heroes' average level (you plus friends in the run; bots don't count)
 function delveHumanLevel() {
@@ -33,12 +33,16 @@ function delveBotScale(b) {
   b.level = L;
   b.maxHp = Math.max(b.fitHp * X.diff.dmg * DV.tough.dmg * K.fit, pl.maxHp * K.hp * hpAt(L) / hpAt(myL), M.atk * K.hits);
   b.dmg = Math.max(b.fitDmg * X.diff.hp * K.fit, pl.dmg * K.dmg * atkAt(L) / atkAt(myL), M.hp / K.shots);
+  // the defence that keeps you alive helps your bots too: your armour (capped) and lifesteal
+  b.armor = Math.max(b.armor || 0, Math.min(K.armor, pl.armor || 0)); b.lifesteal = Math.max(b.lifesteal || 0, pl.lifesteal || 0);
   b.hp = b.scaled ? b.maxHp * frac : b.maxHp; b.scaled = true;
 }
 // called by startDelve: fill the party up to four
 function delveBotsMake(D, humans) {
-  const X = D.delve, pl = G.player, names = BOT_NAMES.slice().sort(() => Math.random() - 0.5);
-  const classes = CFG.brawlerOrder.filter((c) => c !== pl.cls).sort(() => Math.random() - 0.5);
+  // names and heroes are picked here only (the leader's game) and sent to the others, so plain random is fine; a shuffle,
+  // never a random sort comparator (README rule 8)
+  const X = D.delve, pl = G.player, names = seededShuffle(BOT_NAMES.slice(), Math.random);
+  const classes = seededShuffle(CFG.brawlerOrder.filter((c) => c !== pl.cls), Math.random);
   X.bots = []; X.botSendT = 0; X.botScaleT = DV.bots.rescale;
   for (let i = 0; i < DV.maxParty - humans; i++) {
     const a = (i + 1) / DV.maxParty * Math.PI * 2, cls = classes[i % classes.length], name = names[i % names.length];
@@ -109,6 +113,15 @@ function delveBotThink(b, dt) {
       else { ai.rx = lead.x + rand(-2.5, 2.5); ai.rz = lead.z + rand(-2.5, 2.5); }
     }
     tx = ai.rx; tz = ai.rz; stop = 0.8;
+  }
+  // hurt: back off toward the leader, away from the monster, still shooting, until it heals up a bit
+  if (foe && b.hp < b.maxHp * K.flee && !down) { const ax = b.x - foe.x, az = b.z - foe.z, al = Math.hypot(ax, az) || 1; tx = (b.x + ax / al * 6 + lead.x) / 2; tz = (b.z + az / al * 6 + lead.z) / 2; stop = 0.5; }
+  // a marked slam or cleave, or a poison cloud, under its feet: walk out like a player would, dash if it is about to land
+  const hit = G.pendingAoE.find((a) => a.team === 'mob' && !a.cone && Math.hypot(a.x - b.x, a.z - b.z) < a.r + b.r + 0.4) || G.clouds.find((c) => c.team === 'mob' && Math.hypot(c.x - b.x, c.z - b.z) < c.r + b.r);
+  if (hit) {
+    const ax = b.x - hit.x, az = b.z - hit.z, al = Math.hypot(ax, az) || 1, ox = al > 0.2 ? ax / al : Math.sin(ai.side), oz = al > 0.2 ? az / al : Math.cos(ai.side);
+    tx = hit.x + ox * (hit.r + b.r + 1.2); tz = hit.z + oz * (hit.r + b.r + 1.2); stop = 0.2;
+    if (hit.t != null && hit.t < 0.45 && b.dashCd <= 0) it.dash = true;
   }
   const dx = tx - b.x, dz = tz - b.z, d = Math.hypot(dx, dz);
   if (d > stop) { it.mx = dx / d; it.mz = dz / d; }

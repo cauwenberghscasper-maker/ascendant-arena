@@ -1,3 +1,14 @@
+# Dungeon bots no longer die in the first halls on hard difficulties (19 Oct 2026, branch `claude/dungeon-bots-hard`, PR to main)
+Casper: bots still died in the first room on higher difficulties. A full-hall fight test (hero not attacking) showed
+bots holding Mythic → Ascendant 5 halls fine, so the killer was elsewhere: the **spike hall** and **puzzle fail
+spikes** dealt a share of the *player's* max HP (× difficulty damage) to every hero in the marked circle, and bots
+never stepped out. With a geared hero at 4× a bot's HP, bots went down 4-7 times in 30 s in a spike hall (Ascendant 5).
+Fixed: marked areas can carry `pct` (share of each target's own max HP; `stepPendingAoE`), used by both hazards; bots
+step out of marked circles and mob clouds (dash if the hit is < 0.45 s away), back off toward the leader below 35% HP,
+copy your armour (≤ 50%) and lifesteal, and survive at least 30 average hits (was 18). Bot names/heroes use a shuffle,
+not a random sort (rule 8). Measured after: 0 downs, 0% HP lost to the floor in the same test. Open: real runs.
+
+
 # All 27 supers in pixel art, nine new pixel projectiles (19 Oct 2026, branch `claude/hf-models-a`, PR #36)
 Batch `pixel-fx-b` ran after the quota reset (82 pictures, Z-Image Turbo, "retro 16-bit pixel art" prompts; outputs on
 `asset-drop` `drop/pixel-fx-b/`). Accepted and baked (`assets/concepts/hero_fx/` → `assets/fx/hero/`):
