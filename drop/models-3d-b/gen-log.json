@@ -1,0 +1,168 @@
+{
+ "batch": "models-3d-b",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "mat_abyssal",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 1.9
+  },
+  {
+   "name": "mat_arcdust",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 1.0
+  },
+  {
+   "name": "mat_copper",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_emberscale",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_frostfang",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 1.0
+  },
+  {
+   "name": "mat_glacial",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_iron",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_magma",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_mithril",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_obsidian",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_pearl",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_solar",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_starfeather",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_starsteel",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_thornhide",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_tidal",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_titansoul",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_verdant",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "mat_void",
+   "ok": false,
+   "error": "Value 30000 is less than minimum value 50000.",
+   "sec": 0.9
+  },
+  {
+   "name": "siege_banner",
+   "ok": true,
+   "file": "siege_banner.glb",
+   "sec": 18.9
+  },
+  {
+   "name": "siege_captain",
+   "ok": true,
+   "file": "siege_captain.glb",
+   "sec": 30.7
+  },
+  {
+   "name": "siege_hut2",
+   "ok": true,
+   "file": "siege_hut2.glb",
+   "sec": 79.9
+  },
+  {
+   "name": "siege_lord",
+   "ok": true,
+   "file": "siege_lord.glb",
+   "sec": 35.2
+  },
+  {
+   "name": "siege_supplycart",
+   "ok": true,
+   "file": "siege_supplycart.glb",
+   "sec": 45.0
+  },
+  {
+   "name": "world_lectern",
+   "ok": true,
+   "file": "world_lectern.glb",
+   "sec": 26.7
+  },
+  {
+   "name": "world_sunlantern",
+   "ok": true,
+   "file": "world_sunlantern.glb",
+   "sec": 17.6
+  },
+  {
+   "name": "world_totem",
+   "ok": true,
+   "file": "world_totem.glb",
+   "sec": 16.0
+  }
+ ]
+}
