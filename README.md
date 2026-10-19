@@ -80,6 +80,8 @@ The game is played on phones. Every change must work there.
 - Performance budgets (town): about 600k triangles including shadows, ~190 draw calls. Townsfolk ~9k tris, heavy
   monsters ~11k, landmarks ~10k, repeated props 2-4k. Textures 256 (LODs) / 512 (most) / 1024 (bosses, arena, Rift).
   Target 60 FPS on a mid-range phone. Anything heavier needs an LOD or a reason.
+  Sets of many props are cut into cells (`cell` in `WorldModels.place`, 64 m default, 32 m trees, 24 m dungeon
+  pieces) so far ones are skipped; trees cast their shadow from their LOD (`shadowOnly`).
 
 ### 1.3 One style
 

@@ -8765,7 +8765,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 // neutral tone mapping keeps the saturated toy colours but rolls off blown highlights (gold, white hair, sand)
 renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
 renderer.debug.checkShaderErrors = LOCAL_PREVIEW; // reading the compile log waits for the GPU to finish compiling (a hitch whenever a new model or effect appears)
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = true;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false; // redrawn at most 60 times a second (frame() in 80-main-loop.js)
 renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); G.paused = true; }, false);
 renderer.domElement.addEventListener('webglcontextrestored', () => { G.paused = false; }, false);
 const scene = new THREE.Scene();
@@ -8778,6 +8778,11 @@ sun.position.set(30, 60, 18);
 sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.04; sun.shadow.radius = 2.5; // soft PCF edges
 { const c = sun.shadow.camera; c.left = -30; c.right = 30; c.top = 30; c.bottom = -30; c.near = 10; c.far = 140; c.updateProjectionMatrix(); }
 const SUN_OFF = new THREE.Vector3(26, 58, 14);
+// shadow-only stand-ins (light tree LODs that cast the shadow of a full tree): hidden in the picture, shown only while
+// the shadow map draws. WorldModels.update sets userData.on for the ones in range
+const shadowOnly = new Set();
+{ const sm = renderer.shadowMap, base = sm.render.bind(sm);
+  sm.render = (lights, sc, cam) => { for (const m of shadowOnly) m.visible = !!m.userData.on; base(lights, sc, cam); for (const m of shadowOnly) m.visible = false; }; }
 scene.add(hemi, sun, sun.target);
 function hqOn() { return !!(G.profile && G.profile.settings.hq) && !Q.lowTier; }
 
@@ -10227,7 +10232,10 @@ function buildHub() {
   const mput = (name, it, opts, key) => { const k = key || name; if (!MB.has(k)) { MB.set(k, []); MBO[k] = { name, opts: opts || {} }; } MB.get(k).push(it); };
   const _col2 = new THREE.Color(), soft = (c, k) => _col.set(0xffffff).lerp(_col2.set(c), k).getHex(); // a gentle per-instance tint over the painted texture
   const TREE_MODEL = { round: ['tree_oak', 7], pine: ['tree_ash', 8], snowPine: ['tree_snow', 7.5], dead: ['tree_ember', 7.5], crystal: ['tree_crystal', 8], coral: ['tree_coral', 8], blossom: ['tree_gold', 7] };
-  const treeSet = (name) => hasWM(name + '_lod') ? [{ far: 52 }, { near: 52, shadow: false }] : [{}, null];
+  // near trees draw the full mesh, far ones the light LOD; 32 m cells so the switch happens close to each tree, not per
+  // 64 m block. Shadows always come from the LOD (a shadow-only copy, see WorldModels shadowOnly): the same shape in the
+  // shadow map at a seventh of the triangles
+  const treeSet = (name) => hasWM(name + '_lod') ? [{ far: 44, cell: 32, shadow: false }, { near: 44, cell: 32, shadow: false }, { far: 66, cell: 32, shadowOnly: true }] : [{}, null, null];
   // Props per area: the theme sets the defaults (counts per 160 m of road), each area's look overrides them.
   const THEME_DECO = [
     { tree: 'round', trees: 190, rocks: 50, tufts: 1500, tuftC: [0x6d9a4a, 0x82ad55], flowers: 260, flowerC: [0xff7aa8, 0xffd34a, 0xffffff, 0xb08cff], bushes: 220, logs: 16, fungi: 60, ruins: 2, flies: 70, ponds: 6 },
@@ -10324,9 +10332,9 @@ function buildHub() {
     const TM = TREE_MODEL[tree];
     if (TM && hasWM(TM[0])) {
       // one tree model per theme; near cells draw the full mesh, far cells its light LOD (when generated)
-      const [full, lod] = treeSet(TM[0]), glowT = tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {};
+      const [full, lod, shade] = treeSet(TM[0]), glowT = tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {};
       tops.forEach((t) => { const it = { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: TM[1] * t.s, color: soft(t.c, 0.1) };
-        mput(TM[0], it, Object.assign({}, glowT, full)); if (lod) mput(TM[0] + '_lod', it, Object.assign({}, glowT, lod)); });
+        mput(TM[0], it, Object.assign({}, glowT, full)); if (lod) mput(TM[0] + '_lod', it, Object.assign({}, glowT, lod)); if (shade) mput(TM[0] + '_lod', it, shade, TM[0] + '_lod_shadow'); });
     } else {
       if (tree === 'round' || tree === 'pine' || tree === 'snowPine' || tree === 'blossom') bat(trunkGeo, trunks, false);
       const topGeo = { round: roundGeo, blossom: roundGeo, pine: pineGeo, snowPine: pineGeo, dead: deadGeo, coral: worldArt.coralGeo, crystal: crystalGeo }[tree];
@@ -11507,7 +11515,8 @@ function buildDungeonView(D) {
     for (let k = 0; k < n; k++) { const f = (k + 0.5) / n - 0.5;
       walls.push({ x: (w.x0 + w.x1) / 2 + Math.sin(a) * f * len, z: (w.z0 + w.z1) / 2 + Math.cos(a) * f * len, ry: a + Math.PI / 2 + (rng() < 0.5 ? Math.PI : 0), s: S, sx, sz: 0.75 }); }
   }
-  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'dwall', walls, { bright: 1.25 }));
+  // 24 m cells: the camera and the sun's shadow box only see a few halls, so far wall runs are skipped instead of drawn whole
+  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'dwall', walls, { bright: 1.25, cell: 24 }));
   // the boss hall: four chained pillars and braziers; every other hall gets braziers and some clutter by the walls
   const B = D.rooms.at(-1), braz = [], clutter = [], pillars = [];
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) pillars.push({ x: B.x + sx * (B.h - 3), z: B.z + sz * (B.h - 3), ry: rng() * 6.28, s: 4.2 });
@@ -11521,7 +11530,7 @@ function buildDungeonView(D) {
       { x: m.x0 + ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 });
   });
   for (const m of D.side || []) braz.push({ x: m.x0 + 1.6, z: m.z1 - 1.6, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - 1.6, z: m.z1 - 1.6, ry: rng() * 6.28, s: 1.7 }); // party-dungeon side rooms
-  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz), WorldModels.place(dungeonGroup, 'clutter', clutter));
+  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz, { cell: 24 }), WorldModels.place(dungeonGroup, 'clutter', clutter, { cell: 24 }));
   // the biome's own dressing along the walls of every hall but the first and the boss's (TRELLIS.2 models):
   // root-split sarcophagi, glacier coffins, slag carts, toppled bookshelves, coral shrines, fallen stars
   const [themeId, themeS] = DUNGEON_THEME_PROP[areaBiome(D.zone)] || DUNGEON_THEME_PROP[0], theme = [];
@@ -11531,7 +11540,7 @@ function buildDungeonView(D) {
     if (D.delve && hx >= 15) spots.push([m.x - 0.78 * hx, m.z0 + ins], [m.x + 0.78 * hx, m.z1 - ins]);
     for (const [x, z] of spots) if (rng() < 0.85) theme.push({ x, z, ry: Math.atan2(m.x - x, m.z - z) + (rng() - 0.5) * 0.5, s: themeS * (0.9 + rng() * 0.2) });
   });
-  if (theme.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, themeId, theme, { bright: 1.15 }));
+  if (theme.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, themeId, theme, { bright: 1.15, cell: 24 }));
   // brazier flames share one additive mesh so the flicker is a single opacity change
   const fp = braz.map((b) => part(GEO.ico0, 0xffa040, [b.x, b.s * 0.98, b.z], null, [0.32, 0.5, 0.32]));
   if (fp.length) { dungeonParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); dungeonGroup.add(dungeonParts.flame); }
@@ -12203,6 +12212,8 @@ const WorldModels = {
       for (const items of bands.values()) {
         const im = new THREE.InstancedMesh(o.geometry, mat, items.length); im.frustumCulled = true; im.userData.local = local; im.userData.items = items;
         im.castShadow = h.opts.shadow !== false; im.receiveShadow = true; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        // shadowOnly: drawn into the sun's shadow map only (shadowOnly set in 40-render-core.js)
+        if (h.opts.shadowOnly) { im.castShadow = true; im.receiveShadow = false; im.visible = false; shadowOnly.add(im); }
         im.name = 'World model / ' + h.id; h.group.add(im); h.meshes.push(im);
       }
     }
@@ -12239,13 +12250,13 @@ const WorldModels = {
     // d is the gap to the edge of a cell's bounding sphere: it goes negative when the camera is over the cell, which must
     // still count as near (a `d >= 0` test hid the fountain, lanterns and whole 64 m tree cells right under the camera)
     for (const h of this.sets) { const f = h.opts.far ? (h.opts.horizon ? h.opts.far : Math.min(far, h.opts.far)) : far, n = h.opts.near || 0;
-      for (const im of h.meshes) { const b = im.boundingSphere; if (b) { const d = Math.hypot(b.center.x - cx, b.center.z - cz) - b.radius; im.visible = d < f && (n <= 0 || d >= n); } } }
+      for (const im of h.meshes) { const b = im.boundingSphere; if (b) { const d = Math.hypot(b.center.x - cx, b.center.z - cz) - b.radius; const on = d < f && (n <= 0 || d >= n); if (h.opts.shadowOnly) im.userData.on = on; else im.visible = on; } } }
   },
   // free a handle's instance buffers and materials (the model's geometry and textures stay cached)
   dispose(h) {
     if (!h) return; h.dead = true;
     if (h.multi) { for (const x of h.multi) this.dispose(x); return; } // a base name with variants: one handle per variant
-    for (const im of h.meshes) { im.removeFromParent(); im.dispose(); }
+    for (const im of h.meshes) { im.removeFromParent(); im.dispose(); shadowOnly.delete(im); }
     for (const m of h.mats) m.dispose();
     h.meshes = []; h.mats = []; this.sets = this.sets.filter((x) => x !== h);
   },
@@ -17029,7 +17040,7 @@ builderInit();
 // 10. MAIN LOOP — fixed-timestep simulation, render separate
 // ---------------------------------------------------------------------
 const FRAME_MS = 1000 / 60, FRAME_MS_120 = 1000 / 120;
-let lastFrame = performance.now(), nextFrameAt = lastFrame, simAcc = 0, saveT = 0, achT = 0;
+let lastFrame = performance.now(), nextFrameAt = lastFrame, simAcc = 0, saveT = 0, achT = 0, shadowAcc = 1;
 function frame(now) {
   requestAnimationFrame(frame);
   // Cap at 120 Hz (60 Hz with the 60 FPS option) even on faster screens. Accumulate elapsed
@@ -17068,6 +17079,8 @@ function frame(now) {
   if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
   updateCamera(dt);
   updateCompanion(dt,t);
+  // the sun's shadow map at most 60 times a second: the world steps at 60 Hz, so at 120 Hz every other redraw was the same
+  shadowAcc += dt; if (shadowAcc >= 0.0155) { shadowAcc = 0; renderer.shadowMap.needsUpdate = true; }
   Pixel.render();
   updateTags(); updateDmgNumbers(dt);
   Interp.restore();

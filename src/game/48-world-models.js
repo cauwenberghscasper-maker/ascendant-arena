@@ -85,6 +85,8 @@ const WorldModels = {
       for (const items of bands.values()) {
         const im = new THREE.InstancedMesh(o.geometry, mat, items.length); im.frustumCulled = true; im.userData.local = local; im.userData.items = items;
         im.castShadow = h.opts.shadow !== false; im.receiveShadow = true; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        // shadowOnly: drawn into the sun's shadow map only (shadowOnly set in 40-render-core.js)
+        if (h.opts.shadowOnly) { im.castShadow = true; im.receiveShadow = false; im.visible = false; shadowOnly.add(im); }
         im.name = 'World model / ' + h.id; h.group.add(im); h.meshes.push(im);
       }
     }
@@ -121,13 +123,13 @@ const WorldModels = {
     // d is the gap to the edge of a cell's bounding sphere: it goes negative when the camera is over the cell, which must
     // still count as near (a `d >= 0` test hid the fountain, lanterns and whole 64 m tree cells right under the camera)
     for (const h of this.sets) { const f = h.opts.far ? (h.opts.horizon ? h.opts.far : Math.min(far, h.opts.far)) : far, n = h.opts.near || 0;
-      for (const im of h.meshes) { const b = im.boundingSphere; if (b) { const d = Math.hypot(b.center.x - cx, b.center.z - cz) - b.radius; im.visible = d < f && (n <= 0 || d >= n); } } }
+      for (const im of h.meshes) { const b = im.boundingSphere; if (b) { const d = Math.hypot(b.center.x - cx, b.center.z - cz) - b.radius; const on = d < f && (n <= 0 || d >= n); if (h.opts.shadowOnly) im.userData.on = on; else im.visible = on; } } }
   },
   // free a handle's instance buffers and materials (the model's geometry and textures stay cached)
   dispose(h) {
     if (!h) return; h.dead = true;
     if (h.multi) { for (const x of h.multi) this.dispose(x); return; } // a base name with variants: one handle per variant
-    for (const im of h.meshes) { im.removeFromParent(); im.dispose(); }
+    for (const im of h.meshes) { im.removeFromParent(); im.dispose(); shadowOnly.delete(im); }
     for (const m of h.mats) m.dispose();
     h.meshes = []; h.mats = []; this.sets = this.sets.filter((x) => x !== h);
   },

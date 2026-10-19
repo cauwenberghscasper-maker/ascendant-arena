@@ -23,7 +23,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 // neutral tone mapping keeps the saturated toy colours but rolls off blown highlights (gold, white hair, sand)
 renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
 renderer.debug.checkShaderErrors = LOCAL_PREVIEW; // reading the compile log waits for the GPU to finish compiling (a hitch whenever a new model or effect appears)
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = true;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false; // redrawn at most 60 times a second (frame() in 80-main-loop.js)
 renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); G.paused = true; }, false);
 renderer.domElement.addEventListener('webglcontextrestored', () => { G.paused = false; }, false);
 const scene = new THREE.Scene();
@@ -36,6 +36,11 @@ sun.position.set(30, 60, 18);
 sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.04; sun.shadow.radius = 2.5; // soft PCF edges
 { const c = sun.shadow.camera; c.left = -30; c.right = 30; c.top = 30; c.bottom = -30; c.near = 10; c.far = 140; c.updateProjectionMatrix(); }
 const SUN_OFF = new THREE.Vector3(26, 58, 14);
+// shadow-only stand-ins (light tree LODs that cast the shadow of a full tree): hidden in the picture, shown only while
+// the shadow map draws. WorldModels.update sets userData.on for the ones in range
+const shadowOnly = new Set();
+{ const sm = renderer.shadowMap, base = sm.render.bind(sm);
+  sm.render = (lights, sc, cam) => { for (const m of shadowOnly) m.visible = !!m.userData.on; base(lights, sc, cam); for (const m of shadowOnly) m.visible = false; }; }
 scene.add(hemi, sun, sun.target);
 function hqOn() { return !!(G.profile && G.profile.settings.hq) && !Q.lowTier; }
 

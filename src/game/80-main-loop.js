@@ -2,7 +2,7 @@
 // 10. MAIN LOOP — fixed-timestep simulation, render separate
 // ---------------------------------------------------------------------
 const FRAME_MS = 1000 / 60, FRAME_MS_120 = 1000 / 120;
-let lastFrame = performance.now(), nextFrameAt = lastFrame, simAcc = 0, saveT = 0, achT = 0;
+let lastFrame = performance.now(), nextFrameAt = lastFrame, simAcc = 0, saveT = 0, achT = 0, shadowAcc = 1;
 function frame(now) {
   requestAnimationFrame(frame);
   // Cap at 120 Hz (60 Hz with the 60 FPS option) even on faster screens. Accumulate elapsed
@@ -41,6 +41,8 @@ function frame(now) {
   if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
   updateCamera(dt);
   updateCompanion(dt,t);
+  // the sun's shadow map at most 60 times a second: the world steps at 60 Hz, so at 120 Hz every other redraw was the same
+  shadowAcc += dt; if (shadowAcc >= 0.0155) { shadowAcc = 0; renderer.shadowMap.needsUpdate = true; }
   Pixel.render();
   updateTags(); updateDmgNumbers(dt);
   Interp.restore();

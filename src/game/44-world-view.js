@@ -425,7 +425,10 @@ function buildHub() {
   const mput = (name, it, opts, key) => { const k = key || name; if (!MB.has(k)) { MB.set(k, []); MBO[k] = { name, opts: opts || {} }; } MB.get(k).push(it); };
   const _col2 = new THREE.Color(), soft = (c, k) => _col.set(0xffffff).lerp(_col2.set(c), k).getHex(); // a gentle per-instance tint over the painted texture
   const TREE_MODEL = { round: ['tree_oak', 7], pine: ['tree_ash', 8], snowPine: ['tree_snow', 7.5], dead: ['tree_ember', 7.5], crystal: ['tree_crystal', 8], coral: ['tree_coral', 8], blossom: ['tree_gold', 7] };
-  const treeSet = (name) => hasWM(name + '_lod') ? [{ far: 52 }, { near: 52, shadow: false }] : [{}, null];
+  // near trees draw the full mesh, far ones the light LOD; 32 m cells so the switch happens close to each tree, not per
+  // 64 m block. Shadows always come from the LOD (a shadow-only copy, see WorldModels shadowOnly): the same shape in the
+  // shadow map at a seventh of the triangles
+  const treeSet = (name) => hasWM(name + '_lod') ? [{ far: 44, cell: 32, shadow: false }, { near: 44, cell: 32, shadow: false }, { far: 66, cell: 32, shadowOnly: true }] : [{}, null, null];
   // Props per area: the theme sets the defaults (counts per 160 m of road), each area's look overrides them.
   const THEME_DECO = [
     { tree: 'round', trees: 190, rocks: 50, tufts: 1500, tuftC: [0x6d9a4a, 0x82ad55], flowers: 260, flowerC: [0xff7aa8, 0xffd34a, 0xffffff, 0xb08cff], bushes: 220, logs: 16, fungi: 60, ruins: 2, flies: 70, ponds: 6 },
@@ -522,9 +525,9 @@ function buildHub() {
     const TM = TREE_MODEL[tree];
     if (TM && hasWM(TM[0])) {
       // one tree model per theme; near cells draw the full mesh, far cells its light LOD (when generated)
-      const [full, lod] = treeSet(TM[0]), glowT = tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {};
+      const [full, lod, shade] = treeSet(TM[0]), glowT = tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {};
       tops.forEach((t) => { const it = { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: TM[1] * t.s, color: soft(t.c, 0.1) };
-        mput(TM[0], it, Object.assign({}, glowT, full)); if (lod) mput(TM[0] + '_lod', it, Object.assign({}, glowT, lod)); });
+        mput(TM[0], it, Object.assign({}, glowT, full)); if (lod) mput(TM[0] + '_lod', it, Object.assign({}, glowT, lod)); if (shade) mput(TM[0] + '_lod', it, shade, TM[0] + '_lod_shadow'); });
     } else {
       if (tree === 'round' || tree === 'pine' || tree === 'snowPine' || tree === 'blossom') bat(trunkGeo, trunks, false);
       const topGeo = { round: roundGeo, blossom: roundGeo, pine: pineGeo, snowPine: pineGeo, dead: deadGeo, coral: worldArt.coralGeo, crystal: crystalGeo }[tree];

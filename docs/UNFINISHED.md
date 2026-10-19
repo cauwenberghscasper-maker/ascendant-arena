@@ -1,3 +1,16 @@
+# Smoother frame rate: lighter trees, shadows and dungeon walls (19 Oct 2026, on `main`)
+Casper: optimize the FPS without hurting the graphics. Measured in headless Chromium at 390x844 (triangles per frame
+including the shadow pass; GPU timing can't be measured there, so these are counts, not phone FPS):
+- **Trees:** cut into 32 m cells (was 64 m), so the full-detail tree only draws near the hero and the light LOD takes
+  over at 44 m per cell (was 52 m on a whole 64 m block, which drew full trees up to ~140 m away). Tree **shadows**
+  now come from the LOD (a shadow-only copy, `shadowOnly` in 40-render-core.js / 48-world-models.js): the same shadow
+  shape at a seventh of the triangles. Woods: 1.35 M -> 0.45 M triangles, shadow pass ~610k -> ~100k.
+- **Dungeon walls**, braziers, clutter and theme props in 24 m cells: Crypt 1.03 M -> 0.73 M, draw calls 110 -> 90.
+- **Shadow map** redrawn at most 60 times a second (the sim steps at 60 Hz, so at 120 Hz every other redraw was the same).
+- Screenshots before/after match. Town (~650k) is unchanged: houses and townsfolk have no LODs yet.
+Next: check on a real mid-range phone (Options > Show FPS); the Bastion fort could get the same smaller cells once a
+big fort is measured; townsfolk/heroes (9-20k tris) cast full-detail shadows.
+
 # Bastion: buildings blend into the ground (19 Oct 2026, on `main`)
 Casper: buildings should stand on a tile that blends in with the background. The hard square stone tile with a coloured
 rim under every building is now a soft patch of trodden earth with a few worn cobbles that fades into the meadow or the

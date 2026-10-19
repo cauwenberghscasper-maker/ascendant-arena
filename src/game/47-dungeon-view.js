@@ -48,7 +48,8 @@ function buildDungeonView(D) {
     for (let k = 0; k < n; k++) { const f = (k + 0.5) / n - 0.5;
       walls.push({ x: (w.x0 + w.x1) / 2 + Math.sin(a) * f * len, z: (w.z0 + w.z1) / 2 + Math.cos(a) * f * len, ry: a + Math.PI / 2 + (rng() < 0.5 ? Math.PI : 0), s: S, sx, sz: 0.75 }); }
   }
-  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'dwall', walls, { bright: 1.25 }));
+  // 24 m cells: the camera and the sun's shadow box only see a few halls, so far wall runs are skipped instead of drawn whole
+  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'dwall', walls, { bright: 1.25, cell: 24 }));
   // the boss hall: four chained pillars and braziers; every other hall gets braziers and some clutter by the walls
   const B = D.rooms.at(-1), braz = [], clutter = [], pillars = [];
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) pillars.push({ x: B.x + sx * (B.h - 3), z: B.z + sz * (B.h - 3), ry: rng() * 6.28, s: 4.2 });
@@ -62,7 +63,7 @@ function buildDungeonView(D) {
       { x: m.x0 + ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 });
   });
   for (const m of D.side || []) braz.push({ x: m.x0 + 1.6, z: m.z1 - 1.6, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - 1.6, z: m.z1 - 1.6, ry: rng() * 6.28, s: 1.7 }); // party-dungeon side rooms
-  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz), WorldModels.place(dungeonGroup, 'clutter', clutter));
+  dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz, { cell: 24 }), WorldModels.place(dungeonGroup, 'clutter', clutter, { cell: 24 }));
   // the biome's own dressing along the walls of every hall but the first and the boss's (TRELLIS.2 models):
   // root-split sarcophagi, glacier coffins, slag carts, toppled bookshelves, coral shrines, fallen stars
   const [themeId, themeS] = DUNGEON_THEME_PROP[areaBiome(D.zone)] || DUNGEON_THEME_PROP[0], theme = [];
@@ -72,7 +73,7 @@ function buildDungeonView(D) {
     if (D.delve && hx >= 15) spots.push([m.x - 0.78 * hx, m.z0 + ins], [m.x + 0.78 * hx, m.z1 - ins]);
     for (const [x, z] of spots) if (rng() < 0.85) theme.push({ x, z, ry: Math.atan2(m.x - x, m.z - z) + (rng() - 0.5) * 0.5, s: themeS * (0.9 + rng() * 0.2) });
   });
-  if (theme.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, themeId, theme, { bright: 1.15 }));
+  if (theme.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, themeId, theme, { bright: 1.15, cell: 24 }));
   // brazier flames share one additive mesh so the flicker is a single opacity change
   const fp = braz.map((b) => part(GEO.ico0, 0xffa040, [b.x, b.s * 0.98, b.z], null, [0.32, 0.5, 0.32]));
   if (fp.length) { dungeonParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); dungeonGroup.add(dungeonParts.flame); }
