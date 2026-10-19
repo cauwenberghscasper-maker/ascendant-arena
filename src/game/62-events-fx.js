@@ -142,17 +142,17 @@ function processEvents() {
         showBanner(e.had ? 'Pet found again!' : 'A pet in the rock!', e.had ? `+${CFG.mining.petGems} gems` : `${PET_DEFS[e.id].name} joins you · 1 in ${fmt(CFG.mining.pet)}`, 'gold');
         Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
       // party dungeons (36b-delve.js)
-      case 'delveEvent': { const E = CFG.delve.events[e.k]; showBanner(E.name, E.d, 'gold'); ringFx(e.x, e.z, 5, 0xffd34a, 1.1); Sfx.play('horn'); break; }
+      case 'delveEvent': { const E = CFG.delve.events[e.k]; showBanner(E.name, E.d, 'gold', 6); ringFx(e.x, e.z, 5, 0xffd34a, 1.1); Sfx.play('horn'); break; }
       case 'delveMini': showBanner(escapeHTML(e.name), 'A champion of the dungeon guards this hall', 'red'); ringFx(e.x, e.z, 7, 0xff5d8f, 1.1); Sfx.play('horn'); break;
       case 'delvePhase': showBanner(`Phase ${e.n} of ${e.of}`, `${escapeHTML(e.name)}${e.rage ? ' is enraged' : ' calls for help'}${e.adds && e.adds.length ? ' · new: ' + e.adds.map(escapeHTML).join(', ') : ''}`, 'red'); ringFx(e.x, e.z, 6, e.rage ? 0xff3030 : 0xff5d8f, 1); Sfx.play('horn'); if (e.rage) burst(e.x, 1.5, e.z, 34, 0xff3030, 6, 0.9, 0.4, 3, 2); break;
-      case 'delvePuzzle': { const K = CFG.delve.puzzle.kinds[e.kind] || {}; showBanner(`${escapeHTML(e.name)} · ${K.name || ''}`, e.pips ? CFG.delve.puzzle.pipsHint : K.hint || CFG.delve.puzzle.hint, 'gold'); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break; }
-      case 'delvePzClock': showToast(`The race is on: ${e.secs} seconds!`, 'bad'); ringFx(e.x, e.z, 7, 0xffd34a, 0.8); Sfx.play('horn'); break;
-      case 'delvePzStep': showToast(e.kind === 'wisp' ? `Caught the wisp: ${e.n} of ${e.of}` : e.kind === 'match' ? `Riddle ${e.n} of ${e.of} answered` : e.kind === 'pairs' ? `Twins found: ${e.n} of ${e.of} seals` : e.flip ? `${e.n} of ${e.of} seals lit` : `Seal ${e.n} of ${e.of} awake`, 'good'); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
-      case 'delvePzFail': showToast(`${e.timed ? 'Too slow!' : 'Wrong seal!'} ${e.spikes ? 'The floor bites back' : 'Something crawls out'}`, 'bad'); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
-      case 'delvePzDone': showBanner(`${escapeHTML(e.name)} solved`, e.guards ? 'Defeat the guards to open the gate' : 'The gate opens', 'gold'); burst(e.x, 1, e.z, 30, 0xffd34a, 6, 0.9, 0.4, 3, 2); Sfx.play('unlock'); break;
+      case 'delvePuzzle': { const K = CFG.delve.puzzle.kinds[e.kind] || {}; showBanner(`${escapeHTML(e.name)} · ${K.name || ''}`, e.pips ? CFG.delve.puzzle.pipsHint : K.hint || CFG.delve.puzzle.hint, 'gold', 7); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break; }
+      case 'delvePzClock': showToast(`The race is on: ${e.secs} seconds!`, 'bad', 4); ringFx(e.x, e.z, 7, 0xffd34a, 0.8); Sfx.play('horn'); break;
+      case 'delvePzStep': showToast(e.kind === 'wisp' ? `Caught the wisp: ${e.n} of ${e.of}` : e.kind === 'match' ? `Riddle ${e.n} of ${e.of} answered` : e.kind === 'pairs' ? `Twins found: ${e.n} of ${e.of} seals` : e.flip ? `${e.n} of ${e.of} seals lit` : `Seal ${e.n} of ${e.of} awake`, 'good', 4); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
+      case 'delvePzFail': showToast(`${e.timed ? 'Too slow!' : 'Wrong seal!'} ${e.spikes ? 'The floor bites back' : 'Something crawls out'}`, 'bad', 4); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
+      case 'delvePzDone': showBanner(`${escapeHTML(e.name)} solved`, e.guards ? 'Defeat the guards to open the gate' : 'The gate opens', 'gold', 4.5); burst(e.x, 1, e.z, 30, 0xffd34a, 6, 0.9, 0.4, 3, 2); Sfx.play('unlock'); break;
       case 'delveBossCast': if (e.k === 'charge' || e.k === 'spiral' || e.k === 'meteors') Sfx.play('horn', { gap: 1 }); ringFx(e.x, e.z, 3, 0xff5d8f, 0.5); break;
       case 'delveVein': if (e.lode) showBanner('Motherlode!', `+${e.n} ${escapeHTML(e.name)}`, 'gold'); else showToast(`+${e.n} ${escapeHTML(e.name)} · a rare dungeon treasure`, 'good'); burst(e.x, 1.2, e.z, e.lode ? 40 : 24, 0xffe27a, 5, 0.9, 0.4, 4, 2); Sfx.play(e.lode ? 'radiant' : 'unlock'); break;
-      case 'delvePzMiss': showToast('Not twins: they hide again', 'bad'); Sfx.play('tick'); break;
+      case 'delvePzMiss': showToast('Not twins: they hide again', 'bad', 4); Sfx.play('tick'); break;
       case 'delveSide': showBanner(escapeHTML(e.name), e.kind === 'den' ? 'A champion guards its chest' : e.kind === 'vein' ? 'A rare vein, guarded' : 'Treasure, guarded', 'gold'); ringFx(e.x, e.z, 5, 0xffd34a, 1); Sfx.play('unlock'); break;
       case 'delveSecret': showToast('The cracked wall gives way: a hidden room!', 'good'); burst(e.x, 1.2, e.z, 40, 0xc9b38a, 6, 0.9, 0.5, 2, 2); Sfx.play('boom'); break;
       case 'delveWave': showToast(`Wave ${e.n + 1} of ${e.of}!`, 'bad'); ringFx(e.x, e.z, 6, 0xff5d8f, 0.9); break;

@@ -148,15 +148,15 @@ function updateFortBubbles() {
 }
 
 // --- toasts / banners ---
-function showToast(text, kind) {
+function showToast(text, kind, secs = 2.6) {
   const box = $('toasts'), el = document.createElement('div');
   el.className = 'toast ' + (kind || ''); el.textContent = text; box.appendChild(el);
   while (box.children.length > 3) box.removeChild(box.firstChild);
-  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 2600);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, secs * 1000);
 }
 let bannerT = 0;
-function showBanner(big, small, cls) {
-  const b = $('banner'); b.innerHTML = `<b>${big}</b>${small ? `<span>${small}</span>` : ''}`; b.className = 'show ' + (cls || ''); bannerT = 2.6;
+function showBanner(big, small, cls, secs = 2.6) {
+  const b = $('banner'); b.innerHTML = `<b>${big}</b>${small ? `<span>${small}</span>` : ''}`; b.className = 'show ' + (cls || ''); bannerT = secs;
 }
 
 // --- coach marks (tutorial prompts) ---

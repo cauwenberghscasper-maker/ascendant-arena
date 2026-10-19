@@ -1,3 +1,16 @@
+# Dungeons: puzzle info stays longer, fuller and better spread halls (19 Oct 2026, branch `claude/dungeon-fill`, PR to main)
+Casper: puzzle info should stay longer; more monsters per room, spread over the room.
+- **Puzzle info:** the puzzle banner shows 7 s (was 2.6), event banners 6 s, "solved" 4.5 s, puzzle step/fail toasts 4 s
+  (`showBanner`/`showToast` take a duration now). While you stand in an unsolved puzzle hall its name and hint stay in
+  the HUD list (`delveHud`, 'dlvPuzzle').
+- **More monsters:** `spread.area` 95 → 65 m² per monster, `n` [6,16] → [8,22]; puzzle halls hold 40% of a full hall
+  (were 2 guards, the most common hall), champion halls 35% (were 3). `tough` 1.6/1.2 → 1.3/1.1 so the extra monsters
+  don't make runs much harder.
+- **Spread:** spawn spots are dealt first one per cell of a grid over the hall (seeded cell order, jittered spot), then
+  topped up at random; `spread.entry` 11 → 8 m. Same seed → same spots on every phone (check passes).
+- Measured over 12 Heroic Crypt runs: 4.5 → 7.8 monsters per hall, 3×3 hall coverage 42% → 73%, closest pair 4.9 m.
+Open: judge pacing in real runs (counts are `CFG.delve.spread`).
+
 # Bastion: no more stuck monsters, Remove mode, Build button (19 Oct 2026, on `main`)
 Casper (phone screenshot): open-world monsters wandered the fort and could not be killed; wants an easy edit mode to
 delete buildings (all at once) and easier access to building mode.

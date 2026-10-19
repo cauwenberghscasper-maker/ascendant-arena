@@ -6760,8 +6760,8 @@ CFG.delve = {
   side: { n: [[2, 3], [2, 3], [3, 4], [3, 4], [3, 5]], h: [8, 10], corridor: 7, secret: 0.45,
     kinds: [{ k: 'treasure', w: 3, guards: 3 }, { k: 'den', w: 2, guards: 2 }, { k: 'vein', w: 2, guards: 2 }],
     names: { treasure: 'Treasure Room', den: "Champion's Den", vein: 'Hidden Vein' }, denHp: 0.45 },
-  spread: { area: 95, n: [6, 16], gap: 6, entry: 11, alert: 9, cover: 9, patrol: 0.2, roam: 12, captain: 8 },
-  tough: { hp: 1.6, dmg: 1.2 },
+  spread: { area: 65, n: [8, 22], gap: 6, entry: 8, puzzleShare: 0.4, miniShare: 0.35, alert: 9, cover: 9, patrol: 0.2, roam: 12, captain: 8 },
+  tough: { hp: 1.3, dmg: 1.1 }, // more monsters per hall (spread.area 95 → 65), so each is a little less tough
   // halfway through, a hall holds the dungeon's mini-boss with guards; the boss fights in three phases (adds at 66% and
   // 33%, then it gets faster and hits harder)
   mini: { hp: 0.55, guards: 3 }, boss: { hp: 2.4, phases: [0.66, 0.33], rage: { spd: 1.25, atk: 1.2 } },
@@ -6906,8 +6906,9 @@ function delveLayout(seed, def, di) {
   for (const m of rooms) {
     if (m.boss) { m.fight = 'boss'; continue; }
     const SP = C.spread, full = clamp(Math.round(4 * m.hx * m.hz / SP.area), SP.n[0], SP.n[1]);
-    if (m.puzzle) { m.fight = 'puzzle'; m.count = C.puzzle.guards[Math.min(di, C.puzzle.guards.length - 1)]; m.waves = 1; }
-    else if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.count = C.mini.guards; m.waves = 1; }
+    // puzzle and champion halls are guarded too, at a share of a full hall (they used to be nearly empty)
+    if (m.puzzle) { m.fight = 'puzzle'; m.count = Math.max(C.puzzle.guards[Math.min(di, C.puzzle.guards.length - 1)], Math.round(full * SP.puzzleShare)); m.waves = 1; }
+    else if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.count = Math.max(C.mini.guards, Math.round(full * SP.miniShare)); m.waves = 1; }
     else if (!m.event) { const f = wpick(C.fights); m.fight = f.k; m.waves = f.waves || 1; m.count = f.k === 'guard' ? full : Math.max(2, Math.ceil(full / 2)); }
     else { m.fight = 'guard'; m.count = Math.max(3, Math.round(full * (m.event === 'traps' ? 0.5 : 0.6))); m.waves = 1; } // event halls are guarded too (no empty halls)
     m.dark = m.i > 0 && rng() < C.mods.dark;
@@ -6921,7 +6922,14 @@ function delveLayout(seed, def, di) {
     const pv = m.i ? rooms[m.i - 1] : null, ex = pv ? Math.sign(Math.round(pv.x - m.x)) : 0, ez = pv ? Math.sign(Math.round(pv.z - m.z)) : -1;
     m.entry = { x: m.x + ex * m.hx, z: m.z + ez * m.hz }; m.spots = [];
     for (let w = 0; w < m.waves; w++) {
-      const pts = [];
+      const pts = [], ok = (x, z, gap) => Math.hypot(x - m.entry.x, z - m.entry.z) >= Math.min(SP.entry, Math.max(m.hx, m.hz)) && !pts.some((q) => Math.hypot(q.x - x, q.z - z) < gap) && !props.some((q) => q.room === m.i && Math.hypot(q.x - x, q.z - z) < 2);
+      // first one spot per cell of a grid over the hall (cells in a seeded order, a jittered spot in each), so the
+      // monsters cover the whole hall instead of bunching up; then random spots fill what the grid could not
+      { const cols = Math.max(2, Math.round(Math.sqrt(m.count * m.hx / m.hz))), rows = Math.max(2, Math.ceil(m.count / cols)), cw = (m.hx - 3) * 2 / cols, ch = (m.hz - 3) * 2 / rows;
+        const cells = []; for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) cells.push([i, j]);
+        for (const [i, j] of seededShuffle(cells, rng)) { if (pts.length >= m.count) break;
+          const x = m.x - (m.hx - 3) + (i + 0.2 + rng() * 0.6) * cw, z = m.z - (m.hz - 3) + (j + 0.2 + rng() * 0.6) * ch;
+          if (ok(x, z, SP.gap)) pts.push({ x, z, d: Math.hypot(x - m.entry.x, z - m.entry.z), e: rng() }); } }
       for (const gap of [SP.gap, SP.gap * 0.85, SP.gap * 0.75]) for (let t = 0; t < 300 && pts.length < m.count; t++) { // never closer than ~4.5 m: a full hall takes fewer instead
         const x = m.x + (rng() * 2 - 1) * (m.hx - 3), z = m.z + (rng() * 2 - 1) * (m.hz - 3), d = Math.hypot(x - m.entry.x, z - m.entry.z);
         if (d < Math.min(SP.entry, Math.max(m.hx, m.hz)) || pts.some((q) => Math.hypot(q.x - x, q.z - z) < gap) || props.some((q) => q.room === m.i && Math.hypot(q.x - x, q.z - z) < 2)) continue;
@@ -12780,15 +12788,15 @@ function updateFortBubbles() {
 }
 
 // --- toasts / banners ---
-function showToast(text, kind) {
+function showToast(text, kind, secs = 2.6) {
   const box = $('toasts'), el = document.createElement('div');
   el.className = 'toast ' + (kind || ''); el.textContent = text; box.appendChild(el);
   while (box.children.length > 3) box.removeChild(box.firstChild);
-  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 2600);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, secs * 1000);
 }
 let bannerT = 0;
-function showBanner(big, small, cls) {
-  const b = $('banner'); b.innerHTML = `<b>${big}</b>${small ? `<span>${small}</span>` : ''}`; b.className = 'show ' + (cls || ''); bannerT = 2.6;
+function showBanner(big, small, cls, secs = 2.6) {
+  const b = $('banner'); b.innerHTML = `<b>${big}</b>${small ? `<span>${small}</span>` : ''}`; b.className = 'show ' + (cls || ''); bannerT = secs;
 }
 
 // --- coach marks (tutorial prompts) ---
@@ -14132,17 +14140,17 @@ function processEvents() {
         showBanner(e.had ? 'Pet found again!' : 'A pet in the rock!', e.had ? `+${CFG.mining.petGems} gems` : `${PET_DEFS[e.id].name} joins you · 1 in ${fmt(CFG.mining.pet)}`, 'gold');
         Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> dug up <b>${PET_DEFS[e.id].name}</b>!`, 'boss'); break;
       // party dungeons (36b-delve.js)
-      case 'delveEvent': { const E = CFG.delve.events[e.k]; showBanner(E.name, E.d, 'gold'); ringFx(e.x, e.z, 5, 0xffd34a, 1.1); Sfx.play('horn'); break; }
+      case 'delveEvent': { const E = CFG.delve.events[e.k]; showBanner(E.name, E.d, 'gold', 6); ringFx(e.x, e.z, 5, 0xffd34a, 1.1); Sfx.play('horn'); break; }
       case 'delveMini': showBanner(escapeHTML(e.name), 'A champion of the dungeon guards this hall', 'red'); ringFx(e.x, e.z, 7, 0xff5d8f, 1.1); Sfx.play('horn'); break;
       case 'delvePhase': showBanner(`Phase ${e.n} of ${e.of}`, `${escapeHTML(e.name)}${e.rage ? ' is enraged' : ' calls for help'}${e.adds && e.adds.length ? ' · new: ' + e.adds.map(escapeHTML).join(', ') : ''}`, 'red'); ringFx(e.x, e.z, 6, e.rage ? 0xff3030 : 0xff5d8f, 1); Sfx.play('horn'); if (e.rage) burst(e.x, 1.5, e.z, 34, 0xff3030, 6, 0.9, 0.4, 3, 2); break;
-      case 'delvePuzzle': { const K = CFG.delve.puzzle.kinds[e.kind] || {}; showBanner(`${escapeHTML(e.name)} · ${K.name || ''}`, e.pips ? CFG.delve.puzzle.pipsHint : K.hint || CFG.delve.puzzle.hint, 'gold'); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break; }
-      case 'delvePzClock': showToast(`The race is on: ${e.secs} seconds!`, 'bad'); ringFx(e.x, e.z, 7, 0xffd34a, 0.8); Sfx.play('horn'); break;
-      case 'delvePzStep': showToast(e.kind === 'wisp' ? `Caught the wisp: ${e.n} of ${e.of}` : e.kind === 'match' ? `Riddle ${e.n} of ${e.of} answered` : e.kind === 'pairs' ? `Twins found: ${e.n} of ${e.of} seals` : e.flip ? `${e.n} of ${e.of} seals lit` : `Seal ${e.n} of ${e.of} awake`, 'good'); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
-      case 'delvePzFail': showToast(`${e.timed ? 'Too slow!' : 'Wrong seal!'} ${e.spikes ? 'The floor bites back' : 'Something crawls out'}`, 'bad'); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
-      case 'delvePzDone': showBanner(`${escapeHTML(e.name)} solved`, e.guards ? 'Defeat the guards to open the gate' : 'The gate opens', 'gold'); burst(e.x, 1, e.z, 30, 0xffd34a, 6, 0.9, 0.4, 3, 2); Sfx.play('unlock'); break;
+      case 'delvePuzzle': { const K = CFG.delve.puzzle.kinds[e.kind] || {}; showBanner(`${escapeHTML(e.name)} · ${K.name || ''}`, e.pips ? CFG.delve.puzzle.pipsHint : K.hint || CFG.delve.puzzle.hint, 'gold', 7); ringFx(e.x, e.z, 6, 0xffd34a, 1.1); Sfx.play('horn'); break; }
+      case 'delvePzClock': showToast(`The race is on: ${e.secs} seconds!`, 'bad', 4); ringFx(e.x, e.z, 7, 0xffd34a, 0.8); Sfx.play('horn'); break;
+      case 'delvePzStep': showToast(e.kind === 'wisp' ? `Caught the wisp: ${e.n} of ${e.of}` : e.kind === 'match' ? `Riddle ${e.n} of ${e.of} answered` : e.kind === 'pairs' ? `Twins found: ${e.n} of ${e.of} seals` : e.flip ? `${e.n} of ${e.of} seals lit` : `Seal ${e.n} of ${e.of} awake`, 'good', 4); ringFx(e.x, e.z, 2, 0xffd34a, 0.6); Sfx.play('tick'); break;
+      case 'delvePzFail': showToast(`${e.timed ? 'Too slow!' : 'Wrong seal!'} ${e.spikes ? 'The floor bites back' : 'Something crawls out'}`, 'bad', 4); ringFx(e.x, e.z, 7, 0xff3344, 0.8); Sfx.play('lose'); break;
+      case 'delvePzDone': showBanner(`${escapeHTML(e.name)} solved`, e.guards ? 'Defeat the guards to open the gate' : 'The gate opens', 'gold', 4.5); burst(e.x, 1, e.z, 30, 0xffd34a, 6, 0.9, 0.4, 3, 2); Sfx.play('unlock'); break;
       case 'delveBossCast': if (e.k === 'charge' || e.k === 'spiral' || e.k === 'meteors') Sfx.play('horn', { gap: 1 }); ringFx(e.x, e.z, 3, 0xff5d8f, 0.5); break;
       case 'delveVein': if (e.lode) showBanner('Motherlode!', `+${e.n} ${escapeHTML(e.name)}`, 'gold'); else showToast(`+${e.n} ${escapeHTML(e.name)} · a rare dungeon treasure`, 'good'); burst(e.x, 1.2, e.z, e.lode ? 40 : 24, 0xffe27a, 5, 0.9, 0.4, 4, 2); Sfx.play(e.lode ? 'radiant' : 'unlock'); break;
-      case 'delvePzMiss': showToast('Not twins: they hide again', 'bad'); Sfx.play('tick'); break;
+      case 'delvePzMiss': showToast('Not twins: they hide again', 'bad', 4); Sfx.play('tick'); break;
       case 'delveSide': showBanner(escapeHTML(e.name), e.kind === 'den' ? 'A champion guards its chest' : e.kind === 'vein' ? 'A rare vein, guarded' : 'Treasure, guarded', 'gold'); ringFx(e.x, e.z, 5, 0xffd34a, 1); Sfx.play('unlock'); break;
       case 'delveSecret': showToast('The cracked wall gives way: a hidden room!', 'good'); burst(e.x, 1.2, e.z, 40, 0xc9b38a, 6, 0.9, 0.5, 2, 2); Sfx.play('boom'); break;
       case 'delveWave': showToast(`Wave ${e.n + 1} of ${e.of}!`, 'bad'); ringFx(e.x, e.z, 6, 0xff5d8f, 0.9); break;
@@ -16467,6 +16475,10 @@ function delveHud() {
   if (m.event && !s.done && m.seen) {
     const e = E[m.event], extra = m.event === 'vault' && s.t != null ? ` · ${Math.max(0, Math.ceil(E.vault.time - s.t))}s` : m.event === 'plates' ? ` · ${(X.plates[m.i] || []).filter(Boolean).length}/${clamp(X.n, 1, 4)}` : '';
     if (!((m.event === 'altar' && X.used.altar) || (m.event === 'fountain' && X.used.fountain))) Feed.add(`${gi('m_caseOpen')} <b>${e.name}</b> · ${e.d}${extra}`, 'rift', 'dlvEvent', 1.2);
+  }
+  if (m.pz && m.seen && !delvePz(D, m).done) { // the puzzle's name and hint stay up while it is unsolved
+    const PZ = CFG.delve.puzzle, K = PZ.kinds[m.pz.kind] || {};
+    Feed.add(`${gi('m_caseOpen')} <b>${escapeHTML(X.def.puzzle)}${K.name ? ' · ' + K.name : ''}</b> · ${m.pz.pips ? PZ.pipsHint : K.hint || PZ.hint}`, 'rift', 'dlvPuzzle', 1.2);
   }
   if (X.revive) Feed.add(`${gi('m_players')} Reviving <b>${escapeHTML(X.revive.nick || 'ally')}</b> · ${Math.round(X.revive.t / CFG.delve.reviveT * 100)}%`, 'mp', 'dlvRevive', 0.5);
   const bar = $('partyBar'); if (!bar) return;
