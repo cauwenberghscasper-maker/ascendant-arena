@@ -330,7 +330,6 @@ function startDelve(id, di, seed, n, lead = true) {
   D.delve = { def, diff, di, seed, humans, n: DV.bots && DV.bots.on ? DV.maxParty : humans, bots: [], roster: delveRoster(def), slots: new Map(), cursed: false, bonus: {}, used: {}, downT: 0, wipeT: 0, revive: null, plates: {}, ev: {}, pz: {}, emit: [], mined: {}, claimed: {} };
   dungeonGrid(D); clearProjectiles();
   pl.x = D.start.x; pl.z = D.start.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
-  if (lead && D.delve.n > humans) delveBotsMake(D, humans); // computer heroes fill the empty places (36d-delve-bots.js)
   G.zoneIdx = zi;
   D.rooms.forEach((m) => { m.mobs = []; m.cleared = false; m.wave = -1; m.seen = false; if (!m.boss && m.count) spawnRoomWave(D, m, 0); });
   // side rooms: guards round the middle; a den also has its champion (an elite with modifiers). Their monsters count for
@@ -343,6 +342,7 @@ function startDelve(id, di, seed, n, lead = true) {
   const b = D.rooms.at(-1);
   D.boss = delveMob(D, b.i, 0, { type: D.delve.roster[D.delve.roster.length - 1], boss: true, lvl: lvl + CFG.dungeon.boss.lvlAdd, x: b.x, z: b.z + 4, name: def.boss });
   D.boss.maxHp = D.boss.hp = Math.round(D.boss.maxHp * DV.boss.hp); D.boss.delveBoss = true; b.mobs = [D.boss]; D.phase = 0;
+  if (lead && D.delve.n > humans) delveBotsMake(D, humans); // computer heroes fill the empty places, sized to this run's monsters (36d-delve-bots.js)
   ev({ t: 'dungeonStart', name: def.name, lvl, key: 0, x: pl.x, z: pl.z, delve: true, diff: diff.name, n: D.delve.n }); return true;
 }
 // who of the party is in this run with us (peers in the same run seed); always includes the local player
