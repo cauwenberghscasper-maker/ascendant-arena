@@ -5,494 +5,494 @@
   {
    "name": "super_wrenna",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:07. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.7
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:15. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 1.5
   },
   {
    "name": "super_hob",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:07. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.3
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:14. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_corrin",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:07. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:14. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_mott",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:07. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:13. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.7
   },
   {
    "name": "super_nyssa",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:06. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:12. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_pyrrhos",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:06. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:12. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "super_moss",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:06. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:11. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_ione",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:06. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:11. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "super_fenwick",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:06. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:10. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_thimble",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:05. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:10. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "super_unwritten",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:05. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:09. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_lysandra",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:05. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:08. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_kallix",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:05. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:08. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_oko",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:05. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:07. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_ysolt",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:05. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:07. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_halven",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:04. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:06. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_sena",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:04. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:06. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_jory",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:04. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:05. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_sleeper",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:04. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:04. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_camedown",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:04. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:04. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "super_vell",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:04. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:03. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_hespera",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:03. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:03. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "super_kerberon",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:03. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:02. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_ophira",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:03. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:02. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_tychon",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:03. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "super_aurvan",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:03. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "super_ourax",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:02. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "ammo_ione",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:02. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:02:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "ammo_unwritten",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:02. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "ammo_lysandra",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:02. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "ammo_oko",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:02. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "ammo_ysolt",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:02. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:57. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "ammo_halven",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:57. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "ammo_sleeper",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:56. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "ammo_camedown",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:56. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "ammo_ourax",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:55. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_wrenna",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:55. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "hit_hob",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:01. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:54. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_corrin",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:54. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_mott",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:53. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "hit_nyssa",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:53. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "hit_pyrrhos",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:52. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_moss",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:52. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_ione",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:51. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_fenwick",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:13:00. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:51. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_thimble",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:50. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "hit_unwritten",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:49. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_lysandra",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:49. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_kallix",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:48. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_oko",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:48. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_ysolt",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:59. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:47. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "hit_halven",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:47. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "hit_sena",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:46. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_jory",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:46. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_sleeper",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:45. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "hit_camedown",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:45. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_vell",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:44. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_hespera",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:58. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:44. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "hit_kerberon",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:57. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:43. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "hit_ophira",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:57. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:43. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_tychon",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:57. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:42. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_aurvan",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:57. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:42. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "hit_ourax",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:57. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:41. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_copper",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:57. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:41. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_iron",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:56. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:40. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_obsidian",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:56. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:40. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_mithril",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:56. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:39. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_abyssal",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:56. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:39. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "mat_starsteel",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:55. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:38. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "mat_thornhide",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:55. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:37. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "mat_frostfang",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:55. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:37. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_emberscale",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:55. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:36. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "mat_arcdust",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:55. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.1
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:36. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_pearl",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:54. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.3
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:35. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_starfeather",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:54. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:35. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_verdant",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:54. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:34. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "mat_glacial",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:54. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:34. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_magma",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:54. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:33. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "mat_void",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:54. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:33. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "mat_tidal",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:54. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:32. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   },
   {
    "name": "mat_solar",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:53. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:32. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.6
   },
   {
    "name": "mat_titansoul",
    "ok": false,
-   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 9:12:53. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
-   "sec": 0.2
+   "error": "You have exceeded your Pro ZeroGPU quota (60s requested vs. 89s left). Try again in 0:01:31. Add credits to keep using ZeroGPU. $1 for 10 minutes of ZeroGPU inference - https://huggingface.co/settings/billing?add-credits=true",
+   "sec": 0.5
   }
  ]
 }
