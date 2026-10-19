@@ -68,6 +68,7 @@ function delveBotThink(b, dt) {
     if (pzOrdered(pz) && pzS.step >= 1 && X.bots.indexOf(b) === 0) {
       if (ai.pzStep !== pzS.step) { ai.pzStep = pzS.step; ai.pzT = 0; }
       if ((ai.pzT += dt) >= DV.puzzle.botWait) seal = pz.sw[pz.order[pzS.step]];
+    } else if (pz.kind === 'wisp' && X.bots.indexOf(b) === 0) { seal = pz.sw[delvePzWisp(myRoom, pzS)]; // the first bot chases the wisp; the twins are yours alone
     } else if (pz.kind === 'timed' && pzS.bits) {
       const dark = pz.sw.filter((_, j) => !((pzS.bits >> j) & 1)); seal = dark.length ? dark[X.bots.indexOf(b) % dark.length] : null;
     }

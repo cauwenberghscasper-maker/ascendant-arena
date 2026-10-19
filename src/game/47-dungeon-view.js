@@ -38,7 +38,7 @@ function buildDungeonView(D) {
   // floor: checkered 3 m tiles over halls and corridors, a dark plinth underneath
   const floor = (x0, x1, z0, z1) => { for (let x = x0; x < x1 - 0.01; x += 3) for (let z = z0; z < z1 - 0.01; z += 3) { const w = Math.min(3, x1 - x), d = Math.min(3, z1 - z), c = (Math.floor((x - DC.x) / 3) + Math.floor((z - DC.z) / 3)) & 1 ? pal.a : pal.b;
     parts.push(part(GEO.box, c, [x + w / 2, -0.06 - rng() * 0.03, z + d / 2], null, [w * 0.98, 0.12, d * 0.98])); } };
-  for (const m of D.rooms) { floor(m.x0, m.x1, m.z0, m.z1); parts.push(part(GEO.box, pal.trim, [m.x, -0.4, m.z], null, [m.x1 - m.x0 + 2, 0.6, m.z1 - m.z0 + 2])); }
+  for (const m of D.side ? [...D.rooms, ...D.side] : D.rooms) { floor(m.x0, m.x1, m.z0, m.z1); parts.push(part(GEO.box, pal.trim, [m.x, -0.4, m.z], null, [m.x1 - m.x0 + 2, 0.6, m.z1 - m.z0 + 2])); }
   for (const c of D.cors) { floor(c.x0, c.x1, c.z0, c.z1); parts.push(part(GEO.box, pal.trim, [(c.x0 + c.x1) / 2, -0.4, (c.z0 + c.z1) / 2], null, [c.x1 - c.x0 + 2, 0.6, c.z1 - c.z0 + 2])); }
   const masonry = new THREE.Mesh(mergeParts(parts), matDungeonFloor); masonry.receiveShadow = true; dungeonGroup.add(masonry);
   // walls: generated stone wall sections (each with its own sconce torch), tiled along every wall segment
@@ -61,6 +61,7 @@ function buildDungeonView(D) {
     if (D.delve && (m.hx >= 15 || boss)) for (const f of [-0.5, 0.5]) braz.push({ x: m.x + f * m.hx, z: m.z1 - ins, ry: rng() * 6.28, s: 1.7 }, { x: m.x + f * m.hx, z: m.z0 + ins, ry: rng() * 6.28, s: 1.7 },
       { x: m.x0 + ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - ins, z: m.z + f * m.hz, ry: rng() * 6.28, s: 1.7 });
   });
+  for (const m of D.side || []) braz.push({ x: m.x0 + 1.6, z: m.z1 - 1.6, ry: rng() * 6.28, s: 1.7 }, { x: m.x1 - 1.6, z: m.z1 - 1.6, ry: rng() * 6.28, s: 1.7 }); // party-dungeon side rooms
   dungeonParts.sets.push(WorldModels.place(dungeonGroup, 'pillar', pillars), WorldModels.place(dungeonGroup, 'brazier', braz), WorldModels.place(dungeonGroup, 'clutter', clutter));
   // the biome's own dressing along the walls of every hall but the first and the boss's (TRELLIS.2 models):
   // root-split sarcophagi, glacier coffins, slag carts, toppled bookshelves, coral shrines, fallen stars

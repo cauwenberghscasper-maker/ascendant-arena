@@ -262,15 +262,18 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
   their own idle animations. Monsters walk around walls and break the cheapest piece when closed in. The land grows
   with your level to 500×500 m. A fallen Keep restarts the wave it fell on, never lower. Your fort is a shared world:
   friends join with its code, even while you are offline (saved on the server; the player in it longest runs the waves).
-- **Dungeon mode** (party dungeons, level 12, 1-4 heroes, bots fill the empty places): six dungeons, one per biome,
-  each with its own boss, mini-boss, 5-piece set and rare treasure. A run is 7-10 halls of mixed sizes (more on harder difficulties) (20 m cells to
-  56 m arenas, a 64 m boss hall) with few, tough monsters spread over each hall (ranged ones at the back behind pillars;
-  a wake calls only close neighbours, so you can pull them), event rooms, a mini-boss halfway and a three-phase boss
-  whose kit grows each phase (Volley and Ground Slam, then Nova Ring and Charge, then Death Spiral and Falling Stones,
-  plus adds and an enrage). Two puzzle halls per run (three from Heroic; 4-6 seals; guards from Hard), never the same kind: the mural order, the echo (repeat a light
-  show), the race (every seal before the clock runs out) and the balance (lights-out). Some runs hide a rare vein of
-  the dungeon's own treasure (Rootbound Amber, Rimeglass, Forgeheart Ember, Ink Pearl, Tidestone, Starshard), each
-  hero mines their own. Every phone in a party sees the same run (rule 8). Difficulties Normal → Mythic → Ascendant 1, 2, …
+- **Dungeon mode** (party dungeons, a mid to late game mode from level 60, 1-4 heroes, bots fill the empty places):
+  six dungeons, one per biome, each at its own level (Crypt 60, Frostvault 72, Cinder Halls 88, Sunken Archive 108,
+  Abyssal Grotto 135, Starfall Sanctum 170) with its own boss, mini-boss, 5-piece set and rare treasure. A run is 7-10
+  halls of mixed sizes (20 m cells to 56 m arenas, a 64 m boss hall). Every hall is guarded: one monster per ~95 m²,
+  never closer than ~4.5 m, ranged ones at the back (one behind each pillar), a captain in full halls and patrollers
+  that roam; a wake calls only close neighbours, so you can pull them. Event rooms, a mini-boss halfway and a
+  three-phase boss whose kit grows each phase (Volley and Ground Slam, then Nova Ring and Charge, then Death Spiral
+  and Falling Stones, plus adds and an enrage). 2-3 puzzle halls per run from seven kinds, never the same twice: the
+  mural order, the echo (repeat a light show), the race (beat the clock), the balance (lights-out), the twins (find
+  rune pairs), the wisp (catch it where it lands) and the riddle (the mural's rune, round after round). Side rooms off
+  the main halls (some behind a cracked wall you smash open): a guarded treasure room, a champion's den or a hidden
+  rare vein. Every phone in a party sees the same run (rule 8).
 - **Dungeons** with Dungeon Keys (tier + affixes, par time) and **Legendary Trials** (sigils, Radiant 1/500 drops).
 - **Mining:** ore, pickaxe, geodes for the Museum, a 1/10,000 pet.
 - **Daily:** 7-day calendar that never resets, weekly Colossus chest.

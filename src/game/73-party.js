@@ -54,6 +54,7 @@ function partyRecv(event, sid, P) {
   if (event === 'ddoor') { delveDoorRecv(P); return; }
   if (event === 'dpz') { delvePzRecv(P); return; }
   if (event === 'dbs') { delveBossRecv(P); return; }
+  if (event === 'dsec') { delveSecretRecv(P); return; }
   if (event === 'dask') { // the leader asks to play (again): only my party's leader, and only while I'm not already in
     const L = partyLeader(); if (!PARTY.code || !L || L.me || L.key !== sid || delveOn()) return;
     PARTY.dg = delveDef(P.dg).id; PARTY.df = clamp(mpNum(P.df, 0) | 0, 0, 999); PARTY.ready = false;
@@ -215,7 +216,7 @@ function openDelveChest(r) {
 }
 // a cache or an event: the interact button inside a party dungeon
 function delveAct(n) {
-  if (n.kind === 'delveBonus') { const r = delveUse('delveBonus', n.room); if (r) openDelveChest(r); return; }
+  if (n.kind === 'delveBonus' || n.kind === 'delveTreasure') { const r = delveUse(n.kind, n.room); if (r) openDelveChest(r); return; }
   delveUse(n.kind, n.room);
 }
 // HUD inside a party dungeon: the room line, the event line and a revive ring
