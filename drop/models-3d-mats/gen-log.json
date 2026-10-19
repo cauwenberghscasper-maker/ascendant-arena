@@ -1,0 +1,120 @@
+{
+ "batch": "models-3d-mats",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "mat_abyssal",
+   "ok": true,
+   "file": "mat_abyssal.glb",
+   "sec": 22.2
+  },
+  {
+   "name": "mat_arcdust",
+   "ok": true,
+   "file": "mat_arcdust.glb",
+   "sec": 43.7
+  },
+  {
+   "name": "mat_copper",
+   "ok": true,
+   "file": "mat_copper.glb",
+   "sec": 21.7
+  },
+  {
+   "name": "mat_emberscale",
+   "ok": true,
+   "file": "mat_emberscale.glb",
+   "sec": 69.8
+  },
+  {
+   "name": "mat_frostfang",
+   "ok": true,
+   "file": "mat_frostfang.glb",
+   "sec": 14.1
+  },
+  {
+   "name": "mat_glacial",
+   "ok": true,
+   "file": "mat_glacial.glb",
+   "sec": 20.1
+  },
+  {
+   "name": "mat_iron",
+   "ok": true,
+   "file": "mat_iron.glb",
+   "sec": 16.3
+  },
+  {
+   "name": "mat_magma",
+   "ok": true,
+   "file": "mat_magma.glb",
+   "sec": 34.9
+  },
+  {
+   "name": "mat_mithril",
+   "ok": true,
+   "file": "mat_mithril.glb",
+   "sec": 19.5
+  },
+  {
+   "name": "mat_obsidian",
+   "ok": true,
+   "file": "mat_obsidian.glb",
+   "sec": 15.5
+  },
+  {
+   "name": "mat_pearl",
+   "ok": true,
+   "file": "mat_pearl.glb",
+   "sec": 57.9
+  },
+  {
+   "name": "mat_solar",
+   "ok": true,
+   "file": "mat_solar.glb",
+   "sec": 22.1
+  },
+  {
+   "name": "mat_starfeather",
+   "ok": true,
+   "file": "mat_starfeather.glb",
+   "sec": 15.9
+  },
+  {
+   "name": "mat_starsteel",
+   "ok": true,
+   "file": "mat_starsteel.glb",
+   "sec": 15.6
+  },
+  {
+   "name": "mat_thornhide",
+   "ok": true,
+   "file": "mat_thornhide.glb",
+   "sec": 33.4
+  },
+  {
+   "name": "mat_tidal",
+   "ok": true,
+   "file": "mat_tidal.glb",
+   "sec": 34.1
+  },
+  {
+   "name": "mat_titansoul",
+   "ok": true,
+   "file": "mat_titansoul.glb",
+   "sec": 42.4
+  },
+  {
+   "name": "mat_verdant",
+   "ok": true,
+   "file": "mat_verdant.glb",
+   "sec": 23.1
+  },
+  {
+   "name": "mat_void",
+   "ok": true,
+   "file": "mat_void.glb",
+   "sec": 21.6
+  }
+ ]
+}
