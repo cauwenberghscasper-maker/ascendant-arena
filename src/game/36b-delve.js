@@ -56,8 +56,8 @@ CFG.delve = {
   side: { n: [[2, 3], [2, 3], [3, 4], [3, 4], [3, 5]], h: [8, 10], corridor: 7, secret: 0.45,
     kinds: [{ k: 'treasure', w: 3, guards: 3 }, { k: 'den', w: 2, guards: 2 }, { k: 'vein', w: 2, guards: 2 }],
     names: { treasure: 'Treasure Room', den: "Champion's Den", vein: 'Hidden Vein' }, denHp: 0.45 },
-  spread: { area: 95, n: [6, 16], gap: 6, entry: 11, alert: 9, cover: 9, patrol: 0.2, roam: 12, captain: 8 },
-  tough: { hp: 1.6, dmg: 1.2 },
+  spread: { area: 65, n: [8, 22], gap: 6, entry: 8, puzzleShare: 0.4, miniShare: 0.35, alert: 9, cover: 9, patrol: 0.2, roam: 12, captain: 8 },
+  tough: { hp: 1.3, dmg: 1.1 }, // more monsters per hall (spread.area 95 → 65), so each is a little less tough
   // halfway through, a hall holds the dungeon's mini-boss with guards; the boss fights in three phases (adds at 66% and
   // 33%, then it gets faster and hits harder)
   mini: { hp: 0.55, guards: 3 }, boss: { hp: 2.4, phases: [0.66, 0.33], rage: { spd: 1.25, atk: 1.2 } },
@@ -202,8 +202,9 @@ function delveLayout(seed, def, di) {
   for (const m of rooms) {
     if (m.boss) { m.fight = 'boss'; continue; }
     const SP = C.spread, full = clamp(Math.round(4 * m.hx * m.hz / SP.area), SP.n[0], SP.n[1]);
-    if (m.puzzle) { m.fight = 'puzzle'; m.count = C.puzzle.guards[Math.min(di, C.puzzle.guards.length - 1)]; m.waves = 1; }
-    else if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.count = C.mini.guards; m.waves = 1; }
+    // puzzle and champion halls are guarded too, at a share of a full hall (they used to be nearly empty)
+    if (m.puzzle) { m.fight = 'puzzle'; m.count = Math.max(C.puzzle.guards[Math.min(di, C.puzzle.guards.length - 1)], Math.round(full * SP.puzzleShare)); m.waves = 1; }
+    else if (m.i === mi) { m.fight = 'champion'; m.mini = true; m.count = Math.max(C.mini.guards, Math.round(full * SP.miniShare)); m.waves = 1; }
     else if (!m.event) { const f = wpick(C.fights); m.fight = f.k; m.waves = f.waves || 1; m.count = f.k === 'guard' ? full : Math.max(2, Math.ceil(full / 2)); }
     else { m.fight = 'guard'; m.count = Math.max(3, Math.round(full * (m.event === 'traps' ? 0.5 : 0.6))); m.waves = 1; } // event halls are guarded too (no empty halls)
     m.dark = m.i > 0 && rng() < C.mods.dark;
@@ -217,7 +218,14 @@ function delveLayout(seed, def, di) {
     const pv = m.i ? rooms[m.i - 1] : null, ex = pv ? Math.sign(Math.round(pv.x - m.x)) : 0, ez = pv ? Math.sign(Math.round(pv.z - m.z)) : -1;
     m.entry = { x: m.x + ex * m.hx, z: m.z + ez * m.hz }; m.spots = [];
     for (let w = 0; w < m.waves; w++) {
-      const pts = [];
+      const pts = [], ok = (x, z, gap) => Math.hypot(x - m.entry.x, z - m.entry.z) >= Math.min(SP.entry, Math.max(m.hx, m.hz)) && !pts.some((q) => Math.hypot(q.x - x, q.z - z) < gap) && !props.some((q) => q.room === m.i && Math.hypot(q.x - x, q.z - z) < 2);
+      // first one spot per cell of a grid over the hall (cells in a seeded order, a jittered spot in each), so the
+      // monsters cover the whole hall instead of bunching up; then random spots fill what the grid could not
+      { const cols = Math.max(2, Math.round(Math.sqrt(m.count * m.hx / m.hz))), rows = Math.max(2, Math.ceil(m.count / cols)), cw = (m.hx - 3) * 2 / cols, ch = (m.hz - 3) * 2 / rows;
+        const cells = []; for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) cells.push([i, j]);
+        for (const [i, j] of seededShuffle(cells, rng)) { if (pts.length >= m.count) break;
+          const x = m.x - (m.hx - 3) + (i + 0.2 + rng() * 0.6) * cw, z = m.z - (m.hz - 3) + (j + 0.2 + rng() * 0.6) * ch;
+          if (ok(x, z, SP.gap)) pts.push({ x, z, d: Math.hypot(x - m.entry.x, z - m.entry.z), e: rng() }); } }
       for (const gap of [SP.gap, SP.gap * 0.85, SP.gap * 0.75]) for (let t = 0; t < 300 && pts.length < m.count; t++) { // never closer than ~4.5 m: a full hall takes fewer instead
         const x = m.x + (rng() * 2 - 1) * (m.hx - 3), z = m.z + (rng() * 2 - 1) * (m.hz - 3), d = Math.hypot(x - m.entry.x, z - m.entry.z);
         if (d < Math.min(SP.entry, Math.max(m.hx, m.hz)) || pts.some((q) => Math.hypot(q.x - x, q.z - z) < gap) || props.some((q) => q.room === m.i && Math.hypot(q.x - x, q.z - z) < 2)) continue;

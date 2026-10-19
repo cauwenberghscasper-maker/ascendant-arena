@@ -228,6 +228,10 @@ function delveHud() {
     const e = E[m.event], extra = m.event === 'vault' && s.t != null ? ` · ${Math.max(0, Math.ceil(E.vault.time - s.t))}s` : m.event === 'plates' ? ` · ${(X.plates[m.i] || []).filter(Boolean).length}/${clamp(X.n, 1, 4)}` : '';
     if (!((m.event === 'altar' && X.used.altar) || (m.event === 'fountain' && X.used.fountain))) Feed.add(`${gi('m_caseOpen')} <b>${e.name}</b> · ${e.d}${extra}`, 'rift', 'dlvEvent', 1.2);
   }
+  if (m.pz && m.seen && !delvePz(D, m).done) { // the puzzle's name and hint stay up while it is unsolved
+    const PZ = CFG.delve.puzzle, K = PZ.kinds[m.pz.kind] || {};
+    Feed.add(`${gi('m_caseOpen')} <b>${escapeHTML(X.def.puzzle)}${K.name ? ' · ' + K.name : ''}</b> · ${m.pz.pips ? PZ.pipsHint : K.hint || PZ.hint}`, 'rift', 'dlvPuzzle', 1.2);
+  }
   if (X.revive) Feed.add(`${gi('m_players')} Reviving <b>${escapeHTML(X.revive.nick || 'ally')}</b> · ${Math.round(X.revive.t / CFG.delve.reviveT * 100)}%`, 'mp', 'dlvRevive', 0.5);
   const bar = $('partyBar'); if (!bar) return;
   const party = delveParty(); bar.hidden = party.length < 2;
