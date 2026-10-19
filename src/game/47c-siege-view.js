@@ -120,7 +120,7 @@ function buildSiegeView() {
 // their target. A banner in the building's colour grows with its level. Walls: wood to level 5, stone to 10, iron
 // after; each cell draws a half piece toward every wall or gate next to it, so lines, corners and crossings join up.
 // [model, height in m, fallback model while it has none of its own, tint of that fallback]
-const SIEGE_MODEL = { archer: ['siege_archer', 7.4], cannon: ['siege_cannon', 3.0], ballista: ['siege_ballista', 3.3], mage: ['siege_mage', 7.6],
+const SIEGE_MODEL = { archer: ['siege_archer', 7.4], cannon: ['siege_cannon', 3.4], ballista: ['siege_ballista', 3.3], mage: ['siege_mage', 7.6],
   warrior: ['siege_barracks', 3.3], mine: ['siege_mine', 3.9], hut: ['siege_hut', 3.6], gate: ['siege_gate', 2.1],
   mill: ['siege_mill', 3.8, 'siege_hut', 0xe8c89a], iron: ['siege_iron', 3.9, 'siege_mine', 0x9fb4cc],
   spike: ['siege_trap_spike', 0.34], bomb: ['siege_trap_bomb', 1.3], tar: ['siege_trap_tar', 0.36] };

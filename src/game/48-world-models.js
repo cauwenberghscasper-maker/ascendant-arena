@@ -20,7 +20,7 @@ const WORLD_MODEL_BOX = {
   pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61], pond: [2.99, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39], ribcage: [2.8, 1.26],
   rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15], rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3], rock_a_3: [1.48, 1.5],
   ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61], ruined_tower: [1.24, 1.06], rune_obelisk: [0.52, 0.51], sapphire_brazier: [0.65, 0.63], sea_stack: [0.9, 0.88],
-  siege_archer: [0.49, 0.52], siege_ballista: [1.67, 1.66], siege_barracks: [1.18, 1.04], siege_cannon: [1.64, 0.94], siege_gate: [1.03, 0.3], siege_hut: [1.25, 1.15],
+  siege_archer: [0.57, 0.53], siege_ballista: [1.67, 1.66], siege_barracks: [1.18, 1.04], siege_cannon: [1.42, 1.42], siege_gate: [1.03, 0.3], siege_hut: [1.25, 1.15],
   siege_mage: [0.49, 0.45], siege_mine: [1.15, 1.13], siege_trap_bomb: [1.02, 1.02], siege_trap_spike: [5.57, 5.56], siege_trap_tar: [5.18, 5.21], siege_wall_iron: [5.34, 0.64],
   siege_wall_stone: [5.55, 0.67], siege_wall_wood: [1.88, 0.36], signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], snow_mountain: [1.34, 1.39], stall: [1.01, 1.29],
   stall_kit_1: [0.7, 0.35], stall_kit_2: [1.15, 0.4], standing_stone: [0.69, 0.73], statue: [0.65, 0.64], stump: [1.12, 1.05], sundial: [1.74, 1.75],
