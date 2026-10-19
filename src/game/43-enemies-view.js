@@ -23,9 +23,11 @@ const STRIKE_OF = { slam: 'slam', quake: 'slam', ripple: 'slam', cross: 'slam', 
   pounce: 'lunge', ambush: 'lunge', burrow: 'burst', beam: 'recoil', snipe: 'recoil', fan: 'recoil', boomerang: 'swing', mortar: 'recoil', rain: 'recoil', zap: 'recoil', trap: 'recoil',
   breath: 'breath', nova: 'pulse', spiral: 'pulse', vortex: 'pulse', pool: 'slam' };
 const SHOOTER_KIT = { shooter: 1, spray: 1, turret: 1 };
+// Bastion Siege bosses have their own bodies (TRELLIS.2): an armoured ogre with a battering ram, a goblin on a war boar
+const SIEGE_BOSS_BODY = { 'Siege Lord': 'siegelord', 'Siege Captain': 'siegecaptain' };
 AssetSlots.register('enemy', (o) => {
   const root = new THREE.Group();
-  const ED = CFG.enemies[o.type] || {}, bt = enemyBase(o.type), tint = ED.tint != null ? new THREE.Color(ED.tint) : null, esz = ED.scale || 1;
+  const ED = CFG.enemies[o.type] || {}, bt = o.body || enemyBase(o.type), tint = ED.tint != null && !o.body ? new THREE.Color(ED.tint) : null, esz = o.body ? 1 : ED.scale || 1;
   const shadow = new THREE.Mesh(geoShadow, matShadow); shadow.scale.setScalar((bt === 'wolf' || bt === 'beetle' ? 0.9 : 0.75) * esz); shadow.position.y = 0.03; root.add(shadow);
   const pivot = new THREE.Group(); root.add(pivot);
   const mat = flashMaterial();

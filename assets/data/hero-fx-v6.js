@@ -142,9 +142,83 @@ export function createHeroFX(api) {
   const pal = (H) => api.fxPal ? api.fxPal(H.ammo.glow) : 'gold';
   const entY = (e) => (e.kind === 'boss' ? 5.2 : e.kind === 'fighter' ? 2.3 * (api.growth ? api.growth(e) : 1) : Math.max(1.4, (e.r || 0.6) * 3.2));
 
+  // ---------------------------------------------------------------- painted super flipbooks
+  // assets/fx/super/<hero>.webp (tools/bake_super_fx.py): one hand-painted key frame of the super baked into 4x4
+  // frames: it enters (burst, rise, swirl, fall, wave or spread), keeps flowing while the super lasts, then burns away.
+  // Where a hero has one it replaces the decorative props below; props that follow gameplay (waves, beams, chains,
+  // ground zones) stay and the flipbook plays over the cast.
+  const SHEET_DECOR = new Set(['bell', 'orchard', 'candles', 'river', 'labyrinth', 'fog', 'eclipse', 'word', 'petrify', 'theft', 'ledger', 'decree', 'shift', 'flood', 'stairUp', 'pockets', 'heads', 'mirrors', 'bigDie', 'moon', 'sunfall', 'lighthouse']);
+  const SHEET_GROUND = new Set(['moss', 'unwritten', 'lysandra', 'sleeper']);
+  // pixel-art sheets (assets/fx/hero/): super_<hero> (4x4, tools/bake_hero_fx.py), hit_<hero> (4x4, tools/bake_hero_hits.py), ammo_<hero> (4x1)
+  const sheets = new Map(), sheetLoader = new THREE.TextureLoader();
+  const sheet = (kind, id, load) => {
+    const k = kind + '_' + id;
+    if (!sheets.has(k) && load) {
+      sheets.set(k, null);
+      sheetLoader.load('assets/fx/hero/' + k + (kind === 'super' ? '.webp' : '.png'), (t) => {
+        t.colorSpace = THREE.SRGBColorSpace; t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; t.userData.shared = true; sheets.set(k, t);
+      }, undefined, () => sheets.set(k, false));
+    }
+    return sheets.get(k);
+  };
+  // a few dozen KB each, loaded up front so they are ready for the first shot; only what the baker listed
+  fetch('assets/fx/hero/index.json').then((r) => (r.ok ? r.json() : {})).then((ix) => { for (const kind in ix) for (const id of ix[kind]) if (HERO_V6[id]) sheet(kind, id, true); }).catch(() => {});
+  const sheetBySpawn = (H) => H.super.ops.some((op) => SHEET_DECOR.has(op.fx));
+  function flipbook(H, x, z, o = {}) {
+    const base = sheet('super', H.id); if (!base) return false;
+    const tex = base.clone(); tex.userData = {}; tex.repeat.set(0.25, 0.25); tex.needsUpdate = true;
+    const mat = new THREE.MeshBasicMaterial({ map: tex, color: 0xb8b8b8, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }); // dimmed: bloom adds the rest
+    const ground = SHEET_GROUND.has(H.id), size = Math.min(ground ? 12 : 8.5, Math.max(ground ? 6 : 5, (o.r || 3.5) * (ground ? 2.2 : 1.6), o.len ? o.len * 0.55 : 0));
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(size, size), mat), g = new THREE.Group(); g.add(m); g.position.set(x, 0, z);
+    if (ground) { m.rotation.x = -Math.PI / 2; m.rotation.z = -(o.a || 0); m.position.y = 0.14; m.renderOrder = 6; } else m.position.y = size * 0.4;
+    const dur = Math.max(1.5, Math.min(7, o.dur || 1.7)), enter = 0.45, out = 0.65;
+    addProp(g, dur, (t) => {
+      // frames 0-4 enter, 4-9 swing back and forth while it holds, 10-15 burn away at the end
+      let f; if (t < enter) f = Math.floor(t / enter * 4); else if (t > dur - out) f = 10 + Math.min(5, Math.floor((t - (dur - out)) / out * 6));
+      else { const h = Math.floor((t - enter) / 0.11) % 10; f = 4 + (h < 6 ? h : 10 - h); }
+      tex.offset.set((f % 4) * 0.25, 0.75 - Math.floor(f / 4) * 0.25);
+      if (!ground && api.camera) m.quaternion.copy(api.camera.quaternion);
+      if (o.follow && o.follow.x != null) g.position.set(o.follow.x, 0, o.follow.z);
+    });
+    return true;
+  }
+
+  // hit bursts: a pool of camera-facing sprites per hero, each with its own frame (the hero's hit_<id> sheet, 0.36 s)
+  const hits = [];
+  function hitFlip(H, x, y, z, size) {
+    const base = sheet('hit', H.id); if (!base) return false;
+    let h = hits.find((q) => !q.on && q.id === H.id); // each sprite keeps its hero's sheet (clones share one image)
+    if (!h) { if (hits.filter((q) => q.id === H.id).length >= 10) return false; const tex = base.clone(); const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.4, depthWrite: false, fog: false, toneMapped: false }); // pixel art: hard edges, ink outline
+      h = { spr: new THREE.Sprite(mat), tex, id: H.id }; h.spr.frustumCulled = false; h.spr.renderOrder = 7; root.add(h.spr); hits.push(h); }
+    h.tex.repeat.set(0.25, 0.25); h.on = true; h.t = 0; h.spr.visible = true; h.spr.position.set(x, y, z); h.spr.scale.set(size, size, 1); h.spr.material.rotation = Math.random() * TAU;
+    return true;
+  }
+  function stepHits(dt) {
+    for (const h of hits) { if (!h.on) continue; h.t += dt; const f = Math.floor(h.t / 0.36 * 16);
+      if (f >= 16) { h.on = false; h.spr.visible = false; continue; } h.tex.offset.set((f % 4) * 0.25, 0.75 - Math.floor(f / 4) * 0.25); }
+  }
+  // projectiles drawn as the hero's tumbling pixel sprite (ammo_<id>: 4 quarter turns), only for the heroes whose
+  // shape-kit ammo reads poorly; the good ones (Wrenna's vial, Corrin's apple, Tychon's die, Kerberon's hound...) stay
+  const AMMO_PIXEL = new Set(['ione', 'unwritten', 'lysandra', 'oko', 'ysolt', 'halven', 'sleeper', 'camedown', 'ourax']);
+  const ammoSpr = new Map();
+  function ammoSprite(H, p, i) {
+    if (!AMMO_PIXEL.has(H.id)) return false;
+    const base = sheet('ammo', H.id); if (!base) return false;
+    let A = ammoSpr.get(H.id);
+    if (!A) { A = { list: [], n: 0, tex: base.clone() }; A.tex.repeat.set(0.25, 1); ammoSpr.set(H.id, A); }
+    let spr = A.list[A.n];
+    if (!spr) { if (A.n >= 64) return true; spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: A.tex, transparent: true, alphaTest: 0.5, depthWrite: true, fog: false })); spr.frustumCulled = false; root.add(spr); A.list.push(spr); }
+    A.n++; const age = p.total - p.life, sc = p.r * (H.ammo.small ? 2.1 : 2.6) * 1.15;
+    spr.visible = true; spr.position.set(p.x, H.ammo.shape === 'hound' ? 0.55 : p.y, p.z); spr.scale.set(sc, sc, 1);
+    A.tex.offset.set((Math.floor(time * 14) % 4) * 0.25, 0);
+    trail(H, p, age, spr.position.y);
+    return true;
+  }
+
   // ---------------------------------------------------------------- ammunition
   function ammo(p, i, yaw) {
     const H = HERO_V6[p.hx]; if (!H) return false;
+    if (ammoSprite(H, p, i)) return true;
     let shape = p.shape || H.ammo.shape;
     if (shape === 'lost') shape = 'lost' + (p.hv || 0);
     const key = H.id + '|' + shape;
@@ -198,14 +272,14 @@ export function createHeroFX(api) {
     for (let k = 0; k < 12; k++) { const t = k / 11; A.setXYZ(k, hx + (p.x - hx) * t, 1.2 + (p.y - 1.2) * t - Math.sin(t * Math.PI) * 0.25, hz + (p.z - hz) * t); }
     A.needsUpdate = true;
   }
-  function ammoBegin() { for (const im of ammoIM.values()) im.userData.n = 0; threadUsed = 0; frame++; }
-  function ammoEnd() { for (const im of ammoIM.values()) { im.count = im.userData.n; im.instanceMatrix.needsUpdate = true; } for (let i = threadUsed; i < threads.length; i++) threads[i].visible = false; }
+  function ammoBegin() { for (const im of ammoIM.values()) im.userData.n = 0; for (const A of ammoSpr.values()) A.n = 0; threadUsed = 0; frame++; }
+  function ammoEnd() { for (const im of ammoIM.values()) { im.count = im.userData.n; im.instanceMatrix.needsUpdate = true; } for (let i = threadUsed; i < threads.length; i++) threads[i].visible = false; for (const A of ammoSpr.values()) for (let i = A.n; i < A.list.length; i++) A.list[i].visible = false; }
 
   // ---------------------------------------------------------------- impacts (basic attacks)
   function impact(e) {
     const H = HERO_V6[e.hid]; if (!H) return;
     const I = H.impact, x = e.x, z = e.z, big = Math.max(1, (e.r || 1));
-    api.play(I.sprite, I.pal || pal(H), x, I.sprite === 'ring' || I.sprite === 'dust' || I.sprite === 'poof' || I.sprite === 'explosion' || I.sprite === 'flame' ? 0 : 1, z, 1.3 + big * 0.9);
+    if (!hitFlip(H, x, 0.9, z, 1.5 + big * 0.7)) api.play(I.sprite, I.pal || pal(H), x, I.sprite === 'ring' || I.sprite === 'dust' || I.sprite === 'poof' || I.sprite === 'explosion' || I.sprite === 'flame' ? 0 : 1, z, 1.3 + big * 0.9);
     P.burst(x, 0.9, z, 8, I.color, 4.5, 0.4, 0.17, 6);
     if (I.ring) P.ring(x, z, Math.max(0.9, e.r || 1), I.ring, 0.35);
     if (H.ammo.shape === 'die' && e.hv) faceFloat(x, z, e.hv, H);
@@ -583,9 +657,14 @@ export function createHeroFX(api) {
   }
 
   // ---------------------------------------------------------------- public
-  function spawn(name, o) { const fn = S[name]; if (fn) { try { fn(o); } catch (err) { console.warn('hero fx failed', name, err); } } }
+  function spawn(name, o) {
+    if (SHEET_DECOR.has(name) && o.H && sheet('super', o.H.id) && flipbook(o.H, o.x != null ? o.x : o.f.x, o.z != null ? o.z : o.f.z, o)) return;
+    const fn = S[name]; if (fn) { try { fn(o); } catch (err) { console.warn('hero fx failed', name, err); } }
+  }
   function superCast(H, f, c) {
-    api.play('pillar', pal(H), f.x, 0, f.z, 5.5); api.play('ring', pal(H), f.x, 0, f.z, 5, { speed: 1.2 });
+    if (sheet('super', H.id)) { // the hero's own painting instead of the shared pillar and ring
+      if (!sheetBySpawn(H)) { const aimed = c.tx !== f.x || c.tz !== f.z; flipbook(H, aimed ? c.tx : f.x + Math.sin(c.a) * 4, aimed ? c.tz : f.z + Math.cos(c.a) * 4, { a: c.a, r: 4.5 }); }
+    } else { api.play('pillar', pal(H), f.x, 0, f.z, 5.5); api.play('ring', pal(H), f.x, 0, f.z, 5, { speed: 1.2 }); }
     P.burst(f.x, 1.2, f.z, 24, H.ammo.glow, 6, 0.6, 0.24, 2, 1.4); P.burst(f.x, 1.2, f.z, 12, H.ammo.a, 4, 0.5, 0.2, 2, 1.2);
     if (f.isPlayer && api.banner) api.banner(H.super.name, H.name + ' · super');
   }
@@ -614,6 +693,7 @@ export function createHeroFX(api) {
   }
   function update(dt, ents) {
     time += dt;
+    stepHits(dt);
     for (let i = props.length - 1; i >= 0; i--) {
       const p = props[i]; p.t += dt;
       if (p.t >= p.dur) { p.onEnd && p.onEnd(); disposeGroup(p.group); props.splice(i, 1); continue; }
@@ -621,6 +701,6 @@ export function createHeroFX(api) {
     }
     if (ents) statusMarks(ents, dt);
   }
-  function clear() { for (const p of props) disposeGroup(p.group); props.length = 0; for (const [, v] of statusVis) disposeGroup(v.g); statusVis.clear(); }
+  function clear() { for (const p of props) disposeGroup(p.group); props.length = 0; for (const [, v] of statusVis) disposeGroup(v.g); statusVis.clear(); for (const h of hits) { h.on = false; h.spr.visible = false; } }
   return { ammo, ammoBegin, ammoEnd, spawn, superCast, event, update, clear, impact, root, props };
 }

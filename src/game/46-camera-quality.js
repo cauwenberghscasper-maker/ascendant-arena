@@ -17,7 +17,7 @@ function viewFor(e) {
     const asc = G.mode === 'arena' ? 0 : ascTier(e.isPlayer ? G.profile.level : (e.level || 1));
     v = AssetSlots.create('character', { cls: e.cls, body: c.body, accent: e.isPlayer ? (badgeTint(G.profile, e.cls) || c.accent) : c.accent, hair: BR.hair, look: BR.look, ring, gear, xray: e.isPlayer, cape, asc, peer: !!e.isPeer });
     v.cls = e.cls; v.sig = e.isPlayer ? playerViewSig(e.cls) : 'pv' + (e.pvp ? 1 : 0);
-  } else if (e.kind === 'enemy') v = AssetSlots.create('enemy', { type: e.type, elite: e.elite });
+  } else if (e.kind === 'enemy') v = AssetSlots.create('enemy', { type: e.type, elite: e.elite, body: SIEGE_BOSS_BODY[e.bossName] });
   else if (e.kind === 'boss') v = AssetSlots.create('boss', { zone: e.zone });
   else if (e.kind === 'npc') v = AssetSlots.create('npc', { id: e.def.id });
   else if (e.kind === 'soldier') v = AssetSlots.create('character', { model: 'npc.garo' }); // Bastion Siege warriors

@@ -357,7 +357,22 @@ Use them in this order: the first ones need no attribution and have no limits.
 generator or kit with a non-commercial (NC) licence, models ripped from other games, Sketchfab models that aren't
 CC0/CC BY, and any concept image made from another artist's work.
 
-#### Concept images (the input picture for image-to-3D)
+#### Keep it "OG fantasy", not AI-looking
+
+Casper wants the classic hand-painted MMORPG feel (World of Warcraft 2004, RuneScape), never the glossy, over-detailed
+AI look. Every prompt starts from the same style words and every result is judged against them:
+- Prompt: *"hand-painted fantasy game asset (or: spell effect) for a classic MMORPG like World of Warcraft 2004, bold
+  painterly brush strokes, stylized, …, plain flat grey background (effects: pure black background), no text"*. One
+  subject, the game's three-quarter view, the biome's or hero's palette (`combat_kits.json` `palette`).
+- Reject and regenerate: photo-real fur, glass or skin, plastic shine, noisy micro-detail, modern objects, symbols that
+  read as real-world signs (a red ring with a slash), lettering where none belongs, extra limbs, floors or backdrops.
+- Effects are pixel art like the rest of the game's effects, not smooth cartoon art and not built from shapes. Hero
+  effects live in `assets/fx/hero/` (listed in its `index.json`, played by `hero-fx-v6.js`): `super_<hero>` is a
+  generated picture (`assets/concepts/hero_fx/`) baked by `tools/bake_hero_fx.py` into 16 pixelated frames (coarse grid,
+  the hero's own palette, 4x4 ordered dither); `hit_<hero>` is the basic attack's pixel burst from
+  `tools/bake_hero_hits.py` (one burst style and colour per hero), or from a picture when one exists; `ammo_<hero>` is
+  the projectile sprite (picture on magenta, cut out, ink outline, 4 tumble frames).
+
 
 Draw it yourself, paint over a blockout, or use an Apache/MIT image model run locally or on a free tier (Z-Image
 Turbo, Apache-2.0, is what we used). Existing concepts are in `assets/heroes/concepts/` and `assets/concepts/`; reuse
