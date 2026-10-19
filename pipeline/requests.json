@@ -1,10 +1,6 @@
-{"batch": "queue-b-concepts", "files": [
-{"name":"siege_hut2.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/0b1a7ca099a840f1e5d9c0b59ca6ab18efc7e694b6295f93334331044eb059d2/image.png"},
-{"name":"siege_lord.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/c52e2acc74818efa48bc24e7c61030006a5f0782a94bd01553c3d3be6a801c5f/image.png"},
-{"name":"siege_captain.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/23fff85fe4029c6bb605d77e8c4064072630044dcdc2ec8251c0fad14750eb5b/image.png"},
-{"name":"siege_supplycart.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/c67773d7f38561de4b3a4d8162aebfa2ae10b0486f53ce28d5cc2a4215c424ae/image.png"},
-{"name":"world_totem.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/ed7c29dfcfa9d0715d838c99063de0463a650741a0c8545df4abb9d1614a051c/image.png"},
-{"name":"world_lectern.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/1edd71049b377eabfe2c33264e90eab83e58251dfcf7d32fc022d7b1fc2721b6/image.png"},
-{"name":"world_sunlantern.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/28ec1dcf5e799e998d549b4ee18f2fecafea840cccc7006b15370a6b31aaa984/image.png"},
-{"name":"siege_banner.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/24bb98f98a7a69027c5a30b79bae87aa24d72a0b247628ae3cba2715f2068e42/image.png"}
+{"batch": "bastion-remodel", "files": [
+{"name":"siege_archer.glb","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/883af539790542b9227cb31501e9cd6590beeb1ce938cb37e044c9d8501a5d17/trellis_output_2026-10-19T181503.glb"},
+{"name":"siege_cannon.glb","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/3bd60354ec37bc97e4ba13dd99c5c8ac3bb8f539a0a23253937afef0f7ffb72c/trellis_output_2026-10-19T181552.glb"},
+{"name":"siege_archer_concept.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/2583f2eb325c9ff69f4ffc711a5d27d461a464c5e0d0fbaf64fad0bb107fa18d/image.png"},
+{"name":"siege_cannon_concept.png","url":"https://prithivmlmods-trellis-2-text-to-3d.hf.space/--replicas/7cs98/gradio_api/file=/tmp/gradio/3012b6f1122c7c62d347aa7c966ab42fe06d3d940e63b559ccbe08dbf05faee3/image.png"}
 ]}
