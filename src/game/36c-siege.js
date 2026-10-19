@@ -88,7 +88,7 @@ CFG.siege = {
 const SIEGE_TYPES = ['archer', 'cannon', 'ballista', 'mage', 'warrior', 'mill', 'mine', 'iron', 'hut', 'wall', 'gate', 'spike', 'bomb', 'tar'];
 const SIEGE_SHOOTERS = { archer: 1, cannon: 1, ballista: 1, mage: 1 };
 // where shots leave each defender (f: metres ahead of its centre toward the target, y: height) and how long it winds up first
-const SIEGE_MUZZLE = { archer: { f: 0.7, y: 3.3, wind: 0.25 }, cannon: { f: 1.4, y: 1.0, wind: 0.5 }, ballista: { f: 1.1, y: 1.45, wind: 0.6 }, mage: { f: 0.3, y: 4.65, wind: 0.7 } }; // the buildings stand at 0.75 (SIEGE_SCALE)
+const SIEGE_MUZZLE = { archer: { f: 0.7, y: 3.3, wind: 0.25 }, cannon: { f: 1.45, y: 1.5, wind: 0.5 }, ballista: { f: 1.1, y: 1.45, wind: 0.6 }, mage: { f: 0.3, y: 4.65, wind: 0.7 } }; // the buildings stand at 0.75 (SIEGE_SCALE)
 const siegeLvlMul = (l) => 1 + 0.3 * (l - 1);
 const siegeMen = (l, b) => Math.min(5, CFG.siege.towers.warrior.men + Math.floor(l / 5) + (b && fortPath(b) ? fortPath(b).men || 0 : 0));
 const fortNow = () => Date.now();

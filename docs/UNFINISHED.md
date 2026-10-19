@@ -8,6 +8,15 @@ step out of marked circles and mob clouds (dash if the hit is < 0.45 s away), ba
 copy your armour (≤ 50%) and lifesteal, and survive at least 30 average hits (was 18). Bot names/heroes use a shuffle,
 not a random sort (rule 8). Measured after: 0 downs, 0% HP lost to the floor in the same test. Open: real runs.
 
+
+# Bastion: new archer tower and cannon (19 Oct 2026, on `main`)
+Casper: the cannons and archer towers didn't match the vibe. New models in the Keep's look (cream stone, royal blue
+roof, gold): Z-Image Turbo concepts → TRELLIS.2 (1024, seed 7) → relay `bastion-remodel` on `asset-drop` (concepts there
+too) → `v10_prop.cjs` (cannon turned 90° so its muzzle faces +Z) → `v12_simplify_packed` to ~4.5k tris → pack 512 px →
+compact/optimize → `v10_boxes`. Shop pictures rerendered (`assets/ui/fort/archer|cannon.webp`). Cannon stands 3.4 m
+(was 3.0), its muzzle point moved up (`SIEGE_MUZZLE`).
+- **Open:** the tier looks (t2-t7) still tint this base model; the other buildings (ballista, mage, barracks, mines,
+  huts) could get the same Keep-matched remodel.
 # Dungeons: puzzle info stays longer, fuller and better spread halls (19 Oct 2026, branch `claude/dungeon-fill`, PR to main)
 Casper: puzzle info should stay longer; more monsters per room, spread over the room.
 - **Puzzle info:** the puzzle banner shows 7 s (was 2.6), event banners 6 s, "solved" 4.5 s, puzzle step/fail toasts 4 s

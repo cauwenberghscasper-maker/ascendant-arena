@@ -7457,7 +7457,7 @@ CFG.siege = {
 const SIEGE_TYPES = ['archer', 'cannon', 'ballista', 'mage', 'warrior', 'mill', 'mine', 'iron', 'hut', 'wall', 'gate', 'spike', 'bomb', 'tar'];
 const SIEGE_SHOOTERS = { archer: 1, cannon: 1, ballista: 1, mage: 1 };
 // where shots leave each defender (f: metres ahead of its centre toward the target, y: height) and how long it winds up first
-const SIEGE_MUZZLE = { archer: { f: 0.7, y: 3.3, wind: 0.25 }, cannon: { f: 1.4, y: 1.0, wind: 0.5 }, ballista: { f: 1.1, y: 1.45, wind: 0.6 }, mage: { f: 0.3, y: 4.65, wind: 0.7 } }; // the buildings stand at 0.75 (SIEGE_SCALE)
+const SIEGE_MUZZLE = { archer: { f: 0.7, y: 3.3, wind: 0.25 }, cannon: { f: 1.45, y: 1.5, wind: 0.5 }, ballista: { f: 1.1, y: 1.45, wind: 0.6 }, mage: { f: 0.3, y: 4.65, wind: 0.7 } }; // the buildings stand at 0.75 (SIEGE_SCALE)
 const siegeLvlMul = (l) => 1 + 0.3 * (l - 1);
 const siegeMen = (l, b) => Math.min(5, CFG.siege.towers.warrior.men + Math.floor(l / 5) + (b && fortPath(b) ? fortPath(b).men || 0 : 0));
 const fortNow = () => Date.now();
@@ -11870,7 +11870,7 @@ function buildSiegeView() {
 // their target. A banner in the building's colour grows with its level. Walls: wood to level 5, stone to 10, iron
 // after; each cell draws a half piece toward every wall or gate next to it, so lines, corners and crossings join up.
 // [model, height in m, fallback model while it has none of its own, tint of that fallback]
-const SIEGE_MODEL = { archer: ['siege_archer', 7.4], cannon: ['siege_cannon', 3.0], ballista: ['siege_ballista', 3.3], mage: ['siege_mage', 7.6],
+const SIEGE_MODEL = { archer: ['siege_archer', 7.4], cannon: ['siege_cannon', 3.4], ballista: ['siege_ballista', 3.3], mage: ['siege_mage', 7.6],
   warrior: ['siege_barracks', 3.3], mine: ['siege_mine', 3.9], hut: ['siege_hut', 3.6], gate: ['siege_gate', 2.1],
   mill: ['siege_mill', 3.8, 'siege_hut', 0xe8c89a], iron: ['siege_iron', 3.9, 'siege_mine', 0x9fb4cc],
   spike: ['siege_trap_spike', 0.34], bomb: ['siege_trap_bomb', 1.3], tar: ['siege_trap_tar', 0.36] };
@@ -12115,7 +12115,7 @@ const WORLD_MODEL_BOX = {
   pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61], pond: [2.99, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39], ribcage: [2.8, 1.26],
   rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15], rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3], rock_a_3: [1.48, 1.5],
   ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61], ruined_tower: [1.24, 1.06], rune_obelisk: [0.52, 0.51], sapphire_brazier: [0.65, 0.63], sea_stack: [0.9, 0.88],
-  siege_archer: [0.49, 0.52], siege_ballista: [1.67, 1.66], siege_barracks: [1.18, 1.04], siege_cannon: [1.64, 0.94], siege_gate: [1.03, 0.3], siege_hut: [1.25, 1.15],
+  siege_archer: [0.57, 0.53], siege_ballista: [1.67, 1.66], siege_barracks: [1.18, 1.04], siege_cannon: [1.42, 1.42], siege_gate: [1.03, 0.3], siege_hut: [1.25, 1.15],
   siege_mage: [0.49, 0.45], siege_mine: [1.15, 1.13], siege_trap_bomb: [1.02, 1.02], siege_trap_spike: [5.57, 5.56], siege_trap_tar: [5.18, 5.21], siege_wall_iron: [5.34, 0.64],
   siege_wall_stone: [5.55, 0.67], siege_wall_wood: [1.88, 0.36], signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], snow_mountain: [1.34, 1.39], stall: [1.01, 1.29],
   stall_kit_1: [0.7, 0.35], stall_kit_2: [1.15, 0.4], standing_stone: [0.69, 0.73], statue: [0.65, 0.64], stump: [1.12, 1.05], sundial: [1.74, 1.75],
