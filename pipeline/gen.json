@@ -1,5 +1,5 @@
 {
- "batch": "pixel-fx-a",
+ "batch": "pixel-fx-b",
  "jobs": [
   {
    "space": "mcp-tools/Z-Image-Turbo",
@@ -355,126 +355,9 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "ammo_wrenna",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a corked glass vial of green seawater with a small paper label, teal glass and brass cork, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_hob",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a thin bronze sound ring flecked with green verdigris, bronze, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_corrin",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a glossy red-gold apple with one green leaf, glowing core, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_mott",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: three red wax seal droplets stamped with a cross, wax red, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_nyssa",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a spinning tarnished bronze coin with a ferry stamp and green verdigris rim, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_pyrrhos",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a bronze sword swing arc with three fading ghost copies, bronze, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_moss",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a fist-sized ball of red thread unspooling, red, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
    "name": "ammo_ione",
    "args": {
     "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a brass music box tine wrapped in a glowing music note on a wisp of sea fog, brass and pale blue, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_fenwick",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: three pale moon-silver claw slash ribbons, silver, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_thimble",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a mismatched wooden sweater button trailing a strand of mustard yarn, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 7,
     "random_seed": false,
@@ -501,19 +384,6 @@
    "name": "ammo_lysandra",
    "args": {
     "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a white marble fist punch with flying stone chips, marble white, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_kallix",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a sharp teardrop flame with a white-hot core and a soot halo, orange and white, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 7,
     "random_seed": false,
@@ -563,32 +433,6 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "ammo_sena",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a fine glowing red thread with a tiny glowing knot at its tip, red and gold, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_jory",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: an iron key ring with five bone-handled keys spinning flat like a saw blade, iron and bone, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
    "name": "ammo_sleeper",
    "args": {
     "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a basalt stone palm splashing dark teal seawater, basalt grey and teal, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
@@ -605,84 +449,6 @@
    "name": "ammo_camedown",
    "args": {
     "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a white marble stair step with gold veins, marble white and gold, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_vell",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small brass pocket watch with a lilac glint, brass and lilac, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_hespera",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a cracked charcoal lump of rock glowing orange through its cracks, charcoal and orange, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_kerberon",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a running spectral ghost hound of grey smoke with ember eyes, grey and ember orange, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_ophira",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a thin sharp sliver of silver mirror glass, silver, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_tychon",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a single ivory die with violet pips glowing at the edges, ivory and violet, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "ammo_aurvan",
-   "args": {
-    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a cone of silver moonlight frost with tiny crescent shapes and star motes, silver and pale blue, centered, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 7,
     "random_seed": false,
