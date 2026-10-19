@@ -1,0 +1,33 @@
+{
+ "batch": "bastion-remodel",
+ "files": [
+  {
+   "name": "siege_archer.glb",
+   "ok": true,
+   "bytes": 4437720,
+   "sha256": "c7725a6ea719b7a40fa76010289731cc48f9457f0ceb3acb3e96f40a21183405",
+   "error": null
+  },
+  {
+   "name": "siege_cannon.glb",
+   "ok": true,
+   "bytes": 4799000,
+   "sha256": "ffad89d3f549d4b4cbdf4a38187a56e823f9e15649758eb1fac6260906288b94",
+   "error": null
+  },
+  {
+   "name": "siege_archer_concept.png",
+   "ok": true,
+   "bytes": 365595,
+   "sha256": "0a5e042f00a68feae15860183a8736bd4c55a6143b99d7b0a8fa8c001362ea65",
+   "error": null
+  },
+  {
+   "name": "siege_cannon_concept.png",
+   "ok": true,
+   "bytes": 405430,
+   "sha256": "1ad89866ba802c4e5c366f5ab72cb9f5fb65a1a55b81dc160779f049bce7a396",
+   "error": null
+  }
+ ]
+}
