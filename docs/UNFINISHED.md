@@ -1,3 +1,75 @@
+# All 27 supers in pixel art, nine new pixel projectiles (19 Oct 2026, branch `claude/hf-models-a`, PR #36)
+Batch `pixel-fx-b` ran after the quota reset (82 pictures, Z-Image Turbo, "retro 16-bit pixel art" prompts; outputs on
+`asset-drop` `drop/pixel-fx-b/`). Accepted and baked (`assets/concepts/hero_fx/` → `assets/fx/hero/`):
+- **Supers: all 27** now (26 new pixel pictures; Halven keeps his earlier painting, pixelized). Retries for the
+  service's "maybe not safe" placeholders (Hob, Hespera) and Sena's white background were made one by one over MCP.
+- **Ammo: the 9 weak projectiles** (`AMMO_PIXEL`) now fly as tumbling pixel sprites: Camedown's step, Halven's lantern,
+  Ione's tine, Lysandra's marble, Oko's beam, Ourax's clod, the Sleeper's basalt, Unwritten's clay fist, Ysolt's ledger.
+- **Hits:** most generated hits were plain starbursts (a generic, shared look the README rules out), so the themed
+  baked bursts stay; six generated ones replace theirs: Fenwick's claws, Kerberon's jaws, Tychon's dice, Ione's note,
+  Ourax's turf, Corrin's apple.
+- **3D batch `models-3d-b`** (TRELLIS.2) is in: a new thatched builder hut (`siege_hut` + its menu picture), the keep
+  banner (`siege_banner`, at the land corners and round the Keep), a supply cart by each wagon (`siege_cart`), and the
+  Siege Lord (armoured ogre with a battering ram, `assets/enemy/siegelord`) and Siege Captain (goblin on a war boar,
+  `siegecaptain`) as their own bodies (`SIEGE_BOSS_BODY` in `43-enemies-view.js`, picked from `bossName`, so guests
+  see them too). World: a landmark at the heart of each ruin circle (`RUIN_HEART` in `44-world-view.js`): a clan totem
+  in the snow, an arcane lectern in the ruins, a sun lantern on the celestial terraces. The 19 crafting materials are in
+  too (`assets/world/mat_<id>`, ~3k tris, 512 textures, batch `models-3d-mats`): they pop out of monsters as
+  themselves in the loot pop (`LootPop.mats`). Next: use them as the inventory icons (render + pixelize like
+  `tools/fort_icons.*`). Another session pushed
+  `drop/bastion-remodel` (archer, cannon) meanwhile; those are theirs.
+
+# Hero effects in pixel art, a hit burst per hero (19 Oct 2026, branch `claude/hf-models-a`, PR #36)
+Casper: more ammunition and hit effects, and it must fit the pixelated adventure look, not smooth cartoon.
+- Supers: the 14 flipbooks are re-baked as pixel art (`tools/bake_hero_fx.py`, was `bake_super_fx.py`; sources moved to
+  `assets/concepts/hero_fx/super_<hero>.webp`, sheets to `assets/fx/hero/`). Played with hard pixel edges.
+- Hits: every hero's basic attack now lands as its own pixel burst (`tools/bake_hero_hits.py`, 27 sheets of 16 frames,
+  2-3 KB each): seawater crowns (Wrenna, Sleeper), a bronze ring (Hob), petals (Corrin), wax/ink spatter (Mott, Ysolt),
+  glints (Nyssa, Oko, Vell, Ophira), sparks (Pyrrhos, Kallix, Halven, Jory, Hespera), threads (Moss, Thimble, Sena),
+  frost/fog (Ione, Aurvan), claws (Fenwick), chips (Unwritten, Lysandra, Camedown, Ourax), jaws (Kerberon), pips
+  (Tychon). They replace the shared impact sprite; the particle bursts stay.
+- Ammo: code is ready (`ammoSprite` in `hero-fx-v6.js`: a tumbling 4-frame pixel sprite) but only for the nine
+  heroes whose shape ammo reads poorly (`AMMO_PIXEL`: Ione, Unwritten, Lysandra, Oko, Ysolt, Halven, Sleeper, Camedown,
+  Ourax). Casper: the good ones (Wrenna's vial, Corrin's apple, Tychon's die, Kerberon's hound...) stay. Batch
+  `pixel-fx-b` (supers first, then those 9 ammo, hits, materials) is queued on `asset-pipeline`.
+- **GPU:** the batch `pixel-fx-a` (`pipeline/gen.json` on `asset-pipeline`: 27 pixel supers, 27 ammo, 27 hits, 19
+  material concepts) was refused: Hugging Face sees no credits on the account (Casper has EUR 12 ready but it has to
+  be added at huggingface.co/settings/billing). Re-run `pixel-fx-b` with Actions > "generate with HF credits" > Run workflow
+  once credits are in; then bake with `tools/bake_hero_fx.py assets/concepts/hero_fx` after copying the outputs
+  (`super_*`, `ammo_*`, `hit_*`) from `drop/pixel-fx-a/`.
+
+# Monster attack effects are short flashes (18 Oct 2026, branch `claude/hf-models-a`, PR #36)
+Casper (screenshot of a big fight): the hit effects were far too big. Monster blasts (`boomFx`), deaths (`dieFx`),
+ambush/burrow puffs (`windupFx`), falling shells and other move impacts (`aoeImpactFx`) in `62-events-fx.js` are now
+about half the size with a cap (blast 3.4 m, 4.4 m big; death puff 1.7 m) and play 1.5-1.7x faster. Boss deaths and
+hero effects keep their size; the red warning rings of monster moves are unchanged.
+
+# Painted super flipbooks, loot you can see (18 Oct 2026, branch `claude/hf-models-a`, same PR #36)
+Casper: everything must feel "OG fantasy", not AI-ish; supers still look built from three.js shapes and should be
+high-end multi-frame animations, all in one go; matching items for finding.
+- **Super flipbooks:** one painting per hero super (Z-Image Turbo, "classic MMORPG spell effect" style, on black;
+  sources in `assets/concepts/super_fx/`) baked by `tools/bake_super_fx.py` into a 4x4 flipbook (`assets/fx/super/`,
+  ~70-130 KB, `index.json` lists them). Modes per hero (`MODES`): burst, rise, swirl, fall, wave, spread; every sheet
+  enters, keeps its brush strokes flowing, then burns away along a glowing noise edge with embers. `hero-fx-v6.js`
+  plays it (additive, camera-facing or on the ground for Moss/Unwritten/Lysandra/Sleeper) and it **replaces** the
+  decorative primitive props (`SHEET_DECOR`: bell, orchard, candles, river, fog, word, marble, theft, ledger, decree,
+  time dome, flood, stair, pockets, heads, mirrors, die, moon, sun) and the shared pillar+ring on cast. Gameplay props
+  (Wrenna's travelling wave, Oko's beam, chains, shears on a target, ground zones) stay, with the flipbook on top.
+  Long supers hold frames 4-9 back and forth until they end.
+- **Done (14):** Wrenna, Hob, Corrin, Mott, Nyssa, Pyrrhos, Ione, Fenwick, Thimble, The Unwritten, Lysandra, Kallix,
+  Ysolt, Halven. **Waiting for GPU (13):** Sena, Jory, Sleeper, Camedown, Vell, Hespera, Kerberon, Ophira, Tychon,
+  Aurvan, Ourax, plus redo Moss (came out like a no-entry sign) and Oko (a lighthouse in a bubble). Prompts follow the
+  same template as the others (see the README "OG fantasy" rules); drop the painting in `assets/concepts/super_fx/`
+  and run the baker: no code change needed. Hero ammo (vials, apples, coins…) is still built from shapes: next.
+- **Loot you can see** (`62b-loot-pop.js`): a kill's gold pops out as a Quaternius CC0 coin pile, gear as a loot pouch
+  glowing in its rarity colour, crafting materials as a pouch in the material's colour; it bounces once and flies into
+  the hero. Visual only (the loot is already in the bag). Next: real models for the 18 materials (6 ores, 6 monster
+  parts, 6 cores) and Titan Souls, then use them here and as inventory icons.
+- **GPU quota:** Hugging Face counts every ZeroGPU Space (Z-Image, TRELLIS.2, Wan video) against one daily PRO quota.
+  A call is refused unless the quota left is comfortably above what it reserves (TRELLIS 240 s, Wan 180 s, Z-Image
+  60 s; it still refused Z-Image at 89 s left). It did not refill within the hour; the error names ~19 h for a full
+  reset. To keep generating sooner, credits can be added ($1 per 10 minutes, Casper's call). Running calls in parallel
+  makes each reserve its own share, so generate one at a time.
 # Bastion: new archer tower and cannon (19 Oct 2026, on `main`)
 Casper: the cannons and archer towers didn't match the vibe. New models in the Keep's look (cream stone, royal blue
 roof, gold): Z-Image Turbo concepts → TRELLIS.2 (1024, seed 7) → relay `bastion-remodel` on `asset-drop` (concepts there

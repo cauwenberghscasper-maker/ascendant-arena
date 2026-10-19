@@ -24,21 +24,23 @@ function hitFx(e) {
   }
 }
 function boomFx(e) {
-  const pal = fxPal(e.color), R = Math.max(0.7, e.r || 1), sz = R * (e.big ? 4.2 : 3.2);
-  if (pal === 'frost' || pal === 'white') { SpriteFX.play('shatter', 'frost', e.x, 1, e.z, sz * 0.8); SpriteFX.play('ring', 'frost', e.x, 0, e.z, R * 2.6, { speed: 1.2 }); }
-  else if (pal === 'arcane') { SpriteFX.play('nova', 'arcane', e.x, 1, e.z, sz * 0.9); SpriteFX.play('ring', 'arcane', e.x, 0, e.z, R * 2.4, { speed: 1.2 }); }
-  else if (pal === 'storm') { SpriteFX.play('bolt', 'storm', e.x, 0, e.z, sz * 1.3); SpriteFX.play('ring', 'frost', e.x, 0, e.z, R * 2.6, { speed: 1.2 }); }
-  else if (pal === 'venom') { SpriteFX.play('explosion', 'venom', e.x, 0, e.z, sz); SpriteFX.play('bubble', 'venom', e.x, 0, e.z, sz * 0.6, { delay: 0.2 }); SpriteFX.play('ring', 'venom', e.x, 0, e.z, R * 2.6, { speed: 1.2 }); }
-  else { SpriteFX.play('explosion', pal, e.x, 0, e.z, sz); SpriteFX.play('ring', pal, e.x, 0, e.z, R * 2.6, { speed: 1.2 }); if (e.big) SpriteFX.play('dust', 'dust', e.x, 0, e.z, sz * 0.9, { delay: 0.1 }); }
+  // short, tight flashes: a blast reads by its ring on the ground, the sprite only marks the moment (they used to cover the screen)
+  const pal = fxPal(e.color), R = Math.max(0.7, e.r || 1), sz = Math.min(e.big ? 4.4 : 3.4, R * (e.big ? 2.1 : 1.6)), Q2 = { speed: 1.5 };
+  if (pal === 'frost' || pal === 'white') { SpriteFX.play('shatter', 'frost', e.x, 1, e.z, sz * 0.8, Q2); SpriteFX.play('ring', 'frost', e.x, 0, e.z, R * 2.6, { speed: 1.2 }); }
+  else if (pal === 'arcane') { SpriteFX.play('nova', 'arcane', e.x, 1, e.z, sz * 0.9, Q2); SpriteFX.play('ring', 'arcane', e.x, 0, e.z, R * 2.4, { speed: 1.2 }); }
+  else if (pal === 'storm') { SpriteFX.play('bolt', 'storm', e.x, 0, e.z, sz * 1.3, Q2); SpriteFX.play('ring', 'frost', e.x, 0, e.z, R * 2.6, { speed: 1.2 }); }
+  else if (pal === 'venom') { SpriteFX.play('explosion', 'venom', e.x, 0, e.z, sz, Q2); SpriteFX.play('bubble', 'venom', e.x, 0, e.z, sz * 0.5, { delay: 0.12, speed: 1.5 }); SpriteFX.play('ring', 'venom', e.x, 0, e.z, R * 2.6, { speed: 1.2 }); }
+  else { SpriteFX.play('explosion', pal, e.x, 0, e.z, sz, Q2); SpriteFX.play('ring', pal, e.x, 0, e.z, R * 2.6, { speed: 1.2 }); if (e.big) SpriteFX.play('dust', 'dust', e.x, 0, e.z, sz * 0.7, { delay: 0.06, speed: 1.6 }); }
   burst(e.x, 0.6, e.z, e.big ? 8 : 4, e.color, e.big ? 8 : 5, 0.5, 0.25, 14, 0.8);
 }
 function dieFx(e) {
   const dc = e.kind === 'fighter' ? 0xff4d6d : e.elite ? 0xffc94a : DIE_COL[e.kind] || 0xffd34a, pal = fxPal(dc);
   burst(e.x, 1, e.z, e.kind === 'boss' ? 60 : e.elite ? 30 : 16, dc, e.kind === 'boss' ? 14 : 7, 0.8, 0.35, 16, 1);
   const big = e.kind === 'boss' ? 2.6 : e.elite ? 1.6 : 1;
-  SpriteFX.play('poof', e.kind === 'fighter' ? 'blood' : pal, e.x, 0, e.z, 3 * big);
-  SpriteFX.play('impact', pal, e.x, 1, e.z, 2 * big);
-  if (big > 1) { SpriteFX.play('explosion', pal, e.x, 0, e.z, 3 * big, { delay: 0.05 }); SpriteFX.play('crit', 'gold', e.x, 1.4 * big, e.z, 3 * big, { delay: 0.1 }); }
+  const Q2 = { speed: e.kind === 'boss' ? 1 : 1.5 };
+  SpriteFX.play('poof', e.kind === 'fighter' ? 'blood' : pal, e.x, 0, e.z, 1.7 * big, Q2);
+  SpriteFX.play('impact', pal, e.x, 1, e.z, 1.3 * big, Q2);
+  if (big > 1) { SpriteFX.play('explosion', pal, e.x, 0, e.z, 2 * big, { delay: 0.05, speed: Q2.speed }); SpriteFX.play('crit', 'gold', e.x, 1.4 * big, e.z, 3 * big, { delay: 0.1 }); }
   if (e.kind === 'boss') { SpriteFX.play('nova', 'gold', e.x, 2, e.z, 12, { delay: 0.15 }); SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 14, { delay: 0.3 }); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 14); }
 }
 
@@ -90,13 +92,13 @@ function processEvents() {
       }
       case 'forged': showToast(`Forged ${e.name}. ${e.perk}`, 'rare'); break;
       case 'die':
-        dieFx(e);
+        dieFx(e); LootPop.kill(e);
         if (near(e, 22)) Sfx.play('die', { gap: 0.05 });
         if (e.kind === 'boss') Cam.shake = 1;
         break;
       case 'super': if (e.hero) { if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } break; } if (e.isPlayer) { Sfx.play('super'); Cam.shake = Math.max(Cam.shake, 0.4); } burst(e.x, 1, e.z, 14, 0xffb02e, 7, 0.5, 0.25, 6); if (e.isPlayer || near(e, 20)) { SpriteFX.play('nova', 'gold', e.x, 1.2, e.z, 5.5); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 6, { speed: 1.1 }); } break;
       case 'skill': { const pal = e.kind === 'ironskin' ? 'gold' : e.kind === 'swift' ? 'venom' : 'frost'; burst(e.x, 1, e.z, 12, e.kind === 'ironskin' ? 0xffd34a : e.kind === 'swift' ? 0x9cff9c : 0x9ae8ff, 5, 0.5, 0.22, 4); SpriteFX.play('pillar', pal, e.x, 0, e.z, 4.2); if (e.isPlayer) Sfx.play('super'); break; }
-      case 'gold': if (e.amt > 0) Sfx.play('coin', { gap: 0.08 }); break;
+      case 'gold': if (e.amt > 0) Sfx.play('coin', { gap: 0.08 }); LootPop.gold(e); break;
       case 'xp': if (e.reason && e.reason !== 'kill') dmgNumberPlayer(`+${fmtK(e.amt)} XP`, 'xp'); XPDrops.add('xp', e.amt); break;
       case 'killXp': dmgNumber(e.x, 1.6, e.z, `+${fmtK(e.amt)} XP`, 'kxp'); break;
       case 'mxp': XPDrops.add(e.key, e.amt); break;
@@ -131,7 +133,7 @@ function processEvents() {
         showBanner('RADIANT', `${escapeHTML(e.name)} · trial ${e.n} · 1 in ${fmt(e.odds)}`, 'gold'); Feed.add(`<b>${escapeHTML(G.profile.name || 'You')}</b> found <b>${escapeHTML(e.name)}</b> after ${e.n} trials!`, 'boss'); break;
       case 'mined': burst(e.x, 1.6, e.z, 14, e.rich ? 0xffd34a : 0xb8c4d0, 4, 0.6, 0.2, 3, 1); Sfx.play('hit');
         showToast(`${e.name}: +${e.ore} ${e.oreName || 'ore'}${e.geodes ? ` · ${e.geodes} Geode${e.geodes > 1 ? 's' : ''}!` : ''}`, e.geodes || e.rich ? 'good' : ''); break;
-      case 'mats': { const A = UI.matAcc || (UI.matAcc = {}), now = performance.now(); // pickups of one material stack on one feed line
+      case 'mats': { LootPop.mats(e); const A = UI.matAcc || (UI.matAcc = {}), now = performance.now(); // pickups of one material stack on one feed line
         for (const [id, n] of e.got) { const a = A[id] && now - A[id].t < 5500 ? A[id] : (A[id] = { n: 0 }); a.n += n; a.t = now;
           Feed.add(`<i class="matdot" style="--mc:#${MATS[id].color.toString(16).padStart(6, '0')}"></i> +${a.n} <b>${MATS[id].name}</b> <small>(${fmtK(matCount(id))})</small>`, 'mat', 'mat' + id); } break; }
       case 'crafted': showToast(`Garo crafted ${escapeHTML(e.name)}`, 'rare'); Sfx.play('unlock'); break;
@@ -213,6 +215,7 @@ function processEvents() {
       case 'jobTurnedIn': Sfx.play('job'); break;
       case 'drop': {
         if (e.source === 'case') { UI.alertT = 0; break; } // the reel shows it
+        LootPop.item(e);
         const src = e.source === 'level' ? 'Level reward' : e.source === 'milestone' ? 'Milestone chest' : e.source === 'shrine' ? 'Shrine reward' : e.source === 'boss' ? 'Boss loot' : e.source === 'elite' ? 'Elite drop' : e.source === 'idle' ? 'While away' : 'Drop';
         if (!e.better) showToast(`${src}: ${CFG.gear.rarity[e.item.rarity].name} ${e.item.name} · in your bag`, e.item.rarity);
         Sfx.play('pickup'); UI.alertT = 0;
@@ -299,7 +302,7 @@ function windupFx(e) {
   const col = BIOME_TINT.includes(e.color) ? e.color : (e.color != null ? e.color : 0xffffff), pal = e.pal || 'dust', R = Math.max(1.6, e.r * 2.6), life = Math.max(0.4, e.life), n = Math.min(14, 5 + Math.round(e.r * 4));
   for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, d = R * (0.8 + Math.random() * 0.7); mote(e.x + Math.sin(a) * d, 0.3 + Math.random() * 1.6, e.z + Math.cos(a) * d, -Math.sin(a) * d / life, 0.4 + Math.random() * 0.6, -Math.cos(a) * d / life, life * 0.9, 0.22, -0.3, col); }
   SpriteFX.play('ring', pal, e.x, 0, e.z, R * 2.2, { speed: 0.46 / Math.max(0.35, life) });
-  if (e.k === 'ambush' || e.k === 'burrow') SpriteFX.play('poof', pal, e.x, 0.5, e.z, Math.max(2, e.r * 2.6));
+  if (e.k === 'ambush' || e.k === 'burrow') SpriteFX.play('poof', pal, e.x, 0.5, e.z, Math.min(2.6, Math.max(1.4, e.r * 1.2)), { speed: 1.5 });
 }
 // a monster move landing, in the look of its area: shock rings, shards, falling shells, beams along the lane, scythe arcs
 function aoeImpactFx(e) {
@@ -307,12 +310,12 @@ function aoeImpactFx(e) {
   switch (e.kind) {
     case 'ripple': SpriteFX.play('ring', pal, e.x, 0, e.z, e.r * 2.1, { speed: 1.4 }); burst(e.x, 0.3, e.z, 8, col, 5, 0.45, 0.22, 8, 0.2); break;
     case 'spike': SpriteFX.play('impact', pal, e.x, 0.6, e.z, 1.7); burst(e.x, 0.3, e.z, 5, col, 4, 0.35, 0.2, 10, 0.8); break;
-    case 'meteor': SpriteFX.play('explosion', pal, e.x, 0, e.z, Math.max(2.6, e.r * 1.9), { speed: 1.3 }); burst(e.x, 0.4, e.z, 9, col, 6, 0.5, 0.22, 8, 0.6); if (near(e, 12)) Cam.shake = Math.max(Cam.shake, 0.22); break;
+    case 'meteor': SpriteFX.play('explosion', pal, e.x, 0, e.z, Math.min(3, Math.max(1.6, e.r * 1.1)), { speed: 1.7 }); burst(e.x, 0.4, e.z, 9, col, 6, 0.5, 0.22, 8, 0.6); if (near(e, 12)) Cam.shake = Math.max(Cam.shake, 0.22); break;
     case 'beam': for (let i = 0; i < 16; i++) { const d = Math.random() * e.r, a = e.ca + (Math.random() - 0.5) * 0.1; burst(e.x + Math.sin(a) * d, 0.4 + Math.random() * 1.2, e.z + Math.cos(a) * d, 1, col, 1.5, 0.45, 0.28, 0, 0.1); } SpriteFX.play('pillar', pal, e.x + Math.sin(e.ca) * e.r * 0.5, 0, e.z + Math.cos(e.ca) * e.r * 0.5, 4.5); if (near(e, 16)) Cam.shake = Math.max(Cam.shake, 0.35); break;
     case 'sweep': { const a = e.ca; for (let i = 0; i < 8; i++) { const d = e.r * (0.25 + Math.random() * 0.75), aa = a + (Math.random() - 0.5) * 0.6; burst(e.x + Math.sin(aa) * d, 0.7, e.z + Math.cos(aa) * d, 1, col, 3, 0.3, 0.22, 4, 0.3); } SpriteFX.play('slash', 'white', e.x + Math.sin(a) * e.r * 0.55, 1.1, e.z + Math.cos(a) * e.r * 0.55, 3.2, { rot: -a }); break; }
     case 'flurry': SpriteFX.play('slash', 'white', e.x, 1.1, e.z, 2.6, { rot: Math.random() * 6.28 }); burst(e.x, 0.8, e.z, 6, col, 5, 0.3, 0.2, 6, 0.4); break;
     case 'fan': break;
-    default: SpriteFX.play('impact', pal, e.x, 0.8, e.z, Math.max(1.6, e.r * 0.9)); burst(e.x, 0.4, e.z, 7, col, 5, 0.4, 0.22, 7, 0.5); if (e.r >= 3.5 && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.3);
+    default: SpriteFX.play('impact', pal, e.x, 0.8, e.z, Math.min(2.4, Math.max(1.2, e.r * 0.6)), { speed: 1.5 }); burst(e.x, 0.4, e.z, 7, col, 5, 0.4, 0.22, 7, 0.5); if (e.r >= 3.5 && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.3);
   }
 }
 function near(e, r) { const f = G.mode === 'arena' && G.arena ? G.arena.fighters[0] : G.player; return Math.hypot(e.x - f.x, e.z - f.z) < (r || 20); }

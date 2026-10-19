@@ -151,6 +151,7 @@ function fxPal(c) {
 }
 function updateParticles(dt) {
   SpriteFX.update(dt);
+  LootPop.update(dt);
   let n = 0;
   for (let k = 0; k < PART_MAX; k++) {
     if (PD.life[k] <= 0) continue;
