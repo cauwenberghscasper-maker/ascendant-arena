@@ -9666,7 +9666,7 @@ AssetSlots.register('enemy', (o) => {
       if (popT > 0 && popT < 1) popT = Math.min(1, popT + dt * 5);
       root.rotation.y += angDiff(root.rotation.y, e.facing) * (1 - Math.exp(-dt * 10));
       phase += dt * (2 + (e.moveAmt || 0) * 8);
-      pivot.rotation.set(0, 0, 0); pivot.scale.set(1, 1, 1); // the move pose below adds to (and stretches) whatever the body animation sets, so both reset every frame
+      pivot.position.set(0, 0, 0); pivot.rotation.set(0, 0, 0); pivot.scale.set(1, 1, 1); // the move pose below adds to (and stretches) whatever the body animation sets, so both reset every frame
       if (bt === 'slime') { const b = Math.abs(Math.sin(phase)); pivot.scale.set(1 + (1 - b) * 0.18, 0.8 + b * 0.3, 1 + (1 - b) * 0.18); pivot.position.y = b * 0.25 * (e.moveAmt || 0.2); }
       else if (bt === 'wolf') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.12 * (e.moveAmt || 0); }
       else if (bt === 'beetle') { pivot.position.y = Math.abs(Math.sin(phase * 2)) * 0.05 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.25 + Math.sin(t * 40) * 0.05 : 0; pivot.rotation.z = Math.sin(phase * 2) * 0.04 * (e.moveAmt || 0); }
