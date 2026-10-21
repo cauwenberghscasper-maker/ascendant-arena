@@ -1,0 +1,48 @@
+{
+ "batch": "landmarks-3d-b",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "crystal_arch",
+   "ok": true,
+   "file": "crystal_arch.glb",
+   "sec": 56.4
+  },
+  {
+   "name": "crashed_star",
+   "ok": true,
+   "file": "crashed_star.glb",
+   "sec": 38.8
+  },
+  {
+   "name": "storm_rod",
+   "ok": true,
+   "file": "storm_rod.glb",
+   "sec": 14.8
+  },
+  {
+   "name": "volcano_c",
+   "ok": true,
+   "file": "volcano_c.webp",
+   "sec": 6.9
+  },
+  {
+   "name": "volcano",
+   "ok": true,
+   "file": "volcano.glb",
+   "sec": 70.7
+  },
+  {
+   "name": "sky_temple_c",
+   "ok": true,
+   "file": "sky_temple_c.webp",
+   "sec": 10.7
+  },
+  {
+   "name": "sky_temple",
+   "ok": true,
+   "file": "sky_temple.glb",
+   "sec": 43.4
+  }
+ ]
+}
