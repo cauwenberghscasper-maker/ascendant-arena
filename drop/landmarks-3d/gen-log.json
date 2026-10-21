@@ -1,0 +1,54 @@
+{
+ "batch": "landmarks-3d",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "colossus",
+   "ok": true,
+   "file": "colossus.glb",
+   "sec": 47.2
+  },
+  {
+   "name": "lava_forge",
+   "ok": true,
+   "file": "lava_forge.glb",
+   "sec": 41.4
+  },
+  {
+   "name": "chapel",
+   "ok": true,
+   "file": "chapel.glb",
+   "sec": 43.5
+  },
+  {
+   "name": "crystal_arch",
+   "ok": true,
+   "file": "crystal_arch.glb",
+   "sec": 49.6
+  },
+  {
+   "name": "crashed_star",
+   "ok": true,
+   "file": "crashed_star.glb",
+   "sec": 50.1
+  },
+  {
+   "name": "waterwheel",
+   "ok": true,
+   "file": "waterwheel.glb",
+   "sec": 35.9
+  },
+  {
+   "name": "storm_rod",
+   "ok": true,
+   "file": "storm_rod.glb",
+   "sec": 13.8
+  },
+  {
+   "name": "shrine",
+   "ok": true,
+   "file": "shrine.glb",
+   "sec": 22.7
+  }
+ ]
+}
