@@ -1,0 +1,102 @@
+{
+ "batch": "landmarks-c",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "colossus_c7",
+   "ok": true,
+   "file": "colossus_c7.webp",
+   "sec": 10.3
+  },
+  {
+   "name": "colossus_c23",
+   "ok": true,
+   "file": "colossus_c23.webp",
+   "sec": 9.8
+  },
+  {
+   "name": "lava_forge_c7",
+   "ok": true,
+   "file": "lava_forge_c7.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "lava_forge_c23",
+   "ok": true,
+   "file": "lava_forge_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "chapel_c7",
+   "ok": true,
+   "file": "chapel_c7.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "chapel_c23",
+   "ok": true,
+   "file": "chapel_c23.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "crystal_arch_c7",
+   "ok": true,
+   "file": "crystal_arch_c7.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "crystal_arch_c23",
+   "ok": true,
+   "file": "crystal_arch_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "crashed_star_c7",
+   "ok": true,
+   "file": "crashed_star_c7.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "crashed_star_c23",
+   "ok": true,
+   "file": "crashed_star_c23.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "waterwheel_c7",
+   "ok": true,
+   "file": "waterwheel_c7.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "waterwheel_c23",
+   "ok": true,
+   "file": "waterwheel_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "storm_rod_c7",
+   "ok": true,
+   "file": "storm_rod_c7.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "storm_rod_c23",
+   "ok": true,
+   "file": "storm_rod_c23.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "shrine_c7",
+   "ok": true,
+   "file": "shrine_c7.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "shrine_c23",
+   "ok": true,
+   "file": "shrine_c23.webp",
+   "sec": 5.6
+  }
+ ]
+}
