@@ -6,7 +6,7 @@ Play: https://cauwenberghscasper-maker.github.io/ascendant-arena/ · Repo: https
 **This README is the one document every developer and every AI tool reads first** (Claude projects, Claude Code,
 Codex, Cursor, Copilot, Gemini…). It holds the rules, the style, what is in the game, the vision and how 3D models
 are made. `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` and `.github/copilot-instructions.md` only point here.
-Open work, newest at the top: [`docs/UNFINISHED.md`](docs/UNFINISHED.md).
+Open work: [`docs/OPEN.md`](docs/OPEN.md); handovers: [`docs/log/`](docs/log/) (history before 21 Oct 2026: [`docs/UNFINISHED.md`](docs/UNFINISHED.md)).
 
 The owner is Casper. `main` is the live game (GitHub Pages rebuilds from `main` within minutes). When this file and
 the code disagree, check `git log` and fix this file in the same commit.
@@ -15,7 +15,8 @@ the code disagree, check `git log` and fix this file in the same commit.
 
 1. Get the latest code: `git clone https://github.com/cauwenberghscasper-maker/ascendant-arena` (about 365 MB; use
    `GIT_LFS_SKIP_SMUDGE=1` and `--depth 1` for speed) or `git pull` on `main`.
-2. Read this whole README, then the top of `docs/UNFINISHED.md` and `git log --oneline -15` to see what others just did.
+2. Read this whole README, then `docs/OPEN.md`, the newest files in `docs/log/`, `git log --oneline -15` and `npm run team`
+   to see what others just did and are doing now ([`docs/TEAMWORK.md`](docs/TEAMWORK.md)).
 3. For the area you touch, read the matching `audit/*.md` and `assets/heroes/combat_kits.md` for hero work.
 4. No repo access (for example a Claude project chat)? Read this file at
    https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/main/README.md and follow the same rules
@@ -125,22 +126,22 @@ The game is played on phones. Every change must work there.
 
 ### 1.4 Working together across sessions and tools
 
-Several people and AI sessions work on this repo at the same time. To avoid overwriting each other:
+Several people and AI sessions work on this repo at the same time. The full routine is in
+[`docs/TEAMWORK.md`](docs/TEAMWORK.md); in short:
 
-1. **Start fresh:** `git fetch origin && git checkout main && git pull`. Then read `docs/UNFINISHED.md` and
-   `git log --oneline -15` to see what others just did.
-2. **One topic per branch:** `wip/<topic>` or `claude/<topic>`. Small, requested fixes may go straight to `main` once the
-   checks pass. Big or risky work (new systems, roster or save changes, mass asset swaps) goes in a pull request, and
-   Casper approves the merge.
+1. **Look first:** `git fetch origin && git checkout -B claude/<topic> origin/main`, then `npm run team` (open PRs =
+   work in progress, the files each changes, clashes with yours), [`docs/OPEN.md`](docs/OPEN.md) (the backlog) and
+   the newest files in [`docs/log/`](docs/log/).
+2. **Claim it:** your first push opens a **draft PR** naming what you'll change. One topic per branch (`claude/<topic>`,
+   `wip/<topic>`). Small, requested fixes may go straight to `main` once the checks pass; big or risky work (new
+   systems, roster or save changes, mass asset swaps) stays in a PR and Casper approves the merge.
 3. **Keep diffs focused.** Don't reformat, rename or "tidy" files you aren't changing. Big shared files
-   (`61-panels.js`, `63-menus.js`, `ui-v2.css`, `44-world-view.js`) are where conflicts happen: edit only the part you
-   need.
-4. **Merge conflicts in `index.html`:** never resolve them by hand. Resolve the conflicts in `src/`, then run
-   `node tools/build.cjs` and commit the regenerated `index.html`.
-5. **Hand over.** Before you stop, add what you finished and what is still open to the top of `docs/UNFINISHED.md`
-   (date, branch, next steps), commit and push. Never leave work only local; cloud sessions are thrown away.
-   Added a hero, system, rule or file? Update the matching part of this README in the same commit, so the next
-   person reads the truth.
+   (`61-panels.js`, `63-menus.js`, `ui-v2.css`, `44-world-view.js`, this README) are where conflicts happen: edit only
+   the part you need.
+4. **Sync with `npm run sync`:** it rebases on `main` and rebuilds `index.html` (never resolve `index.html` by hand).
+5. **Hand over in your own file:** `docs/log/YYYY-MM-DD-<topic>.md` (asked, changed for the player, tested, still open),
+   tick/add your lines in `docs/OPEN.md`, commit and push. Never leave work only local; cloud sessions are thrown away.
+   Added a hero, system, rule or file? Update the matching part of this README in the same commit.
 6. **Commit messages describe what the player sees** ("Skill tree opens ring by ring: …"), not code internals.
 
 ### 1.5 Check before you say it works
@@ -148,6 +149,10 @@ Several people and AI sessions work on this repo at the same time. To avoid over
 1. `node tools/build.cjs` after any `src/` edit (`node tools/build.cjs --check` fails if `index.html` is stale).
 2. `npm run check` must exit 0. If it rewrites `audit/regression-evidence.json` and that wasn't intended, restore it
    with `git checkout -- audit/regression-evidence.json`.
+   `npm run smoke` plays the real game headless (boot, Play, walk, shoot, super, every monster body and world boss
+   through every attack, no page errors); it needs Playwright (`npm i --no-save playwright && npx playwright install
+   chromium`, or `PW_CHROMIUM=/path/to/chrome`). GitHub Actions runs both on every push and PR
+   (`.github/workflows/checks.yml`). Fixed a bug a check could have caught? Add that check too.
 3. **Look at it.** Serve the repo (`python3 -m http.server 8766`), open it in a browser (headless Chromium with
    Playwright is fine: `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`), wait for
    `window.__gameBooted`, click `#playBtn`, screenshot at 390×844. No `pageerror` or console errors.
@@ -289,7 +294,7 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
 
 ### Where we're going next
 
-Current list: `docs/UNFINISHED.md`. The big directions:
+Current list: `docs/OPEN.md`. The big directions:
 
 1. **Replace every code-built object with a real 3D model** (pets, menu thumbnails, shrines, lava, dungeon floor,
    lair bosses, broken landmarks, modular town houses from the Quaternius Medieval Village kit). See
@@ -458,7 +463,7 @@ After editing: `node tools/build.cjs`, then run the checks.
 
 ## 5. Checks
 
-`npm run check` runs `tools/check_release.cjs` (which also fails when `index.html` was not rebuilt), `check_test_mode`, `check_companions`, `check_gameplay` and `audit/checks.cjs`. Browser checks (`tools/check_game_browser.cjs` and the other `check_*_integration.cjs`) need a server on port 8766 and Playwright. Assessment: [audit/REPORT.md](audit/REPORT.md). Current implementation and release gates: [audit/PHASE1.md](audit/PHASE1.md). Map and pace of the 1-210 world: [audit/world-v9.md](audit/world-v9.md).
+`npm run check` runs `tools/check_release.cjs` (which also fails when `index.html` was not rebuilt), `check_test_mode`, `check_companions`, `check_gameplay`, `audit/checks.cjs` and the system checks (dungeons, Bastion, delve, mining, daily…). `npm run smoke` (`tools/check_smoke.cjs`) is the browser smoke test; CI runs all of them on every push and pull request. Browser checks (`tools/check_game_browser.cjs` and the other `check_*_integration.cjs`) need a server on port 8766 and Playwright. Assessment: [audit/REPORT.md](audit/REPORT.md). Current implementation and release gates: [audit/PHASE1.md](audit/PHASE1.md). Map and pace of the 1-210 world: [audit/world-v9.md](audit/world-v9.md).
 
 ## 6. Store apps (iOS and Android)
 

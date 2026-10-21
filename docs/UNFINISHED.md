@@ -1,3 +1,6 @@
+> **History, read-only since 21 Oct 2026.** New handovers go in their own file in [`docs/log/`](log/) and open items
+> in [`docs/OPEN.md`](OPEN.md), so parallel branches stop colliding at the top of this file. See [`docs/TEAMWORK.md`](TEAMWORK.md).
+
 # Dungeons: bots stay on your side of the walls, the minimap shows the dungeon (21 Oct 2026, branch `claude/dungeon-walls-minimap`, PR to main)
 Casper: bots sometimes go behind walls; sync the dungeon map to the minimap.
 - **Walls:** `dungeonClamp` puts a body in whichever hall/corridor is nearest, so anything that carried a bot across a

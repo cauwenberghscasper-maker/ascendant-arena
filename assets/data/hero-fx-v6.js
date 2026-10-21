@@ -335,7 +335,7 @@ export function createHeroFX(api) {
     const g = new THREE.Group(); g.rotation.y = o.a; const W = o.width, Hh = 3.2;
     const waveTex = canvasTex('wave', 64, 128, (c) => { const r = c.createLinearGradient(0, 0, 0, 128); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.18, 'rgba(200,245,240,.95)'); r.addColorStop(0.5, 'rgba(70,170,170,.85)'); r.addColorStop(1, 'rgba(30,90,95,.55)'); c.fillStyle = r; c.fillRect(0, 0, 64, 128); });
     const geo = new THREE.PlaneGeometry(W, Hh, 16, 6); const pos = geo.attributes.position;
-    for (let i = 0; i < pos.count; i++) { const y = pos.getY(i) / Hh + 0.5; pos.setZ(i, Math.pow(y, 2.2) * 1.4 - Math.abs(pos.getX(i) / W) * 0.8); }
+    for (let i = 0; i < pos.count; i++) { const y = Math.max(0, pos.getY(i) / Hh + 0.5); /* rounding puts the bottom row a hair below 0, and pow(<0, 2.2) is NaN */ pos.setZ(i, Math.pow(y, 2.2) * 1.4 - Math.abs(pos.getX(i) / W) * 0.8); }
     geo.computeVertexNormals();
     const wall = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: waveTex, transparent: true, side: THREE.DoubleSide, depthWrite: false })); wall.position.y = Hh / 2; g.add(wall);
     const boats = []; for (let i = 0; i < 3; i++) { const b = new THREE.Mesh(merge([part(Box(0.6, 0.35, 1.7), 0x2e6e6a), part(Box(0.06, 1.3, 0.06), 0x2e6e6a, [0, 0.8, 0]), part(new THREE.PlaneGeometry(0.9, 0.9), 0xd8f4f0, [0, 0.9, 0.25], [0, Math.PI / 2, 0])]), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.45, depthWrite: false })); b.position.set((i - 1) * W * 0.3, 1.3, -0.3); b.rotation.y = Math.PI / 2; boats.push(b); g.add(b); }

@@ -1,0 +1,5 @@
+# index.html is generated from src/ (node tools/build.cjs). On a merge or rebase keep our copy and rebuild afterwards
+# (tools/sync.sh sets up the "rebuild" driver and rebuilds); never resolve it by hand. Hidden from diffs and stats.
+index.html merge=rebuild linguist-generated=true -diff
+# the old handover log: if two branches still add to its top, keep both entries
+docs/UNFINISHED.md merge=union
