@@ -42,7 +42,7 @@ the code disagree, check `git log` and fix this file in the same commit.
    real 3D model files (glTF) in `assets/`. No `BoxGeometry`/`CylinderGeometry` sculptures, no "procedural hero",
    no primitives stacked into a house. Code geometry is only allowed for: VFX (particles, trails, rings, decals, the
    gas wall), invisible helpers (colliders, picking), and the existing temporary fallbacks that show until a model
-   loads. Remaining primitive fallbacks (shrines, lava pools, dungeon floor, volcanic horizon) are debt to replace
+   loads. Remaining primitive fallbacks (lava pools, dungeon floor, volcanic horizon) are debt to replace
    with models, not a pattern to copy. See section 3.
 4. **Saves never break.** Players must never lose gear or progress. Any change to the save format goes through
    `sanitizeProfile` in `src/game/22-profile.js` with a migration for old saves.
@@ -327,9 +327,9 @@ These exist today and should be swapped for real models. Pick one up if you're l
 |---|---|
 | Pets and prestige companions (bull, crystal dragon, …) | `assets/art/pet-companions.js`, `assets/art/crystal-dragon.js` |
 | Menu thumbnails of gear, chests and daily rewards | `assets/art/premium-models.js` |
-| Shrines, lava pools, dungeon floor, volcanic horizon (procedural fallbacks) | `src/game/44-world-view.js`, `47-dungeon-view.js` |
+| Lava pools, dungeon floor, volcanic horizon (procedural fallbacks) | `src/game/44-world-view.js`, `47-dungeon-view.js` |
 | Lair bosses (today: the area's monster scaled ×1.8) | `src/game/39b-lair-bosses.js` |
-| Broken landmarks to regenerate: chapel, colossus, crystal_arch, lava_forge, shrine, crashed_star, storm_rod, waterwheel, volcano, rift_pylon, rift_gate, arena_wall, dungeon_tile, sky_temple | `assets/world/<name>/` |
+| Landmarks still to (re)make: volcano (horizon; TRELLIS meshed its lava glow as flat walls, 21 Oct), rift_pylon, rift_gate, arena_wall, dungeon_tile | `assets/world/<name>/` |
 
 ### The look a model must have
 
