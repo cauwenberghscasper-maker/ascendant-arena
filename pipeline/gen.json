@@ -1,365 +1,212 @@
 {
- "batch": "models-3d-mats",
+ "batch": "landmarks-c",
  "jobs": [
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_abyssal",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "colossus_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_abyssal.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. The ruins of a giant ancient stone colossus statue on a mountain top: its huge weathered granite head with a calm carved face lies tilted beside two cracked legs still standing on a stepped plinth, patches of snow and frost, lichen, cold grey-blue stone.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_arcdust",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "colossus_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_arcdust.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. The ruins of a giant ancient stone colossus statue on a mountain top: its huge weathered granite head with a calm carved face lies tilted beside two cracked legs still standing on a stepped plinth, patches of snow and frost, lichen, cold grey-blue stone.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_copper",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lava_forge_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_copper.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. An ancient dwarven lava forge built from heavy black basalt blocks with bronze bands, a glowing orange molten mouth, a big iron anvil in front, a squat chimney with ember sparks, cracks of glowing magma between the stones.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_emberscale",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lava_forge_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_emberscale.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. An ancient dwarven lava forge built from heavy black basalt blocks with bronze bands, a glowing orange molten mouth, a big iron anvil in front, a squat chimney with ember sparks, cracks of glowing magma between the stones.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_frostfang",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "chapel_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_frostfang.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A small ruined gothic stone chapel blackened by fire, a short bell tower with a broken roof, pointed arch doorway, scorched charcoal grey stone with soot, glowing orange embers smouldering on the broken roof edges.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_glacial",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "chapel_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_glacial.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A small ruined gothic stone chapel blackened by fire, a short bell tower with a broken roof, pointed arch doorway, scorched charcoal grey stone with soot, glowing orange embers smouldering on the broken roof edges.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_iron",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crystal_arch_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_iron.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A tall natural arch made of giant violet amethyst crystal columns rising from a ruined round stone base with carved arcane runes, a glowing pale ring of magic floating inside the arch, purple and lilac glow.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_magma",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crystal_arch_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_magma.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A tall natural arch made of giant violet amethyst crystal columns rising from a ruined round stone base with carved arcane runes, a glowing pale ring of magic floating inside the arch, purple and lilac glow.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_mithril",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crashed_star_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_mithril.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A fallen star: a large glowing golden faceted crystal star half buried in a round crater of cracked brown rock and rubble, warm golden light, little sparkles, molten gold veins in the crater rim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_obsidian",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crashed_star_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_obsidian.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A fallen star: a large glowing golden faceted crystal star half buried in a round crater of cracked brown rock and rubble, warm golden light, little sparkles, molten gold veins in the crater rim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_pearl",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "waterwheel_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_pearl.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. An old sunken stone mill with a big wooden waterwheel on its side, overgrown with teal seaweed, kelp and barnacles, small coral, a mossy tiled roof, cool teal and sea-green palette.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_solar",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "waterwheel_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_solar.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. An old sunken stone mill with a big wooden waterwheel on its side, overgrown with teal seaweed, kelp and barnacles, small coral, a mossy tiled roof, cool teal and sea-green palette.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_starfeather",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "storm_rod_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_starfeather.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A tall slender ancient stone and bronze lightning rod tower on a stepped marble base, glowing blue rune bands spiralling up the column, a forked bronze tip crackling with blue lightning, white marble and gold trim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_starsteel",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "storm_rod_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_starsteel.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A tall slender ancient stone and bronze lightning rod tower on a stepped marble base, glowing blue rune bands spiralling up the column, a forked bronze tip crackling with blue lightning, white marble and gold trim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_thornhide",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "shrine_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_thornhide.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A circular ancient stone challenge shrine: a ring of short carved standing stones around a raised round altar with a stone bowl on top, glowing violet runes carved into the stones, moss in the cracks, weathered warm grey stone.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_tidal",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "shrine_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_tidal.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_titansoul",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_titansoul.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_verdant",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_verdant.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
-   }
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "mat_void",
-   "files": [
-    "image"
-   ],
-   "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/pixel-fx-b/mat_void.webp",
-    "resolution": "1024",
-    "decimation_target": 50000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single landmark, three-quarter view from slightly above, plain flat light grey background, soft even light, no ground plane, no text, no people. A circular ancient stone challenge shrine: a ring of short carved standing stones around a raised round altar with a stone bowl on top, glowing violet runes carved into the stones, moss in the cracks, weathered warm grey stone.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   }
  ]
