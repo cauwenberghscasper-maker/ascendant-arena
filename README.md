@@ -444,7 +444,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Dungeon mode (party dungeons): dungeons, difficulties, power gate, rooms, events, loot, set bonuses | `src/game/36b-delve.js` (`CFG.delve`); event-room props: `47b-delve-view.js`; parties, random match, the Dungeons panel and HUD: `73-party.js`; bots that fill a party up to four: `36d-delve-bots.js` (`CFG.delve.bots`); boss attack kits per phase: `36e-delve-boss.js` (`CFG.delve.bossKit`); banners `assets/ui/delve/`, set pieces `assets/world/delve_*` |
 | Bastion Siege (tower defense from the Bastion house in town): the grid, building, walls and pathing, waves and sides, objectives, builders, the permanent fort save | `src/game/36c-siege.js` (`CFG.siege`); looks: `47c-siege-view.js`; builder mode: `75-siege-builder.js`; menu pictures: `tools/fort_icons.mjs` + `.py` → `assets/ui/fort/`; save: `profile.fort` via `sanitizeFort` in `22-profile.js`; shared worlds (codes, host, sync): `74-siege-mp.js` + `supabase/bastion_worlds.sql`; checks: `tools/check_siege.cjs` |
 | Multiplayer lobby (Supabase Realtime), future partitioning (`mpRoomKey`) | `src/game/70-multiplayer.js`; notes in `docs/UNFINISHED.md` |
-| HUD | `src/game/60-hud.js` |
+| HUD | `src/game/60-hud.js`; minimap: `drawMinimap` in `62-events-fx.js` (world, arena, Bastion, Rift, and the dungeon map `drawDungeonMinimap`) |
 | Panels, settings, button actions (`data-act`) | `src/game/61-panels.js` (`handlePanelClick`) |
 | Menus, skill-tree screen, credits | `src/game/63-menus.js` |
 | Effects for hits, kills and events | `src/game/62-events-fx.js` (`processEvents`); particles and sprite FX: `45-fx.js` |

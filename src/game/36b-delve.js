@@ -170,7 +170,7 @@ function delveLayout(seed, def, di) {
       if (sideHit(r, 3) || sideHit(c, 0.5, a)) continue;
       const k = side.length, kind = wpick(SR.kinds);
       side.push(Object.assign(r, { x, z, hx, hz, h: Math.min(hx, hz), i: 100 + k, side: true, parent: pi, kind: kind.k, guards: kind.guards, shape: 'side' }));
-      cors.push(Object.assign(c, { side: true }));
+      cors.push(Object.assign(c, { side: true, sk: k })); // sk: its side room (the minimap hides it behind a closed cracked wall)
       if (rng() < SR.secret) secrets.push(d[1] ? { x: a.x, z: d[1] > 0 ? a.z1 + 0.6 : a.z0 - 0.6, ax: 'x', w, open: false, side: k } : { x: d[0] > 0 ? a.x1 + 0.6 : a.x0 - 0.6, z: a.z, ax: 'z', w, open: false, side: k });
       break;
     }

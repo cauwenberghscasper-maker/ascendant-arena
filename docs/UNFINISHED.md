@@ -1,3 +1,17 @@
+# Dungeons: bots stay on your side of the walls, the minimap shows the dungeon (21 Oct 2026, branch `claude/dungeon-walls-minimap`, PR to main)
+Casper: bots sometimes go behind walls; sync the dungeon map to the minimap.
+- **Walls:** `dungeonClamp` puts a body in whichever hall/corridor is nearest, so anything that carried a bot across a
+  wall left it there: a heavy hit's knock-back (up to ~1.4 m in one step) or the catch-up jump beside a leader standing
+  at a wall. Bots now keep their last legal spot (`safeX/Z`); a move or knock-back whose straight line runs through a
+  wall/door core (`wallBetween`) is undone, and the catch-up jump picks a free spot the leader can see (`besideLeader`).
+  Test: a bot thrown through the start hall's wall came straight back; 40 s of fighting with doors shut, no bot ever
+  stood behind a shut door.
+- **Minimap in dungeons** (`drawDungeonMinimap`, 62-events-fx.js): north up, centred on you (Map button: wider).
+  Seen halls lit and outlined (boss hall red, puzzle halls blue), unseen dim; corridors; gates red when shut, green
+  when open; side rooms behind a cracked wall hidden until it breaks (side corridors carry `sk`); monsters in halls
+  you have seen (bosses gold), friends blue, bots green, you as an arrow. The world's small dungeons show whole.
+Open: look at it on a phone; maybe a full-screen dungeon map on the Map button.
+
 # Smoother frame rate: lighter trees, shadows and dungeon walls (19 Oct 2026, on `main`)
 Casper: optimize the FPS without hurting the graphics. Measured in headless Chromium at 390x844 (triangles per frame
 including the shadow pass; GPU timing can't be measured there, so these are counts, not phone FPS):

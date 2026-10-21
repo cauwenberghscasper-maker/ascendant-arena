@@ -133,7 +133,22 @@ function delveBotThink(b, dt) {
     if (ai.stuck) { ai.roamT = 0; ai.side += 1.9; }
   }
   const far = lead.alive !== false && Math.hypot(lead.x - b.x, lead.z - b.z) > K.lost;
-  if ((ai.stuck >= K.stuck || far) && !foe) { b.x = lead.x + Math.sin(ai.side) * 1.5; b.z = lead.z + Math.cos(ai.side) * 1.5; dungeonClamp(b, b.r); ai.stuck = 0; }
+  if ((ai.stuck >= K.stuck || far) && !foe) { const p = besideLeader(b, lead); b.x = b.safeX = p.x; b.z = b.safeZ = p.z; ai.stuck = 0; }
+}
+// walls: a straight line between two spots that passes through a wall or a closed door (a knock-back can throw a body
+// 1.4 m, through a thin wall; a catch-up jump beside a leader standing at a wall can land in the next hall)
+function wallBetween(x0, z0, x1, z1) {
+  const d = Math.hypot(x1 - x0, z1 - z0); if (d < 0.3 || !G.obstacles) return false;
+  for (let k = 0.25; k < d; k += 0.25) { const t = k / d, x = x0 + (x1 - x0) * t, z = z0 + (z1 - z0) * t; let hit = false;
+    G.obstacles.query(x, z, (o) => { if (!hit && Math.hypot(x - o.x, z - o.z) < o.r * 0.9) hit = true; }); if (hit) return true; } // a legal move never runs through a wall's or a pillar's core
+  return false;
+}
+// a free spot beside the leader that the leader can see (same side of every wall), else the leader's own spot
+function besideLeader(b, lead) {
+  for (let k = 0; k < 8; k++) { const a = b.ai.side + k * Math.PI / 4, x = lead.x + Math.sin(a) * 1.6, z = lead.z + Math.cos(a) * 1.6;
+    if (pointBlocked(x, z, b.r) || wallBetween(lead.x, lead.z, x, z)) continue;
+    const f = { x, z }; dungeonClamp(f, b.r); if (Math.abs(f.x - x) + Math.abs(f.z - z) < 0.01) return f; }
+  return { x: lead.x, z: lead.z };
 }
 function delveBotRevive(b, by) {
   if (!b || b.alive) return;
@@ -152,7 +167,12 @@ function stepDelveBots(dt) {
   if ((X.botScaleT -= dt) <= 0) { X.botScaleT = DV.bots.rescale; for (const b of bots) delveBotScale(b); } // a friend joined late or someone levelled
   for (const b of bots) {
     if (!b.alive) continue;
+    // never on the far side of a wall: a hit's knock-back (taken during the monsters' step) or this step's move that went
+    // through one is undone back to the last spot it stood legally
+    if (b.safeX == null) { b.safeX = b.x; b.safeZ = b.z; }
+    if (wallBetween(b.safeX, b.safeZ, b.x, b.z)) { b.x = b.safeX; b.z = b.safeZ; }
     delveBotThink(b, dt); stepFighter(b, dt, 'hub');
+    if (wallBetween(b.safeX, b.safeZ, b.x, b.z)) { b.x = b.safeX; b.z = b.safeZ; } else { b.safeX = b.x; b.safeZ = b.z; }
     if (b.lastAttack !== b.lastShot) { b.lastShot = b.lastAttack; b.shots++; }
     const down = party.find((f) => f !== b && f.alive === false && Math.hypot(f.x - b.x, f.z - b.z) < DV.reviveR), ai = b.ai;
     if (!down) { ai.rev = null; continue; }

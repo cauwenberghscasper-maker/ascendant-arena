@@ -6875,7 +6875,7 @@ function delveLayout(seed, def, di) {
       if (sideHit(r, 3) || sideHit(c, 0.5, a)) continue;
       const k = side.length, kind = wpick(SR.kinds);
       side.push(Object.assign(r, { x, z, hx, hz, h: Math.min(hx, hz), i: 100 + k, side: true, parent: pi, kind: kind.k, guards: kind.guards, shape: 'side' }));
-      cors.push(Object.assign(c, { side: true }));
+      cors.push(Object.assign(c, { side: true, sk: k })); // sk: its side room (the minimap hides it behind a closed cracked wall)
       if (rng() < SR.secret) secrets.push(d[1] ? { x: a.x, z: d[1] > 0 ? a.z1 + 0.6 : a.z0 - 0.6, ax: 'x', w, open: false, side: k } : { x: d[0] > 0 ? a.x1 + 0.6 : a.x0 - 0.6, z: a.z, ax: 'z', w, open: false, side: k });
       break;
     }
@@ -8177,7 +8177,22 @@ function delveBotThink(b, dt) {
     if (ai.stuck) { ai.roamT = 0; ai.side += 1.9; }
   }
   const far = lead.alive !== false && Math.hypot(lead.x - b.x, lead.z - b.z) > K.lost;
-  if ((ai.stuck >= K.stuck || far) && !foe) { b.x = lead.x + Math.sin(ai.side) * 1.5; b.z = lead.z + Math.cos(ai.side) * 1.5; dungeonClamp(b, b.r); ai.stuck = 0; }
+  if ((ai.stuck >= K.stuck || far) && !foe) { const p = besideLeader(b, lead); b.x = b.safeX = p.x; b.z = b.safeZ = p.z; ai.stuck = 0; }
+}
+// walls: a straight line between two spots that passes through a wall or a closed door (a knock-back can throw a body
+// 1.4 m, through a thin wall; a catch-up jump beside a leader standing at a wall can land in the next hall)
+function wallBetween(x0, z0, x1, z1) {
+  const d = Math.hypot(x1 - x0, z1 - z0); if (d < 0.3 || !G.obstacles) return false;
+  for (let k = 0.25; k < d; k += 0.25) { const t = k / d, x = x0 + (x1 - x0) * t, z = z0 + (z1 - z0) * t; let hit = false;
+    G.obstacles.query(x, z, (o) => { if (!hit && Math.hypot(x - o.x, z - o.z) < o.r * 0.9) hit = true; }); if (hit) return true; } // a legal move never runs through a wall's or a pillar's core
+  return false;
+}
+// a free spot beside the leader that the leader can see (same side of every wall), else the leader's own spot
+function besideLeader(b, lead) {
+  for (let k = 0; k < 8; k++) { const a = b.ai.side + k * Math.PI / 4, x = lead.x + Math.sin(a) * 1.6, z = lead.z + Math.cos(a) * 1.6;
+    if (pointBlocked(x, z, b.r) || wallBetween(lead.x, lead.z, x, z)) continue;
+    const f = { x, z }; dungeonClamp(f, b.r); if (Math.abs(f.x - x) + Math.abs(f.z - z) < 0.01) return f; }
+  return { x: lead.x, z: lead.z };
 }
 function delveBotRevive(b, by) {
   if (!b || b.alive) return;
@@ -8196,7 +8211,12 @@ function stepDelveBots(dt) {
   if ((X.botScaleT -= dt) <= 0) { X.botScaleT = DV.bots.rescale; for (const b of bots) delveBotScale(b); } // a friend joined late or someone levelled
   for (const b of bots) {
     if (!b.alive) continue;
+    // never on the far side of a wall: a hit's knock-back (taken during the monsters' step) or this step's move that went
+    // through one is undone back to the last spot it stood legally
+    if (b.safeX == null) { b.safeX = b.x; b.safeZ = b.z; }
+    if (wallBetween(b.safeX, b.safeZ, b.x, b.z)) { b.x = b.safeX; b.z = b.safeZ; }
     delveBotThink(b, dt); stepFighter(b, dt, 'hub');
+    if (wallBetween(b.safeX, b.safeZ, b.x, b.z)) { b.x = b.safeX; b.z = b.safeZ; } else { b.safeX = b.x; b.safeZ = b.z; }
     if (b.lastAttack !== b.lastShot) { b.lastShot = b.lastAttack; b.shots++; }
     const down = party.find((f) => f !== b && f.alive === false && Math.hypot(f.x - b.x, f.z - b.z) < DV.reviveR), ai = b.ai;
     if (!down) { ai.rev = null; continue; }
@@ -14497,6 +14517,35 @@ function mmStar(g, x, y, r, fill) {
   for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
   g.closePath(); g.fillStyle = fill; g.fill(); g.lineWidth = r * 0.16; g.strokeStyle = 'rgba(0,0,0,.55)'; g.stroke();
 }
+// inside a dungeon the minimap is the dungeon's own map, north up and centred on you (Map button: a wider view).
+// Halls you have seen are lit (the boss hall red, puzzle halls blue), the rest dim; closed gates red, open ones green;
+// side rooms behind a cracked wall stay hidden until it breaks; monsters only in halls you have seen.
+function drawDungeonMinimap(g, W2, H2, dpr) {
+  const D = G.dungeon, pl = G.player, view = MM.big ? 130 : 64, s = W2 / view, cx = W2 / 2, cy = H2 / 2;
+  const ax = (x) => cx - (x - pl.x) * s, ay = (z) => cy - (z - pl.z) * s; // same handedness as the arena map (camera looks north)
+  const box = (m, fill, edge) => { g.fillStyle = fill; g.fillRect(ax(m.x1), ay(m.z1), (m.x1 - m.x0) * s, (m.z1 - m.z0) * s); if (edge) { g.strokeStyle = edge; g.lineWidth = 1.5 * dpr; g.strokeRect(ax(m.x1), ay(m.z1), (m.x1 - m.x0) * s, (m.z1 - m.z0) * s); } };
+  const dot = (x, z, r, c, ring) => { g.fillStyle = c; g.beginPath(); g.arc(ax(x), ay(z), r * dpr, 0, Math.PI * 2); g.fill(); if (ring) { g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.2 * dpr; g.stroke(); } };
+  g.fillStyle = '#0c0a14'; g.fillRect(0, 0, W2, H2);
+  const hidden = new Set((D.secrets || []).filter((q) => !q.open).map((q) => q.side)), seen = (m) => !D.delve || m.seen || inRoom(m, pl.x, pl.z) || (D.rooms[D.room] === m); // the world's small dungeons show whole
+  for (const c of D.cors) if (!(c.side && hidden.has(c.sk))) box(c, '#5d5682');
+  for (const m of D.side || []) if (!hidden.has(m.i - 100)) box(m, m.seen ? '#7a70a6' : '#332e4c', '#a59ad8');
+  for (const m of D.rooms) box(m, !seen(m) ? '#332e4c' : m.boss ? '#93404f' : m.pz ? '#4a69a3' : '#7a70a6', seen(m) ? '#c9c0f0' : '#5d5682');
+  // gates: red while shut, a short green bar once open
+  for (const d of D.doors) { g.fillStyle = d.open ? 'rgba(88,224,138,.6)' : '#ff5d6c'; const w = d.w * s, t = Math.max(2 * dpr, 0.9 * s);
+    if (d.ax === 'x') g.fillRect(ax(d.x) - w, ay(d.z) - t / 2, w * 2, t); else g.fillRect(ax(d.x) - t / 2, ay(d.z) - w, t, w * 2); }
+  // the chest once the boss is down, the way out
+  if (D.bossDead && !D.chestOpen) dot(D.chest.x, D.chest.z, 3.5, '#ffd34a', true);
+  dot(D.exit.x, D.exit.z, 3, '#9fe8ff', true);
+  // monsters in halls you have seen (the boss and mini-boss bigger, gold)
+  for (const e of G.enemies) { if (!e.alive || e.hidden || !(e.dungeon || e.delve)) continue; const m = D.rooms.find((r) => inRoom(r, e.x, e.z)) || (D.side || []).find((r) => inRoom(r, e.x, e.z));
+    if (!m || !(m.seen || inRoom(m, pl.x, pl.z))) continue; const big = e.boss || e.delveBoss || e.mini; dot(e.x, e.z, big ? 4 : e.elite ? 2.6 : 2, big ? '#ffc94a' : '#ff5d6c'); }
+  // the party: friends, your bots, you (an arrow that points where you face)
+  for (const q of mpVisible()) dot(q.x, q.z, 3.2, q.alive === false ? '#7a8095' : '#5dd6ff', true);
+  if (D.delve) for (const b of D.delve.bots || []) dot(b.x, b.z, 3, b.alive ? '#8dd96a' : '#7a8095', true);
+  const X = ax(pl.x), Y = ay(pl.z), f = pl.facing, k = 5 * dpr;
+  g.fillStyle = pl.alive ? '#3fa9ff' : '#7a8095'; g.strokeStyle = '#0b0c1f'; g.lineWidth = 1.5 * dpr; g.beginPath();
+  g.moveTo(X - Math.sin(f) * k, Y - Math.cos(f) * k); g.lineTo(X - Math.sin(f + 2.5) * k * 0.7, Y - Math.cos(f + 2.5) * k * 0.7); g.lineTo(X - Math.sin(f - 2.5) * k * 0.7, Y - Math.cos(f - 2.5) * k * 0.7); g.closePath(); g.fill(); g.stroke();
+}
 function drawMinimap() {
   const box = $('mapBox'); if (!G.started || box.hidden || Showcase.on) return;
   const cv = $('mini'), r = cv.getBoundingClientRect(); if (!r.width) return;
@@ -14537,6 +14586,7 @@ function drawMinimap() {
     g.fillStyle = '#3fa9ff'; g.beginPath(); g.arc(ax(G.player.x), ay(G.player.z), 4 * dpr, 0, Math.PI * 2); g.fill();
     return;
   }
+  if (G.dungeon) { drawDungeonMinimap(g, W2, H2, dpr); return; }
   if (!MM.base) mmBuildBase();
   const W = CFG.world, pl = G.player;
   const winW = MM.big ? 300 : 120, winH = winW * H2 / W2, sc = W2 / winW, u = winW / 172;
