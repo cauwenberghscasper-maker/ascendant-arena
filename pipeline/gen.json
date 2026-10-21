@@ -1,156 +1,121 @@
 {
- "batch": "landmarks-3d",
+ "batch": "landmarks-c2",
  "jobs": [
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "colossus",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crystal_arch_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c/colossus_c7.webp",
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no light rays, no sparkles, no particles, no ground plane, no text, no people. A tall natural arch made of giant violet amethyst crystal columns rising from a ruined round stone base with carved runes, the opening of the arch is completely empty and open, you can see the grey background through it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "lava_forge",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crystal_arch_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c/lava_forge_c23.webp",
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no light rays, no sparkles, no particles, no ground plane, no text, no people. A tall natural arch made of giant violet amethyst crystal columns rising from a ruined round stone base with carved runes, the opening of the arch is completely empty and open, you can see the grey background through it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "chapel",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crystal_arch_c41",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c/chapel_c23.webp",
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no light rays, no sparkles, no particles, no ground plane, no text, no people. A tall natural arch made of giant violet amethyst crystal columns rising from a ruined round stone base with carved runes, the opening of the arch is completely empty and open, you can see the grey background through it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crystal_arch",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crashed_star_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c/crystal_arch_c7.webp",
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no light rays, no sparkles, no particles, no ground plane, no text, no people. A fallen star: a large solid faceted golden crystal star lying tilted and half buried in a round crater of cracked brown rock and rubble, molten gold veins in the rocks of the crater rim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crashed_star",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crashed_star_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c/crashed_star_c23.webp",
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no light rays, no sparkles, no particles, no ground plane, no text, no people. A fallen star: a large solid faceted golden crystal star lying tilted and half buried in a round crater of cracked brown rock and rubble, molten gold veins in the rocks of the crater rim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "waterwheel",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "crashed_star_c41",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c/waterwheel_c23.webp",
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no light rays, no sparkles, no particles, no ground plane, no text, no people. A fallen star: a large solid faceted golden crystal star lying tilted and half buried in a round crater of cracked brown rock and rubble, molten gold veins in the rocks of the crater rim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "storm_rod",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "storm_rod_c7",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c/storm_rod_c7.webp",
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no light rays, no sparkles, no particles, no ground plane, no text, no people. A tall slender ancient stone and bronze lightning rod tower on a stepped white marble base, blue painted rune bands spiralling up the column, topped with a solid three-pronged bronze spike, gold trim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "shrine",
-   "files": [
-    "image"
-   ],
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "storm_rod_c23",
    "args": {
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c/shrine_c7.webp",
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no light rays, no sparkles, no particles, no ground plane, no text, no people. A tall slender ancient stone and bronze lightning rod tower on a stepped white marble base, blue painted rune bands spiralling up the column, topped with a solid three-pronged bronze spike, gold trim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "storm_rod_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no light rays, no sparkles, no particles, no ground plane, no text, no people. A tall slender ancient stone and bronze lightning rod tower on a stepped white marble base, blue painted rune bands spiralling up the column, topped with a solid three-pronged bronze spike, gold trim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   }
  ]
