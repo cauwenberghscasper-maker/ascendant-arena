@@ -97,7 +97,12 @@ The game is played on phones. Every change must work there.
   rarities.
 - Icons: 32×32 pixel icons, element-coloured, with an ink outline. Every new resource, tab or button gets its own icon
   in that style.
-- Menus are full pages with a Menu/back button and sub-tabs. New screens follow the existing hub layout
+- **No walls of text in tabs** (Casper, 22 Oct). A tab shows pictures, numbers and a word or two per card; never an
+  explanation paragraph or a long list. Any `p.fine` / `p.say` note shows one line and opens on tap (`ui-v2.css`),
+  so keep its first words meaningful. Nothing opens by itself in the player's face (no auto popups at startup):
+  waiting rewards light a dot or a glow on the button instead. Pages are only as tall as their content: a short page
+  sits at the bottom over the dimmed game, never a full screen with empty space below.
+- Menus are pages with a Menu/back button and sub-tabs. New screens follow the existing hub layout
   (Hero / Forge / Gear / Journal).
 - `src/css/ui-v2.css` is loaded last and holds the current look. Add new UI styling there (or next to its feature),
   reusing the existing tokens and classes. Don't restyle the whole game in a side file.
@@ -283,7 +288,8 @@ Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team
   rare vein. Every phone in a party sees the same run (rule 8).
 - **Dungeons** with Dungeon Keys (tier + affixes, par time) and **Legendary Trials** (sigils, Radiant 1/500 drops).
 - **Mining:** ore, pickaxe, geodes for the Museum, a 1/10,000 pet.
-- **Daily:** 7-day calendar that never resets, weekly Colossus chest.
+- **Daily:** 7-day calendar that never resets, weekly Colossus chest (Journal › Daily; it never opens by itself, the Menu
+  button glows while a reward waits).
 - **Idle:** Vault (fills while away), Expeditions (benched heroes fetch loot), Auto Hunt (walks, fights and mines by
   itself), offline rewards.
 - **Pets and prestige companions:** world bonuses only, never in the arena.

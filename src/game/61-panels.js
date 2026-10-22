@@ -151,10 +151,12 @@ function diffChips(it) {
 // --- hero sheet (portrait dressing room): a bottom sheet at 45% that the grip drags up to full height and back ---
 // The sheet's rect is cached here (open, resize, drag) so the camera and paper doll never read layout per frame.
 UI.sheet = { top: 0, left: 0, right: 0, bottom: 0 };
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => measureSheet()).observe($('panel'));
 function measureSheet() {
   if ($('modal').hidden) return;
   const r = $('panel').getBoundingClientRect(), S = UI.sheet;
   S.top = r.top; S.left = r.left; S.right = r.right; S.bottom = r.bottom;
+  { const P = $('panel'); $('modal').classList.toggle('fits', P.scrollHeight <= P.clientHeight + 1 && r.top > 1); } // a short page: its close button sits in its own corner
   // the spin hint sits just above the sheet, over the hero's side of the screen
   const hint = $('spinHint');
   if (Cam.portrait) { hint.style.top = `${Math.max(8, r.top - 30)}px`; hint.style.left = ''; hint.style.width = ''; }
@@ -844,6 +846,7 @@ function openSettings() {
 }
 
 function handlePanelClick(e) {
+  const txt = e.target.closest('p.fine, p.say'); if (txt && !e.target.closest('[data-act], a, button')) { txt.classList.toggle('open'); return; } // tap a one-line note to read it all
   const b = e.target.closest('[data-act]'); if (!b) return;
   UI.tapAnchor = panelAnchor(b);
   if (b.getAttribute('aria-disabled') === 'true') { Sfx.play('click'); return; }

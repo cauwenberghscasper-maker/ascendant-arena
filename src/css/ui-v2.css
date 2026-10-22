@@ -784,3 +784,20 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 #bdDel.on { background: linear-gradient(#e06a5a, #8a2418) !important; color: #fff4d6; box-shadow: 0 0 0 2px #ffb3a6, 0 2px 0 #120a03; }
 #bdAll { background: linear-gradient(#7a3a30, #401a14) !important; } #bdAll.arm { background: linear-gradient(#ff5a44, #a01c10) !important; color: #fff; animation: fbubGlow .5s ease-in-out infinite alternate; }
 #fortChip { color: #c9cbe8; letter-spacing: .06em; } #fortChip.on { color: #1b1300; background: linear-gradient(180deg,#9fe0a0,#4aa860); }
+
+/* Daily rewards: four cards a row (eight with the weekly chest), claimed days dim with a tick, today glows */
+.dailyGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.dailyGrid .rcard.done { opacity: .5; }
+.dailyGrid .rcard small { text-align: center; line-height: 1.25; }
+
+/* Tabs carry no walls of text: an explanation shows its first line; tap it to read the rest (and tap again to fold) */
+#panel p.fine, #panel p.say { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+#panel p.fine.open, #panel p.say.open { -webkit-line-clamp: unset; display: block; }
+
+/* Pages are only as tall as their content (Casper, 22 Oct: no big empty pages): a short page sits at the bottom like a
+   sheet over the dimmed game, a long one still fills the screen and scrolls. Its close button then sits in its own corner. */
+#modal.full { place-items: end stretch; background: rgba(8, 9, 22, .62); }
+#modal.full .panel { height: auto; max-height: 100% !important; }
+#modal.full.fits .panel > .x { position: absolute !important; top: 12px !important; right: 12px !important; }
+#modal.full .hubTiles { min-height: 0; grid-template-rows: none; }
+#modal.full .panel .hubTile { min-height: 150px; }

@@ -193,18 +193,17 @@ function openJournal() {
 function comingUpHtml(n) { const L = comingUp(Date.now()).slice(0, n); return L.length ? `<h4 class="sub">Coming up</h4><div class="list">${L.map((x) => `<div class="row"><small>${escapeHTML(x.label)}</small></div>`).join('')}</div>` : ''; }
 // a model for every calendar day (same order as CFG.daily.days): chests use their chest art, the rest a 3D reward model
 const DAILY_ART = [{ case: 'treasure' }, { model: 'gems', col: '#58b4ff' }, { model: 'geode', col: '#c77dff' }, { model: 'key', col: '#2fffd0' }, { case: 'treasure' }, { model: 'ore', col: '#ffb347' }, { case: 'boss' }];
-// the login calendar: seven days that never reset, the weekly Colossus bonus and the full coming-up list
+// the login calendar: seven day cards and the weekly boss chest as the eighth, then the claim button. No paragraphs:
+// the cards say it (README 1.3: tabs carry pictures and a word or two, not explanations)
 function openDaily() {
   UI.current = 'daily';
   const now = Date.now(), L = loginState(), i = L.n % 7, ready = loginReady(now), wk = G.profile.weekly, wdone = wk && wk.wk === weekNum(now) && wk.done;
   const art = (k) => { const a = DAILY_ART[k]; return a.case ? caseArt(a.case) : `<span class="caseArt" style="--cc:${a.col}"><img src="${PremiumPortraits.reward(a.model)}" width="256" height="256" alt=""></span>`; };
-  const tiles = CFG.daily.days.map((d, k) => `<div class="rcard ${k === 6 ? 'legendary' : k === 3 ? 'epic' : 'rare'} ${k < i ? 'win' : ''}" style="opacity:${k < i ? 0.55 : 1}">${art(k)}<small><b>Day ${k + 1}</b>${k < i ? '✓ claimed' : escapeHTML(d)}${k === i && ready ? ' · today' : ''}</small></div>`).join('');
+  const tiles = CFG.daily.days.map((d, k) => `<div class="rcard ${k === 6 ? 'legendary' : k === 3 ? 'epic' : 'rare'}${k < i ? ' done' : ''}${k === i && ready ? ' win' : ''}">${art(k)}<small><b>Day ${k + 1}</b>${k < i ? '✓' : escapeHTML(d)}</small></div>`).join('');
+  const weekly = `<div class="rcard legendary${wdone ? ' done' : ''}">${caseArt('boss')}<small><b>Weekly</b>${wdone ? '✓' : 'Slay a world boss'}</small></div>`;
   openModal(`<div class="npcHead">${gi('m_progress', 'hd')}<h3>Daily rewards</h3><span class="cnt">Week ${Math.floor(L.n / 7) + 1}</span></div>
-    <p class="fine">One reward per day. Missing a day never resets your calendar: you just pick up where you left off. Rewards grow every full week.</p>
-    <div class="fastGrid">${tiles}</div>
-    <p class="say">Weekly Colossus: ${wdone ? 'claimed this week ✓' : 'the first world boss you slay this week drops a <b>Legendary-or-better Colossus Chest</b>.'}</p>
-    ${comingUpHtml(12)}
-    <div class="row end"><button class="ghost" data-act="mMenu">Menu</button><button class="${ready ? 'primary big' : 'disabled'}" data-act="dailyClaim" ${ready ? '' : 'aria-disabled="true"'}>${ready ? `Claim day ${i + 1}: ${escapeHTML(CFG.daily.days[i])}` : 'Come back tomorrow'}</button></div>`);
+    <div class="fastGrid dailyGrid">${tiles}${weekly}</div>
+    <div class="row end"><button class="ghost" data-act="mMenu">Menu</button><button class="${ready ? 'primary big' : 'disabled'}" data-act="dailyClaim" ${ready ? '' : 'aria-disabled="true"'}>${ready ? `Claim day ${i + 1}` : 'Come back tomorrow'}</button></div>`);
   $('panel').classList.add('wide');
 }
 

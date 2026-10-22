@@ -222,7 +222,7 @@ function updateHUD(dt) {
     { const F = G.siege && fortState(); setHidden('fortChip', !F || !F.go); if (F && F.go) { setText('fortChip', F.hold ? 'WAVES PAUSED' : 'AUTO WAVES'); $('fortChip').classList.toggle('on', !F.hold); } }
     setHidden('pvpChip', G.mode !== 'hub' || inInstance()); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
   } else { setHidden('caseChip', true); setHidden('autoChip', true); setHidden('pvpChip', true); setHidden('fortChip', true); setHidden('fortBuildBtn', true); }
-  $('bMenu').classList.toggle('newU', G.started && Object.keys(UNLOCK_AT).some(unlockNew)); // the menu button glows while something new is unopened
+  $('bMenu').classList.toggle('newU', G.started && (Object.keys(UNLOCK_AT).some(unlockNew) || loginReady(Date.now()))); // the menu button glows while something new is unopened or a daily reward waits (it never pops up by itself)
   { const n = mpCount(), on = G.started && !inArena; setHidden('mpChip', !on || !n); if (on && n) setText('mpChip', String(n + 1)); }
   const stk = G.streak >= 3 && !inArena;
   setHidden('streak', !stk);
