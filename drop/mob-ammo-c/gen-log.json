@@ -1,0 +1,30 @@
+{
+ "batch": "mob-ammo-c",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "mob_voidray_s5",
+   "ok": true,
+   "file": "mob_voidray_s5.webp",
+   "sec": 10.0
+  },
+  {
+   "name": "mob_voidray_s59",
+   "ok": true,
+   "file": "mob_voidray_s59.webp",
+   "sec": 15.6
+  },
+  {
+   "name": "mob_voidray_s211",
+   "ok": true,
+   "file": "mob_voidray_s211.webp",
+   "sec": 9.6
+  },
+  {
+   "name": "mob_voidray_s307",
+   "ok": true,
+   "file": "mob_voidray_s307.webp",
+   "sec": 10.7
+  }
+ ]
+}
