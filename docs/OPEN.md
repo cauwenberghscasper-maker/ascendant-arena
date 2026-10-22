@@ -13,9 +13,10 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [ ] 120 Hz on a ProMotion iPhone once the iOS project exists (Info.plist key, README 6).
 
 ## 3D models (README 3: real models only)
-- [ ] The 7 area landmarks without a model (Broken Colossus, Lava Forge, Burnt Chapel, Crystal Arch, Crashed Star,
-      Old Waterwheel, Storm Rod), the challenge shrine, and the horizon `volcano` and `sky_temple`: generated 21 Oct,
-      in PR `claude/landmark-models` (Casper merges).
+- [x] The 7 area landmarks without a model, the challenge shrine and the celestial `sky_temple` horizon (21 Oct,
+      `docs/log/2026-10-21-landmark-models.md`).
+- [ ] Horizon `volcano`: the 21 Oct mesh came out with flat black walls (lava glow); repaint the concept as a plain
+      rock cone with painted lava, no glow (volcanic biome uses a tinted mountain meanwhile).
 - [ ] Hero ammo/supers: the smoke test casts only the starter's super (TIDE); cast every hero's super in it too.
 - [ ] Rift `rift_gate` reads as a black block; `rift_pylon`, `arena_wall`, `dungeon_tile`.
 - [ ] Lair bosses: 29 named bosses use their area's monster ×1.8 (`39b-lair-bosses.js`); per-dungeon boss models.
