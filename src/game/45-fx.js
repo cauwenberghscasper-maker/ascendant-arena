@@ -150,7 +150,7 @@ function fxPal(c) {
   if (h < 40) return 'fire'; if (h < 68) return 'gold'; if (h < 160) return 'venom'; if (h < 200) return 'storm'; if (h < 250) return 'frost'; return 'arcane';
 }
 function updateParticles(dt) {
-  SpriteFX.update(dt);
+  SpriteFX.update(dt); MobFX.update(dt);
   LootPop.update(dt);
   let n = 0;
   for (let k = 0; k < PART_MAX; k++) {
@@ -177,7 +177,7 @@ const LONG_KINDS = { arrow: [1, 1, 1], ice: [1, 1, 1], tracer: [0.55, 0.55, 0.7]
 let trailAcc = 0, fxK = 1; // fxK: share of a 60 Hz frame this frame covers, so per-frame sparks stay as dense at 120 Hz
 function updateProjectileMeshes(dt) {
   let no = 0, na = 0, nd = 0, ng = 0;
-  HeroFX.ammoBegin();
+  HeroFX.ammoBegin(); MobFX.ammoBegin();
   trailAcc += dt; const trailOn = trailAcc >= 1 / 30 - 1e-4; if (trailOn) trailAcc = Math.min(trailAcc - 1 / 30, 1 / 30); // trail puffs 30 times a second
   const glowOn = hqOn();
   for (let i = 0; i < PROJ_MAX; i++) {
@@ -189,6 +189,7 @@ function updateProjectileMeshes(dt) {
       glowIM.setMatrixAt(ng, _m4); glowIM.setColorAt(ng, _col.set(p.color).multiplyScalar(p.team === 'mob' ? 0.8 : 0.65)); ng++;
     }
     if (p.hx && HeroFX.ammo(p, i, yaw)) continue; // Codex heroes fire their own ammunition (hero-fx-v6.js)
+    if (p.mt && MobFX.ammo(p, trailOn)) continue; // monsters fire their species' own shot (45b-mob-fx.js)
     if (p.kind === 'flame') {
       if (no >= PROJ_MAX) continue;
       const k = 1 - Math.max(0, p.life) / p.total, s2 = p.r * (0.5 + k * 1.3);
@@ -248,6 +249,7 @@ function updateRings(dt) {
   for (const s of rings) { s.tele = false; s.disc.material.userData.px.uIn.value = 0; }
   for (const a of G.pendingAoE) {
     const k = 1 - a.t / a.max, col = a.col && (a.soak || a.spread) ? a.col : a.team === 'mob' ? TELE_MOB : TELE_PLAYER;
+    if (a.kind === 'meteor' && a.mt && a.team === 'mob' && k > 0.15) MobFX.shell(a.mt, a.x, a.z, (k - 0.15) / 0.85);
     if (a.cone) { if (cones < CONE_SHOWN) mobCone(cones++, a, k, col); continue; }
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN) continue; used++;
     s.tele = true;
@@ -280,12 +282,14 @@ function updateRings(dt) {
   }
   for (const c of G.clouds) {
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
-    s.tele = true; const fade = Math.min(1, c.t / 0.5), tint = c.color || 0x5fd84a;
+    if (c.mt === undefined) c.mt = c.team === 'mob' ? mobTypeOf(c.owner) : null;
+    s.tele = true; const fade = Math.min(1, c.t / 0.5), tint = c.mt ? MobFX.color(c.mt) : c.color || 0x5fd84a;
     s.ring.visible = s.disc.visible = true;
     s.ring.position.set(c.x, 0.08, c.z); s.ring.scale.setScalar(c.r); s.ring.material.opacity = 0.7 * fade; s.ring.material.color.setHex(c.team === 'mob' ? TELE_MOB : 0x8dff6a);
     s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * (c.pull ? 14 : 6)) * 0.05) * fade; s.disc.material.color.setHex(tint);
     // a vortex sheds sparks from its rim; other clouds bubble anywhere
-    if (c.pull) { if (Math.random() < 0.7 * fxK) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
+    if (c.mt) { if (Math.random() < (c.pull ? 0.8 : 0.6) * fxK) { if (c.pull) { const a = Math.random() * 6.283; MobFX.bits(c.mt, c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, 'pull', { r: 0.2, t: 0.5 }); } else MobFX.bits(c.mt, c.x, 0.2, c.z, 1, 'rise', { r: c.r * 0.8 }); } }
+    else if (c.pull) { if (Math.random() < 0.7 * fxK) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
     else if (Math.random() < 0.5 * fxK) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
   }
   for (let i = 0; i < RING_MAX - used; i++) {

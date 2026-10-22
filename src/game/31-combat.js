@@ -5,6 +5,8 @@ function blankProj() { return { active: false, x: 0, z: 0, vx: 0, vz: 0, life: 0
   burn: 0, burnT: 0, homing: 0, pierce: 0, hits: [], bounce: 0, split: null, lob: false, lobH: 0, boomerang: false, returning: false, vamp: 0, speed: 0, chain: 0 }; }
 for (let i = 0; i < PROJ_MAX; i++) projectiles.push(blankProj());
 let projCursor = 0;
+// the species of the monster that fired a shot, so it flies and lands in that monster's own look (45b-mob-fx.js)
+const mobTypeOf = (id) => { const e = id != null ? G.ents.get(id) : null; return e && e.kind === 'enemy' && CFG.enemies[e.type] && CFG.enemies[e.type].kit ? e.type : null; };
 function spawnProjectile(o) {
   for (let n = 0; n < PROJ_MAX; n++) {
     const p = projectiles[projCursor]; projCursor = (projCursor + 1) % PROJ_MAX;
@@ -13,7 +15,7 @@ function spawnProjectile(o) {
       p.team = o.team; p.owner = o.owner; p.pet = !!o.pet; p.kind = o.kind; p.aoe = o.aoe || 0; p.aoeMult = o.aoeMult || 0;
       p.slow = o.slow || 0; p.charge = o.charge || 0; p.color = o.color; p.y = o.y || 1.0; p.burn = o.burn || 0; p.burnT = o.burnT || 0;
       p.homing = o.homing || 0; p.pierce = o.pierce || 0; p.hits.length = 0; p.bounce = o.bounce || 0; p.split = o.split || null;
-      p.hx = o.hx || null; p.hv = o.hv || 0; p.hf = null; p.shape = o.shape || null; p.stun = o.stun || 0; p.knock = o.knock || 1.5; p.ghost = !!o.ghost; p.lob = !!o.lob && !o.ghost; p.lobH = o.lobH || 0; p.boomerang = !!o.boomerang; p.returning = false; p.vamp = o.vamp || 0; p.speed = Math.hypot(o.vx, o.vz); p.chain = o.chain || 0;
+      p.mt = o.team === 'mob' ? mobTypeOf(o.owner) : null; p.hx = o.hx || null; p.hv = o.hv || 0; p.hf = null; p.shape = o.shape || null; p.stun = o.stun || 0; p.knock = o.knock || 1.5; p.ghost = !!o.ghost; p.lob = !!o.lob && !o.ghost; p.lobH = o.lobH || 0; p.boomerang = !!o.boomerang; p.returning = false; p.vamp = o.vamp || 0; p.speed = Math.hypot(o.vx, o.vz); p.chain = o.chain || 0;
       return p;
     }
   }
@@ -25,7 +27,7 @@ function obstacleAt(x, z, pad) {
   G.obstacles.query(x, z, (o) => { if (!hit && Math.hypot(x - o.x, z - o.z) < o.r + pad) hit = o; });
   return hit;
 }
-function clearProjectiles() { for (const p of projectiles) p.active = false; G.pendingAoE.length = 0; G.clouds.length = 0; HeroSupers.clear(); if (HeroFXRef) HeroFXRef.clear(); }
+function clearProjectiles() { for (const p of projectiles) p.active = false; if (typeof MobFX !== 'undefined') MobFX.clear(); G.pendingAoE.length = 0; G.clouds.length = 0; HeroSupers.clear(); if (HeroFXRef) HeroFXRef.clear(); }
 // Codex heroes' supers and statuses run on the sim clock; their art (HeroFX) is created with the renderer below
 const heroApi = { G, forEachTarget, dealDamage, spawnProjectile, ev, nearestFoe: (f, d) => nearestFoe(f, d),
   collide: (e) => { collideObstacles(e); if (e.kind === 'fighter') boundFighter(e, G.mode === 'arena' ? 'arena' : 'hub'); }, fx: null };
@@ -156,9 +158,9 @@ function expireProjectile(p, explode, direct) {
   if (explode && p.split) spawnSplit(p, direct);
   if (explode && p.aoe > 0) {
     aoeDamage(p.x, p.z, p.aoe, p.dmg * (direct ? p.aoeMult : p.aoeMult * 1.25), p.team, p.owner, { exclude: direct, charge: p.charge * 0.5, knock: 3, burn: p.burn, burnT: p.burnT, slow: p.slow });
-    ev({ t: 'boom', x: p.x, z: p.z, r: p.aoe, color: p.color, lob: p.lob, hid: p.hx, hv: p.hv });
+    ev({ t: 'boom', x: p.x, z: p.z, r: p.aoe, color: p.color, lob: p.lob, hid: p.hx, hv: p.hv, mt: p.mt });
   } else if (explode) {
-    ev({ t: 'puff', x: p.x, z: p.z, color: p.color, hid: direct ? null : p.hx, hv: p.hv });
+    ev({ t: 'puff', x: p.x, z: p.z, color: p.color, hid: direct ? null : p.hx, hv: p.hv, mt: p.mt });
   }
 }
 function aoeDamage(x, z, r, dmg, team, owner, o) {
@@ -226,7 +228,7 @@ function dealDamage(t, amount, srcId, o) {
   }
   if (t.kind === 'boss') { t.dmgBy[srcId] = (t.dmgBy[srcId] || 0) + amt; t.total += amt; }
   if (t.kind === 'enemy' && src && (src.isPlayer || src.delveBot)) t.tagged = true; // your dungeon bots' hits count as yours
-  ev({ t: 'hit', x: t.x, z: t.z, y: t.kind === 'boss' ? 5.5 : 2.1, amt, crit, pet:!!o.pet, toPlayer: !!t.isPlayer, byPlayer: !!(src && src.isPlayer), pk: o.pk, pc: o.pc, slow: !!o.slow, burnFx: !!o.burnFx, proc: !!o.proc }); // pk/pc/burnFx/proc: cosmetic only
+  ev({ t: 'hit', x: t.x, z: t.z, y: t.kind === 'boss' ? 5.5 : 2.1, amt, crit, pet:!!o.pet, toPlayer: !!t.isPlayer, byPlayer: !!(src && src.isPlayer), pk: o.pk, pc: o.pc, slow: !!o.slow, burnFx: !!o.burnFx, proc: !!o.proc, mt: t.kind === 'enemy' ? t.type : null, ms: src && src.kind === 'enemy' ? src.type : null }); // pk/pc/burnFx/proc: cosmetic only
   if (t.isPlayer || (src && src.isPlayer)) markCombat();
   if (sf && sf.isPlayer && amt > (G.profile.records.maxHit || 0)) G.profile.records.maxHit = amt;
   if (sf && sf !== t && amt > 0) {

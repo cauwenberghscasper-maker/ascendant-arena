@@ -650,7 +650,7 @@ function eliteMods(e) {
 // pendingAoE extras: inner (donut, safe centre), cone {a, half} (apex at x,z), grp (shared: one hit per target per volley),
 // slow/burn (applied on the hit). The renderer draws AOE_SHOWN ring markers and CONE_SHOWN cones; a move needing more waits.
 const AOE_SHOWN = 24, CONE_SHOWN = 10;
-const moveAoE = (e, x, z, r, t, dmg, o) => { const a = Object.assign({ x, z, r, t, max: t, dmg, team: 'mob', owner: e.id, kind: 'slam', pal: areaFx(e.zone) }, o); G.pendingAoE.push(a); return a; };
+const moveAoE = (e, x, z, r, t, dmg, o) => { const a = Object.assign({ x, z, r, t, max: t, dmg, team: 'mob', owner: e.id, kind: 'slam', pal: areaFx(e.zone), mt: e.type }, o); G.pendingAoE.push(a); return a; };
 function markersFree(n, cone) { let c = 0, k = 0; for (const a of G.pendingAoE) if (a.cone) k++; else c++; return cone ? k + n <= CONE_SHOWN : c + n <= AOE_SHOWN; }
 // does marker a cover a body of radius r at x,z? (the donut hole tests the body centre so hugging its owner is safe)
 function aoeCovers(a, x, z, r) {
@@ -735,7 +735,7 @@ function enemyMove(e, dt, pl, dp) {
   if (e.windT > 0 || e.lungeT > 0 || M.gap > 0) return false;
   for (const k of d.moves) {
     const S = MON_MOVES[k]; if (!S.wind || M.cd[k] > 0 || dp > S.max || dp < (S.min || 0)) continue;
-    if (startMove(e, k, S, pl, slow)) { M.cd[k] = rand(S.cd[0], S.cd[1]); M.k = k; M.t = e.windT = S.wind; e.windK = k; e.windMax = S.wind; ev({ t: 'windFx', x: e.x, z: e.z, r: e.r, k, life: S.wind, pal: areaFx(e.zone), color: d.shotColor || d.tint }); return true; }
+    if (startMove(e, k, S, pl, slow)) { M.cd[k] = rand(S.cd[0], S.cd[1]); M.k = k; M.t = e.windT = S.wind; e.windK = k; e.windMax = S.wind; ev({ t: 'windFx', x: e.x, z: e.z, r: e.r, k, life: S.wind, pal: areaFx(e.zone), color: d.shotColor || d.tint, mt: e.type }); return true; }
   }
   return false;
 }
@@ -1053,7 +1053,7 @@ function stepPendingAoE(dt) {
       if (a.kind === 'zap') ev({ t: 'bolt', x: a.x, z: a.z });
       const C = a.cone, bx = C ? a.x + Math.sin(C.a) * a.r * 0.55 : a.x, bz = C ? a.z + Math.cos(C.a) * a.r * 0.55 : a.z;
       ev({ t: 'boom', x: bx, z: bz, r: C ? a.r * 0.45 : a.r, color: a.kind === 'meteor' || a.kind === 'breath' ? 0xff7b2e : a.kind === 'comet' || a.kind === 'zap' || a.kind === 'trap' ? 0x9fb8ff : a.kind === 'vortex' ? 0xb36bff : 0xc9a16b, big: a.kind !== 'comet' && a.kind !== 'spike' && a.kind !== 'zap' });
-      if (a.pal && a.team === 'mob') ev({ t: 'aoeFx', x: a.x, z: a.z, r: a.r, kind: a.kind, pal: a.pal, ca: a.cone ? a.cone.a : null, col: a.col });
+      if (a.pal && a.team === 'mob') ev({ t: 'aoeFx', x: a.x, z: a.z, r: a.r, kind: a.kind, pal: a.pal, ca: a.cone ? a.cone.a : null, col: a.col, mt: a.mt });
       G.pendingAoE.splice(i, 1);
     }
   }
