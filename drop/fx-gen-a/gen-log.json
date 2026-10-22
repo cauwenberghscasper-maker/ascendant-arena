@@ -1,0 +1,516 @@
+{
+ "batch": "fx-gen-a",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "fx_explosion_fire",
+   "ok": true,
+   "file": "fx_explosion_fire.webp",
+   "sec": 8.6
+  },
+  {
+   "name": "fx_explosion_frost",
+   "ok": true,
+   "file": "fx_explosion_frost.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "fx_explosion_arcane",
+   "ok": true,
+   "file": "fx_explosion_arcane.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "fx_explosion_venom",
+   "ok": true,
+   "file": "fx_explosion_venom.webp",
+   "sec": 9.4
+  },
+  {
+   "name": "fx_explosion_blood",
+   "ok": true,
+   "file": "fx_explosion_blood.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_hit_fire",
+   "ok": true,
+   "file": "fx_hit_fire.webp",
+   "sec": 16.2
+  },
+  {
+   "name": "fx_hit_frost",
+   "ok": true,
+   "file": "fx_hit_frost.webp",
+   "sec": 11.5
+  },
+  {
+   "name": "fx_hit_arcane",
+   "ok": true,
+   "file": "fx_hit_arcane.webp",
+   "sec": 9.5
+  },
+  {
+   "name": "fx_hit_venom",
+   "ok": true,
+   "file": "fx_hit_venom.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_hit_blood",
+   "ok": true,
+   "file": "fx_hit_blood.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_impact_fire",
+   "ok": true,
+   "file": "fx_impact_fire.webp",
+   "sec": 13.2
+  },
+  {
+   "name": "fx_impact_frost",
+   "ok": true,
+   "file": "fx_impact_frost.webp",
+   "sec": 9.6
+  },
+  {
+   "name": "fx_impact_arcane",
+   "ok": true,
+   "file": "fx_impact_arcane.webp",
+   "sec": 10.7
+  },
+  {
+   "name": "fx_impact_venom",
+   "ok": true,
+   "file": "fx_impact_venom.webp",
+   "sec": 14.0
+  },
+  {
+   "name": "fx_impact_blood",
+   "ok": true,
+   "file": "fx_impact_blood.webp",
+   "sec": 18.5
+  },
+  {
+   "name": "fx_impact_gold",
+   "ok": true,
+   "file": "fx_impact_gold.webp",
+   "sec": 9.1
+  },
+  {
+   "name": "fx_impact_white",
+   "ok": true,
+   "file": "fx_impact_white.webp",
+   "sec": 11.2
+  },
+  {
+   "name": "fx_impact_storm",
+   "ok": true,
+   "file": "fx_impact_storm.webp",
+   "sec": 6.4
+  },
+  {
+   "name": "fx_ring_fire",
+   "ok": true,
+   "file": "fx_ring_fire.webp",
+   "sec": 13.6
+  },
+  {
+   "name": "fx_ring_frost",
+   "ok": true,
+   "file": "fx_ring_frost.webp",
+   "sec": 6.1
+  },
+  {
+   "name": "fx_ring_arcane",
+   "ok": true,
+   "file": "fx_ring_arcane.webp",
+   "sec": 14.8
+  },
+  {
+   "name": "fx_ring_venom",
+   "ok": true,
+   "file": "fx_ring_venom.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_ring_blood",
+   "ok": true,
+   "file": "fx_ring_blood.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "fx_crit_gold",
+   "ok": true,
+   "file": "fx_crit_gold.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_crit_fire",
+   "ok": true,
+   "file": "fx_crit_fire.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_crit_arcane",
+   "ok": true,
+   "file": "fx_crit_arcane.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_slash_white",
+   "ok": true,
+   "file": "fx_slash_white.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_slash_fire",
+   "ok": true,
+   "file": "fx_slash_fire.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_slash_frost",
+   "ok": true,
+   "file": "fx_slash_frost.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_slash_arcane",
+   "ok": true,
+   "file": "fx_slash_arcane.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_slash_venom",
+   "ok": true,
+   "file": "fx_slash_venom.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_slash_blood",
+   "ok": true,
+   "file": "fx_slash_blood.webp",
+   "sec": 12.2
+  },
+  {
+   "name": "fx_slash_gold",
+   "ok": true,
+   "file": "fx_slash_gold.webp",
+   "sec": 10.1
+  },
+  {
+   "name": "fx_poof_fire",
+   "ok": true,
+   "file": "fx_poof_fire.webp",
+   "sec": 9.7
+  },
+  {
+   "name": "fx_poof_frost",
+   "ok": true,
+   "file": "fx_poof_frost.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "fx_poof_arcane",
+   "ok": true,
+   "file": "fx_poof_arcane.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "fx_poof_venom",
+   "ok": true,
+   "file": "fx_poof_venom.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_poof_blood",
+   "ok": true,
+   "file": "fx_poof_blood.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "fx_poof_gold",
+   "ok": true,
+   "file": "fx_poof_gold.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_poof_white",
+   "ok": true,
+   "file": "fx_poof_white.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "fx_nova_gold",
+   "ok": true,
+   "file": "fx_nova_gold.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_nova_arcane",
+   "ok": true,
+   "file": "fx_nova_arcane.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_nova_frost",
+   "ok": true,
+   "file": "fx_nova_frost.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_nova_fire",
+   "ok": true,
+   "file": "fx_nova_fire.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_nova_venom",
+   "ok": true,
+   "file": "fx_nova_venom.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_nova_blood",
+   "ok": true,
+   "file": "fx_nova_blood.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_shatter_frost",
+   "ok": true,
+   "file": "fx_shatter_frost.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_shatter_arcane",
+   "ok": true,
+   "file": "fx_shatter_arcane.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_shatter_white",
+   "ok": true,
+   "file": "fx_shatter_white.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_zap_storm",
+   "ok": true,
+   "file": "fx_zap_storm.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_zap_arcane",
+   "ok": true,
+   "file": "fx_zap_arcane.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_flame_fire",
+   "ok": true,
+   "file": "fx_flame_fire.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_flame_venom",
+   "ok": true,
+   "file": "fx_flame_venom.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "fx_flame_arcane",
+   "ok": true,
+   "file": "fx_flame_arcane.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "fx_flame_frost",
+   "ok": true,
+   "file": "fx_flame_frost.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_fluff",
+   "ok": true,
+   "file": "bit_fluff.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_leaf",
+   "ok": true,
+   "file": "bit_leaf.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "bit_petal",
+   "ok": true,
+   "file": "bit_petal.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_feather",
+   "ok": true,
+   "file": "bit_feather.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "bit_spore",
+   "ok": true,
+   "file": "bit_spore.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_pollen",
+   "ok": true,
+   "file": "bit_pollen.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_needle",
+   "ok": true,
+   "file": "bit_needle.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_clod",
+   "ok": true,
+   "file": "bit_clod.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_pebble",
+   "ok": true,
+   "file": "bit_pebble.webp",
+   "sec": 12.7
+  },
+  {
+   "name": "bit_shard",
+   "ok": true,
+   "file": "bit_shard.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_flake",
+   "ok": true,
+   "file": "bit_flake.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_ember",
+   "ok": true,
+   "file": "bit_ember.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_spark",
+   "ok": true,
+   "file": "bit_spark.webp",
+   "sec": 13.8
+  },
+  {
+   "name": "bit_drop",
+   "ok": true,
+   "file": "bit_drop.webp",
+   "sec": 9.4
+  },
+  {
+   "name": "bit_bubble",
+   "ok": true,
+   "file": "bit_bubble.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_glob",
+   "ok": true,
+   "file": "bit_glob.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_ink",
+   "ok": true,
+   "file": "bit_ink.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_sand",
+   "ok": true,
+   "file": "bit_sand.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_web",
+   "ok": true,
+   "file": "bit_web.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_bone",
+   "ok": true,
+   "file": "bit_bone.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_scale",
+   "ok": true,
+   "file": "bit_scale.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_coral",
+   "ok": true,
+   "file": "bit_coral.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_bolt",
+   "ok": true,
+   "file": "bit_bolt.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_smoke",
+   "ok": true,
+   "file": "bit_smoke.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_wisp",
+   "ok": true,
+   "file": "bit_wisp.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_rune",
+   "ok": true,
+   "file": "bit_rune.webp",
+   "sec": 5.4
+  },
+  {
+   "name": "bit_mote",
+   "ok": true,
+   "file": "bit_mote.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "bit_star",
+   "ok": true,
+   "file": "bit_star.webp",
+   "sec": 5.5
+  },
+  {
+   "name": "bit_chip",
+   "ok": true,
+   "file": "bit_chip.webp",
+   "sec": 5.3
+  },
+  {
+   "name": "bit_arc",
+   "ok": true,
+   "file": "bit_arc.webp",
+   "sec": 12.7
+  }
+ ]
+}
