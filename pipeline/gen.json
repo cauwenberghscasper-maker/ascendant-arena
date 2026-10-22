@@ -1,14 +1,14 @@
 {
- "batch": "mob-ammo-b",
+ "batch": "mob-ammo-c",
  "jobs": [
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "mob_iceshard_s41",
+   "name": "mob_voidray_s5",
    "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a pointed pale cyan ice crystal, cyan and white, centered, isolated on a plain flat solid magenta background, no text",
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round teal marble orb with a bright cyan ring around it like a little planet, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
+    "seed": 5,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -17,11 +17,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "mob_iceshard_s77",
+   "name": "mob_voidray_s59",
    "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a pointed pale cyan ice crystal, cyan and white, centered, isolated on a plain flat solid magenta background, no text",
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round teal marble orb with a bright cyan ring around it like a little planet, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
+    "seed": 59,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -30,11 +30,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "mob_iceshard_s131",
+   "name": "mob_voidray_s211",
    "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a pointed pale cyan ice crystal, cyan and white, centered, isolated on a plain flat solid magenta background, no text",
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round teal marble orb with a bright cyan ring around it like a little planet, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
+    "seed": 211,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -43,349 +43,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "mob_geodrone_s41",
+   "name": "mob_voidray_s307",
    "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a violet diamond shaped gem crystal, violet and white, centered, isolated on a plain flat solid bright lime green background, no text",
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round teal marble orb with a bright cyan ring around it like a little planet, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_geodrone_s77",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a violet diamond shaped gem crystal, violet and white, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_geodrone_s131",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a violet diamond shaped gem crystal, violet and white, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_voidray_s41",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a teal energy orb with a cyan ring around it, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_voidray_s77",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a teal energy orb with a cyan ring around it, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_voidray_s131",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a teal energy orb with a cyan ring around it, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_astronomer_s41",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a little gold star with a purple sparkle trail, gold and purple, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_astronomer_s77",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a little gold star with a purple sparkle trail, gold and purple, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_astronomer_s131",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a little gold star with a purple sparkle trail, gold and purple, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_nebulajelly_s41",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round pink soap bubble with tiny white stars inside, pink and white, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_nebulajelly_s77",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round pink soap bubble with tiny white stars inside, pink and white, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_nebulajelly_s131",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round pink soap bubble with tiny white stars inside, pink and white, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_pressuresquid_s41",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a blob of purple squid ink with drips, purple and black, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_pressuresquid_s77",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a blob of purple squid ink with drips, purple and black, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_pressuresquid_s131",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a blob of purple squid ink with drips, purple and black, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_lightningwyvern_s41",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a yellow ball of lightning with zigzag sparks, yellow and white, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_lightningwyvern_s77",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a yellow ball of lightning with zigzag sparks, yellow and white, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_lightningwyvern_s131",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a yellow ball of lightning with zigzag sparks, yellow and white, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_cyclone_s41",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a small pale blue swirl of wind shaped like a tornado, pale blue and white, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_cyclone_s77",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a small pale blue swirl of wind shaped like a tornado, pale blue and white, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_cyclone_s131",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a small pale blue swirl of wind shaped like a tornado, pale blue and white, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_aetherray_s41",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a lilac feather made of light, lilac and white, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_aetherray_s77",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a lilac feather made of light, lilac and white, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_aetherray_s131",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a lilac feather made of light, lilac and white, centered, isolated on a plain flat solid bright lime green background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_halosentinel_s41",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a golden ring halo, gold and pale yellow, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_halosentinel_s77",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a golden ring halo, gold and pale yellow, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 77,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "mob_halosentinel_s131",
-   "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a golden ring halo, gold and pale yellow, centered, isolated on a plain flat solid magenta background, no text",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 131,
+    "seed": 307,
     "random_seed": false,
     "steps": 8,
     "shift": 3
