@@ -1,0 +1,306 @@
+{
+ "batch": "mob-ammo-a",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "mob_thistlehare_s7",
+   "ok": true,
+   "file": "mob_thistlehare_s7.webp",
+   "sec": 9.6
+  },
+  {
+   "name": "mob_thistlehare_s23",
+   "ok": true,
+   "file": "mob_thistlehare_s23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_myconid_s7",
+   "ok": true,
+   "file": "mob_myconid_s7.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_myconid_s23",
+   "ok": true,
+   "file": "mob_myconid_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_dustharpy_s7",
+   "ok": true,
+   "file": "mob_dustharpy_s7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_dustharpy_s23",
+   "ok": true,
+   "file": "mob_dustharpy_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_galeweaver_s7",
+   "ok": true,
+   "file": "mob_galeweaver_s7.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mob_galeweaver_s23",
+   "ok": true,
+   "file": "mob_galeweaver_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_chillbanshee_s7",
+   "ok": true,
+   "file": "mob_chillbanshee_s7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_chillbanshee_s23",
+   "ok": true,
+   "file": "mob_chillbanshee_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_iceshard_s7",
+   "ok": true,
+   "file": "mob_iceshard_s7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_iceshard_s23",
+   "ok": true,
+   "file": "mob_iceshard_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_echobat_s7",
+   "ok": true,
+   "file": "mob_echobat_s7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_echobat_s23",
+   "ok": true,
+   "file": "mob_echobat_s23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_fumetoad_s7",
+   "ok": true,
+   "file": "mob_fumetoad_s7.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mob_fumetoad_s23",
+   "ok": true,
+   "file": "mob_fumetoad_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_emberwraith_s7",
+   "ok": true,
+   "file": "mob_emberwraith_s7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_emberwraith_s23",
+   "ok": true,
+   "file": "mob_emberwraith_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_flamewyrm_s7",
+   "ok": true,
+   "file": "mob_flamewyrm_s7.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mob_flamewyrm_s23",
+   "ok": true,
+   "file": "mob_flamewyrm_s23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_riftspider_s7",
+   "ok": true,
+   "file": "mob_riftspider_s7.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_riftspider_s23",
+   "ok": true,
+   "file": "mob_riftspider_s23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mob_geodrone_s7",
+   "ok": true,
+   "file": "mob_geodrone_s7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_geodrone_s23",
+   "ok": true,
+   "file": "mob_geodrone_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_voidray_s7",
+   "ok": true,
+   "file": "mob_voidray_s7.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_voidray_s23",
+   "ok": true,
+   "file": "mob_voidray_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_astronomer_s7",
+   "ok": true,
+   "file": "mob_astronomer_s7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_astronomer_s23",
+   "ok": true,
+   "file": "mob_astronomer_s23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_nebulajelly_s7",
+   "ok": true,
+   "file": "mob_nebulajelly_s7.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_nebulajelly_s23",
+   "ok": true,
+   "file": "mob_nebulajelly_s23.webp",
+   "sec": 10.5
+  },
+  {
+   "name": "mob_rapidsiren_s7",
+   "ok": true,
+   "file": "mob_rapidsiren_s7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_rapidsiren_s23",
+   "ok": true,
+   "file": "mob_rapidsiren_s23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mob_pressuresquid_s7",
+   "ok": true,
+   "file": "mob_pressuresquid_s7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "mob_pressuresquid_s23",
+   "ok": true,
+   "file": "mob_pressuresquid_s23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_abyssphantom_s7",
+   "ok": true,
+   "file": "mob_abyssphantom_s7.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mob_abyssphantom_s23",
+   "ok": true,
+   "file": "mob_abyssphantom_s23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_steamelemental_s7",
+   "ok": true,
+   "file": "mob_steamelemental_s7.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mob_steamelemental_s23",
+   "ok": true,
+   "file": "mob_steamelemental_s23.webp",
+   "sec": 6.9
+  },
+  {
+   "name": "mob_shaftvulture_s7",
+   "ok": true,
+   "file": "mob_shaftvulture_s7.webp",
+   "sec": 7.2
+  },
+  {
+   "name": "mob_shaftvulture_s23",
+   "ok": true,
+   "file": "mob_shaftvulture_s23.webp",
+   "sec": 7.1
+  },
+  {
+   "name": "mob_lightningwyvern_s7",
+   "ok": true,
+   "file": "mob_lightningwyvern_s7.webp",
+   "sec": 18.3
+  },
+  {
+   "name": "mob_lightningwyvern_s23",
+   "ok": true,
+   "file": "mob_lightningwyvern_s23.webp",
+   "sec": 11.9
+  },
+  {
+   "name": "mob_cyclone_s7",
+   "ok": true,
+   "file": "mob_cyclone_s7.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_cyclone_s23",
+   "ok": true,
+   "file": "mob_cyclone_s23.webp",
+   "sec": 9.4
+  },
+  {
+   "name": "mob_aetherray_s7",
+   "ok": true,
+   "file": "mob_aetherray_s7.webp",
+   "sec": 7.6
+  },
+  {
+   "name": "mob_aetherray_s23",
+   "ok": true,
+   "file": "mob_aetherray_s23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "mob_halosentinel_s7",
+   "ok": true,
+   "file": "mob_halosentinel_s7.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_halosentinel_s23",
+   "ok": true,
+   "file": "mob_halosentinel_s23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_archon_s7",
+   "ok": true,
+   "file": "mob_archon_s7.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "mob_archon_s23",
+   "ok": true,
+   "file": "mob_archon_s23.webp",
+   "sec": 5.8
+  }
+ ]
+}
