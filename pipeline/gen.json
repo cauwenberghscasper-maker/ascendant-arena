@@ -1,14 +1,14 @@
 {
- "batch": "mob-ammo-c",
+ "batch": "fx-gen-a",
  "jobs": [
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "mob_voidray_s5",
+   "name": "fx_explosion_fire",
    "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round teal marble orb with a bright cyan ring around it like a little planet, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a big round explosion fireball blast with billowing puffs and flying debris, orange red and yellow fire colours, centered, isolated on a pure black background, no text, no people",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 5,
+    "seed": 7,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -17,11 +17,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "mob_voidray_s59",
+   "name": "fx_explosion_frost",
    "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round teal marble orb with a bright cyan ring around it like a little planet, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a big round explosion fireball blast with billowing puffs and flying debris, icy cyan, pale blue and white, centered, isolated on a pure black background, no text, no people",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 59,
+    "seed": 7,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -30,11 +30,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "mob_voidray_s211",
+   "name": "fx_explosion_arcane",
    "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round teal marble orb with a bright cyan ring around it like a little planet, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a big round explosion fireball blast with billowing puffs and flying debris, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 211,
+    "seed": 7,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -43,11 +43,1064 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "mob_voidray_s307",
+   "name": "fx_explosion_venom",
    "args": {
-    "prompt": "16-bit pixel art game item sprite, chunky square pixels, limited palette, black pixel outline, cute retro RPG style: a round teal marble orb with a bright cyan ring around it like a little planet, teal and cyan, centered, isolated on a plain flat solid magenta background, no text",
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a big round explosion fireball blast with billowing puffs and flying debris, toxic lime green and yellow green, centered, isolated on a pure black background, no text, no people",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 307,
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_explosion_blood",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a big round explosion fireball blast with billowing puffs and flying debris, crimson red and deep red, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_hit_fire",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a sharp impact hit spark burst with short streaks flying outward, orange red and yellow fire colours, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_hit_frost",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a sharp impact hit spark burst with short streaks flying outward, icy cyan, pale blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_hit_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a sharp impact hit spark burst with short streaks flying outward, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_hit_venom",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a sharp impact hit spark burst with short streaks flying outward, toxic lime green and yellow green, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_hit_blood",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a sharp impact hit spark burst with short streaks flying outward, crimson red and deep red, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_impact_fire",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a small punchy impact flash star with a few chunky sparks, orange red and yellow fire colours, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_impact_frost",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a small punchy impact flash star with a few chunky sparks, icy cyan, pale blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_impact_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a small punchy impact flash star with a few chunky sparks, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_impact_venom",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a small punchy impact flash star with a few chunky sparks, toxic lime green and yellow green, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_impact_blood",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a small punchy impact flash star with a few chunky sparks, crimson red and deep red, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_impact_gold",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a small punchy impact flash star with a few chunky sparks, golden yellow and warm white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_impact_white",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a small punchy impact flash star with a few chunky sparks, white and pale silver, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_impact_storm",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a small punchy impact flash star with a few chunky sparks, electric blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_ring_fire",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a magic shockwave ring seen from directly above, a circle of energy with little sparkles on its edge, orange red and yellow fire colours, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_ring_frost",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a magic shockwave ring seen from directly above, a circle of energy with little sparkles on its edge, icy cyan, pale blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_ring_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a magic shockwave ring seen from directly above, a circle of energy with little sparkles on its edge, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_ring_venom",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a magic shockwave ring seen from directly above, a circle of energy with little sparkles on its edge, toxic lime green and yellow green, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_ring_blood",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a magic shockwave ring seen from directly above, a circle of energy with little sparkles on its edge, crimson red and deep red, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_crit_gold",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a critical hit starburst with a big four pointed star and radiating rays, golden yellow and warm white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_crit_fire",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a critical hit starburst with a big four pointed star and radiating rays, orange red and yellow fire colours, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_crit_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a critical hit starburst with a big four pointed star and radiating rays, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_slash_white",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a curved crescent sword slash arc swoosh, white and pale silver, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_slash_fire",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a curved crescent sword slash arc swoosh, orange red and yellow fire colours, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_slash_frost",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a curved crescent sword slash arc swoosh, icy cyan, pale blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_slash_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a curved crescent sword slash arc swoosh, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_slash_venom",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a curved crescent sword slash arc swoosh, toxic lime green and yellow green, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_slash_blood",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a curved crescent sword slash arc swoosh, crimson red and deep red, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_slash_gold",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a curved crescent sword slash arc swoosh, golden yellow and warm white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_poof_fire",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a rising puff of magic smoke cloud with sparkles, orange red and yellow fire colours, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_poof_frost",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a rising puff of magic smoke cloud with sparkles, icy cyan, pale blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_poof_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a rising puff of magic smoke cloud with sparkles, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_poof_venom",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a rising puff of magic smoke cloud with sparkles, toxic lime green and yellow green, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_poof_blood",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a rising puff of magic smoke cloud with sparkles, crimson red and deep red, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_poof_gold",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a rising puff of magic smoke cloud with sparkles, golden yellow and warm white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_poof_white",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a rising puff of magic smoke cloud with sparkles, white and pale silver, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_nova_gold",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a radiant magic nova burst, a circle of light with rays shooting outward, golden yellow and warm white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_nova_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a radiant magic nova burst, a circle of light with rays shooting outward, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_nova_frost",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a radiant magic nova burst, a circle of light with rays shooting outward, icy cyan, pale blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_nova_fire",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a radiant magic nova burst, a circle of light with rays shooting outward, orange red and yellow fire colours, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_nova_venom",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a radiant magic nova burst, a circle of light with rays shooting outward, toxic lime green and yellow green, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_nova_blood",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a radiant magic nova burst, a circle of light with rays shooting outward, crimson red and deep red, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_shatter_frost",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a shattering burst of crystal shards flying apart, icy cyan, pale blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_shatter_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a shattering burst of crystal shards flying apart, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_shatter_white",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a shattering burst of crystal shards flying apart, white and pale silver, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_zap_storm",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a crackling electric zap of zigzag lightning sparks, electric blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_zap_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a crackling electric zap of zigzag lightning sparks, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_flame_fire",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a single tall flickering flame tongue, orange red and yellow fire colours, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_flame_venom",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a single tall flickering flame tongue, toxic lime green and yellow green, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_flame_arcane",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a single tall flickering flame tongue, violet purple and pink magic, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "fx_flame_frost",
+   "args": {
+    "prompt": "16-bit pixel art spell effect sprite for a fantasy RPG game, chunky visible square pixels, limited palette, bold readable shapes, bright saturated colours, a single tall flickering flame tongue, icy cyan, pale blue and white, centered, isolated on a pure black background, no text, no people",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_fluff",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny dandelion seed fluff puff, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_leaf",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny leaf, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_petal",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny flower petal, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_feather",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny feather, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_spore",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny round mushroom spore ball with spots, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_pollen",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny cluster of pollen dots, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_needle",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny sharp thorn spike, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_clod",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny lump of dirt, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_pebble",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny pebble stone, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_shard",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny crystal shard, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_flake",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny snowflake, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_ember",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny glowing ember spark, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_spark",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny four pointed sparkle star, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_drop",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny water droplet, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_bubble",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny soap bubble, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_glob",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny blob of slime, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_ink",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny ink splat blob, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_sand",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny few grains of sand, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_web",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny curly strand of spider silk, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_bone",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny small bone, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_scale",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny fish scale, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_coral",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny branch of coral, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_bolt",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny zigzag lightning bolt, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_smoke",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny puff of smoke cloud, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_wisp",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny ghostly wisp flame, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_rune",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny round magic rune glyph disc, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_mote",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny round glowing orb of light, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_star",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny five pointed star, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_chip",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny flake of ash, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "bit_arc",
+   "args": {
+    "prompt": "16-bit pixel art game item sprite, chunky square pixels, black pixel outline, shaded only in white and grey tones (greyscale, no colour), cute retro RPG style: a single tiny curved sound wave arc, centered, isolated on a plain flat solid magenta background, no text",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
     "random_seed": false,
     "steps": 8,
     "shift": 3
