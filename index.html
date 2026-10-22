@@ -3954,6 +3954,8 @@ function blankProj() { return { active: false, x: 0, z: 0, vx: 0, vz: 0, life: 0
   burn: 0, burnT: 0, homing: 0, pierce: 0, hits: [], bounce: 0, split: null, lob: false, lobH: 0, boomerang: false, returning: false, vamp: 0, speed: 0, chain: 0 }; }
 for (let i = 0; i < PROJ_MAX; i++) projectiles.push(blankProj());
 let projCursor = 0;
+// the species of the monster that fired a shot, so it flies and lands in that monster's own look (45b-mob-fx.js)
+const mobTypeOf = (id) => { const e = id != null ? G.ents.get(id) : null; return e && e.kind === 'enemy' && CFG.enemies[e.type] && CFG.enemies[e.type].kit ? e.type : null; };
 function spawnProjectile(o) {
   for (let n = 0; n < PROJ_MAX; n++) {
     const p = projectiles[projCursor]; projCursor = (projCursor + 1) % PROJ_MAX;
@@ -3962,7 +3964,7 @@ function spawnProjectile(o) {
       p.team = o.team; p.owner = o.owner; p.pet = !!o.pet; p.kind = o.kind; p.aoe = o.aoe || 0; p.aoeMult = o.aoeMult || 0;
       p.slow = o.slow || 0; p.charge = o.charge || 0; p.color = o.color; p.y = o.y || 1.0; p.burn = o.burn || 0; p.burnT = o.burnT || 0;
       p.homing = o.homing || 0; p.pierce = o.pierce || 0; p.hits.length = 0; p.bounce = o.bounce || 0; p.split = o.split || null;
-      p.hx = o.hx || null; p.hv = o.hv || 0; p.hf = null; p.shape = o.shape || null; p.stun = o.stun || 0; p.knock = o.knock || 1.5; p.ghost = !!o.ghost; p.lob = !!o.lob && !o.ghost; p.lobH = o.lobH || 0; p.boomerang = !!o.boomerang; p.returning = false; p.vamp = o.vamp || 0; p.speed = Math.hypot(o.vx, o.vz); p.chain = o.chain || 0;
+      p.mt = o.team === 'mob' ? mobTypeOf(o.owner) : null; p.hx = o.hx || null; p.hv = o.hv || 0; p.hf = null; p.shape = o.shape || null; p.stun = o.stun || 0; p.knock = o.knock || 1.5; p.ghost = !!o.ghost; p.lob = !!o.lob && !o.ghost; p.lobH = o.lobH || 0; p.boomerang = !!o.boomerang; p.returning = false; p.vamp = o.vamp || 0; p.speed = Math.hypot(o.vx, o.vz); p.chain = o.chain || 0;
       return p;
     }
   }
@@ -3974,7 +3976,7 @@ function obstacleAt(x, z, pad) {
   G.obstacles.query(x, z, (o) => { if (!hit && Math.hypot(x - o.x, z - o.z) < o.r + pad) hit = o; });
   return hit;
 }
-function clearProjectiles() { for (const p of projectiles) p.active = false; G.pendingAoE.length = 0; G.clouds.length = 0; HeroSupers.clear(); if (HeroFXRef) HeroFXRef.clear(); }
+function clearProjectiles() { for (const p of projectiles) p.active = false; if (typeof MobFX !== 'undefined') MobFX.clear(); G.pendingAoE.length = 0; G.clouds.length = 0; HeroSupers.clear(); if (HeroFXRef) HeroFXRef.clear(); }
 // Codex heroes' supers and statuses run on the sim clock; their art (HeroFX) is created with the renderer below
 const heroApi = { G, forEachTarget, dealDamage, spawnProjectile, ev, nearestFoe: (f, d) => nearestFoe(f, d),
   collide: (e) => { collideObstacles(e); if (e.kind === 'fighter') boundFighter(e, G.mode === 'arena' ? 'arena' : 'hub'); }, fx: null };
@@ -4105,9 +4107,9 @@ function expireProjectile(p, explode, direct) {
   if (explode && p.split) spawnSplit(p, direct);
   if (explode && p.aoe > 0) {
     aoeDamage(p.x, p.z, p.aoe, p.dmg * (direct ? p.aoeMult : p.aoeMult * 1.25), p.team, p.owner, { exclude: direct, charge: p.charge * 0.5, knock: 3, burn: p.burn, burnT: p.burnT, slow: p.slow });
-    ev({ t: 'boom', x: p.x, z: p.z, r: p.aoe, color: p.color, lob: p.lob, hid: p.hx, hv: p.hv });
+    ev({ t: 'boom', x: p.x, z: p.z, r: p.aoe, color: p.color, lob: p.lob, hid: p.hx, hv: p.hv, mt: p.mt });
   } else if (explode) {
-    ev({ t: 'puff', x: p.x, z: p.z, color: p.color, hid: direct ? null : p.hx, hv: p.hv });
+    ev({ t: 'puff', x: p.x, z: p.z, color: p.color, hid: direct ? null : p.hx, hv: p.hv, mt: p.mt });
   }
 }
 function aoeDamage(x, z, r, dmg, team, owner, o) {
@@ -4175,7 +4177,7 @@ function dealDamage(t, amount, srcId, o) {
   }
   if (t.kind === 'boss') { t.dmgBy[srcId] = (t.dmgBy[srcId] || 0) + amt; t.total += amt; }
   if (t.kind === 'enemy' && src && (src.isPlayer || src.delveBot)) t.tagged = true; // your dungeon bots' hits count as yours
-  ev({ t: 'hit', x: t.x, z: t.z, y: t.kind === 'boss' ? 5.5 : 2.1, amt, crit, pet:!!o.pet, toPlayer: !!t.isPlayer, byPlayer: !!(src && src.isPlayer), pk: o.pk, pc: o.pc, slow: !!o.slow, burnFx: !!o.burnFx, proc: !!o.proc }); // pk/pc/burnFx/proc: cosmetic only
+  ev({ t: 'hit', x: t.x, z: t.z, y: t.kind === 'boss' ? 5.5 : 2.1, amt, crit, pet:!!o.pet, toPlayer: !!t.isPlayer, byPlayer: !!(src && src.isPlayer), pk: o.pk, pc: o.pc, slow: !!o.slow, burnFx: !!o.burnFx, proc: !!o.proc, mt: t.kind === 'enemy' ? t.type : null, ms: src && src.kind === 'enemy' ? src.type : null }); // pk/pc/burnFx/proc: cosmetic only
   if (t.isPlayer || (src && src.isPlayer)) markCombat();
   if (sf && sf.isPlayer && amt > (G.profile.records.maxHit || 0)) G.profile.records.maxHit = amt;
   if (sf && sf !== t && amt > 0) {
@@ -5569,7 +5571,7 @@ function eliteMods(e) {
 // pendingAoE extras: inner (donut, safe centre), cone {a, half} (apex at x,z), grp (shared: one hit per target per volley),
 // slow/burn (applied on the hit). The renderer draws AOE_SHOWN ring markers and CONE_SHOWN cones; a move needing more waits.
 const AOE_SHOWN = 24, CONE_SHOWN = 10;
-const moveAoE = (e, x, z, r, t, dmg, o) => { const a = Object.assign({ x, z, r, t, max: t, dmg, team: 'mob', owner: e.id, kind: 'slam', pal: areaFx(e.zone) }, o); G.pendingAoE.push(a); return a; };
+const moveAoE = (e, x, z, r, t, dmg, o) => { const a = Object.assign({ x, z, r, t, max: t, dmg, team: 'mob', owner: e.id, kind: 'slam', pal: areaFx(e.zone), mt: e.type }, o); G.pendingAoE.push(a); return a; };
 function markersFree(n, cone) { let c = 0, k = 0; for (const a of G.pendingAoE) if (a.cone) k++; else c++; return cone ? k + n <= CONE_SHOWN : c + n <= AOE_SHOWN; }
 // does marker a cover a body of radius r at x,z? (the donut hole tests the body centre so hugging its owner is safe)
 function aoeCovers(a, x, z, r) {
@@ -5654,7 +5656,7 @@ function enemyMove(e, dt, pl, dp) {
   if (e.windT > 0 || e.lungeT > 0 || M.gap > 0) return false;
   for (const k of d.moves) {
     const S = MON_MOVES[k]; if (!S.wind || M.cd[k] > 0 || dp > S.max || dp < (S.min || 0)) continue;
-    if (startMove(e, k, S, pl, slow)) { M.cd[k] = rand(S.cd[0], S.cd[1]); M.k = k; M.t = e.windT = S.wind; e.windK = k; e.windMax = S.wind; ev({ t: 'windFx', x: e.x, z: e.z, r: e.r, k, life: S.wind, pal: areaFx(e.zone), color: d.shotColor || d.tint }); return true; }
+    if (startMove(e, k, S, pl, slow)) { M.cd[k] = rand(S.cd[0], S.cd[1]); M.k = k; M.t = e.windT = S.wind; e.windK = k; e.windMax = S.wind; ev({ t: 'windFx', x: e.x, z: e.z, r: e.r, k, life: S.wind, pal: areaFx(e.zone), color: d.shotColor || d.tint, mt: e.type }); return true; }
   }
   return false;
 }
@@ -5972,7 +5974,7 @@ function stepPendingAoE(dt) {
       if (a.kind === 'zap') ev({ t: 'bolt', x: a.x, z: a.z });
       const C = a.cone, bx = C ? a.x + Math.sin(C.a) * a.r * 0.55 : a.x, bz = C ? a.z + Math.cos(C.a) * a.r * 0.55 : a.z;
       ev({ t: 'boom', x: bx, z: bz, r: C ? a.r * 0.45 : a.r, color: a.kind === 'meteor' || a.kind === 'breath' ? 0xff7b2e : a.kind === 'comet' || a.kind === 'zap' || a.kind === 'trap' ? 0x9fb8ff : a.kind === 'vortex' ? 0xb36bff : 0xc9a16b, big: a.kind !== 'comet' && a.kind !== 'spike' && a.kind !== 'zap' });
-      if (a.pal && a.team === 'mob') ev({ t: 'aoeFx', x: a.x, z: a.z, r: a.r, kind: a.kind, pal: a.pal, ca: a.cone ? a.cone.a : null, col: a.col });
+      if (a.pal && a.team === 'mob') ev({ t: 'aoeFx', x: a.x, z: a.z, r: a.r, kind: a.kind, pal: a.pal, ca: a.cone ? a.cone.a : null, col: a.col, mt: a.mt });
       G.pendingAoE.splice(i, 1);
     }
   }
@@ -9707,7 +9709,7 @@ AssetSlots.register('enemy', (o) => {
         else if (k === 'breath') { pivot.rotation.x += 0.35 * ez; pivot.position.z += 0.18 * ez; pivot.scale.z *= 1 + 0.1 * ez; }
         else if (k === 'pulse') { const g = 1 + 0.22 * v; pivot.scale.multiplyScalar(g); pivot.position.y += 0.1 * v; }
         else if (k === 'burst') { pivot.position.y += 0.6 * Math.sin(a * Math.PI); pivot.rotation.x -= 0.3 * v; }
-        if (!struck && a > 0.85) { struck = true; if (k === 'slam' && fxK > 0) burst(e.x, 0.1, e.z, Math.round(10 * fxK), BIOME_TINT[areaBiome(e.zone)] || 0xc8b89a, 4.5, 0.45, 0.32, -2, 0.6); }
+        if (!struck && a > 0.85) { struck = true; if (MobFX.has(e.type)) { if (k === 'slam') MobFX.bits(e.type, e.x, 0.2, e.z, 9, 'ring'); else if (k === 'lunge' || k === 'swing') MobFX.bits(e.type, e.x + Math.sin(e.facing) * e.r, 0.8, e.z + Math.cos(e.facing) * e.r, 3, 'spray', { a: e.facing, speed: 0.8 }); } else if (k === 'slam' && fxK > 0) burst(e.x, 0.1, e.z, Math.round(10 * fxK), BIOME_TINT[areaBiome(e.zone)] || 0xc8b89a, 4.5, 0.45, 0.32, -2, 0.6); }
       } else { struck = false; if (!(e.windT > 0)) relK = null; }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
@@ -10770,7 +10772,7 @@ function fxPal(c) {
   if (h < 40) return 'fire'; if (h < 68) return 'gold'; if (h < 160) return 'venom'; if (h < 200) return 'storm'; if (h < 250) return 'frost'; return 'arcane';
 }
 function updateParticles(dt) {
-  SpriteFX.update(dt);
+  SpriteFX.update(dt); MobFX.update(dt);
   LootPop.update(dt);
   let n = 0;
   for (let k = 0; k < PART_MAX; k++) {
@@ -10797,7 +10799,7 @@ const LONG_KINDS = { arrow: [1, 1, 1], ice: [1, 1, 1], tracer: [0.55, 0.55, 0.7]
 let trailAcc = 0, fxK = 1; // fxK: share of a 60 Hz frame this frame covers, so per-frame sparks stay as dense at 120 Hz
 function updateProjectileMeshes(dt) {
   let no = 0, na = 0, nd = 0, ng = 0;
-  HeroFX.ammoBegin();
+  HeroFX.ammoBegin(); MobFX.ammoBegin();
   trailAcc += dt; const trailOn = trailAcc >= 1 / 30 - 1e-4; if (trailOn) trailAcc = Math.min(trailAcc - 1 / 30, 1 / 30); // trail puffs 30 times a second
   const glowOn = hqOn();
   for (let i = 0; i < PROJ_MAX; i++) {
@@ -10809,6 +10811,7 @@ function updateProjectileMeshes(dt) {
       glowIM.setMatrixAt(ng, _m4); glowIM.setColorAt(ng, _col.set(p.color).multiplyScalar(p.team === 'mob' ? 0.8 : 0.65)); ng++;
     }
     if (p.hx && HeroFX.ammo(p, i, yaw)) continue; // Codex heroes fire their own ammunition (hero-fx-v6.js)
+    if (p.mt && MobFX.ammo(p, trailOn)) continue; // monsters fire their species' own shot (45b-mob-fx.js)
     if (p.kind === 'flame') {
       if (no >= PROJ_MAX) continue;
       const k = 1 - Math.max(0, p.life) / p.total, s2 = p.r * (0.5 + k * 1.3);
@@ -10868,6 +10871,7 @@ function updateRings(dt) {
   for (const s of rings) { s.tele = false; s.disc.material.userData.px.uIn.value = 0; }
   for (const a of G.pendingAoE) {
     const k = 1 - a.t / a.max, col = a.col && (a.soak || a.spread) ? a.col : a.team === 'mob' ? TELE_MOB : TELE_PLAYER;
+    if (a.kind === 'meteor' && a.mt && a.team === 'mob' && k > 0.15) MobFX.shell(a.mt, a.x, a.z, (k - 0.15) / 0.85);
     if (a.cone) { if (cones < CONE_SHOWN) mobCone(cones++, a, k, col); continue; }
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN) continue; used++;
     s.tele = true;
@@ -10900,12 +10904,14 @@ function updateRings(dt) {
   }
   for (const c of G.clouds) {
     const s = rings[RING_MAX - 1 - used]; if (!s || used >= AOE_SHOWN + 8) break; used++;
-    s.tele = true; const fade = Math.min(1, c.t / 0.5), tint = c.color || 0x5fd84a;
+    if (c.mt === undefined) c.mt = c.team === 'mob' ? mobTypeOf(c.owner) : null;
+    s.tele = true; const fade = Math.min(1, c.t / 0.5), tint = c.mt ? MobFX.color(c.mt) : c.color || 0x5fd84a;
     s.ring.visible = s.disc.visible = true;
     s.ring.position.set(c.x, 0.08, c.z); s.ring.scale.setScalar(c.r); s.ring.material.opacity = 0.7 * fade; s.ring.material.color.setHex(c.team === 'mob' ? TELE_MOB : 0x8dff6a);
     s.disc.position.set(c.x, 0.07, c.z); s.disc.scale.setScalar(c.r); s.disc.material.opacity = (0.28 + Math.sin(G.time * (c.pull ? 14 : 6)) * 0.05) * fade; s.disc.material.color.setHex(tint);
     // a vortex sheds sparks from its rim; other clouds bubble anywhere
-    if (c.pull) { if (Math.random() < 0.7 * fxK) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
+    if (c.mt) { if (Math.random() < (c.pull ? 0.8 : 0.6) * fxK) { if (c.pull) { const a = Math.random() * 6.283; MobFX.bits(c.mt, c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, 'pull', { r: 0.2, t: 0.5 }); } else MobFX.bits(c.mt, c.x, 0.2, c.z, 1, 'rise', { r: c.r * 0.8 }); } }
+    else if (c.pull) { if (Math.random() < 0.7 * fxK) { const a = Math.random() * 6.283; burst(c.x + Math.sin(a) * c.r * 0.9, 0.3, c.z + Math.cos(a) * c.r * 0.9, 1, tint, 0.5, 0.5, 0.25, -0.5, 0.6); } }
     else if (Math.random() < 0.5 * fxK) burst(c.x + (Math.random() - 0.5) * c.r * 1.4, 0.3, c.z + (Math.random() - 0.5) * c.r * 1.4, 1, c.color || 0x9cff7a, 0.6, 0.8, 0.3, -0.8, 1.2);
   }
   for (let i = 0; i < RING_MAX - used; i++) {
@@ -11079,6 +11085,257 @@ function drawSuperAim(f, kind, a, mag) {
   else if (el === 'poison') { const d = E.dist * clamp(mag, 0.3, 1.3); const tx = f.x + Math.sin(a) * d, tz = f.z + Math.cos(a) * d; AimFX.circle(tx, tz, E.r, c, true); AimFX.arc(f.x, f.z, tx, tz, 2, c); }
 }
 
+// --- Monster attack art: every species fights in its own look ------------------------------------------------------
+// One row per species (MON_ROWS in 12-monsters.js): its colours, the pixel particle it sheds (bit, bit2), the burst its
+// moves and death make (hit: a style from tools/bake_hero_hits.py), all baked by tools/bake_mob_fx.py into
+// assets/fx/mob/ (bits.png atlas, hit_<id>.png, ammo_<id>.png for the 25 species that shoot). The block between the
+// markers is plain JSON: the baker reads it, so the art and the game never disagree. tools/check_mob_fx.cjs guards it.
+// glyphs: atlas cell, frames, and how the particle moves (flutter: drifts and sways down; float: rises; debris: falls,
+// bounces once, spins; ember: rises and flickers; spark: fast and short; drop: falls and splats; flake: drifts down;
+// bolt: flickers in place; arc: flies straight out). glow: lit from inside (bloom picks it up).
+const MOB_FX = /* <mob-fx> */ {
+  "glyphs": {
+    "fluff": { "cell": 0, "n": 1, "move": "flutter" }, "leaf": { "cell": 1, "n": 1, "move": "flutter" },
+    "petal": { "cell": 2, "n": 1, "move": "flutter" }, "feather": { "cell": 3, "n": 1, "move": "flutter" },
+    "spore": { "cell": 4, "n": 1, "move": "float" }, "pollen": { "cell": 5, "n": 1, "move": "float", "glow": true },
+    "needle": { "cell": 6, "n": 1, "move": "debris" }, "clod": { "cell": 7, "n": 1, "move": "debris" },
+    "pebble": { "cell": 8, "n": 1, "move": "debris" }, "shard": { "cell": 9, "n": 1, "move": "debris" },
+    "flake": { "cell": 10, "n": 1, "move": "flake" }, "ember": { "cell": 11, "n": 2, "move": "ember", "glow": true },
+    "spark": { "cell": 13, "n": 2, "move": "spark", "glow": true }, "drop": { "cell": 15, "n": 1, "move": "drop" },
+    "bubble": { "cell": 16, "n": 1, "move": "float" }, "glob": { "cell": 17, "n": 1, "move": "drop" },
+    "ink": { "cell": 18, "n": 1, "move": "drop" }, "sand": { "cell": 19, "n": 1, "move": "debris" },
+    "web": { "cell": 20, "n": 1, "move": "flutter" }, "bone": { "cell": 21, "n": 1, "move": "debris" },
+    "scale": { "cell": 22, "n": 1, "move": "debris" }, "coral": { "cell": 23, "n": 1, "move": "debris" },
+    "bolt": { "cell": 24, "n": 2, "move": "bolt", "glow": true }, "smoke": { "cell": 26, "n": 3, "move": "float" },
+    "wisp": { "cell": 29, "n": 2, "move": "float", "glow": true }, "rune": { "cell": 31, "n": 1, "move": "float", "glow": true },
+    "mote": { "cell": 32, "n": 1, "move": "float", "glow": true }, "star": { "cell": 33, "n": 2, "move": "float", "glow": true },
+    "chip": { "cell": 35, "n": 1, "move": "flake" }, "arc": { "cell": 36, "n": 1, "move": "arc", "glow": true }
+  },
+  "species": {
+    "thistlehare": { "c": "#e8d890", "bit": "fluff", "bit2": "needle", "hit": "petals" },
+    "hornet": { "c": "#ffd23a", "bit": "pollen", "bit2": "needle", "hit": "glint" },
+    "truffleboar": { "c": "#a07858", "bit": "clod", "bit2": "leaf", "hit": "chips" },
+    "myconid": { "c": "#d77cff", "bit": "spore", "bit2": "pollen", "hit": "mist" },
+    "bramble": { "c": "#7a8a3a", "bit": "leaf", "bit2": "needle", "hit": "fibres" },
+    "barkviper": { "c": "#8a6a48", "bit": "scale", "bit2": "leaf", "hit": "jaws" },
+    "thornbeetle": { "c": "#8faa5a", "bit": "needle", "bit2": "pebble", "hit": "chips" },
+    "gloompanther": { "c": "#6a5aa6", "bit": "wisp", "bit2": "mote", "hit": "claw" },
+    "craggoat": { "c": "#c8c0b0", "bit": "pebble", "bit2": "sand", "hit": "chips" },
+    "dustharpy": { "c": "#d8b080", "bit": "feather", "bit2": "sand", "hit": "fibres" },
+    "bouldermimic": { "c": "#a8a89e", "bit": "pebble", "bit2": "clod", "hit": "chips" },
+    "galeweaver": { "c": "#dfe6ee", "bit": "web", "bit2": "mote", "hit": "fibres" },
+    "miragestalker": { "c": "#e8c890", "bit": "sand", "bit2": "wisp", "hit": "claw" },
+    "pitfallwurm": { "c": "#c89a7a", "bit": "sand", "bit2": "clod", "hit": "jaws" },
+    "frostgargoyle": { "c": "#8a9ab0", "bit": "pebble", "bit2": "flake", "hit": "chips" },
+    "chillbanshee": { "c": "#bfe6ff", "bit": "wisp", "bit2": "flake", "hit": "mist" },
+    "glacialtroll": { "c": "#d8f0ff", "bit": "flake", "bit2": "shard", "hit": "ring" },
+    "iceshard": { "c": "#9fe8ff", "bit": "shard", "bit2": "flake", "hit": "glint" },
+    "screecrawler": { "c": "#9a8a7a", "bit": "pebble", "bit2": "sand", "hit": "chips" },
+    "echobat": { "c": "#c8a8ff", "bit": "arc", "bit2": "mote", "hit": "ring" },
+    "sulfurslime": { "c": "#e0d84a", "bit": "glob", "bit2": "bubble", "hit": "splash" },
+    "fumetoad": { "c": "#b8d040", "bit": "bubble", "bit2": "glob", "hit": "spatter" },
+    "magmahound": { "c": "#ff7a3a", "bit": "ember", "bit2": "smoke", "hit": "claw" },
+    "cinderelemental": { "c": "#ffa060", "bit": "ember", "bit2": "chip", "hit": "sparks" },
+    "ashstalker": { "c": "#a8a29e", "bit": "chip", "bit2": "ember", "hit": "claw" },
+    "emberwraith": { "c": "#ff8a3a", "bit": "ember", "bit2": "wisp", "hit": "sparks" },
+    "scoriascorpion": { "c": "#ff9a6a", "bit": "pebble", "bit2": "ember", "hit": "chips" },
+    "flamewyrm": { "c": "#ff6a1f", "bit": "ember", "bit2": "smoke", "hit": "sparks" },
+    "manaleech": { "c": "#4a8aff", "bit": "mote", "bit2": "rune", "hit": "spatter" },
+    "azuregolem": { "c": "#6a9aff", "bit": "shard", "bit2": "rune", "hit": "chips" },
+    "riftspider": { "c": "#a06aff", "bit": "web", "bit2": "rune", "hit": "fibres" },
+    "geodrone": { "c": "#c77dff", "bit": "shard", "bit2": "spark", "hit": "glint" },
+    "voidray": { "c": "#4fd8ff", "bit": "wisp", "bit2": "mote", "hit": "mist" },
+    "asteroidhermit": { "c": "#9a90a8", "bit": "pebble", "bit2": "spark", "hit": "chips" },
+    "prismmimic": { "c": "#d0f4ff", "bit": "shard", "bit2": "spark", "hit": "glint" },
+    "glassminotaur": { "c": "#bfe8ff", "bit": "shard", "bit2": "pebble", "hit": "chips" },
+    "starsentry": { "c": "#fff0c0", "bit": "star", "bit2": "spark", "hit": "glint" },
+    "astronomer": { "c": "#b08aff", "bit": "star", "bit2": "rune", "hit": "glint" },
+    "nebulajelly": { "c": "#ff9bf2", "bit": "bubble", "bit2": "star", "hit": "mist" },
+    "kelpie": { "c": "#2fbfa0", "bit": "drop", "bit2": "leaf", "hit": "splash" },
+    "rapidsiren": { "c": "#7fd0ff", "bit": "drop", "bit2": "bubble", "hit": "splash" },
+    "thrasher": { "c": "#6a8aaa", "bit": "drop", "bit2": "scale", "hit": "jaws" },
+    "sporeurchin": { "c": "#4fffb0", "bit": "needle", "bit2": "spore", "hit": "spatter" },
+    "angler": { "c": "#4a6aaa", "bit": "bubble", "bit2": "mote", "hit": "jaws" },
+    "trenchcrawler": { "c": "#4a5a6a", "bit": "bubble", "bit2": "pebble", "hit": "chips" },
+    "pressuresquid": { "c": "#6a3a9a", "bit": "ink", "bit2": "bubble", "hit": "spatter" },
+    "leviathan": { "c": "#2a7a80", "bit": "drop", "bit2": "scale", "hit": "splash" },
+    "abyssphantom": { "c": "#2fffd0", "bit": "wisp", "bit2": "bubble", "hit": "mist" },
+    "boilcrab": { "c": "#ff6a4a", "bit": "bubble", "bit2": "smoke", "hit": "chips" },
+    "steamelemental": { "c": "#f0f0f4", "bit": "smoke", "bit2": "drop", "hit": "mist" },
+    "shaftvulture": { "c": "#7a6450", "bit": "feather", "bit2": "bone", "hit": "claw" },
+    "obsidiangargoyle": { "c": "#5a4a70", "bit": "shard", "bit2": "ember", "hit": "chips" },
+    "lightningwyvern": { "c": "#fff04a", "bit": "bolt", "bit2": "spark", "hit": "sparks" },
+    "cyclone": { "c": "#d8e0ea", "bit": "wisp", "bit2": "sand", "hit": "mist" },
+    "aetherray": { "c": "#c8b8ff", "bit": "feather", "bit2": "star", "hit": "glint" },
+    "halosentinel": { "c": "#ffd86a", "bit": "star", "bit2": "spark", "hit": "ring" },
+    "archon": { "c": "#fff07a", "bit": "feather", "bit2": "star", "hit": "glint" },
+    "cosmicweaver": { "c": "#9a7aff", "bit": "web", "bit2": "star", "hit": "fibres" }
+  }
+} /* </mob-fx> */;
+
+// --- runtime: pixel particles (one draw call), impact bursts and projectile sprites per species -------------------
+// MobFX.bits(species, x, y, z, n, mode, opts)   modes: burst (outward), ring (along the ground), rise (out of a patch),
+//   pull (drawn in: a wind-up), trail (behind a shot), spray (a cone along opts.a), line (along a lane)
+// MobFX.hit(species, x, y, z, size) the species' burst · MobFX.ammo(projectile, trailOn) its shot · MobFX.shell(...)
+// a shell falling onto a marker · MobFX.has(species) · MobFX.color(species) (hex)
+const MobFX = (() => {
+  const GL = MOB_FX.glyphs, SP = MOB_FX.species, MAX = 900, COLS = 8, ROWS = 5;
+  const lin = {}; for (const id in SP) lin[id] = new THREE.Color(SP[id].c);
+  const hexOf = {}; for (const id in SP) hexOf[id] = parseInt(SP[id].c.slice(1), 16);
+  let index = { ammo: [], hit: [] };
+  fetch('assets/fx/mob/index.json').then((r) => (r.ok ? r.json() : {})).then((j) => { index = Object.assign({ ammo: [], hit: [] }, j); }).catch(() => {});
+  const loader = new THREE.TextureLoader(), texs = new Map();
+  const tex = (name, data) => {
+    let t = texs.get(name);
+    if (!t) { t = loader.load('assets/fx/mob/' + name + '.png'); t.colorSpace = data ? THREE.NoColorSpace : THREE.SRGBColorSpace; t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; texs.set(name, t); }
+    return t;
+  };
+  // ---------------------------------------------------------------- particles
+  const MOVE = { flutter: 0, float: 1, debris: 2, ember: 3, spark: 4, drop: 5, flake: 6, bolt: 7, arc: 8 };
+  const pos = new Float32Array(MAX * 3), dat = new Float32Array(MAX * 4), col = new Float32Array(MAX * 4);
+  const vx = new Float32Array(MAX), vy = new Float32Array(MAX), vz = new Float32Array(MAX), life = new Float32Array(MAX), max = new Float32Array(MAX);
+  const mv = new Uint8Array(MAX), cell0 = new Float32Array(MAX), frames = new Uint8Array(MAX), spin = new Float32Array(MAX), size0 = new Float32Array(MAX), ph = new Float32Array(MAX), landed = new Uint8Array(MAX);
+  let n = 0;
+  const geo = new THREE.InstancedBufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute([-0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, 0.5, 0], 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2)); geo.setIndex([0, 1, 2, 0, 2, 3]);
+  const aPos = new THREE.InstancedBufferAttribute(pos, 3), aDat = new THREE.InstancedBufferAttribute(dat, 4), aCol = new THREE.InstancedBufferAttribute(col, 4);
+  for (const a of [aPos, aDat, aCol]) a.setUsage(THREE.DynamicDrawUsage);
+  geo.setAttribute('aPos', aPos); geo.setAttribute('aData', aDat); geo.setAttribute('aCol', aCol); geo.instanceCount = 0;
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { map: { value: tex('bits', true) }, uGrid: { value: new THREE.Vector2(COLS, ROWS) } },
+    vertexShader: `attribute vec3 aPos; attribute vec4 aData; attribute vec4 aCol; uniform vec2 uGrid;
+      varying vec2 vUv; varying vec4 vCol; varying float vA;
+      void main() {
+        vec4 mv = modelViewMatrix * vec4(aPos, 1.0); float c = cos(aData.y), s = sin(aData.y);
+        mv.xy += vec2(c * position.x - s * position.y, s * position.x + c * position.y) * aData.x;
+        gl_Position = projectionMatrix * mv;
+        vec2 g = vec2(mod(aData.z, uGrid.x), floor(aData.z / uGrid.x));
+        vUv = vec2((g.x + uv.x) / uGrid.x, 1.0 - (g.y + 1.0 - uv.y) / uGrid.y); vCol = aCol; vA = aData.w;
+      }`,
+    fragmentShader: `uniform sampler2D map; varying vec2 vUv; varying vec4 vCol; varying float vA;
+      float b2(vec2 a) { a = floor(a); return fract(a.x / 2.0 + a.y * a.y * 0.75); }
+      void main() {
+        vec4 t = texture2D(map, vUv); if (t.a < 0.5) discard;
+        if (vA < b2(0.5 * gl_FragCoord.xy) * 0.25 + b2(gl_FragCoord.xy) + 0.02) discard; // pixel-dithered fade, no blending
+        float l = t.r; vec3 c = vCol.rgb, o;
+        if (l < 0.1) o = vec3(0.03, 0.022, 0.016);
+        else if (l < 0.7) o = mix(c * 0.32, c, clamp((l - 0.38) / 0.32, 0.0, 1.0));
+        else o = mix(c, mix(c, vec3(1.0), 0.72), (l - 0.7) / 0.3);
+        gl_FragColor = vec4(o * (1.0 + vCol.a * 0.7), 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
+    fog: false,
+  });
+  const mesh = new THREE.Mesh(geo, mat); mesh.frustumCulled = false; mesh.renderOrder = 5; dynGroup.add(mesh);
+  const R = Math.random;
+  function spawn(g, c, x, y, z, ux, uy, uz, lf, sz) {
+    if (n >= MAX) return -1; const i = n++, G0 = GL[g];
+    pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z; vx[i] = ux; vy[i] = uy; vz[i] = uz; life[i] = max[i] = lf;
+    mv[i] = MOVE[G0.move]; cell0[i] = G0.cell; frames[i] = G0.n; spin[i] = (R() - 0.5) * (G0.move === 'debris' ? 14 : 4); size0[i] = sz; ph[i] = R() * 6.283; landed[i] = 0;
+    dat[i * 4 + 1] = R() * 6.283; col[i * 4] = c.r; col[i * 4 + 1] = c.g; col[i * 4 + 2] = c.b; col[i * 4 + 3] = G0.glow ? 1 : 0;
+    return i;
+  }
+  // how fast and how long each kind of particle lives when thrown out (floaty ones drift, debris flies)
+  const THROW = { 0: [2.2, 1.4], 1: [1.4, 1.2], 2: [5.5, 0.9], 3: [2.6, 0.8], 4: [7, 0.4], 5: [4.5, 0.8], 6: [2, 1.4], 7: [0.4, 0.28], 8: [6, 0.6] };
+  function bits(id, x, y, z, num, mode, o) {
+    const S = SP[id]; if (!S || num <= 0) return; o = o || {};
+    num = Math.max(1, Math.round(num * (Q.lowTier ? 0.5 : 1)));
+    const c = lin[id], sc = o.size || 1;
+    for (let k = 0; k < num; k++) {
+      const g = o.glyph || (k % 3 === 2 && S.bit2 ? S.bit2 : S.bit), m = MOVE[GL[g].move], T = THROW[m];
+      const sp = T[0] * (o.speed || 1) * (0.55 + R() * 0.7), lf = T[1] * (0.7 + R() * 0.6) * (o.life || 1), sz = (0.42 + R() * 0.24) * sc;
+      let px = x, py = y, pz = z, ux, uy, uz, a = R() * 6.283;
+      if (mode === 'ring') { ux = Math.sin(a) * sp * 1.2; uz = Math.cos(a) * sp * 1.2; uy = sp * 0.35; py = 0.25; }
+      else if (mode === 'rise') { const d = (o.r || 1) * Math.sqrt(R()); px += Math.sin(a) * d; pz += Math.cos(a) * d; py = 0.15; ux = (R() - 0.5) * 0.6; uz = (R() - 0.5) * 0.6; uy = 0.6 + R() * 1.2; }
+      else if (mode === 'pull') { const d = (o.r || 2) * (0.8 + R() * 0.6), t = Math.max(0.3, o.t || 0.6); px += Math.sin(a) * d; pz += Math.cos(a) * d; py = 0.3 + R() * 1.6; ux = -Math.sin(a) * d / t; uz = -Math.cos(a) * d / t; uy = (y - py) / t; const i = spawn(g, c, px, py, pz, ux, uy, uz, t, sz); if (i >= 0) mv[i] = MOVE.arc; continue; }
+      else if (mode === 'trail') { ux = (R() - 0.5) * 0.8; uy = (R() - 0.3) * 0.8; uz = (R() - 0.5) * 0.8; }
+      else if (mode === 'spray' || mode === 'line') { const aa = (o.a || 0) + (R() - 0.5) * (o.spread || 0.6); if (mode === 'line') { const d = R() * (o.len || 6); px += Math.sin(o.a || 0) * d; pz += Math.cos(o.a || 0) * d; } ux = Math.sin(aa) * sp; uz = Math.cos(aa) * sp; uy = sp * 0.3 * R(); }
+      else { const e = R() * 1.2 + 0.15; ux = Math.sin(a) * Math.cos(e) * sp; uz = Math.cos(a) * Math.cos(e) * sp; uy = Math.sin(e) * sp + (m === 2 || m === 5 ? 2.5 : 0.5); }
+      spawn(g, c, px, py, pz, ux, uy, uz, lf, sz);
+    }
+  }
+  function updateBits(dt, t) {
+    let w = 0;
+    for (let i = 0; i < n; i++) {
+      life[i] -= dt; if (life[i] <= 0) continue;
+      const m = mv[i]; let gy = 0, drag = 1, sway = 0;
+      if (m === 0) { gy = -1.6; drag = 1.8; sway = 1.1; } else if (m === 1) { gy = 0.9; drag = 1.6; sway = 0.5; }
+      else if (m === 2) { gy = -16; drag = 0.4; } else if (m === 3) { gy = 1.6; drag = 1.3; sway = 0.4; } else if (m === 4) { gy = -7; drag = 2.6; }
+      else if (m === 5) { gy = -13; drag = 0.3; } else if (m === 6) { gy = -1.1; drag = 1.5; sway = 1.4; } else if (m === 7) { drag = 6; } else { drag = 0.6; }
+      const k = Math.exp(-drag * dt); vx[i] *= k; vz[i] *= k; vy[i] = vy[i] * k + gy * dt;
+      let x = pos[i * 3] + vx[i] * dt + (sway ? Math.sin(t * 5 + ph[i]) * sway * dt : 0), y = pos[i * 3 + 1] + vy[i] * dt, z = pos[i * 3 + 2] + vz[i] * dt;
+      if (y < 0.06 && vy[i] < 0) {
+        y = 0.06;
+        if ((m === 2 || m === 8) && !landed[i]) { landed[i] = 1; vy[i] = -vy[i] * 0.32; vx[i] *= 0.5; vz[i] *= 0.5; spin[i] *= 0.3; }
+        else { vy[i] = 0; vx[i] *= 0.6; vz[i] *= 0.6; spin[i] = 0; if (m === 5) life[i] = Math.min(life[i], 0.12); }
+      }
+      const age = max[i] - life[i], fade = Math.min(1, life[i] / (max[i] * 0.4));
+      let s = size0[i], f = 0;
+      if (frames[i] > 1) f = (m === 1 && frames[i] === 3) ? Math.min(2, Math.floor(age / max[i] * 3)) : Math.floor((t * 12 + ph[i]) % frames[i]);
+      if (m === 4) s *= 0.5 + 0.5 * fade; else if (m === 1 && frames[i] === 3) s *= 1 + age * 0.8;
+      // compact into slot w (swap-free: live particles move down)
+      pos[w * 3] = x; pos[w * 3 + 1] = y; pos[w * 3 + 2] = z;
+      dat[w * 4] = s; dat[w * 4 + 1] = dat[i * 4 + 1] + spin[i] * dt; dat[w * 4 + 2] = cell0[i] + f; dat[w * 4 + 3] = fade;
+      if (w !== i) {
+        col[w * 4] = col[i * 4]; col[w * 4 + 1] = col[i * 4 + 1]; col[w * 4 + 2] = col[i * 4 + 2]; col[w * 4 + 3] = col[i * 4 + 3];
+        vx[w] = vx[i]; vy[w] = vy[i]; vz[w] = vz[i]; life[w] = life[i]; max[w] = max[i]; mv[w] = mv[i]; cell0[w] = cell0[i]; frames[w] = frames[i];
+        spin[w] = spin[i]; size0[w] = size0[i]; ph[w] = ph[i]; landed[w] = landed[i];
+      }
+      w++;
+    }
+    n = w; geo.instanceCount = n;
+    if (n) { aPos.needsUpdate = aDat.needsUpdate = aCol.needsUpdate = true; aPos.addUpdateRange(0, n * 3); aDat.addUpdateRange(0, n * 4); aCol.addUpdateRange(0, n * 4); }
+  }
+  // ---------------------------------------------------------------- sprite players: bursts (16 frames, 4x4) and shots (4 frames)
+  const pool = [];
+  function sprite() {
+    let s = pool.find((o) => !o.on);
+    if (!s) { if (pool.length >= 96) return null; const m = new THREE.SpriteMaterial({ transparent: true, alphaTest: 0.5, depthWrite: false, fog: false, toneMapped: false }); s = { spr: new THREE.Sprite(m), mat: m, on: false, map: null }; s.spr.frustumCulled = false; s.spr.renderOrder = 6; dynGroup.add(s.spr); pool.push(s); }
+    return s;
+  }
+  function bind(s, name, rx, ry) {
+    const base = tex(name);
+    if (!s.map || s.map.source !== base.source) { if (s.map) s.map.dispose(); s.map = base.clone(); s.map.repeat.set(rx, ry); s.mat.map = s.map; s.mat.needsUpdate = true; }
+  }
+  const has = (kind, id) => index[kind] && index[kind].includes(id);
+  function hit(id, x, y, z, size, speed) {
+    if (!has('hit', id)) return false; const s = sprite(); if (!s) return false;
+    bind(s, 'hit_' + id, 0.25, 0.25); s.on = true; s.kind = 'hit'; s.t = 0; s.speed = speed || 1.4;
+    s.spr.position.set(x, y, z); s.spr.scale.set(size, size, 1); s.mat.rotation = (R() - 0.5) * 0.6; s.spr.visible = true; s.map.offset.set(0, 0.75);
+    return true;
+  }
+  let ammoUsed = [];
+  function ammoBegin() { for (const s of ammoUsed) { s.on = false; s.spr.visible = false; } ammoUsed = []; }
+  function shot(id, x, y, z, size, t) {
+    if (!has('ammo', id)) return false; const s = sprite(); if (!s) return true;
+    bind(s, 'ammo_' + id, 0.25, 1); s.on = true; s.kind = 'ammo'; s.spr.visible = true; s.spr.position.set(x, y, z); s.spr.scale.set(size, size, 1); s.mat.rotation = 0;
+    s.map.offset.set((Math.floor(t * 14) % 4) * 0.25, 0); ammoUsed.push(s); return true;
+  }
+  function ammo(p, trailOn) {
+    const id = p.mt; if (!SP[id]) return false;
+    if (trailOn && R() < 0.55 * fxK) bits(id, p.x, p.y, p.z, 1, 'trail', { size: 0.8 });
+    return shot(id, p.x, p.y, p.z, Math.max(0.9, p.r * 2.7), G.time + (p.owner || 0) * 0.13);
+  }
+  // a shell on its way down to a rain marker (k: 0 just cast .. 1 landing)
+  function shell(id, x, z, k) {
+    const y = 0.5 + 11 * (1 - k) * (1 - k);
+    if (!shot(id, x + (1 - k) * 2.5, y, z - (1 - k) * 1.5, 1.2, G.time)) { if (R() < 0.4 * fxK) bits(id, x, y, z, 1, 'trail'); }
+    else if (R() < 0.35 * fxK) bits(id, x, y + 0.3, z, 1, 'trail', { size: 0.8 });
+  }
+  function update(dt) {
+    updateBits(dt, G.time);
+    for (const s of pool) {
+      if (!s.on || s.kind !== 'hit') continue;
+      s.t += dt * s.speed; const f = Math.floor(s.t * 30);
+      if (f >= 16) { s.on = false; s.spr.visible = false; continue; }
+      s.map.offset.set((f % 4) * 0.25, 0.75 - Math.floor(f / 4) * 0.25);
+    }
+  }
+  function clear() { n = 0; geo.instanceCount = 0; for (const s of pool) { s.on = false; s.spr.visible = false; } ammoUsed = []; }
+  return { bits, hit, ammo, ammoBegin, shell, update, clear, has: (id) => !!SP[id], color: (id) => hexOf[id], pal: (id) => fxPal(hexOf[id]), count: () => n, index: () => index };
+})();
 // --- view sync: entities -> meshes ---------------------------------------------------------
 const views = new Map();
 // everything that changes how your hero looks; the view is rebuilt when this changes
@@ -14122,6 +14379,14 @@ function boomFx(e) {
   burst(e.x, 0.6, e.z, e.big ? 8 : 4, e.color, e.big ? 8 : 5, 0.5, 0.25, 14, 0.8);
 }
 function dieFx(e) {
+  if (MobFX.has(e.kind)) {
+    const big = e.elite ? 1.5 : 1, pal = MobFX.pal(e.kind);
+    SpriteFX.play('poof', pal, e.x, 0, e.z, 1.6 * big, { speed: 1.5 });
+    MobFX.hit(e.kind, e.x, 1, e.z, 2.2 * big, 1.2);
+    MobFX.bits(e.kind, e.x, 0.9, e.z, e.elite ? 26 : 14, 'burst', { speed: 1.1 });
+    if (e.elite) { MobFX.bits(e.kind, e.x, 0.3, e.z, 12, 'ring'); SpriteFX.play('crit', 'gold', e.x, 2.2, e.z, 4.5, { delay: 0.1 }); }
+    return;
+  }
   const dc = e.kind === 'fighter' ? 0xff4d6d : e.elite ? 0xffc94a : DIE_COL[e.kind] || 0xffd34a, pal = fxPal(dc);
   burst(e.x, 1, e.z, e.kind === 'boss' ? 60 : e.elite ? 30 : 16, dc, e.kind === 'boss' ? 14 : 7, 0.8, 0.35, 16, 1);
   const big = e.kind === 'boss' ? 2.6 : e.elite ? 1.6 : 1;
@@ -14132,6 +14397,21 @@ function dieFx(e) {
   if (e.kind === 'boss') { SpriteFX.play('nova', 'gold', e.x, 2, e.z, 12, { delay: 0.15 }); SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 14, { delay: 0.3 }); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 14); }
 }
 
+// a monster move landing in its species' look (45b-mob-fx.js): its burst, and its particles thrown the way the move hits
+function mobImpactFx(e) {
+  const m = e.mt, R = Math.max(0.8, e.r || 1), big = Math.min(3.4, Math.max(1.6, R * 1.25)), B = (n, mode, o) => MobFX.bits(m, e.x, 0.5, e.z, n, mode, o);
+  switch (e.kind) {
+    case 'ripple': SpriteFX.play('ring', MobFX.pal(m), e.x, 0, e.z, R * 2.1, { speed: 1.4 }); B(10, 'ring', { speed: 1.2 }); break;
+    case 'spike': MobFX.hit(m, e.x, 0.9, e.z, 1.9); B(5, 'burst', { speed: 1.3 }); break;
+    case 'meteor': MobFX.hit(m, e.x, 0.8, e.z, big); B(9, 'burst'); B(6, 'ring', { speed: 0.8 }); if (near(e, 12)) Cam.shake = Math.max(Cam.shake, 0.22); break;
+    case 'beam': if (e.ca != null) { B(16, 'line', { a: e.ca, len: e.r, spread: 0.2, speed: 0.5 }); MobFX.hit(m, e.x + Math.sin(e.ca) * e.r * 0.5, 1, e.z + Math.cos(e.ca) * e.r * 0.5, 2.4); } break;
+    case 'sweep': case 'breath': if (e.ca != null) { B(12, 'spray', { a: e.ca, spread: e.kind === 'breath' ? 1.0 : 0.7, speed: 1.4 }); MobFX.hit(m, e.x + Math.sin(e.ca) * R * 0.45, 1.1, e.z + Math.cos(e.ca) * R * 0.45, 2.6); } break;
+    case 'flurry': MobFX.hit(m, e.x, 1.1, e.z, 2.2); B(6, 'burst'); break;
+    case 'zap': MobFX.hit(m, e.x, 1, e.z, 1.8); B(5, 'burst', { speed: 1.4 }); break;
+    case 'fan': break;
+    default: MobFX.hit(m, e.x, 0.9, e.z, big); B(Math.min(14, 6 + Math.round(R * 2)), 'burst'); if (R >= 2.4) B(8, 'ring'); if (e.r >= 3.5 && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.3);
+  }
+}
 // --- event consumer: sim events -> sound, particles, UI ---
 let fxBudget = 6;
 function processEvents() {
@@ -14145,7 +14425,9 @@ function processEvents() {
       case 'hit':
         if (e.gas) dmgNumber(e.x, e.y, e.z, e.amt, 'gas');
         else dmgNumber(e.x, e.y, e.z, e.amt, e.toPlayer ? 'hurt' : e.pet ? 'pet mine' : e.crit ? 'crit' : e.byPlayer ? 'mine' : 'other');
-        hitFx(e);
+        if (e.ms && e.toPlayer && MobFX.has(e.ms)) { if (!MobFX.hit(e.ms, e.x, Math.max(0.6, e.y * 0.6), e.z, 1.6, 1.6)) hitFx(e); MobFX.bits(e.ms, e.x, 1.2, e.z, 3, 'burst', { speed: 0.9 }); }
+        else hitFx(e);
+        if (e.mt && !e.gas && Math.random() < 0.6) MobFX.bits(e.mt, e.x, Math.max(0.6, e.y * 0.55), e.z, e.crit ? 4 : 2, 'burst', { speed: 0.8 });
         if (e.crit) burst(e.x, e.y * 0.6, e.z, 6, 0xffc94a, 6, 0.35, 0.18, 14);
         if (e.toPlayer) { Sfx.play('hurt', { gap: 0.08 }); if (!G.profile.settings.calm) { Cam.shake = Math.max(Cam.shake, 0.4); const vg = $('vignette'); vg.dataset.o = '0.32'; } }
         else if (e.byPlayer) { Sfx.play('hit', { gap: 0.03 }); if (!e.pet && !G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, e.crit ? 0.3 : 0.15); }
@@ -14156,8 +14438,9 @@ function processEvents() {
         break;
       case 'melee': SpriteFX.play('slash', 'white', e.x, 1.1, e.z, 2.8, { rot: Math.random() * 6.28 }); burst(e.x, 1, e.z, 6, 0xffffff, 6, 0.25, 0.2, 10); if (e.isPlayer || near(e, 15)) Sfx.play('melee'); break;
       case 'dash': SpriteFX.play('dust', 'dust', e.x, 0, e.z, 1.6); burst(e.x, 0.4, e.z, 10, 0xe8f4ff, 4, 0.35, 0.25, 2, 0.2); if (e.isPlayer || near(e, 15)) Sfx.play('dash', { gap: 0.05 }); break;
-      case 'boom': if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); if (e.hid) HeroFX.impact(e); else boomFx(e); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
-      case 'puff': if (e.hid) HeroFX.impact(e); else burst(e.x, 1, e.z, 3, e.color, 3, 0.25, 0.15, 6); break;
+      case 'boom': if (e.mt && MobFX.has(e.mt)) { MobFX.hit(e.mt, e.x, 0.6, e.z, Math.min(3.4, Math.max(1.6, (e.r || 1) * 1.6))); MobFX.bits(e.mt, e.x, 0.5, e.z, 8, 'burst'); SpriteFX.play('ring', MobFX.pal(e.mt), e.x, 0, e.z, Math.max(0.7, e.r || 1) * 2.6, { speed: 1.2 }); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); break; }
+        if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); if (e.hid) HeroFX.impact(e); else boomFx(e); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
+      case 'puff': if (e.mt && MobFX.has(e.mt)) { MobFX.hit(e.mt, e.x, 1, e.z, 1.3, 1.8); MobFX.bits(e.mt, e.x, 1, e.z, 3, 'burst', { speed: 0.7 }); } else if (e.hid) HeroFX.impact(e); else burst(e.x, 1, e.z, 3, e.color, 3, 0.25, 0.15, 6); break;
       case 'bounce': SpriteFX.play('impact', 'white', e.x, 1, e.z, 1.1); burst(e.x, 1, e.z, 4, 0xffffff, 3, 0.2, 0.14, 4); if (near(e, 16)) Sfx.play('bounce', { gap: 0.05 }); break;
       case 'split': SpriteFX.play('impact', fxPal(e.color), e.x, 1, e.z, 1.5); burst(e.x, 1, e.z, 8, e.color, 5, 0.3, 0.18, 6); if (near(e, 18)) Sfx.play('split', { gap: 0.05 }); break;
       case 'petAttack':
@@ -14387,6 +14670,13 @@ const XPDrops = {
 };
 // a monster charging a move: motes drawn into it in its area's colour, a pulse ring on the ground, smoke for the vanishing moves
 function windupFx(e) {
+  if (e.mt && MobFX.has(e.mt)) {
+    const life = Math.max(0.4, e.life), R = Math.max(1.6, e.r * 2.6);
+    MobFX.bits(e.mt, e.x, 1, e.z, Math.min(14, 6 + Math.round(e.r * 4)), 'pull', { r: R, t: life * 0.9 });
+    SpriteFX.play('ring', MobFX.pal(e.mt), e.x, 0, e.z, R * 2.2, { speed: 0.46 / Math.max(0.35, life) });
+    if (e.k === 'ambush' || e.k === 'burrow') { SpriteFX.play('poof', MobFX.pal(e.mt), e.x, 0.5, e.z, Math.min(2.6, Math.max(1.4, e.r * 1.2)), { speed: 1.5 }); MobFX.bits(e.mt, e.x, 0.3, e.z, 8, 'ring'); }
+    return;
+  }
   const col = BIOME_TINT.includes(e.color) ? e.color : (e.color != null ? e.color : 0xffffff), pal = e.pal || 'dust', R = Math.max(1.6, e.r * 2.6), life = Math.max(0.4, e.life), n = Math.min(14, 5 + Math.round(e.r * 4));
   for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, d = R * (0.8 + Math.random() * 0.7); mote(e.x + Math.sin(a) * d, 0.3 + Math.random() * 1.6, e.z + Math.cos(a) * d, -Math.sin(a) * d / life, 0.4 + Math.random() * 0.6, -Math.cos(a) * d / life, life * 0.9, 0.22, -0.3, col); }
   SpriteFX.play('ring', pal, e.x, 0, e.z, R * 2.2, { speed: 0.46 / Math.max(0.35, life) });
@@ -14394,6 +14684,7 @@ function windupFx(e) {
 }
 // a monster move landing, in the look of its area: shock rings, shards, falling shells, beams along the lane, scythe arcs
 function aoeImpactFx(e) {
+  if (e.mt && MobFX.has(e.mt)) { mobImpactFx(e); return; }
   const pal = e.pal || 'dust', col = e.col != null ? e.col : BIOME_TINT[BIOME_FX.indexOf(pal)] || 0xc9a16b;
   switch (e.kind) {
     case 'ripple': SpriteFX.play('ring', pal, e.x, 0, e.z, e.r * 2.1, { speed: 1.4 }); burst(e.x, 0.3, e.z, 8, col, 5, 0.45, 0.22, 8, 0.2); break;
@@ -17337,7 +17628,7 @@ function boot(hotData) {
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
   if (LOCAL_PREVIEW) window.__delve = { startDelve, delveBots, delveBotsRecv, delveHumanLevel, partyRecv, partyUpdate, delveLayout, delveGate, delveReq, diffDef, playerPower, refPower, claimDelveChest, openDelvePanel, PARTY, partyMembers, get D() { return G.dungeon; } };
-  if (LOCAL_PREVIEW) window.__dbg = { AssetSlots, enemyBase, matGround, bossAttack, bossPlan, bossPlanMech, bossKit, bossDamageMod, BOSS_KITS, BOSS_TEAM, bossPartySize, MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, pvpRecv, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
+  if (LOCAL_PREVIEW) window.__dbg = { AssetSlots, enemyBase, MobFX, mobTypeOf, makeEnemy, matGround, bossAttack, bossPlan, bossPlanMech, bossKit, bossDamageMod, BOSS_KITS, BOSS_TEAM, bossPartySize, MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, pvpRecv, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
   const btn = $('playBtn'), label = btn.textContent;

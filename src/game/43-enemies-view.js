@@ -101,7 +101,7 @@ AssetSlots.register('enemy', (o) => {
         else if (k === 'breath') { pivot.rotation.x += 0.35 * ez; pivot.position.z += 0.18 * ez; pivot.scale.z *= 1 + 0.1 * ez; }
         else if (k === 'pulse') { const g = 1 + 0.22 * v; pivot.scale.multiplyScalar(g); pivot.position.y += 0.1 * v; }
         else if (k === 'burst') { pivot.position.y += 0.6 * Math.sin(a * Math.PI); pivot.rotation.x -= 0.3 * v; }
-        if (!struck && a > 0.85) { struck = true; if (k === 'slam' && fxK > 0) burst(e.x, 0.1, e.z, Math.round(10 * fxK), BIOME_TINT[areaBiome(e.zone)] || 0xc8b89a, 4.5, 0.45, 0.32, -2, 0.6); }
+        if (!struck && a > 0.85) { struck = true; if (MobFX.has(e.type)) { if (k === 'slam') MobFX.bits(e.type, e.x, 0.2, e.z, 9, 'ring'); else if (k === 'lunge' || k === 'swing') MobFX.bits(e.type, e.x + Math.sin(e.facing) * e.r, 0.8, e.z + Math.cos(e.facing) * e.r, 3, 'spray', { a: e.facing, speed: 0.8 }); } else if (k === 'slam' && fxK > 0) burst(e.x, 0.1, e.z, Math.round(10 * fxK), BIOME_TINT[areaBiome(e.zone)] || 0xc8b89a, 4.5, 0.45, 0.32, -2, 0.6); }
       } else { struck = false; if (!(e.windT > 0)) relK = null; }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }

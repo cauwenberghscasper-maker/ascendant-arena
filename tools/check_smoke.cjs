@@ -35,6 +35,7 @@ function serve() {
     { headless: true, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] }));
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 }), errors = [];
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
+  page.on('response', (r) => { if (r.status() >= 400 && /\/assets\/fx\//.test(r.url())) errors.push(`missing effect art ${r.status()}: ${r.url().replace(/^.*?\/assets\//, 'assets/')}`); });
   page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource|net::ERR|favicon|realtime|supabase/i.test(m.text())) errors.push('console: ' + m.text()); });
   // an aimed shot, like tapping the ground (deterministic: no target needed, unlike auto-fire)
   const volley = async (n = 4) => { for (let i = 0; i < n; i++) { await page.evaluate((i) => { const p = __game.player; __dbg.Input.mouseFire = [p.x + Math.sin(i) * 4, p.z + Math.cos(i) * 4]; }, i); await page.waitForTimeout(350); } };
@@ -121,6 +122,23 @@ function serve() {
         return { tested: out.length, bad };
       });
       assert(r.tested >= 10, 'only ' + r.tested + ' monster bodies tested'); assert.deepEqual(r.bad, []); return { bodies: r.tested };
+    });
+
+    await step('every monster species fights in its own art', async () => {
+      const r = await page.evaluate(async () => {
+        const M = __dbg.MobFX, idx = M.index(), pl = __game.player, bad = [];
+        const sp = Object.keys(__dbg.CFG.enemies).filter((t) => M.has(t));
+        for (const t of sp) {
+          for (const mode of ['burst', 'ring', 'rise', 'pull', 'trail', 'spray', 'line']) M.bits(t, pl.x + 3, 1, pl.z, 2, mode, { a: 1, r: 2, t: 0.5, len: 4 });
+          if (!M.hit(t, pl.x + 3, 1, pl.z, 2)) bad.push(t + ': no burst');
+        }
+        for (const t of idx.ammo) if (!M.ammo({ mt: t, x: pl.x + 3, y: 1, z: pl.z, r: 0.4, owner: 1 }, true)) bad.push(t + ': no projectile');
+        await new Promise((ok) => setTimeout(ok, 1500));
+        return { species: sp.length, ammo: idx.ammo.length, bits: M.count(), bad };
+      });
+      assert.deepEqual(r.bad, []); assert(r.species >= 58, 'only ' + r.species + ' species'); assert(r.bits > 0, 'no particles alive');
+      assert.deepEqual(await nanScan(), [], 'effects with broken coordinates'); assert.deepEqual(errors, []);
+      return r;
     });
 
     await step('world bosses end every cast where they started', async () => {

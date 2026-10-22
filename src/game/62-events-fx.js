@@ -34,6 +34,14 @@ function boomFx(e) {
   burst(e.x, 0.6, e.z, e.big ? 8 : 4, e.color, e.big ? 8 : 5, 0.5, 0.25, 14, 0.8);
 }
 function dieFx(e) {
+  if (MobFX.has(e.kind)) {
+    const big = e.elite ? 1.5 : 1, pal = MobFX.pal(e.kind);
+    SpriteFX.play('poof', pal, e.x, 0, e.z, 1.6 * big, { speed: 1.5 });
+    MobFX.hit(e.kind, e.x, 1, e.z, 2.2 * big, 1.2);
+    MobFX.bits(e.kind, e.x, 0.9, e.z, e.elite ? 26 : 14, 'burst', { speed: 1.1 });
+    if (e.elite) { MobFX.bits(e.kind, e.x, 0.3, e.z, 12, 'ring'); SpriteFX.play('crit', 'gold', e.x, 2.2, e.z, 4.5, { delay: 0.1 }); }
+    return;
+  }
   const dc = e.kind === 'fighter' ? 0xff4d6d : e.elite ? 0xffc94a : DIE_COL[e.kind] || 0xffd34a, pal = fxPal(dc);
   burst(e.x, 1, e.z, e.kind === 'boss' ? 60 : e.elite ? 30 : 16, dc, e.kind === 'boss' ? 14 : 7, 0.8, 0.35, 16, 1);
   const big = e.kind === 'boss' ? 2.6 : e.elite ? 1.6 : 1;
@@ -44,6 +52,21 @@ function dieFx(e) {
   if (e.kind === 'boss') { SpriteFX.play('nova', 'gold', e.x, 2, e.z, 12, { delay: 0.15 }); SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 14, { delay: 0.3 }); SpriteFX.play('ring', 'fire', e.x, 0, e.z, 14); }
 }
 
+// a monster move landing in its species' look (45b-mob-fx.js): its burst, and its particles thrown the way the move hits
+function mobImpactFx(e) {
+  const m = e.mt, R = Math.max(0.8, e.r || 1), big = Math.min(3.4, Math.max(1.6, R * 1.25)), B = (n, mode, o) => MobFX.bits(m, e.x, 0.5, e.z, n, mode, o);
+  switch (e.kind) {
+    case 'ripple': SpriteFX.play('ring', MobFX.pal(m), e.x, 0, e.z, R * 2.1, { speed: 1.4 }); B(10, 'ring', { speed: 1.2 }); break;
+    case 'spike': MobFX.hit(m, e.x, 0.9, e.z, 1.9); B(5, 'burst', { speed: 1.3 }); break;
+    case 'meteor': MobFX.hit(m, e.x, 0.8, e.z, big); B(9, 'burst'); B(6, 'ring', { speed: 0.8 }); if (near(e, 12)) Cam.shake = Math.max(Cam.shake, 0.22); break;
+    case 'beam': if (e.ca != null) { B(16, 'line', { a: e.ca, len: e.r, spread: 0.2, speed: 0.5 }); MobFX.hit(m, e.x + Math.sin(e.ca) * e.r * 0.5, 1, e.z + Math.cos(e.ca) * e.r * 0.5, 2.4); } break;
+    case 'sweep': case 'breath': if (e.ca != null) { B(12, 'spray', { a: e.ca, spread: e.kind === 'breath' ? 1.0 : 0.7, speed: 1.4 }); MobFX.hit(m, e.x + Math.sin(e.ca) * R * 0.45, 1.1, e.z + Math.cos(e.ca) * R * 0.45, 2.6); } break;
+    case 'flurry': MobFX.hit(m, e.x, 1.1, e.z, 2.2); B(6, 'burst'); break;
+    case 'zap': MobFX.hit(m, e.x, 1, e.z, 1.8); B(5, 'burst', { speed: 1.4 }); break;
+    case 'fan': break;
+    default: MobFX.hit(m, e.x, 0.9, e.z, big); B(Math.min(14, 6 + Math.round(R * 2)), 'burst'); if (R >= 2.4) B(8, 'ring'); if (e.r >= 3.5 && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.3);
+  }
+}
 // --- event consumer: sim events -> sound, particles, UI ---
 let fxBudget = 6;
 function processEvents() {
@@ -57,7 +80,9 @@ function processEvents() {
       case 'hit':
         if (e.gas) dmgNumber(e.x, e.y, e.z, e.amt, 'gas');
         else dmgNumber(e.x, e.y, e.z, e.amt, e.toPlayer ? 'hurt' : e.pet ? 'pet mine' : e.crit ? 'crit' : e.byPlayer ? 'mine' : 'other');
-        hitFx(e);
+        if (e.ms && e.toPlayer && MobFX.has(e.ms)) { if (!MobFX.hit(e.ms, e.x, Math.max(0.6, e.y * 0.6), e.z, 1.6, 1.6)) hitFx(e); MobFX.bits(e.ms, e.x, 1.2, e.z, 3, 'burst', { speed: 0.9 }); }
+        else hitFx(e);
+        if (e.mt && !e.gas && Math.random() < 0.6) MobFX.bits(e.mt, e.x, Math.max(0.6, e.y * 0.55), e.z, e.crit ? 4 : 2, 'burst', { speed: 0.8 });
         if (e.crit) burst(e.x, e.y * 0.6, e.z, 6, 0xffc94a, 6, 0.35, 0.18, 14);
         if (e.toPlayer) { Sfx.play('hurt', { gap: 0.08 }); if (!G.profile.settings.calm) { Cam.shake = Math.max(Cam.shake, 0.4); const vg = $('vignette'); vg.dataset.o = '0.32'; } }
         else if (e.byPlayer) { Sfx.play('hit', { gap: 0.03 }); if (!e.pet && !G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, e.crit ? 0.3 : 0.15); }
@@ -68,8 +93,9 @@ function processEvents() {
         break;
       case 'melee': SpriteFX.play('slash', 'white', e.x, 1.1, e.z, 2.8, { rot: Math.random() * 6.28 }); burst(e.x, 1, e.z, 6, 0xffffff, 6, 0.25, 0.2, 10); if (e.isPlayer || near(e, 15)) Sfx.play('melee'); break;
       case 'dash': SpriteFX.play('dust', 'dust', e.x, 0, e.z, 1.6); burst(e.x, 0.4, e.z, 10, 0xe8f4ff, 4, 0.35, 0.25, 2, 0.2); if (e.isPlayer || near(e, 15)) Sfx.play('dash', { gap: 0.05 }); break;
-      case 'boom': if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); if (e.hid) HeroFX.impact(e); else boomFx(e); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
-      case 'puff': if (e.hid) HeroFX.impact(e); else burst(e.x, 1, e.z, 3, e.color, 3, 0.25, 0.15, 6); break;
+      case 'boom': if (e.mt && MobFX.has(e.mt)) { MobFX.hit(e.mt, e.x, 0.6, e.z, Math.min(3.4, Math.max(1.6, (e.r || 1) * 1.6))); MobFX.bits(e.mt, e.x, 0.5, e.z, 8, 'burst'); SpriteFX.play('ring', MobFX.pal(e.mt), e.x, 0, e.z, Math.max(0.7, e.r || 1) * 2.6, { speed: 1.2 }); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); break; }
+        if (e.lob) Cam.shake = Math.max(Cam.shake, near(e, 10) ? 0.3 : 0); if (e.hid) HeroFX.impact(e); else boomFx(e); if (near(e, 25)) Sfx.play('boom', { gap: 0.06 }); if (e.big && near(e, 14)) Cam.shake = Math.max(Cam.shake, 0.8); break;
+      case 'puff': if (e.mt && MobFX.has(e.mt)) { MobFX.hit(e.mt, e.x, 1, e.z, 1.3, 1.8); MobFX.bits(e.mt, e.x, 1, e.z, 3, 'burst', { speed: 0.7 }); } else if (e.hid) HeroFX.impact(e); else burst(e.x, 1, e.z, 3, e.color, 3, 0.25, 0.15, 6); break;
       case 'bounce': SpriteFX.play('impact', 'white', e.x, 1, e.z, 1.1); burst(e.x, 1, e.z, 4, 0xffffff, 3, 0.2, 0.14, 4); if (near(e, 16)) Sfx.play('bounce', { gap: 0.05 }); break;
       case 'split': SpriteFX.play('impact', fxPal(e.color), e.x, 1, e.z, 1.5); burst(e.x, 1, e.z, 8, e.color, 5, 0.3, 0.18, 6); if (near(e, 18)) Sfx.play('split', { gap: 0.05 }); break;
       case 'petAttack':
@@ -299,6 +325,13 @@ const XPDrops = {
 };
 // a monster charging a move: motes drawn into it in its area's colour, a pulse ring on the ground, smoke for the vanishing moves
 function windupFx(e) {
+  if (e.mt && MobFX.has(e.mt)) {
+    const life = Math.max(0.4, e.life), R = Math.max(1.6, e.r * 2.6);
+    MobFX.bits(e.mt, e.x, 1, e.z, Math.min(14, 6 + Math.round(e.r * 4)), 'pull', { r: R, t: life * 0.9 });
+    SpriteFX.play('ring', MobFX.pal(e.mt), e.x, 0, e.z, R * 2.2, { speed: 0.46 / Math.max(0.35, life) });
+    if (e.k === 'ambush' || e.k === 'burrow') { SpriteFX.play('poof', MobFX.pal(e.mt), e.x, 0.5, e.z, Math.min(2.6, Math.max(1.4, e.r * 1.2)), { speed: 1.5 }); MobFX.bits(e.mt, e.x, 0.3, e.z, 8, 'ring'); }
+    return;
+  }
   const col = BIOME_TINT.includes(e.color) ? e.color : (e.color != null ? e.color : 0xffffff), pal = e.pal || 'dust', R = Math.max(1.6, e.r * 2.6), life = Math.max(0.4, e.life), n = Math.min(14, 5 + Math.round(e.r * 4));
   for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, d = R * (0.8 + Math.random() * 0.7); mote(e.x + Math.sin(a) * d, 0.3 + Math.random() * 1.6, e.z + Math.cos(a) * d, -Math.sin(a) * d / life, 0.4 + Math.random() * 0.6, -Math.cos(a) * d / life, life * 0.9, 0.22, -0.3, col); }
   SpriteFX.play('ring', pal, e.x, 0, e.z, R * 2.2, { speed: 0.46 / Math.max(0.35, life) });
@@ -306,6 +339,7 @@ function windupFx(e) {
 }
 // a monster move landing, in the look of its area: shock rings, shards, falling shells, beams along the lane, scythe arcs
 function aoeImpactFx(e) {
+  if (e.mt && MobFX.has(e.mt)) { mobImpactFx(e); return; }
   const pal = e.pal || 'dust', col = e.col != null ? e.col : BIOME_TINT[BIOME_FX.indexOf(pal)] || 0xc9a16b;
   switch (e.kind) {
     case 'ripple': SpriteFX.play('ring', pal, e.x, 0, e.z, e.r * 2.1, { speed: 1.4 }); burst(e.x, 0.3, e.z, 8, col, 5, 0.45, 0.22, 8, 0.2); break;

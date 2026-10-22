@@ -234,7 +234,7 @@ deeper you go inside an area). Biomes and their world bosses:
 | Celestial Ascension | Celestial Colossus |
 
 Every area has: two monster kinds (24 generated bodies in `assets/enemy/`, shared and tinted per species; each
-monster shows its wind-up in its body and then strikes: slams drop, pounces lunge, sweeps swing through, shooters kick back), monster dens (fast respawn, best XP), a lair with a lair boss and unique item,
+monster shows its wind-up in its body and then strikes: slams drop, pounces lunge, sweeps swing through, shooters kick back; every species fires its own pixel projectile and sheds its own pixel particles), monster dens (fast respawn, best XP), a lair with a lair boss and unique item,
 a hero landmark, three dungeons (Caves, Warrens, Sanctum), four ore veins and a mine, runestones for a Legendary
 Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team kits), World Tiers. The world map
 (Map button) shows a pixel-art scene per area.
@@ -452,7 +452,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | HUD | `src/game/60-hud.js`; minimap: `drawMinimap` in `62-events-fx.js` (world, arena, Bastion, Rift, and the dungeon map `drawDungeonMinimap`) |
 | Panels, settings, button actions (`data-act`) | `src/game/61-panels.js` (`handlePanelClick`) |
 | Menus, skill-tree screen, credits | `src/game/63-menus.js` |
-| Effects for hits, kills and events | `src/game/62-events-fx.js` (`processEvents`); particles and sprite FX: `45-fx.js` |
+| Effects for hits, kills and events | `src/game/62-events-fx.js` (`processEvents`); particles and sprite FX: `45-fx.js`; each monster species' own projectiles, pixel particles, bursts and death: `45b-mob-fx.js` (`MOB_FX`, art baked by `tools/bake_mob_fx.py` into `assets/fx/mob/`) |
 | Sound: engine, buses, music crossfade, synth fallback | `src/game/50-audio.js` (`Sfx`, `Music`); which sound files exist and their bus/volume/voice caps: `49-audio-data.js` (`AUDIO_MANIFEST`), files in `assets/audio/` |
 | Touch and keyboard controls | `src/game/51-input.js` |
 | Camera, adaptive quality, pixel-art pass | `src/game/46-camera-quality.js` |

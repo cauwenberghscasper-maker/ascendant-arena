@@ -30,6 +30,8 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [ ] Monster LODs (a full dungeon hall is heavy); townsfolk and hero shadows from a light LOD.
 
 ## Art and effects
+- [x] Monster attacks: every species' own projectiles, particles, bursts and death (22 Oct, `docs/log/2026-10-22-monster-attack-art.md`).
+- [ ] World and dungeon bosses' attack art in the same per-boss style; monster sounds per species.
 - [ ] Hero ammo still built from shapes for most heroes (vials, apples, coins…): pixel sprites like the nine in `AMMO_PIXEL`.
 - [ ] Crafting materials as inventory icons (render + pixelize the 3D models).
 - [ ] Unique item icons (96-128 px painted), hub page banners, a tall title image (outpaint failed before).
