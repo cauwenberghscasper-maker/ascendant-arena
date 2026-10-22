@@ -1,0 +1,186 @@
+{
+ "batch": "mob-ammo-b",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "mob_iceshard_s41",
+   "ok": true,
+   "file": "mob_iceshard_s41.webp",
+   "sec": 6.8
+  },
+  {
+   "name": "mob_iceshard_s77",
+   "ok": true,
+   "file": "mob_iceshard_s77.webp",
+   "sec": 6.2
+  },
+  {
+   "name": "mob_iceshard_s131",
+   "ok": true,
+   "file": "mob_iceshard_s131.webp",
+   "sec": 8.4
+  },
+  {
+   "name": "mob_geodrone_s41",
+   "ok": true,
+   "file": "mob_geodrone_s41.webp",
+   "sec": 7.7
+  },
+  {
+   "name": "mob_geodrone_s77",
+   "ok": true,
+   "file": "mob_geodrone_s77.webp",
+   "sec": 6.1
+  },
+  {
+   "name": "mob_geodrone_s131",
+   "ok": true,
+   "file": "mob_geodrone_s131.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_voidray_s41",
+   "ok": true,
+   "file": "mob_voidray_s41.webp",
+   "sec": 6.1
+  },
+  {
+   "name": "mob_voidray_s77",
+   "ok": true,
+   "file": "mob_voidray_s77.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "mob_voidray_s131",
+   "ok": true,
+   "file": "mob_voidray_s131.webp",
+   "sec": 6.1
+  },
+  {
+   "name": "mob_astronomer_s41",
+   "ok": true,
+   "file": "mob_astronomer_s41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_astronomer_s77",
+   "ok": true,
+   "file": "mob_astronomer_s77.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "mob_astronomer_s131",
+   "ok": true,
+   "file": "mob_astronomer_s131.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_nebulajelly_s41",
+   "ok": true,
+   "file": "mob_nebulajelly_s41.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "mob_nebulajelly_s77",
+   "ok": true,
+   "file": "mob_nebulajelly_s77.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "mob_nebulajelly_s131",
+   "ok": true,
+   "file": "mob_nebulajelly_s131.webp",
+   "sec": 6.1
+  },
+  {
+   "name": "mob_pressuresquid_s41",
+   "ok": true,
+   "file": "mob_pressuresquid_s41.webp",
+   "sec": 6.2
+  },
+  {
+   "name": "mob_pressuresquid_s77",
+   "ok": true,
+   "file": "mob_pressuresquid_s77.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "mob_pressuresquid_s131",
+   "ok": true,
+   "file": "mob_pressuresquid_s131.webp",
+   "sec": 6.3
+  },
+  {
+   "name": "mob_lightningwyvern_s41",
+   "ok": true,
+   "file": "mob_lightningwyvern_s41.webp",
+   "sec": 9.2
+  },
+  {
+   "name": "mob_lightningwyvern_s77",
+   "ok": true,
+   "file": "mob_lightningwyvern_s77.webp",
+   "sec": 12.3
+  },
+  {
+   "name": "mob_lightningwyvern_s131",
+   "ok": true,
+   "file": "mob_lightningwyvern_s131.webp",
+   "sec": 7.4
+  },
+  {
+   "name": "mob_cyclone_s41",
+   "ok": true,
+   "file": "mob_cyclone_s41.webp",
+   "sec": 9.9
+  },
+  {
+   "name": "mob_cyclone_s77",
+   "ok": true,
+   "file": "mob_cyclone_s77.webp",
+   "sec": 12.7
+  },
+  {
+   "name": "mob_cyclone_s131",
+   "ok": true,
+   "file": "mob_cyclone_s131.webp",
+   "sec": 15.4
+  },
+  {
+   "name": "mob_aetherray_s41",
+   "ok": true,
+   "file": "mob_aetherray_s41.webp",
+   "sec": 11.1
+  },
+  {
+   "name": "mob_aetherray_s77",
+   "ok": true,
+   "file": "mob_aetherray_s77.webp",
+   "sec": 33.4
+  },
+  {
+   "name": "mob_aetherray_s131",
+   "ok": true,
+   "file": "mob_aetherray_s131.webp",
+   "sec": 6.5
+  },
+  {
+   "name": "mob_halosentinel_s41",
+   "ok": true,
+   "file": "mob_halosentinel_s41.webp",
+   "sec": 16.0
+  },
+  {
+   "name": "mob_halosentinel_s77",
+   "ok": true,
+   "file": "mob_halosentinel_s77.webp",
+   "sec": 15.3
+  },
+  {
+   "name": "mob_halosentinel_s131",
+   "ok": true,
+   "file": "mob_halosentinel_s131.webp",
+   "sec": 11.4
+  }
+ ]
+}
