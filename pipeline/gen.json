@@ -1,69 +1,25 @@
 {
- "batch": "landmarks-3d-b",
+ "batch": "mob-ammo-a",
  "jobs": [
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crystal_arch",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_thistlehare_s7",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a spinning thistle burr seed head with pale golden spines and a fluffy cream tuft, straw yellow and cream, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
     "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c2/crystal_arch_c23.webp"
-   },
-   "files": [
-    "image"
-   ]
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "crashed_star",
-   "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c2/crashed_star_c23.webp"
-   },
-   "files": [
-    "image"
-   ]
-  },
-  {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "storm_rod",
-   "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/landmarks-c2/storm_rod_c23.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "volcano_c",
+   "name": "mob_thistlehare_s23",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A distant volcano mountain for the horizon: a steep cone of black and charcoal basalt rock with jagged ridges, rivers of glowing orange lava running down its sides from the crater rim, a wide rocky base.",
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a spinning thistle burr seed head with pale golden spines and a fluffy cream tuft, straw yellow and cream, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 23,
     "random_seed": false,
@@ -72,29 +28,24 @@
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "volcano",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_myconid_s7",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
-   },
-   "from": {
-    "image": "volcano_c"
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a round lumpy violet mushroom spore pod with pale spots, cracking open with tiny spores, violet and lilac, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   },
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "sky_temple_c",
+   "name": "mob_myconid_s23",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A floating island in the sky carrying a small ancient white marble temple with golden domes and slender columns, the island underside is rough brown rock tapering to a point, grass and little trees on top.",
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a round lumpy violet mushroom spore pod with pale spots, cracking open with tiny spores, violet and lilac, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 23,
     "random_seed": false,
@@ -103,21 +54,601 @@
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "sky_temple",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_dustharpy_s7",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7
-   },
-   "from": {
-    "image": "sky_temple_c"
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a sharp tan and brown harpy feather quill with a dusty sand coloured tip, sandy brown and cream, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_dustharpy_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a sharp tan and brown harpy feather quill with a dusty sand coloured tip, sandy brown and cream, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_galeweaver_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a spinning ball of white spider silk thread wrapped around a little pale blue gust of wind, white and pale blue, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_galeweaver_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a spinning ball of white spider silk thread wrapped around a little pale blue gust of wind, white and pale blue, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_chillbanshee_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a wailing pale blue ghost wisp with a frozen teardrop of ice at its head and a wavy tail, ice blue and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_chillbanshee_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a wailing pale blue ghost wisp with a frozen teardrop of ice at its head and a wavy tail, ice blue and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_iceshard_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a sharp faceted pale cyan ice crystal shard, cyan and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_iceshard_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a sharp faceted pale cyan ice crystal shard, cyan and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_echobat_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a curved crescent of lavender sound wave rings, an echo pulse, lavender and pale violet, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_echobat_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a curved crescent of lavender sound wave rings, an echo pulse, lavender and pale violet, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_fumetoad_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a bubbling glob of yellow green toad spit with small bubbles and a drip, swamp yellow green, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_fumetoad_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a bubbling glob of yellow green toad spit with small bubbles and a drip, swamp yellow green, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_emberwraith_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a flickering orange ghost flame wisp with a small hollow face and ember sparks, orange and yellow, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_emberwraith_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a flickering orange ghost flame wisp with a small hollow face and ember sparks, orange and yellow, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_flamewyrm_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a molten dragon fireball with a black rock core and orange flames, orange red and yellow, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_flamewyrm_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a molten dragon fireball with a black rock core and orange flames, orange red and yellow, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_riftspider_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a round violet silk egg sac wrapped in shiny web threads, violet and pale purple, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_riftspider_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a round violet silk egg sac wrapped in shiny web threads, violet and pale purple, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_geodrone_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a spinning violet crystal octahedron gem with bright edges, violet and white, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_geodrone_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a spinning violet crystal octahedron gem with bright edges, violet and white, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_voidray_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a deep teal void energy orb with a bright cyan ring around it, teal and cyan, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_voidray_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a deep teal void energy orb with a bright cyan ring around it, teal and cyan, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_astronomer_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a small falling star meteor with a purple and gold sparkling tail, gold and purple, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_astronomer_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a small falling star meteor with a purple and gold sparkling tail, gold and purple, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_nebulajelly_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a translucent pink nebula bubble with tiny white stars inside, pink and white, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_nebulajelly_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a translucent pink nebula bubble with tiny white stars inside, pink and white, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_rapidsiren_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a curling droplet of river water with a white foam crest, sky blue and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_rapidsiren_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a curling droplet of river water with a white foam crest, sky blue and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_pressuresquid_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a deep purple squid ink blob jet with ink drips trailing behind, deep purple and black, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_pressuresquid_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a deep purple squid ink blob jet with ink drips trailing behind, deep purple and black, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_abyssphantom_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a ghostly aqua green spirit orb with trailing wisps, aqua and mint, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_abyssphantom_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a ghostly aqua green spirit orb with trailing wisps, aqua and mint, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_steamelemental_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a puff of hot white steam cloud with a small orange glowing core, white grey and orange, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_steamelemental_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a puff of hot white steam cloud with a small orange glowing core, white grey and orange, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_shaftvulture_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a curved brown vulture talon claw spinning like a boomerang, brown and bone white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_shaftvulture_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a curved brown vulture talon claw spinning like a boomerang, brown and bone white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_lightningwyvern_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a crackling yellow lightning ball with zigzag bolts around it, yellow and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_lightningwyvern_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a crackling yellow lightning ball with zigzag bolts around it, yellow and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_cyclone_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a small spinning pale blue and white whirlwind tornado, pale blue and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_cyclone_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a small spinning pale blue and white whirlwind tornado, pale blue and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_aetherray_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a lilac and white feather made of light with a bright tip, lilac and white, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_aetherray_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a lilac and white feather made of light with a bright tip, lilac and white, centered, crisp edges, no glow halo, isolated on a plain flat solid bright lime green background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_halosentinel_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a spinning golden halo ring disc of holy light, gold and pale yellow, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_halosentinel_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a spinning golden halo ring disc of holy light, gold and pale yellow, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_archon_s7",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a radiant golden javelin of light with a white diamond tip, gold and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 7,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "mob_archon_s23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp dark pixel outline, classic fantasy adventure RPG game sprite, a single small projectile sprite: a radiant golden javelin of light with a white diamond tip, gold and white, centered, crisp edges, no glow halo, isolated on a plain flat solid magenta background, no text, no shadow, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
    }
   }
  ]
