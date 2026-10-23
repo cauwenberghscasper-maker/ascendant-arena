@@ -244,6 +244,10 @@ a hero landmark, three dungeons (Caves, Warrens, Sanctum), four ore veins and a 
 Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team kits), World Tiers. The world map
 (Map button) shows a pixel-art scene per area.
 
+The wolf body (including Gloom-Panthers) and Ancient Golem have lightweight limb rigs: arms, elbows and legs
+move independently during walking and attacks. `assets/data/enemy-motion.js` rigs the cached mesh once; instances
+share the vertex buffers and own their seven-bone skeleton. Other bodies keep their existing whole-body motion.
+
 ### Systems already in the game
 
 - **Levels:** player level (content to 210, cap 100000, ascensions at 100/150/200). **Level Road:** an item every
@@ -473,7 +477,10 @@ After editing: `node tools/build.cjs`, then run the checks.
 
 ## 6. Store apps (iOS and Android)
 
-The apps are Capacitor shells around `www/`, which `node tools/build.cjs --app` fills with only what the game loads (about 72 MB; concept art, audit and tools stay out).
+The apps are Capacitor shells around `www/`, filled by `node tools/build.cjs --app`. The current copy rules exclude
+`assets/concepts`, `assets/hero-v5`, audit and tools; the remaining tracked assets and vendor files total about
+210 MiB before the page and native packaging (23 Oct 2026). Remeasure the actual release build and review unused
+assets before submission; the earlier ~72 MB estimate is outdated.
 
 1. Once: `npm install`, then `npx cap add ios` (needs a Mac with Xcode) and `npx cap add android` (needs Android Studio).
 2. Each release: `npm run app` (build `www/` and copy it into both native projects), then build and upload from Xcode / Android Studio.

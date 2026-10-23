@@ -199,6 +199,7 @@ const AssetLibrary = {
   },
   prepare(scene, def, id) {
     const holder = new THREE.Group();
+    rigEnemyModel(THREE, scene, id);
     addHeroEyes(scene, def, THREE);
     if (def.original) prepareOriginalAdventurer(scene, def, THREE);
     else scene.scale.setScalar(def.size);

@@ -35,7 +35,7 @@ AssetSlots.register('enemy', (o) => {
   const vs = (0.9 + Math.random() * 0.2) * esz, tj = Math.random() * 0.16; mat.color.setRGB(1 - tj * 0.6, 1 - tj * 0.2, 1 - tj); if (tint) mat.color.lerp(tint, 0.6);
   // the species' sculpted body; a missing file falls back to another monster model, never to primitives
   const queue = ['enemy.' + bt, 'enemy.slime', 'enemy.wolf'].filter((id, i, a) => AssetLibrary.has(id) && a.indexOf(id) === i);
-  let model = null, popT = 0;
+  let model = null, motion = null, popT = 0;
   const swapModel = () => {
     while (queue.length) {
       const id = queue[0], st = AssetLibrary.status(id);
@@ -43,6 +43,7 @@ AssetSlots.register('enemy', (o) => {
       if (st === 'failed') { queue.shift(); continue; }
       if (st !== 'ready') return;
       queue.length = 0; model = AssetLibrary.instance(id); pivot.add(model); popT = 0.001;
+      motion = createEnemyMotion(model);
       if (tint) for (const m of model.userData.mats) tintMonsterMaterial(m, tint, ED.tintK || 0.72);
     }
   };
@@ -103,6 +104,7 @@ AssetSlots.register('enemy', (o) => {
         else if (k === 'burst') { pivot.position.y += 0.6 * Math.sin(a * Math.PI); pivot.rotation.x -= 0.3 * v; }
         if (!struck && a > 0.85) { struck = true; if (MobFX.has(e.type)) { if (k === 'slam') MobFX.bits(e.type, e.x, 0.2, e.z, 9, 'ring'); else if (k === 'lunge' || k === 'swing') MobFX.bits(e.type, e.x + Math.sin(e.facing) * e.r, 0.8, e.z + Math.cos(e.facing) * e.r, 3, 'spray', { a: e.facing, speed: 0.8 }); } else if (k === 'slam' && fxK > 0) burst(e.x, 0.1, e.z, Math.round(10 * fxK), BIOME_TINT[areaBiome(e.zone)] || 0xc8b89a, 4.5, 0.45, 0.32, -2, 0.6); }
       } else { struck = false; if (!(e.windT > 0)) relK = null; }
+      if (motion) motion.update(e, dt, t, phase, STRIKE_OF[relK] || (SHOOTER_KIT[ED.kit] ? 'recoil' : 'lunge'), e.windT > 0 ? clamp(1 - e.windT / (e.windMax || 1), 0, 1) : 0, e.windT > 0 ? 0 : a);
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
       else if (e.invulnT > 0) mat.emissive.setRGB(0.15 + f, 0.55 + f, 0.85 + f);
@@ -132,7 +134,7 @@ AssetSlots.register('boss', (o) => {
   const wardMat = new THREE.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0, depthWrite: false, wireframe: false, side: THREE.DoubleSide });
   const wardDome = new THREE.Mesh(new THREE.SphereGeometry(5.2, 24, 16), wardMat); wardDome.position.y = 4.2; wardDome.visible = false; root.add(wardDome);
   const queue = ['world.' + (BOSS_MODELS[Z.biome] || BOSS_MODELS[0]), 'world.boss_golem'].filter((id, i, a) => AssetLibrary.has(id) && a.indexOf(id) === i);
-  let model = null; const tint = new THREE.Color();
+  let model = null, motion = null; const tint = new THREE.Color();
   const swap = () => {
     while (queue.length) {
       const id = queue[0], st = AssetLibrary.status(id);
@@ -140,6 +142,7 @@ AssetSlots.register('boss', (o) => {
       if (st === 'failed') { queue.shift(); continue; }
       if (st !== 'ready') return;
       queue.length = 0; model = AssetLibrary.instance(id); model.scale.setScalar(7.2); pivot.add(model);
+      motion = createEnemyMotion(model);
       for (const m of model.userData.mats) { addRimLight(m, 0.45); if (m.map && !m.emissiveMap) { m.emissiveMap = m.map; m.emissive.set(Z.coreColor); m.emissiveIntensity = 0.12; m.userData.baseEmissive = m.emissive.getHex(); m.userData.baseEmissiveI = 0.12; } m.needsUpdate = true; }
     }
   };
@@ -169,6 +172,12 @@ AssetSlots.register('boss', (o) => {
         else { pitch = -0.55 * up + 0.95 * hit; lift = 0.7 * up - 0.5 * hit; grow = -0.03 * hit; } // slam / lanes / ripple / rain / rocks: rear up, then crash down
       }
       const ph = b.phase || 1;
+      if (motion) {
+        const kind = ck === 'sweep' || ck === 'beams' ? 'swing' : ck === 'plates' || ck === 'soak' || ck === 'spread' || ck === 'wardEnd' ? 'pulse' : ck === 'fan' || ck === 'wells' ? 'recoil' : 'slam';
+        const wind = cu >= 0 ? Math.sin(Math.min(1, cu / .55) * Math.PI / 2) * (1 - clamp((cu - .55) / .25, 0, 1)) : 0;
+        const strike = cu >= .55 ? Math.sin(clamp((cu - .55) / .45, 0, 1) * Math.PI) : cu < 0 ? atk : 0;
+        motion.update(b, dt, t, phase, kind, wind, strike);
+      }
       pivot.position.y = Math.abs(Math.sin(phase)) * 0.18 * b.moveAmt + Math.sin(t * 1.5) * 0.05 + lift;
       pivot.rotation.z = Math.sin(phase) * 0.05 * b.moveAmt;
       pivot.rotation.x += (pitch - pivot.rotation.x) * (1 - Math.exp(-dt * 14)); pivot.rotation.y += (twist - pivot.rotation.y) * (1 - Math.exp(-dt * 12));
