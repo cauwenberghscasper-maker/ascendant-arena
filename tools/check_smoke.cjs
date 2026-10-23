@@ -124,6 +124,56 @@ function serve() {
       assert(r.tested >= 10, 'only ' + r.tested + ' monster bodies tested'); assert.deepEqual(r.bad, []); return { bodies: r.tested };
     });
 
+    await step('forest limbs move without changing the body or other instances', async () => {
+      const result = await page.evaluate(async () => {
+        const { createEnemyMotion } = await import('./assets/data/enemy-motion.js');
+        const T = __THREE, bad = [], rows = [];
+        for (const id of ['enemy.wolf', 'world.boss_golem']) {
+          __assets.request(id); const start = performance.now();
+          while (__assets.status(id) !== 'ready' && performance.now() - start < 30000) await new Promise(ok => setTimeout(ok, 50));
+          const a = __assets.instance(id), b = __assets.instance(id);
+          if (!a || !b) { bad.push(id + ': did not load'); continue; }
+          let mesh, other; a.traverse(o => { if (o.isSkinnedMesh) mesh = o; }); b.traverse(o => { if (o.isSkinnedMesh) other = o; });
+          if (!mesh || !other) { bad.push(id + ': no limb rig'); __assets.disposeInstance(a); __assets.disposeInstance(b); continue; }
+          if (mesh.geometry !== other.geometry || mesh.skeleton === other.skeleton || mesh.skeleton.bones[1] === other.skeleton.bones[1]) bad.push(id + ': instance ownership');
+          const g = mesh.geometry, w = g.attributes.skinWeight, j = g.attributes.skinIndex, v = new T.Vector3(), rest = [];
+          a.updateMatrixWorld(true); mesh.skeleton.update();
+          for (let i = 0; i < w.count; i++) {
+            const sum = w.getX(i) + w.getY(i) + w.getZ(i) + w.getW(i);
+            if (!Number.isFinite(sum) || Math.abs(sum - 1) > 1e-5) { bad.push(id + ': invalid weights'); break; }
+            mesh.getVertexPosition(i, v); rest.push(v.clone());
+            const p = new T.Vector3().fromBufferAttribute(g.attributes.position, i);
+            if (p.distanceTo(v) > .0001) { bad.push(id + ': bind pose changed'); break; }
+          }
+          const motion = createEnemyMotion(a), state = { alive: true, moveAmt: 1 };
+          let moved = 0, legMoved = 0;
+          for (const kind of ['slam', 'swing', 'recoil', 'pulse', 'lunge']) {
+            motion.update(state, 1 / 60, 0, Math.PI / 2, kind, .9, 0);
+            a.updateMatrixWorld(true); mesh.skeleton.update();
+            for (let i = 0; i < rest.length; i++) {
+              mesh.getVertexPosition(i, v); const d = v.distanceTo(rest[i]);
+              if (![v.x, v.y, v.z].every(Number.isFinite)) { bad.push(id + ': invalid animated position'); break; }
+              if (w.getX(i) === 1 && j.getX(i) === 0 && d > .0001) { bad.push(id + ': torso anchor moved'); break; }
+              moved = Math.max(moved, d);
+            }
+          }
+          for (let i = 0; i < 30; i++) motion.update(state, 1 / 60, 0, Math.PI / 2, 'lunge', 0, 0);
+          legMoved = Math.abs(mesh.skeleton.bones.find(o => o.name === 'enemyLeg0').rotation.x);
+          if (moved < .02 || legMoved < .05) bad.push(id + ': limbs did not move');
+          if (other.skeleton.bones.some(o => o.rotation.x || o.rotation.y || o.rotation.z)) bad.push(id + ': changed another instance');
+          state.moveAmt = 0;
+          for (let i = 0; i < 120; i++) motion.update(state, 1 / 60, 0, 0, 'slam', 0, 0);
+          const pose = mesh.skeleton.bones.map(o => o.quaternion.toArray());
+          for (let i = 0; i < 50; i++) { motion.update(state, 1 / 60, 0, 0, 'slam', 1, 0); motion.update(state, 1 / 60, 0, 0, 'slam', 0, 1); motion.update(state, 1 / 60, 0, 0, 'slam', 0, 0); }
+          if (mesh.skeleton.bones.some((o, i) => o.quaternion.toArray().some((q, k) => Math.abs(q - pose[i][k]) > 1e-6))) bad.push(id + ': pose accumulated');
+          rows.push({ id, bones: mesh.skeleton.bones.length, vertices: w.count, maxMotion: +moved.toFixed(2) });
+          __assets.disposeInstance(a); __assets.disposeInstance(b);
+        }
+        return { rows, bad };
+      });
+      assert.deepEqual(result.bad, []); assert.equal(result.rows.length, 2); return result.rows;
+    });
+
     await step('every monster species fights in its own art', async () => {
       const r = await page.evaluate(async () => {
         const M = __dbg.MobFX, idx = M.index(), pl = __game.player, bad = [];
