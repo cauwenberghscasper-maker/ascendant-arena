@@ -1,12 +1,12 @@
 {
- "batch": "lanes-concepts-a",
+ "batch": "openworld-c",
  "jobs": [
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_core_c23",
+   "name": "warden_gate_c23",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A large ancient crystal core monument: a big faceted pale blue crystal held upright by a heavy carved grey stone pedestal with four stone claws, bronze bands around the base, sturdy and symmetrical.",
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A massive fortified stone gate for a mountain pass: two thick square towers of grey weathered stone blocks joined by a heavy arch, a closed iron portcullis grid filling the arch, wooden beams and iron studs, a carved stone guardian face on the keystone, moss in the cracks, a wide solid base.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 23,
     "random_seed": false,
@@ -17,9 +17,9 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_core_c41",
+   "name": "warden_gate_c41",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A large ancient crystal core monument: a big faceted pale blue crystal held upright by a heavy carved grey stone pedestal with four stone claws, bronze bands around the base, sturdy and symmetrical.",
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A massive fortified stone gate for a mountain pass: two thick square towers of grey weathered stone blocks joined by a heavy arch, a closed iron portcullis grid filling the arch, wooden beams and iron studs, a carved stone guardian face on the keystone, moss in the cracks, a wide solid base.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 41,
     "random_seed": false,
@@ -30,9 +30,9 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_tower_c23",
+   "name": "danger_sign_c23",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A tall slender defensive stone watchtower turret for a battle lane: round grey stone body with a bronze crown of spikes on top holding a small crystal, carved runes, sturdy square stone base, symmetrical.",
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A crooked wooden warning post: a thick weathered wooden stake with a cracked plank sign nailed across it, an animal skull with horns tied on top, a torn red cloth banner hanging from a crossbar, bound with rope, small stones piled around the foot.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 23,
     "random_seed": false,
@@ -43,9 +43,9 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_tower_c41",
+   "name": "danger_sign_c41",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A tall slender defensive stone watchtower turret for a battle lane: round grey stone body with a bronze crown of spikes on top holding a small crystal, carved runes, sturdy square stone base, symmetrical.",
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A crooked wooden warning post: a thick weathered wooden stake with a cracked plank sign nailed across it, an animal skull with horns tied on top, a torn red cloth banner hanging from a crossbar, bound with rope, small stones piled around the foot.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 41,
     "random_seed": false,
@@ -56,9 +56,9 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_minion_melee_c23",
+   "name": "cliff_ridge_c23",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A small stocky stone golem soldier minion standing upright, full body front view, chunky grey stone body with mossy cracks, a round bronze shield built into one arm, short legs, simple glowing-free eyes, cute but sturdy.",
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A long jagged rocky cliff ridge segment, a wall of tall grey stone slabs and boulders standing side by side, about four times longer than tall, layered rock strata, mossy ledges and a few small bushes in the cracks, flat bottom, seen from the side at three-quarter angle.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 23,
     "random_seed": false,
@@ -69,9 +69,9 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_minion_melee_c41",
+   "name": "cliff_ridge_c41",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A small stocky stone golem soldier minion standing upright, full body front view, chunky grey stone body with mossy cracks, a round bronze shield built into one arm, short legs, simple glowing-free eyes, cute but sturdy.",
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A long jagged rocky cliff ridge segment, a wall of tall grey stone slabs and boulders standing side by side, about four times longer than tall, layered rock strata, mossy ledges and a few small bushes in the cracks, flat bottom, seen from the side at three-quarter angle.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 41,
     "random_seed": false,
@@ -82,9 +82,9 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_minion_ranged_c23",
+   "name": "quest_beacon_c23",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A small hovering spirit lantern minion: a bronze lantern cage with a pale blue crystal inside, little stone wings on the sides, a pointed stone bottom, full object front view, cute and readable.",
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. An ancient standing waystone pillar: a tall carved grey stone obelisk on a round stepped stone base, golden metal bands and a golden compass rose emblem inlaid on its front, a round golden orb set on the top, engraved runes along the sides.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 23,
     "random_seed": false,
@@ -95,35 +95,9 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_minion_ranged_c41",
+   "name": "quest_beacon_c41",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A small hovering spirit lantern minion: a bronze lantern cage with a pale blue crystal inside, little stone wings on the sides, a pointed stone bottom, full object front view, cute and readable.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "lanes_brazier_c23",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A sturdy iron and stone battle brazier on a short stone pillar with a cloth war banner hanging on a wooden pole beside it, the bowl filled with dark coals, no fire.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "lanes_brazier_c41",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no clouds, no sparkles, no particles, no text, no people. A sturdy iron and stone battle brazier on a short stone pillar with a cloth war banner hanging on a wooden pole beside it, the bowl filled with dark coals, no fire.",
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. An ancient standing waystone pillar: a tall carved grey stone obelisk on a round stepped stone base, golden metal bands and a golden compass rose emblem inlaid on its front, a round golden orb set on the top, engraved runes along the sides.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 41,
     "random_seed": false,
