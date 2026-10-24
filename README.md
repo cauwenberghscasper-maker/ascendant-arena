@@ -244,9 +244,18 @@ a hero landmark, three dungeons (Caves, Warrens, Sanctum), four ore veins and a 
 Trial, and a lodestone to travel. Elites, timed world bosses (60 s warning, team kits), World Tiers. The world map
 (Map button) shows a pixel-art scene per area.
 
-The wolf body (including Gloom-Panthers) and Ancient Golem have lightweight limb rigs: arms, elbows and legs
-move independently during walking and attacks. `assets/data/enemy-motion.js` rigs the cached mesh once; instances
-share the vertex buffers and own their seven-bone skeleton. Other bodies keep their existing whole-body motion.
+All 26 monster bodies and six world bosses use articulated skeletons with anatomy-specific arms, elbows, legs,
+wings, tails or tendrils. The same bodies cover named variants, lair and dungeon bosses. Baked Blender bone-heat
+weights live in `assets/animation/enemy-rigs/`; `enemy-motion.js` attaches them once to cached geometry, and
+instances share buffers while owning their bones. `enemy-clips.js` supplies 17 animation states: idle, stride,
+six attack wind-ups, seven contact/recovery clips (including alternating swipes), hit and death. Warning timers
+and attack impulses drive the clips; repeated hits use their real intervals. Existing heroes/townsfolk retain
+their authored KayKit clips. Review any body at `tools/preview_enemy_animation.html` on a local server.
+
+To rebake weights: `node tools/export_enemy_rigs.mjs`, then Blender 5.2
+`--background --python tools/build_enemy_skins.py` (optional ids after `--`). No rig solving runs on phones.
+`tools/check_enemy_skins.mjs` verifies source hashes, joint placement and normalized weights; the browser smoke
+checks all 32 bodies, the Panther's three contacts, and all 43 hero models (27 active + 16 legacy) and seven NPCs.
 
 ### Systems already in the game
 

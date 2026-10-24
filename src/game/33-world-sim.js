@@ -538,6 +538,7 @@ function separate(a, b) {
 }
 const bodyMass = (e) => { const M = CFG.enemies.mass; return e.kind === 'enemy' ? (M[(CFG.enemies[e.type] || {}).kit || 'legacy'] || 1) * (e.elite ? M.elite : 1) : M.player; };
 function stepEnemy(e, dt) {
+  if (e.animAge != null) e.animAge += dt;
   if (e.siege) { stepSiegeEnemy(e, dt); return; } // Bastion Siege monsters go for the fort (36b-siege.js)
   if (inInstance() && !e.rift && !e.dungeon && !e.delve && !e.own) { parkHubEnemy(e); return; } // open-world monsters wait at home while you are in the fort, Rift or a dungeon
   e.parked = false;
@@ -976,6 +977,7 @@ function stepBoss(b, dt) {
 function bossAttack(b, o, remote) {
   const B = CFG.boss;
   if (BOSS_EXEC[o.k]) { bossKitCast(b, o); if (!remote && typeof mpBossAttack === 'function') mpBossAttack(o); return; }
+  bossMotionCue(b, o);
   if (o.k === 'slam') G.pendingAoE.push({ x: o.x, z: o.z, r: B.slamR, t: B.slamDelay, max: B.slamDelay, dmg: b.atk * 1.4, team: 'mob', owner: b.id, kind: 'slam', pal: o.pal, col: o.col });
   else if (o.k === 'spike') {
     // three spike lines fan out toward the target, rippling outward; one hit at most

@@ -49,6 +49,11 @@ function delveBossCast(c) {
   const later = (t, fn) => X.emit.push({ t, fn });
   const a0 = Math.atan2(c.tx - c.x, c.tz - c.z);
   e.facing = a0; e.attackAnim = 1;
+  // Visual cue uses the same delays as the markers/projectiles below on every peer.
+  e.animAge = 0; e.animKind = c.k;
+  e.animWindMax = c.k === 'slam' ? BK.slamT : c.k === 'charge' ? BK.charge.warn : c.k === 'meteors' ? .4 + BK.meteors.warn : 0;
+  e.animHits = c.k === 'ring' ? 2 : c.k === 'spiral' ? Math.ceil(BK.spiral.time / BK.spiral.every) : 1;
+  e.animInterval = c.k === 'ring' ? BK.ring.gap : c.k === 'spiral' ? BK.spiral.every : 0;
   if (e.bk) e.bk.busy = 0.5;
   switch (c.k) {
     case 'volley': for (let i = 0; i < 5; i++) shot(c.x, c.z, a0 + (i / 4 - 0.5) * 0.6, 'volley'); break;

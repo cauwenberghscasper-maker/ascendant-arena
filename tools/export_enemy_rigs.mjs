@@ -1,0 +1,1 @@
+import fs from 'node:fs';import{ENEMY_RIGS,enemyJoints}from'../assets/data/enemy-rigs.js';fs.writeFileSync(new URL('./.gen/rig-catalog.json',import.meta.url),JSON.stringify(Object.fromEntries(Object.entries(ENEMY_RIGS).map(([id,spec])=>[id,{spec,joints:enemyJoints(spec)}]))));

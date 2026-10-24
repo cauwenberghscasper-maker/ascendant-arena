@@ -124,11 +124,11 @@ function serve() {
       assert(r.tested >= 10, 'only ' + r.tested + ' monster bodies tested'); assert.deepEqual(r.bad, []); return { bodies: r.tested };
     });
 
-    await step('forest limbs move without changing the body or other instances', async () => {
+    await step('every enemy and boss has articulated animation states', async () => {
       const result = await page.evaluate(async () => {
-        const { createEnemyMotion } = await import('./assets/data/enemy-motion.js');
+        const { createEnemyMotion, ENEMY_RIGS } = await import('./assets/data/enemy-motion.js');
         const T = __THREE, bad = [], rows = [];
-        for (const id of ['enemy.wolf', 'world.boss_golem']) {
+        for (const id of Object.keys(ENEMY_RIGS)) {
           __assets.request(id); const start = performance.now();
           while (__assets.status(id) !== 'ready' && performance.now() - start < 30000) await new Promise(ok => setTimeout(ok, 50));
           const a = __assets.instance(id), b = __assets.instance(id);
@@ -146,6 +146,7 @@ function serve() {
             if (p.distanceTo(v) > .0001) { bad.push(id + ': bind pose changed'); break; }
           }
           const motion = createEnemyMotion(a), state = { alive: true, moveAmt: 1 };
+          if (motion.clips.length < 17) bad.push(id + ': animation states missing');
           let moved = 0, legMoved = 0;
           for (const kind of ['slam', 'swing', 'recoil', 'pulse', 'lunge']) {
             motion.update(state, 1 / 60, 0, Math.PI / 2, kind, .9, 0);
@@ -155,23 +156,74 @@ function serve() {
               if (![v.x, v.y, v.z].every(Number.isFinite)) { bad.push(id + ': invalid animated position'); break; }
               if (w.getX(i) === 1 && j.getX(i) === 0 && d > .0001) { bad.push(id + ': torso anchor moved'); break; }
               moved = Math.max(moved, d);
+              if(id==='enemy.wolf'){
+                const box=g.boundingBox,h=box.max.y-box.min.y,cx=(box.min.x+box.max.x)/2;
+                if((rest[i].y-box.min.y)/h<.10&&Math.abs(rest[i].x-cx)/h<.19&&d/h>.03)bad.push(id+': forearm pulled a planted foot');
+              }
             }
           }
           for (let i = 0; i < 30; i++) motion.update(state, 1 / 60, 0, Math.PI / 2, 'lunge', 0, 0);
-          legMoved = Math.abs(mesh.skeleton.bones.find(o => o.name === 'enemyLeg0').rotation.x);
-          if (moved < .02 || legMoved < .05) bad.push(id + ': limbs did not move');
+          legMoved = Math.max(...mesh.skeleton.bones.filter(o => /arm|elbow|leg|wing|neck|tendril/.test(o.name)).map(o => Math.abs(o.rotation.x) + Math.abs(o.rotation.y) + Math.abs(o.rotation.z)),0);
+          if (moved < .02 || legMoved < .01) bad.push(id + ': limbs did not move');
           if (other.skeleton.bones.some(o => o.rotation.x || o.rotation.y || o.rotation.z)) bad.push(id + ': changed another instance');
           state.moveAmt = 0;
           for (let i = 0; i < 120; i++) motion.update(state, 1 / 60, 0, 0, 'slam', 0, 0);
           const pose = mesh.skeleton.bones.map(o => o.quaternion.toArray());
           for (let i = 0; i < 50; i++) { motion.update(state, 1 / 60, 0, 0, 'slam', 1, 0); motion.update(state, 1 / 60, 0, 0, 'slam', 0, 1); motion.update(state, 1 / 60, 0, 0, 'slam', 0, 0); }
+          for (let i = 0; i < 120; i++) motion.update(state, 1 / 60, 0, 0, 'slam', 0, 0);
           if (mesh.skeleton.bones.some((o, i) => o.quaternion.toArray().some((q, k) => Math.abs(q - pose[i][k]) > 1e-6))) bad.push(id + ': pose accumulated');
           rows.push({ id, bones: mesh.skeleton.bones.length, vertices: w.count, maxMotion: +moved.toFixed(2) });
-          __assets.disposeInstance(a); __assets.disposeInstance(b);
+          motion.dispose(); __assets.disposeInstance(a); __assets.disposeInstance(b);
         }
         return { rows, bad };
       });
-      assert.deepEqual(result.bad, []); assert.equal(result.rows.length, 2); return result.rows;
+      assert.deepEqual(result.bad, []); assert.equal(result.rows.length, 32); return { bodies: result.rows.length };
+    });
+
+    await step('Panther flurry alternates visible arms on all three contacts', async () => {
+      const r = await page.evaluate(async () => {
+        const { createEnemyMotion } = await import('./assets/data/enemy-motion.js');
+        const a = __assets.instance('enemy.wolf'), m = createEnemyMotion(a), e = { alive:true, moveAmt:0, windT:.55 };
+        const arm = a.getObjectByName('enemy_armL'), elbow = a.getObjectByName('enemy_elbowL'), poses = [], states = [];
+        m.update(e, 1/60, 0, 0, 'swing', .95, 0, 'flurry', {n:3,step:.32});
+        const wind = arm.quaternion.clone(); e.windT = 0;
+        for(let i=0;i<60;i++) {
+          m.update(e, .016, i*.016, 0, 'swing', 0, i===0?1:0, 'flurry', {n:3,step:.32});
+          if(i===0||i===20||i===40){poses.push(arm.quaternion.toArray());states.push(m.state.name);}
+        }
+        let mesh; a.traverse(o=>{if(o.isSkinnedMesh)mesh=o;});
+        const weights=mesh.geometry.attributes.skinWeight,indices=mesh.geometry.attributes.skinIndex;
+        const armIds=mesh.skeleton.bones.map((b,i)=>/arm|elbow/.test(b.name)?i:-1),counts={L:0,R:0};
+        for(let i=0;i<weights.count;i++)for(let k=0;k<4;k++){const j=indices.array[i*4+k];if(armIds.includes(j)&&weights.array[i*4+k]>.25)counts[mesh.skeleton.bones[j].name.endsWith('L')?'L':'R']++;}
+        const difference=wind.angleTo(new __THREE.Quaternion().fromArray(poses[0]));
+        m.dispose();__assets.disposeInstance(a);return{states,counts,difference,alternates:poses[0].some((x,k)=>Math.abs(x-poses[1][k])>.1),elbow:!!elbow};
+      });
+      assert.deepEqual(r.states,['strike_swing','strike_swing_alt','strike_swing']);
+      assert(r.alternates&&r.elbow&&r.difference>.2&&r.counts.L>100&&r.counts.R>100);return r;
+    });
+
+    await step('all heroes and townsfolk play authored locomotion, attacks, hurt and death', async () => {
+      const r = await page.evaluate(async () => {
+        const { createKayKitMotion } = await import('./assets/data/kaykit-motion.js');
+        const ids=Object.keys(__manifest).filter(id=>/^(hero|npc)\./.test(id)),bad=[];
+        for(const id of ids){
+          __assets.request(id);const t0=performance.now();while(__assets.status(id)!=='ready'&&performance.now()-t0<30000)await new Promise(ok=>setTimeout(ok,50));
+          const entry=__assets.entries.get(id),a=__assets.instance(id);if(!a){bad.push(id+': load');continue;}
+          const clips=entry.model.animations,def=__manifest[id];
+          for(const name of ['Idle','Running_A','Walking_Backwards','Running_Strafe_Left','Running_Strafe_Right',def.attack,'Hit_A','Death_A','Dodge_Forward'])if(!clips.some(c=>c.name===name))bad.push(id+': missing '+name);
+          const m=createKayKitMotion(__THREE,a,clips,def),bones=[];a.traverse(o=>{if(o.isBone)bones.push(o);});
+          const snapshot=()=>bones.map(b=>b.quaternion.clone());
+          const advance=e=>{for(let i=0;i<8;i++)m.update(e,1/60);return snapshot();};
+          const idle=advance({alive:true,moveAmt:0,x:0,z:0,lastAttack:-1,lastHurt:-1}),run=advance({alive:true,moveAmt:1,x:1,z:0,lastAttack:-1,lastHurt:-1});
+          const attack=advance({alive:true,moveAmt:0,x:1,z:0,lastAttack:1,lastHurt:-1});
+          for(let i=0;i<70;i++)m.update({alive:true,moveAmt:0,x:1,z:0,lastAttack:1,lastHurt:-1},1/60);
+          const hurt=advance({alive:true,moveAmt:0,x:1,z:0,lastAttack:1,lastHurt:2}),dead=advance({alive:false});
+          for(const[name,pose]of [['run',run],['attack',attack],['hurt',hurt],['death',dead]])if(!pose.some((q,i)=>q.angleTo(idle[i])>.02))bad.push(id+': static '+name);
+          m.dispose();__assets.disposeInstance(a);
+        }
+        return{heroes:ids.filter(id=>id.startsWith('hero.')).length,npcs:ids.filter(id=>id.startsWith('npc.')).length,bad};
+      });
+      assert.deepEqual(r.bad,[]);assert.equal(r.heroes,43);assert.equal(r.npcs,7);return r;
     });
 
     await step('every monster species fights in its own art', async () => {

@@ -144,6 +144,7 @@ function bossKitThink(b, tgt) {
 }
 // every game, every frame: phase changes, wards (the leader decides when they break), the delayed bolts
 function bossKitTick(b, dt, leader) {
+  if (b.animAge != null) b.animAge += dt;
   const K = bossKit(b), hp = b.maxHp > 0 ? b.hp / b.maxHp : 1, ph = hp > BOSS_TEAM.phases[0] ? 1 : hp > BOSS_TEAM.phases[1] ? 2 : 3;
   if (b.phase == null) { b.phase = 1; b.mechT = 16; }
   if (ph > b.phase) { b.phase = ph; b.mechT = Math.max(b.mechT || 0, 6); if (leader) b.atkT = Math.max(b.atkT, 2.6); ev({ t: 'bossPhase', x: b.x, z: b.z, n: ph, pal: K.pal, col: K.col, name: b.name }); }
@@ -160,7 +161,15 @@ function bossKitTick(b, dt, leader) {
   }
 }
 // one cast on every game: the caption, the boss's pose, then the attack itself
+function bossMotionCue(b, o) {
+  const k = o.k;
+  b.animAge = 0; b.animKind = k;
+  b.animWindMax = k === 'rocks' || k === 'wardEnd' ? 0 : k === 'slam' || k === 'spike' ? CFG.boss.slamDelay : k === 'wells' || k === 'vortex' ? 2.2 : k === 'rain' ? bossBase() * .8 : k === 'beams' ? bossBase() + .3 : k === 'soak' || k === 'spread' ? o.t : k === 'plates' ? .8 : bossBase();
+  b.animHits = k === 'sweep' || k === 'rain' || k === 'lane' || k === 'ripple' ? o.n || o.pts?.length || 1 : k === 'beams' ? o.steps : 1;
+  b.animInterval = k === 'sweep' ? .22 : k === 'rain' ? .14 : k === 'lane' ? .1 : k === 'ripple' ? .5 : k === 'beams' ? .55 : 0;
+}
 function bossKitCast(b, o) {
+  bossMotionCue(b, o);
   const dur = o.k === 'plates' || o.k === 'wardEnd' ? 1.2 : 1.6;
   b.castK = o.k; b.castT = b.castMax = dur; b.attackAnim = 1;
   if (o.k !== 'wardEnd') ev({ t: 'bossCall', nm: o.nm, say: o.say, mech: o.k === 'plates' || o.k === 'soak' || o.k === 'spread', pal: o.pal, col: o.col, x: b.x, z: b.z });

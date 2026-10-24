@@ -16,7 +16,7 @@ import { PRESTIGE_LEVEL, prestigeCount, migratePrestige, prestigeBlock, prestige
 import { PET_DEFS, PET_MAX_LEVEL, migratePets, equippedPet, petProgress, petBonuses, petAttackSpec, choosePet, grantPetXp, petCombatAllowed, findPetTarget } from './assets/data/companions.js';
 import { createCompanion } from './assets/art/pet-companions.js';
 import { damageMotion } from './assets/art/combat-feedback.js';
-import { rigEnemyModel, createEnemyMotion } from './assets/data/enemy-motion.js';
+import { rigEnemyModel, createEnemyMotion, enemySkinPath } from './assets/data/enemy-motion.js?v=2';
 import { createWorldArt, REGION_ART, POI_MODEL, poiRotation, poiLayout } from './assets/art/world-art.js';
 import { TEST_PROFILE_TAG, isTestMode, isTestProfile, profileSaveKey, prepareTestProfile, testModeUrl } from './assets/data/test-mode.js';
 // Icons: game-icons.net (CC BY 3.0) by caro-asercion, delapouite, lorc, sbed, skoll, various-artists, willdabeast — see Settings › Credits

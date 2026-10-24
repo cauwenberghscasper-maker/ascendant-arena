@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ascendant Arena — character animation review</title>
+<style>body{margin:0;background:#182028;color:#eee;font:16px system-ui}header{position:absolute;z-index:1;padding:16px;display:flex;gap:10px;flex-wrap:wrap}select,button{font:inherit;padding:10px;background:#273543;color:white;border:1px solid #738496;border-radius:6px}p{position:absolute;bottom:12px;padding:0 16px}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"../vendor/three/build/three.module.js","three/addons/":"../vendor/three/examples/jsm/"}}</script>
+<header><select id="body" aria-label="Character"></select><select id="action" aria-label="Animation"><option value="idle">Idle</option><option value="walk">Walk</option><option value="flurry" selected>Three-hit flurry</option><option value="slam">Slam</option><option value="lunge">Lunge</option><option value="recoil">Ranged recoil</option><option value="pulse">Spell pulse</option><option value="breath">Breath</option><option value="hit">Hit reaction</option><option value="death">Death</option></select><button id="pause">Pause</button></header>
+<p id="status">Loading…</p>
+<script type="module">
+import * as T from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {ENEMY_RIGS,rigEnemyModel,createEnemyMotion,enemySkinPath} from '../assets/data/enemy-motion.js';
+const select=document.querySelector('#body'),action=document.querySelector('#action'),status=document.querySelector('#status');
+for(const id of Object.keys(ENEMY_RIGS)){const o=new Option(id,id);select.add(o);}select.value='enemy.wolf';
+const scene=new T.Scene(),camera=new T.PerspectiveCamera(34,innerWidth/innerHeight,.01,100),renderer=new T.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0x182028);document.body.append(renderer.domElement);
+camera.position.set(1.4,1.1,2.8);camera.lookAt(0,.5,0);let dragX=null,yaw=.46;renderer.domElement.style.touchAction='none';
+renderer.domElement.onpointerdown=e=>{dragX=e.clientX;renderer.domElement.setPointerCapture(e.pointerId);};
+renderer.domElement.onpointermove=e=>{if(dragX===null)return;yaw+=(e.clientX-dragX)*.01;dragX=e.clientX;camera.position.set(Math.sin(yaw)*3.1,1.1,Math.cos(yaw)*3.1);camera.lookAt(0,.5,0);};
+renderer.domElement.onpointerup=renderer.domElement.onpointercancel=()=>{dragX=null;};
+scene.add(new T.HemisphereLight(0xffffff,0x71819b,2.5));const light=new T.DirectionalLight(0xffffff,3);light.position.set(2,4,4);scene.add(light);
+const loader=new GLTFLoader();let model,motion,time=0,paused=false,token=0;
+async function load(){const request=++token;status.textContent='Loading…';const id=select.value,dir='../assets/'+id.replace('.','/')+'/';const pack=await(await fetch(dir+'model.json')).json(),bytes=Uint8Array.from(atob(pack.glb),c=>c.charCodeAt(0));const gltf=await loader.parseAsync(bytes.buffer,dir),skin=await(await fetch('../'+enemySkinPath(id))).json();
+ if(request!==token)return;motion?.dispose();if(model){scene.remove(model);model.traverse(o=>{if(o.isMesh){o.geometry.dispose();for(const m of [o.material].flat()){for(const v of Object.values(m))if(v?.isTexture)v.dispose();m.dispose();}}});}
+ model=gltf.scene;rigEnemyModel(T,model,id,skin);scene.add(model);motion=createEnemyMotion(model);time=0;window.reviewReady=true;
+}
+function pose(at,dt=1/60){if(!motion)return;const mode=action.value,cycle=at%2.8,windMax=.55,strikeAge=cycle-windMax,flurry=mode==='flurry',kind=flurry?'swing':['idle','walk','hit','death'].includes(mode)?'lunge':mode;
+ const e={alive:mode!=='death'||cycle<.4,moveAmt:mode==='walk'?1:0,windT:!['idle','walk','hit','death'].includes(mode)&&cycle<windMax?windMax-cycle:0,flashT:mode==='hit'&&cycle<.1?.2:0};
+ const wind=e.windT>0?cycle/windMax:0,strike=strikeAge>=0&&strikeAge<.35?1-strikeAge/.35:0;
+ motion.update(e,dt,at,at*8,kind,wind,['idle','walk','hit','death'].includes(mode)?0:strike,mode,flurry?{n:3,step:.32}:null);status.textContent=select.value+' · '+motion.state.name+' · drag to orbit';
+}
+select.onchange=()=>load().catch(e=>status.textContent=e.message);action.onchange=()=>{time=0;};document.querySelector('#pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'Play':'Pause';};
+window.review={pose,select,action,renderer,scene,camera,get model(){return model;},get motion(){return motion;}};
+let last=performance.now();function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!paused){time+=dt;pose(time,dt);}renderer.render(scene,camera);requestAnimationFrame(frame);}requestAnimationFrame(frame);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});await load();
+</script></html>
