@@ -7,6 +7,7 @@ function interact() {
   if (n.kind === 'riftLeave') return endRift('leave');
   if (n.kind === 'dungeon') return openDungeonPanel(n.poi);
   if (n.kind === 'trial') return openTrialPanel(n.zone);
+  if (n.kind === 'warden') return startWarden(n.edge);
   if (n.kind === 'mine') return mineNode(n.st);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
   if (n.kind === 'dungeonChest') return delveOn() ? openDelveChest(claimDelveChest()) : openDungeonChest();
@@ -603,22 +604,28 @@ function heroTab(tab) {
   }
   openModal(dock(`<div class="heroHead"><span class="lv">${p.level}</span><div><h3>${c.name}</h3><small>${c.role} · ${ICON.coin}${fmtK(p.gold)} · ${ICON.ess}${fmtK(p.essence)} gems</small>${prestigeBadge(p)}</div></div>${tab === 'Gear' ? invTabsHTML(invTabNow(), p) : ''}`, `<div class="tabBody">${body}</div>`, bar), true, false);
 }
-// World map (the Map button): the whole road north, one row per area, top = furthest. Tap an attuned lodestone
-// to travel there from anywhere in the open world; areas you have not reached yet stay hidden.
+// World map (the Map button), World v11: the open map as it lies, 6 x 5 area squares round Base Camp (north up).
+// Each square shows its painted area art, name and levels; red when far above you, dim until you have been there.
+// Warden Gates sit on the borders (red shut, green open) and the Main Path objective has a gold star.
+// Tap an area with an attuned lodestone to travel there from anywhere in the open world.
 function openWorldMap() {
   UI.current = 'worldmap';
-  const p = G.profile, here = zoneAt(G.player.z), far = Math.max(p.stats.zone || 0, here), hub = G.mode === 'hub' && !G.rift;
-  const wpOf = {}; CFG.world.waypoints.forEach((w, i) => { wpOf[w.zone] = i; });
-  const Z = CFG.world.zones, html = [];
-  for (let zi = Z.length - 1; zi >= 0; zi--) { // north (furthest) at the top; each biome's name sits above its areas
-    const zn = Z[zi], seen = zi <= far, i = wpOf[zi], have = i != null && p.waypoints.includes(i), lvlOk = p.level >= (zn.minLevel || 1), col = hex6(BIOMES[zn.biome].coreColor);
-    if (zi === Z.length - 1 || Z[zi + 1].biome !== zn.biome) html.push(`<div class="mbiome" style="--bc:${col}">${zn.biomeName}</div>`);
-    const right = zi === here ? '<span class="mtag here">You</span>' : !seen ? '' : have && lvlOk && hub ? `<button class="primary" data-act="travel" data-i="${i}">Go</button>`
-      : `<span class="mtag">${!lvlOk ? 'Lv ' + zn.minLevel : i == null ? '' : 'Find stone'}</span>`;
-    html.push(`<div class="marea ${seen ? '' : 'fog'} ${zi === here ? 'here' : ''}" style="--bc:${col};--art:url(assets/ui/areas/${zi}.webp)"><b>${zn.name}</b><small>${zn.safe ? 'Safe' : `Lv ${zn.lvl[0]}–${zn.lvl[1]}`}</small>${right}</div>`);
+  const p = G.profile, here = zoneAt(G.player.x, G.player.z), hub = G.mode === 'hub' && !G.rift, W = CFG.world, Z = W.zones;
+  const wpOf = {}; W.waypoints.forEach((w, i) => { wpOf[w.zone] = i; });
+  const qs = p.quest ? questStep() : null, cells = [], gates = [];
+  for (let r = AREA_ROWS_N - 1; r >= 0; r--) for (let c = 0; c < AREA_COLS; c++) {
+    const zi = AREA_AT[r * AREA_COLS + c], zn = Z[zi], seen = p.visited.includes(zi) || zi === here, i = wpOf[zi], have = i != null && p.waypoints.includes(i);
+    const go = hub && have && zi !== here && p.level >= zn.minLevel, bad = areaDanger(zi, p.level), col = hex6(BIOMES[zn.biome].coreColor);
+    cells.push(`<button class="mcell ${seen ? '' : 'fog'} ${zi === here ? 'here' : ''} ${bad ? 'danger' : ''}" ${go ? `data-act="travel" data-i="${i}"` : 'aria-disabled="true"'} style="--bc:${col};--art:url(assets/ui/areas/${zi}.webp)">`
+      + `<b>${zn.name}</b><small>${zn.safe ? 'Safe' : `Lv ${zn.lvl[0]}–${zn.lvl[1]}`}</small>${zi === here ? '<i class="mt you">You</i>' : go ? '<i class="mt go">Go</i>' : ''}${qs && qs.zone === zi ? '<i class="mt quest"></i>' : ''}</button>`);
   }
-  openModal(`<div class="npcHead"><h3>World map</h3><span class="cnt">${p.waypoints.length}/${CFG.world.waypoints.length} stones</span></div>${hub ? '' : '<p class="fine">Travel works in the open world.</p>'}<div class="wmap">${html.join('')}</div>`);
-  setTimeout(() => { const h = $('panel').querySelector('.marea.here'); if (h) h.scrollIntoView({ block: 'center' }); }, 30);
+  // Warden Gates on the borders, placed in % of the grid (column 0 = +x on the left, row 0 at the bottom)
+  for (const e of W.edges) { if (!e.warden) continue; const A = Z[e.a], B = Z[e.b];
+    const cx = (Math.min(A.col, B.col) + (e.vert ? 1 : 0.5 - (e.x - (A.col <= B.col ? A : B).cx) / AREA_CELL)) / AREA_COLS * 100;
+    const ry = e.vert ? AREA_ROWS_N - 1 - A.row + 0.5 - (e.z - A.cz) / AREA_CELL : AREA_ROWS_N - 1 - Math.max(A.row, B.row) + 1;
+    gates.push(`<i class="mgate ${gateOpen(e) ? 'open' : ''} ${e.vert ? 'v' : 'h'}" style="left:${cx.toFixed(2)}%;top:${(ry / AREA_ROWS_N * 100).toFixed(2)}%"></i>`); }
+  const stones = `${p.waypoints.length}/${W.waypoints.length} stones`;
+  openModal(`<div class="npcHead"><h3>World map</h3><span class="cnt">${stones}</span></div>${qs ? `<p class="fine">Main Path: ${qs.text}</p>` : ''}${hub ? '' : '<p class="fine">Travel works in the open world.</p>'}<div class="wgrid">${cells.join('')}${gates.join('')}</div>`);
 }
 function openWaypoints() {
   UI.current = 'waypoints';

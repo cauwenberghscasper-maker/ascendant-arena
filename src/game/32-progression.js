@@ -92,7 +92,7 @@ function chooseKeystone(tier, id) {
 // --- waypoints (fast travel) ------------------------------------------------------------------
 function travelTo(i) {
   const p = G.profile, w = CFG.world.waypoints[i]; if (!w || !p.waypoints.includes(i) || G.mode !== 'hub') return false;
-  const pl = G.player; pl.x = w.x - 3; pl.z = w.z + 2; pl.invulnT = 1; G.zoneIdx = zoneAt(pl.z);
+  const pl = G.player; pl.x = w.x - 3; pl.z = w.z + 2; pl.invulnT = 1; G.zoneIdx = zoneAt(pl.x, pl.z);
   ev({ t: 'teleport', name: w.name, x: pl.x, z: pl.z }); return true;
 }
 // --- idle rewards: what you earned while away --------------------------------------------------

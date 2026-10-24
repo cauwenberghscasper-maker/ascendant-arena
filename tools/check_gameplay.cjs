@@ -22,13 +22,14 @@ check('all combat areas have distributed, valid patrol slots with road and flank
   for (let run = 0; run < 12; run++) {
     reset();
     // Padded edge crosses a spatial-grid boundary; validate against complete obstacle circles.
-    for (let zi = 0; zi < W.zones.length; zi++) { const Z = W.zones[zi]; for (let n = 0; n < 60; n++) c.G.obstacles.add({ x: -(W.maxX - 10) + math.random() * 2 * (W.maxX - 10), z: Z.z0 + 10 + math.random() * (Z.z1 - Z.z0 - 20), r: 1 + math.random() * 2 }); }
+    for (let zi = 0; zi < W.zones.length; zi++) { const Z = W.zones[zi]; for (let n = 0; n < 60; n++) c.G.obstacles.add({ x: Z.x0 + 10 + math.random() * (Z.x1 - Z.x0 - 20), z: Z.z0 + 10 + math.random() * (Z.z1 - Z.z0 - 20), r: 1 + math.random() * 2 }); }
     for (let zi = 0; zi < W.zones.length; zi++) {
       if(W.zones[zi].safe) { assert.equal(c.patrolCountFor(zi),0); continue; }
       const row = [];
       for (let n = 0; n < c.patrolCountFor(zi); n++) { const e = c.makeEnemy(W.zones[zi].enemy, zi, { patrol: n }); c.G.enemies.push(e); row.push(e); assert(c.enemySpawnClear(e, e.x, e.z, false)); }
-      assert(row.filter(e => Math.abs(e.x) < W.maxX * 0.25).length >= Math.floor(row.length/6)*2-1); assert(row.some(e => e.x < -0.7 * W.maxX)); assert(row.some(e => e.x > 0.7 * W.maxX));
-      const zMin = zi === 0 ? -26 : W.zones[zi].z0 + 5, zMax = Math.min(W.zones[zi].z1, W.maxZ) - 5;
+      const Zc = W.zones[zi]; // open world: lanes run across each area square, around its centre
+      assert(row.filter(e => Math.abs(e.x - Zc.cx) < Zc.hw * 0.25).length >= Math.floor(row.length/6)*2-1); assert(row.some(e => e.x < Zc.cx - 0.6 * Zc.hw)); assert(row.some(e => e.x > Zc.cx + 0.6 * Zc.hw));
+      const zMin = W.zones[zi].z0 + 10, zMax = W.zones[zi].z1 - 10;
       for (let band = 0; band < 4; band++) assert(row.some(e => e.z >= zMin + (zMax - zMin) * band / 4 && e.z < zMin + (zMax - zMin) * (band + 1) / 4));
     }
   }
@@ -68,7 +69,7 @@ check('stationary unprotected targets can die at early and late levels; armor re
     assert(fraction > .04 && fraction < .12, 'unarmored single hit remains meaningful without oneshots');
     const results = [];
     for (const armor of [0, .3]) {
-      const p = c.G.player; Object.assign(p, { alive: true, hp, maxHp: hp, armor, x: 80, z: 50 }); Object.assign(e, { x: 78.7, z: 50, hx: 78.7, hz: 50, state: 'chase', atkCd: 0 }); c.G.enemies = [e];
+      const p = c.G.player; Object.assign(p, { alive: true, hp, maxHp: hp, armor, x: W.zones[1].cx + 30, z: W.zones[1].cz + 30 }); Object.assign(e, { x: W.zones[1].cx + 28.7, z: W.zones[1].cz + 30, hx: W.zones[1].cx + 28.7, hz: W.zones[1].cz + 30, state: 'chase', atkCd: 0 }); c.G.enemies = [e];
       let seconds = 0; while (p.alive && seconds < 60) { c.stepEnemy(e, 1 / 60); seconds += 1 / 60; }
       assert(!p.alive); results.push(Number(seconds.toFixed(2)));
     }
@@ -77,14 +78,15 @@ check('stationary unprotected targets can die at early and late levels; armor re
 });
 check('wolf and boar bursts show a warning, stop winding up, and preserve the dodge lane', () => {
   for (const type of ['wolf', 'boar']) {
-    reset(12); const e = c.makeEnemy(type, 2, { patrol: 2 }); Object.assign(e, { x: 50, z: 150, hx: 50, hz: 150, state: 'chase', lungeCd: 0 }); Object.assign(c.G.player, { x: 50, z: 154 }); c.G.enemies = [e];
-    c.stepEnemy(e, 1 / 60); assert(events.some(x => x.t === 'telegraph')); assert.equal(e.x, 50); assert.equal(e.z, 150); assert(e.windT >= .4); assert.equal(hits.length, 0);
-    c.G.player.x = 54; c.G.player.z = 150; for (let i = 0; i < 40; i++) c.stepEnemy(e, 1 / 60);
-    assert.equal(e.cx, 0); assert.equal(e.cz, 1); assert(e.z > 150); assert.equal(hits.length, 0, 'sidestep evades the committed burst');
+    const X = W.zones[2].cx + 30, Y = W.zones[2].cz + 30; // a spot inside area 2's square
+    reset(12); const e = c.makeEnemy(type, 2, { patrol: 2 }); Object.assign(e, { x: X, z: Y, hx: X, hz: Y, state: 'chase', lungeCd: 0 }); Object.assign(c.G.player, { x: X, z: Y + 4 }); c.G.enemies = [e];
+    c.stepEnemy(e, 1 / 60); assert(events.some(x => x.t === 'telegraph')); assert.equal(e.x, X); assert.equal(e.z, Y); assert(e.windT >= .4); assert.equal(hits.length, 0);
+    c.G.player.x = X + 4; c.G.player.z = Y; for (let i = 0; i < 40; i++) c.stepEnemy(e, 1 / 60);
+    assert.equal(e.cx, 0); assert.equal(e.cz, 1); assert(e.z > Y); assert.equal(hits.length, 0, 'sidestep evades the committed burst');
   }
 });
 check('safe town/menu/dead-player state drops pursuit and distant idle enemies remain asleep', () => {
   reset(); const e = c.makeEnemy('slime', 1, { patrol: 14 }); e.state = 'chase'; c.stepEnemy(e, 1 / 60); assert.equal(e.state, 'return'); assert.equal(hits.length, 0);
-  e.state = 'idle'; e.x = 100; e.z = 80; const before = [e.x, e.z, e.wanderT]; c.stepEnemy(e, 1); assert.deepEqual([e.x, e.z, e.wanderT], before);
+  e.state = 'idle'; e.x = W.zones[1].cx + 60; e.z = W.zones[1].cz + 60; const before = [e.x, e.z, e.wanderT]; c.stepEnemy(e, 1); assert.deepEqual([e.x, e.z, e.wanderT], before);
 });
 console.log(JSON.stringify({ passed, population: W.zones.reduce((n,z,i)=>n+c.patrolCountFor(i)+(z.safe?0:W.elitesPerZone),0) + W.dens.reduce((n, d) => n + d.n + 1, 0), balance }, null, 2));

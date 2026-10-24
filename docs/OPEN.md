@@ -45,6 +45,7 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [ ] More painted ground tiles per area (darker forest floor, sand, marble).
 
 ## Game
+- [ ] Open world map (PR #51, `docs/log/2026-10-25-open-world-map.md`): merge after review; check FPS near area walls on a phone, tune `CFG.openWorld` (warden HP, kills per step, danger gap) and maybe `AREA_CELL`.
 - [ ] Dungeon treasures have no recipe yet (dungeon crafting / secret weapons: one recipe per biome).
 - [ ] Party dungeons: rejoin after a disconnect, party chat, Collection Log for set pieces, full-screen dungeon map.
 - [ ] Multiplayer: first-play name prompt + name filter, room partitioning (`mpRoomKey`) past ~60 players, sharing

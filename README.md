@@ -182,7 +182,8 @@ change and say which one you picked. Send a screenshot of visual changes.
 ### The vision
 
 A **3D fantasy RPG brawler for phones**: Brawl Stars-style twin-stick combat inside a RuneScape/Diablo-style open
-world with loot, masteries and endless progression. You start in Base Camp, walk the long road north through 29 areas,
+world with loot, masteries and endless progression. You start in Base Camp in the middle of an open map of 29 areas
+(Zelda-style: every direction leads somewhere, the further out the higher the level), follow the Main Path or roam,
 fight, loot, upgrade and unlock heroes, and never run out of things to push (World Tiers, Torment tiers, masteries to 99).
 
 What it should feel like:
@@ -228,8 +229,18 @@ arena HP and a class skill.
 
 ### World
 
-Base Camp plus 29 areas in 6 biomes, laid out as bands along the road north (levels 1-210, monster level rises the
-deeper you go inside an area). Biomes and their world bosses:
+Base Camp plus 29 areas in 6 biomes (levels 1-210) on an **open map** (World v11, Casper 25 Oct 2026: "like the Zelda
+map"): a 6 × 5 grid of 190 m area squares with Base Camp in the middle (`AREA_CELLS` in `11-world-data.js`). The main
+path spirals outwards in level order, so most areas border one far above them. Cliffs and woods wall the areas off;
+every shared border has one pass (roads run from each area's heart to its passes). A pass between two biomes is a
+**Warden Gate**: challenge its warden (a big elite at the level of the higher side) and it stays open for good
+(`profile.gates`). Walking into an area far above your level is allowed but shows a red **DANGER** banner, skull posts
+stand at passes into much higher areas, and pass labels turn red. The **Main Path** (`profile.quest`) leads through
+the areas in level order: travel there, hunt, clear a den (or beat the lair boss in a biome's last area), open the
+Warden Gate into the next biome; gold and XP per step, a Treasure Chest per chapter. It shows in the objective tracker,
+as a gold beacon in the world and a gold star on the minimap and the world map (a 2D grid of the areas). Monster level
+rises the deeper you go into an area from the side the main path enters it. Code: `39d-open-world.js`. Biomes and their
+world bosses:
 
 | Biome | World boss |
 |---|---|
@@ -464,6 +475,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Heroes, attacks, supers | roster `assets/data/heroes-v6.js` (`HEROES_V6`), ammo/impact art `assets/data/hero-fx-v6.js`, supers `assets/data/hero-supers-v6.js`; roles, badges, tree node kinds `src/game/13-brawlers.js`; models `41-assets.js` (`ASSET_MANIFEST`), `assets/hero-v6/` |
 | Skill trees | `src/game/23-skill-tree.js`; screen in `63-menus.js` |
 | Dungeons, keys, Legendary Trials / Mining, Museum / Daily, Colossus / Crafting / Lair bosses / PvP | `36-dungeon.js` / `37-mining.js` / `38-daily.js` / `39-crafting.js` / `39b-lair-bosses.js` / `72-pvp.js` |
+| Open world: Warden Gates, danger warning, routes through passes, the Main Path quest (`CFG.openWorld`) | `src/game/39d-open-world.js`; layout (area squares, passes, roads, walls, POI placement) in `11-world-data.js`; walls, gates, skull posts and the quest beacon in `44-world-view.js`; check `tools/check_open_world.cjs` |
 | Items, rarities, merge, salvage, forge | `src/game/21-items.js`; inventory and loot rolls: `32-progression.js` |
 | Cases, Vault, Expeditions, Auto Hunt | `src/game/71-cases-idle.js`; named collection drops: `assets/data/loot-collection.js` |
 | Pets, prestige | `assets/data/companions.js`, `assets/data/prestige.js`; pet models: `assets/art/pet-companions.js` |

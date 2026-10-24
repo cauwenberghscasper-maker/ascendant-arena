@@ -47,7 +47,7 @@ function applyProfile(prof, note) {
   Sfx.applyVolumes();
   applyUiSize();
   setMap(prof.settings.map !== false);
-  G.zoneIdx = zoneAt(G.player.z);
+  G.zoneIdx = zoneAt(G.player.x, G.player.z);
   if (!G.started) $('playBtn').textContent = prof.level > 1 || prof.stats.jobs > 0 ? `Continue · Level ${prof.level}` : 'PLAY';
   if (note) toast(note, 'good');
 }

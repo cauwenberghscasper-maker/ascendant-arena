@@ -184,14 +184,15 @@ function ahSteer(f, tx, tz, dt) {
 // the best open den for your level; the den you just emptied scores as if it were 300 m further away
 function autoHuntDen(f, level) {
   let D = null, bd = 1e9;
-  CFG.world.dens.forEach((dn) => { if (level < CFG.world.zones[dn.zone].minLevel) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2 + (dn === AH.lastDen ? 60 : 0); if (score < bd) { bd = score; D = dn; } });
+  const here = zoneAt(f.x, f.z);
+  CFG.world.dens.forEach((dn) => { if (level < CFG.world.zones[dn.zone].minLevel || !areaReachable(here, dn.zone)) return; const L = CFG.world.zones[dn.zone].lvl[1] + tierAdd(); const score = Math.abs(L - level) * 8 + Math.hypot(dn.x - f.x, dn.z - f.z) * 0.2 + (dn === AH.lastDen ? 60 : 0); if (score < bd) { bd = score; D = dn; } });
   return D;
 }
 // the nearest ready ore vein you are allowed to mine (veins that blocked the hero recently are skipped for a while)
 function autoHuntNode(f, level, maxD) {
   let best = null, bd = maxD;
   for (const st of nodeStates()) {
-    if (st.t > 0 || (st.ahSkip || 0) > G.time || level < CFG.world.zones[st.q.zone].minLevel) continue;
+    if (st.t > 0 || (st.ahSkip || 0) > G.time || level < CFG.world.zones[st.q.zone].minLevel || st.q.zone !== zoneAt(f.x, f.z)) continue;
     const d = Math.hypot(st.q.x - f.x, st.q.z - f.z); if (d < bd) { bd = d; best = st; }
   }
   return best;
@@ -206,7 +207,8 @@ function autoHuntIntent(f, it, manual, dt) {
   const okZone = (zi) => p.level >= CFG.world.zones[zi].minLevel;
   if (AH.t <= 0 || !AH.tgt || !AH.tgt.alive) {
     AH.t = 0.4; let best = null, bd = 30;
-    for (const e of G.enemies) { if (!e.alive || e.rift || e.lvl > p.level + 3 || !okZone(e.zone) || (e.ahSkip || 0) > G.time) continue; const d = Math.hypot(e.x - f.x, e.z - f.z); if (d < bd) { bd = d; best = e; } }
+    const here = zoneAt(f.x, f.z); // monsters behind an area wall are out of reach
+    for (const e of G.enemies) { if (!e.alive || e.rift || e.zone !== here || e.lvl > p.level + 3 || !okZone(e.zone) || (e.ahSkip || 0) > G.time) continue; const d = Math.hypot(e.x - f.x, e.z - f.z); if (d < bd) { bd = d; best = e; } }
     AH.tgt = best;
   }
   let tx, tz;
@@ -235,7 +237,7 @@ function autoHuntIntent(f, it, manual, dt) {
     D = autoHuntDen(f, p.level);
     if (!D) return;
     AH.curDen = D; if (Math.hypot(D.x - f.x, D.z - f.z) < D.r) AH.lastDen = D; // emptied this den: head for the other one next
-    const dx = D.x - f.x, dz = D.z - f.z, d = Math.hypot(dx, dz) || 1; tx = dx / d; tz = dz / d;
+    const R = routeNext(f.x, f.z, D.x, D.z) || D, dx = R.x - f.x, dz = R.z - f.z, d = Math.hypot(dx, dz) || 1; tx = dx / d; tz = dz / d; // through the passes
   }
   // unstick: if we barely moved for a while, switch sides, give up on whatever we are walking to, and sidestep out of the pocket
   AH.stuckT += dt;

@@ -241,7 +241,7 @@ function endDungeon(why) {
   if (why !== 'away') { pl.x = D.enterPos.x; pl.z = D.enterPos.z; }
   // a fall sends you back to the entrance after the normal respawn delay
   if (pl.alive) { pl.invulnT = 1; pl.hp = pl.maxHp; } else { G.respawnAt = { x: pl.x, z: pl.z }; if (D.delve) G.respawnT = CFG.player.respawn; }
-  G.zoneIdx = zoneAt(pl.z);
+  G.zoneIdx = zoneAt(pl.x, pl.z);
   ev({ t: 'dungeonEnd', why, name: D.poi.name, cleared: D.bossDead, x: pl.x, z: pl.z, delve: !!D.delve });
 }
 // --- end dungeons

@@ -1,27 +1,26 @@
 // --- hub world population ---------------------------------------------------
 function patrolCountFor(zi) { const Z = CFG.world.zones[zi]; return Z.safe ? 0 : Math.ceil(Z.count * CFG.world.patrolDensity); }
-function zoneAt(z) { const Z = CFG.world.zones; for (let i = Z.length - 1; i >= 0; i--) if (z >= Z[i].z0) return i; return 0; }
 function distToTown(x, z) { const T = CFG.world.town; return Math.hypot(x - T.x, z - T.z); }
 function randomPointInZone(zi, avoidTown) {
   const W = CFG.world, Z = W.zones[zi];
   for (let tries = 0; tries < 40; tries++) {
-    const x = rand(W.minX + 4, W.maxX - 4), z = rand(Math.max(Z.z0, W.minZ) + 4, Math.min(Z.z1, W.maxZ) - 4);
+    const x = rand(Z.x0 + 8, Z.x1 - 8), z = rand(Z.z0 + 8, Z.z1 - 8); // the walls between areas are ~5 m deep
     if (avoidTown && distToTown(x, z) < W.town.r + 8) continue;
     if (pointBlocked(x, z, 1.2)) continue;
     let nearLair = false; for (const l of W.lairList) if (Math.hypot(x - l.x, z - l.z) < 9) nearLair = true;
     if (nearLair) continue;
     return { x, z };
   }
-  return { x: 0, z: Z.z0 + 10 };
+  return { x: Z.cx + 6, z: Z.cz + 6 };
 }
-// monster level rises with depth inside a zone
-function areaLevel(zi, z) {
-  const Z = CFG.world.zones[zi], z0 = Math.max(Z.z0, CFG.world.town.z + CFG.world.town.r), k = clamp((z - z0) / (Z.z1 - z0), 0, 1);
+// monster level rises with depth inside an area, measured from the side the main path enters it (dirX/dirZ)
+function areaLevel(zi, x, z) {
+  const Z = CFG.world.zones[zi], d = (x - Z.cx) * Z.dirX + (z - Z.cz) * Z.dirZ, k = clamp(0.5 + d / (2 * Z.hw), 0, 1);
   return Math.round(lerp(Z.lvl[0], Z.lvl[1], k));
 }
 function enemySpawnClear(e, x, z, respawning) {
   const W = CFG.world, Z = W.zones[e.zone], pad = e.r + 0.45;
-  if (x < W.minX + pad || x > W.maxX - pad || z < Math.max(Z.z0, W.minZ) + pad || z > Math.min(Z.z1, W.maxZ) - pad) return false;
+  if (x < Z.x0 + 5 + pad || x > Z.x1 - 5 - pad || z < Z.z0 + 5 + pad || z > Z.z1 - 5 - pad) return false;
   if (distToTown(x, z) < W.town.r + 12) return false;
   if (W.waypoints.some(w => Math.hypot(x - w.x, z - w.z) < 10)) return false;
   if (W.lairList.some(l => Math.hypot(x - l.x, z - l.z) < 10)) return false;
@@ -31,7 +30,7 @@ function enemySpawnClear(e, x, z, respawning) {
   if (respawning && G.player.alive && Math.hypot(x - G.player.x, z - G.player.z) < W.spawnSafeRadius) return false;
   return true;
 }
-const PATROL_LANES = [-0.8, -0.5, -0.17, 0.17, 0.5, 0.8]; // × maxX
+const PATROL_LANES = [-0.8, -0.5, -0.17, 0.17, 0.5, 0.8]; // × the area's half width, across it
 function enemySpot(e, respawning = false) {
   const W = CFG.world;
   if (e.siege) return { x: SC.x, z: SC.z }; // placed at a gate by spawnSiegeMob
@@ -46,12 +45,12 @@ function enemySpot(e, respawning = false) {
     // A camp occupied by the hero stays cleared until there is room to reappear safely.
     if (respawning) return null;
   }
-  const Z = W.zones[e.zone], z0 = e.zone === 0 ? W.town.z + W.town.r + 12 : Z.z0 + 5, z1 = Math.min(Z.z1, W.maxZ) - 5;
+  const Z = W.zones[e.zone], z0 = Z.z0 + 10, z1 = Z.z1 - 10;
   if (e.patrol != null) {
     // Six lanes cover the road and flanks; depth bands scale with each area’s population.
-    const lanes = PATROL_LANES.map((k) => k * W.maxX), row = Math.floor(e.patrol / lanes.length), dz = (z1 - z0) / Math.ceil(patrolCountFor(e.zone) / lanes.length);
+    const lanes = PATROL_LANES.map((k) => Z.cx + k * (Z.hw - 8)), row = Math.floor(e.patrol / lanes.length), dz = (z1 - z0) / Math.ceil(patrolCountFor(e.zone) / lanes.length);
     for (let i = 0; i < 48; i++) {
-      const x = lanes[e.patrol % lanes.length] + rand(-10, 10), z = z0 + (row + 0.5) * dz + rand(-dz * 0.4, dz * 0.4);
+      const x = lanes[e.patrol % lanes.length] + rand(-5, 5), z = z0 + (row + 0.5) * dz + rand(-dz * 0.4, dz * 0.4);
       if (enemySpawnClear(e, x, z, respawning)) return { x, z };
     }
     if (respawning) return null;
@@ -60,14 +59,14 @@ function enemySpot(e, respawning = false) {
     const pt = randomPointInZone(e.zone, true);
     if (enemySpawnClear(e, pt.x, pt.z, respawning)) return pt;
   }
-  // The main road is kept clear of scenery; scan it instead of returning an unchecked point.
-  for (let z = z0 + 2; z < z1; z += 3) if (enemySpawnClear(e, 0, z, respawning)) return { x: 0, z };
+  // The roads are kept clear of scenery; scan this area's roads instead of returning an unchecked point.
+  for (const r of W.roads) if (r.zone === e.zone) for (let k = 0.15; k < 0.95; k += 0.04) { const x = lerp(r.x0, r.x1, k), z = lerp(r.z0, r.z1, k); if (enemySpawnClear(e, x, z, respawning)) return { x, z }; }
   return null;
 }
 function enemyLevelFor(e) {
   if (e.rift) return e.riftLvl + (e.elite ? 2 : 0);
   const Z = CFG.world.zones[e.zone];
-  let L = clamp(areaLevel(e.zone, e.z) + randInt(-1, 1), Z.lvl[0], Z.lvl[1]);
+  let L = clamp(areaLevel(e.zone, e.x, e.z) + randInt(-1, 1), Z.lvl[0], Z.lvl[1]);
   // Zone-authored: monsters never level with the hero, so going back to an old zone feels strong and a new zone is a wall.
   if (e.den != null) L += CFG.world.denLevelBonus;
   if (e.elite) L += 3;
@@ -164,6 +163,8 @@ function rewardEnemyKill(e) {
   if (e.den != null && Math.random() < 0.02) dropShards(1);
   if (typeof craftKillDrop === 'function') craftKillDrop(e);
   if (e.lairBoss != null) lairBossKilled(e);
+  if (e.warden) wardenKilled(e);
+  questOnKill(e);
   checkAchievements();
 }
 
@@ -334,7 +335,7 @@ function endRift(why) {
   const pl = G.player, p = G.profile;
   if (pl.alive) { pl.x = CFG.rift.gate.x + 2.5; pl.z = CFG.rift.gate.z + 3; pl.invulnT = 1; pl.hp = pl.maxHp; }
   else { pl.x = CFG.world.spawn.x; pl.z = CFG.world.spawn.z; }
-  G.zoneIdx = zoneAt(pl.z);
+  G.zoneIdx = zoneAt(pl.x, pl.z);
   const res = { why, floor: r.floor, start: r.start, cleared: r.cleared, grades: r.grades || { S: 0, A: 0, B: 0 }, gems: r.gems, gold: r.gold, items: r.items, best: p.records.bestRift || 0, x: pl.x, z: pl.z };
   G.riftResult = res; G.dirty = true;
   ev(Object.assign({ t: 'riftEnd' }, res));
@@ -397,7 +398,7 @@ function initHubWorldSeeded() {
   CFG.pellets.perZone.forEach((n, zi) => { for (let i = 0; i < n; i++) { const pt = randomPointInZone(zi, false); G.pellets.push({ x: pt.x, z: pt.z, zone: zi, active: true, respawnT: 0, color: pick(PELLET_COLORS) }); } });
   G.pelletsDirty = true;
   // challenge shrines
-  G.shrines = CFG.shrines.list.map((sp, i) => ({ i, x: sp.x, z: sp.z, zone: zoneAt(sp.z), state: 'ready', t: 0, cd: 0, wave: [] }));
+  G.shrines = CFG.shrines.list.map((sp, i) => ({ i, x: sp.x, z: sp.z, zone: zoneAt(sp.x, sp.z), state: 'ready', t: 0, cd: 0, wave: [] }));
   // berries
   G.berries = [];
   for (let i = 0; i < W.berryCount; i++) { const pt = randomPointInZone(1, true); G.berries.push({ x: pt.x, z: pt.z, active: true, respawnT: 0, seed: Math.random() * 10 }); }
@@ -418,8 +419,9 @@ function stepHub(dt) {
   if (G.rift) stepRift(dt);
   if (G.dungeon) stepDungeon(dt);
   if (G.siege) stepSiege(dt);
-  const zi = inInstance() ? G.zoneIdx : zoneAt(pl.z);
-  if (zi !== G.zoneIdx) { G.zoneIdx = zi; ev({ t: 'zone', name: W.zones[zi].name, town: false }); if (zi > G.profile.stats.zone) { G.profile.stats.zone = zi; checkAchievements(); } }
+  const zi = inInstance() ? G.zoneIdx : zoneAt(pl.x, pl.z);
+  if (zi !== G.zoneIdx) { G.zoneIdx = zi; ev({ t: 'zone', name: W.zones[zi].name, town: false }); if (zi > G.profile.stats.zone) G.profile.stats.zone = zi; if (!inInstance()) openWorldEnter(zi); checkAchievements(); }
+  stepOpenWorld(dt);
   // bots
   for (let i = 1; i < G.hubFighters.length; i++) { const b = G.hubFighters[i]; hubBotThink(b, dt); stepFighter(b, dt, 'hub'); }
   // enemies
@@ -463,8 +465,9 @@ function stepHub(dt) {
     for (const po of dungeonPois()) { const d = Math.hypot(pl.x - po.x, pl.z - po.z); if (d < best) { best = d; G.interact = { kind: 'dungeon', poi: po, label: 'Enter ' + po.name }; } }
     for (const n of shownNpcs()) { const d = Math.hypot(pl.x - n.x, pl.z - n.z); if (d < best) { best = d; G.interact = n; } }
     CFG.world.waypoints.forEach((w, i) => { const d = Math.hypot(pl.x - w.x, pl.z - w.z); if (d < best) { best = d; G.interact = { kind: 'waypoint', i, def: w }; } });
+    if (!G.interact) G.interact = wardenInteract(pl);
     if (!G.interact) { const st = nodeNear(pl); if (st && G.profile.level >= CFG.world.zones[st.q.zone].minLevel) G.interact = { kind: 'mine', st, label: 'Mine ' + veinName(st.q, st) }; }
-    if (!G.interact) { const tp = trialPoi(zoneAt(pl.z)); if (tp && trialOpen(tp.zone) && Math.hypot(pl.x - tp.x, pl.z - tp.z) < tp.r + 2) G.interact = { kind: 'trial', zone: tp.zone, label: 'Legendary Trial' }; }
+    if (!G.interact) { const tp = trialPoi(zoneAt(pl.x, pl.z)); if (tp && trialOpen(tp.zone) && Math.hypot(pl.x - tp.x, pl.z - tp.z) < tp.r + 2) G.interact = { kind: 'trial', zone: tp.zone, label: 'Legendary Trial' }; }
   }
   // boss proximity counts as combat
   if (G.boss && Math.hypot(pl.x - G.boss.x, pl.z - G.boss.z) < 22) markCombat();
@@ -489,7 +492,7 @@ function hubBotThink(b, dt) {
   ai.t -= dt; ai.shootT -= dt;
   let tx = ai.dx, tz = ai.dz, moving = ai.state === 'walk';
   const boss = G.boss;
-  if (boss && ai.joinBoss && (b.level >= W.zones[zoneAt(boss.z)].minLevel)) {
+  if (boss && ai.joinBoss && (b.level >= W.zones[zoneAt(boss.x, boss.z)].minLevel)) {
     const rr = 8 + (ai.slot % 1) * 3;
     tx = boss.x + Math.sin(ai.slot + G.time * 0.15) * rr; tz = boss.z + Math.cos(ai.slot + G.time * 0.15) * rr;
     moving = Math.hypot(tx - b.x, tz - b.z) > 1.2;
@@ -503,8 +506,8 @@ function hubBotThink(b, dt) {
       ai.state = 'walk';
       if (Math.random() < 0.3) { const n = pick(NPC_DEFS); ai.dx = n.x + rand(-2, 2); ai.dz = n.z + rand(-2, 2); }
       else {
-        const maxZone = highestZone(b.level);
-        const pt = randomPointInZone(Math.random() < 0.6 ? maxZone : randInt(0, maxZone), false); ai.dx = pt.x; ai.dz = pt.z;
+        const here = zoneAt(b.x, b.z), nb = W.edgesOf[here].filter((e) => gateOpen(e) && W.zones[edgeFar(e, here)].minLevel <= b.level).map((e) => edgeFar(e, here));
+        const pt = randomPointInZone(nb.length && Math.random() < 0.25 ? pick(nb) : here, false); ai.dx = pt.x; ai.dz = pt.z;
       }
       tx = ai.dx; tz = ai.dz; moving = true;
     }
@@ -517,6 +520,7 @@ function hubBotThink(b, dt) {
     }
   }
   if (moving) {
+    { const r = routeNext(b.x, b.z, tx, tz); if (r) { tx = r.x; tz = r.z; } else { ai.state = 'idle'; ai.t = 0.5; } } // round the walls, through open passes
     const dx = tx - b.x, dz = tz - b.z, d = Math.hypot(dx, dz) || 1;
     const sp = boss && ai.joinBoss ? 1 : 0.7;
     it.mx = (dx / d) * sp; it.mz = (dz / d) * sp;
@@ -628,7 +632,7 @@ function stepEnemy(e, dt) {
   if (e.rift) { riftClamp(e, e.r); return; }
   if (e.dungeon) { dungeonClamp(e, e.r); return; }
   // stay in own zone and out of town
-  e.z = clamp(e.z, Z.z0 + 1, Z.z1 - 1); e.x = clamp(e.x, CFG.world.minX, CFG.world.maxX);
+  e.z = clamp(e.z, Z.z0 + 3, Z.z1 - 3); e.x = clamp(e.x, Z.x0 + 3, Z.x1 - 3);
   const T = CFG.world.town, td = distToTown(e.x, e.z), minT = T.r + 1.5;
   if (td < minT) { e.x = T.x + (e.x - T.x) / (td || 1) * minT; e.z = T.z + (e.z - T.z) / (td || 1) * minT; }
 }
@@ -930,7 +934,7 @@ function stepBossTimer(dt) {
   if (!G.bossWarned && G.bossTimer <= CFG.boss.warn) {
     G.bossWarned = true;
     // the boss rises in the zone you are in (or your highest open zone)
-    G.bossLair = Math.max(1, Math.min(zoneAt(G.player.z), highestZone(G.profile.level)));
+    G.bossLair = Math.max(1, Math.min(zoneAt(G.player.x, G.player.z), highestZone(G.profile.level)));
     ev({ t: 'bossWarn', lair: currentLair().name, secs: Math.ceil(G.bossTimer) });
   }
   if (G.bossTimer <= 0) spawnBoss();
