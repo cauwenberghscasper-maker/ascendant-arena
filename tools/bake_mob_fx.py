@@ -1,6 +1,7 @@
 """Monster attack art for every species (assets/fx/mob/), from the MOB_FX table in src/game/45b-mob-fx.js.
 
-python3 tools/bake_mob_fx.py                      bits.png atlas + hit_<species>.png for all species, index.json
+python3 tools/bake_mob_fx.py                      bits.png atlas, index.json
+python3 tools/bake_mob_fx.py --drawn-hits         code-drawn hit_<species>.png (replaced by painted ones: bake_fx_gen.py --mobs)
 python3 tools/bake_mob_fx.py --ammo DIR [id ...]  also cut out ammo_<species>.png from DIR/<species>.* (picks below)
 
 bits.png  the pixel particles monsters shed (thistle fluff, leaves, feathers, spores, embers, frost, bubbles, sparks,
@@ -169,14 +170,39 @@ def render_glyph(g):
     img[edge] = (INK, INK, INK, 255)
     return img
 
-def bake_bits(T):
+CELL = 32                                   # atlas cell (px): a drawn 16 px glyph is doubled, a painted one fills it
+
+def gen_glyph(src, f):
+    """a generated particle picture (grey shades on a flat background): cut out, grey levels with dither, ink outline;
+    later frames of an animated glyph turn and shrink a little"""
+    A, alpha = cut_out(src); ys, xs = np.nonzero(alpha > 0)
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1; side = max(y1 - y0, x1 - x0); cy, cx = (y0 + y1) // 2, (x0 + x1) // 2; h = side // 2 + 4
+    L = A.max(-1) * 0.55 + A.min(-1) * 0.45
+    im = Image.fromarray((np.dstack([L, L, L, alpha]) * 255).astype(np.uint8), 'RGBA').crop((cx - h, cy - h, cx + h, cy + h))
+    if f: im = im.rotate(-25 * f, resample=Image.BICUBIC).resize((int(im.width * (1 - 0.12 * f)),) * 2, Image.BOX)
+    g = CELL - 2; small = np.asarray(im.resize((g, g), Image.BOX)).astype(np.float32) / 255
+    al = keep_big(small[..., 3] > 0.5, 6); lum = small[..., 0] / np.maximum(small[..., 3], 1e-3)
+    dith = FX.BAYER[(np.arange(g)[:, None] % 4), (np.arange(g)[None, :] % 4)]
+    lv = np.array([0.1] + list(LEVELS)); q = lv[np.clip(np.round(lum * (len(lv) - 1) + (dith - 0.5) * 0.5).astype(int), 0, len(lv) - 1)]
+    q = np.maximum(q, 0.38)                                                   # the darkest line art becomes the ink below
+    out = np.zeros((CELL, CELL, 4), np.uint8); A2 = np.pad(al, 1)
+    ink = np.zeros_like(A2); ink[1:] |= A2[:-1]; ink[:-1] |= A2[1:]; ink[:, 1:] |= A2[:, :-1]; ink[:, :-1] |= A2[:, 1:]; ink &= ~A2
+    dark = np.pad(al & (lum < 0.22), 1)                                       # the picture's own black outline stays ink
+    out[1:-1, 1:-1][al] = np.dstack([(q * 255).astype(np.uint8)] * 3 + [np.full((g, g), 255, np.uint8)])[al]
+    out[ink | dark] = (INK, INK, INK, 255)
+    return out
+
+def bake_bits(T, gen=None):
     cells = {}
     for name, gl in T['glyphs'].items():
         for f in range(gl['n']): cells[gl['cell'] + f] = (name, f)
     n = max(cells) + 1; cols = 8; rows = (n + cols - 1) // cols
-    atlas = np.zeros((rows * G, cols * G, 4), np.uint8)
+    atlas = np.zeros((rows * CELL, cols * CELL, 4), np.uint8)
     for i, (name, f) in cells.items():
-        g = Glyph(); DRAW[name](g, f); r, c = divmod(i, cols); atlas[r * G:(r + 1) * G, c * G:(c + 1) * G] = render_glyph(g)
+        r, c = divmod(i, cols); src = gen and next((p for p in (gen / (name + e) for e in ('.webp', '.png')) if p.exists()), None)
+        if src: tile = gen_glyph(src, f)
+        else: g = Glyph(); DRAW[name](g, f); tile = np.asarray(Image.fromarray(render_glyph(g), 'RGBA').resize((CELL, CELL), Image.NEAREST))
+        atlas[r * CELL:(r + 1) * CELL, c * CELL:(c + 1) * CELL] = tile
     Image.fromarray(atlas, 'RGBA').save(OUT / 'bits.png', optimize=True)
     print('bits.png', len(cells), 'cells', atlas.shape[1], 'x', atlas.shape[0])
 
@@ -258,8 +284,12 @@ def main():
         for sid in want:
             f = next((p for p in (src / (sid + e) for e in ('.webp', '.png', '.jpg')) if p.exists()), None)
             if f: bake_ammo(f).save(OUT / f'ammo_{sid}.png', optimize=True); print('ammo', sid)
+    elif args[:1] == ['--bits']:
+        bake_bits(T, Path(args[1]) if len(args) > 1 else None)  # DIR: generated particle pictures <glyph>.(webp|png)
+    elif args[:1] == ['--drawn-hits']:
+        bake_hits(T)                     # the old code-drawn bursts (painted ones: tools/bake_fx_gen.py --mobs)
     else:
-        bake_bits(T); bake_hits(T)
+        bake_bits(T)
     write_index()
 
 if __name__ == '__main__':
