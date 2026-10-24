@@ -303,8 +303,8 @@ function buildHub() {
     // Warden Gates: the shut gate with a glowing seal across its arch, or the open arch once beaten (toggled in updateGates)
     const shut = [], open = []; hubParts.gates = [];
     for (const e of W.edges) { if (!e.warden) continue;
-      const gb = WORLD_MODEL_BOX.warden_gate || [1, 1], s = (e.w + 7) / gb[0], it = { x: e.x, z: e.z, ry: e.vert ? Math.PI / 2 : 0, s };
-      const io = Object.assign({}, it, { s: (e.w + 7) / (WORLD_MODEL_BOX.warden_gate_open || gb)[0], hidden: true }); shut.push(it); open.push(io);
+      const gb = WORLD_MODEL_BOX.warden_gate || [1, 1], s = (e.w + 4) / gb[0], it = { x: e.x, z: e.z, ry: e.vert ? Math.PI / 2 : 0, s };
+      const io = Object.assign({}, it, { s: (e.w + 4) / (WORLD_MODEL_BOX.warden_gate_open || gb)[0], hidden: true }); shut.push(it); open.push(io);
       const bm = new THREE.Mesh(new THREE.PlaneGeometry(e.w, 5), new THREE.MeshBasicMaterial({ color: P2.gateLocked, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
       bm.position.set(e.x, 2.5, e.z); bm.rotation.y = e.vert ? Math.PI / 2 : 0; hubGroup.add(bm);
       hubParts.gates.push({ e, shut: it, open: io, seal: bm });
@@ -319,6 +319,11 @@ function buildHub() {
       const p2 = W.passSide(e, me), k = e.w / 2 + 2.5; signs.push(e.vert ? { x: p2.x, z: e.z + k, ry: Math.sign(M.cx - e.x) * Math.PI / 2, s: 2.6 } : { x: e.x + k, z: p2.z, ry: M.cz > e.z ? 0 : Math.PI, s: 2.6 });
       grid.add({ x: signs[signs.length - 1].x, z: signs[signs.length - 1].z, r: 0.4 }); }
     WorldModels.place(hubGroup, hasWM('danger_sign') ? 'danger_sign' : 'signpost', signs, { far: 120 });
+    // the Main Path beacon: a golden waystone and a tall soft beam over the current objective (moved in updateQuestBeacon)
+    const qb = { x: 0, z: 0, ry: 0, s: 4.2, hidden: true };
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.8, 60, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xffd34a, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    beam.visible = false; hubGroup.add(beam);
+    hubParts.quest = { item: qb, set: WorldModels.place(hubGroup, 'quest_beacon', [qb], { glow: 0xffd34a, glowK: 0.25, far: 400 }), beam };
   }
   // monster dens: a ring of bones, rocks and banners so the camp reads from far away
   const den = { tent: [], banner: [], bones: [], rock: [] };

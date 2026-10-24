@@ -400,6 +400,7 @@ function updateHubProps(t) {
   sparkleT -= 1 / 60;
   const topR = CFG.gear.slots.reduce((m, s) => Math.max(m, p.gear[s] ? rarIdx(p.gear[s].rarity) : 0), 0);
   if (HERO_OVERLAYS && sparkleT <= 0 && G.player.alive && topR >= 4) { sparkleT = topR >= 6 ? 0.08 : topR >= 5 ? 0.12 : 0.18; burst(G.player.x + (Math.random() - 0.5), 1 + Math.random() * 1.2, G.player.z + (Math.random() - 0.5), 1, RAR_HEX[RARITIES[topR]], 0.8, 0.7, 0.16, -1, 1); }
+  updateQuestBeacon(t);
   // Warden Gates: the seal glows across a shut arch; once beaten the open arch replaces the shut one
   if (hubParts.gates) { let ch = false;
     for (const g of hubParts.gates) { const op = gateOpen(g.e); g.seal.visible = !op; if (!op) g.seal.material.opacity = 0.16 + Math.sin(t * 2) * 0.06;
@@ -776,4 +777,16 @@ function wardBreakFx(e, ok) {
   showBanner(ok ? 'WARDS BROKEN' : 'WARDS HELD', ok ? 'The boss is exposed: hit it hard!' : 'The boss lashes out', ok ? 'gold' : 'red');
   SpriteFX.play('ring', e.pal || 'gold', e.x, 0, e.z, ok ? 20 : 16);
   for (let i = 0; i < 50; i++) burst(e.x, 1.5, e.z, 1, ok ? 0xfff2b0 : (e.col || 0xff4d4d), 10, 1, 0.4, 1.5, 2);
+}
+
+// the Main Path beacon stands just beside the current objective (a lair or den keeps its middle free)
+function updateQuestBeacon(t) {
+  const Q = hubParts.quest; if (!Q) return;
+  const s = G.mode === 'hub' && !inInstance() && G.profile.quest ? questStep() : null, qt = s ? questTarget() : null;
+  Q.beam.visible = !!qt;
+  if (!qt) { if (!Q.item.hidden) { Q.item.hidden = true; Q.set.dirty = true; } return; }
+  const off = s.k === 'gate' ? 0 : s.k === 'den' ? 16 : 14, x = qt.x + (s.k === 'gate' ? 0 : off * 0.7), z = qt.z + (s.k === 'gate' ? 0 : off * 0.7);
+  Q.beam.position.set(x, 30, z); Q.beam.material.opacity = 0.16 + Math.sin(t * 2) * 0.05;
+  if (s.k === 'gate') { if (!Q.item.hidden) { Q.item.hidden = true; Q.set.dirty = true; } return; } // the gate itself is the marker
+  if (Q.item.hidden || Q.item.x !== x || Q.item.z !== z) { Q.item.hidden = false; Q.item.x = x; Q.item.z = z; Q.set.dirty = true; }
 }

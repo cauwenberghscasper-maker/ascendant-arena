@@ -8956,7 +8956,7 @@ function startWarden(e) {
   const p = G.profile, pl = G.player, Z = CFG.world.zones, C = CFG.openWorld.warden, L = e.lvl + C.lvlAdd + tierAdd();
   if (OW.warden || gateOpen(e) || !pl.alive) return false;
   // far above you: warn first, a second tap within a few seconds starts the fight anyway
-  if (L >= p.level + CFG.openWorld.dangerGap && !(G.time - (OW.askT[e.id] || -99) < 5)) {
+  if (L >= p.level + CFG.openWorld.dangerGap && !(G.time - (OW.askT[e.id] ?? -99) < 5)) {
     OW.askT[e.id] = G.time; ev({ t: 'danger', gate: true, lvl: L, name: Z[edgeHigh(e)].name });
     toast(`The warden is level ${L}. You will probably die. Tap again to fight it anyway.`, 'bad'); return false;
   }
@@ -8996,7 +8996,7 @@ function wardenKilled(e) {
 // --- danger warning when you walk into an area far above you (once a minute per area) ---
 function dangerCheck(zi) {
   const p = G.profile, zn = CFG.world.zones[zi];
-  if (!areaDanger(zi, p.level) || G.time - (OW.dangerT[zi] || -99) < 60) return;
+  if (!areaDanger(zi, p.level) || G.time - (OW.dangerT[zi] ?? -99) < 60) return;
   OW.dangerT[zi] = G.time; ev({ t: 'danger', zone: zi, name: zn.name, lvl: zn.lvl[0], hi: zn.lvl[1] });
 }
 
@@ -10458,8 +10458,8 @@ function buildHub() {
     // Warden Gates: the shut gate with a glowing seal across its arch, or the open arch once beaten (toggled in updateGates)
     const shut = [], open = []; hubParts.gates = [];
     for (const e of W.edges) { if (!e.warden) continue;
-      const gb = WORLD_MODEL_BOX.warden_gate || [1, 1], s = (e.w + 7) / gb[0], it = { x: e.x, z: e.z, ry: e.vert ? Math.PI / 2 : 0, s };
-      const io = Object.assign({}, it, { s: (e.w + 7) / (WORLD_MODEL_BOX.warden_gate_open || gb)[0], hidden: true }); shut.push(it); open.push(io);
+      const gb = WORLD_MODEL_BOX.warden_gate || [1, 1], s = (e.w + 4) / gb[0], it = { x: e.x, z: e.z, ry: e.vert ? Math.PI / 2 : 0, s };
+      const io = Object.assign({}, it, { s: (e.w + 4) / (WORLD_MODEL_BOX.warden_gate_open || gb)[0], hidden: true }); shut.push(it); open.push(io);
       const bm = new THREE.Mesh(new THREE.PlaneGeometry(e.w, 5), new THREE.MeshBasicMaterial({ color: P2.gateLocked, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
       bm.position.set(e.x, 2.5, e.z); bm.rotation.y = e.vert ? Math.PI / 2 : 0; hubGroup.add(bm);
       hubParts.gates.push({ e, shut: it, open: io, seal: bm });
@@ -10474,6 +10474,11 @@ function buildHub() {
       const p2 = W.passSide(e, me), k = e.w / 2 + 2.5; signs.push(e.vert ? { x: p2.x, z: e.z + k, ry: Math.sign(M.cx - e.x) * Math.PI / 2, s: 2.6 } : { x: e.x + k, z: p2.z, ry: M.cz > e.z ? 0 : Math.PI, s: 2.6 });
       grid.add({ x: signs[signs.length - 1].x, z: signs[signs.length - 1].z, r: 0.4 }); }
     WorldModels.place(hubGroup, hasWM('danger_sign') ? 'danger_sign' : 'signpost', signs, { far: 120 });
+    // the Main Path beacon: a golden waystone and a tall soft beam over the current objective (moved in updateQuestBeacon)
+    const qb = { x: 0, z: 0, ry: 0, s: 4.2, hidden: true };
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.8, 60, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xffd34a, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    beam.visible = false; hubGroup.add(beam);
+    hubParts.quest = { item: qb, set: WorldModels.place(hubGroup, 'quest_beacon', [qb], { glow: 0xffd34a, glowK: 0.25, far: 400 }), beam };
   }
   // monster dens: a ring of bones, rocks and banners so the camp reads from far away
   const den = { tent: [], banner: [], bones: [], rock: [] };
@@ -12794,35 +12799,36 @@ const WORLD_MODEL_BOX = {
   boss_celestial: [0.74, 0.39], boss_frost: [0.99, 0.51], boss_golem: [1.04, 0.55], boss_magma: [1.01, 0.47], boss_void: [1, 0.5], brazier: [0.86, 0.84],
   bucket: [1.48, 1.31], bush_a_1: [1.21, 1.24], bush_a_2: [3.36, 3.16], bush_a_3: [0.77, 0.83], bush_flower_1: [1.21, 1.24], cage: [1.06, 1.1],
   camp: [3.01, 2.74], cave: [1.5, 1.21], chapel: [0.93, 0.9], chest: [1.46, 1.37], chest_open: [1.13, 1.07], clan_totem: [0.27, 0.31],
-  clutter: [2.44, 2.16], colossus: [0.99, 1.02], crashed_star: [1.78, 1.82], crate_1: [0.91, 0.98], crate_2: [1.02, 1.02], crystal: [1.04, 1.05],
-  crystal_arch: [0.98, 0.92], delve_altar: [0.58, 0.57], delve_bookshelf: [0.53, 0.46], delve_coralshrine: [0.44, 0.45], delve_echo: [1, 0.82], delve_hoard: [2.39, 2.45],
-  delve_icecoffin: [1.6, 0.83], delve_meteor: [1.43, 1.43], delve_moonwell: [1.3, 1.3], delve_sarcophagus: [2.27, 1.52], delve_slagcart: [0.83, 1.26], delve_throne: [0.69, 0.59],
-  dragon_skull: [1.29, 1.6], dummy: [0.43, 0.31], dwall: [2.24, 0.48], elder_stump: [1.33, 1.42], fairy_ring: [2.91, 2.91], farm_crate: [2.93, 1.7],
-  fence: [2.46, 0.14], floating_isle: [0.93, 0.98], flower_1: [0.72, 0.77], flower_2: [0.67, 0.66], forge: [1.3, 1.25], fountain: [1.25, 1.26],
-  frozen_fall: [1.46, 1.4], gatehouse: [1.27, 0.63], geyser: [2.13, 2.08], ghost_ship: [0.79, 0.5], glass_chimney: [0.75, 0.78], graves: [0.8, 0.77],
-  hermit_shack: [1.11, 1.22], house_a: [0.94, 0.94], house_b: [0.91, 0.9], keep: [1.07, 1.07], kettle: [1.21, 1.16], lantern_post: [0.26, 0.5],
-  lava_forge: [0.96, 0.99], leviathan_spine: [3.82, 1.53], lighthouse: [0.66, 0.7], lodestone: [0.72, 0.72], log: [2, 1.15], loot_coins: [2.69, 2.1],
-  loot_pouch: [1.42, 0.75], mat_abyssal: [1.02, 1.06], mat_arcdust: [0.65, 0.64], mat_copper: [1.3, 1.25], mat_emberscale: [0.8, 0.79], mat_frostfang: [2.7, 0.84],
-  mat_glacial: [0.87, 0.83], mat_iron: [0.99, 0.97], mat_magma: [0.67, 0.68], mat_mithril: [0.93, 0.89], mat_obsidian: [0.63, 0.61], mat_pearl: [1.01, 1.02],
-  mat_solar: [1.14, 0.6], mat_starfeather: [0.79, 0.13], mat_starsteel: [1.02, 1.03], mat_thornhide: [1.31, 1.74], mat_tidal: [0.86, 0.85], mat_titansoul: [0.78, 0.71],
-  mat_verdant: [0.83, 0.86], mat_void: [1.04, 0.65], mine_cart: [1.01, 0.81], mine_lift: [0.85, 0.59], mirror_maze: [1.6, 1.53], moon_gate: [1.15, 0.89],
-  mountain: [0.79, 0.82], mushrooms_1: [1.22, 1.68], ore: [1.4, 1.19], ore_pile: [1.43, 1.53], pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61],
-  pond: [2.99, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39], ribcage: [2.8, 1.26], rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15],
-  rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3], rock_a_3: [1.48, 1.5], ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61],
-  ruined_tower: [1.24, 1.06], rune_obelisk: [0.52, 0.51], sapphire_brazier: [0.65, 0.63], sea_stack: [0.9, 0.88], shrine: [2.32, 2.22], siege_archer: [0.57, 0.53],
-  siege_ballista: [1.67, 1.66], siege_banner: [0.3, 0.17], siege_barracks: [1.18, 1.04], siege_cannon: [1.42, 1.42], siege_cart: [0.75, 1.14], siege_gate: [1.03, 0.3],
-  siege_hut: [1.06, 1.19], siege_mage: [0.49, 0.45], siege_mine: [1.15, 1.13], siege_trap_bomb: [1.02, 1.02], siege_trap_spike: [5.57, 5.56], siege_trap_tar: [5.18, 5.21],
-  siege_wall_iron: [5.34, 0.64], siege_wall_stone: [5.55, 0.67], siege_wall_wood: [1.88, 0.36], signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], sky_temple: [0.74, 0.73],
-  snow_mountain: [1.34, 1.39], stall: [1.01, 1.29], stall_kit_1: [0.7, 0.35], stall_kit_2: [1.15, 0.4], standing_stone: [0.69, 0.73], statue: [0.65, 0.64],
-  storm_rod: [0.27, 0.27], stump: [1.12, 1.05], sun_lantern: [0.27, 0.28], sundial: [1.74, 1.75], torch: [0.34, 0.6], tower: [0.58, 0.6],
-  tree_ash_1: [0.68, 0.62], tree_ash_2: [0.78, 0.71], tree_ash_3: [0.57, 0.53], tree_ash_lod_1: [0.68, 0.62], tree_ash_lod_2: [0.78, 0.71], tree_ash_lod_3: [0.57, 0.53],
-  tree_coral_1: [0.71, 0.72], tree_coral_2: [0.55, 0.6], tree_coral_lod_1: [0.71, 0.72], tree_coral_lod_2: [0.55, 0.6], tree_crystal_1: [0.81, 0.69], tree_crystal_2: [0.56, 0.49],
-  tree_crystal_lod_1: [0.81, 0.69], tree_crystal_lod_2: [0.56, 0.49], tree_ember_1: [0.48, 0.48], tree_ember_2: [0.62, 0.6], tree_ember_lod_1: [0.48, 0.48], tree_ember_lod_2: [0.62, 0.6],
-  tree_gold_1: [0.43, 0.45], tree_gold_2: [0.52, 0.6], tree_gold_lod_1: [0.43, 0.45], tree_gold_lod_2: [0.52, 0.6], tree_oak_1: [0.43, 0.45], tree_oak_2: [0.41, 0.4],
-  tree_oak_3: [0.52, 0.6], tree_oak_lod_1: [0.43, 0.45], tree_oak_lod_2: [0.41, 0.4], tree_oak_lod_3: [0.52, 0.6], tree_snow_1: [0.78, 0.71], tree_snow_2: [0.57, 0.53],
-  tree_snow_3: [0.74, 0.71], tree_snow_lod_1: [0.78, 0.71], tree_snow_lod_2: [0.57, 0.53], tree_snow_lod_3: [0.74, 0.71], tuft_1: [0.48, 0.55], tuft_2: [1.23, 1.13],
-  upside_tower: [0.77, 0.56], wagon: [1.28, 2.63], war_tent: [0.9, 0.94], waterwheel: [1.17, 1.14], weapon_rack: [1.25, 0.89], well: [0.68, 0.74],
-  wind_arch: [1.45, 0.72], windmill: [0.99, 0.68], workbench: [2.26, 1.15],
+  cliff_ridge: [1.64, 0.56], clutter: [2.44, 2.16], colossus: [0.99, 1.02], crashed_star: [1.78, 1.82], crate_1: [0.91, 0.98], crate_2: [1.02, 1.02],
+  crystal: [1.04, 1.05], crystal_arch: [0.98, 0.92], danger_sign: [0.54, 0.34], delve_altar: [0.58, 0.57], delve_bookshelf: [0.53, 0.46], delve_coralshrine: [0.44, 0.45],
+  delve_echo: [1, 0.82], delve_hoard: [2.39, 2.45], delve_icecoffin: [1.6, 0.83], delve_meteor: [1.43, 1.43], delve_moonwell: [1.3, 1.3], delve_sarcophagus: [2.27, 1.52],
+  delve_slagcart: [0.83, 1.26], delve_throne: [0.69, 0.59], dragon_skull: [1.29, 1.6], dummy: [0.43, 0.31], dwall: [2.24, 0.48], elder_stump: [1.33, 1.42],
+  fairy_ring: [2.91, 2.91], farm_crate: [2.93, 1.7], fence: [2.46, 0.14], floating_isle: [0.93, 0.98], flower_1: [0.72, 0.77], flower_2: [0.67, 0.66],
+  forge: [1.3, 1.25], fountain: [1.25, 1.26], frozen_fall: [1.46, 1.4], gatehouse: [1.27, 0.63], geyser: [2.13, 2.08], ghost_ship: [0.79, 0.5],
+  glass_chimney: [0.75, 0.78], graves: [0.8, 0.77], hermit_shack: [1.11, 1.22], house_a: [0.94, 0.94], house_b: [0.91, 0.9], keep: [1.07, 1.07],
+  kettle: [1.21, 1.16], lantern_post: [0.26, 0.5], lava_forge: [0.96, 0.99], leviathan_spine: [3.82, 1.53], lighthouse: [0.66, 0.7], lodestone: [0.72, 0.72],
+  log: [2, 1.15], loot_coins: [2.69, 2.1], loot_pouch: [1.42, 0.75], mat_abyssal: [1.02, 1.06], mat_arcdust: [0.65, 0.64], mat_copper: [1.3, 1.25],
+  mat_emberscale: [0.8, 0.79], mat_frostfang: [2.7, 0.84], mat_glacial: [0.87, 0.83], mat_iron: [0.99, 0.97], mat_magma: [0.67, 0.68], mat_mithril: [0.93, 0.89],
+  mat_obsidian: [0.63, 0.61], mat_pearl: [1.01, 1.02], mat_solar: [1.14, 0.6], mat_starfeather: [0.79, 0.13], mat_starsteel: [1.02, 1.03], mat_thornhide: [1.31, 1.74],
+  mat_tidal: [0.86, 0.85], mat_titansoul: [0.78, 0.71], mat_verdant: [0.83, 0.86], mat_void: [1.04, 0.65], mine_cart: [1.01, 0.81], mine_lift: [0.85, 0.59],
+  mirror_maze: [1.6, 1.53], moon_gate: [1.15, 0.89], mountain: [0.79, 0.82], mushrooms_1: [1.22, 1.68], ore: [1.4, 1.19], ore_pile: [1.43, 1.53],
+  pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61], pond: [2.99, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39], quest_beacon: [0.48, 0.48],
+  ribcage: [2.8, 1.26], rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15], rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3],
+  rock_a_3: [1.48, 1.5], ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61], ruined_tower: [1.24, 1.06], rune_obelisk: [0.52, 0.51], sapphire_brazier: [0.65, 0.63],
+  sea_stack: [0.9, 0.88], shrine: [2.32, 2.22], siege_archer: [0.57, 0.53], siege_ballista: [1.67, 1.66], siege_banner: [0.3, 0.17], siege_barracks: [1.18, 1.04],
+  siege_cannon: [1.42, 1.42], siege_cart: [0.75, 1.14], siege_gate: [1.03, 0.3], siege_hut: [1.06, 1.19], siege_mage: [0.49, 0.45], siege_mine: [1.15, 1.13],
+  siege_trap_bomb: [1.02, 1.02], siege_trap_spike: [5.57, 5.56], siege_trap_tar: [5.18, 5.21], siege_wall_iron: [5.34, 0.64], siege_wall_stone: [5.55, 0.67], siege_wall_wood: [1.88, 0.36],
+  signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], sky_temple: [0.74, 0.73], snow_mountain: [1.34, 1.39], stall: [1.01, 1.29], stall_kit_1: [0.7, 0.35],
+  stall_kit_2: [1.15, 0.4], standing_stone: [0.69, 0.73], statue: [0.65, 0.64], storm_rod: [0.27, 0.27], stump: [1.12, 1.05], sun_lantern: [0.27, 0.28],
+  sundial: [1.74, 1.75], torch: [0.34, 0.6], tower: [0.58, 0.6], tree_ash_1: [0.68, 0.62], tree_ash_2: [0.78, 0.71], tree_ash_3: [0.57, 0.53],
+  tree_ash_lod_1: [0.68, 0.62], tree_ash_lod_2: [0.78, 0.71], tree_ash_lod_3: [0.57, 0.53], tree_coral_1: [0.71, 0.72], tree_coral_2: [0.55, 0.6], tree_coral_lod_1: [0.71, 0.72],
+  tree_coral_lod_2: [0.55, 0.6], tree_crystal_1: [0.81, 0.69], tree_crystal_2: [0.56, 0.49], tree_crystal_lod_1: [0.81, 0.69], tree_crystal_lod_2: [0.56, 0.49], tree_ember_1: [0.48, 0.48],
+  tree_ember_2: [0.62, 0.6], tree_ember_lod_1: [0.48, 0.48], tree_ember_lod_2: [0.62, 0.6], tree_gold_1: [0.43, 0.45], tree_gold_2: [0.52, 0.6], tree_gold_lod_1: [0.43, 0.45],
+  tree_gold_lod_2: [0.52, 0.6], tree_oak_1: [0.43, 0.45], tree_oak_2: [0.41, 0.4], tree_oak_3: [0.52, 0.6], tree_oak_lod_1: [0.43, 0.45], tree_oak_lod_2: [0.41, 0.4],
+  tree_oak_lod_3: [0.52, 0.6], tree_snow_1: [0.78, 0.71], tree_snow_2: [0.57, 0.53], tree_snow_3: [0.74, 0.71], tree_snow_lod_1: [0.78, 0.71], tree_snow_lod_2: [0.57, 0.53],
+  tree_snow_lod_3: [0.74, 0.71], tuft_1: [0.48, 0.55], tuft_2: [1.23, 1.13], upside_tower: [0.77, 0.56], wagon: [1.28, 2.63], war_tent: [0.9, 0.94],
+  warden_gate: [1.13, 0.61], warden_gate_open: [1.25, 0.6], waterwheel: [1.17, 1.14], weapon_rack: [1.25, 0.89], well: [0.68, 0.74], wind_arch: [1.45, 0.72],
+  windmill: [0.99, 0.68], workbench: [2.26, 1.15],
 };
 // </world-boxes>
 for (const k in WORLD_MODEL_BOX) ASSET_MANIFEST['world.' + k] = { dir: 'assets/world/' + k + '/', size: 1, world: true,
@@ -15144,6 +15150,7 @@ function updateHubProps(t) {
   sparkleT -= 1 / 60;
   const topR = CFG.gear.slots.reduce((m, s) => Math.max(m, p.gear[s] ? rarIdx(p.gear[s].rarity) : 0), 0);
   if (HERO_OVERLAYS && sparkleT <= 0 && G.player.alive && topR >= 4) { sparkleT = topR >= 6 ? 0.08 : topR >= 5 ? 0.12 : 0.18; burst(G.player.x + (Math.random() - 0.5), 1 + Math.random() * 1.2, G.player.z + (Math.random() - 0.5), 1, RAR_HEX[RARITIES[topR]], 0.8, 0.7, 0.16, -1, 1); }
+  updateQuestBeacon(t);
   // Warden Gates: the seal glows across a shut arch; once beaten the open arch replaces the shut one
   if (hubParts.gates) { let ch = false;
     for (const g of hubParts.gates) { const op = gateOpen(g.e); g.seal.visible = !op; if (!op) g.seal.material.opacity = 0.16 + Math.sin(t * 2) * 0.06;
@@ -15520,6 +15527,18 @@ function wardBreakFx(e, ok) {
   showBanner(ok ? 'WARDS BROKEN' : 'WARDS HELD', ok ? 'The boss is exposed: hit it hard!' : 'The boss lashes out', ok ? 'gold' : 'red');
   SpriteFX.play('ring', e.pal || 'gold', e.x, 0, e.z, ok ? 20 : 16);
   for (let i = 0; i < 50; i++) burst(e.x, 1.5, e.z, 1, ok ? 0xfff2b0 : (e.col || 0xff4d4d), 10, 1, 0.4, 1.5, 2);
+}
+
+// the Main Path beacon stands just beside the current objective (a lair or den keeps its middle free)
+function updateQuestBeacon(t) {
+  const Q = hubParts.quest; if (!Q) return;
+  const s = G.mode === 'hub' && !inInstance() && G.profile.quest ? questStep() : null, qt = s ? questTarget() : null;
+  Q.beam.visible = !!qt;
+  if (!qt) { if (!Q.item.hidden) { Q.item.hidden = true; Q.set.dirty = true; } return; }
+  const off = s.k === 'gate' ? 0 : s.k === 'den' ? 16 : 14, x = qt.x + (s.k === 'gate' ? 0 : off * 0.7), z = qt.z + (s.k === 'gate' ? 0 : off * 0.7);
+  Q.beam.position.set(x, 30, z); Q.beam.material.opacity = 0.16 + Math.sin(t * 2) * 0.05;
+  if (s.k === 'gate') { if (!Q.item.hidden) { Q.item.hidden = true; Q.set.dirty = true; } return; } // the gate itself is the marker
+  if (Q.item.hidden || Q.item.x !== x || Q.item.z !== z) { Q.item.hidden = false; Q.item.x = x; Q.item.z = z; Q.set.dirty = true; }
 }
 // --- loot you can see: what a kill drops pops out of the monster as a real item (Quaternius CC0 coin pile and loot
 // pouch, assets/world/loot_*), bounces once and flies into the hero. Gold is a coin pile, gear a pouch glowing in its
@@ -18048,7 +18067,7 @@ function boot(hotData) {
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
   if (LOCAL_PREVIEW) window.__delve = { startDelve, delveBots, delveBotsRecv, delveHumanLevel, partyRecv, partyUpdate, delveLayout, delveGate, delveReq, diffDef, playerPower, refPower, claimDelveChest, openDelvePanel, PARTY, partyMembers, get D() { return G.dungeon; } };
-  if (LOCAL_PREVIEW) window.__dbg = { AssetSlots, enemyBase, MobFX, mobTypeOf, makeEnemy, matGround, bossAttack, bossPlan, bossPlanMech, bossKit, bossDamageMod, BOSS_KITS, BOSS_TEAM, bossPartySize, MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, pvpRecv, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
+  if (LOCAL_PREVIEW) window.__dbg = { hubParts, OW, questStep, questTarget, startWarden, routeNext, AssetSlots, enemyBase, MobFX, mobTypeOf, makeEnemy, matGround, bossAttack, bossPlan, bossPlanMech, bossKit, bossDamageMod, BOSS_KITS, BOSS_TEAM, bossPartySize, MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, pvpRecv, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
   const btn = $('playBtn'), label = btn.textContent;

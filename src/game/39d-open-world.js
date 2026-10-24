@@ -74,7 +74,7 @@ function startWarden(e) {
   const p = G.profile, pl = G.player, Z = CFG.world.zones, C = CFG.openWorld.warden, L = e.lvl + C.lvlAdd + tierAdd();
   if (OW.warden || gateOpen(e) || !pl.alive) return false;
   // far above you: warn first, a second tap within a few seconds starts the fight anyway
-  if (L >= p.level + CFG.openWorld.dangerGap && !(G.time - (OW.askT[e.id] || -99) < 5)) {
+  if (L >= p.level + CFG.openWorld.dangerGap && !(G.time - (OW.askT[e.id] ?? -99) < 5)) {
     OW.askT[e.id] = G.time; ev({ t: 'danger', gate: true, lvl: L, name: Z[edgeHigh(e)].name });
     toast(`The warden is level ${L}. You will probably die. Tap again to fight it anyway.`, 'bad'); return false;
   }
@@ -114,7 +114,7 @@ function wardenKilled(e) {
 // --- danger warning when you walk into an area far above you (once a minute per area) ---
 function dangerCheck(zi) {
   const p = G.profile, zn = CFG.world.zones[zi];
-  if (!areaDanger(zi, p.level) || G.time - (OW.dangerT[zi] || -99) < 60) return;
+  if (!areaDanger(zi, p.level) || G.time - (OW.dangerT[zi] ?? -99) < 60) return;
   OW.dangerT[zi] = G.time; ev({ t: 'danger', zone: zi, name: zn.name, lvl: zn.lvl[0], hi: zn.lvl[1] });
 }
 
