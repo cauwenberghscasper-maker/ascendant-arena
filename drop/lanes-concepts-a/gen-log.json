@@ -1,0 +1,66 @@
+{
+ "batch": "lanes-concepts-a",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "lanes_core_c23",
+   "ok": true,
+   "file": "lanes_core_c23.webp",
+   "sec": 9.5
+  },
+  {
+   "name": "lanes_core_c41",
+   "ok": true,
+   "file": "lanes_core_c41.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "lanes_tower_c23",
+   "ok": true,
+   "file": "lanes_tower_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lanes_tower_c41",
+   "ok": true,
+   "file": "lanes_tower_c41.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "lanes_minion_melee_c23",
+   "ok": true,
+   "file": "lanes_minion_melee_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "lanes_minion_melee_c41",
+   "ok": true,
+   "file": "lanes_minion_melee_c41.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "lanes_minion_ranged_c23",
+   "ok": true,
+   "file": "lanes_minion_ranged_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "lanes_minion_ranged_c41",
+   "ok": true,
+   "file": "lanes_minion_ranged_c41.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "lanes_brazier_c23",
+   "ok": true,
+   "file": "lanes_brazier_c23.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "lanes_brazier_c41",
+   "ok": true,
+   "file": "lanes_brazier_c41.webp",
+   "sec": 5.7
+  }
+ ]
+}
