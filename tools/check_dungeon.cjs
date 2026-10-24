@@ -189,7 +189,7 @@ check('leaving, falling or being carried away ends the instance and restores the
   D = enter(p, 120); pl = c.G.player; pl.alive = false; c.stepDungeon(1 / 60);
   assert.equal(c.G.dungeon, null); assert.deepEqual({ ...c.G.respawnAt }, { ...D.enterPos }); assert.equal(c.G.obstacles, c.G.hubObstacles); assert(!c.G.enemies.length);
   D = enter(p, 120); pl = c.G.player; pl.x = 50; pl.z = 900; c.stepDungeon(1 / 60);
-  assert.equal(c.G.dungeon, null); assert.deepEqual({ x: pl.x, z: pl.z }, { x: 50, z: 900 }, 'travel keeps where you went'); assert.equal(c.G.zoneIdx, c.zoneAt(900));
+  assert.equal(c.G.dungeon, null); assert.deepEqual({ x: pl.x, z: pl.z }, { x: 50, z: 900 }, 'travel keeps where you went'); assert.equal(c.G.zoneIdx, c.zoneAt(50, 900));
 });
 check('Legendary Trial: sealed until all four runestones of the area are lit; one arena, a 4-affix champion at +6 levels, no keys', () => {
   reset(90); const zi = 7, tp = c.trialPoi(zi), runes = W.runes.filter((q) => q.zone === zi);

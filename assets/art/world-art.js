@@ -106,10 +106,10 @@ export const POI_MODEL = {
   obelisk: ['rune_obelisk', 5], shack: ['hermit_shack', 5],
 };
 // world rotation of a POI's front (+z faces the road) — the same frame poiLayout uses
-export const poiRotation = (q) => (q.art === 'cache' ? 0 : (q.x < 0 ? Math.PI / 2 : -Math.PI / 2));
+export const poiRotation = (q) => (q.art === 'cache' ? 0 : (q.x < (q.cx || 0) ? Math.PI / 2 : -Math.PI / 2)); // fronts face the area's heart (q.cx)
 export function poiLayout(q, style, emit) {
   // landmarks and caves turn their front (+z) to the road; secret pockets keep world axes for their gap
-  const rot = q.art === 'cache' ? 0 : (q.x < 0 ? Math.PI / 2 : -Math.PI / 2), cs = Math.cos(rot), sn = Math.sin(rot), hits = [];
+  const rot = q.art === 'cache' ? 0 : (q.x < (q.cx || 0) ? Math.PI / 2 : -Math.PI / 2), cs = Math.cos(rot), sn = Math.sin(rot), hits = [];
   const P = (x, z) => [q.x + cs * x + sn * z, q.z - sn * x + cs * z];
   const put = (glow) => (geo, c, x, y, z, sx = 1, sy = sx, sz = sx, rx = 0, ry = 0, rz = 0) => { const [wx, wz] = P(x, z); emit(glow, geo, c, [wx, y, wz], [sx, sy, sz], [rx, ry + rot, rz]); };
   (POI_ART[q.art] || POI_ART.statue)({ b: put(false), g: put(true), h: (x, z, r) => { const [wx, wz] = P(x, z); hits.push({ x: wx, z: wz, r }); }, s: style || REGION_ART[0] }, q);
@@ -215,7 +215,7 @@ export function createWorldArt({THREE, GEO, part, mergeParts, hasModel = () => f
       }
     }
     // Region gates: stepped bases, engraved lintels, distinct stone and metal treatments.
-    if(zi>0&&!hasModel('gatehouse')){for(const x of [-3.2,3.2]){
+    if(zi>0&&!W.edges&&!hasModel('gatehouse')){for(const x of [-3.2,3.2]){
       add(parts,box,style.dark,[x,.18,zn.z0],[1.14,.36,1.16]);
       add(parts,box,style.trim,[x,3.87,zn.z0],[1.03,.17,1.04]);
       add(parts,box,style.accent,[x,2.7,zn.z0-.48],[.24,1.4,.06]);

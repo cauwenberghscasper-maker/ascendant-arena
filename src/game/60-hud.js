@@ -96,13 +96,16 @@ function updateTags() {
       put(e.x, h, e.z, e.bossName ? `${e.enraged ? 'Enraged ' : ''}${e.bossName} ${e.lvl}` : e.affixed ? `Elite ${CFG.enemies[e.type].name} ${e.lvl} · ${e.champName}` : e.champ ? `${e.guardian ? 'Rift Lord' : 'Champion'} ${e.lvl} · ${e.champName}` : `${e.guardian ? 'Rift Guardian ' : e.elite ? 'Elite ' : ''}${CFG.enemies[e.type].name} ${e.lvl}`, e.hp / e.maxHp, 'mob' + (e.elite ? ' elite' : '') + lvlCls);
     }
     for (const ml of hubParts.mineLabels || []) if (Math.hypot(ml.x - cx, ml.z - cz) < 45) put(ml.x, ml.y, ml.z, `${ml.name} · Lv ${CFG.world.zones[ml.zone].minLevel}`, null, 'den');
-    for (const dl of hubParts.denLabels) { const D = CFG.world.dens[dl.den]; if (Math.hypot(dl.x - cx, dl.z - cz) < 55) put(dl.x, dl.y, dl.z, `${D.name} · Lv ${areaLevel(D.zone, D.z) + CFG.world.denLevelBonus + tierAdd()}`, null, 'den'); }
+    for (const dl of hubParts.denLabels) { const D = CFG.world.dens[dl.den]; if (Math.hypot(dl.x - cx, dl.z - cz) < 55) put(dl.x, dl.y, dl.z, `${D.name} · Lv ${areaLevel(D.zone, D.x, D.z) + CFG.world.denLevelBonus + tierAdd()}`, null, 'den'); }
     for (const q of CFG.world.pois) if (q.major && !CFG.world.zones[q.zone].safe && Math.hypot(q.x - cx, q.z - cz) < 40) put(q.x, 6.5, q.z, trialOpen(q.zone) ? `${q.name} · Legendary Trial` : `${q.name} · ${runesLit(q.zone)}/${CFG.dungeon.trial.runes} runestones`, null, 'wp');
     for (const q of dungeonPois()) if (Math.hypot(q.x - cx, q.z - cz) < 90) put(q.x, 7.2, q.z, G.profile.level >= dungeonReq(q) ? `${q.name} · Dungeon` : `${q.name} · Level ${dungeonReq(q)}`, null, 'den');
     { const SG = CFG.siege.gate; if (!G.siege && Math.hypot(SG.x - cx, SG.z - cz) < 30) put(CFG.siege.house.x + 1, 7.4, SG.z, G.profile.level >= CFG.siege.unlock ? `Bastion Siege · wave ${(G.profile.fort && G.profile.fort.wave) || 1}` : `Bastion Siege · Level ${CFG.siege.unlock}`, null, 'wp'); }
     { const RG = CFG.rift.gate; if (Math.hypot(RG.x - cx, RG.z - cz) < 30) put(RG.x, 4.4, RG.z, G.profile.level >= CFG.rift.unlock ? `The Rift · best floor ${G.profile.records.bestRift || 0}` : `The Rift · Level ${CFG.rift.unlock}`, null, 'wp'); }
     CFG.world.waypoints.forEach((w, i) => { if (Math.hypot(w.x - cx, w.z - cz) < 30) put(w.x, 4.4, w.z, G.profile.waypoints.includes(i) ? 'Waypoint' : 'Waypoint · touch to unlock', null, 'wp'); });
-    for (const gl of hubParts.gateLabels) { const zn = CFG.world.zones[gl.zone]; if (G.profile.level < zn.minLevel && Math.hypot(gl.x - cx, gl.z - cz) < 60) put(gl.x, gl.y, gl.z, `${zn.name} · Level ${zn.minLevel}`, null, 'gate'); }
+    // passes: where they lead and its levels; red when that area is far above you, and shut Warden Gates say so
+    { const here = zoneAt(cx, cz);
+      for (const e of CFG.world.edgesOf[here]) { if (Math.hypot(e.x - cx, e.z - cz) > (e.warden ? 60 : 40)) continue; const zn = CFG.world.zones[edgeFar(e, here)], bad = areaDanger(edgeFar(e, here), G.profile.level);
+        put(e.x, e.warden ? 7 : 4.6, e.z, `${gateOpen(e) ? '' : 'Warden Gate · '}${zn.name} · Lv ${zn.lvl[0]}–${zn.lvl[1]}`, null, bad || !gateOpen(e) ? 'gate' : 'wp'); } }
   }
   for (let i = n; i < TAG_MAX; i++) if (!tagPool[i].el.hidden) tagPool[i].el.hidden = true;
   updateFortBubbles();
@@ -206,8 +209,8 @@ function updateHUD(dt) {
   setText('hGold', fmtK(p.gold)); setText('hTroph', fmt(p.trophies)); setText('hEss', fmtK(p.essence));
   // area level + kill streak
   if (!inArena && G.started) {
-    const zi = zoneAt(G.player.z), zn = CFG.world.zones[zi], town = distToTown(G.player.x, G.player.z) < CFG.world.town.r + 2;
-    const ct = curTier(), al = areaLevel(zi, G.player.z) + tierAdd(), ts = ct ? ` · ${tierDef(ct).short}` : '';
+    const zi = zoneAt(G.player.x, G.player.z), zn = CFG.world.zones[zi], town = distToTown(G.player.x, G.player.z) < CFG.world.town.r + 2;
+    const ct = curTier(), al = areaLevel(zi, G.player.x, G.player.z) + tierAdd(), ts = ct ? ` · ${tierDef(ct).short}` : '';
     if (G.rift) setText('zoneChip', `Rift · Floor ${G.rift.floor} · Lv ${riftWaveLevel(G.rift.floor)}`);
     else if (G.siege) setText('zoneChip', `Bastion Siege · Wave ${G.siege.wave} · Lv ${G.siege.lvl}`);
     else setText('zoneChip', town || zn.safe ? `Willowcross Base Camp · safe${ts}` : `${zn.name} · Lv ${al}${ts}`);
@@ -298,7 +301,7 @@ function updateHUD(dt) {
 }
 function updateObjective() {
   const p = G.profile, pl = G.player;
-  let text = '', tx = null, tz = null;
+  let text = '', tx = null, tz = null, farD = null;
   if (G.mode === 'arena') { setHidden('objective', true); return; }
   const shr = activeShrine();
   if (G.rift) { const r = G.rift; text = r.phase === 'intro' ? `Rift floor ${r.floor} · get ready` : r.phase === 'clear' ? `Floor ${r.floor} cleared! Next floor…` : `Rift floor ${r.floor} · ${riftLeft()} left · ${Math.ceil(r.t)}s`; }
@@ -312,12 +315,18 @@ function updateObjective() {
     else {
       text = `${j.title}: ${j.progress}/${j.count}`;
       const zi = Math.max(1, CFG.world.zones.findIndex((zn) => zn.enemy === j.target || zn.alt === j.target));
-      if (zoneAt(pl.z) !== zi || distToTown(pl.x, pl.z) < CFG.world.town.r + 4) { let D = null, bd = 1e9; for (const d of CFG.world.dens) { const k = d.zone === zi ? Math.hypot(d.x - pl.x, d.z - pl.z) : 1e9; if (k < bd) { bd = k; D = d; } } tx = D ? D.x : 0; tz = D ? D.z : CFG.world.zones[zi].z0 + 25; }
+      if (zoneAt(pl.x, pl.z) !== zi || distToTown(pl.x, pl.z) < CFG.world.town.r + 4) { let D = null, bd = 1e9; for (const d of CFG.world.dens) { const k = d.zone === zi ? Math.hypot(d.x - pl.x, d.z - pl.z) : 1e9; if (k < bd) { bd = k; D = d; } } tx = D ? D.x : 0; tz = D ? D.z : CFG.world.zones[zi].cz; }
     }
   } else if (G.started) {
     const avail = NPC_DEFS.find((n) => n.role === 'job' && p.level >= n.minLevel && n.id === 'ida') || null;
     if (p.tut < 3 && avail && p.settings.npcs) { text = `Talk to ${avail.name}`; tx = avail.x; tz = avail.z; }
+    // the Main Path (World v11): the current objective; the arrow follows the way through open passes
+    const s = !text && p.quest ? questStep() : null, qt = s && questTarget();
+    if (s && qt) { const zn = CFG.world.zones[s.zone], rec = zn.lvl[0] >= p.level + CFG.openWorld.dangerGap ? ` · Rec. Lv ${zn.lvl[0]}` : '';
+      text = `${s.text}${s.n ? ` ${p.quest.n}/${s.n}` : ''}${rec}`; const r = routeNext(pl.x, pl.z, qt.x, qt.z, qt.edge) || qt; tx = r.x; tz = r.z; farD = Math.hypot(qt.x - pl.x, qt.z - pl.z); }
   }
+  // in the open world the arrow walks you round the area walls, through the passes
+  if (tx != null && farD == null && G.mode === 'hub' && !inInstance()) { const r = routeNext(pl.x, pl.z, tx, tz); if (r && (r.x !== tx || r.z !== tz)) { farD = Math.hypot(tx - pl.x, tz - pl.z); tx = r.x; tz = r.z; } }
   setHidden('objective', !text);
   if (!text) return;
   let dist = '';
@@ -325,9 +334,10 @@ function updateObjective() {
     const d = Math.hypot(tx - pl.x, tz - pl.z);
     const ang = Math.atan2(tx - pl.x, tz - pl.z) - Cam.yaw;
     setStyle('objArrow', 'transform', `rotate(${(-ang * 180 / Math.PI).toFixed(0)}deg)`);
-    dist = d > 6 ? ` · ${Math.round(d)}m` : '';
+    const dd = farD != null ? farD : d; dist = dd > 6 ? ` · ${Math.round(dd)}m` : '';
     setHidden('objArrow', d <= 6);
   } else setHidden('objArrow', true);
   setText('objText', text + dist);
 }
+
 

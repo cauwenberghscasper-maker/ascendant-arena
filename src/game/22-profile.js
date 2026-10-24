@@ -10,7 +10,7 @@ function defaultProfile() {
     treeVersion: 9, brawlers: { bolt: newBrawlerState() }, collection: {}, collectionLuck: {}, pets: {}, activePet: null,
     ach: {}, stats: { kills: 0, slimes: 0, jobs: 0, upgrades: 0, bosses: 0, matches: 0, wins: 0, zone: 0, shrines: 0, pellets: 0, elites: 0, bestStreak: 0 },
     artifacts: [], unlocked: { attacks: [], artifacts: [] }, newUnlocks: [],
-    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 10, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
+    essence: 0, luck: { rare: 0, epic: 0, legendary: 0, mythic: 0, ancient: 0, divine: 0 }, cases: [], caseLuck: { legendary: 0, mythic: 0 }, vault: { t: Date.now(), lv: 0 }, exp: [], mastery: {}, waypoints: [0], worldVersion: 11, gates: {}, visited: [0], quest: { ch: 1, step: 0, n: 0 }, road: 0, artStars: {}, shards: {}, gemBuys: 0, records: {}, worldTier: 0, secrets: {}, pois: {}, dungeons: {}, keys: [], runes: {}, trials: {}, mine: { ore: 0, pick: 0, mined: 0, museum: {} }, petFinds: {}, login: { n: 0, last: -1 }, weekly: { wk: 0, done: false },
     job: null, jobCycle: {}, tut: 0, settings: { mute: false, fps: false, fastXp: false, testSeen: true, calm: false, map: true, autoSalvage: 0, hq: true, fx: true, pixel: false, bots: false, npcs: true, autoHunt: false, uiSize: 0, fps60: false, volMaster: 80, volMusic: 60, volSfx: 80, volUi: 70 },
   };
   prof.artifacts = prof.brawlers.bolt.artifacts;
@@ -96,6 +96,12 @@ function sanitizeProfile(p) {
     // v10: same 30 areas in the same order (waypoint/zone indices stay valid), just wider; adds secrets, POIs and dungeons
     out.worldVersion = 10;
   }
+  if ((out.worldVersion | 0) < 11) {
+    // v11: the same 30 areas laid out round Base Camp (open world): gates you could already pass stay open and the
+    // Main Path starts at your highest area (openWorldMigrate, 39d-open-world.js)
+    out.quest = null; out.worldVersion = 11;
+  }
+  openWorldMigrate(out);
   for (const k of ['secrets', 'pois', 'dungeons', 'runes', 'trials', 'petFinds']) if (!out[k] || typeof out[k] !== 'object' || Array.isArray(out[k])) out[k] = {};
   // party dungeons: clears and best difficulty per dungeon, this week's first clears, set pieces found
   { const o = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {}), d = o(out.delve);
@@ -167,6 +173,20 @@ function fortKeepFor(b) {
   return 10;
 }
 // --- end Bastion fort save
+// a new save, or a save from the old road (World v10): areas you could already walk into keep their gates open,
+// and the Main Path starts at the highest area your level reaches
+function openWorldMigrate(p) {
+  if (!p.gates || typeof p.gates !== 'object' || Array.isArray(p.gates)) p.gates = {};
+  if (!Array.isArray(p.visited)) p.visited = [0];
+  const Z = (CFG.world && CFG.world.zones) || [];
+  if (!p.quest || typeof p.quest !== 'object') {
+    let hz = 0; Z.forEach((zn, i) => { if (p.level >= zn.minLevel) hz = i; });
+    p.quest = { ch: Math.max(1, hz), step: 0, n: 0 };
+    for (const e of (CFG.world && CFG.world.edges) || []) if (e.warden && p.level >= e.lvl && hz > 0) p.gates[e.id] = 1;
+    for (let i = 0; i <= Math.max(0, (p.stats && p.stats.zone) | 0); i++) if (!p.visited.includes(i)) p.visited.push(i);
+  }
+  const q = p.quest; q.ch = Math.max(1, Math.min(Z.length || 30, q.ch | 0)); q.step = Math.max(0, q.step | 0); q.n = Math.max(0, q.n | 0);
+}
 const Store = {
   load() {
     try {

@@ -13,7 +13,7 @@ const matGround = new THREE.MeshStandardMaterial({ vertexColors: true, roughness
 // Each zone gets its own floor pattern on top of the zone colours: grass clumps and dirt patches,
 // snow drifts, glowing lava cracks, broken flagstones, wet pebbles, marble terraces, and cobblestones
 // in the town plaza and along the road (all world-space, so it tiles forever without a texture file).
-matGround.userData.u = { uTown: { value: new THREE.Vector3() }, uRoad: { value: new THREE.Vector2() },
+matGround.userData.u = { uTown: { value: new THREE.Vector3() }, uRoad: { value: new THREE.Vector4() }, uRoadTex: { value: null },
   // painted ground tiles (assets/world/_ground, loadGroundTiles): one texture array, on once loaded; uTime drives the animation
   uGTex: { value: null }, uGOn: { value: 0 }, uTime: { value: 0 }, uGMean: { value: Array.from({ length: 7 }, () => new THREE.Vector3(0.3, 0.3, 0.3)) } };
 matGround.onBeforeCompile = (sh) => {
@@ -22,7 +22,7 @@ matGround.onBeforeCompile = (sh) => {
     .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvGW = (modelMatrix * vec4(transformed, 1.0)).xyz; vTh = aTh; vGc = aGc;');
   sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
 varying vec3 vGW;
-uniform vec3 uTown; uniform vec2 uRoad; varying float vTh; varying vec3 vGc;
+uniform vec3 uTown; uniform vec4 uRoad; uniform sampler2D uRoadTex; varying float vTh; varying vec3 vGc;
 uniform mediump sampler2DArray uGTex; uniform float uGOn, uTime; uniform vec3 uGMean[7];
 // a painted tile at two scales and angles, so its repeat never shows; divided by the tile's mean colour it becomes
 // pure detail that the zone's own palette is multiplied with
@@ -95,7 +95,7 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0); float gDirt = 0.0;`)
   }
   // town plaza and the road: cobblestones like an old dungeon floor
   float plaza = 1.0 - smoothstep(uTown.z - 3.0, uTown.z - 1.0, length(w - uTown.xy));
-  float road = (1.0 - smoothstep(uRoad.x - 0.6, uRoad.x + 0.4, abs(w.x))) * step(uTown.y, w.y) * step(w.y, uRoad.y);
+  float road = smoothstep(0.35, 0.65, texture2D(uRoadTex, (w - uRoad.xy) * uRoad.zw).r); // the roads between passes (roadMaskTexture)
   float cob = max(plaza, road * (1.0 - smoothstep(0.62, 0.7, gn(px * 0.3 + 5.0)) * 0.6));
   if (cob > 0.01) {
     vec2 v = vor(px * 1.05);
@@ -114,7 +114,7 @@ float gGlow = 0.0; vec3 gGlowC = vec3(0.0); float gDirt = 0.0;`)
 }`)
     .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += gGlowC * gGlow * 1.4;');
 };
-matGround.customProgramCacheKey = () => 'ground5';
+matGround.customProgramCacheKey = () => 'ground6';
 // the painted ground tiles: seven 512 px webp files packed into one texture array (grass, dirt, snow, basalt,
 // flagstone, seabed, cobblestone); the ground keeps its procedural look until they arrive
 const GROUND_TILES = ['grass', 'dirt', 'snow', 'basalt', 'flagstone', 'seabed', 'cobble'];
@@ -138,14 +138,31 @@ loadGroundTiles();
 const worldArt = createWorldArt({THREE, GEO, part, mergeParts, hasModel: (n) => hasWorldModel(n) });
 const hasWM = (n) => hasWorldModel(n); // a generated world model exists (src/game/48-world-models.js)
 const zoneGround = (zi) => { const g = CFG.world.zones[zi].ground; return typeof g === 'string' ? PALETTE[g] : g; };
+const THEME_STONE = [0x8a8478, 0x6f6a5c, 0xb8c6d2, 0x4a3a34, 0x5b5390, 0x2f5560, 0xe3d8bd];
+const soft2 = (c, k) => new THREE.Color(0xffffff).lerp(new THREE.Color(c), k).getHex(); // a gentle tint over a painted texture
 const zonePath = (zi) => PALETTE[CFG.world.zones[zi].path] || PALETTE.path;
+// the open map's roads (World v11): distance to the nearest road of an area, and a 1 px per metre mask for the shader
+function roadNear(x, z, zi) {
+  const W = CFG.world; let best = 1e9;
+  for (const r of W.roads) { if (r.zone !== zi) continue; const vx = r.x1 - r.x0, vz = r.z1 - r.z0, L = vx * vx + vz * vz, t = clamp(((x - r.x0) * vx + (z - r.z0) * vz) / L, 0, 1); best = Math.min(best, Math.hypot(x - r.x0 - vx * t, z - r.z0 - vz * t)); }
+  return best;
+}
+function roadMaskTexture() {
+  const W = CFG.world, w = Math.ceil(W.maxX - W.minX), h = Math.ceil(W.maxZ - W.minZ), cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const g = cv.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, w, h); g.strokeStyle = '#fff'; g.lineCap = 'round'; g.lineWidth = 5.6;
+  for (const r of W.roads) { g.beginPath(); g.moveTo(r.x0 - W.minX, r.z0 - W.minZ); g.lineTo(r.x1 - W.minX, r.z1 - W.minZ); g.stroke(); }
+  // the road runs on through each pass to the far side's road
+  for (const e of W.edges) { const a = W.passSide(e, e.a), b = W.passSide(e, e.b); g.beginPath(); g.moveTo(a.x - W.minX, a.z - W.minZ); g.lineTo(b.x - W.minX, b.z - W.minZ); g.stroke(); }
+  const t = new THREE.CanvasTexture(cv); t.flipY = false; t.magFilter = t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
+  return t;
+}
 function groundColorAt(x, z, r) {
   const W = CFG.world, T = W.town, P2 = PALETTE;
-  const zi = zoneAt(z);
+  const zi = zoneAt(x, z);
   if (x < W.minX - 1 || x > W.maxX + 1 || z < W.minZ - 1 || z > W.maxZ + 1) { const o = zoneGround(zi); return new THREE.Color(o[r < 0.5 ? 0 : 1]).multiplyScalar(0.72).getHex(); }
   const dt = Math.hypot(x - T.x, z - T.z);
   if (dt < T.r - 2) return P2.plaza[Math.floor(r * 3)];
-  if (Math.abs(x + Math.sin(z * 0.03) * 0) < 2.8 && z > T.z && z < W.maxZ - 6) return zonePath(zi)[r < 0.5 ? 0 : 1];
+  if (roadNear(x, z, zi) < 2.8) return zonePath(zi)[r < 0.5 ? 0 : 1];
   { const l = W.lairs[zi]; if (l && Math.hypot(x - l.x, z - l.z) < 8) return new THREE.Color(zoneGround(zi)[0]).multiplyScalar(0.8).getHex(); }
   for (const D of W.dens) { if (D.zone !== zi) continue; const d = Math.hypot(x - D.x, z - D.z); if (d < D.r + 1) return new THREE.Color(zoneGround(zi)[Math.floor(r * 4)]).multiplyScalar(d < D.r - 1 ? 0.7 : 0.82).getHex(); }
   const arr = zoneGround(zi);
@@ -157,26 +174,29 @@ function buildHub() {
   const W = CFG.world, T = W.town, P2 = PALETTE, rng = mulberry32(1337);
   const grid = new Grid(6);
   // ground: one mesh per zone so the GPU can skip zones that are out of view
-  { const u = matGround.userData.u; u.uTown.value.set(T.x, T.z, T.r); u.uRoad.value.set(2.8, W.maxZ - 6);
-  }
+  { const u = matGround.userData.u; u.uTown.value.set(T.x, T.z, T.r);
+    u.uRoad.value.set(W.minX, W.minZ, 1 / Math.ceil(W.maxX - W.minX), 1 / Math.ceil(W.maxZ - W.minZ)); u.uRoadTex.value = roadMaskTexture(); }
   const TG = [[1, 0.33, 0.06], [1, 0.33, 0.06], [1, 0.33, 0.06], [1, 0.33, 0.06], [0.65, 0.4, 1.0], [0.2, 1.0, 0.85], [1, 0.85, 0.4]];
   W.zones.forEach((zn, zi) => {
-    const z0 = zi === 0 ? W.minZ - 20 : zn.z0, z1 = zi === W.zones.length - 1 ? W.maxZ + 20 : zn.z1;
-    const gw = W.maxX - W.minX + 60, gd = z1 - z0;
-    let g = new THREE.PlaneGeometry(gw, gd, Math.round(gw / 5), Math.max(4, Math.round(gd / 5))).rotateX(-Math.PI / 2);
-    g.translate((W.minX + W.maxX) / 2, 0, (z0 + z1) / 2);
+    // one square per area; the ones on the map's edge run 30 m on under the border woods
+    const ex = (v, lim, d) => (Math.abs(v - lim) < 1 ? v + d * 30 : v);
+    const x0 = ex(zn.x0, W.minX, -1), x1 = ex(zn.x1, W.maxX, 1), z0 = ex(zn.z0, W.minZ, -1), z1 = ex(zn.z1, W.maxZ, 1);
+    const gw = x1 - x0, gd = z1 - z0;
+    let g = new THREE.PlaneGeometry(gw, gd, Math.round(gw / 5), Math.round(gd / 5)).rotateX(-Math.PI / 2);
+    g.translate((x0 + x1) / 2, 0, (z0 + z1) / 2);
     const pos = g.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i), z = pos.getZ(i);
-      const flat = Math.hypot(x - T.x, z - T.z) < T.r + 2 || Math.abs(x) < 4 || Math.abs(z - zn.z0) < 1 || Math.abs(z - zn.z1) < 1;
+      // seams between the squares stay flat so neighbouring meshes meet exactly
+      const flat = Math.hypot(x - T.x, z - T.z) < T.r + 2 || Math.abs(x - zn.x0) < 1 || Math.abs(x - zn.x1) < 1 || Math.abs(z - zn.z0) < 1 || Math.abs(z - zn.z1) < 1;
       const edge = x < W.minX || x > W.maxX || z < W.minZ || z > W.maxZ;
-      const amp = edge ? 2.6 : flat ? 0.02 : zoneAmp(zoneAt(z));
+      const amp = edge ? 2.6 : flat ? 0.02 : zoneAmp(zi);
       pos.setY(i, (hashf(x * 0.7, z * 0.7) - 0.5) * amp - (flat ? 0 : 0.08) + (edge ? 1.4 + Math.min(4, (Math.max(W.minX - x, x - W.maxX, 0)) * 0.12) : 0));
     }
     g.computeVertexNormals(); g = g.toNonIndexed(); // smooth rolling ground, not faceted triangles
     const gp = g.attributes.position, gc = new Float32Array(gp.count * 3);
     for (let i = 0; i < gp.count; i++) {
-      const cx = gp.getX(i), cz = gp.getZ(i);
+      const cx = clamp(gp.getX(i), zn.x0 + 0.01, zn.x1 - 0.01), cz = clamp(gp.getZ(i), zn.z0 + 0.01, zn.z1 - 0.01); // colour from this square's own area
       _col.set(groundColorAt(cx, cz, clamp(vnoise(cx * 0.07, cz * 0.07) * 1.15 - 0.07, 0, 0.999)));
       gc[i * 3] = _col.r; gc[i * 3 + 1] = _col.g; gc[i * 3 + 2] = _col.b;
     }
@@ -199,7 +219,7 @@ function buildHub() {
   });
   WorldModels.place(hubGroup, 'house_a', houses[0]); WorldModels.place(hubGroup, 'house_b', houses[1]);
   // the castle behind the arena portal, with two watchtowers flanking the town
-  WorldModels.place(hubGroup, 'keep', [{ x: T.x, z: CFG.world.minZ - 6, ry: 0, s: 15 }]);
+  WorldModels.place(hubGroup, 'keep', [{ x: T.x, z: -96, ry: 0, s: 15 }]);
   WorldModels.place(hubGroup, 'tower', [{ x: T.x - 27, z: T.z - 14, ry: 0.5, s: 12 }, { x: T.x + 27, z: T.z - 14, ry: -0.5, s: 12 }]);
   grid.add({ x: T.x - 27, z: T.z - 14, r: 3.6 }); grid.add({ x: T.x + 27, z: T.z - 14, r: 3.6 });
 
@@ -258,26 +278,48 @@ function buildHub() {
     }
   });
   WorldModels.place(hubGroup, 'standing_stone', lairStones, { glow: 0x9fe8ff, glowK: 0.08 });
-  // gates: a castle gatehouse over the road + fence posts
-  const gates = [], fences = [];
-  for (let zi = 1; zi < W.zones.length; zi++) {
-    const zn = W.zones[zi], gz = zn.z0;
-    gates.push({ x: 0, z: gz, ry: Math.PI, s: 8.2 }); // castle gatehouse over the road (model below)
-    grid.add({ x: -3.2, z: gz, r: 0.6 }); grid.add({ x: 3.2, z: gz, r: 0.6 });
-    const fence = zi === 1 || zn.biome !== W.zones[zi - 1].biome;
-    if (fence && hasWM('fence')) { const fw = WORLD_MODEL_BOX.fence[0]; for (let x = W.minX + 2; x <= W.maxX - 2; x += 4) { if (Math.abs(x) < 6) continue; fences.push({ x, z: gz, ry: 0, s: 4.05 / fw }); } }
-    else if (fence) for (let x = W.minX; x <= W.maxX; x += 3) {
-      if (Math.abs(x) < 4) continue;
-      tParts.push(part(GEO.box, P2.fence, [x, 0.7, gz], [0, 0, 0], [0.24, 1.4, 0.24]));
+  // walls between the areas (World v11): a band of cliffs and woods along every shared border, open only at its pass.
+  // A pass inside a biome is a wide gap; a pass between two biomes is a Warden Gate (shut until its warden falls).
+  for (const o of W.wallSolids) grid.add(o);
+  { const WT = [, 'tree_oak', 'tree_ash', 'tree_snow', 'tree_ember', 'tree_crystal', 'tree_coral', 'tree_gold'], tw = new Map(), rocks = [], cliffs = [], wrng = mulberry32(4242);
+    const tput = (n, it) => { if (!tw.has(n)) tw.set(n, []); tw.get(n).push(it); };
+    const CL = hasWM('cliff_ridge'), cb = CL ? WORLD_MODEL_BOX.cliff_ridge : null;
+    for (const e of W.edges) {
+      const A = W.zones[e.a], B = W.zones[e.b], H = A.hw, c0 = e.vert ? A.cz - H : A.cx - H, at = (u, k) => (e.vert ? { x: e.x + k, z: u } : { x: u, z: e.z + k });
+      const along = e.vert ? e.z : e.x, ry = e.vert ? Math.PI / 2 : 0;
+      for (let u = c0; u < c0 + 2 * H; u += 1) {
+        if (Math.abs(u + 0.5 - along) < e.w / 2 + 1.5) continue;
+        // a cliff ridge every ~11 m between two biomes, a line of boulders inside one; trees of both sides lean in
+        if (e.warden && CL && (Math.round(u) % 11 === 0)) { const s = 11.5 / cb[0]; cliffs.push(Object.assign(at(u + 0.5, (wrng() - 0.5) * 1.2), { ry: ry + (wrng() < 0.5 ? 0 : Math.PI), s, color: soft2(THEME_STONE[A.theme], 0.4) })); }
+        else if (Math.round(u) % 5 === 0) rocks.push(Object.assign(at(u + wrng() * 2, (wrng() - 0.5) * 2), { ry: wrng() * 6.28, s: 2.2 + wrng() * 1.4, color: soft2(THEME_STONE[(wrng() < 0.5 ? A : B).theme], 0.5) }));
+        if (Math.round(u) % 4 === 0) for (const [Z2, side] of [A, B].map((Q2) => [Q2, e.vert ? Math.sign(Q2.cx - e.x) : Math.sign(Q2.cz - e.z)])) {
+          const nm = WT[Z2.theme + 1] || 'tree_ash'; if (!hasWM(nm)) continue; const m = hasWM(nm + '_lod') ? nm + '_lod' : nm;
+          tput(m, Object.assign(at(u + wrng() * 3, side * (2.5 + wrng() * 3)), { ry: wrng() * 6.28, s: (Z2.theme <= 2 ? 7 : 6) * (0.85 + wrng() * 0.4) })); }
+      }
     }
-    if (fence && !hasWM('fence')) { tParts.push(part(GEO.box, P2.fence, [(W.minX - 4) / 2, 1.0, gz], null, [-W.minX - 4, 0.12, 0.12]));
-    tParts.push(part(GEO.box, P2.fence, [(W.maxX + 4) / 2, 1.0, gz], null, [W.maxX - 4, 0.12, 0.12])); }
-    const bm = new THREE.Mesh(new THREE.PlaneGeometry(W.maxX - W.minX, 5), new THREE.MeshBasicMaterial({ color: P2.gateLocked, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
-    bm.position.set(0, 2.5, gz); hubGroup.add(bm);
-    hubParts.barriers.push({ mesh: bm, zone: zi });
-    hubParts.gateLabels.push({ x: 0, z: gz, y: 5.6, zone: zi });
+    if (hasWM('rock_b') || hasWM('rock_a')) WorldModels.place(hubGroup, hasWM('rock_b') ? 'rock_b' : 'rock_a', rocks, { far: 140 });
+    if (cliffs.length) WorldModels.place(hubGroup, 'cliff_ridge', cliffs, { far: 160 });
+    for (const [n, items] of tw) WorldModels.place(hubGroup, n, items, { shadow: false, far: 140 });
+    // Warden Gates: the shut gate with a glowing seal across its arch, or the open arch once beaten (toggled in updateGates)
+    const shut = [], open = []; hubParts.gates = [];
+    for (const e of W.edges) { if (!e.warden) continue;
+      const gb = WORLD_MODEL_BOX.warden_gate || [1, 1], s = (e.w + 7) / gb[0], it = { x: e.x, z: e.z, ry: e.vert ? Math.PI / 2 : 0, s };
+      const io = Object.assign({}, it, { s: (e.w + 7) / (WORLD_MODEL_BOX.warden_gate_open || gb)[0], hidden: true }); shut.push(it); open.push(io);
+      const bm = new THREE.Mesh(new THREE.PlaneGeometry(e.w, 5), new THREE.MeshBasicMaterial({ color: P2.gateLocked, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
+      bm.position.set(e.x, 2.5, e.z); bm.rotation.y = e.vert ? Math.PI / 2 : 0; hubGroup.add(bm);
+      hubParts.gates.push({ e, shut: it, open: io, seal: bm });
+      hubParts.gateLabels.push({ x: e.x, z: e.z, y: 7, edge: e }); }
+    hubParts.gateSets = [WorldModels.place(hubGroup, 'warden_gate', shut, { far: 200 }), WorldModels.place(hubGroup, 'warden_gate_open', open, { far: 200 })];
+    // the gate's towers are solid; its arch is held by gateClamp while shut
+    for (const g2 of hubParts.gates) { const e = g2.e; for (const k of [-1, 1]) grid.add(e.vert ? { x: e.x, z: e.z + k * (e.w / 2 + 2), r: 2.2 } : { x: e.x + k * (e.w / 2 + 2), z: e.z, r: 2.2 }); }
+    // skull posts on the near side of a pass that leads somewhere far above this area
+    const signs = [];
+    for (const e of W.edges) for (const [me, other] of [[e.a, e.b], [e.b, e.a]]) {
+      const M = W.zones[me], O = W.zones[other]; if (O.lvl[0] < M.lvl[1] + 8) continue;
+      const p2 = W.passSide(e, me), k = e.w / 2 + 2.5; signs.push(e.vert ? { x: p2.x, z: e.z + k, ry: Math.sign(M.cx - e.x) * Math.PI / 2, s: 2.6 } : { x: e.x + k, z: p2.z, ry: M.cz > e.z ? 0 : Math.PI, s: 2.6 });
+      grid.add({ x: signs[signs.length - 1].x, z: signs[signs.length - 1].z, r: 0.4 }); }
+    WorldModels.place(hubGroup, hasWM('danger_sign') ? 'danger_sign' : 'signpost', signs, { far: 120 });
   }
-  WorldModels.place(hubGroup, 'gatehouse', gates); WorldModels.place(hubGroup, 'fence', fences);
   // monster dens: a ring of bones, rocks and banners so the camp reads from far away
   const den = { tent: [], banner: [], bones: [], rock: [] };
   W.dens.forEach((D, di) => {
@@ -304,7 +346,7 @@ function buildHub() {
     const caves = W.pois.filter((q) => q.kind === 'dungeon'), bim = new THREE.InstancedMesh(bg, bmat, caves.length), m4 = new THREE.Matrix4();
     caves.forEach((q, i) => bim.setMatrixAt(i, m4.makeTranslation(q.x, 23, q.z))); bim.frustumCulled = false; hubGroup.add(bim); }
   // ore veins: a generated ore outcrop per vein (crystal cluster for the rare vein); greyed and sunk while regrowing
-  { const rot = (q) => (q.x < 0 ? Math.PI / 2 : -Math.PI / 2) + (hashf(q.x, q.z) - 0.5) * 1.2;
+  { const rot = (q) => (q.x < W.zones[q.zone].cx ? Math.PI / 2 : -Math.PI / 2) + (hashf(q.x, q.z) - 0.5) * 1.2;
     const items = { ore: [], crystal: [] }; hubParts.oreItems = [];
     W.nodes.forEach((q) => { const k = q.id.endsWith(':3') ? 'crystal' : 'ore', it = { x: q.x, z: q.z, ry: rot(q), s: k === 'ore' ? 2.2 : 2.6, base: k === 'ore' ? 2.2 : 2.6 }; items[k].push(it); hubParts.oreItems.push(it); });
     hubParts.oreSets = [WorldModels.place(hubGroup, 'ore', items.ore, { shadow: false }), WorldModels.place(hubGroup, 'crystal', items.crystal, { glow: 0x9fe8ff, glowK: 0.5, shadow: false })];
@@ -321,7 +363,7 @@ function buildHub() {
     WorldModels.place(hubGroup, 'quarry_wall', L.wall); WorldModels.place(hubGroup, 'mine_cart', L.cart); WorldModels.place(hubGroup, 'ore_pile', L.pile);
     WorldModels.place(hubGroup, 'signpost', L.sign); WorldModels.place(hubGroup, 'lantern_post', L.lamp, { glow: 0xffd99a, glowK: 0.12 }); }
   // cave mouths down to the dungeons (the rock colliders come from the area art)
-  { const caves = W.pois.filter((q) => q.kind === 'dungeon').map((q) => { const r = q.x < 0 ? Math.PI / 2 : -Math.PI / 2; return { x: q.x - Math.sin(r) * 2.5, z: q.z - Math.cos(r) * 2.5, ry: r, s: 6.4 }; });
+  { const caves = W.pois.filter((q) => q.kind === 'dungeon').map((q) => { const r = q.face > 0 ? Math.PI / 2 : -Math.PI / 2; return { x: q.x - Math.sin(r) * 2.5, z: q.z - Math.cos(r) * 2.5, ry: r, s: 6.4 }; });
     WorldModels.place(hubGroup, 'cave', caves, { shadow: false, bright: 1.35 }); }
   // waypoint stones: obelisks with a floating crystal
   W.waypoints.forEach((w) => grid.add({ x: w.x, z: w.z, r: 1.1 }));
@@ -364,8 +406,9 @@ function buildHub() {
   // vegetation and props, built per zone
   function placeOk(x, z, pad) {
     if (Math.hypot(x - T.x, z - T.z) < T.r + 5) return false;
-    if (Math.abs(x) < 5.5) return false;
-    for (let zi = 1; zi < W.zones.length; zi++) if (Math.abs(z - W.zones[zi].z0) < 3) return false;
+    const zi = zoneAt(x, z), zn = W.zones[zi]; // keep the roads and the wall bands between areas free
+    if (x < zn.x0 + 6 || x > zn.x1 - 6 || z < zn.z0 + 6 || z > zn.z1 - 6) return false;
+    if (roadNear(x, z, zi) < 5) return false;
     for (const l of W.lairList) if (Math.hypot(x - l.x, z - l.z) < 13) return false;
     for (const D of W.dens) if (Math.hypot(x - D.x, z - D.z) < D.r + 3) return false;
     for (const w of W.waypoints) if (Math.hypot(x - w.x, z - w.z) < 4) return false;
@@ -444,16 +487,16 @@ function buildHub() {
   const RUIN_HEART = { 2: ['clan_totem', 4.6], 4: ['arcane_lectern', 2.3], 6: ['sun_lantern', 3.3] };
   const THEME_RUIN = [0x7d786c, 0x7d786c, 0xaab8c4, 0x4a3a34, 0x5b5390, 0x2f5560, 0xe3d8bd];
   const TREE_TOP = { round: 'roundLeaf', pine: 'pine', snowPine: 'snowPine', dead: 'deadTree', crystal: 'crystal', coral: 'coral', blossom: 'blossom' };
-  const lava = [], WK = (W.maxX - W.minX) / 260 * 0.8; // counts were tuned for a 260 m wide map; v10 is a bit more open per m²
+  const lava = [], WK = AREA_CELL / 260 * 0.8; // counts were tuned per 160 m of a 260 m wide road; v11 areas are 190 m squares
   W.zones.forEach((zn, zi) => {
     const th = zn.theme, D = Object.assign({}, THEME_DECO[th], zn.deco || {}), k = zn.len / 160 * WK, cnt = (v) => Math.round((v || 0) * k);
     const trunks = [], tops = [], rocks = [], tufts = [], flowers = [], spikes = [];
-    const z0 = Math.max(zn.z0, W.minZ), z1 = Math.min(zn.z1, W.maxZ);
-    const rnd = () => ({ x: W.minX + 2 + rng() * (W.maxX - W.minX - 4), z: z0 + 2 + rng() * (z1 - z0 - 4) });
+    const z0 = zn.z0, z1 = zn.z1, xa = zn.x0, xb = zn.x1, rn = (x, z) => roadNear(x, z, zi);
+    const rnd = () => ({ x: xa + 4 + rng() * (xb - xa - 8), z: z0 + 4 + rng() * (z1 - z0 - 8) });
     let n = 0, tries = 0;
     // most trees grow in groves around a few centres, leaving open glades in between
     const groves = []; for (let g2 = 0; g2 < Math.max(4, Math.round(9 * k)); g2++) groves.push(rnd());
-    const near = () => { const c = groves[Math.floor(rng() * groves.length)], a = rng() * 6.283, d = Math.sqrt(rng()) * 22; return { x: clamp(c.x + Math.sin(a) * d, W.minX + 2, W.maxX - 2), z: clamp(c.z + Math.cos(a) * d * 0.8, z0 + 2, z1 - 2) }; };
+    const near = () => { const c = groves[Math.floor(rng() * groves.length)], a = rng() * 6.283, d = Math.sqrt(rng()) * 22; return { x: clamp(c.x + Math.sin(a) * d, xa + 4, xb - 4), z: clamp(c.z + Math.cos(a) * d * 0.8, z0 + 4, z1 - 4) }; };
     const tree = D.tree, topC = D.treeC || P2[TREE_TOP[tree]] || P2.roundLeaf;
     while (tree !== 'none' && n < cnt(D.trees) && tries++ < 6000) {
       const { x, z } = rng() < 0.65 ? near() : rnd(); if (!placeOk(x, z, 1.9)) continue;
@@ -475,14 +518,14 @@ function buildHub() {
     }
     // grass tufts + flowers (no collision)
     const tuftC = D.tuftC;
-    for (let i = 0; i < cnt(D.tufts); i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r + 2 || Math.abs(x) < 3.5) continue; tufts.push({ x, z, s: 0.8 + rng() * 0.9, c: tuftC[i % tuftC.length], ry: rng() * 6 }); }
-    for (let i = 0; i < cnt(D.flowers); i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r || Math.abs(x) < 3.5) continue; flowers.push({ x, z, s: 0.8 + rng() * 0.6, c: D.flowerC[i % D.flowerC.length] }); }
+    for (let i = 0; i < cnt(D.tufts); i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r + 2 || rn(x, z) < 3.5) continue; tufts.push({ x, z, s: 0.8 + rng() * 0.9, c: tuftC[i % tuftC.length], ry: rng() * 6 }); }
+    for (let i = 0; i < cnt(D.flowers); i++) { const { x, z } = rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r || rn(x, z) < 3.5) continue; flowers.push({ x, z, s: 0.8 + rng() * 0.6, c: D.flowerC[i % D.flowerC.length] }); }
     for (let i = 0; i < cnt(D.lava); i++) { const { x, z } = rnd(); if (!placeOk(x, z, 3)) continue; lava.push({ x, z, s: 2 + rng() * 3, c: D.lavaC || 0xff6a1f }); }
     // undergrowth and points of interest so the ground never reads as an empty plain
     const bushes = [], logs = [], stumps = [], stems = [], caps = [], pillars = [], blocks = [];
     const leafC = D.leafC || THEME_LEAF[th];
     for (let i = 0; i < cnt(D.bushes); i++) {
-      const { x, z } = rng() < 0.6 ? near() : rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r + 3 || Math.abs(x) < 4.5) continue;
+      const { x, z } = rng() < 0.6 ? near() : rnd(); if (Math.hypot(x - T.x, z - T.z) < T.r + 3 || rn(x, z) < 4.5) continue;
       bushes.push({ x, z, s: 0.55 + rng() * 0.7, c: leafC[Math.floor(rng() * leafC.length)] });
     }
     for (let i = 0, kk = 0; i < cnt(D.logs) && kk < 400; kk++) {
@@ -493,7 +536,7 @@ function buildHub() {
     }
     const fungiC = D.fungiC || [0xc23b3b, 0xd9a441, 0xe9e3cf], fs = D.fungiS || 1;
     for (let i = 0; i < cnt(D.fungi); i++) {
-      const { x, z } = near(); if (Math.abs(x) < 4.5) continue;
+      const { x, z } = near(); if (rn(x, z) < 4.5) continue;
       const s = (0.6 + rng() * 0.8) * (fs > 1 ? 1 + rng() * (fs - 1) : 1);
       stems.push({ x, z, s, c: 0xe9e3cf }); caps.push({ x, z, s, c: fungiC[i % fungiC.length] });
     }
@@ -572,25 +615,28 @@ function buildHub() {
   }
   // a deep forest wall around the play area (several rows), so the world ends in woods, not a flat plain
   const bTrunks = [], bTops = [];
-  for (let i = 0; i < Math.min(4500, Math.round(1400 * (W.maxZ - W.minZ) / 1150)); i++) {
+  for (let i = 0; i < Math.round((W.maxX - W.minX + W.maxZ - W.minZ) * 1.3); i++) {
     const side = i % 4; let x, z;
     if (side < 2) { x = side ? W.maxX + 3 + Math.pow(rng(), 0.7) * 34 : W.minX - 3 - Math.pow(rng(), 0.7) * 34; z = W.minZ - 20 + rng() * (W.maxZ - W.minZ + 40); }
     else { z = side === 2 ? W.minZ - 3 - rng() * 26 : W.maxZ + 3 + rng() * 26; x = W.minX - 30 + rng() * (W.maxX - W.minX + 60); }
-    const zi = W.zones[zoneAt(z)].theme, s = 1 + rng() * 0.8;
+    const zi = W.zones[zoneAt(x, z)].theme, s = 1 + rng() * 0.8;
     if (zi <= 2) { bTrunks.push({ x, z, s, y: 1.6 }); bTops.push({ x, z, s, y: 1.6, c: zi === 2 ? P2.snowPine[0] : P2.pine[Math.floor(rng() * 3)] }); }
     else bTops.push({ x, z, s: s * 1.2, y: 1.6, c: zi === 3 ? 0x2b1c17 : zi === 5 ? 0x1b4f58 : zi === 6 ? 0xe8d3a3 : 0x4a4378 });
   }
   if (hasWM('tree_ash')) {
     // the wall of woods uses each theme's tree (its light LOD when generated); no shadows this far out
     const bt = (th) => [, 'tree_ash', 'tree_ash', 'tree_snow', 'tree_ember', 'tree_crystal', 'tree_coral', 'tree_gold'][th + 1] || 'tree_ash';
-    bTops.forEach((t) => { const th = W.zones[zoneAt(t.z)].theme, nm = hasWM(bt(th)) ? bt(th) : 'tree_ash', m = hasWM(nm + '_lod') ? nm + '_lod' : nm;
+    bTops.forEach((t) => { const th = W.zones[zoneAt(t.x, t.z)].theme, nm = hasWM(bt(th)) ? bt(th) : 'tree_ash', m = hasWM(nm + '_lod') ? nm + '_lod' : nm;
       mput(m, { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: (th <= 2 ? 7.5 : 6) * t.s, color: soft(t.c, 0.25) }, { shadow: false }, 'border_' + m); });
     for (const k of [...MB.keys()].filter((k) => k.startsWith('border_'))) WorldModels.place(hubGroup, MBO[k].name, MB.get(k), MBO[k].opts);
   } else { inst(trunkGeo, bTrunks, false, { shadow: false }); inst(pineGeo, bTops, true, { shadow: false }); }
   // horizon: each theme's distant landmass beyond the woods (mountains, volcanoes, sea stacks, floating isles, sky temples)
   { const HZ = ['mountain', 'mountain', 'snow_mountain', hasWM('volcano') ? 'volcano' : 'mountain', 'floating_isle', 'sea_stack', hasWM('sky_temple') ? 'sky_temple' : 'floating_isle'], hz = new Map();
     W.zones.forEach((zn, zi) => { const nm = HZ[zn.theme]; if (!hasWM(nm)) return; if (!hz.has(nm)) hz.set(nm, []);
-      for (const side of [-1, 1]) for (let j = 0; j < 2; j++) { const x = side * (W.maxX + 48 + ((zi + j) % 2) * 16), z = zn.z0 + (j + 0.5) * zn.len / 2 + (hashf(zi, j) - 0.5) * 20;
+      // areas on the map's edge get two distant pieces beyond the woods on each outer side
+      const outs = [[zn.x1 >= W.maxX - 1, 1, 0], [zn.x0 <= W.minX + 1, -1, 0], [zn.z1 >= W.maxZ - 1, 0, 1], [zn.z0 <= W.minZ + 1, 0, -1]].filter((o) => o[0]);
+      for (const [, ox, oz] of outs) for (let j = 0; j < 2; j++) { const u = (j - 0.5) * zn.hw + (hashf(zi, j) - 0.5) * 30, d = zn.hw + 48 + ((zi + j) % 2) * 16;
+        const x = zn.cx + (ox ? ox * d : u), z = zn.cz + (oz ? oz * d : u);
         hz.get(nm).push({ x, z, y: nm === 'floating_isle' || nm === 'sky_temple' ? 14 + hashf(z, x) * 10 : -1, ry: hashf(x, z) * 6, s: 34 + hashf(z, zi) * 14, color: zn.theme === 3 ? 0x8a5a4a : zn.theme === 6 ? 0xfff0d0 : 0xffffff }); } });
     for (const [nm, items] of hz) WorldModels.place(hubGroup, nm, items, { shadow: false, horizon: true, far: 230, glow: nm === 'volcano' ? 0xff6a2a : 0, glowK: 0.25 }); }
 
@@ -636,11 +682,11 @@ function updateZoneMood(dt) {
   if (G.dungeon) { updateDungeonView(dt); return; } // the dungeon owns fog and sky while inside
   if (G.siege) { updateSiegeView(dt); return; } // so does the fort
   if (G.mode !== 'hub' || !G.player || G.rift) return;
-  const W = CFG.world, z = G.player.z, zi = zoneAt(z), zn = W.zones[zi];
-  // blend toward the next zone near its border
+  const W = CFG.world, x = G.player.x, z = G.player.z, zi = zoneAt(x, z), zn = W.zones[zi];
+  // blend toward the area across the nearest border (half way at the wall)
   let k = 0, nz = zn;
-  if (zi < W.zones.length - 1) { const nb = W.zones[zi + 1]; k = clamp(1 - (nb.z0 - z) / 20, 0, 1) * 0.5; nz = nb; }
-  if (zi > 0 && z - zn.z0 < 20) { const pb = W.zones[zi - 1]; const kk = clamp(1 - (z - zn.z0) / 20, 0, 1) * 0.5; if (kk > k) { k = kk; nz = pb; } }
+  for (const [d, ox, oz] of [[zn.x1 - x, 1, 0], [x - zn.x0, -1, 0], [zn.z1 - z, 0, 1], [z - zn.z0, 0, -1]]) {
+    const kk = clamp(1 - d / 20, 0, 1) * 0.5; if (kk <= k) continue; const ni = zoneAt(x + ox * (d + 5), z + oz * (d + 5)); if (ni !== zi) { k = kk; nz = W.zones[ni]; } }
   const a = 1 - Math.exp(-dt * 2);
   ZoneMood.fog.lerp(_fogA.set(zn.fog).lerp(_skyTop.set(nz.fog), k), a);
   ZoneMood.top.lerp(_skyTop.set(zn.sky[0]).lerp(_skyHor.set(nz.sky[0]), k), a);

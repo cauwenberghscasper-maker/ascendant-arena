@@ -102,12 +102,16 @@ check('fast opening never stops on a full bag and later drops cannot evict its r
 check('v8 saves move onto the 29-area map: open gates, remapped jobs, no lost progress',()=>{
   const old={...ctx.newProfile(),level:60,savedAt:Date.now()-1000,waypoints:[0,1,2,3],job:{npc:'mira',type:'kill',target:'imp',count:15,progress:4},stats:{...ctx.newProfile().stats,zone:4,kills:999}};delete old.worldVersion;
   const p=ctx.sanitizeProfile(JSON.parse(JSON.stringify(old)));const Z=ctx.config.world.zones;
-  assert.equal(p.worldVersion,10);assert.equal(Object.keys(p.secrets).length,0);assert.equal(p.level,60);assert.equal(p.stats.kills,999);
+  assert.equal(p.worldVersion,11);assert.equal(Object.keys(p.secrets).length,0);assert.equal(p.level,60);assert.equal(p.stats.kills,999);
   assert.deepEqual(Array.from(p.waypoints),[0].concat(Array.from(Z.map((z,i)=>i).filter(i=>i>0&&Z[i].minLevel<=60))));
   assert.equal(Z[p.stats.zone].name,'Grumbling Descent');assert.equal(p.job.target,'craggoat');assert.equal(p.job.progress,4);
   const again=ctx.sanitizeProfile(JSON.parse(JSON.stringify(p)));assert.deepEqual(Array.from(again.waypoints),Array.from(p.waypoints));
   const fresh2=ctx.sanitizeProfile(JSON.parse(JSON.stringify(ctx.newProfile())));assert.deepEqual(Array.from(fresh2.waypoints),[0]);
-  assert.equal(Z.length,30);assert(Z.every((z,i)=>!i||z.z0===Z[i-1].z1));assert.equal(Z.at(-1).lvl[1],210);
+  assert.equal(Z.length,30);assert(Z.every((z,i)=>!i||Math.abs(z.col-Z[i-1].col)+Math.abs(z.row-Z[i-1].row)===1),'the main path walks area to neighbouring area');
+  // v11 open world: the Main Path starts at the highest area your level reaches; gates up to your level are open
+  assert.equal(Z[p.quest.ch].name,'Grumbling Descent');assert.equal(p.quest.step,0);
+  for(const e of ctx.config.world.edges)if(e.warden)assert.equal(!!p.gates[e.id],e.lvl<=60,e.id);
+  assert(p.visited.includes(4)&&p.visited.includes(0));assert.equal(fresh2.quest.ch,1);assert.equal(Object.keys(fresh2.gates).length,0);assert.equal(Z.at(-1).lvl[1],210);
   for(const z of Z.slice(1)){assert(ctx.config.enemies[z.enemy]&&ctx.config.enemies[z.alt],z.name);}
 });
 check('Bastion Siege fort saves: old pads move onto the grid, known types, levels 1-15, whole stones, a builder hut',()=>{
@@ -120,11 +124,11 @@ check('Bastion Siege fort saves: old pads move onto the grid, known types, level
 check('v9 saves move onto the widened v10 map: indices kept, secrets/POIs/dungeons added, found secrets survive',()=>{
   const old={...ctx.newProfile(),level:80,savedAt:Date.now()-1000,worldVersion:9,waypoints:[0,3,7],stats:{...ctx.newProfile().stats,zone:7,kills:5}};delete old.secrets;delete old.pois;delete old.dungeons;
   const p=ctx.sanitizeProfile(JSON.parse(JSON.stringify(old)));
-  assert.equal(p.worldVersion,10);assert.deepEqual(Array.from(p.waypoints),[0,3,7]);assert.equal(p.stats.zone,7);
+  assert.equal(p.worldVersion,11);assert.deepEqual(Array.from(p.waypoints),[0,3,7]);assert.equal(p.stats.zone,7);
   for(const k of ['secrets','pois','dungeons'])assert(p[k]&&typeof p[k]==='object'&&!Array.isArray(p[k]),k);
-  p.secrets['a01:secret:0']=123;const again=ctx.sanitizeProfile(JSON.parse(JSON.stringify(p)));assert.equal(again.secrets['a01:secret:0'],123);assert.equal(again.worldVersion,10);
+  p.secrets['a01:secret:0']=123;const again=ctx.sanitizeProfile(JSON.parse(JSON.stringify(p)));assert.equal(again.secrets['a01:secret:0'],123);assert.equal(again.worldVersion,11);
   const bad=ctx.sanitizeProfile(JSON.parse(JSON.stringify({...p,secrets:[1],dungeons:null})));assert.equal(Object.keys(bad.secrets).length,0);assert.equal(Object.keys(bad.dungeons).length,0);
-  assert.equal(ctx.newProfile().worldVersion,10);
+  assert.equal(ctx.newProfile().worldVersion,11);
 });
 check('one skill tree per hero: 9 branches, no overlapping nodes, v8 hero tree merges into every hero',()=>{
   const C=ctx.config;assert.equal(C.heroTree,undefined);

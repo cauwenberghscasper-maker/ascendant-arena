@@ -667,7 +667,7 @@ function endSiege(why) {
   const pl = G.player, p = G.profile, C = CFG.siege, out = { x: C.gate.x + 2, z: C.gate.z };
   if (why !== 'away') { pl.x = out.x; pl.z = out.z; }
   if (pl.alive) { pl.invulnT = 1; pl.hp = pl.maxHp; } else G.respawnAt = { x: pl.x, z: pl.z };
-  G.zoneIdx = zoneAt(pl.z);
+  G.zoneIdx = zoneAt(pl.x, pl.z);
   const res = { why, wave: S.wave, next: F.wave || S.wave, cleared: S.cleared, held: S.held || 0, gold: S.gold, stones: S.stones, items: S.items, best: p.records.bestSiege || 0, x: pl.x, z: pl.z, code: S.code };
   G.siegeResult = res; G.dirty = true;
   ev(Object.assign({ t: 'siegeEnd' }, res));

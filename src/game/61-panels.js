@@ -7,6 +7,7 @@ function interact() {
   if (n.kind === 'riftLeave') return endRift('leave');
   if (n.kind === 'dungeon') return openDungeonPanel(n.poi);
   if (n.kind === 'trial') return openTrialPanel(n.zone);
+  if (n.kind === 'warden') return startWarden(n.edge);
   if (n.kind === 'mine') return mineNode(n.st);
   if (n.kind === 'dungeonLeave') return endDungeon('leave');
   if (n.kind === 'dungeonChest') return delveOn() ? openDelveChest(claimDelveChest()) : openDungeonChest();
@@ -607,7 +608,7 @@ function heroTab(tab) {
 // to travel there from anywhere in the open world; areas you have not reached yet stay hidden.
 function openWorldMap() {
   UI.current = 'worldmap';
-  const p = G.profile, here = zoneAt(G.player.z), far = Math.max(p.stats.zone || 0, here), hub = G.mode === 'hub' && !G.rift;
+  const p = G.profile, here = zoneAt(G.player.x, G.player.z), far = Math.max(p.stats.zone || 0, here), hub = G.mode === 'hub' && !G.rift;
   const wpOf = {}; CFG.world.waypoints.forEach((w, i) => { wpOf[w.zone] = i; });
   const Z = CFG.world.zones, html = [];
   for (let zi = Z.length - 1; zi >= 0; zi--) { // north (furthest) at the top; each biome's name sits above its areas

@@ -38,9 +38,10 @@ function reset() { G.enemies = []; G.ents.clear(); G.pendingAoE.length = G.cloud
 // a monster in area 2's middle, chasing, with only `move` ready (lunges and normal attacks parked unless asked)
 function rig(type, move, dist, keepAttack) {
   reset(); const Z = W.zones[2], zm = (Z.z0 + Z.z1) / 2, e = c.makeEnemy(type, 2, { patrol: 3 });
-  Object.assign(e, { x: 50, z: zm, hx: 50, hz: zm, state: 'chase', atkCd: keepAttack ? 0 : 99, lungeCd: move === 'trample' ? 0 : 99 }); G.enemies.push(e);
+  const X = Z.cx + 30; // inside area 2's square (open world)
+  Object.assign(e, { x: X, z: zm, hx: X, hz: zm, state: 'chase', atkCd: keepAttack ? 0 : 99, lungeCd: move === 'trample' ? 0 : 99 }); G.enemies.push(e);
   e.mv = c.moveState(e); for (const k in e.mv.cd) e.mv.cd[k] = k === move ? 0 : 99; e.mv.gap = 0;
-  Object.assign(G.player, { x: 50, z: zm + dist }); return e;
+  Object.assign(G.player, { x: X, z: zm + dist }); return e;
 }
 const teleSeen = (since) => events.some(x => x.at >= since && (x.t === 'moveTele' || (x.t === 'telegraph' && x.len)));
 // dodge(e, pl) → the 3 m sidestep direction once the windup ends ([dx, dz, metres] to step another distance);
@@ -128,7 +129,7 @@ check('elites roll champion affixes (two from area 10) at mobDmg x0.6; Rift cham
   G.pendingAoE.length = 0; e.rift = true; e.champ.cd.slam = 0; c.stepEnemy(e, DT); assert(G.pendingAoE.length >= 3 && G.pendingAoE.every(a => a.dmg === G.player.maxHp * 0.2));
 });
 check('no moves toward a hero in town, in a menu or dead', () => {
-  for (const f of [p => { p.alive = false; }, () => { G.menuSafe = 1; }, (p, e) => { p.x = e.x = W.town.x; p.z = W.town.z + W.town.r + 1; e.z = p.z + 2.5; e.zone = c.zoneAt(e.z); }]) {
+  for (const f of [p => { p.alive = false; }, () => { G.menuSafe = 1; }, (p, e) => { p.x = e.x = W.town.x; p.z = W.town.z + W.town.r + 1; e.z = p.z + 2.5; e.zone = c.zoneAt(e.x, e.z); }]) {
     const e = rig('glacialtroll', 'slam', 2.5); f(G.player, e); assert(Math.hypot(G.player.x - e.x, G.player.z - e.z) < 3); for (let i = 0; i < 30; i++) c.stepEnemy(e, DT); G.menuSafe = 0;
     assert.equal(G.pendingAoE.length, 0); assert(!teleSeen(0));
   }

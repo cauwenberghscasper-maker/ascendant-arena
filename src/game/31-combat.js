@@ -649,21 +649,7 @@ function boundFighter(f, ctx) {
   }
   const W = CFG.world;
   f.x = clamp(f.x, W.minX, W.maxX); f.z = clamp(f.z, W.minZ, W.maxZ);
-  if (f.isPlayer) {
-    const L = G.profile.level;
-    for (let i = 1; i < W.zones.length; i++) {
-      const zn = W.zones[i];
-      if (L < zn.minLevel && f.z > zn.z0 - f.r) {
-        f.z = zn.z0 - f.r;
-        if (G.time - G.gateToastT > 3) { G.gateToastT = G.time; toast(`The ${zn.name} gate needs level ${zn.minLevel}`, 'bad'); }
-        break;
-      }
-    }
-  } else if (f.isBot && G.mode === 'hub') {
-    for (let i = 1; i < W.zones.length; i++) {
-      const zn = W.zones[i];
-      if (f.level < zn.minLevel && f.z > zn.z0 - f.r) { f.z = zn.z0 - f.r; break; }
-    }
-  }
+  // open world: no level gates any more (walking somewhere far above you only warns); shut Warden Gates block their pass
+  if ((f.isPlayer || f.isBot) && G.mode === 'hub') gateClamp(f);
 }
 

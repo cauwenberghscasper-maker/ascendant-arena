@@ -20,7 +20,7 @@ function boot(hotData) {
   buildHub(); buildArena(); buildRift();
   G.obstacles = G.hubObstacles;
   initHub();
-  G.zoneIdx = zoneAt(G.player.z);
+  G.zoneIdx = zoneAt(G.player.x, G.player.z);
   setupPools(); setupInput();
   $('panel').addEventListener('click', handlePanelClick);
   $('panel').addEventListener('change', handleSettingChange);

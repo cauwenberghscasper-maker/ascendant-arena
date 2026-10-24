@@ -59,7 +59,7 @@ async function mpInit() {
 // 'hit' share the monsters (see the shared monsters section below).
 const MP_ROOM_CAP = 60;
 // a party (or a matchmaking queue) has its own channel instead of the lobby (73-party.js)
-function mpRoomKey() { const fk = G.siege && G.siege.code ? 'fort-' + G.siege.code : '', pk = typeof partyRoomKey === 'function' ? partyRoomKey() : ''; return (LOCAL_PREVIEW ? 'dev-' : '') + (fk || pk || 'lobby'); }
+function mpRoomKey() { const fk = G.siege && G.siege.code ? 'fort-' + G.siege.code : '', pk = typeof partyRoomKey === 'function' ? partyRoomKey() : ''; return (LOCAL_PREVIEW ? 'dev-' : '') + (fk || pk || 'lobby-w11') // World v11 moved every monster slot: old clients stay in their own lobby; }
 const RT = { ws: null, state: 'none', topic: '', key: '', joinRef: '', ref: 0, retry: 0, backoff: 1, hbT: 25, sendT: 0, beatT: 0, last: '', tracked: '', present: 0, sent: 0 };
 function rtSend(topic, event, payload, joinRef) {
   if (!RT.ws || RT.ws.readyState !== 1) return false;
@@ -443,14 +443,14 @@ function mpSummary() { const n = mpCount(); return MP.state === 'off' ? 'Offline
 function mpGoTo(key) {
   const e = MP.peers.get(key), pl = G.player, p = G.profile; if (!e || G.mode !== 'hub' || G.rift) return;
   if (e.md !== 'hub') { toast(`${e.nick} is in the Rift or a match right now`, 'bad'); return; }
-  const zn = CFG.world.zones[zoneAt(e.z)]; if (p.level < zn.minLevel) { toast(`${zn.name} needs level ${zn.minLevel}`, 'bad'); return; }
-  pl.x = e.x + 2; pl.z = e.z - 1.5; pl.invulnT = 1; G.zoneIdx = zoneAt(pl.z);
+  const zn = CFG.world.zones[zoneAt(e.x, e.z)]; if (p.level < zn.minLevel) { toast(`${zn.name} needs level ${zn.minLevel}`, 'bad'); return; }
+  pl.x = e.x + 2; pl.z = e.z - 1.5; pl.invulnT = 1; G.zoneIdx = zoneAt(pl.x, pl.z);
   ev({ t: 'teleport', name: `Joined ${e.nick}`, x: pl.x, z: pl.z }); UI.close();
 }
 function openPlayers() {
   UI.current = 'players';
   const pl = G.player, rows = MP.list.map((e) => {
-    const zn = e.md === 'hub' ? CFG.world.zones[zoneAt(e.z)].name : e.md === 'rift' ? 'In the Rift' : 'In a match';
+    const zn = e.md === 'hub' ? CFG.world.zones[zoneAt(e.x, e.z)].name : e.md === 'rift' ? 'In the Rift' : 'In a match';
     const d = Math.round(Math.hypot(e.x - pl.x, e.z - pl.z)), B = CFG.brawlers[e.cls];
     return `<div class="item"><div class="meta"><div class="slot">${escHtml(zn)}${e.md === 'hub' ? ` · ${d} m` : ''}</div><div class="nm">${escHtml(e.nick)} <em>Lv ${e.level}</em></div><div class="st">${B.name} · ${CFG.attacks[e.cls].name}</div></div>${e.md === 'hub' ? `<button class="primary" data-act="mpGo" data-k="${escHtml(e.key)}">Go to</button>` : ''}</div>`;
   }).join('');

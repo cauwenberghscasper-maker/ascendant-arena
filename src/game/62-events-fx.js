@@ -261,7 +261,12 @@ function processEvents() {
       case 'shrineFail': showToast(`Challenge failed. The shrine recharges in ${CFG.shrines.cooldownFail}s`, 'bad'); Sfx.play('lose'); break;
       case 'upgrade': showToast(e.n > 1 ? `${e.name} +${e.n} upgrades → +${e.up}` : `${e.name} is now +${e.up}`, 'good'); break;
       case 'pickup': burst(e.x, 0.6, e.z, 10, 0xff5fa2, 4, 0.5, 0.2, 8); SpriteFX.play('crit', 'arcane', e.x, 0.9, e.z, 1.8); Sfx.play('pickup'); break;
-      case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.z)]; const prevB = Feed.lastBiome; Feed.lastBiome = zn.biome;
+      case 'danger': Sfx.play('horn');
+        showBanner('DANGER', e.gate ? `This warden is level ${e.lvl}. You will probably die.` : `${e.name} · Lv ${e.lvl}–${e.hi} · far above you. You will probably die here.`, 'red', 4); break;
+      case 'gateOpen': Sfx.play('win'); burst(e.x, 2, e.z, 40, 0xffd34a, 8, 1.2, 0.5, 6, 1); Feed.add(`${gi('m_progress')} Warden Gate open: <b>${e.name}</b>`); break;
+      case 'questStep': Sfx.play('click'); Feed.add(`${gi('m_progress')} Main Path: ${e.text}`); break;
+      case 'questChapter': Sfx.play('win'); showBanner(e.done ? 'MAIN PATH COMPLETE' : 'CHAPTER COMPLETE', `${e.name} · a Treasure Chest is yours`, 'gold', 3); break;
+      case 'zone': { const zn = CFG.world.zones[zoneAt(G.player.x, G.player.z)]; const prevB = Feed.lastBiome; Feed.lastBiome = zn.biome;
         Feed.add(zn.safe ? `${gi('m_progress')} Back at <b>${e.name}</b> · safe` : prevB != null && prevB !== zn.biome ? `${gi('m_progress')} <b>${zn.biomeName}</b> › ${e.name} · Lv ${zn.lvl[0]}–${zn.lvl[1]}` : `${gi('m_progress')} Entered <b>${e.name}</b> · Lv ${zn.lvl[0]}–${zn.lvl[1]}`, 'zone'); break; }
       case 'bossWarn': { Sfx.play('horn'); const Zb = CFG.world.zones[G.bossLair], locked = G.bossLair > highestZone(G.profile.level);
         showBanner('BOSS INCOMING', `${Zb ? Zb.boss : 'A world boss'} rises in ${e.lair} in ${e.secs}s${locked ? ' · area not unlocked for you yet' : ' · unlocked area'}`, 'red'); break; }
@@ -395,7 +400,11 @@ function updateHubProps(t) {
   sparkleT -= 1 / 60;
   const topR = CFG.gear.slots.reduce((m, s) => Math.max(m, p.gear[s] ? rarIdx(p.gear[s].rarity) : 0), 0);
   if (HERO_OVERLAYS && sparkleT <= 0 && G.player.alive && topR >= 4) { sparkleT = topR >= 6 ? 0.08 : topR >= 5 ? 0.12 : 0.18; burst(G.player.x + (Math.random() - 0.5), 1 + Math.random() * 1.2, G.player.z + (Math.random() - 0.5), 1, RAR_HEX[RARITIES[topR]], 0.8, 0.7, 0.16, -1, 1); }
-  for (const b of hubParts.barriers) { const locked = p.level < CFG.world.zones[b.zone].minLevel; b.mesh.visible = locked; b.mesh.material.opacity = 0.16 + Math.sin(t * 2) * 0.06; }
+  // Warden Gates: the seal glows across a shut arch; once beaten the open arch replaces the shut one
+  if (hubParts.gates) { let ch = false;
+    for (const g of hubParts.gates) { const op = gateOpen(g.e); g.seal.visible = !op; if (!op) g.seal.material.opacity = 0.16 + Math.sin(t * 2) * 0.06;
+      if (g.shut.hidden !== op) { g.shut.hidden = op; g.open.hidden = !op; ch = true; } }
+    if (ch) for (const h of hubParts.gateSets) for (const x of h.multi || [h]) x.dirty = true; }
   if (hubParts.siegeDisc) { hubParts.siegeDisc.rotation.y = t * 0.9; hubParts.siegeRing.material.opacity = 0.55 + Math.sin(t * 3) * 0.2; }
   if (hubParts.riftDisc) { hubParts.riftDisc.rotation.z = -t * 1.1; hubParts.riftRing.rotation.z = t * 0.5; hubParts.riftRing.scale.setScalar(1 + Math.sin(t * 3) * 0.04); }
   // ascended (level 200): a golden trail while you move
@@ -450,8 +459,15 @@ const mmY = (z) => (CFG.world.maxZ - z);
 function mmBuildBase() {
   const c = document.createElement('canvas'); c.width = Math.ceil(MW * MS); c.height = Math.ceil(MH * MS);
   const g = c.getContext('2d'), W = CFG.world; g.scale(MS, MS);
-  W.zones.forEach((zn, i) => { const y0 = mmY(Math.min(zn.z1, W.maxZ)), y1 = mmY(Math.max(zn.z0, W.minZ)); g.fillStyle = zn.mm; g.fillRect(0, y0, MW, y1 - y0); });
-  g.strokeStyle = 'rgba(210,176,123,.9)'; g.lineWidth = 4; g.beginPath(); g.moveTo(mmX(0), mmY(W.town.z)); g.lineTo(mmX(0), mmY(W.maxZ - 6)); g.stroke();
+  // open map (World v11): one square per area, the walls between them, the roads through the passes
+  W.zones.forEach((zn) => { g.fillStyle = zn.mm; g.fillRect(mmX(zn.x1), mmY(zn.z1), zn.x1 - zn.x0, zn.z1 - zn.z0); });
+  g.strokeStyle = 'rgba(14,12,20,.75)'; g.lineWidth = 5; g.lineCap = 'butt';
+  for (const e of W.edges) { const A = W.zones[e.a], H = A.hw, c0 = e.vert ? A.cz - H : A.cx - H, along = e.vert ? e.z : e.x;
+    for (const [u0, u1] of [[c0, along - e.w / 2], [along + e.w / 2, c0 + 2 * H]]) { g.beginPath();
+      if (e.vert) { g.moveTo(mmX(e.x), mmY(u0)); g.lineTo(mmX(e.x), mmY(u1)); } else { g.moveTo(mmX(u0), mmY(e.z)); g.lineTo(mmX(u1), mmY(e.z)); } g.stroke(); } }
+  g.strokeStyle = 'rgba(210,176,123,.9)'; g.lineWidth = 3.5; g.lineCap = 'round';
+  for (const r of W.roads) { g.beginPath(); g.moveTo(mmX(r.x0), mmY(r.z0)); g.lineTo(mmX(r.x1), mmY(r.z1)); g.stroke(); }
+  for (const e of W.edges) { const a = W.passSide(e, e.a), b = W.passSide(e, e.b); g.beginPath(); g.moveTo(mmX(a.x), mmY(a.z)); g.lineTo(mmX(b.x), mmY(b.z)); g.stroke(); }
   g.fillStyle = '#e8d5a6'; g.beginPath(); g.arc(mmX(W.town.x), mmY(W.town.z), W.town.r, 0, Math.PI * 2); g.fill();
   g.fillStyle = '#8f8aa8'; g.beginPath(); g.arc(mmX(PORTAL.x), mmY(PORTAL.z), 3, 0, Math.PI * 2); g.fill();
   g.fillStyle = '#ff5d8f'; g.beginPath(); g.arc(mmX(CFG.rift.gate.x), mmY(CFG.rift.gate.z), 3, 0, Math.PI * 2); g.fill();
@@ -538,25 +554,29 @@ function drawMinimap() {
   if (!MM.base) mmBuildBase();
   const W = CFG.world, pl = G.player;
   const winW = MM.big ? 300 : 120, winH = winW * H2 / W2, sc = W2 / winW, u = winW / 172;
-  const ox = clamp(mmX(pl.x) - winW / 2, 0, MW - winW), oy = clamp(mmY(pl.z) - winH * 0.62, 0, Math.max(0, MH - winH));
+  const ox = clamp(mmX(pl.x) - winW / 2, 0, Math.max(0, MW - winW)), oy = clamp(mmY(pl.z) - winH / 2, 0, Math.max(0, MH - winH));
   g.setTransform(sc, 0, 0, sc, -ox * sc, -oy * sc);
   g.drawImage(MM.base, 0, 0, MW, MH);
-  for (let i = 1; i < W.zones.length; i++) {
-    const zn = W.zones[i], y = mmY(zn.z0), locked = p.level < zn.minLevel;
-    g.strokeStyle = locked ? '#ff4d5a' : '#58e08a'; g.lineWidth = 2 * u; g.setLineDash(locked ? [5 * u, 3 * u] : []);
-    g.beginPath(); g.moveTo(0, y); g.lineTo(MW, y); g.stroke(); g.setLineDash([]);
-  }
+  // areas far above you are shaded red; Warden Gates are red bars while shut, green once open
+  for (let i = 1; i < W.zones.length; i++) { const zn = W.zones[i]; if (areaDanger(i, p.level)) { g.fillStyle = 'rgba(255,60,70,.16)'; g.fillRect(mmX(zn.x1), mmY(zn.z1), zn.x1 - zn.x0, zn.z1 - zn.z0); } }
+  for (const e of W.edges) { if (!e.warden) continue; const op = gateOpen(e), k = e.w / 2 + 2; g.strokeStyle = op ? '#58e08a' : '#ff4d5a'; g.lineWidth = 3.2 * u; g.beginPath();
+    if (e.vert) { g.moveTo(mmX(e.x), mmY(e.z - k)); g.lineTo(mmX(e.x), mmY(e.z + k)); } else { g.moveTo(mmX(e.x - k), mmY(e.z)); g.lineTo(mmX(e.x + k), mmY(e.z)); } g.stroke(); }
+  // the Main Path: a gold star on the current objective and a dotted line along the way there
+  { const qt = typeof questTarget === 'function' ? questTarget() : null;
+    if (qt) { g.strokeStyle = 'rgba(255,211,74,.85)'; g.lineWidth = 1.6 * u; g.setLineDash([3 * u, 3 * u]); g.beginPath(); g.moveTo(mmX(pl.x), mmY(pl.z));
+      let cx = pl.x, cz = pl.z; for (let n = 0; n < 8; n++) { const r = routeNext(cx, cz, qt.x, qt.z, qt.edge); if (!r || (Math.abs(r.x - cx) < 0.5 && Math.abs(r.z - cz) < 0.5)) break; g.lineTo(mmX(r.x), mmY(r.z)); cx = r.x; cz = r.z; if (r.x === qt.x && r.z === qt.z) break; }
+      g.stroke(); g.setLineDash([]); mmStar(g, mmX(qt.x), mmY(qt.z), (6 + Math.sin(t * 5)) * u, '#ffd34a'); } }
   g.textAlign = 'center'; g.textBaseline = 'middle';
   for (const q of W.pois) {
     if (q.hidden && !p.secrets[q.id]) continue; // undiscovered secrets never show
-    if (Math.abs(q.z - pl.z) > winH) continue;
+    if (Math.abs(q.z - pl.z) > winH || Math.abs(q.x - pl.x) > winW) continue;
     g.font = `bold ${(q.major || q.kind === 'dungeon' ? 9 : 7) * u}px Rubik, sans-serif`; g.fillStyle = q.kind === 'dungeon' ? '#ffb347' : q.kind === 'secret' ? '#fff07a' : '#e8d5a6';
     { const s = (q.major || q.kind === 'dungeon' ? 3 : 1.8) * u; g.fillRect(mmX(q.x) - s, mmY(q.z) - s, 2 * s, 2 * s); } // pixel squares, no emoji glyphs
   }
   for (const D of W.dens) { g.fillStyle = '#ff5d6c'; g.font = `bold ${9 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillRect(mmX(D.x) - 3 * u, mmY(D.z) - 3 * u, 6 * u, 6 * u); }
   for (const st of nodeStates()) if (!st.t && Math.abs(st.q.z - pl.z) < winH) { g.fillStyle = st.rich ? '#ffd34a' : isRareVein(st.q) ? '#c77dff' : '#7fe3c4'; g.fillRect(mmX(st.q.x) - 1.6 * u, mmY(st.q.z) - 1.6 * u, 3.2 * u, 3.2 * u); }
   // off-window dens and caves of this area: a pinned icon on the window edge so the flanks are never forgotten
-  { const zi = zoneAt(pl.z), m = 6 * u, ex = (x) => clamp(x, ox + m, ox + winW - m), ey = (y) => clamp(y, oy + m, oy + winH - m);
+  { const zi = zoneAt(pl.x, pl.z), m = 6 * u, ex = (x) => clamp(x, ox + m, ox + winW - m), ey = (y) => clamp(y, oy + m, oy + winH - m);
     const pin = (x, z, ch, col) => { const X = mmX(x), Y = mmY(z); if (X > ox && X < ox + winW && Y > oy && Y < oy + winH) return;
       g.fillStyle = 'rgba(20,22,43,.8)'; g.beginPath(); g.arc(ex(X), ey(Y), 5.5 * u, 0, Math.PI * 2); g.fill(); g.fillStyle = col; g.fillRect(ex(X) - 2.5 * u, ey(Y) - 2.5 * u, 5 * u, 5 * u); };
     for (const D of W.dens) if (D.zone === zi) pin(D.x, D.z, '☠', '#ff5d6c');
@@ -587,7 +607,7 @@ function drawMinimap() {
   g.fillStyle = '#ffc94a'; g.fill(); g.lineWidth = 1.5 * u; g.strokeStyle = '#3a2400'; g.stroke();
   if (MM.big) {
     g.font = `bold ${10 * u}px Rubik, sans-serif`; g.textAlign = 'center'; g.fillStyle = 'rgba(20,22,43,.85)';
-    W.zones.forEach((zn) => { const y = mmY(Math.min(zn.z1, W.maxZ)) + 14 * u; g.fillText(zn.safe ? zn.name : `${zn.name} · ${zn.lvl[0]}–${zn.lvl[1]}`, MW / 2, y); });
+    W.zones.forEach((zn, i) => { g.fillStyle = areaDanger(i, p.level) ? 'rgba(120,10,20,.9)' : 'rgba(20,22,43,.85)'; g.fillText(zn.name, mmX(zn.cx), mmY(zn.cz + 30)); if (!zn.safe) g.fillText(`${zn.lvl[0]}–${zn.lvl[1]}`, mmX(zn.cx), mmY(zn.cz + 30) + 12 * u); });
   }
 }
 function setMap(open) { G.profile.settings.map = open; G.dirty = true; $('mapBox').hidden = !open; $('bMap').classList.toggle('on', open); MM.t = 0; }
@@ -596,7 +616,7 @@ function setMap(open) { G.profile.settings.map = open; G.dirty = true; $('mapBox
 function updateBossTracker() {
   const inHub = G.mode === 'hub' && G.started && !Showcase.on;
   const b = inHub ? G.boss : null;
-  const fighting = !!b && (b.dmgBy[G.player.id] || 0) > 0 && zoneAt(G.player.z) === b.zone; // only people who attack it, in its zone, get the health bar
+  const fighting = !!b && (b.dmgBy[G.player.id] || 0) > 0 && zoneAt(G.player.x, G.player.z) === b.zone; // only people who attack it, in its zone, get the health bar
   setHidden('bossBar', !fighting);
   if (b) {
     setText('bossName', `${b.name} · Lv ${b.lvl}`);

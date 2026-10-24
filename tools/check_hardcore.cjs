@@ -56,15 +56,16 @@ function mob(type, L, x, z, o = {}) {
   const e = c.makeEnemy(type, 2, { patrol: 0, elite: !!o.elite }); c.setEnemyLevel(e, L);
   Object.assign(e, { x, z, hx: x, hz: z, state: 'chase', atkCd: o.cd ?? 0.3, lungeCd: 1 }); return e;
 }
-const arenaZ = () => (W.zones[2].z0 + W.zones[2].z1) / 2;
+const arenaZ = () => (W.zones[2].z0 + W.zones[2].z1) / 2, AX = W.zones[2].cx + 30; // a spot inside area 2's square (open world)
 // one stationary hero vs a list of monsters; returns seconds until it drops (or `limit`)
 function fight(f, list, limit = 60) {
-  const G = c.G; G.time = 0; G.player = f; f.x = 70; f.z = arenaZ(); G.enemies = list; c.clearProjectiles();
+  seed = 7; // every fight rolls the same dice, whatever the world layout drew before it
+  const G = c.G; G.time = 0; G.player = f; f.x = AX; f.z = arenaZ(); G.enemies = list; c.clearProjectiles();
   G.ents = new Map([[f.id, f], ...list.map((e) => [e.id, e])]);
   while (f.alive && G.time < limit) { G.time += DT; for (const e of list) c.stepEnemy(e, DT); c.stepProjectiles(DT); f.invulnT -= DT; f.retalCd -= DT; c.tickBurn(f, DT); if (f.alive) c.regenTick(f, DT, 'hub'); }
   return G.time;
 }
-const pack = (L) => { const z = arenaZ(); return [mob('ref_swarm', L, 66, z + 2), mob('ref_swarm', L, 74, z - 2), mob('ref_charger', L, 70, z + 6), mob('ref_shooter', L, 70, z - 8)]; };
+const pack = (L) => { const z = arenaZ(); return [mob('ref_swarm', L, AX - 4, z + 2), mob('ref_swarm', L, AX + 4, z - 2), mob('ref_charger', L, AX, z + 6), mob('ref_shooter', L, AX, z - 8)]; };
 // sustained auto-attack: ammo, reload, fire cooldown and the rare Twin Shot perk
 function killTime(f, e) {
   const w = c.weaponOf(f); let hp = e.maxHp, t = 0, ammo = f.ammoMax, rl = 0, cd = 0;
