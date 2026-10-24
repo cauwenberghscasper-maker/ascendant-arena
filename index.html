@@ -787,8 +787,15 @@ button.inl { margin-left: 8px; vertical-align: middle; }
 
 /* ===== pixel-art UI theme: hard-edged bevelled frames (generated in PixelFrames), pixel icons, pixel display font ===== */
 /* Smooth digits/operators use installed fonts; pixel lettering is preserved. */
-@font-face { font-family: 'Arena Numerals'; src: local('Arial'), local('Roboto'), local('Helvetica'), local('DejaVu Sans'); font-weight: 100 600; unicode-range: U+0025, U+002B-003A, U+00D7, U+2212, U+221E; }
-@font-face { font-family: 'Arena Numerals'; src: local('Arial Bold'), local('Roboto Bold'), local('Helvetica Bold'), local('DejaVu Sans Bold'); font-weight: 700 900; unicode-range: U+0025, U+002B-003A, U+00D7, U+2212, U+221E; }
+/* The game's text font is Tiny5 (OFL, assets/fonts/tiny5-*.woff2) under the old family name 'Arena Numerals', so every
+   font stack picks it up. Pixelify Sans drew 5 like S, 2 like Z, B like 8 and C like O; it stays only as the fallback
+   for characters Tiny5 lacks and the × of close buttons (Tiny5's is a 3x3 checker). Scaled to Pixelify's cap height and line metrics so layouts keep their size (Casper, 25 Oct). */
+@font-face { font-family: 'Arena Numerals'; src: url(assets/fonts/tiny5-latin.woff2) format('woff2'); font-weight: 100 900; font-display: block; size-adjust: 112%; ascent-override: 82%; descent-override: 25%; line-gap-override: 0%;
+  unicode-range: U+0000-00D6, U+00D8-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Arena Numerals'; src: url(assets/fonts/tiny5-latin-ext.woff2) format('woff2'); font-weight: 100 900; font-display: block; size-adjust: 112%; ascent-override: 82%; descent-override: 25%; line-gap-override: 0%;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* Tiny5 has one weight: a browser-made bold smears its 1-pixel gaps shut (6 read as E, 2 as Z), so never fake one. */
+html, body, button, input, select, textarea { font-synthesis: none; }
 :root { --display: 'Arena Numerals', 'Pixelify Sans', monospace; --myth: 'Arena Numerals', 'Pixelify Sans', monospace; --body: 'Arena Numerals', 'Pixelify Sans', monospace; --numbers: 'Rubik', system-ui, -apple-system, 'Segoe UI', sans-serif; --gl: linear-gradient(#ece3cc, #ece3cc);
   --gold: #e9dfc6; --goldDeep: #6f6656; --text: #ece6d8; --muted: #9b94a6; --ink: #121019; --ink2: #1c1925; --ink3: #2a2633; --line: #3a3545; }
 body, button, input, select, textarea, .panel, .panel * { font-family: var(--body) !important; letter-spacing: .01em; font-variant-numeric: lining-nums tabular-nums; }
@@ -2446,6 +2453,9 @@ const LOCAL_PREVIEW = ['localhost', '127.0.0.1', '[::1]'].includes(location.host
 const TEST_MODE = isTestMode(location.search);
 const CFG = {
   sim: { step: 1 / 60, maxSteps: 5 },
+  // Auto Hunt plays calmer and weaker than your own thumbs (Casper, 25 Oct: it looked sped up and too strong):
+  // walk pace and sideways strafe (share of full speed), time between its shots (x the weapon's cooldown), its damage
+  autoHunt: { pace: 0.75, strafe: 0.35, fireGap: 1.5, dmg: 0.7 },
   quality: { maxDpr: 2, minDpr: 0.6, downFps: 50, upFps: 58, sampleSec: 1.5, cullFar: 72, cullNear: 46 },
   world: {
     minX: -210, maxX: 210, minZ: -90, maxZ: 1062, // maxZ set from the areas below; every x layout scales with maxX
@@ -4162,6 +4172,7 @@ function dealDamage(t, amount, srcId, o) {
   let crit = false;
   const sf = src && src.kind === 'fighter' && !o.pet ? src : null, K = sf ? sf.keys : null;
   if (sf) {
+    if (sf.autoHunting) amt *= CFG.autoHunt.dmg; // Auto Hunt hits softer than your own play
     if (t.kind === 'enemy' && sf.isPlayer) amt *= 1 + slayerBonus(t.type);
     if (sf.arts && sf.arts.giant && (t.elite || t.kind === 'boss')) amt *= 1 + artVal('giant', sf.arts.giant);
     if (K.execute && t.hp < t.maxHp * 0.35) amt *= 1.25;
@@ -4588,7 +4599,7 @@ function stepFighter(f, dt, ctx) {
   }
   if ((it.fire || it.autoFire) && f.ammo >= 1 && f.fireCd <= 0 && f.burstLeft <= 0) {
     const [dx, dz, ad] = aimDir(f, it);
-    fireWeapon(f, dx, dz, ad); f.ammo--; f.fireCd = w.cd * Math.max(0.3, 1 - (f.atkSpeed || 0) - tempo);
+    fireWeapon(f, dx, dz, ad); f.ammo--; f.fireCd = w.cd * Math.max(0.3, 1 - (f.atkSpeed || 0) - tempo) * (f.autoHunting ? CFG.autoHunt.fireGap : 1);
   }
   if (it.melee && f.meleeCd <= 0) { doMelee(f); f.meleeCd = C.melee.cd; }
   if (it.super && f.superCharge >= 1) {
@@ -13025,10 +13036,10 @@ function stickToWorld(sx, sy) {
   const fx = Math.sin(Cam.yaw), fz = Math.cos(Cam.yaw), rx = -Math.cos(Cam.yaw), rz = Math.sin(Cam.yaw);
   return [fx * sy + rx * sx, fz * sy + rz * sx];
 }
-function buildPlayerIntent() {
+function buildPlayerIntent(dt = 1 / 60) {
   const f = G.mode === 'arena' && G.arena ? G.arena.fighters[0] : G.player;
   if (!f) return;
-  const it = f.intent;
+  const it = f.intent; f.autoHunting = false; // set again below while Auto Hunt is driving
   let sx = Input.move.sx, sy = Input.move.sy;
   if (Input.keys.has('a')) sx -= 1; if (Input.keys.has('d')) sx += 1; if (Input.keys.has('w')) sy += 1; if (Input.keys.has('s')) sy -= 1;
   // Auto Hunt keeps fighting behind menus in the open world (the sim runs there and you are safe while one is open)
@@ -13037,7 +13048,8 @@ function buildPlayerIntent() {
   if (frozen) { it.mx = it.mz = 0; it.aiming = false; it.fire = it.autoFire = false; return; }
   const [mx, mz] = stickToWorld(sx, sy);
   it.mx = mx; it.mz = mz;
-  if (autoHuntOn() && f === G.player) autoHuntIntent(f, it, Math.hypot(sx, sy) > 0.1 || Input.atk.active, 1 / 60);
+  // real frame time: intents are built every drawn frame (up to 120 a second), so a fixed 1/60 ran its timers twice as fast
+  if (autoHuntOn() && f === G.player) autoHuntIntent(f, it, Math.hypot(sx, sy) > 0.1 || Input.atk.active, dt);
   it.aiming = Input.atk.aiming;
   if (Input.atk.aiming) { const [ax, az] = stickToWorld(Input.atk.dx / STICK_R, -Input.atk.dy / STICK_R); it.ax = ax; it.az = az; it.aimDist = clamp(Math.hypot(Input.atk.dx, Input.atk.dy) / STICK_R, 0, 1); }
   const os = Input.oneShot;
@@ -15771,7 +15783,7 @@ function drawTree() {
     }
   }
   // nodes
-  const label = (txt, x, y, size, col) => { const numeric = /^[\d/×+−.%∞]+$/.test(txt); g.font = `700 ${size}px ${numeric ? 'Rubik, sans-serif' : "'Arena Numerals', 'Pixelify Sans', monospace"}`; g.textAlign = 'center'; g.fillStyle = '#000'; g.fillText(txt, x, y + 2); g.fillStyle = col; g.fillText(txt, x, y); };
+  const label = (txt, x, y, size, col) => { const numeric = /^[\d/×+−.%∞]+$/.test(txt); g.font = `${numeric ? 700 : 400} ${size}px ${numeric ? 'Rubik, sans-serif' : "'Arena Numerals', 'Pixelify Sans', monospace"}`; g.textAlign = 'center'; g.fillStyle = '#000'; g.fillText(txt, x, y + 2); g.fillStyle = col; g.fillText(txt, x, y); };
   for (const id in T.nodes) {
     if (!shown(id)) continue;
     const n = T.nodes[id], info = nodeInfo(n), cx = X(n.x), cy = Y(n.y);
@@ -15836,7 +15848,7 @@ function creditsPanel() {
   const by = {}; for (const k in GI_SRC) { const [n, a] = GI_SRC[k]; (by[a] = by[a] || []).push(n); }
   const rows = Object.keys(by).sort().map((a) => `<div class="cr"><b>${a}</b><small>${by[a].join(', ')}</small></div>`).join('');
   openModal(`<h3>Credits</h3><p class="fine">Skeletal animations adapted from KayKit by Kay Lousberg (CC0 1.0). Original character meshes retained, with fitted fantasy equipment. See assets/animation/LICENSE.txt.</p><p class="fine">Icons from <b>game-icons.net</b>, licensed under Creative Commons BY 3.0 (creativecommons.org/licenses/by/3.0). Made by:</p><div class="credits">${rows}</div>
-    <p class="fine">Most 3D models, effects and sounds are made in code for this game. Engine: three.js (MIT). Fonts: Cinzel, Lilita One, Pixelify Sans and Rubik (SIL Open Font License 1.1, see assets/fonts).</p>
+    <p class="fine">Most 3D models, effects and sounds are made in code for this game. Engine: three.js (MIT). Fonts: Tiny5, Pixelify Sans, Cinzel, Lilita One and Rubik (SIL Open Font License 1.1, see assets/fonts).</p>
     <p class="fine">Generated 3D models: Microsoft TRELLIS.2 (MIT) from concept images made with Z-Image-Turbo by Tongyi-MAI (Apache 2.0).</p><div class="row end"><button class="primary" data-act="openSettings">Back</button></div>`);
 }
 function openV8Intro() {
@@ -16513,6 +16525,7 @@ function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt 
 function autoHuntIntent(f, it, manual, dt) {
   if (manual) { AH.manualT = 1.5; return; }
   if ((AH.manualT -= dt) > 0 || !f.alive) return;
+  f.autoHunting = true; const AC = CFG.autoHunt;
   const p = G.profile, w = weaponOf(f), range = w.range || 12;
   AH.t -= dt; AH.dashT -= dt;
   const okZone = (zi) => p.level >= CFG.world.zones[zi].minLevel;
@@ -16536,7 +16549,7 @@ function autoHuntIntent(f, it, manual, dt) {
   } else if (e) {
     const dx = e.x - f.x, dz = e.z - f.z, d = Math.hypot(dx, dz) || 1, want = range * 0.7, los = !losBlocked(f.x, f.z, e.x, e.z);
     if (!los) { tx = dx / d; tz = dz / d; } // a prop is in the way: walk round it instead of firing into it
-    else if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * 0.7 * AH.side; tz = dx / d * 0.7 * AH.side; }
+    else if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * AC.strafe * AH.side; tz = dx / d * AC.strafe * AH.side; }
     if (d < range + 1 && los) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
     if (f.superCharge >= 1 && d < range && los) it.super = true;
     if (f.hp < f.maxHp * 0.35 && d < 5 && AH.dashT <= 0) { it.dash = true; AH.dashT = 3; it.mx = -dx / d; it.mz = -dz / d; return; }
@@ -16560,8 +16573,8 @@ function autoHuntIntent(f, it, manual, dt) {
     } else AH.stuckN = 0;
     AH.stuckT = 0; AH.lx = f.x; AH.lz = f.z;
   }
-  const st = ahSteer(f, tx || 0, tz || 0, dt); tx = st[0]; tz = st[1];
-  it.mx = tx; it.mz = tz;
+  const st = ahSteer(f, tx || 0, tz || 0, dt), sl = Math.hypot(st[0], st[1]), k = sl > AC.pace ? AC.pace / sl : 1; // an easy walk, not a sprint
+  it.mx = st[0] * k; it.mz = st[1] * k;
 }
 const powerOf = (f) => Math.round(Math.sqrt(Math.max(1, f.dmg) * Math.max(1, f.maxHp)));
 
@@ -17471,7 +17484,7 @@ function frame(now) {
   if (dt > 0.1) dt = 0.1;
   fxK = hz120 ? Math.min(1, dt * 60) : 1;
   if (G.paused) return;
-  buildPlayerIntent();
+  buildPlayerIntent(dt);
   // the open world keeps running behind menus (you are safe while one is open); Showdown pauses
   if (!G.modal || (G.mode === 'hub' && G.started)) {
     simAcc += G.slowT > 0 ? dt * 0.3 : dt; G.slowT -= dt; // a Radiant drop slows the world for a moment
