@@ -399,6 +399,10 @@ AI look. Every prompt starts from the same style words and every result is judge
   the hero's own palette, 4x4 ordered dither); `hit_<hero>` is the basic attack's pixel burst from
   `tools/bake_hero_hits.py` (one burst style and colour per hero), or from a picture when one exists; `ammo_<hero>` is
   the projectile sprite (picture on magenta, cut out, ink outline, 4 tumble frames).
+  Shared combat effects (explosions, hits, impacts, crits, novas, rings, slashes, poofs, shatters, zaps, flames) and
+  every monster's burst are painted too: pictures in `assets/concepts/fx_gen/` baked by `tools/bake_fx_gen.py` into
+  `assets/fx/gen/` (missing colour themes and the monster bursts are repainted from a donor picture through a colour
+  ramp); monster particles come from `assets/concepts/mob_bits/` (`tools/bake_mob_fx.py --bits`).
 
 
 Draw it yourself, paint over a blockout, or use an Apache/MIT image model run locally or on a free tier (Z-Image
@@ -472,7 +476,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | HUD | `src/game/60-hud.js`; minimap: `drawMinimap` in `62-events-fx.js` (world, arena, Bastion, Rift, and the dungeon map `drawDungeonMinimap`) |
 | Panels, settings, button actions (`data-act`) | `src/game/61-panels.js` (`handlePanelClick`) |
 | Menus, skill-tree screen, credits | `src/game/63-menus.js` |
-| Effects for hits, kills and events | `src/game/62-events-fx.js` (`processEvents`); particles and sprite FX: `45-fx.js`; each monster species' own projectiles, pixel particles, bursts and death: `45b-mob-fx.js` (`MOB_FX`, art baked by `tools/bake_mob_fx.py` into `assets/fx/mob/`) |
+| Effects for hits, kills and events | `src/game/62-events-fx.js` (`processEvents`); particles and sprite FX: `45-fx.js` (painted sheets from `assets/fx/gen/`, `tools/bake_fx_gen.py`); each monster species' own projectiles, pixel particles, bursts and death: `45b-mob-fx.js` (`MOB_FX`, art baked by `tools/bake_mob_fx.py` into `assets/fx/mob/`) |
 | Sound: engine, buses, music crossfade, synth fallback | `src/game/50-audio.js` (`Sfx`, `Music`); which sound files exist and their bus/volume/voice caps: `49-audio-data.js` (`AUDIO_MANIFEST`), files in `assets/audio/` |
 | Touch and keyboard controls | `src/game/51-input.js` |
 | Camera, adaptive quality, pixel-art pass | `src/game/46-camera-quality.js` |

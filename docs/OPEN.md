@@ -34,6 +34,8 @@ and change only your own line here: tick it when it is merged, add what you foun
       swipes, actual boss cue timing and full hero/NPC animation checks. Run phone FPS/visual acceptance before release.
       Details: `docs/log/2026-10-23-character-animation-fix.md`.
 - [x] Monster attacks: every species' own projectiles, particles, bursts and death (22 Oct, `docs/log/2026-10-22-monster-attack-art.md`).
+- [x] Painted combat effects and monster bursts from generated pictures (24 Oct, `docs/log/2026-10-24-painted-effects.md`).
+- [ ] Painted effects: look at them on a real phone (size, readability in big fights); per-hero hit pictures still use the drawn bursts.
 - [ ] World and dungeon bosses' attack art in the same per-boss style; monster sounds per species.
 - [ ] Hero ammo still built from shapes for most heroes (vials, apples, coins…): pixel sprites like the nine in `AMMO_PIXEL`.
 - [ ] Crafting materials as inventory icons (render + pixelize the 3D models).
