@@ -48,6 +48,9 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [ ] Bastion: "place many" toggle, wall snapping, who may build in a shared fort, cost balance.
 - [ ] Menu sounds (PR #25 by nickcaels, waiting since 18 Oct: review or take over with a comment).
 
+- [ ] Rewarding feel, a home farm, a non-linear world: research done (24 Oct,
+      `docs/RESEARCH_REWARD_AND_WORLD.md`); Casper picks what to build first.
+
 ## Release (audit/PHASE1.md)
 - [ ] Native iOS/Android projects, app icon and splash, privacy policy URL, store accounts, final `appId`.
 
