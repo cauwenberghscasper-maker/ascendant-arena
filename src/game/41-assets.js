@@ -160,11 +160,12 @@ const AssetLibrary = {
         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         return this.loader.parseAsync(bytes.buffer, d.dir); // textures load from the same folder
       });
-    return this.init().then(() => Promise.all([load(def), def.v4 && def.weapon ? load(def.weapon).catch(() => null) : null, def.v4 ? this.adventurerClips() : null]))
-      .then(([gltf, weapon, clips]) => {
+    return this.init().then(() => Promise.all([load(def), def.v4 && def.weapon ? load(def.weapon).catch(() => null) : null, def.v4 ? this.adventurerClips() : null,
+      enemySkinPath(id) ? fetch(enemySkinPath(id)).then(r => { if (!r.ok) throw Error('Skin weights: HTTP ' + r.status); return r.json(); }) : null]))
+      .then(([gltf, weapon, clips, skin]) => {
         if (def.v4) def.weaponScene = weapon ? weapon.scene : null;
         if (id.startsWith('world.')) this.shareTextures(gltf.scene);
-        e.model = this.prepare(gltf.scene, def, id);
+        e.model = this.prepare(gltf.scene, def, id, skin);
         e.model.animations = def.v4 ? withShowcase(relaxArms(THREE, heroV4Clips(THREE, clips, gltf.scene), gltf.scene), gltf.scene) : def.original ? this.heroClips : gltf.animations; e.state = 'ready';
       })
       .catch((err) => {
@@ -197,9 +198,9 @@ const AssetLibrary = {
       });
     return this.boot;
   },
-  prepare(scene, def, id) {
+  prepare(scene, def, id, skin) {
     const holder = new THREE.Group();
-    rigEnemyModel(THREE, scene, id);
+    rigEnemyModel(THREE, scene, id, skin);
     addHeroEyes(scene, def, THREE);
     if (def.original) prepareOriginalAdventurer(scene, def, THREE);
     else scene.scale.setScalar(def.size);

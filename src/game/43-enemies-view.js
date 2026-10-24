@@ -84,6 +84,12 @@ AssetSlots.register('enemy', (o) => {
       else if (bt === 'myconid') { pivot.position.y = Math.abs(Math.sin(phase)) * 0.08 * (e.moveAmt || 0); pivot.rotation.z = Math.sin(phase) * 0.1 * (e.moveAmt || 0); pivot.scale.y = 1 + Math.sin(t * 1.7 + phase) * 0.025; }
       else if (bt === 'glassbull') { pivot.position.y = Math.abs(Math.sin(phase * 1.3)) * 0.09 * (e.moveAmt || 0); pivot.rotation.x = e.windT > 0 ? -0.2 + Math.sin(t * 40) * 0.04 : 0; }
       else { pivot.position.y = Math.sin(t * 3 + phase) * 0.2 + 0.2; pivot.rotation.z = Math.sin(t * 2 + phase) * 0.08; }
+      // Grounded, articulated bodies plant their feet. Keep hovering and slime
+      // squash, but do not hide an actual stride under the old whole-body hop.
+      if (motion && motion.family !== 'blob') {
+        pivot.position.set(0, motion.floating ? .35 + Math.sin(t * 2 + phase * .1) * .06 : Math.abs(Math.sin(phase)) * .018 * (e.moveAmt || 0), 0);
+        pivot.rotation.set(0, 0, Math.sin(phase) * .018 * (e.moveAmt || 0)); pivot.scale.set(1, 1, 1);
+      }
       // wind-up poses: each move has its own telegraph in the body (rear up, coil, lean back, wind the arms), eased in as the marker fills
       if (e.windK && e.windT > 0) relK = e.windK;
       if (e.windK && e.windT > 0) {
@@ -104,7 +110,13 @@ AssetSlots.register('enemy', (o) => {
         else if (k === 'burst') { pivot.position.y += 0.6 * Math.sin(a * Math.PI); pivot.rotation.x -= 0.3 * v; }
         if (!struck && a > 0.85) { struck = true; if (MobFX.has(e.type)) { if (k === 'slam') MobFX.bits(e.type, e.x, 0.2, e.z, 9, 'ring'); else if (k === 'lunge' || k === 'swing') MobFX.bits(e.type, e.x + Math.sin(e.facing) * e.r, 0.8, e.z + Math.cos(e.facing) * e.r, 3, 'spray', { a: e.facing, speed: 0.8 }); } else if (k === 'slam' && fxK > 0) burst(e.x, 0.1, e.z, Math.round(10 * fxK), BIOME_TINT[areaBiome(e.zone)] || 0xc8b89a, 4.5, 0.45, 0.32, -2, 0.6); }
       } else { struck = false; if (!(e.windT > 0)) relK = null; }
-      if (motion) motion.update(e, dt, t, phase, STRIKE_OF[relK] || (SHOOTER_KIT[ED.kit] ? 'recoil' : 'lunge'), e.windT > 0 ? clamp(1 - e.windT / (e.windMax || 1), 0, 1) : 0, e.windT > 0 ? 0 : a);
+      if (motion) {
+        const cue = e.animAge != null && e.animAge < e.animWindMax + Math.max(0, (e.animHits || 1) - 1) * (e.animInterval || 0) + .5, key = cue ? e.animKind : relK;
+        const wind = cue ? (e.animWindMax > 0 && e.animAge < e.animWindMax ? clamp(e.animAge / e.animWindMax, 0, 1) : 0) : e.windT > 0 ? clamp(1 - e.windT / (e.windMax || 1), 0, 1) : 0;
+        const strike = cue ? (e.animAge >= e.animWindMax ? Math.max(0, 1 - (e.animAge - e.animWindMax) / .35) : 0) : e.windT > 0 ? 0 : a;
+        const kind = STRIKE_OF[key] || (key === 'ring' ? 'pulse' : key === 'charge' ? 'lunge' : key === 'volley' || key === 'meteors' ? 'recoil' : SHOOTER_KIT[ED.kit] ? 'recoil' : 'lunge');
+        motion.update(e, dt, t, phase, kind, wind, strike, key, MON_MOVES[key]);
+      }
       const f = e.flashT > 0 ? 0.9 : 0;
       if (e.windT > 0) { const w = 0.45 + Math.abs(Math.sin(t * 22)) * 0.5; mat.emissive.setRGB(w + f, 0.08 + f, f); }
       else if (e.invulnT > 0) mat.emissive.setRGB(0.15 + f, 0.55 + f, 0.85 + f);
@@ -113,11 +125,11 @@ AssetSlots.register('enemy', (o) => {
       const s = (0.9 + Math.min(0.25, (e.lvl - 1) * 0.004)) * (e.elite ? 1.35 : 1) * vs;
       if (aura) { aura.scale.setScalar(1.3 + Math.sin(t * 4) * 0.08); aura.material.opacity = 0.35 + Math.sin(t * 4) * 0.15; }
       const pop = popT > 0 && popT < 1 ? 0.6 + 0.4 * (1 - Math.pow(1 - popT, 3)) : 1;
-      if (!e.alive) { deadT += dt; const k = Math.max(0, 1 - deadT * 3); root.scale.setScalar(s * k); root.visible = k > 0; }
+      if (!e.alive) { deadT += dt; const k = Math.max(0, 1 - Math.max(0, deadT - .4) * 3); root.scale.setScalar(s * k); root.visible = k > 0; }
       else { deadT = 0; root.scale.setScalar(s * pop); root.visible = !e.hidden; } // hidden: burrowed (a burrow move's marker shows where it is)
       if (e.hidden && Math.random() < 0.3 * fxK) burst(e.x + (Math.random() - 0.5), 0.2, e.z + (Math.random() - 0.5), 1, 0x9a8a6a, 1.2, 0.4, 0.25, 6, 2);
     },
-    dispose() { AssetLibrary.disposeInstance(model); mat.dispose(); if (aura) aura.material.dispose(); },
+    dispose() { if (motion) motion.dispose(); AssetLibrary.disposeInstance(model); mat.dispose(); if (aura) aura.material.dispose(); },
   };
 });
 
@@ -173,10 +185,12 @@ AssetSlots.register('boss', (o) => {
       }
       const ph = b.phase || 1;
       if (motion) {
-        const kind = ck === 'sweep' || ck === 'beams' ? 'swing' : ck === 'plates' || ck === 'soak' || ck === 'spread' || ck === 'wardEnd' ? 'pulse' : ck === 'fan' || ck === 'wells' ? 'recoil' : 'slam';
-        const wind = cu >= 0 ? Math.sin(Math.min(1, cu / .55) * Math.PI / 2) * (1 - clamp((cu - .55) / .25, 0, 1)) : 0;
-        const strike = cu >= .55 ? Math.sin(clamp((cu - .55) / .45, 0, 1) * Math.PI) : cu < 0 ? atk : 0;
-        motion.update(b, dt, t, phase, kind, wind, strike);
+        const cue = b.animAge != null && b.animAge < b.animWindMax + Math.max(0, (b.animHits || 1) - 1) * (b.animInterval || 0) + .5;
+        const key = cue ? b.animKind : ck;
+        const kind = key === 'sweep' ? 'swing' : key === 'plates' || key === 'soak' || key === 'spread' || key === 'wardEnd' ? 'pulse' : key === 'fan' || key === 'wells' || key === 'rain' || key === 'rocks' || key === 'beams' ? 'recoil' : 'slam';
+        const wind = cue ? (b.animWindMax > 0 && b.animAge < b.animWindMax ? clamp(b.animAge / b.animWindMax, 0, 1) : 0) : cu >= 0 ? clamp(cu / .55, 0, 1) : 0;
+        const strike = cue ? (b.animAge >= b.animWindMax ? Math.max(0, 1 - (b.animAge - b.animWindMax) / .35) : 0) : cu >= .55 ? 1 - clamp((cu - .55) / .45, 0, 1) : cu < 0 ? atk : 0;
+        motion.update(b, dt, t, phase, kind, wind, strike, key);
       }
       pivot.position.y = Math.abs(Math.sin(phase)) * 0.18 * b.moveAmt + Math.sin(t * 1.5) * 0.05 + lift;
       pivot.rotation.z = Math.sin(phase) * 0.05 * b.moveAmt;
@@ -194,7 +208,7 @@ AssetSlots.register('boss', (o) => {
       const pulse = 0.75 + Math.sin(t * 4) * 0.25 + (ph - 1) * 0.15;
       rune.rotation.y = t * (0.4 + (ph - 1) * 0.35); rune2.rotation.y = -t * (0.25 + (ph - 1) * 0.3); runeMat.opacity = 0.3 + pulse * 0.25;
     },
-    dispose() { AssetLibrary.disposeInstance(model); runeMat.dispose(); wardMat.dispose(); wardDome.geometry.dispose(); rune.geometry.dispose(); rune2.geometry.dispose(); },
+    dispose() { if (motion) motion.dispose(); AssetLibrary.disposeInstance(model); runeMat.dispose(); wardMat.dispose(); wardDome.geometry.dispose(); rune.geometry.dispose(); rune2.geometry.dispose(); },
   };
 });
 
