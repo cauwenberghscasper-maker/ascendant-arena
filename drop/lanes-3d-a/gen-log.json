@@ -1,0 +1,36 @@
+{
+ "batch": "lanes-3d-a",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "lanes_core",
+   "ok": true,
+   "file": "lanes_core.glb",
+   "sec": 36.0
+  },
+  {
+   "name": "lanes_tower",
+   "ok": true,
+   "file": "lanes_tower.glb",
+   "sec": 14.7
+  },
+  {
+   "name": "lanes_minion_melee",
+   "ok": true,
+   "file": "lanes_minion_melee.glb",
+   "sec": 38.1
+  },
+  {
+   "name": "lanes_minion_ranged",
+   "ok": true,
+   "file": "lanes_minion_ranged.glb",
+   "sec": 20.5
+  },
+  {
+   "name": "lanes_brazier",
+   "ok": true,
+   "file": "lanes_brazier.glb",
+   "sec": 25.6
+  }
+ ]
+}
