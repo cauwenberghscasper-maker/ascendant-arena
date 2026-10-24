@@ -193,6 +193,7 @@ function dealDamage(t, amount, srcId, o) {
   let crit = false;
   const sf = src && src.kind === 'fighter' && !o.pet ? src : null, K = sf ? sf.keys : null;
   if (sf) {
+    if (sf.autoHunting) amt *= CFG.autoHunt.dmg; // Auto Hunt hits softer than your own play
     if (t.kind === 'enemy' && sf.isPlayer) amt *= 1 + slayerBonus(t.type);
     if (sf.arts && sf.arts.giant && (t.elite || t.kind === 'boss')) amt *= 1 + artVal('giant', sf.arts.giant);
     if (K.execute && t.hp < t.maxHp * 0.35) amt *= 1.25;
@@ -619,7 +620,7 @@ function stepFighter(f, dt, ctx) {
   }
   if ((it.fire || it.autoFire) && f.ammo >= 1 && f.fireCd <= 0 && f.burstLeft <= 0) {
     const [dx, dz, ad] = aimDir(f, it);
-    fireWeapon(f, dx, dz, ad); f.ammo--; f.fireCd = w.cd * Math.max(0.3, 1 - (f.atkSpeed || 0) - tempo);
+    fireWeapon(f, dx, dz, ad); f.ammo--; f.fireCd = w.cd * Math.max(0.3, 1 - (f.atkSpeed || 0) - tempo) * (f.autoHunting ? CFG.autoHunt.fireGap : 1);
   }
   if (it.melee && f.meleeCd <= 0) { doMelee(f); f.meleeCd = C.melee.cd; }
   if (it.super && f.superCharge >= 1) {

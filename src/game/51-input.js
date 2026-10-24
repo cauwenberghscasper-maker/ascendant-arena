@@ -152,10 +152,10 @@ function stickToWorld(sx, sy) {
   const fx = Math.sin(Cam.yaw), fz = Math.cos(Cam.yaw), rx = -Math.cos(Cam.yaw), rz = Math.sin(Cam.yaw);
   return [fx * sy + rx * sx, fz * sy + rz * sx];
 }
-function buildPlayerIntent() {
+function buildPlayerIntent(dt = 1 / 60) {
   const f = G.mode === 'arena' && G.arena ? G.arena.fighters[0] : G.player;
   if (!f) return;
-  const it = f.intent;
+  const it = f.intent; f.autoHunting = false; // set again below while Auto Hunt is driving
   let sx = Input.move.sx, sy = Input.move.sy;
   if (Input.keys.has('a')) sx -= 1; if (Input.keys.has('d')) sx += 1; if (Input.keys.has('w')) sy += 1; if (Input.keys.has('s')) sy -= 1;
   // Auto Hunt keeps fighting behind menus in the open world (the sim runs there and you are safe while one is open)
@@ -164,7 +164,8 @@ function buildPlayerIntent() {
   if (frozen) { it.mx = it.mz = 0; it.aiming = false; it.fire = it.autoFire = false; return; }
   const [mx, mz] = stickToWorld(sx, sy);
   it.mx = mx; it.mz = mz;
-  if (autoHuntOn() && f === G.player) autoHuntIntent(f, it, Math.hypot(sx, sy) > 0.1 || Input.atk.active, 1 / 60);
+  // real frame time: intents are built every drawn frame (up to 120 a second), so a fixed 1/60 ran its timers twice as fast
+  if (autoHuntOn() && f === G.player) autoHuntIntent(f, it, Math.hypot(sx, sy) > 0.1 || Input.atk.active, dt);
   it.aiming = Input.atk.aiming;
   if (Input.atk.aiming) { const [ax, az] = stickToWorld(Input.atk.dx / STICK_R, -Input.atk.dy / STICK_R); it.ax = ax; it.az = az; it.aimDist = clamp(Math.hypot(Input.atk.dx, Input.atk.dy) / STICK_R, 0, 1); }
   const os = Input.oneShot;

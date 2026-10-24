@@ -30,6 +30,8 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [ ] Monster LODs (a full dungeon hall is heavy); townsfolk and hero shadows from a light LOD.
 
 ## Art and effects
+- [x] Readable pixel text (Tiny5, no more 5/S, 2/Z, B/8, C/O) and a calmer, weaker Auto Hunt (25 Oct, `docs/log/2026-10-25-readable-text-calmer-auto.md`).
+- [ ] Judge Tiny5 and the Auto Hunt pace (`CFG.autoHunt`) on a real phone.
 - [ ] Merge/review PR #49: baked limb rigs for all 32 enemy/boss bodies, 17 animation states, alternating Panther
       swipes, actual boss cue timing and full hero/NPC animation checks. Run phone FPS/visual acceptance before release.
       Details: `docs/log/2026-10-23-character-animation-fix.md`.

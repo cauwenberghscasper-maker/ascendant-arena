@@ -13,6 +13,9 @@ const LOCAL_PREVIEW = ['localhost', '127.0.0.1', '[::1]'].includes(location.host
 const TEST_MODE = isTestMode(location.search);
 const CFG = {
   sim: { step: 1 / 60, maxSteps: 5 },
+  // Auto Hunt plays calmer and weaker than your own thumbs (Casper, 25 Oct: it looked sped up and too strong):
+  // walk pace and sideways strafe (share of full speed), time between its shots (x the weapon's cooldown), its damage
+  autoHunt: { pace: 0.75, strafe: 0.35, fireGap: 1.5, dmg: 0.7 },
   quality: { maxDpr: 2, minDpr: 0.6, downFps: 50, upFps: 58, sampleSec: 1.5, cullFar: 72, cullNear: 46 },
   world: {
     minX: -210, maxX: 210, minZ: -90, maxZ: 1062, // maxZ set from the areas below; every x layout scales with maxX

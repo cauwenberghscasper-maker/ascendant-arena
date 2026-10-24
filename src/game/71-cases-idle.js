@@ -200,6 +200,7 @@ function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt 
 function autoHuntIntent(f, it, manual, dt) {
   if (manual) { AH.manualT = 1.5; return; }
   if ((AH.manualT -= dt) > 0 || !f.alive) return;
+  f.autoHunting = true; const AC = CFG.autoHunt;
   const p = G.profile, w = weaponOf(f), range = w.range || 12;
   AH.t -= dt; AH.dashT -= dt;
   const okZone = (zi) => p.level >= CFG.world.zones[zi].minLevel;
@@ -223,7 +224,7 @@ function autoHuntIntent(f, it, manual, dt) {
   } else if (e) {
     const dx = e.x - f.x, dz = e.z - f.z, d = Math.hypot(dx, dz) || 1, want = range * 0.7, los = !losBlocked(f.x, f.z, e.x, e.z);
     if (!los) { tx = dx / d; tz = dz / d; } // a prop is in the way: walk round it instead of firing into it
-    else if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * 0.7 * AH.side; tz = dx / d * 0.7 * AH.side; }
+    else if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * AC.strafe * AH.side; tz = dx / d * AC.strafe * AH.side; }
     if (d < range + 1 && los) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
     if (f.superCharge >= 1 && d < range && los) it.super = true;
     if (f.hp < f.maxHp * 0.35 && d < 5 && AH.dashT <= 0) { it.dash = true; AH.dashT = 3; it.mx = -dx / d; it.mz = -dz / d; return; }
@@ -247,8 +248,8 @@ function autoHuntIntent(f, it, manual, dt) {
     } else AH.stuckN = 0;
     AH.stuckT = 0; AH.lx = f.x; AH.lz = f.z;
   }
-  const st = ahSteer(f, tx || 0, tz || 0, dt); tx = st[0]; tz = st[1];
-  it.mx = tx; it.mz = tz;
+  const st = ahSteer(f, tx || 0, tz || 0, dt), sl = Math.hypot(st[0], st[1]), k = sl > AC.pace ? AC.pace / sl : 1; // an easy walk, not a sprint
+  it.mx = st[0] * k; it.mz = st[1] * k;
 }
 const powerOf = (f) => Math.round(Math.sqrt(Math.max(1, f.dmg) * Math.max(1, f.maxHp)));
 

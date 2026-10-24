@@ -15,7 +15,7 @@ function frame(now) {
   if (dt > 0.1) dt = 0.1;
   fxK = hz120 ? Math.min(1, dt * 60) : 1;
   if (G.paused) return;
-  buildPlayerIntent();
+  buildPlayerIntent(dt);
   // the open world keeps running behind menus (you are safe while one is open); Showdown pauses
   if (!G.modal || (G.mode === 'hub' && G.started)) {
     simAcc += G.slowT > 0 ? dt * 0.3 : dt; G.slowT -= dt; // a Radiant drop slows the world for a moment

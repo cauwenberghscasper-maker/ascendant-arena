@@ -87,8 +87,9 @@ The game is played on phones. Every change must work there.
 ### 1.3 One style
 
 #### UI (menus, HUD, icons)
-- **Pixel-art UI over a graded 3D world.** One font: Pixelify Sans (`var(--body)`, `var(--og-font)`). No other fonts,
-  no emoji.
+- **Pixel-art UI over a graded 3D world.** One font: Tiny5 (`var(--body)`, `var(--og-font)`; served as the family
+  'Arena Numerals' in `src/css/main.css`, never faked bold). Pixelify Sans is only its fallback: it drew 5 like S, 2 like
+  Z, B like 8 and C like O (Casper, 25 Oct). No other fonts, no emoji.
 - Dark stone pixel panels with bevels, stepped corners and a 2-3 px ink outline (`--og-ink`); bone-white highlights.
   No gold gradients, medallions or Greek borders.
 - Buttons: the "deep neon" look in `src/css/ui-v2.css` (light-to-dark gradient over the button colour, soft glow in
@@ -305,7 +306,7 @@ checks all 32 bodies, the Panther's three contacts, and all 43 hero models (27 a
 - **Daily:** 7-day calendar that never resets, weekly Colossus chest (Journal › Daily; it never opens by itself, the Menu
   button glows while a reward waits).
 - **Idle:** Vault (fills while away), Expeditions (benched heroes fetch loot), Auto Hunt (walks, fights and mines by
-  itself), offline rewards.
+  itself, calmer and weaker than playing yourself: `CFG.autoHunt`), offline rewards.
 - **Pets and prestige companions:** world bonuses only, never in the arena.
 - **Multiplayer:** shared open world (one Supabase Realtime lobby), shared monsters and world bosses, opt-in PvP.
 - **Saves:** local cache plus cloud save (Supabase). ×100 test mode (`?test=100`) for testing late content.
@@ -446,7 +447,7 @@ and ignore GitHub's "Compare & pull request" banner for them.
 ### Licences we ship (keep this list true)
 
 TRELLIS.2 MIT · Z-Image Turbo Apache-2.0 · KayKit CC0 · Quaternius CC0 · game-icons.net CC BY 3.0 (named on the
-Credits screen). Anything new gets added here, to `assets/world/CREDITS.md`, and to the Credits screen if its licence
+Credits screen) · fonts Tiny5, Pixelify Sans, Rubik OFL 1.1 (`assets/fonts/OFL-*.txt`). Anything new gets added here, to `assets/world/CREDITS.md`, and to the Credits screen if its licence
 needs attribution. Keep concepts, `tools/.gen/`, rejected meshes and zips out of the shipped `www/`.
 
 ## 4. Where to change what
