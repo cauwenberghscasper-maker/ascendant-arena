@@ -1,5 +1,5 @@
 {
- "batch": "openworld-3d",
+ "batch": "lanes-3d-a",
  "jobs": [
   {
    "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
@@ -8,13 +8,13 @@
     "/start_session"
    ],
    "ext": ".glb",
-   "name": "warden_gate",
+   "name": "lanes_core",
    "args": {
     "resolution": "1024",
     "decimation_target": 100000,
     "texture_size": 1024,
     "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/openworld-c/warden_gate_c23.webp"
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/lanes-concepts-a/lanes_core_c41.webp"
    },
    "files": [
     "image"
@@ -27,13 +27,13 @@
     "/start_session"
    ],
    "ext": ".glb",
-   "name": "cliff_ridge",
+   "name": "lanes_tower",
    "args": {
     "resolution": "1024",
     "decimation_target": 100000,
     "texture_size": 1024,
     "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/openworld-c/cliff_ridge_c23.webp"
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/lanes-concepts-a/lanes_tower_c23.webp"
    },
    "files": [
     "image"
@@ -46,13 +46,13 @@
     "/start_session"
    ],
    "ext": ".glb",
-   "name": "danger_sign",
+   "name": "lanes_minion_melee",
    "args": {
     "resolution": "1024",
     "decimation_target": 100000,
     "texture_size": 1024,
     "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/openworld-c/danger_sign_c41.webp"
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/lanes-concepts-a/lanes_minion_melee_c23.webp"
    },
    "files": [
     "image"
@@ -65,30 +65,17 @@
     "/start_session"
    ],
    "ext": ".glb",
-   "name": "quest_beacon",
+   "name": "lanes_minion_ranged",
    "args": {
     "resolution": "1024",
     "decimation_target": 100000,
     "texture_size": 1024,
     "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/openworld-c/quest_beacon_c23.webp"
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/lanes-concepts-a/lanes_minion_ranged_c41.webp"
    },
    "files": [
     "image"
    ]
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "warden_gate_open_c23",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A massive fortified stone gate for a mountain pass: two thick square towers of grey weathered stone blocks joined by a heavy arch, the arch is wide open with an empty passage through it and no door, a broken iron portcullis rolled up tight under the top of the arch, wooden beams and iron studs, a carved stone guardian face on the keystone, moss in the cracks, a wide solid base.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
   },
   {
    "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
@@ -97,16 +84,17 @@
     "/start_session"
    ],
    "ext": ".glb",
-   "name": "warden_gate_open",
+   "name": "lanes_brazier",
    "args": {
     "resolution": "1024",
     "decimation_target": 100000,
     "texture_size": 1024,
-    "seed": 7
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/lanes-concepts-a/lanes_brazier_c41.webp"
    },
-   "from": {
-    "image": "warden_gate_open_c23"
-   }
+   "files": [
+    "image"
+   ]
   }
  ]
 }
