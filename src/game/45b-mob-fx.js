@@ -158,7 +158,7 @@ const MobFX = (() => {
     const c = lin[id], sc = o.size || 1;
     for (let k = 0; k < num; k++) {
       const g = o.glyph || (k % 3 === 2 && S.bit2 ? S.bit2 : S.bit), m = MOVE[GL[g].move], T = THROW[m];
-      const sp = T[0] * (o.speed || 1) * (0.55 + R() * 0.7), lf = T[1] * (0.7 + R() * 0.6) * (o.life || 1), sz = (0.42 + R() * 0.24) * sc;
+      const sp = T[0] * (o.speed || 1) * (0.55 + R() * 0.7), lf = T[1] * (0.7 + R() * 0.6) * (o.life || 1), sz = (0.55 + R() * 0.3) * sc;
       let px = x, py = y, pz = z, ux, uy, uz, a = R() * 6.283;
       if (mode === 'ring') { ux = Math.sin(a) * sp * 1.2; uz = Math.cos(a) * sp * 1.2; uy = sp * 0.35; py = 0.25; }
       else if (mode === 'rise') { const d = (o.r || 1) * Math.sqrt(R()); px += Math.sin(a) * d; pz += Math.cos(a) * d; py = 0.15; ux = (R() - 0.5) * 0.6; uz = (R() - 0.5) * 0.6; uy = 0.6 + R() * 1.2; }

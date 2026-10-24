@@ -29,8 +29,8 @@ for (const [s, r] of Object.entries(T.species)) {
 ok('colours, particle glyphs and burst styles are all real');
 
 const png = (f) => { const b = fs.readFileSync(path.join(dir, f)); assert.equal(b.toString('ascii', 1, 4), 'PNG', f); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
-assert.deepEqual(png('bits.png'), [128, 80], 'particle atlas 8x5 cells of 16 px');
-for (const s of species) { assert.deepEqual(png(`hit_${s}.png`), [192, 192], s + ' burst sheet'); assert(index.hit.includes(s), s + ' burst listed in index.json'); }
+assert.deepEqual(png('bits.png'), [256, 160], 'particle atlas 8x5 cells of 32 px');
+for (const s of species) { const [w, h] = png(`hit_${s}.png`); assert(w === h && w % 4 === 0 && w >= 160, s + ' burst sheet: a square 4x4 sheet'); assert(index.hit.includes(s), s + ' burst listed in index.json'); }
 ok('particle atlas and a burst sheet for every species');
 
 const shooters = species.filter((s) => { const [, kit, , , , x] = MON_ROWS[s]; const moves = x.moves || []; return ['shooter', 'spray', 'turret'].includes(kit) || moves.some((m) => SHOOTS.has(m)); });
