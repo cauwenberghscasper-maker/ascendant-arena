@@ -101,7 +101,8 @@ The game is played on phones. Every change must work there.
   explanation paragraph or a long list. Any `p.fine` / `p.say` note shows one line and opens on tap (`ui-v2.css`),
   so keep its first words meaningful. Nothing opens by itself in the player's face (no auto popups at startup):
   waiting rewards light a dot or a glow on the button instead. Pages are only as tall as their content: a short page
-  sits at the bottom over the dimmed game, never a full screen with empty space below.
+  sits at the bottom over the dimmed game, never a full screen with empty space below. Exception: the talent tree,
+  world map, travel and chest reel always fill the screen (`FULL_PAGES` in `61-panels.js`).
 - Menus are pages with a Menu/back button and sub-tabs. New screens follow the existing hub layout
   (Hero / Forge / Gear / Journal).
 - `src/css/ui-v2.css` is loaded last and holds the current look. Add new UI styling there (or next to its feature),

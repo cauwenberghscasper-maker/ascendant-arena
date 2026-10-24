@@ -42,6 +42,8 @@ function hubNav() {
   const sub = (HUB_SUB[hub] || []).map(([k, n, act]) => `<button class="tab ${k === UI.current ? 'on' : ''}${gate(act)}" data-act="${act}">${lockLabel(act, n)}</button>`).join('');
   return `<div class="hubTop"><button class="ghost hubBack" data-act="mMenu" aria-label="Back to the menu">Menu</button>${sub ? `<div class="tabs hubSub">${sub}</div>` : ''}</div>`;
 }
+// pages that always take the whole screen (a canvas or map to pan around); every other page is only as tall as its content
+const FULL_PAGES = new Set(['skills', 'worldmap', 'waypoints', 'reel']);
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
   const panelKind = UI.current + (UI.current === 'hero' ? '|' + UI.heroTab + '|' + (UI.gearAll && UI.heroTab === 'Gear' ? 'all' : UI.gearSlot) : UI.current === 'collection' ? '|' + UI.collectionSlot : UI.current === 'artifacts' ? '|' + UI.artTab + '|' + UI.relicTier : '');
@@ -53,6 +55,7 @@ function openModal(html, closable, showcase) {
   $('modal').classList.toggle('room', !!showcase);
   // every hub screen except the Hero (3D showcase) fills the whole page
   $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || UI.current === 'worldmap' || UI.current === 'waypoints' || !!HUB_OF[UI.current]));
+  $('modal').classList.toggle('tall', FULL_PAGES.has(UI.current)); // these always fill the screen, short or not
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
   const full = hubNav() + html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');

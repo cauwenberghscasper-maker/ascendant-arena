@@ -801,3 +801,5 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 #modal.full.fits .panel > .x { position: absolute !important; top: 12px !important; right: 12px !important; }
 #modal.full .hubTiles { min-height: 0; grid-template-rows: none; }
 #modal.full .panel .hubTile { min-height: 150px; }
+/* the talent tree, the world map and travel always fill the whole screen (Casper, 24 Oct) */
+#modal.full.tall .panel { height: 100%; }
