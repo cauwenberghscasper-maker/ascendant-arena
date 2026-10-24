@@ -22,13 +22,13 @@ async function load(){const request=++token;status.textContent='Loading…';cons
  if(request!==token)return;motion?.dispose();if(model){scene.remove(model);model.traverse(o=>{if(o.isMesh){o.geometry.dispose();for(const m of [o.material].flat()){for(const v of Object.values(m))if(v?.isTexture)v.dispose();m.dispose();}}});}
  model=gltf.scene;rigEnemyModel(T,model,id,skin);scene.add(model);motion=createEnemyMotion(model);time=0;window.reviewReady=true;
 }
-function pose(at){if(!motion)return;const mode=action.value,cycle=at%2.8,windMax=.55,strikeAge=cycle-windMax,flurry=mode==='flurry',kind=flurry?'swing':['idle','walk','hit','death'].includes(mode)?'lunge':mode;
+function pose(at,dt=1/60){if(!motion)return;const mode=action.value,cycle=at%2.8,windMax=.55,strikeAge=cycle-windMax,flurry=mode==='flurry',kind=flurry?'swing':['idle','walk','hit','death'].includes(mode)?'lunge':mode;
  const e={alive:mode!=='death'||cycle<.4,moveAmt:mode==='walk'?1:0,windT:!['idle','walk','hit','death'].includes(mode)&&cycle<windMax?windMax-cycle:0,flashT:mode==='hit'&&cycle<.1?.2:0};
  const wind=e.windT>0?cycle/windMax:0,strike=strikeAge>=0&&strikeAge<.35?1-strikeAge/.35:0;
- motion.update(e,1/60,at,at*8,kind,wind,['idle','walk','hit','death'].includes(mode)?0:strike,mode,flurry?{n:3,step:.32}:null);status.textContent=select.value+' · '+motion.state.name+' · drag to orbit';
+ motion.update(e,dt,at,at*8,kind,wind,['idle','walk','hit','death'].includes(mode)?0:strike,mode,flurry?{n:3,step:.32}:null);status.textContent=select.value+' · '+motion.state.name+' · drag to orbit';
 }
 select.onchange=()=>load().catch(e=>status.textContent=e.message);action.onchange=()=>{time=0;};document.querySelector('#pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'Play':'Pause';};
 window.review={pose,select,action,renderer,scene,camera,get model(){return model;},get motion(){return motion;}};
-let last=performance.now();function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!paused){time+=dt;pose(time);}renderer.render(scene,camera);requestAnimationFrame(frame);}requestAnimationFrame(frame);
+let last=performance.now();function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!paused){time+=dt;pose(time,dt);}renderer.render(scene,camera);requestAnimationFrame(frame);}requestAnimationFrame(frame);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});await load();
 </script></html>
