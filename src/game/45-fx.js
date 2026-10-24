@@ -58,10 +58,15 @@ function fxPalFor(kind, pal) {
   for (const q of FX_PAL_NEAR[pal] || []) if (P.includes(q)) return q;
   return P[0];
 }
+// painted effects (tools/bake_fx_gen.py: generated pictures animated into 4x4 pixel flipbooks) replace a code-drawn
+// sheet wherever one exists for that kind and colour; GEN_FX lists them. Square frames: GEN_SIZE trims the tall kinds.
+let GEN_FX = {};
+fetch('assets/fx/gen/index.json').then((r) => (r.ok ? r.json() : {})).then((j) => { GEN_FX = j || {}; }).catch(() => {});
+const GEN_SIZE = { explosion: 0.82, poof: 0.8, flame: 0.75 };
 const SpriteFX = {
   tex: new Map(), items: [], loader: new THREE.TextureLoader(),
-  sheet(kind, pal) {
-    const k = kind + '_' + pal; let t = this.tex.get(k);
+  sheet(kind, pal, gen) {
+    const k = (gen ? 'gen/' : '') + kind + '_' + pal; let t = this.tex.get(k);
     if (!t) { t = this.loader.load('assets/fx/' + k + '.png'); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; this.tex.set(k, t); }
     return t;
   },
@@ -78,23 +83,27 @@ const SpriteFX = {
     return it;
   },
   play(kind, pal, x, y, z, size, opts) {
-    const S = FX_SHEETS[kind]; if (!S) return; pal = fxPalFor(kind, pal);
+    const S = FX_SHEETS[kind]; if (!S) return;
+    const G2 = GEN_FX[kind], gen = G2 && (G2.includes(pal) ? pal : G2.includes(fxPalFor(kind, pal)) ? fxPalFor(kind, pal) : null);
+    pal = gen || fxPalFor(kind, pal);
     const it = this.item(!!S.flat); if (!it) return;
-    const base = this.sheet(kind, pal);
-    if (!it.map || it.map.source !== base.source) { if (it.map) it.map.dispose(); it.map = base.clone(); it.map.repeat.set(1 / S.n, 1); it.mat.map = it.map; it.mat.needsUpdate = true; }
+    const base = this.sheet(kind, pal, !!gen);
+    if (!it.map || it.map.source !== base.source) { if (it.map) it.map.dispose(); it.map = base.clone(); it.map.repeat.set(gen ? 0.25 : 1 / S.n, gen ? 0.25 : 1); it.mat.map = it.map; it.mat.needsUpdate = true; }
     it.on = true; it.obj.visible = true; it.kind = kind; it.t = -(opts && opts.delay || 0); it.speed = (opts && opts.speed) || 1;
-    const h = size, w = size * S.w / S.h;
+    it.gen = !!gen; it.fps = gen ? 16 / (S.n / S.fps) : S.fps; it.n = gen ? 16 : S.n; // a painted sheet plays as long as the old one did
+    const h = gen ? size * (GEN_SIZE[kind] || 1) : size, w = gen ? h : size * S.w / S.h;
     if (it.flat) { it.obj.position.set(x, 0.32, z); it.obj.scale.set(w, 1, h); it.obj.rotation.y = Math.random() * 6.28; }
     else { it.obj.position.set(x, y, z); it.obj.scale.set(w, h, 1); it.obj.center.set(0.5, S.base === 'bottom' ? 0.06 : 0.5); it.mat.rotation = opts && opts.rot != null ? opts.rot : 0; }
-    it.map.offset.set(0, 0); it.obj.visible = it.t >= 0;
+    if (gen) it.map.offset.set(0, 0.75); else it.map.offset.set(0, 0); it.obj.visible = it.t >= 0;
   },
   update(dt) {
     for (const it of this.items) {
       if (!it.on) continue;
       it.t += dt * it.speed; if (it.t < 0) continue;
-      const S = FX_SHEETS[it.kind], f = Math.floor(it.t * S.fps);
-      if (f >= S.n) { it.on = false; it.obj.visible = false; continue; }
-      it.obj.visible = true; it.map.offset.set(f / S.n, 0);
+      const f = Math.floor(it.t * it.fps);
+      if (f >= it.n) { it.on = false; it.obj.visible = false; continue; }
+      it.obj.visible = true;
+      if (it.gen) it.map.offset.set((f % 4) * 0.25, 0.75 - Math.floor(f / 4) * 0.25); else it.map.offset.set(f / it.n, 0);
     }
   },
 };
