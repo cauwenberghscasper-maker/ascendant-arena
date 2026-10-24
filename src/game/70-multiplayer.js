@@ -59,7 +59,7 @@ async function mpInit() {
 // 'hit' share the monsters (see the shared monsters section below).
 const MP_ROOM_CAP = 60;
 // a party (or a matchmaking queue) has its own channel instead of the lobby (73-party.js)
-function mpRoomKey() { const fk = G.siege && G.siege.code ? 'fort-' + G.siege.code : '', pk = typeof partyRoomKey === 'function' ? partyRoomKey() : ''; return (LOCAL_PREVIEW ? 'dev-' : '') + (fk || pk || 'lobby-w11') // World v11 moved every monster slot: old clients stay in their own lobby; }
+function mpRoomKey() { const fk = G.siege && G.siege.code ? 'fort-' + G.siege.code : '', pk = typeof partyRoomKey === 'function' ? partyRoomKey() : ''; return (LOCAL_PREVIEW ? 'dev-' : '') + (fk || pk || 'lobby-w11'); } // World v11 moved every monster slot: old clients stay in their old lobby
 const RT = { ws: null, state: 'none', topic: '', key: '', joinRef: '', ref: 0, retry: 0, backoff: 1, hbT: 25, sendT: 0, beatT: 0, last: '', tracked: '', present: 0, sent: 0 };
 function rtSend(topic, event, payload, joinRef) {
   if (!RT.ws || RT.ws.readyState !== 1) return false;
