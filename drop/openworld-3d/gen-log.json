@@ -1,0 +1,42 @@
+{
+ "batch": "openworld-3d",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "warden_gate",
+   "ok": true,
+   "file": "warden_gate.glb",
+   "sec": 48.4
+  },
+  {
+   "name": "cliff_ridge",
+   "ok": true,
+   "file": "cliff_ridge.glb",
+   "sec": 20.6
+  },
+  {
+   "name": "danger_sign",
+   "ok": true,
+   "file": "danger_sign.glb",
+   "sec": 21.8
+  },
+  {
+   "name": "quest_beacon",
+   "ok": true,
+   "file": "quest_beacon.glb",
+   "sec": 15.2
+  },
+  {
+   "name": "warden_gate_open_c23",
+   "ok": true,
+   "file": "warden_gate_open_c23.webp",
+   "sec": 9.1
+  },
+  {
+   "name": "warden_gate_open",
+   "ok": true,
+   "file": "warden_gate_open.glb",
+   "sec": 29.3
+  }
+ ]
+}
