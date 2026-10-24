@@ -1,12 +1,88 @@
 {
- "batch": "openworld-c",
+ "batch": "openworld-3d",
  "jobs": [
   {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "warden_gate",
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/openworld-c/warden_gate_c23.webp"
+   },
+   "files": [
+    "image"
+   ]
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "cliff_ridge",
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/openworld-c/cliff_ridge_c23.webp"
+   },
+   "files": [
+    "image"
+   ]
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "danger_sign",
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/openworld-c/danger_sign_c41.webp"
+   },
+   "files": [
+    "image"
+   ]
+  },
+  {
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "quest_beacon",
+   "args": {
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/openworld-c/quest_beacon_c23.webp"
+   },
+   "files": [
+    "image"
+   ]
+  },
+  {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "warden_gate_c23",
+   "name": "warden_gate_open_c23",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A massive fortified stone gate for a mountain pass: two thick square towers of grey weathered stone blocks joined by a heavy arch, a closed iron portcullis grid filling the arch, wooden beams and iron studs, a carved stone guardian face on the keystone, moss in the cracks, a wide solid base.",
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A massive fortified stone gate for a mountain pass: two thick square towers of grey weathered stone blocks joined by a heavy arch, the arch is wide open with an empty passage through it and no door, a broken iron portcullis rolled up tight under the top of the arch, wooden beams and iron studs, a carved stone guardian face on the keystone, moss in the cracks, a wide solid base.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 23,
     "random_seed": false,
@@ -15,94 +91,21 @@
    }
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "warden_gate_c41",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "warden_gate_open",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A massive fortified stone gate for a mountain pass: two thick square towers of grey weathered stone blocks joined by a heavy arch, a closed iron portcullis grid filling the arch, wooden beams and iron studs, a carved stone guardian face on the keystone, moss in the cracks, a wide solid base.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "danger_sign_c23",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A crooked wooden warning post: a thick weathered wooden stake with a cracked plank sign nailed across it, an animal skull with horns tied on top, a torn red cloth banner hanging from a crossbar, bound with rope, small stones piled around the foot.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "danger_sign_c41",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A crooked wooden warning post: a thick weathered wooden stake with a cracked plank sign nailed across it, an animal skull with horns tied on top, a torn red cloth banner hanging from a crossbar, bound with rope, small stones piled around the foot.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "cliff_ridge_c23",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A long jagged rocky cliff ridge segment, a wall of tall grey stone slabs and boulders standing side by side, about four times longer than tall, layered rock strata, mossy ledges and a few small bushes in the cracks, flat bottom, seen from the side at three-quarter angle.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "cliff_ridge_c41",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A long jagged rocky cliff ridge segment, a wall of tall grey stone slabs and boulders standing side by side, about four times longer than tall, layered rock strata, mossy ledges and a few small bushes in the cracks, flat bottom, seen from the side at three-quarter angle.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "quest_beacon_c23",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. An ancient standing waystone pillar: a tall carved grey stone obelisk on a round stepped stone base, golden metal bands and a golden compass rose emblem inlaid on its front, a round golden orb set on the top, engraved runes along the sides.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "quest_beacon_c41",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. An ancient standing waystone pillar: a tall carved grey stone obelisk on a round stepped stone base, golden metal bands and a golden compass rose emblem inlaid on its front, a round golden orb set on the top, engraved runes along the sides.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7
+   },
+   "from": {
+    "image": "warden_gate_open_c23"
    }
   }
  ]
