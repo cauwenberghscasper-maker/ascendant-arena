@@ -15,7 +15,9 @@ for(const[id,spec]of Object.entries(ENEMY_RIGS)){
   const source=read('assets/'+id.replace('.','/')+'/model.json');
   assert.equal(skin.modelSha256,crypto.createHash('sha256').update(source).digest('hex'),id+': stale source');
   assert.deepEqual(skin.joints,enemyJoints(spec).map(j=>j.name),id+': stale joints');
-  assert.deepEqual(skin.jointPositions,enemyJoints(spec).map(j=>j.p),id+': stale joint placement');
+  const joints=enemyJoints(spec);assert.equal(skin.jointPositions.length,joints.length);
+  // Math.sin/cos can differ in the last bits across Node/Chromium versions.
+  assert(joints.every((j,i)=>j.p.every((v,k)=>Number.isFinite(skin.jointPositions[i][k])&&Math.abs(v-skin.jointPositions[i][k])<1e-7)),id+': stale joint placement');
   const glb=Buffer.from(JSON.parse(source).glb,'base64'),doc=JSON.parse(glb.subarray(20,20+glb.readUInt32LE(12)));
   assert.equal(skin.vertices,doc.accessors[doc.meshes[0].primitives[0].attributes.POSITION].count,id+': vertex order');
   const indices=Buffer.from(skin.indices,'base64'),weights=Buffer.from(skin.weights,'base64');
