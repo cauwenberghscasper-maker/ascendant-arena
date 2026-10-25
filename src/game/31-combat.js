@@ -36,6 +36,7 @@ let HeroFXRef = null;
 
 // team 'mob' (monster and boss attacks) in the open world can only hurt your own hero: skip the scan over every monster
 function forEachTarget(fn, team) {
+  if (G.mode === 'lanes' && G.lanes) { lanesTargets(fn); return; } // Ascendant Lanes: heroes, minions, buildings, camps (34b-lanes.js)
   if (team === 'mob' && G.mode !== 'arena') { fn(G.player); if (G.dungeon && G.dungeon.delve) for (const b of G.dungeon.delve.bots) fn(b); return; }
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
   fn(G.player);
@@ -181,12 +182,13 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
 function dealDamage(t, amount, srcId, o) {
   if (!t || !t.alive) return 0;
   if (t.isPeer) { // only your own shots, the victim decides; your hits on players still fill your super
-    if (srcId !== G.player.id) return 0;
-    const dealt = pvpHit(t, amount), s = G.player;
-    if (dealt > 0 && o && o.charge) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
+    if (srcId !== G.player.id && !(G.mode === 'lanes' && typeof lanesMpRuns === 'function' && lanesMpRuns(srcId))) return 0;
+    const dealt = G.mode === 'lanes' ? lanesMpHeroHit(t, amount, srcId) : pvpHit(t, amount), s = G.player;
+    if (dealt > 0 && o && o.charge && srcId === s.id) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
     return dealt;
   }
   if (t.invulnT > 0) { if (t.isPlayer && typeof delveDodge === 'function') { const s0 = G.ents.get(srcId); if (s0 && (s0.kind === 'enemy' || s0.kind === 'boss')) delveDodge(t); } return 0; }
+  if (G.mode === 'lanes' && G.lanes) { amount = lanesDmgMod(t, srcId, amount); if (!(amount > 0)) return 0; } // shields, backdoor, tower aggro (34b-lanes.js)
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
   if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot && !t.delveBot) return 0; // hub bots are bystanders (dungeon bots fight)
@@ -300,6 +302,7 @@ function stepKeystones(f, dt) {
 }
 function killEntity(t, src, pet = false) {
   t.alive = false;
+  if (G.mode === 'lanes' && G.lanes) { lanesOnKill(t, src); return; } // Ascendant Lanes counts its own falls (34b-lanes.js)
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
@@ -643,6 +646,7 @@ function stepFighter(f, dt, ctx) {
 }
 
 function boundFighter(f, ctx) {
+  if (G.lanes) { lanesClamp(f); return; }
   if (G.rift && f.isPlayer) { riftClamp(f, f.r); return; }
   if (G.dungeon && (f.isPlayer || f.delveBot)) { dungeonClamp(f, f.r); return; }
   if (G.siege && f.isPlayer) { siegeClamp(f, f.r); return; }

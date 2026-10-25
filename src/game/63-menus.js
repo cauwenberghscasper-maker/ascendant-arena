@@ -185,6 +185,7 @@ function openJournal() {
     tile('mIdle', 'm_idle', 'Bank & Camp', 'Coffers & expeditions', idleAlert()),
     tile('mPlayers', 'm_players', 'Fellow Adventurers', mpSummary()),
     tile('mArena', 'm_arena', 'Showdown', 'Duel 9 rival champions', false),
+    tile('mLanes', 'm_lanes', 'Ascendant Lanes', G.lanes ? 'Match on' : '1v1 · 2v2 · 3v3 lane battles', false),
     tile('mDelve', 'm_portal', 'Dungeons', 'Party dungeons, sets & loot', false),
   ];
   openModal(`<div class="mtiles">${adventure.join('')}</div>${comingUpHtml(3)}`);

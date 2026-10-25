@@ -2255,6 +2255,15 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .kW button { min-width: 44px; min-height: 32px; padding: 0; font-size: 16px; }
 .kBuy { flex: 0 0 auto; min-width: 84px; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
 .kBuy small { font-size: 11px; }
+/* Ascendant Lanes page (76-lanes-mp.js): size cards reuse the dungeon cards; two team columns of slots */
+.lnTeams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 6px 0 8px; }
+.lnTeam { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lnTeam > b { font-size: 12px; letter-spacing: .04em; text-shadow: 1px 1px 0 #000; }
+.lnTeam.blue > b { color: #7fd0ff; } .lnTeam.red > b { color: #ff7a7a; }
+.lnTeam .dlvSlot.empty { min-height: 44px; }
+.panel .row.lnSides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.panel .row.lnSides button { min-height: 44px; }
+.tag.obj.foe .tb i { background: var(--hpLow); } .tag.obj.ally .tb i { background: #5dd6ff; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -3675,6 +3684,9 @@ function sanitizeProfile(p) {
   { const o = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {}), d = o(out.delve);
     out.delve = { clears: o(d.clears), best: o(d.best), wk: { w: +o(d.wk).w || 0, done: o(o(d.wk).done) }, pieces: o(d.pieces),
       found: o(d.found), upity: Math.max(0, +d.upity | 0), s: Math.max(0, +d.s | 0) }; } // found: dungeon treasures logged; upity: chests since one; s: S-rank clears
+  // Ascendant Lanes: rank points, best, wins, losses, matches (34b-lanes.js)
+  { const l = out.lanes && typeof out.lanes === 'object' && !Array.isArray(out.lanes) ? out.lanes : {}, n = (v) => Math.max(0, Math.floor(+v || 0));
+    out.lanes = { rp: n(l.rp), best: n(l.best), w: n(l.w), l: n(l.l), n: n(l.n) }; }
   // Dungeon Keys (CFG.dungeon loads later; the cap of 12 matches CFG.dungeon.keys.max)
   out.keys = (Array.isArray(out.keys) ? out.keys : []).filter((k) => k && k.t >= 1 && Array.isArray(k.a)).slice(0, 12)
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));
@@ -4143,6 +4155,7 @@ let HeroFXRef = null;
 
 // team 'mob' (monster and boss attacks) in the open world can only hurt your own hero: skip the scan over every monster
 function forEachTarget(fn, team) {
+  if (G.mode === 'lanes' && G.lanes) { lanesTargets(fn); return; } // Ascendant Lanes: heroes, minions, buildings, camps (34b-lanes.js)
   if (team === 'mob' && G.mode !== 'arena') { fn(G.player); if (G.dungeon && G.dungeon.delve) for (const b of G.dungeon.delve.bots) fn(b); return; }
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
   fn(G.player);
@@ -4288,12 +4301,13 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
 function dealDamage(t, amount, srcId, o) {
   if (!t || !t.alive) return 0;
   if (t.isPeer) { // only your own shots, the victim decides; your hits on players still fill your super
-    if (srcId !== G.player.id) return 0;
-    const dealt = pvpHit(t, amount), s = G.player;
-    if (dealt > 0 && o && o.charge) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
+    if (srcId !== G.player.id && !(G.mode === 'lanes' && typeof lanesMpRuns === 'function' && lanesMpRuns(srcId))) return 0;
+    const dealt = G.mode === 'lanes' ? lanesMpHeroHit(t, amount, srcId) : pvpHit(t, amount), s = G.player;
+    if (dealt > 0 && o && o.charge && srcId === s.id) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
     return dealt;
   }
   if (t.invulnT > 0) { if (t.isPlayer && typeof delveDodge === 'function') { const s0 = G.ents.get(srcId); if (s0 && (s0.kind === 'enemy' || s0.kind === 'boss')) delveDodge(t); } return 0; }
+  if (G.mode === 'lanes' && G.lanes) { amount = lanesDmgMod(t, srcId, amount); if (!(amount > 0)) return 0; } // shields, backdoor, tower aggro (34b-lanes.js)
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
   if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot && !t.delveBot) return 0; // hub bots are bystanders (dungeon bots fight)
@@ -4407,6 +4421,7 @@ function stepKeystones(f, dt) {
 }
 function killEntity(t, src, pet = false) {
   t.alive = false;
+  if (G.mode === 'lanes' && G.lanes) { lanesOnKill(t, src); return; } // Ascendant Lanes counts its own falls (34b-lanes.js)
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
@@ -4750,6 +4765,7 @@ function stepFighter(f, dt, ctx) {
 }
 
 function boundFighter(f, ctx) {
+  if (G.lanes) { lanesClamp(f); return; }
   if (G.rift && f.isPlayer) { riftClamp(f, f.r); return; }
   if (G.dungeon && (f.isPlayer || f.delveBot)) { dungeonClamp(f, f.r); return; }
   if (G.siege && f.isPlayer) { siegeClamp(f, f.r); return; }
@@ -6544,12 +6560,375 @@ function arenaBotThink(b, dt) {
   it.mx = mx; it.mz = mz;
 }
 
+// ---------------------------------------------------------------------
+// Ascendant Lanes: a small MOBA for phones (Casper, 25 Oct 2026: "League of Legends-style, 1v1, 2v2, 3v3, with your
+// own character from the farm map"). You bring your own hero exactly as you built it (gear, talents, masteries,
+// relics); empty places are filled with computer heroes. One lane runs north-south between two bases: each base has
+// a Core and two towers in front of it, and minion waves march down the lane every CFG.lanes.wave seconds. 2v2 and
+// 3v3 add a jungle camp on each flank (a guardian whose fall gives the team a damage buff). Destroy the enemy Core to
+// win; at the time limit the team with more structure health left wins.
+// Rules of the lane: towers shoot the nearest enemy in range, minions first, but a hero who hurts an allied hero
+// under the tower becomes its target. A tower only takes full damage while your minions are near it (no backdooring),
+// and the inner tower and the Core stay shielded until the structure in front of them has fallen.
+// The game that runs the match (you alone, or the earliest player in an online party: 76-lanes-mp.js) simulates the
+// minions, towers, Cores, camps and bots; every human always runs their own hero (victim-authoritative, like 72-pvp).
+// Level matching (to be finished later): every player has a Lanes rating card (`lanesRating`: level, Power, bracket);
+// quick match queues per bracket, and CFG.lanes.normalize scales every hero to the match level so a level 20 and a
+// level 150 can play fairly. See docs/log/2026-10-25-lanes-mode.md.
+// ---------------------------------------------------------------------
+const LC = { x: 0, z: -2600 }; // Lanes map centre (arena −1000, rift −1400, dungeon −1800, siege −2200)
+CFG.lanes = {
+  unlock: 10, sizes: [1, 2, 3], half: { x: 19, z: 64 }, wide3: 23, // field half-size (3v3 is a little wider)
+  core: 54, towers: [38, 21], fountain: 60, fountainR: 6, campX: 15, campZ: 0,
+  wave: 26, firstWave: 4, melee: 3, ranged: 2, maxMinions: 40, time: 600, countdown: 3,
+  respawn: [6, 1, 18], // base seconds, +per minute, cap
+  // stats in units of the match's reference hero (a level-L hero in level-L Rare gear): hp in hero shots, dmg in hero HP
+  minion: { melee: { hp: 2.6, dmg: 0.055, cd: 1.1, range: 1.7, speed: 3.4, r: 0.6 }, ranged: { hp: 1.8, dmg: 0.05, cd: 1.5, range: 7, speed: 3.4, r: 0.5 } },
+  tower: { hp: 46, dmg: 0.17, minionDmg: 0.42, cd: 1.15, range: 11, r: 1.6, aggro: 2.5 },
+  coreHp: 70, coreR: 2.4, structDmg: 0.5, backdoor: 0.35, sight: 7.5, pvp: 0.6,
+  camp: { hp: 22, dmg: 0.09, cd: 1.3, range: 2.4, leash: 9, respawn: 75, buff: 0.15, buffT: 60, type: 'boar' },
+  heal: 0.18, // fountain heal per second (share of max HP)
+  zoom: 1.12,
+  // rank points per win / loss (never below 0), the Lanes ranks, and play-earned chests (never sold, odds in Inventory)
+  rp: { win: 20, loss: -8, bot: 0.5 }, ranks: [[0, 'Bronze'], [100, 'Silver'], [250, 'Gold'], [450, 'Platinum'], [700, 'Diamond'], [1000, 'Ascendant']],
+  chest: { win: 'treasure', loss: 'hunter' },
+  // level matching: brackets by player level (quick match only queues inside one), and stat normalisation
+  brackets: [1, 20, 40, 70, 100, 150, 210], normalize: 'auto', normalizeGap: 15, normalizeSoft: 0.5,
+};
+const LN_TEAMS = ['blue', 'red'];
+const lanesRec = () => { const p = G.profile; if (!p.lanes) p.lanes = { rp: 0, best: 0, w: 0, l: 0, n: 0 }; return p.lanes; };
+const lanesRank = (rp) => { let r = CFG.lanes.ranks[0][1]; for (const [k, n] of CFG.lanes.ranks) if (rp >= k) r = n; return r; };
+// --- Lanes rating: the card a player brings to matchmaking (sent in the lobby presence) ---
+function lanesBracket(level) { const B = CFG.lanes.brackets; let i = 0; while (i < B.length - 1 && level >= B[i + 1]) i++; return i; }
+function lanesBracketName(i) { const B = CFG.lanes.brackets; return i >= B.length - 1 ? `Lv ${B[B.length - 1]}+` : `Lv ${B[i]}-${B[i + 1] - 1}`; }
+// mmr: rank points plus a little for level and Power, so a later queue can widen its search step by step
+function lanesRating(p, power) { const L = (p && p.level) || 1, rp = ((p && p.lanes) || {}).rp || 0; return { lvl: L, pw: Math.round(power || 0), br: lanesBracket(L), mmr: Math.round(1000 + rp + 2 * Math.min(L, 210)) }; }
+// should this match scale everyone to its level? 'auto': only when the humans' levels are far apart
+function lanesShouldNormalize(levels) { const N = CFG.lanes.normalize; if (N === true || N === false) return N; return levels.length > 1 && Math.max(...levels) - Math.min(...levels) > CFG.lanes.normalizeGap; }
+// --- end Lanes rating
+
+// the reference hero of a match level: what minion, tower and bot numbers are measured in
+function lanesRef(L) {
+  const f = makeFighter({ name: 'ref', team: 'ref', cls: STARTER_HERO, x: 0, z: 0 }); applyLoadout(f, STARTER_HERO, []);
+  applyStats(f, 'hub', { level: L, gear: refGear(L) }); G.ents.delete(f.id);
+  return { hp: f.maxHp, dmg: f.dmg * (CFG.attacks[STARTER_HERO].mult || 1), power: powerOf(f) };
+}
+// scale a hero so its Power matches the match level, keeping a softened share of how good its build is for its own level
+function lanesNormalize(f, L, ownL) {
+  const R = CFG.lanes, mine = powerOf(f), refOwn = lanesRef(ownL).power, refL = lanesRef(L).power;
+  const build = clamp(mine / Math.max(1, refOwn), 0.6, 1.6), target = refL * Math.pow(build, R.normalizeSoft), s = target / Math.max(1, mine);
+  const k = f.maxHp > 0 ? f.hp / f.maxHp : 1; f.maxHp = Math.round(f.maxHp * s); f.dmg *= s; f.dmgAlt *= s; f.hp = f.maxHp * k;
+}
+const lanesSide = (team) => (team === 'blue' ? -1 : 1); // blue base in the south (−z), red in the north
+const lanesEnemy = (team) => (team === 'blue' ? 'red' : 'blue');
+const lanesHalfX = () => (G.lanes && G.lanes.size >= 3 ? CFG.lanes.wide3 : CFG.lanes.half.x);
+function lanesSpawnPoint(team, i) { const s = lanesSide(team), R = CFG.lanes; return { x: LC.x + ((i || 0) - 1) * 2.4, z: LC.z + s * (R.fountain - 1) }; }
+// opts: { size, team, seed, humans: [{ key, team, nick, cls, level }], host, code, normalize }
+function startLanes(opts) {
+  const p = G.profile, pl = G.player, R = CFG.lanes;
+  if (G.mode !== 'hub' || G.rift || G.dungeon || G.siege || G.lanes || !pl.alive) return false;
+  opts = opts || {};
+  const size = clamp(opts.size | 0 || 1, 1, 3), myTeam = opts.team === 'red' ? 'red' : 'blue';
+  const humans = (opts.humans || []).filter((h) => h && h.key !== MP.sid);
+  const levels = [p.level, ...humans.map((h) => h.level || p.level)], L = Math.max(1, Math.round(levels.reduce((a, b) => a + b, 0) / levels.length));
+  const norm = opts.normalize != null ? !!opts.normalize : lanesShouldNormalize(levels);
+  clearProjectiles();
+  const S = G.lanes = { size, t: 0, phase: 'countdown', cd: R.countdown, L, ref: lanesRef(L), norm, myTeam, code: opts.code || '', host: opts.host !== false, seed: opts.seed || 1,
+    waveT: R.firstWave, waveN: 0, fighters: [], bots: [], minions: [], structs: [], camps: [], peers: humans, kills: { blue: 0, red: 0 }, buff: { blue: 0, red: 0 },
+    result: null, overT: 0, back: { x: pl.x, z: pl.z, team: pl.team }, stats: { kills: 0, deaths: 0, structs: 0, minions: 0 }, mid: 0 };
+  G.mode = 'lanes'; G.obstacles = S.grid = new Grid(6);
+  // structures: two towers and a Core per base (kept in G.ents so their shots have an owner)
+  for (const team of LN_TEAMS) {
+    const s = lanesSide(team);
+    R.towers.forEach((tz, i) => S.structs.push(lanesStruct(team, 'tower', LC.x, LC.z + s * tz, R.tower.hp, R.tower.r, i === 0 ? 'outer' : 'inner')));
+    S.structs.push(lanesStruct(team, 'core', LC.x, LC.z + s * R.core, R.coreHp, R.coreR, 'core'));
+  }
+  if (size >= 2) for (const sx of [-1, 1]) S.camps.push(lanesCamp(LC.x + sx * (lanesHalfX() - 4), LC.z + R.campZ));
+  // your hero, as you built it (stats normalised to the match level when asked)
+  pl.team = myTeam; refreshPlayerStats(true); if (norm) lanesNormalize(pl, L, p.level);
+  const sp = lanesSpawnPoint(myTeam, 1); pl.x = sp.x; pl.z = sp.z; pl.facing = myTeam === 'blue' ? 0 : Math.PI; pl.hp = pl.maxHp; pl.invulnT = 2; pl.ammo = pl.ammoMax; pl.superCharge = 0; pl.intent = newIntent();
+  S.fighters.push(pl);
+  // empty places: bots (only the game that runs the match makes them; 76-lanes-mp.js sends them to the others)
+  if (S.host) lanesFillBots(S, humans);
+  ev({ t: 'lanesStart', size, team: myTeam, x: pl.x, z: pl.z, norm, L });
+  return true;
+}
+function lanesStruct(team, kind, x, z, hpK, r, tier) {
+  const S = G.lanes, hp = Math.round(S.ref.dmg * hpK);
+  const o = { id: nextId++, kind: 'structure', sk: kind, tier, team, x, z, hx: x, hz: z, r, hp, maxHp: hp, alive: true, flashT: 0, hurtT: 0, atkCd: 1, tgt: null, aggro: null, aggroT: 0, armor: 0, invulnT: 0, lastHurt: -99 };
+  G.ents.set(o.id, o); return o;
+}
+function lanesCamp(x, z) {
+  const S = G.lanes, C = CFG.lanes.camp, type = CFG.enemies[C.type] ? C.type : Object.keys(CFG.enemies).find((k) => CFG.enemies[k] && CFG.enemies[k].r) || 'boar';
+  const e = { id: nextId++, kind: 'enemy', type, zone: 1, team: 'neutral', lanesCamp: true, x, z, hx: x, hz: z, r: (CFG.enemies[type].r || 0.8) * 1.6, elite: true, bossName: 'Lane Guardian',
+    lvl: S.L, hp: 1, maxHp: 1, atk: 1, alive: true, state: 'idle', atkCd: 0, flashT: 0, slowT: 0, invulnT: 0, armorT: 0, respawnT: 0, facing: 0, moveAmt: 0, attackAnim: 0, lungeT: 0, windT: 0, lastHurt: -99, tgt: null };
+  e.maxHp = e.hp = Math.round(S.ref.dmg * C.hp); e.atk = S.ref.hp * C.dmg; G.ents.set(e.id, e); return e;
+}
+// bots: heroes of the match level in Rare gear (lanes are fair: a bot is as strong as the reference hero)
+function lanesBot(team, i, cls, name) {
+  const S = G.lanes, sp = lanesSpawnPoint(team, i);
+  const b = makeFighter({ name, team, isBot: true, cls, x: sp.x, z: sp.z, level: S.L, facing: team === 'blue' ? 0 : Math.PI,
+    ai: { role: 'lane', t: 0, tgt: null, stuck: 0, lx: sp.x, lz: sp.z, side: Math.random() < 0.5 ? 1 : -1, sideT: 1, fireT: 0, back: false } });
+  applyLoadout(b, cls, []); applyStats(b, 'hub', { level: S.L, gear: refGear(S.L) }); b.hp = b.maxHp;
+  b.lanesBot = true; b.nick = name; b.slot = i; b.key = 'lbot:' + S.seed + ':' + team + i;
+  return b;
+}
+function lanesFillBots(S, humans) {
+  const names = seededShuffle(BOT_NAMES.slice(), Math.random), classes = seededShuffle(CFG.brawlerOrder.slice(), Math.random);
+  let n = 0;
+  for (const team of LN_TEAMS) {
+    const have = (team === S.myTeam ? 1 : 0) + humans.filter((h) => h.team === team).length;
+    for (let i = have; i < S.size; i++) {
+      const b = lanesBot(team, i, classes[n % classes.length], names[n % names.length]); n++;
+      if (S.size >= 2 && i === S.size - 1) b.ai.role = 'jungle'; // the last bot of a team takes the camps now and then
+      S.bots.push(b); S.fighters.push(b);
+    }
+  }
+}
+// --- targets: everything alive on the field (forEachTarget in 31-combat.js) ---
+function lanesTargets(fn) {
+  const S = G.lanes; if (!S) return;
+  for (const f of S.fighters) fn(f);
+  for (const m of S.minions) if (m.alive) fn(m);
+  for (const s of S.structs) if (s.alive) fn(s);
+  for (const c of S.camps) if (c.alive) fn(c);
+  if (typeof lanesMpPeers === 'function') for (const e of lanesMpPeers()) fn(e);
+}
+// structures are shielded until the one in front of them falls; towers take little damage with no enemy minions near
+function lanesShielded(s) {
+  const S = G.lanes; if (s.sk === 'tower' && s.tier === 'outer') return false;
+  const front = S.structs.filter((o) => o.team === s.team && o.alive && (s.sk === 'core' ? o.sk === 'tower' : o.tier === 'outer'));
+  return front.length > 0;
+}
+// every hit inside a match passes here first (dealDamage): shields, backdoor protection, softer hero-vs-hero hits,
+// and tower aggro on a hero who hurts an allied hero under it
+function lanesDmgMod(t, srcId, amount) {
+  const S = G.lanes, R = CFG.lanes, src = G.ents.get(srcId);
+  if (t.kind === 'structure') {
+    if (!t.alive || lanesShielded(t)) return 0;
+    if (src && src.kind === 'fighter') { const near = S.minions.some((m) => m.alive && m.team !== t.team && Math.hypot(m.x - t.x, m.z - t.z) < R.tower.range + 2); if (!near) amount *= R.backdoor; }
+    t.hurtT = 1.2;
+  }
+  if (src && src.team && src.team !== 'neutral' && S.buff[src.team] > 0) amount *= 1 + R.camp.buff;
+  if (t.kind === 'fighter' && src && src.kind === 'fighter') {
+    amount *= R.pvp;
+    for (const s of S.structs) if (s.alive && s.sk === 'tower' && s.team === t.team && Math.hypot(src.x - s.x, src.z - s.z) < R.tower.range) { s.aggro = src; s.aggroT = R.tower.aggro; }
+  }
+  if (t.lanesCamp && src) { t.tgt = src; t.state = 'chase'; }
+  // an online guest: hits on the host's bodies show here at once and go to the host, which decides when they fall
+  if (!S.host && S.code && (t.kind === 'minion' || t.kind === 'structure' || t.lanesCamp || t.lanesBot)) { amount = Math.min(amount, Math.max(0, t.hp - 1)); if (typeof lanesMpGuestHit === 'function') lanesMpGuestHit(t, amount, srcId); }
+  return amount;
+}
+// a body fell (killEntity): count it, schedule hero respawns, pay structure kills, end the match on a Core
+function lanesOnKill(t, src) {
+  const S = G.lanes, R = CFG.lanes;
+  ev({ t: 'die', x: t.x, z: t.z, kind: t.kind === 'enemy' ? t.type : t.kind === 'structure' ? 'boss' : t.kind, isPlayer: !!t.isPlayer });
+  if (t.kind === 'fighter') {
+    const min = S.t / 60; t.respawnT = Math.min(R.respawn[2], R.respawn[0] + R.respawn[1] * min);
+    const by = lanesEnemy(t.team); S.kills[by]++;
+    if (t.isPlayer) { S.stats.deaths++; toast(`You fell · back in ${Math.ceil(t.respawnT)}s`, 'bad'); }
+    if (src && src.isPlayer) { S.stats.kills++; ev({ t: 'ko', name: t.nick || t.name }); }
+    ev({ t: 'lanesKill', team: by, name: t.nick || t.name, mine: t.team === S.myTeam });
+  } else if (t.kind === 'structure') {
+    if (src && src.team === S.myTeam) S.stats.structs++;
+    ev({ t: 'lanesStructDown', sk: t.sk, team: t.team, mine: t.team === S.myTeam, x: t.x, z: t.z });
+    if (t.sk === 'core' && S.host) lanesEnd(lanesEnemy(t.team), 'core');
+  } else if (t.kind === 'minion') { t.deadAt = G.time; if (src && src.isPlayer) S.stats.minions++; }
+  else if (t.lanesCamp) { t.respawnT = R.camp.respawn; const team = src && src.team; if (team === 'blue' || team === 'red') { S.buff[team] = R.camp.buffT; ev({ t: 'lanesBuff', team, mine: team === S.myTeam }); } }
+}
+function lanesSpawnWave() {
+  const S = G.lanes, R = CFG.lanes; S.waveN++;
+  for (const team of LN_TEAMS) {
+    const s = lanesSide(team), z0 = LC.z + s * (R.core - 3);
+    const kinds = []; for (let i = 0; i < R.melee; i++) kinds.push('melee'); for (let i = 0; i < R.ranged; i++) kinds.push('ranged');
+    kinds.forEach((k, i) => { if (S.minions.filter((m) => m.alive).length < R.maxMinions) S.minions.push(lanesMinion(team, k, LC.x + ((i % 3) - 1) * 1.6, z0 + s * Math.floor(i / 3) * 1.8)); });
+  }
+  S.minions = S.minions.filter((m) => m.alive || G.time - m.deadAt < 2);
+}
+function lanesMinion(team, mk, x, z) {
+  const S = G.lanes, M = CFG.lanes.minion[mk], grow = 1 + 0.04 * S.waveN; // each wave a little sturdier
+  const m = { id: nextId++, kind: 'minion', mk, team, x, z, r: M.r, hp: Math.round(S.ref.dmg * M.hp * grow), maxHp: 0, dmg: S.ref.hp * M.dmg * grow, alive: true, facing: team === 'blue' ? 0 : Math.PI,
+    atkCd: Math.random(), flashT: 0, slowT: 0, invulnT: 0, armorT: 0, moveAmt: 0, attackAnim: 0, tgt: null, tgtT: 0, lastHurt: -99, deadAt: 0 };
+  m.maxHp = m.hp; G.ents.set(m.id, m); return m;
+}
+function stepLanes(dt) {
+  const S = G.lanes, R = CFG.lanes, pl = G.player;
+  if (S.phase === 'countdown') { S.cd -= dt; for (const f of S.fighters) clearOneShots(f.intent); if (S.cd <= 0) { S.phase = 'fight'; ev({ t: 'lanesFight' }); } return; }
+  if (S.phase === 'over') { S.overT -= dt; for (const f of S.fighters) clearOneShots(f.intent); }
+  else S.t += dt;
+  const guest = typeof lanesMpStep === 'function' && lanesMpStep(dt); // an online guest mirrors the host's field
+  // heroes (yours always; bots only on the game that runs the match)
+  for (const f of S.fighters) {
+    if (!f.alive) { if ((f.respawnT -= dt) <= 0 && S.phase !== 'over') lanesRespawn(f); continue; }
+    if (f.lanesBot && !guest && S.phase === 'fight') lanesBotThink(f, dt);
+    if (f.lanesBot && guest) { lanesMirrorBot(f, dt); continue; }
+    stepFighter(f, dt, 'lanes');
+    // the fountain heals fast and keeps enemies out
+    const sp = lanesSpawnPoint(f.team, 1);
+    if (Math.hypot(f.x - sp.x, f.z - sp.z) < R.fountainR) f.hp = Math.min(f.maxHp, f.hp + f.maxHp * R.heal * dt);
+    const esp = lanesSpawnPoint(lanesEnemy(f.team), 1), ed = Math.hypot(f.x - esp.x, f.z - esp.z);
+    if (ed < R.fountainR + 1) { f.x = esp.x + (f.x - esp.x) / (ed || 1) * (R.fountainR + 1); f.z = esp.z + (f.z - esp.z) / (ed || 1) * (R.fountainR + 1); }
+  }
+  for (let i = 0; i < S.fighters.length; i++) for (let j = i + 1; j < S.fighters.length; j++) { const a = S.fighters[i], b = S.fighters[j]; if (a.alive && b.alive) separate(a, b); }
+  for (const team of LN_TEAMS) S.buff[team] = Math.max(0, S.buff[team] - dt);
+  for (const s of S.structs) { s.flashT -= dt; s.hurtT -= dt; s.x = s.hx; s.z = s.hz; } // knock-backs and supers never move a building
+  // keep bodies out of the buildings (they are not obstacles, so shots still reach them)
+  const push = (e) => { for (const s of S.structs) { if (!s.alive) continue; const dx = e.x - s.x, dz = e.z - s.z, d = Math.hypot(dx, dz), min = s.r + (e.r || 0.5); if (d < min && d > 1e-4) { e.x = s.x + dx / d * min; e.z = s.z + dz / d * min; } } };
+  for (const f of S.fighters) if (f.alive) push(f);
+  if (guest) { for (const m of S.minions) push(m); return; }
+  if (S.phase === 'fight') { if ((S.waveT -= dt) <= 0) { S.waveT = R.wave; lanesSpawnWave(); } }
+  for (const m of S.minions) if (m.alive) { lanesStepMinion(m, dt); push(m); }
+  for (let i = 0; i < S.minions.length; i++) for (let j = i + 1; j < S.minions.length; j++) { const a = S.minions[i], b = S.minions[j]; if (a.alive && b.alive) lanesSeparate(a, b); }
+  for (const s of S.structs) if (s.alive && s.sk === 'tower') lanesStepTower(s, dt);
+  for (const c of S.camps) lanesStepCamp(c, dt);
+  if (S.phase === 'fight' && S.t >= R.time) { const hp = (team) => S.structs.filter((s) => s.team === team).reduce((a, s) => a + Math.max(0, s.hp) / s.maxHp, 0); const b = hp('blue'), r = hp('red'); lanesEnd(b === r ? (S.kills.blue >= S.kills.red ? 'blue' : 'red') : b > r ? 'blue' : 'red', 'time'); }
+}
+const lanesSeparate = (a, b) => { const dx = a.x - b.x, dz = a.z - b.z, min = (a.r + b.r) * 0.9, d = Math.hypot(dx, dz); if (d >= min || d < 1e-4) return; const k = (min - d) / d * 0.5; a.x += dx * k; a.z += dz * k; b.x -= dx * k; b.z -= dz * k; };
+function lanesRespawn(f) {
+  const sp = lanesSpawnPoint(f.team, f.isPlayer ? 1 : (f.slot || 0));
+  f.alive = true; f.x = sp.x; f.z = sp.z; f.hp = f.maxHp; f.invulnT = 2; f.ammo = f.ammoMax; f.burnT = 0; f.slowT = 0;
+  if (f.ai) { f.ai.back = false; f.ai.tgt = null; }
+  if (f.isPlayer) ev({ t: 'lanesRespawn' });
+}
+// nearest enemy body for a minion or tower: minions first, then heroes, then buildings
+function lanesNearest(x, z, team, range, heroes) {
+  const S = G.lanes; let best = null, bd = range;
+  for (const m of S.minions) if (m.alive && m.team !== team) { const d = Math.hypot(m.x - x, m.z - z) - m.r; if (d < bd) { bd = d; best = m; } }
+  if (best) return best;
+  if (heroes !== false) { bd = range; lanesTargets((f) => { if (f.kind !== 'fighter' || !f.alive || f.team === team || f.team === 'neutral' || f.invulnT > 1.2) return; const d = Math.hypot(f.x - x, f.z - z) - (f.r || 0.5); if (d < bd) { bd = d; best = f; } }); }
+  return best;
+}
+function lanesStepMinion(m, dt) {
+  const S = G.lanes, R = CFG.lanes, M = R.minion[m.mk], s = lanesSide(m.team);
+  m.flashT -= dt; m.atkCd -= dt; m.attackAnim = Math.max(0, m.attackAnim - dt * 3);
+  if ((m.tgtT -= dt) <= 0 || !m.tgt || !m.tgt.alive) {
+    m.tgtT = 0.4; m.tgt = lanesNearest(m.x, m.z, m.team, R.sight);
+    if (!m.tgt) { let bd = R.sight + 4; for (const o of S.structs) if (o.alive && o.team !== m.team && !lanesShielded(o)) { const d = Math.hypot(o.x - m.x, o.z - m.z) - o.r; if (d < bd) { bd = d; m.tgt = o; } } }
+  }
+  const t = m.tgt, sp = M.speed * (m.slowT > 0 ? 0.55 : 1); m.slowT -= dt;
+  let mx = 0, mz = -s; // march toward the enemy base
+  if (t) {
+    const dx = t.x - m.x, dz = t.z - m.z, d = Math.hypot(dx, dz), reach = M.range + (t.r || 0.5);
+    m.facing = Math.atan2(dx, dz);
+    if (d > reach) { mx = dx / d; mz = dz / d; }
+    else { mx = mz = 0; if (m.atkCd <= 0) { m.atkCd = M.cd; m.attackAnim = 1; lanesMinionHit(m, t); } }
+  } else { mx = (LC.x - m.x) * 0.15; m.facing = Math.atan2(mx, mz); } // drift back to the lane's middle
+  const l = Math.hypot(mx, mz); if (l > 0.01) { m.x += mx / l * sp * dt; m.z += mz / l * sp * dt; }
+  m.moveAmt = lerp(m.moveAmt, l > 0.01 ? 1 : 0, 1 - Math.exp(-dt * 8));
+  lanesClamp(m);
+}
+function lanesMinionHit(m, t) {
+  const R = CFG.lanes, dmg = t.kind === 'structure' ? G.lanes.ref.dmg * R.structDmg : m.dmg;
+  if (m.mk === 'ranged') { const a = Math.atan2(t.x - m.x, t.z - m.z), sp = 16, d = Math.hypot(t.x - m.x, t.z - m.z); spawnProjectile({ x: m.x, z: m.z, vx: Math.sin(a) * sp, vz: Math.cos(a) * sp, life: (d + 1) / sp, r: 0.3, dmg, team: m.team, owner: m.id, kind: 'orb', color: m.team === 'blue' ? 0x7fd8ff : 0xff8a6a, y: 1.1 }); }
+  else dealDamage(t, dmg, m.id, { knock: 0 });
+}
+function lanesStepTower(s, dt) {
+  const R = CFG.lanes, T = R.tower;
+  s.atkCd -= dt; s.aggroT -= dt;
+  let t = s.aggro && s.aggro.alive && s.aggroT > 0 && Math.hypot(s.aggro.x - s.x, s.aggro.z - s.z) < T.range ? s.aggro : null;
+  if (!t) { if (s.tgt && s.tgt.alive && Math.hypot(s.tgt.x - s.x, s.tgt.z - s.z) < T.range + (s.tgt.r || 0.5)) t = s.tgt; else t = lanesNearest(s.x, s.z, s.team, T.range); }
+  s.tgt = t;
+  if (!t || s.atkCd > 0) return;
+  s.atkCd = T.cd;
+  const a = Math.atan2(t.x - s.x, t.z - s.z), sp = 20, d = Math.hypot(t.x - s.x, t.z - s.z);
+  const dmg = t.kind === 'minion' ? t.maxHp * T.minionDmg : G.lanes.ref.hp * T.dmg;
+  spawnProjectile({ x: s.x + Math.sin(a) * 1.2, z: s.z + Math.cos(a) * 1.2, vx: Math.sin(a) * sp, vz: Math.cos(a) * sp, life: (d + 2) / sp, r: 0.45, dmg, team: s.team, owner: s.id, kind: 'orb', homing: 9, color: s.team === 'blue' ? 0x9fe8ff : 0xffa070, y: 3.4 });
+  ev({ t: 'lanesTowerShot', x: s.x, z: s.z, team: s.team });
+}
+function lanesStepCamp(c, dt) {
+  const C = CFG.lanes.camp;
+  if (!c.alive) { if ((c.respawnT -= dt) <= 0) { c.alive = true; c.hp = c.maxHp; c.x = c.hx; c.z = c.hz; c.tgt = null; c.state = 'idle'; ev({ t: 'spawn', x: c.x, z: c.z, elite: true }); } return; }
+  c.flashT -= dt; c.atkCd -= dt; c.attackAnim = Math.max(0, (c.attackAnim || 0) - dt * 2);
+  const t = c.tgt && c.tgt.alive && Math.hypot(c.tgt.x - c.hx, c.tgt.z - c.hz) < C.leash + 4 ? c.tgt : null;
+  if (!t) { c.tgt = null; const dx = c.hx - c.x, dz = c.hz - c.z, d = Math.hypot(dx, dz); if (d > 0.3) { c.x += dx / d * 5 * dt; c.z += dz / d * 5 * dt; c.facing = Math.atan2(dx, dz); c.moveAmt = 1; } else { c.moveAmt = 0; c.hp = Math.min(c.maxHp, c.hp + c.maxHp * 0.2 * dt); } return; }
+  const dx = t.x - c.x, dz = t.z - c.z, d = Math.hypot(dx, dz); c.facing = Math.atan2(dx, dz);
+  if (d > C.range + (t.r || 0.5)) { c.x += dx / d * 4.6 * dt; c.z += dz / d * 4.6 * dt; c.moveAmt = 1; }
+  else { c.moveAmt = 0; if (c.atkCd <= 0) { c.atkCd = C.cd; c.attackAnim = 1; dealDamage(t, c.atk, c.id, { knock: 3, knockX: dx, knockZ: dz }); } }
+}
+function lanesClamp(f) {
+  const hx = lanesHalfX() - (f.r || 0.5), hz = CFG.lanes.half.z - (f.r || 0.5);
+  f.x = clamp(f.x, LC.x - hx, LC.x + hx); f.z = clamp(f.z, LC.z - hz, LC.z + hz);
+}
+// --- computer heroes: push with the wave, trade with heroes, stay out of enemy towers without minions, go home hurt
+function lanesBotThink(b, dt) {
+  const S = G.lanes, R = CFG.lanes, ai = b.ai, it = b.intent, s = lanesSide(b.team), w = weaponOf(b), range = (w.range || 10);
+  it.mx = it.mz = 0; it.aiming = false;
+  const home = lanesSpawnPoint(b.team, b.slot || 0);
+  if (b.hp < b.maxHp * 0.3) ai.back = true;
+  if (ai.back) { if (Math.hypot(b.x - home.x, b.z - home.z) < 2.5) { if (b.hp >= b.maxHp * 0.95) ai.back = false; } else { lanesMoveTo(b, home.x, home.z); } }
+  // the front of our wave (or our outer tower when there is none)
+  const ours = S.minions.filter((m) => m.alive && m.team === b.team);
+  const front = ours.length ? ours.reduce((a, m) => (m.z * -s > a.z * -s ? m : a)) : null;
+  const myTower = S.structs.filter((o) => o.alive && o.team === b.team && o.sk === 'tower').sort((a, c) => Math.abs(a.z - LC.z) - Math.abs(c.z - LC.z))[0];
+  let goal = front ? { x: front.x + ai.side * 2, z: front.z + s * 2.5 } : myTower ? { x: myTower.x + ai.side * 3, z: myTower.z - s * 4 } : { x: home.x, z: home.z - s * 10 };
+  // the jungler visits a camp that is up and not already being hit by the other team
+  if (ai.role === 'jungle' && !ai.back) { const c = S.camps.filter((q) => q.alive).sort((a, q) => Math.hypot(a.x - b.x, a.z - b.z) - Math.hypot(q.x - b.x, q.z - b.z))[0]; if (c && S.t > 50 && b.hp > b.maxHp * 0.6) goal = { x: c.x, z: c.z, camp: c }; }
+  // what to shoot: heroes in range when healthy, else minions, else a building our minions are at, else the camp
+  let tgt = null, bd = range * 1.05;
+  lanesTargets((t) => { if (!t.alive || t.team === b.team || t.team === 'neutral' || t.kind !== 'fighter') return; const d = Math.hypot(t.x - b.x, t.z - b.z); if (d < bd && (b.hp > b.maxHp * 0.45 || d < range * 0.6)) { bd = d; tgt = t; } });
+  if (!tgt) { bd = range; for (const m of S.minions) if (m.alive && m.team !== b.team) { const d = Math.hypot(m.x - b.x, m.z - b.z); if (d < bd) { bd = d; tgt = m; } } }
+  if (!tgt) for (const o of S.structs) if (o.alive && o.team !== b.team && !lanesShielded(o) && Math.hypot(o.x - b.x, o.z - b.z) < range + o.r && ours.some((m) => Math.hypot(m.x - o.x, m.z - o.z) < R.tower.range)) { tgt = o; break; }
+  if (!tgt && goal.camp && Math.hypot(goal.camp.x - b.x, goal.camp.z - b.z) < range) tgt = goal.camp;
+  // never stand in an enemy tower's reach without our minions taking its shots
+  const danger = S.structs.find((o) => o.alive && o.sk === 'tower' && o.team !== b.team && Math.hypot(o.x - b.x, o.z - b.z) < R.tower.range + 1.5 && !ours.some((m) => Math.hypot(m.x - o.x, m.z - o.z) < R.tower.range));
+  if (!ai.back) {
+    if (tgt) {
+      const d = Math.hypot(tgt.x - b.x, tgt.z - b.z) || 1, keep = range * 0.75;
+      if ((ai.sideT -= dt) <= 0) { ai.sideT = rand(0.8, 2); ai.side = -ai.side; }
+      const ux = (tgt.x - b.x) / d, uz = (tgt.z - b.z) / d, rad = d > keep + 1 ? 1 : d < keep - 1.5 ? -1 : 0;
+      it.mx = ux * rad - uz * ai.side * 0.6; it.mz = uz * rad + ux * ai.side * 0.6;
+      if ((ai.fireT -= dt) <= 0 && d < range * 1.02) { const err = rand(-0.08, 0.08), a = Math.atan2(ux, uz) + err; it.ax = Math.sin(a); it.az = Math.cos(a); it.aiming = true; it.fire = true; it.aimDist = clamp(d / range, 0.2, 1); ai.fireT = rand(0.15, 0.45); }
+      if (b.superCharge >= 1 && d < range * 0.8 && (tgt.kind === 'fighter' || tgt.kind === 'structure')) it.super = true;
+    } else lanesMoveTo(b, goal.x, goal.z);
+    if (danger) { const dx = b.x - danger.x, dz = b.z - danger.z, d = Math.hypot(dx, dz) || 1; it.mx = dx / d; it.mz = dz / d; }
+  }
+  // dodge: dash out of an enemy hero's shot coming straight at it
+  if (b.dashCd <= 0 && Math.random() < dt * 4) for (let i = 0; i < PROJ_MAX; i++) { const p = projectiles[i]; if (!p.active || p.team === b.team || p.ghost) continue; const rx = b.x - p.x, rz = b.z - p.z, dd = Math.hypot(rx, rz); if (dd > 4) continue; const sp = Math.hypot(p.vx, p.vz) || 1; if ((rx * p.vx + rz * p.vz) / (dd * sp) > 0.92) { it.dash = true; it.mx = -p.vz / sp * ai.side; it.mz = p.vx / sp * ai.side; break; } }
+  ai.stuck += dt; if (ai.stuck > 1) { if (Math.hypot(b.x - ai.lx, b.z - ai.lz) < 0.4) ai.side = -ai.side; ai.stuck = 0; ai.lx = b.x; ai.lz = b.z; }
+}
+function lanesMoveTo(b, x, z) { const dx = x - b.x, dz = z - b.z, d = Math.hypot(dx, dz); if (d > 1) { b.intent.mx = dx / d; b.intent.mz = dz / d; } }
+// a guest draws the host's bots where it says they are (76-lanes-mp.js fills sx/sz)
+function lanesMirrorBot(b, dt) {
+  if (b.sx == null) return; const k = 1 - Math.exp(-dt * 10);
+  b.x += (b.sx - b.x) * k; b.z += (b.sz - b.z) * k; if (b.sf != null) b.facing += angDiff(b.facing, b.sf) * k;
+  b.attackAnim = Math.max(0, (b.attackAnim || 0) - dt * 3); trackVel(b, dt);
+}
+function lanesEnd(winner, why) {
+  const S = G.lanes; if (!S || S.result) return;
+  if (typeof lanesMpEnd === 'function') lanesMpEnd(winner, why);
+  lanesFinish(winner, why);
+}
+// pay this player for the match (each game pays its own): rank points, gold, a chest earned in play, mastery
+function lanesFinish(winner, why) {
+  const S = G.lanes, R = CFG.lanes, p = G.profile; if (!S || S.result) return;
+  const win = winner === S.myTeam, rec = lanesRec(), humansVs = S.peers.some((h) => h.team !== S.myTeam);
+  const k = humansVs ? 1 : R.rp.bot, rp0 = rec.rp;
+  rec.rp = Math.max(0, Math.round(rec.rp + (win ? R.rp.win : R.rp.loss) * k)); rec.best = Math.max(rec.best || 0, rec.rp); rec.n++; if (win) rec.w++; else rec.l++;
+  const gold = Math.round((win ? 60 : 25) * (1 + S.t / 300) * Math.pow(CFG.enemies.goldGrowth, Math.min(S.L, p.level) - 1)); addGold(gold, true);
+  const chest = win ? R.chest.win : S.t > 120 ? R.chest.loss : null; if (chest && typeof addCase === 'function') addCase(chest, { src: 'lanes' });
+  addMastery('w:' + G.player.attackId, 20 + Math.round(S.t / 15));
+  S.result = { win, why, rp: rec.rp - rp0, rank: lanesRank(rec.rp), rpTotal: rec.rp, gold, chest, t: S.t, kills: S.stats.kills, deaths: S.stats.deaths, structs: S.stats.structs, minions: S.stats.minions, score: { blue: S.kills.blue, red: S.kills.red }, size: S.size };
+  S.phase = 'over'; S.overT = 2.6; checkAchievements(); G.dirty = true;
+  ev({ t: 'lanesEnd', win, why });
+}
+function leaveLanes() {
+  const S = G.lanes; if (!S) return;
+  if (typeof lanesMpLeave === 'function') lanesMpLeave();
+  for (const o of S.structs.concat(S.minions, S.camps, S.bots)) G.ents.delete(o.id);
+  clearProjectiles();
+  const pl = G.player; G.lanes = null; G.mode = 'hub'; G.obstacles = G.hubObstacles;
+  pl.team = 'ally'; pl.x = S.back.x; pl.z = S.back.z; pl.alive = true; pl.intent = newIntent(); refreshPlayerStats(true); pl.invulnT = 1.5;
+  G.lastCombat = -99;
+  ev({ t: 'lanesLeave', x: pl.x, z: pl.z });
+}
+// --- end Lanes
 // --- top-level sim step --------------------------------------------------------------
 function simStep(dt) {
   G.time += dt;
   if (G.started && G.profile) { const R = G.profile.records; R.time = (R.time || 0) + dt; if (G.profile.gemBuys > 0) G.profile.gemBuys = Math.max(0, G.profile.gemBuys - dt / 600); }
   if (G.mode === 'hub') stepHub(dt);
   else if (G.mode === 'arena' && G.arena) stepArena(dt);
+  else if (G.mode === 'lanes' && G.lanes) stepLanes(dt);
   stepPendingAoE(dt);
   stepClouds(dt);
   HeroSupers.step(dt);
@@ -11946,7 +12325,7 @@ function viewFor(e) {
   if (v) return v;
   if (e.kind === 'fighter') {
     const c = CFG.classes[e.cls];
-    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (!!(G.profile && G.profile.settings.pvp) ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : e.delveBot ? 0x8dd96a : null);
+    const ring = G.mode === 'lanes' ? (e.team === G.player.team ? (e.isPlayer ? 0xffc94a : 0x3fa9ff) : 0xff4d4d) : G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (!!(G.profile && G.profile.settings.pvp) ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : e.delveBot ? 0x8dd96a : null);
     const gear = e.isPlayer ? G.profile.gear : null;
     const cape = e.isPlayer ? capeColor(G.profile) : null;
     const BR = CFG.brawlers[e.cls] || {};
@@ -11992,6 +12371,7 @@ function syncViews(dt, t) {
     } else if (v.ring) v.ring.visible = true;
   };
   if (G.mode === 'arena' && G.arena) { for (const f of G.arena.fighters) handle(f); }
+  else if (G.mode === 'lanes' && G.lanes) { for (const f of G.lanes.fighters) if (f.alive) handle(f); for (const c of G.lanes.camps) if (c.alive) handle(c); for (const e of lanesMpPeers()) handle(e); }
   else {
     for (const f of G.hubFighters) handle(f);
     for (const e of G.enemies) handle(e);
@@ -12080,7 +12460,7 @@ function updateCamera(dt) {
   Showcase.b = clamp(Showcase.b + (Showcase.on ? dt / 0.45 : -dt / 0.45), 0, 1);
   const sb = Showcase.b * Showcase.b * (3 - 2 * Showcase.b);
   // angled top-down: camera south of the player, looking north
-  let zoom = Math.min(CFG.growth.zoomCap, 1 + CFG.growth.zoomPerLevel * (G.profile.level - 1) * (G.mode === 'arena' ? 0.5 : 1)) * (LOCAL_PREVIEW && window.__camZoom || 1) * (G.siege ? CFG.siege.zoom : 1); // __camZoom: local tours only; the fort sees further
+  let zoom = Math.min(CFG.growth.zoomCap, 1 + CFG.growth.zoomPerLevel * (G.profile.level - 1) * (G.mode === 'arena' ? 0.5 : 1)) * (LOCAL_PREVIEW && window.__camZoom || 1) * (G.siege ? CFG.siege.zoom : 1) * (G.lanes ? CFG.lanes.zoom : 1); // __camZoom: local tours only; the fort sees further
   // frame the world boss with the hero when you fight it, so it is never hidden under the top bar
   let fx = pl.x, fz = pl.z + 1.5;
   const bb = G.mode === 'hub' ? G.boss : null;
@@ -13000,6 +13380,142 @@ function updateSiegeView(dt) {
   if (siegeParts.gateGlow) siegeParts.gateGlow.forEach((m, i) => { m.material.opacity = S.sides.includes(i) ? (S.phase === 'fight' ? 0.45 : 0.25 + Math.sin(t * 4) * 0.15) : 0; });
   WorldModels.update();
 }
+// --- Ascendant Lanes view: the lane field, built on entry and disposed on exit. Everything standing is a generated
+// world model (lanes_core, lanes_tower, lanes_brazier, the two minions lanes_minion_melee / lanes_minion_ranged, trees,
+// rocks); code geometry is only the ground, the dirt lane decal and VFX (team rings under minions, tower reach rings).
+// Red's buildings and minions are the same models tinted warm. Minions are instanced and moved every frame.
+const lanesGroup = new THREE.Group(); scene.add(lanesGroup); lanesGroup.visible = false;
+const lanesParts = { sets: [], structs: [], mins: null, rings: null, reach: [], t: 0 };
+const LN_TINT = { blue: 0xffffff, red: 0xffa894 }, LN_COL = { blue: 0x3fa9ff, red: 0xff4d4d };
+const LN_MIN_POOL = 24, LN_MODEL = { tower: ['lanes_tower', 8.5], core: ['lanes_core', 6.2], melee: ['lanes_minion_melee', 1.55], ranged: ['lanes_minion_ranged', 1.25] };
+function lanesGround(HX, HZ) {
+  const w = HX * 2 + 70, d = HZ * 2 + 70;
+  let g = new THREE.PlaneGeometry(w, d, Math.round(w / 4), Math.round(d / 4)).rotateX(-Math.PI / 2);
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) { const x = pos.getX(i), z = pos.getZ(i), out = Math.max(Math.abs(x) - HX, Math.abs(z) - HZ); pos.setY(i, out > 2 ? Math.min(4, (out - 2) * 0.14) + (hashf(x * 0.7, z * 0.7) - 0.5) * 1.2 : -0.03); }
+  g.computeVertexNormals(); g = g.toNonIndexed();
+  const gp = g.attributes.position, n = gp.count, col = new Float32Array(n * 3), th = new Float32Array(n).fill(1), gl = new Float32Array(n * 3);
+  const lo = new THREE.Color(0x3d6a2e), hi = new THREE.Color(0x6a9a3e), dirt = new THREE.Color(0x7a6a46);
+  for (let i = 0; i < n; i++) { const x = gp.getX(i), z = gp.getZ(i), k = clamp(vnoise((x + LC.x) * 0.06, (z + LC.z) * 0.06) * 1.2 - 0.1, 0, 1); _col.copy(lo).lerp(hi, k); if (vnoise(x * 0.11 + 3, z * 0.11) > 0.8) _col.lerp(dirt, 0.3); col.set([_col.r, _col.g, _col.b], i * 3); }
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.setAttribute('aTh', new THREE.BufferAttribute(th, 1)); g.setAttribute('aGc', new THREE.BufferAttribute(gl, 3)); g.deleteAttribute('uv');
+  const m = new THREE.Mesh(g, matGround); m.position.set(LC.x, 0, LC.z); m.receiveShadow = true; lanesGroup.add(m);
+  // the lane: a dirt path from base to base, and a dirt clearing round each base
+  const tex = new THREE.CanvasTexture(siegeDirtTex().image); tex.wrapT = THREE.RepeatWrapping; tex.magFilter = THREE.NearestFilter; tex.colorSpace = THREE.SRGBColorSpace; tex.repeat.set(1, HZ * 2 / 6);
+  const lane = new THREE.Mesh(new THREE.PlaneGeometry(7, HZ * 2).rotateX(-Math.PI / 2), new THREE.MeshLambertMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+  lane.position.set(LC.x, 0.02, LC.z); lanesGroup.add(lane);
+}
+function buildLanesView() {
+  const S = G.lanes, R = CFG.lanes, HX = lanesHalfX(), HZ = R.half.z, rng = mulberry32(4242);
+  lanesGround(HX, HZ);
+  const L = {}, add = (n, it) => (L[n] || (L[n] = [])).push(it);
+  // woods round the field: two rows of oaks and a few rocks and bushes along the edge
+  for (const [off, name, sc] of [[3, 'tree_oak', 5.4], [9, 'tree_oak_lod', 6.2]]) {
+    for (let z = -HZ - 12; z <= HZ + 12; z += 4.2 + rng() * 2) for (const sx of [-1, 1]) add(name, { x: LC.x + sx * (HX + off + rng() * 3), z: LC.z + z, ry: rng() * 6.28, s: sc * (0.8 + rng() * 0.4) });
+    for (let x = -HX - 12; x <= HX + 12; x += 4.2 + rng() * 2) for (const sz of [-1, 1]) add(name, { x: LC.x + x, z: LC.z + sz * (HZ + off + rng() * 3), ry: rng() * 6.28, s: sc * (0.8 + rng() * 0.4) });
+  }
+  for (let i = 0; i < 26; i++) { const sx = rng() < 0.5 ? -1 : 1, z = (rng() * 2 - 1) * (HZ - 8); add(rng() < 0.5 ? 'rock_a' : 'bush_a', { x: LC.x + sx * (HX - 1.5 - rng() * 3), z: LC.z + z, ry: rng() * 6.28, s: 1.3 + rng() * 1.2 }); }
+  for (const z of [-30, -10, 10, 30]) for (const sx of [-1, 1]) add('lanes_brazier', { x: LC.x + sx * 5.2, z: LC.z + z, ry: sx > 0 ? -Math.PI / 2 : Math.PI / 2, s: 2.4 });
+  for (const n in L) lanesParts.sets.push(WorldModels.place(lanesGroup, n, L[n], { far: 999 }));
+  // buildings: one set per team so red can wear its tint
+  for (const team of LN_TEAMS) for (const sk of ['tower', 'core']) {
+    const list = S.structs.filter((s) => s.team === team && s.sk === sk), [name, sc] = LN_MODEL[sk];
+    const items = list.map((s) => ({ x: s.x, z: s.z, ry: team === 'blue' ? 0 : Math.PI, s: sc }));
+    const h = WorldModels.place(lanesGroup, name, items, { far: 999, tint: LN_TINT[team], glow: sk === 'core' ? LN_COL[team] : null, glowK: 0.18 });
+    lanesParts.sets.push(h); list.forEach((s, i) => lanesParts.structs.push({ s, h, it: items[i] }));
+  }
+  // minion pools: hidden until a minion takes a slot (the set's bounds span the lane so it loads with the field)
+  lanesParts.mins = {};
+  for (const team of LN_TEAMS) for (const mk of ['melee', 'ranged']) {
+    const [name, sc] = LN_MODEL[mk], items = Array.from({ length: LN_MIN_POOL }, (_, i) => ({ x: LC.x + (i % 2 ? 4 : -4), z: LC.z + (i / LN_MIN_POOL * 2 - 1) * HZ, s: sc, base: sc, hidden: true }));
+    const h = WorldModels.place(lanesGroup, name, items, { far: 999, tint: LN_TINT[team], cell: 9999 }); lanesParts.sets.push(h); lanesParts.mins[team + mk] = { h, items };
+  }
+  // team rings under every minion (they also show the minion while its model is still loading)
+  const rg = new THREE.RingGeometry(0.45, 0.68, 20).rotateX(-Math.PI / 2), rm = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.85, depthWrite: false });
+  lanesParts.rings = new THREE.InstancedMesh(rg, rm, LN_MIN_POOL * 4); for (let i = 0; i < LN_MIN_POOL * 4; i++) lanesParts.rings.setColorAt(i, _col.set(0xffffff)); lanesParts.rings.count = 0; lanesParts.rings.frustumCulled = false; lanesGroup.add(lanesParts.rings);
+  // enemy tower reach: a faint red ring that shows when you walk close
+  for (const s of S.structs) if (s.sk === 'tower') { const m = new THREE.Mesh(new THREE.RingGeometry(R.tower.range - 0.25, R.tower.range, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: LN_COL[s.team], transparent: true, opacity: 0, depthWrite: false })); m.position.set(s.x, 0.05, s.z); lanesGroup.add(m); lanesParts.reach.push({ s, m }); }
+}
+function disposeLanesView() {
+  for (const h of lanesParts.sets) WorldModels.dispose(h);
+  const geos = new Set(), mats = new Set();
+  lanesGroup.traverse((o) => { if (o.geometry) geos.add(o.geometry); if (o.material && o.material !== matGround) mats.add(o.material); });
+  geos.forEach((g) => g.dispose()); mats.forEach((m) => { if (m.map) m.map.dispose(); m.dispose(); });
+  lanesGroup.clear(); Object.assign(lanesParts, { sets: [], structs: [], mins: null, rings: null, reach: [], t: 0 });
+}
+function enterLanesView(on) {
+  hubGroup.visible = !on; riftGroup.visible = false; lanesGroup.visible = on;
+  if (on) { buildLanesView(); scene.fog.color.set(0x6f8a9a); scene.fog.near = 60; scene.fog.far = 150; paintSky(new THREE.Color(0x3a5a9a), new THREE.Color(0xd8c8a0)); }
+  else { disposeLanesView(); scene.fog.near = 50; scene.fog.far = Q.lowTier ? 95 : 140; }
+}
+function updateLanesView(dt, t) {
+  const S = G.lanes; if (!S || !lanesGroup.visible) { WorldModels.update(); return; }
+  hubGroup.visible = false;
+  lanesParts.t += dt;
+  // buildings: a fallen one disappears in a cloud of rubble
+  for (const q of lanesParts.structs) { const dead = !q.s.alive; if (dead !== !!q.it.hidden) { q.it.hidden = dead; q.h.dirty = true; if (dead) burst(q.s.x, 2, q.s.z, 50, 0x6a5a4a, 8, 1.3, 0.5, 4, 2.4); } }
+  // minions: alive ones take the pool's slots in order, the rest hide
+  const rings = lanesParts.rings; let rn = 0;
+  for (const team of LN_TEAMS) for (const mk of ['melee', 'ranged']) {
+    const P = lanesParts.mins[team + mk]; let i = 0;
+    for (const m of S.minions) {
+      if (!m.alive || m.team !== team || m.mk !== mk || i >= LN_MIN_POOL) continue;
+      const it = P.items[i++], bob = mk === 'ranged' ? 0.55 + Math.sin(t * 3 + m.id) * 0.15 : Math.abs(Math.sin(t * 8 + m.id)) * 0.1 * (m.moveAmt || 0);
+      it.x = m.x; it.z = m.z; it.y = bob; it.ry = m.facing; it.rx = (m.attackAnim || 0) * (mk === 'melee' ? 0.35 : -0.2); it.hidden = false;
+      it.s = it.base * (m.flashT > 0 ? 1.08 : 1);
+      if (rn < rings.instanceMatrix.count) { _m4.makeTranslation(m.x, 0.04, m.z); rings.setMatrixAt(rn, _m4); rings.setColorAt(rn, _col.set(LN_COL[team])); rn++; }
+    }
+    for (let k = i; k < LN_MIN_POOL; k++) P.items[k].hidden = true;
+    P.h.dirty = true; if (P.h.multi) for (const x of P.h.multi) x.dirty = true;
+  }
+  rings.count = rn; if (rn) { rings.instanceMatrix.needsUpdate = true; if (rings.instanceColor) rings.instanceColor.needsUpdate = true; }
+  const pl = G.player;
+  for (const r of lanesParts.reach) { const d = Math.hypot(pl.x - r.s.x, pl.z - r.s.z), on = r.s.alive && r.s.team !== pl.team && d < CFG.lanes.tower.range + 6; r.m.material.opacity += ((on ? 0.45 + Math.sin(t * 5) * 0.12 : 0) - r.m.material.opacity) * Math.min(1, dt * 6); }
+  WorldModels.update();
+}
+// labels and bars over the field (60-hud.js updateTags)
+function lanesTags(put, near) {
+  const S = G.lanes, my = G.player.team;
+  for (const s of S.structs) if (s.alive && near(s, 60)) { const sh = lanesShielded(s); put(s.x, s.sk === 'core' ? 6.8 : 9, s.z, `${s.sk === 'core' ? 'Core' : 'Tower'}${sh ? ' · shielded' : ''}`, s.hp / s.maxHp, `obj${s.sk === 'core' ? ' main' : ''}${s.hurtT > 0 ? ' hurt' : ''}${s.team === my ? ' ally' : ' foe'}`); }
+  for (const f of S.fighters) if (!f.isPlayer && f.alive && near(f, 40)) put(f.x, 2.5 * growthScale(f), f.z, `${f.nick || f.name}${f.lanesBot ? ' · bot' : ''}`, f.hp / f.maxHp, f.team === my ? 'peer' : 'foe arena');
+  for (const e of lanesMpPeers()) if (e.alive && near(e, 40)) put(e.x, 2.5 * growthScale(e), e.z, `${e.nick} · ${e.level}`, e.hp, e.team === my ? 'peer' : 'foe arena');
+  for (const m of S.minions) if (m.alive && m.hp < m.maxHp && near(m, 24)) put(m.x, m.mk === 'ranged' ? 2.4 : 2.1, m.z, '', m.hp / m.maxHp, m.team === my ? 'peer' : 'foe arena');
+  for (const c of S.camps) if (c.alive && near(c, 30)) put(c.x, 3, c.z, `Lane Guardian · ${Math.round(CFG.lanes.camp.buff * 100)}% damage`, c.hp / c.maxHp, 'mob elite');
+}
+function lanesObjText() {
+  const S = G.lanes, pl = G.player, m = Math.floor(Math.max(0, CFG.lanes.time - S.t) / 60), s = Math.floor(Math.max(0, CFG.lanes.time - S.t) % 60);
+  if (S.phase === 'countdown') return `Ascendant Lanes · ${S.size}v${S.size} · get ready`;
+  if (S.phase === 'over') return S.result ? (S.result.win ? 'Victory!' : 'Defeat') : 'Match over';
+  const head = `Blue ${S.kills.blue} · ${m}:${String(s).padStart(2, '0')} · ${S.kills.red} Red`;
+  return !pl.alive ? `${head} · back in ${Math.ceil(pl.respawnT || 0)}s` : S.buff[pl.team] > 0 ? `${head} · Guardian's might ${Math.ceil(S.buff[pl.team])}s` : head;
+}
+function drawLanesMinimap(g, W2, H2, dpr) {
+  const S = G.lanes, R = CFG.lanes, HX = lanesHalfX(), HZ = R.half.z, s = Math.min(W2 / (HX * 2 + 6), H2 / (HZ * 2 + 6)), cx = W2 / 2, cy = H2 / 2;
+  const ax = (x) => cx - (x - LC.x) * s, ay = (z) => cy - (z - LC.z) * s, my = G.player.team, col = (team) => (team === my ? '#3fa9ff' : '#ff4d4d');
+  g.fillStyle = '#2f4a26'; g.fillRect(cx - HX * s, cy - HZ * s, HX * 2 * s, HZ * 2 * s);
+  g.fillStyle = '#8a7650'; g.fillRect(cx - 3.5 * s, cy - HZ * s, 7 * s, HZ * 2 * s);
+  for (const o of S.structs) { const w = (o.sk === 'core' ? 5 : 3.5) * dpr; g.fillStyle = o.alive ? col(o.team) : '#555'; g.fillRect(ax(o.x) - w / 2, ay(o.z) - w / 2, w, w); }
+  for (const c of S.camps) if (c.alive) { g.fillStyle = '#ffd34a'; g.fillRect(ax(c.x) - 2 * dpr, ay(c.z) - 2 * dpr, 4 * dpr, 4 * dpr); }
+  for (const m of S.minions) if (m.alive) { g.fillStyle = col(m.team); g.fillRect(ax(m.x) - dpr, ay(m.z) - dpr, 2 * dpr, 2 * dpr); }
+  const dot = (x, z, c, r) => { g.fillStyle = c; g.beginPath(); g.arc(ax(x), ay(z), r * dpr, 0, Math.PI * 2); g.fill(); };
+  for (const f of S.fighters) if (f.alive && !f.isPlayer) dot(f.x, f.z, col(f.team), 3);
+  for (const e of lanesMpPeers()) if (e.alive) dot(e.x, e.z, col(e.team), 3);
+  if (G.player.alive) { dot(G.player.x, G.player.z, '#ffd34a', 4); }
+}
+function lanesEvent(e) {
+  switch (e.t) {
+    case 'lanesStart': enterLanesView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5;
+      SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`Ascendant Lanes · ${e.size}v${e.size}`, `Destroy the enemy Core${e.norm ? ` · heroes scaled to level ${e.L}` : ''}`, 'gold'); break;
+    case 'lanesFight': Sfx.play('horn'); showBanner('Fight!', 'Push your lane with the minions', 'gold'); break;
+    case 'lanesLeave': enterLanesView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('lanes'); break;
+    case 'lanesEnd': if (e.win) { Sfx.play('win'); showBanner('Victory!', e.why === 'time' ? 'More of your base still stands' : 'The enemy Core has fallen', 'gold'); } else { Sfx.play('lose'); showBanner('Defeat', e.why === 'time' ? 'Time is up' : 'Your Core has fallen', 'red'); } break;
+    case 'lanesKill': Feed.add(`${gi('m_arena')} ${e.mine ? `<b>${escapeHTML(e.name)}</b> fell` : `<b>${escapeHTML(e.name)}</b> was defeated`} · Blue ${G.lanes.kills.blue} · ${G.lanes.kills.red} Red`, e.mine ? 'boss' : 'rift', null, 4); break;
+    case 'lanesStructDown': Cam.shake = Math.max(Cam.shake, 0.6); Sfx.play(e.mine ? 'lose' : 'job'); SpriteFX.play('pillar', e.mine ? 'blood' : 'gold', e.x, 0, e.z, 7);
+      showBanner(e.sk === 'core' ? (e.mine ? 'Your Core fell' : 'Enemy Core destroyed') : e.mine ? 'We lost a tower' : 'Enemy tower destroyed', '', e.mine ? 'red' : 'gold', 1.8); break;
+    case 'lanesBuff': toast(e.mine ? `Guardian's might: +${Math.round(CFG.lanes.camp.buff * 100)}% damage for your team` : 'The enemy took the Lane Guardian', e.mine ? 'good' : 'bad'); break;
+    case 'lanesRespawn': SpriteFX.play('pillar', 'frost', G.player.x, 0, G.player.z, 4); break;
+    case 'lanesTowerShot': if (near(e, 30)) { burst(e.x, 8.4, e.z, 6, e.team === 'blue' ? 0x9fe8ff : 0xffa070, 3, 0.35, 0.22, 1, 0.5); Sfx.play('zap', { x: e.x, z: e.z, gap: 0.25 }); } break;
+  }
+}
 // --- world models: generated 3D buildings, caves, ore, dungeon pieces and world bosses --------------------------
 // Each model is a TRELLIS.2 mesh from a Z-Image Turbo concept (tools/v10_prop.cjs + tools/v4_pack.py --static),
 // normalised to height 1 with its base on y=0 and its front facing +Z. box.json beside it holds width/depth.
@@ -13018,29 +13534,30 @@ const WORLD_MODEL_BOX = {
   fairy_ring: [2.91, 2.91], farm_crate: [2.93, 1.7], fence: [2.46, 0.14], floating_isle: [0.93, 0.98], flower_1: [0.72, 0.77], flower_2: [0.67, 0.66],
   forge: [1.3, 1.25], fountain: [1.25, 1.26], frozen_fall: [1.46, 1.4], gatehouse: [1.27, 0.63], geyser: [2.13, 2.08], ghost_ship: [0.79, 0.5],
   glass_chimney: [0.75, 0.78], graves: [0.8, 0.77], hermit_shack: [1.11, 1.22], house_a: [0.94, 0.94], house_b: [0.91, 0.9], keep: [1.07, 1.07],
-  kettle: [1.21, 1.16], lantern_post: [0.26, 0.5], lava_forge: [0.96, 0.99], leviathan_spine: [3.82, 1.53], lighthouse: [0.66, 0.7], lodestone: [0.72, 0.72],
-  log: [2, 1.15], loot_coins: [2.69, 2.1], loot_pouch: [1.42, 0.75], mat_abyssal: [1.02, 1.06], mat_arcdust: [0.65, 0.64], mat_copper: [1.3, 1.25],
-  mat_emberscale: [0.8, 0.79], mat_frostfang: [2.7, 0.84], mat_glacial: [0.87, 0.83], mat_iron: [0.99, 0.97], mat_magma: [0.67, 0.68], mat_mithril: [0.93, 0.89],
-  mat_obsidian: [0.63, 0.61], mat_pearl: [1.01, 1.02], mat_solar: [1.14, 0.6], mat_starfeather: [0.79, 0.13], mat_starsteel: [1.02, 1.03], mat_thornhide: [1.31, 1.74],
-  mat_tidal: [0.86, 0.85], mat_titansoul: [0.78, 0.71], mat_verdant: [0.83, 0.86], mat_void: [1.04, 0.65], mine_cart: [1.01, 0.81], mine_lift: [0.85, 0.59],
-  mirror_maze: [1.6, 1.53], moon_gate: [1.15, 0.89], mountain: [0.79, 0.82], mushrooms_1: [1.22, 1.68], ore: [1.4, 1.19], ore_pile: [1.43, 1.53],
-  pearl_clam: [1.27, 1.35], pillar: [0.61, 0.61], pond: [2.99, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39], quest_beacon: [0.48, 0.48],
-  ribcage: [2.8, 1.26], rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15], rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3],
-  rock_a_3: [1.48, 1.5], ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61], ruined_tower: [1.24, 1.06], rune_obelisk: [0.52, 0.51], sapphire_brazier: [0.65, 0.63],
-  sea_stack: [0.9, 0.88], shrine: [2.32, 2.22], siege_archer: [0.57, 0.53], siege_ballista: [1.67, 1.66], siege_banner: [0.3, 0.17], siege_barracks: [1.18, 1.04],
-  siege_cannon: [1.42, 1.42], siege_cart: [0.75, 1.14], siege_gate: [1.03, 0.3], siege_hut: [1.06, 1.19], siege_mage: [0.49, 0.45], siege_mine: [1.15, 1.13],
-  siege_trap_bomb: [1.02, 1.02], siege_trap_spike: [5.57, 5.56], siege_trap_tar: [5.18, 5.21], siege_wall_iron: [5.34, 0.64], siege_wall_stone: [5.55, 0.67], siege_wall_wood: [1.88, 0.36],
-  signpost: [0.79, 0.5], sky_altar: [1.19, 1.19], sky_temple: [0.74, 0.73], snow_mountain: [1.34, 1.39], stall: [1.01, 1.29], stall_kit_1: [0.7, 0.35],
-  stall_kit_2: [1.15, 0.4], standing_stone: [0.69, 0.73], statue: [0.65, 0.64], storm_rod: [0.27, 0.27], stump: [1.12, 1.05], sun_lantern: [0.27, 0.28],
-  sundial: [1.74, 1.75], torch: [0.34, 0.6], tower: [0.58, 0.6], tree_ash_1: [0.68, 0.62], tree_ash_2: [0.78, 0.71], tree_ash_3: [0.57, 0.53],
-  tree_ash_lod_1: [0.68, 0.62], tree_ash_lod_2: [0.78, 0.71], tree_ash_lod_3: [0.57, 0.53], tree_coral_1: [0.71, 0.72], tree_coral_2: [0.55, 0.6], tree_coral_lod_1: [0.71, 0.72],
-  tree_coral_lod_2: [0.55, 0.6], tree_crystal_1: [0.81, 0.69], tree_crystal_2: [0.56, 0.49], tree_crystal_lod_1: [0.81, 0.69], tree_crystal_lod_2: [0.56, 0.49], tree_ember_1: [0.48, 0.48],
-  tree_ember_2: [0.62, 0.6], tree_ember_lod_1: [0.48, 0.48], tree_ember_lod_2: [0.62, 0.6], tree_gold_1: [0.43, 0.45], tree_gold_2: [0.52, 0.6], tree_gold_lod_1: [0.43, 0.45],
-  tree_gold_lod_2: [0.52, 0.6], tree_oak_1: [0.43, 0.45], tree_oak_2: [0.41, 0.4], tree_oak_3: [0.52, 0.6], tree_oak_lod_1: [0.43, 0.45], tree_oak_lod_2: [0.41, 0.4],
-  tree_oak_lod_3: [0.52, 0.6], tree_snow_1: [0.78, 0.71], tree_snow_2: [0.57, 0.53], tree_snow_3: [0.74, 0.71], tree_snow_lod_1: [0.78, 0.71], tree_snow_lod_2: [0.57, 0.53],
-  tree_snow_lod_3: [0.74, 0.71], tuft_1: [0.48, 0.55], tuft_2: [1.23, 1.13], upside_tower: [0.77, 0.56], wagon: [1.28, 2.63], war_tent: [0.9, 0.94],
-  warden_gate: [1.13, 0.61], warden_gate_open: [1.25, 0.6], waterwheel: [1.17, 1.14], weapon_rack: [1.25, 0.89], well: [0.68, 0.74], wind_arch: [1.45, 0.72],
-  windmill: [0.99, 0.68], workbench: [2.26, 1.15],
+  kettle: [1.21, 1.16], lanes_brazier: [0.64, 0.49], lanes_core: [0.47, 0.47], lanes_minion_melee: [0.87, 0.49], lanes_minion_ranged: [0.75, 0.47], lanes_tower: [0.35, 0.35],
+  lantern_post: [0.26, 0.5], lava_forge: [0.96, 0.99], leviathan_spine: [3.82, 1.53], lighthouse: [0.66, 0.7], lodestone: [0.72, 0.72], log: [2, 1.15],
+  loot_coins: [2.69, 2.1], loot_pouch: [1.42, 0.75], mat_abyssal: [1.02, 1.06], mat_arcdust: [0.65, 0.64], mat_copper: [1.3, 1.25], mat_emberscale: [0.8, 0.79],
+  mat_frostfang: [2.7, 0.84], mat_glacial: [0.87, 0.83], mat_iron: [0.99, 0.97], mat_magma: [0.67, 0.68], mat_mithril: [0.93, 0.89], mat_obsidian: [0.63, 0.61],
+  mat_pearl: [1.01, 1.02], mat_solar: [1.14, 0.6], mat_starfeather: [0.79, 0.13], mat_starsteel: [1.02, 1.03], mat_thornhide: [1.31, 1.74], mat_tidal: [0.86, 0.85],
+  mat_titansoul: [0.78, 0.71], mat_verdant: [0.83, 0.86], mat_void: [1.04, 0.65], mine_cart: [1.01, 0.81], mine_lift: [0.85, 0.59], mirror_maze: [1.6, 1.53],
+  moon_gate: [1.15, 0.89], mountain: [0.79, 0.82], mushrooms_1: [1.22, 1.68], ore: [1.4, 1.19], ore_pile: [1.43, 1.53], pearl_clam: [1.27, 1.35],
+  pillar: [0.61, 0.61], pond: [2.99, 3.01], portcullis: [1.06, 0.56], quarry_wall: [1.17, 0.39], quest_beacon: [0.48, 0.48], ribcage: [2.8, 1.26],
+  rift_floor: [3.34, 3.34], rift_gate: [1.15, 1.15], rift_shard: [0.89, 0.87], rock_a_1: [1.43, 1.32], rock_a_2: [1.6, 1.3], rock_a_3: [1.48, 1.5],
+  ruin_block: [0.99, 1.22], ruin_pillar: [0.63, 0.61], ruined_tower: [1.24, 1.06], rune_obelisk: [0.52, 0.51], sapphire_brazier: [0.65, 0.63], sea_stack: [0.9, 0.88],
+  shrine: [2.32, 2.22], siege_archer: [0.57, 0.53], siege_ballista: [1.67, 1.66], siege_banner: [0.3, 0.17], siege_barracks: [1.18, 1.04], siege_cannon: [1.42, 1.42],
+  siege_cart: [0.75, 1.14], siege_gate: [1.03, 0.3], siege_hut: [1.06, 1.19], siege_mage: [0.49, 0.45], siege_mine: [1.15, 1.13], siege_trap_bomb: [1.02, 1.02],
+  siege_trap_spike: [5.57, 5.56], siege_trap_tar: [5.18, 5.21], siege_wall_iron: [5.34, 0.64], siege_wall_stone: [5.55, 0.67], siege_wall_wood: [1.88, 0.36], signpost: [0.79, 0.5],
+  sky_altar: [1.19, 1.19], sky_temple: [0.74, 0.73], snow_mountain: [1.34, 1.39], stall: [1.01, 1.29], stall_kit_1: [0.7, 0.35], stall_kit_2: [1.15, 0.4],
+  standing_stone: [0.69, 0.73], statue: [0.65, 0.64], storm_rod: [0.27, 0.27], stump: [1.12, 1.05], sun_lantern: [0.27, 0.28], sundial: [1.74, 1.75],
+  torch: [0.34, 0.6], tower: [0.58, 0.6], tree_ash_1: [0.68, 0.62], tree_ash_2: [0.78, 0.71], tree_ash_3: [0.57, 0.53], tree_ash_lod_1: [0.68, 0.62],
+  tree_ash_lod_2: [0.78, 0.71], tree_ash_lod_3: [0.57, 0.53], tree_coral_1: [0.71, 0.72], tree_coral_2: [0.55, 0.6], tree_coral_lod_1: [0.71, 0.72], tree_coral_lod_2: [0.55, 0.6],
+  tree_crystal_1: [0.81, 0.69], tree_crystal_2: [0.56, 0.49], tree_crystal_lod_1: [0.81, 0.69], tree_crystal_lod_2: [0.56, 0.49], tree_ember_1: [0.48, 0.48], tree_ember_2: [0.62, 0.6],
+  tree_ember_lod_1: [0.48, 0.48], tree_ember_lod_2: [0.62, 0.6], tree_gold_1: [0.43, 0.45], tree_gold_2: [0.52, 0.6], tree_gold_lod_1: [0.43, 0.45], tree_gold_lod_2: [0.52, 0.6],
+  tree_oak_1: [0.43, 0.45], tree_oak_2: [0.41, 0.4], tree_oak_3: [0.52, 0.6], tree_oak_lod_1: [0.43, 0.45], tree_oak_lod_2: [0.41, 0.4], tree_oak_lod_3: [0.52, 0.6],
+  tree_snow_1: [0.78, 0.71], tree_snow_2: [0.57, 0.53], tree_snow_3: [0.74, 0.71], tree_snow_lod_1: [0.78, 0.71], tree_snow_lod_2: [0.57, 0.53], tree_snow_lod_3: [0.74, 0.71],
+  tuft_1: [0.48, 0.55], tuft_2: [1.23, 1.13], upside_tower: [0.77, 0.56], wagon: [1.28, 2.63], war_tent: [0.9, 0.94], warden_gate: [1.13, 0.61],
+  warden_gate_open: [1.25, 0.6], waterwheel: [1.17, 1.14], weapon_rack: [1.25, 0.89], well: [0.68, 0.74], wind_arch: [1.45, 0.72], windmill: [0.99, 0.68],
+  workbench: [2.26, 1.15],
 };
 // </world-boxes>
 for (const k in WORLD_MODEL_BOX) ASSET_MANIFEST['world.' + k] = { dir: 'assets/world/' + k + '/', size: 1, world: true,
@@ -13671,6 +14188,7 @@ function updateTags() {
     if (delveOn()) for (const e of mpVisible()) if (e.alive === false) put(e.x, 1.6, e.z, `${e.nick} is down · stand close to revive`, null, 'peer down');
     for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.pvp ? 'PvP · ' : ''}${e.nick} · ${e.level}`, e.hp, e.pvp ? 'peer pvp' : 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');
+    if (G.lanes) lanesTags(put, near);
     if (G.siege) {
       // fort objectives: always shown, big bars that flash while under attack
       for (const o of G.siege.objs) put(o.x, o.def.h, o.z, o.alive ? `${o.name} · ${Math.ceil(clamp(o.hp / o.maxHp, 0, 1) * 100)}%` : `${o.name} · destroyed`, o.alive ? o.hp / o.maxHp : 0, `obj${o.def.main ? ' main' : ''}${o.hurtT > 0 ? ' hurt' : ''}${o.alive ? '' : ' down'}`);
@@ -13870,7 +14388,8 @@ function updateHUD(dt) {
     setText('aGas', ar.phase === 'countdown' ? 'Showdown' : gasIn > 0 ? `Gas in ${Math.ceil(gasIn)}s` : 'Gas closing in');
     const cd = ar.phase === 'countdown' ? String(Math.ceil(ar.cd)) : '';
     setHidden('countdown', !cd); if (cd) setText('countdown', cd);
-  } else setHidden('countdown', true);
+  } else if (G.lanes && G.lanes.phase === 'countdown') { setHidden('countdown', false); setText('countdown', String(Math.ceil(G.lanes.cd))); }
+  else setHidden('countdown', true);
   // objective tracker
   updateObjective();
   updateBossTracker();
@@ -13892,6 +14411,7 @@ function updateObjective() {
   if (G.mode === 'arena') { setHidden('objective', true); return; }
   const shr = activeShrine();
   if (G.rift) { const r = G.rift; text = r.phase === 'intro' ? `Rift floor ${r.floor} · get ready` : r.phase === 'clear' ? `Floor ${r.floor} cleared! Next floor…` : `Rift floor ${r.floor} · ${riftLeft()} left · ${Math.ceil(r.t)}s`; }
+  else if (G.lanes) text = lanesObjText();
   else if (G.siege) { const S = G.siege, k = S.objs[0];
     const F = fortState();
     text = S.phase === 'build' ? (!F.go ? `Wave ${S.wave} · press Start when ready` : F.hold ? `Paused · wave ${S.wave} from ${siegeSideNames(S.sides)}` : `Wave ${S.wave} in ${Math.ceil(S.t)}s · from ${siegeSideNames(S.sides)}`) : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }
@@ -13953,9 +14473,9 @@ function interact() {
   openNpc(d);
 }
 // Systems open slowly with level: a locked button shows its level; a newly opened one glows until you tap it
-const UNLOCK_AT = { mArtifacts: 2, mDaily: 2, mSmith: 3, mCollection: 4, mSkills: 5, Forge: 6, mIdle: 8, mBrawlers: 9, Masterwork: 10, mArena: 10, Enchant: 12, mDelve: CFG.delve.unlock, Craft: 15 };
+const UNLOCK_AT = { mArtifacts: 2, mDaily: 2, mSmith: 3, mCollection: 4, mSkills: 5, Forge: 6, mIdle: 8, mBrawlers: 9, Masterwork: 10, mArena: 10, mLanes: CFG.lanes.unlock, Enchant: 12, mDelve: CFG.delve.unlock, Craft: 15 };
 const UNLOCK_NAME = { mArtifacts: 'Relics', mDaily: 'Daily rewards', mSmith: 'Forge', mCollection: 'Collection Log', mSkills: 'Talents', Forge: 'Forge › Buy gear', mIdle: 'Kingdom & Camp',
-  mBrawlers: 'Heroes', Masterwork: 'Forge › Masterwork', mArena: 'Showdown', mDelve: 'Dungeons', Enchant: 'Forge › Enchant', Craft: 'Forge › Craft' };
+  mBrawlers: 'Heroes', Masterwork: 'Forge › Masterwork', mArena: 'Showdown', mLanes: 'Ascendant Lanes', mDelve: 'Dungeons', Enchant: 'Forge › Enchant', Craft: 'Forge › Craft' };
 const unlockOpen = (k) => !G.profile || G.profile.level >= (UNLOCK_AT[k] || 0);
 const unlockNew = (k) => !!UNLOCK_AT[k] && unlockOpen(k) && !(G.profile.uiSeen || {})[k];
 function unlockSeen(k) { if (!unlockNew(k)) return; (G.profile.uiSeen || (G.profile.uiSeen = {}))[k] = true; G.dirty = true; }
@@ -14803,6 +15323,7 @@ function handlePanelClick(e) {
   unlockSeen(act);
   if (!LOCAL_PREVIEW && !TEST_MODE && ['tLevel', 't5', 't100', 'tGold', 'tEss', 'tShards', 'tBoss', 'tUnlock', 'tLegend', 'tFocus'].includes(act)) return;
   if (/^dlv/.test(act)) return partyAction(act, b);
+  if (/^ln[A-Z]/.test(act)) return lanesAction(act, b); // Ascendant Lanes (76-lanes-mp.js)
   switch (act) {
     case 'mDelve': openDelvePanel(); break;
     case 'testMode': saveNow(true); location.assign(testModeUrl(location.href, !TEST_MODE)); break;
@@ -14839,6 +15360,7 @@ function handlePanelClick(e) {
     case 'expGo': { const sel = $('expB'); if (sel && startExped(sel.value, +b.dataset.d)) openIdle('Expeditions'); break; }
     case 'expClaim': if (claimExped(+b.dataset.i)) openIdle('Expeditions'); break;
     case 'mArena': openArenaPanel(); break;
+    case 'mLanes': openLanesPanel(); break;
     case 'mPlayers': openPlayers(); break;
     case 'mpGo': mpGoTo(b.dataset.k); break;
     case 'nickSave': { const v = cleanNick(($('nickIn') || {}).value); if (v) { G.profile.nick = v; G.dirty = true; MP.last = ''; showToast(`Nickname: ${v}`, 'good'); } else showToast('Use letters or numbers', 'bad'); break; }
@@ -15273,6 +15795,7 @@ function processEvents() {
       case 'respawn': showToast('Back in town. Watch your health!'); break;
       case 'spawn': break;
       case 'classChosen': showBanner(`You are a ${CFG.classes[e.cls].name}`, 'New super, skill and skill tree unlocked', 'gold'); Sfx.play('level'); break;
+      case 'lanesStart': case 'lanesLeave': case 'lanesEnd': case 'lanesKill': case 'lanesStructDown': case 'lanesBuff': case 'lanesRespawn': case 'lanesTowerShot': case 'lanesFight': lanesEvent(e); break; // 47e-lanes-view.js
       case 'arenaStart': Cam.yaw = 0; { const f0 = G.arena.fighters[0]; Cam.pos.set(f0.x, 30, f0.z - 14); Cam.look.set(f0.x, 0, f0.z + 1.5); Cam.fx = f0.x; Cam.fz = f0.z + 1.5; } hubGroup.visible = false; arenaGroup.visible = true; scene.fog.near = 60; scene.fog.far = 160; scene.fog.color.set(PALETTE.fog); paintSky(new THREE.Color(PALETTE.skyTop), new THREE.Color(PALETTE.skyHorizon)); Coach.render(); break;
       case 'arenaEnd': Cam.yaw = 0; Cam.pos.set(G.player.x, 30, G.player.z - 14); Cam.fx = G.player.x; Cam.fz = G.player.z + 1.5; hubGroup.visible = true; arenaGroup.visible = false; scene.fog.near = 50; scene.fog.far = Q.lowTier ? 95 : 140; Coach.render(); break;
       case 'fightStart': Sfx.play('tick'); showBanner('Fight!', 'Last one standing wins', 'gold'); break;
@@ -15514,6 +16037,7 @@ function drawMinimap() {
     const f = ar.fighters[0]; if (f.alive) { g.fillStyle = '#3fa9ff'; g.beginPath(); g.arc(ax(f.x), ay(f.z), 4 * dpr, 0, Math.PI * 2); g.fill(); }
     return;
   }
+  if (G.mode === 'lanes' && G.lanes) { drawLanesMinimap(g, W2, H2, dpr); return; } // 47e-lanes-view.js
   if (G.siege) {
     // the land from above: buildings (walls grey), objectives with their health, monsters, friends and you
     // a big land shows the 120 m around you
@@ -16010,6 +16534,7 @@ function openJournal() {
     tile('mIdle', 'm_idle', 'Bank & Camp', 'Coffers & expeditions', idleAlert()),
     tile('mPlayers', 'm_players', 'Fellow Adventurers', mpSummary()),
     tile('mArena', 'm_arena', 'Showdown', 'Duel 9 rival champions', false),
+    tile('mLanes', 'm_lanes', 'Ascendant Lanes', G.lanes ? 'Match on' : '1v1 · 2v2 · 3v3 lane battles', false),
     tile('mDelve', 'm_portal', 'Dungeons', 'Party dungeons, sets & loot', false),
   ];
   openModal(`<div class="mtiles">${adventure.join('')}</div>${comingUpHtml(3)}`);
@@ -16508,7 +17033,7 @@ async function mpInit() {
 // 'hit' share the monsters (see the shared monsters section below).
 const MP_ROOM_CAP = 60;
 // a party (or a matchmaking queue) has its own channel instead of the lobby (73-party.js)
-function mpRoomKey() { const fk = G.siege && G.siege.code ? 'fort-' + G.siege.code : '', pk = typeof partyRoomKey === 'function' ? partyRoomKey() : ''; return (LOCAL_PREVIEW ? 'dev-' : '') + (fk || pk || 'lobby-w11'); } // World v11 moved every monster slot: old clients stay in their old lobby
+function mpRoomKey() { const fk = G.siege && G.siege.code ? 'fort-' + G.siege.code : '', lk = typeof lanesRoomKey === 'function' ? lanesRoomKey() : '', pk = typeof partyRoomKey === 'function' ? partyRoomKey() : ''; return (LOCAL_PREVIEW ? 'dev-' : '') + (fk || lk || pk || 'lobby-w11'); } // lk: an Ascendant Lanes party, queue or match (76-lanes-mp.js) // World v11 moved every monster slot: old clients stay in their old lobby
 const RT = { ws: null, state: 'none', topic: '', key: '', joinRef: '', ref: 0, retry: 0, backoff: 1, hbT: 25, sendT: 0, beatT: 0, last: '', tracked: '', present: 0, sent: 0 };
 function rtSend(topic, event, payload, joinRef) {
   if (!RT.ws || RT.ws.readyState !== 1) return false;
@@ -16561,6 +17086,7 @@ function rtMessage(d) {
       if (P.event === 'phit' && P.payload && P.payload.to === MP.sid) { pvpRecv(P.payload); break; }
       if (P.event === 'pdie' && P.payload && P.payload.to === MP.sid) { pvpDieRecv(P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull|dbot|dask|dans|ddoor|dpz|dbs|dsec)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
+      if (P.payload && typeof P.payload.sid === 'string' && /^l[a-z]+$/.test(P.event) && typeof lanesRecv === 'function') { lanesRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; } // Ascendant Lanes (76-lanes-mp.js)
       if (P.payload && typeof P.payload.sid === 'string' && /^f[a-z]+$/.test(P.event) && typeof siegeMpRecv === 'function') { siegeMpRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^b/.test(P.event)) { bossRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
@@ -16569,7 +17095,7 @@ function rtMessage(d) {
 }
 // presence holds the slow-changing card (nick, hero, level, mode); it is re-sent only when one of those changes
 function rtTrack() {
-  const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al, s.pv, s.pc, s.rd, s.dg, s.df, s.dr, s.pw, s.qk, s.fc, s.ft].join('|'); if (card === RT.tracked) return;
+  const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al, s.pv, s.pc, s.rd, s.dg, s.df, s.dr, s.pw, s.qk, s.fc, s.ft, s.lc, s.lt, s.lq, s.lrd, s.ls].join('|'); if (card === RT.tracked) return;
   const now = performance.now(); if (now - (RT.trackAt || 0) < 1000) return; // the server limits presence updates per client
   RT.trackAt = now; RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
 }
@@ -16776,7 +17302,7 @@ function mpApply(key, s, via, guest) {
   const t = mpNum(s.t, Date.now());
   let e = MP.peers.get(key);
   if (e && t < e.t - 50) return e; // older than what we already have
-  const cls = CFG.brawlerOrder.includes(s.c) ? s.c : STARTER_HERO, x = clamp(mpNum(s.x, 0), -2000, 2000), z = clamp(mpNum(s.z, 0), -2000, 2000);
+  const cls = CFG.brawlerOrder.includes(s.c) ? s.c : STARTER_HERO, x = clamp(mpNum(s.x, 0), -3000, 3000), z = clamp(mpNum(s.z, 0), -3000, 3000); // instances sit far out (Lanes at z −2600)
   if (!e) {
     e = { id: 'peer:' + key, key, kind: 'fighter', isPeer: true, team: 'peer', cls, x, z, tx: x, tz: z, facing: 0, tf: 0, moveAmt: 0, alive: true, level: 1, r: 0.55,
       hp: 1, maxHp: 1, nick: 'Hero', md: 'hub', seq: mpNum(s.s, 0), guest: !!guest, attackAnim: 0, t: 0 };
@@ -16786,14 +17312,15 @@ function mpApply(key, s, via, guest) {
   { const pdt = (t - (e.t || t)) / 1000; if (pdt > 0.02 && pdt < 1) { e.vx = clamp((x - e.tx) / pdt, -20, 20); e.vz = clamp((z - e.tz) / pdt, -20, 20); } if (!(mpNum(s.m, 0) > 0)) e.vx = e.vz = 0; }
   e.t = t; e.seenAt = Date.now(); e.via = via; e.rcv = performance.now();
   e.cls = cls; e.tx = x; e.tz = z; e.tf = mpNum(s.f, 0); e.moveAmt = clamp(mpNum(s.m, 0), 0, 1);
-  e.level = clamp(Math.floor(mpNum(s.l, 1)), 1, 100000); e.nick = cleanNick(s.n) || 'Hero'; e.md = s.md === 'hub' ? 'hub' : s.md === 'rift' ? 'rift' : s.md === 'delve' ? 'delve' : s.md === 'siege' ? 'siege' : 'away';
+  e.level = clamp(Math.floor(mpNum(s.l, 1)), 1, 100000); e.nick = cleanNick(s.n) || 'Hero'; e.md = s.md === 'hub' ? 'hub' : s.md === 'rift' ? 'rift' : s.md === 'delve' ? 'delve' : s.md === 'siege' ? 'siege' : s.md === 'lanes' ? 'lanes' : 'away';
+  if (typeof lanesApplyPeer === 'function') lanesApplyPeer(e, s);
   e.fc = typeof s.fc === 'string' ? s.fc.slice(0, 12) : ''; e.ft = mpNum(s.ft, 0); // Bastion world code and when they came in
   // party card: code, join time, Power, ready, the leader's dungeon and difficulty, the run seed, the queue
   e.pc = typeof s.pc === 'string' ? s.pc.slice(0, 8) : ''; e.jt = mpNum(s.jt, 0); e.pw = Math.max(0, mpNum(s.pw, 0)); e.rd = s.rd === 1; e.dg = typeof s.dg === 'string' ? s.dg.slice(0, 12) : '';
   e.df = clamp(Math.floor(mpNum(s.df, 0)), 0, 999); e.dr = mpNum(s.dr, 0) >>> 0; e.qk = typeof s.qk === 'string' ? s.qk.slice(0, 32) : '';
   e.pvp = s.pv === 1; e.alive = s.al !== 0; e.hp = clamp(mpNum(s.h, 1), 0, 1); e.maxHp = 1; e.aim = mpNum(s.a, 0);
   const sq = mpNum(s.s, 0);
-  if (sq !== e.seq) { if (sq > e.seq && sq - e.seq < 6 && (e.md === 'hub' || e.md === 'delve' || e.md === 'siege')) mpGhostShot(e); e.seq = sq; }
+  if (sq !== e.seq) { if (sq > e.seq && sq - e.seq < 6 && (e.md === 'hub' || e.md === 'delve' || e.md === 'siege' || e.md === 'lanes')) mpGhostShot(e); e.seq = sq; }
   return e;
 }
 function mpRebuild() {
@@ -16833,7 +17360,7 @@ function mpDbPeers(snap) {
 }
 // another player's shot: same look as theirs, but it never hits anything here
 function mpGhostShot(e) {
-  const pl = G.player; if (!pl || Math.hypot(e.x - pl.x, e.z - pl.z) > 45 || G.rift || G.mode !== 'hub') return;
+  const pl = G.player; if (!pl || Math.hypot(e.x - pl.x, e.z - pl.z) > 45 || G.rift || (G.mode !== 'hub' && G.mode !== 'lanes')) return;
   const w = CFG.attacks[e.cls] || CFG.attacks.bolt, n = Math.min(5, w.count || 1), base = e.aim;
   for (let i = 0; i < n; i++) {
     const a = n > 1 ? base + (i / (n - 1) - 0.5) * (w.spread || 0.3) : base, sp = Math.min(w.speed, 30);
@@ -16844,12 +17371,12 @@ function mpGhostShot(e) {
 // visible peers: in the open world, while you are too
 // in a party dungeon: the party members in this run
 function mpVisible() { if (G.siege) return G.siege.code ? MP.list.filter((e) => e.md === 'siege' && e.fc === G.siege.code) : []; if (G.mode !== 'hub' || G.rift) return []; if (delveOn()) { const seed = G.dungeon.delve.seed; return MP.list.filter((e) => e.md === 'delve' && e.dr === seed); } return MP.list.filter((e) => e.md === 'hub'); }
-function mpOnShot(f, dx, dz) { if (f.isPlayer && G.mode === 'hub') { MP.seq++; MP.aim = Math.atan2(dx, dz); } }
+function mpOnShot(f, dx, dz) { if (f.isPlayer && (G.mode === 'hub' || G.mode === 'lanes')) { MP.seq++; MP.aim = Math.atan2(dx, dz); } }
 function mpState() {
   const p = G.profile, pl = G.player, r1 = (v) => Math.round(v * 10) / 10;
   return { v: 8, sid: MP.sid, n: mpNick(p), c: p.cls, l: p.level, x: r1(pl.x), z: r1(pl.z), f: Math.round(pl.facing * 100) / 100, m: r1(pl.moveAmt || 0), s: MP.seq, a: Math.round(MP.aim * 100) / 100,
     h: Math.round(clamp(pl.hp / pl.maxHp, 0, 1) * 100) / 100, al: pl.alive ? 1 : 0, md: G.rift ? 'rift' : delveOn() ? 'delve' : G.dungeon ? 'dungeon' : G.siege ? 'siege' : G.mode, pv: typeof pvpOn === 'function' && pvpOn() ? 1 : 0,
-    ...(typeof partyCard === 'function' ? partyCard() : {}), ...(G.siege && G.siege.code ? { fc: G.siege.code, ft: FW.ft } : {}) };
+    ...(typeof partyCard === 'function' ? partyCard() : {}), ...(typeof lanesCard === 'function' ? lanesCard() : {}), ...(G.siege && G.siege.code ? { fc: G.siege.code, ft: FW.ft } : {}) };
 }
 function mpUpdate(dt) {
   // smooth other players toward where they said they are
@@ -16864,6 +17391,7 @@ function mpUpdate(dt) {
   rtUpdate(dt);
   if (typeof pvpFlush === 'function') pvpFlush(dt);
   if (typeof partyUpdate === 'function') partyUpdate(dt);
+  if (typeof lanesUpdate === 'function') lanesUpdate(dt);
   if (!G.started) return;
   MP.sendT -= dt; MP.dbT -= dt; MP.dbBeat -= dt;
   // room: ~8 times a second, only when something changed
@@ -17112,7 +17640,7 @@ function autoHuntNode(f, level, maxD) {
   return best;
 }
 // never in dungeons (Casper, 25 Oct): only the open world, not the Rift, the fort or any dungeon / party dungeon
-function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && !G.siege && !G.dungeon && G.started); }
+function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && !G.siege && !G.dungeon && !G.lanes && G.started); } // never in a Lanes match
 function autoHuntIntent(f, it, manual, dt) {
   if (manual) { AH.manualT = 1.5; return; }
   if ((AH.manualT -= dt) > 0 || !f.alive) return;
@@ -18260,6 +18788,248 @@ function builderTick() {
 }
 builderInit();
 // ---------------------------------------------------------------------
+// Ascendant Lanes online, lobby and results (34b-lanes.js runs the match, 47e-lanes-view.js draws it).
+// Party: a 5-letter code, its own Realtime channel 'lanes-<code>' (mpRoomKey). Presence carries each player's Lanes
+// card (code, join time, team, rating bracket, Power, mode size). The leader (earliest in) picks 1v1/2v2/3v3 and
+// "together" (friends against bots) or "versus" (friends split into two teams, balanced by Power) and sends 'lgo';
+// every named player starts the same match. Quick match waits in 'lq-<size>-<bracket>' (only players of the same
+// level bracket meet: the level-matching hook); the earliest there forms a match when it is full, or after
+// LANES_WAIT seconds with two or more, and sends 'lmm'. Empty places are bots.
+// In a match the host (the first listed player still present) runs minions, towers, Cores, camps and bots and sends
+// them 6 times a second ('lst'). Everyone runs their own hero. Hits: on host-run bodies they go to the host as a share
+// of max HP ('lhit'); on a human hero they go to that hero's own game, which applies them ('lph', victim decides, like
+// 72-pvp.js). The host ends the match ('lend'), and each game pays its own rewards.
+// Test mode and local previews play alone with bots (no Realtime there).
+// ---------------------------------------------------------------------
+const LN = { code: '', jt: 0, ready: false, size: 1, sides: 'together', q: '', qT: 0, joinT: 0, uiT: 0, sendT: 0, hits: new Map(), hitT: 0, m: null, uiHtml: '' };
+const LANES_WAIT = 30;
+GI.m_lanes = GI.m_shard; PX_KEY_FAM.m_lanes = 'ice'; // the Core's crystal, in frost blue (Showdown keeps the red swords)
+const lanesOnline = () => !TEST_MODE && typeof RT !== 'undefined' && (RT.state === 'on' || RT.state === 'joining' || RT.state === 'connecting');
+function lanesRoomKey() { if (G.lanes && G.lanes.code) return 'lanes-' + G.lanes.code; return LN.q ? 'lq-' + LN.q : LN.code ? 'lanes-' + LN.code : ''; }
+function lanesCard() {
+  const r = lanesRating(G.profile, typeof playerPower === 'function' ? playerPower() : 0);
+  return { lc: G.lanes ? G.lanes.code : LN.code, lj: LN.jt, lt: G.lanes ? G.player.team : '', lr: r.br, lw: r.pw, lm: r.mmr, ls: LN.size, lq: LN.q, lrd: LN.ready ? 1 : 0 };
+}
+// presence → peer (70-multiplayer.js mpApply)
+function lanesApplyPeer(e, s) {
+  e.lc = typeof s.lc === 'string' ? s.lc.slice(0, 8) : ''; e.lj = mpNum(s.lj, 0); e.lt = s.lt === 'red' ? 'red' : s.lt === 'blue' ? 'blue' : '';
+  e.lr = clamp(mpNum(s.lr, 0) | 0, 0, 20); e.lw = Math.max(0, mpNum(s.lw, 0)); e.lm = mpNum(s.lm, 1000); e.ls = clamp(mpNum(s.ls, 1) | 0, 1, 3); e.lq = typeof s.lq === 'string' ? s.lq.slice(0, 16) : ''; e.lrd = s.lrd === 1;
+  if (e.md === 'lanes') e.team = e.lt || 'peer';
+}
+function lanesSend(event, payload) { return typeof RT !== 'undefined' && RT.state === 'on' && rtSend(RT.topic, 'broadcast', { type: 'broadcast', event, payload: Object.assign({ sid: MP.sid }, payload) }); }
+// human players in my match (other games)
+function lanesMpPeers() { const S = G.lanes; if (!S || !S.code || typeof MP === 'undefined') return []; return MP.list.filter((e) => e.via === 'rt' && e.md === 'lanes' && e.lc === S.code && (e.lt === 'blue' || e.lt === 'red')); }
+function lanesMembers() {
+  const r = lanesRating(G.profile, playerPower()), me = { key: MP.sid, me: true, nick: mpNick(G.profile), cls: G.profile.cls, level: G.profile.level, pw: r.pw, br: r.br, lj: LN.jt, rd: LN.ready };
+  if (!LN.code) return [me];
+  return [me, ...MP.list.filter((e) => e.via === 'rt' && e.lc === LN.code && e.md === 'hub').map((e) => ({ key: e.key, nick: e.nick, cls: e.cls, level: e.level, pw: e.lw, br: e.lr, lj: e.lj, rd: e.lrd }))]
+    .sort((a, b) => a.lj - b.lj || (a.key < b.key ? -1 : 1)).slice(0, LN.size * 2);
+}
+const lanesLeads = () => !LN.code || lanesMembers()[0].me;
+// teams: together = every human on blue; versus = snake by Power (strongest blue, next two red, ...) for even sides
+function lanesTeams(members, sides) {
+  if (sides !== 'versus') return members.map((m) => ['blue', m]);
+  const s = members.slice().sort((a, b) => b.pw - a.pw || (a.key < b.key ? -1 : 1));
+  return s.map((m, i) => [(i % 4 === 0 || i % 4 === 3) ? 'blue' : 'red', m]);
+}
+function lanesGoMsg(members, sides, size, code) {
+  const levels = members.map((m) => m.level || 1), T = lanesTeams(members, sides);
+  return { code, size, seed: (Math.random() * 4294967295) >>> 0, norm: lanesShouldNormalize(levels) ? 1 : 0, m: T.map(([team, m]) => [m.key, team, m.level | 0, String(m.nick || 'Hero').slice(0, 14), m.cls]) };
+}
+function lanesStartFrom(msg) {
+  const mine = msg.m.find((r) => r[0] === MP.sid); if (!mine) return false;
+  const humans = msg.m.filter((r) => r[0] !== MP.sid).map((r) => ({ key: r[0], team: r[1] === 'red' ? 'red' : 'blue', level: r[2] | 0 || 1, nick: cleanNick(r[3]) || 'Hero', cls: r[4] }));
+  if (G.modal) UI.close();
+  LN.m = msg.m.map((r) => r[0]); LN.ready = false;
+  const ok = startLanes({ size: clamp(msg.size | 0, 1, 3), team: mine[1], seed: msg.seed >>> 0, humans, host: msg.m[0][0] === MP.sid, code: String(msg.code || '').slice(0, 8), normalize: !!msg.norm });
+  if (!ok) toast('Your Lanes match started, but finish what you are doing first', 'bad');
+  return ok;
+}
+// --- lobby actions
+function lanesPlay(solo) {
+  if (G.mode !== 'hub' || G.rift || G.dungeon || G.siege) return toast('Finish what you are doing first', 'bad');
+  if (solo || !LN.code) { UI.close(); LN.m = null; if (!startLanes({ size: LN.size, team: 'blue', seed: (Math.random() * 4294967295) >>> 0 })) toast('Finish what you are doing first', 'bad'); return; }
+  const M = lanesMembers();
+  if (M.some((m) => !m.me && !m.rd)) return toast('Waiting for everyone to be ready', 'bad');
+  if (LN.sides === 'versus' && M.length < 2) return toast('Versus needs a friend in the party', 'bad');
+  const msg = lanesGoMsg(M, LN.sides, LN.size, LN.code); lanesSend('lgo', msg); lanesStartFrom(msg);
+}
+function lanesCreate() { if (!lanesOnline()) return toast('Parties need the online game (the public site or the app)', 'bad'); LN.code = newCode(); LN.jt = Date.now(); LN.ready = true; LN.q = ''; LN.joinT = 0; Sfx.play('unlock'); }
+function lanesJoin(code) {
+  code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
+  if (code.length !== 5) return toast('Party codes have 5 letters and numbers', 'bad');
+  if (!lanesOnline()) return toast('Parties need the online game (the public site or the app)', 'bad');
+  LN.code = code; LN.jt = Date.now(); LN.ready = false; LN.q = ''; LN.joinT = G.time;
+}
+function lanesQueue() {
+  if (!lanesOnline()) return toast('Quick match needs the online game (the public site or the app)', 'bad');
+  LN.code = ''; LN.q = `${LN.size}-${lanesBracket(G.profile.level)}`; LN.qT = 0; LN.jt = Date.now();
+}
+// --- every frame (from mpUpdate): party upkeep and the quick-match queue
+function lanesUpdate(dt) {
+  if (!G.started || typeof RT === 'undefined') return;
+  if (LN.code && !G.lanes && RT.state === 'on' && RT.key === mpRoomKey()) {
+    const M = lanesMembers();
+    if (!M.some((m) => m.me)) { LN.code = ''; toast('That Lanes party is full', 'bad'); }
+    else if (LN.joinT && G.time - LN.joinT > 8 && M.length < 2) { LN.code = ''; LN.joinT = 0; toast('No Lanes party with that code', 'bad'); }
+    else if (M.length > 1) { LN.joinT = 0; if (!M[0].me) { const P = MP.peers.get(M[0].key); if (P) LN.size = P.ls; } }
+  }
+  if (LN.q && !G.lanes && RT.state === 'on' && RT.key === mpRoomKey()) {
+    LN.qT += dt; const need = LN.size * 2;
+    const Q = [lanesMembers()[0], ...MP.list.filter((e) => e.via === 'rt' && e.lq === LN.q && e.md === 'hub' && e.alive).map((e) => ({ key: e.key, nick: e.nick, cls: e.cls, level: e.level, pw: e.lw, lj: e.lj }))].sort((a, b) => a.lj - b.lj || (a.key < b.key ? -1 : 1));
+    if (Q[0].me && (Q.length >= need || (LN.qT >= LANES_WAIT && Q.length >= 2))) { const msg = Object.assign(lanesGoMsg(Q.slice(0, need), 'versus', LN.size, newCode()), { q: LN.q }); lanesSend('lmm', msg); lanesRecv('lmm', MP.sid, msg); }
+  }
+  if (UI.current === 'lanes' && G.modal && (LN.uiT -= dt) <= 0) { LN.uiT = 1; const a = document.activeElement; if (!a || a.id !== 'lnCode') openLanesPanel(); }
+}
+// --- in a match: who runs it, sending, mirroring
+function lanesHostKey() {
+  const S = G.lanes; if (!S || !S.code || !LN.m) return MP.sid;
+  const here = new Set(lanesMpPeers().map((e) => e.key)); here.add(MP.sid);
+  return LN.m.find((k) => here.has(k)) || MP.sid;
+}
+// a body this game runs for the match (host only): minions, buildings, camps, bots
+function lanesMpRuns(srcId) { const S = G.lanes; if (!S || !S.host) return false; const s = G.ents.get(srcId); return !!s && (s.kind === 'minion' || s.kind === 'structure' || s.lanesCamp || s.lanesBot); }
+// a hit on another human hero: their own game applies it
+function lanesMpHeroHit(t, amount, srcId) {
+  if (!G.lanes || !(amount > 0) || t.team === G.player.team && srcId === G.player.id) return 0;
+  lanesSend('lph', { to: t.key, a: Math.round(amount) });
+  if (srcId === G.player.id) ev({ t: 'hit', x: t.x, z: t.z, y: 2.1, amt: Math.round(amount), crit: false, byPlayer: true });
+  return amount;
+}
+const lanesNid = (o) => o.nid || (o.kind === 'minion' ? 'm' + (o.hid || o.id) : o.lanesBot ? 'b' + o.key : o.kind === 'structure' ? 's' + G.lanes.structs.indexOf(o) : o.lanesCamp ? 'c' + G.lanes.camps.indexOf(o) : '');
+// called every match step; true = this game is a guest (it mirrors instead of simulating)
+function lanesMpStep(dt) {
+  const S = G.lanes; if (!S.code || typeof RT === 'undefined') return false;
+  const host = lanesHostKey() === MP.sid;
+  if (host !== S.host) { S.host = host; if (host) { for (const m of S.minions) m.tgt = null; toast('You run the match now', 'good'); } }
+  if (host) {
+    // a human hero going down counts for the other team (their own game ran the fall)
+    for (const e of lanesMpPeers()) { if (e._lnAlive && !e.alive) { S.kills[lanesEnemy(e.lt)]++; ev({ t: 'lanesKill', team: lanesEnemy(e.lt), name: e.nick, mine: e.lt === S.myTeam }); } e._lnAlive = e.alive; }
+    if ((LN.sendT -= dt) <= 0) { LN.sendT = 0.16; lanesMpSendState(); }
+    return false;
+  }
+  // guest: hits on host bodies go out 5 times a second, minions glide to where the host says
+  if ((LN.hitT -= dt) <= 0) { LN.hitT = 0.2; if (LN.hits.size) { lanesSend('lhit', { to: lanesHostKey(), h: [...LN.hits].map(([k, f]) => [k, Math.round(Math.min(1, f) * 10000) / 10000]) }); LN.hits.clear(); } }
+  const k = 1 - Math.exp(-dt * 10);
+  for (const m of S.minions) if (m.alive && m.sx != null) { m.x += (m.sx - m.x) * k; m.z += (m.sz - m.z) * k; m.facing += angDiff(m.facing, m.sf || 0) * k; m.attackAnim = Math.max(0, m.attackAnim - dt * 3); m.flashT -= dt; }
+  for (const c of S.camps) if (c.alive && c.sx != null) { c.x += (c.sx - c.x) * k; c.z += (c.sz - c.z) * k; c.flashT -= dt; }
+  return true;
+}
+// a guest's own hit on a host body (from lanesDmgMod via dealDamage): the share goes to the host
+function lanesMpGuestHit(t, amount, srcId) { const S = G.lanes; if (!S || S.host || !S.code || srcId !== G.player.id || !t.maxHp) return; const k = lanesNid(t); if (k) LN.hits.set(k, (LN.hits.get(k) || 0) + amount / t.maxHp); }
+function lanesMpSendState() {
+  const S = G.lanes, f1 = (v) => Math.round(v * 10), h = (o) => (o.alive ? Math.max(1, Math.round(o.hp / o.maxHp * 1000)) : 0);
+  lanesSend('lst', { t: Math.round(S.t * 10) / 10, ph: S.phase === 'countdown' ? 0 : S.phase === 'fight' ? 1 : 2, k: [S.kills.blue, S.kills.red], bf: [Math.round(S.buff.blue), Math.round(S.buff.red)],
+    s: S.structs.map(h), c: S.camps.map((c) => [f1(c.x), f1(c.z), h(c)]),
+    m: S.minions.filter((m) => m.alive).slice(0, 60).map((m) => [m.id, m.mk === 'ranged' ? 1 : 0, m.team === 'red' ? 1 : 0, f1(m.x), f1(m.z), h(m), Math.round(m.facing * 100), m.attackAnim > 0.5 ? 1 : 0]),
+    b: S.bots.map((b) => [b.key, b.team === 'red' ? 1 : 0, b.cls, b.nick, f1(b.x), f1(b.z), Math.round(b.facing * 100), b.alive ? h(b) : 0, b.slot]) });
+}
+function lanesMirror(P) {
+  const S = G.lanes, ph = ['countdown', 'fight', 'over'][mpNum(P.ph, 1) | 0] || 'fight';
+  if (S.phase === 'countdown' && ph === 'fight') { S.phase = 'fight'; ev({ t: 'lanesFight' }); }
+  S.t = mpNum(P.t, S.t);
+  if (Array.isArray(P.k)) { S.kills.blue = mpNum(P.k[0], 0) | 0; S.kills.red = mpNum(P.k[1], 0) | 0; }
+  if (Array.isArray(P.bf)) { S.buff.blue = mpNum(P.bf[0], 0); S.buff.red = mpNum(P.bf[1], 0); }
+  if (Array.isArray(P.s)) S.structs.forEach((o, i) => { const f = mpNum(P.s[i], 1000) / 1000; if (f <= 0 && o.alive) { o.hp = 0; killEntity(o, null); } else if (f > 0) { if (f * o.maxHp < o.hp - 1) { o.flashT = 0.12; o.hurtT = 1.2; } o.hp = f * o.maxHp; } });
+  if (Array.isArray(P.c)) S.camps.forEach((c, i) => { const r = P.c[i]; if (!Array.isArray(r)) return; const f = mpNum(r[2], 0) / 1000; c.sx = mpNum(r[0], 0) / 10; c.sz = mpNum(r[1], 0) / 10; if (f <= 0) { if (c.alive) { c.alive = false; ev({ t: 'die', x: c.x, z: c.z, kind: c.type, elite: true }); } } else { if (!c.alive) { c.alive = true; c.x = c.sx; c.z = c.sz; } c.hp = f * c.maxHp; } });
+  const seen = new Set();
+  for (const r of Array.isArray(P.m) ? P.m : []) {
+    if (!Array.isArray(r) || r.length < 8) continue; const id = r[0]; seen.add(id);
+    let m = S.minions.find((q) => q.hid === id);
+    const x = mpNum(r[3], 0) / 10, z = mpNum(r[4], 0) / 10, f = mpNum(r[5], 0) / 1000;
+    if (!m) { if (f <= 0) continue; m = lanesMinion(r[2] ? 'red' : 'blue', r[1] ? 'ranged' : 'melee', x, z); m.hid = id; S.minions.push(m); }
+    m.sx = x; m.sz = z; m.sf = mpNum(r[6], 0) / 100; if (r[7]) m.attackAnim = 1;
+    if (f * m.maxHp < m.hp - 1) m.flashT = 0.1; m.hp = Math.max(1, f * m.maxHp);
+  }
+  for (const m of S.minions) if (m.alive && m.hid != null && !seen.has(m.hid)) { m.alive = false; m.deadAt = G.time; ev({ t: 'die', x: m.x, z: m.z, kind: 'minion' }); G.ents.delete(m.id); }
+  S.minions = S.minions.filter((m) => m.alive || G.time - m.deadAt < 2);
+  for (const r of Array.isArray(P.b) ? P.b : []) {
+    if (!Array.isArray(r) || r.length < 9 || typeof r[0] !== 'string') continue;
+    let b = S.bots.find((q) => q.key === r[0]);
+    if (!b) { const cls = CFG.brawlerOrder.includes(r[2]) ? r[2] : STARTER_HERO; b = lanesBot(r[1] ? 'red' : 'blue', r[8] | 0, cls, cleanNick(r[3]) || 'Bot'); b.key = r[0]; S.bots.push(b); S.fighters.push(b); }
+    b.sx = mpNum(r[4], 0) / 10; b.sz = mpNum(r[5], 0) / 10; b.sf = mpNum(r[6], 0) / 100;
+    const f = mpNum(r[7], 0) / 1000; if (f <= 0) { if (b.alive) { b.alive = false; b.respawnT = 99; ev({ t: 'die', x: b.x, z: b.z, kind: 'fighter' }); } } else { if (!b.alive) { b.alive = true; b.x = b.sx; b.z = b.sz; } b.hp = f * b.maxHp; }
+  }
+}
+function lanesMpEnd(winner, why) { if (G.lanes && G.lanes.code && G.lanes.host) lanesSend('lend', { w: winner, why }); }
+function lanesMpLeave() { LN.m = null; LN.hits.clear(); }
+// broadcast events l* (70-multiplayer.js rtMessage)
+function lanesRecv(event, sid, P) {
+  if (!G.started) return;
+  if (event === 'lgo') { const L = lanesMembers()[0]; if (!LN.code || !L || L.key !== sid || !Array.isArray(P.m) || G.lanes) return; lanesStartFrom(P); return; }
+  if (event === 'lmm') { if (!LN.q || P.q !== LN.q || !Array.isArray(P.m) || !P.m.some((r) => r[0] === MP.sid) || G.lanes) return; LN.q = ''; LN.code = String(P.code || '').slice(0, 5); toast(`Matched with ${P.m.length - 1} hero${P.m.length > 2 ? 'es' : ''}!`, 'good'); lanesStartFrom(P); return; }
+  const S = G.lanes; if (!S || !S.code) return;
+  if (event === 'lph') { // a hit on my hero: only from a player in this match on the other team (or the host's bodies), within reach
+    if (P.to !== MP.sid || !G.player.alive) return; const a = MP.peers.get(sid); if (!a || a.md !== 'lanes' || a.lc !== S.code) return;
+    if (a.lt === G.player.team && sid !== lanesHostKey()) return;
+    const dmg = Math.min(Math.max(0, mpNum(P.a, 0)), G.player.maxHp * 0.5); if (dmg > 0) dealDamage(G.player, dmg, -1, {}); return;
+  }
+  if (event === 'lhit') { if (!S.host || P.to !== MP.sid || !Array.isArray(P.h)) return;
+    for (const [k, f] of P.h) { const o = typeof k === 'string' ? lanesFindNid(k) : null; if (!o || !o.alive) continue; const amt = clamp(mpNum(f, 0), 0, 1) * o.maxHp; if (o.kind === 'structure' && lanesShielded(o)) continue; o.hp -= amt; o.flashT = CFG.combat.hitFlash; if (o.hp <= 0) { o.hp = 0; killEntity(o, null); } }
+    return; }
+  if (sid !== lanesHostKey()) return; // the rest only from the game that runs the match
+  if (event === 'lst') lanesMirror(P);
+  else if (event === 'lend') lanesFinish(P.w === 'red' ? 'red' : 'blue', P.why === 'time' ? 'time' : 'core');
+}
+function lanesFindNid(k) { const S = G.lanes, i = parseInt(k.slice(1), 10); if (k[0] === 's') return S.structs[i]; if (k[0] === 'c') return S.camps[i]; if (k[0] === 'b') return S.bots.find((b) => b.key === k.slice(1)); if (k[0] === 'm') return S.minions.find((m) => m.id === i); return null; }
+// --- the Lanes page: pick 1v1/2v2/3v3, solo with bots or a party, quick match per bracket
+function openLanesPanel() {
+  const live = UI.current === 'lanes' && G.modal && !$('modal').hidden; UI.current = 'lanes';
+  const p = G.profile, rec = lanesRec(), r = lanesRating(p, playerPower()), online = lanesOnline(), lead = lanesLeads(), M = lanesMembers();
+  let body;
+  if (G.lanes) body = `<div class="riftCard"><p>A match is on: ${G.lanes.size}v${G.lanes.size}.</p></div><div class="row end"><button class="ghost" data-act="close">Back to the match</button><button class="primary" data-act="lnForfeit">Leave match</button></div>`;
+  else {
+    const sizes = CFG.lanes.sizes.map((n) => `<button class="dlvCard lnSize${LN.size === n ? ' on' : ''}" style="--art:url(assets/ui/lanes/${n}v${n}.webp);--bc:#7fd8ff" data-act="lnSize" data-n="${n}" ${lead ? '' : 'aria-disabled="true"'}><b>${n}v${n}</b><small>${n === 1 ? 'One lane, no camps' : n === 2 ? 'Lane + 2 camps' : 'Wide lane + 2 camps'}</small></button>`).join('');
+    const T = lanesTeams(M, LN.sides), slot = (m) => m ? `<div class="dlvSlot rd"><i>${gi(m.me ? 'm_hero' : 'm_players')}</i><b>${escapeHTML(m.nick)}${m.me ? ' (you)' : ''}</b><small>Lv ${fmt(m.level)} · ${fmtK(m.pw)} Power</small></div>` : `<div class="dlvSlot empty"><small>Bot</small></div>`;
+    const team = (name) => { const ms = T.filter(([t]) => t === name).map(([, m]) => m); return Array.from({ length: LN.size }, (_, i) => slot(ms[i])).join(''); };
+    let buttons;
+    if (LN.q) buttons = `<div class="dlvQueue"><div class="spin"></div><b>Looking for heroes · ${lanesBracketName(r.br)}</b><small>${Math.floor(LN.qT)}s · bots fill the rest</small></div><div class="row end"><button class="ghost" data-act="lnCancelQ">Cancel</button><button class="primary" data-act="lnSolo">Play with bots</button></div>`;
+    else if (LN.code) buttons = `<div class="dlvCode">Party code <b>${LN.code}</b><small>Friends type it in Lanes › Join</small></div>
+      <div class="row lnSides"><button class="${LN.sides === 'together' ? 'primary' : 'ghost'}" data-act="lnSides" data-s="together" ${lead ? '' : 'aria-disabled="true"'}>Together</button><button class="${LN.sides === 'versus' ? 'primary' : 'ghost'}" data-act="lnSides" data-s="versus" ${lead ? '' : 'aria-disabled="true"'}>Versus</button></div>
+      <div class="row end"><button class="ghost" data-act="lnLeave">Leave party</button>${lead ? `<button class="primary big" data-act="lnStart">Start ${LN.size}v${LN.size}</button>` : `<button class="${LN.ready ? 'ghost' : 'primary'} big" data-act="lnReady">${LN.ready ? 'Not ready' : 'Ready'}</button>`}</div>`;
+    else buttons = `<div class="row dlvJoin"><input id="lnCode" maxlength="5" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" ${online ? '' : 'disabled'}><button class="ghost" data-act="lnJoin" ${online ? '' : 'aria-disabled="true"'}>Join</button><button class="ghost" data-act="lnCreate" ${online ? '' : 'aria-disabled="true"'}>Party</button></div>
+      <div class="row end"><button class="ghost" data-act="lnQueue" ${online ? '' : 'aria-disabled="true"'}>Quick match</button><button class="primary big" data-act="lnSolo">Play with bots</button></div>
+      ${online ? '' : `<p class="fine">${TEST_MODE ? 'Test mode plays with bots.' : 'Parties and quick match work on the public site and in the app.'}</p>`}`;
+    body = `<div class="dlvCards lnSizes">${sizes}</div>
+      <p class="fine">Your own hero, gear and talents. Minions march, towers guard, destroy the enemy Core to win.</p>
+      <div class="lnTeams"><div class="lnTeam blue"><b>Blue</b>${team('blue')}</div><div class="lnTeam red"><b>Red</b>${team('red')}</div></div>
+      <div class="dlvGate ok">Bracket <b>${lanesBracketName(r.br)}</b> · ${fmtK(r.pw)} Power · rating ${fmt(r.mmr)}</div>
+      ${buttons}`;
+  }
+  const html = `<div class="npcHead">${gi('m_lanes', 'hd')}<h3>Ascendant Lanes</h3><span class="cnt">${lanesRank(rec.rp)} · ${fmt(rec.rp)} RP · ${rec.w}W ${rec.l}L</span></div>${body}`;
+  if (live && html === LN.uiHtml) return;
+  LN.uiHtml = html; openModal(html); $('panel').classList.add('menuPanel');
+}
+function lanesAction(act, b) {
+  switch (act) {
+    case 'lnSize': if (lanesLeads()) LN.size = clamp(+b.dataset.n | 0, 1, 3); break;
+    case 'lnSides': if (lanesLeads()) LN.sides = b.dataset.s === 'versus' ? 'versus' : 'together'; break;
+    case 'lnCreate': lanesCreate(); break;
+    case 'lnJoin': lanesJoin(($('lnCode') || {}).value); break;
+    case 'lnLeave': LN.code = ''; LN.ready = false; LN.jt = 0; break;
+    case 'lnReady': LN.ready = !LN.ready; break;
+    case 'lnQueue': lanesQueue(); break;
+    case 'lnCancelQ': LN.q = ''; LN.jt = 0; break;
+    case 'lnSolo': LN.q = ''; lanesPlay(true); return;
+    case 'lnStart': lanesPlay(false); return;
+    case 'lnForfeit': UI.close(); if (G.lanes && !G.lanes.result) { const S = G.lanes; S.peers = S.peers || []; lanesFinish(lanesEnemy(S.myTeam), 'left'); } leaveLanes(); return;
+    case 'lnHub': UI.close(); leaveLanes(); return;
+    case 'lnAgain': UI.close(); leaveLanes(); setTimeout(() => { if (!G.modal && G.mode === 'hub') openLanesPanel(); }, 300); return;
+  }
+  if (UI.current === 'lanes') openLanesPanel();
+}
+function openLanesResult() {
+  const r = G.lanes && G.lanes.result; if (!r) return;
+  UI.current = 'lanesResult';
+  openModal(`<div class="results ${r.win ? 'win' : ''}"><div class="place">${r.win ? 'WIN' : 'LOSS'}</div><h2>${r.win ? 'Victory!' : 'Defeat'}</h2>
+    <div class="stats3"><div><b class="${r.rp >= 0 ? 'up' : 'down'}">${r.rp >= 0 ? '+' : ''}${r.rp}</b><span>${escapeHTML(r.rank)} · ${fmt(r.rpTotal)} RP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${r.kills}/${r.deaths}</b><span>Takedowns / falls</span></div></div>
+    <div class="stats3"><div><b>${r.structs}</b><span>Buildings</span></div><div><b>${r.minions}</b><span>Minions</span></div><div><b>${Math.floor(r.t / 60)}:${String(Math.floor(r.t % 60)).padStart(2, '0')}</b><span>Match</span></div></div>
+    ${r.chest ? `<div class="list"><div class="item">${caseArt(r.chest)}<div class="meta"><div class="slot">Earned</div><div class="nm">${CFG.cases[r.chest].name}</div><div class="st">Open it in your Inventory</div></div></div></div>` : ''}</div>
+    <div class="row end"><button class="ghost" data-act="lnHub">Back to the world</button><button class="primary" data-act="lnAgain">Play again</button></div>`, false);
+}
+if (LOCAL_PREVIEW) window.__lanes = { LN, startLanes, leaveLanes, openLanesPanel, lanesRating, lanesBracket, lanesShouldNormalize, lanesGoMsg, lanesTeams, lanesRecv, lanesMirror, get S() { return G.lanes; } };
+// --- end Lanes online
+// ---------------------------------------------------------------------
 // 10. MAIN LOOP — fixed-timestep simulation, render separate
 // ---------------------------------------------------------------------
 const FRAME_MS = 1000 / 60, FRAME_MS_120 = 1000 / 120;
@@ -18278,7 +19048,7 @@ function frame(now) {
   if (G.paused) return;
   buildPlayerIntent(dt);
   // the open world keeps running behind menus (you are safe while one is open); Showdown pauses
-  if (!G.modal || (G.mode === 'hub' && G.started)) {
+  if (!G.modal || (G.mode === 'hub' && G.started) || G.mode === 'lanes') { // a Lanes match runs on behind menus too
     simAcc += G.slowT > 0 ? dt * 0.3 : dt; G.slowT -= dt; // a Radiant drop slows the world for a moment
     let n = 0;
     while (simAcc >= CFG.sim.step && n < CFG.sim.maxSteps) { if (hz120) Interp.snap(); simStep(CFG.sim.step); simAcc -= CFG.sim.step; n++; }
@@ -18288,6 +19058,7 @@ function frame(now) {
   // modal queue: class choice, boss loot, arena results
   if (!G.modal) {
     if (G.mode === 'arena' && G.arena && G.arena.result && G.arena.phase === 'over' && G.arena.overT <= 0) openResults();
+    else if (G.mode === 'lanes' && G.lanes && G.lanes.result && G.lanes.overT <= 0 && !G.lanes.shown) { G.lanes.shown = true; openLanesResult(); }
     else if (G.mode === 'hub' && G.pendingClassChoice && !G.profile.cls) openClassChoice();
     else if (G.mode === 'hub' && G.lootQueue.length) openLoot(G.lootQueue.shift());
     else if (G.mode === 'hub' && G.riftResult) { const rr = G.riftResult; G.riftResult = null; openRiftResult(rr); }
@@ -18298,7 +19069,7 @@ function frame(now) {
   if (hz120) Interp.apply(simAcc / CFG.sim.step);
   syncViews(dt, t);
   updateGearAura(dt); updateProjectileMeshes(dt); HeroFX.update(dt, HeroSupers.marked); updateParticles(dt); updateRings(dt); updateAim(dt);
-  if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
+  if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else if (G.mode === 'lanes') updateLanesView(dt, t); else updateArenaProps(t);
   updateCamera(dt);
   updateCompanion(dt,t);
   // the sun's shadow map at most 60 times a second: the world steps at 60 Hz, so at 120 Hz every other redraw was the same
@@ -18322,6 +19093,7 @@ const Interp = {
   steps: 0, saved: [],
   bodies(fn) {
     if (G.mode === 'arena' && G.arena) { for (const f of G.arena.fighters) fn(f); }
+    else if (G.mode === 'lanes' && G.lanes) { for (const f of G.lanes.fighters) fn(f); for (const m of G.lanes.minions) if (m.alive) fn(m); }
     else { for (const f of G.hubFighters) fn(f); for (const e of G.enemies) fn(e); if (G.boss) fn(G.boss); }
     for (let i = 0; i < PROJ_MAX; i++) { const p = projectiles[i]; if (p && p.active) fn(p); }
   },

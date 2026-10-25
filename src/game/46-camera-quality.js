@@ -10,7 +10,7 @@ function viewFor(e) {
   if (v) return v;
   if (e.kind === 'fighter') {
     const c = CFG.classes[e.cls];
-    const ring = G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (!!(G.profile && G.profile.settings.pvp) ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : e.delveBot ? 0x8dd96a : null);
+    const ring = G.mode === 'lanes' ? (e.team === G.player.team ? (e.isPlayer ? 0xffc94a : 0x3fa9ff) : 0xff4d4d) : G.mode === 'arena' ? (e.isPlayer ? 0x3fa9ff : 0xff4d4d) : (e.isPlayer ? (!!(G.profile && G.profile.settings.pvp) ? 0xff3344 : 0xffc94a) : e.isPeer ? (e.pvp ? 0xff3344 : 0x5dd6ff) : e.delveBot ? 0x8dd96a : null);
     const gear = e.isPlayer ? G.profile.gear : null;
     const cape = e.isPlayer ? capeColor(G.profile) : null;
     const BR = CFG.brawlers[e.cls] || {};
@@ -56,6 +56,7 @@ function syncViews(dt, t) {
     } else if (v.ring) v.ring.visible = true;
   };
   if (G.mode === 'arena' && G.arena) { for (const f of G.arena.fighters) handle(f); }
+  else if (G.mode === 'lanes' && G.lanes) { for (const f of G.lanes.fighters) if (f.alive) handle(f); for (const c of G.lanes.camps) if (c.alive) handle(c); for (const e of lanesMpPeers()) handle(e); }
   else {
     for (const f of G.hubFighters) handle(f);
     for (const e of G.enemies) handle(e);
@@ -144,7 +145,7 @@ function updateCamera(dt) {
   Showcase.b = clamp(Showcase.b + (Showcase.on ? dt / 0.45 : -dt / 0.45), 0, 1);
   const sb = Showcase.b * Showcase.b * (3 - 2 * Showcase.b);
   // angled top-down: camera south of the player, looking north
-  let zoom = Math.min(CFG.growth.zoomCap, 1 + CFG.growth.zoomPerLevel * (G.profile.level - 1) * (G.mode === 'arena' ? 0.5 : 1)) * (LOCAL_PREVIEW && window.__camZoom || 1) * (G.siege ? CFG.siege.zoom : 1); // __camZoom: local tours only; the fort sees further
+  let zoom = Math.min(CFG.growth.zoomCap, 1 + CFG.growth.zoomPerLevel * (G.profile.level - 1) * (G.mode === 'arena' ? 0.5 : 1)) * (LOCAL_PREVIEW && window.__camZoom || 1) * (G.siege ? CFG.siege.zoom : 1) * (G.lanes ? CFG.lanes.zoom : 1); // __camZoom: local tours only; the fort sees further
   // frame the world boss with the hero when you fight it, so it is never hidden under the top bar
   let fx = pl.x, fz = pl.z + 1.5;
   const bb = G.mode === 'hub' ? G.boss : null;

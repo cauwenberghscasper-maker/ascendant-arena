@@ -845,3 +845,12 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .kW button { min-width: 44px; min-height: 32px; padding: 0; font-size: 16px; }
 .kBuy { flex: 0 0 auto; min-width: 84px; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
 .kBuy small { font-size: 11px; }
+/* Ascendant Lanes page (76-lanes-mp.js): size cards reuse the dungeon cards; two team columns of slots */
+.lnTeams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 6px 0 8px; }
+.lnTeam { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lnTeam > b { font-size: 12px; letter-spacing: .04em; text-shadow: 1px 1px 0 #000; }
+.lnTeam.blue > b { color: #7fd0ff; } .lnTeam.red > b { color: #ff7a7a; }
+.lnTeam .dlvSlot.empty { min-height: 44px; }
+.panel .row.lnSides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.panel .row.lnSides button { min-height: 44px; }
+.tag.obj.foe .tb i { background: var(--hpLow); } .tag.obj.ally .tb i { background: #5dd6ff; }
