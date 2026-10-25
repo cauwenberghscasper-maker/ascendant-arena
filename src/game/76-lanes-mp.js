@@ -238,5 +238,5 @@ function openLanesResult() {
     ${r.chest ? `<div class="list"><div class="item">${caseArt(r.chest)}<div class="meta"><div class="slot">Earned</div><div class="nm">${CFG.cases[r.chest].name}</div><div class="st">Open it in your Inventory</div></div></div></div>` : ''}</div>
     <div class="row end"><button class="ghost" data-act="lnHub">Back to the world</button><button class="primary" data-act="lnAgain">Play again</button></div>`, false);
 }
-if (LOCAL_PREVIEW) window.__lanes = { LN, startLanes, leaveLanes, openLanesPanel, lanesRating, lanesBracket, lanesShouldNormalize, lanesGoMsg, lanesTeams, lanesRecv, lanesMirror, get S() { return G.lanes; } };
+if (LOCAL_PREVIEW) window.__lanes = { LN, startLanes, leaveLanes, lanesEnd, lanesSpawnWave, openLanesPanel, lanesRating, lanesBracket, lanesShouldNormalize, lanesGoMsg, lanesTeams, lanesRecv, lanesMirror, get S() { return G.lanes; } };
 // --- end Lanes online

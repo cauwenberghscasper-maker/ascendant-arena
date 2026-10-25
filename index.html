@@ -6580,12 +6580,12 @@ const LC = { x: 0, z: -2600 }; // Lanes map centre (arena −1000, rift −1400,
 CFG.lanes = {
   unlock: 10, sizes: [1, 2, 3], half: { x: 19, z: 64 }, wide3: 23, // field half-size (3v3 is a little wider)
   core: 54, towers: [38, 21], fountain: 60, fountainR: 6, campX: 15, campZ: 0,
-  wave: 26, firstWave: 4, melee: 3, ranged: 2, maxMinions: 40, time: 600, countdown: 3,
+  wave: 22, firstWave: 4, melee: 3, ranged: 2, maxMinions: 40, time: 600, countdown: 3,
   respawn: [6, 1, 18], // base seconds, +per minute, cap
   // stats in units of the match's reference hero (a level-L hero in level-L Rare gear): hp in hero shots, dmg in hero HP
-  minion: { melee: { hp: 2.6, dmg: 0.055, cd: 1.1, range: 1.7, speed: 3.4, r: 0.6 }, ranged: { hp: 1.8, dmg: 0.05, cd: 1.5, range: 7, speed: 3.4, r: 0.5 } },
-  tower: { hp: 46, dmg: 0.17, minionDmg: 0.42, cd: 1.15, range: 11, r: 1.6, aggro: 2.5 },
-  coreHp: 70, coreR: 2.4, structDmg: 0.5, backdoor: 0.35, sight: 7.5, pvp: 0.6,
+  minion: { melee: { hp: 1.7, dmg: 0.055, cd: 1.1, range: 1.7, speed: 3.4, r: 0.6 }, ranged: { hp: 1.2, dmg: 0.05, cd: 1.5, range: 7, speed: 3.4, r: 0.5 } },
+  tower: { hp: 34, dmg: 0.17, minionDmg: 0.42, cd: 1.15, range: 11, r: 1.6, aggro: 2.5 },
+  coreHp: 50, coreR: 2.4, structDmg: 0.75, backdoor: 0.35, sight: 7.5, pvp: 0.8, push: 0.12, // push: each tower a team has lost makes the other side's minions 12% sturdier
   camp: { hp: 22, dmg: 0.09, cd: 1.3, range: 2.4, leash: 9, respawn: 75, buff: 0.15, buffT: 60, type: 'boar' },
   heal: 0.18, // fountain heal per second (share of max HP)
   zoom: 1.12,
@@ -6746,7 +6746,7 @@ function lanesSpawnWave() {
   S.minions = S.minions.filter((m) => m.alive || G.time - m.deadAt < 2);
 }
 function lanesMinion(team, mk, x, z) {
-  const S = G.lanes, M = CFG.lanes.minion[mk], grow = 1 + 0.04 * S.waveN; // each wave a little sturdier
+  const S = G.lanes, M = CFG.lanes.minion[mk], lost = S.structs.filter((o) => o.team !== team && !o.alive).length, grow = (1 + 0.04 * S.waveN) * (1 + CFG.lanes.push * lost); // each wave a little sturdier, and more so for the side that is ahead
   const m = { id: nextId++, kind: 'minion', mk, team, x, z, r: M.r, hp: Math.round(S.ref.dmg * M.hp * grow), maxHp: 0, dmg: S.ref.hp * M.dmg * grow, alive: true, facing: team === 'blue' ? 0 : Math.PI,
     atkCd: Math.random(), flashT: 0, slowT: 0, invulnT: 0, armorT: 0, moveAmt: 0, attackAnim: 0, tgt: null, tgtT: 0, lastHurt: -99, deadAt: 0 };
   m.maxHp = m.hp; G.ents.set(m.id, m); return m;
@@ -6865,7 +6865,7 @@ function lanesBotThink(b, dt) {
   if (ai.role === 'jungle' && !ai.back) { const c = S.camps.filter((q) => q.alive).sort((a, q) => Math.hypot(a.x - b.x, a.z - b.z) - Math.hypot(q.x - b.x, q.z - b.z))[0]; if (c && S.t > 50 && b.hp > b.maxHp * 0.6) goal = { x: c.x, z: c.z, camp: c }; }
   // what to shoot: heroes in range when healthy, else minions, else a building our minions are at, else the camp
   let tgt = null, bd = range * 1.05;
-  lanesTargets((t) => { if (!t.alive || t.team === b.team || t.team === 'neutral' || t.kind !== 'fighter') return; const d = Math.hypot(t.x - b.x, t.z - b.z); if (d < bd && (b.hp > b.maxHp * 0.45 || d < range * 0.6)) { bd = d; tgt = t; } });
+  lanesTargets((t) => { if (!t.alive || t.team === b.team || t.team === 'neutral' || t.kind !== 'fighter') return; const d = Math.hypot(t.x - b.x, t.z - b.z); if (d < bd && ((b.hp > b.maxHp * 0.45 && d < range * 0.7) || t.hp < t.maxHp * 0.35 || d < range * 0.4)) { bd = d; tgt = t; } });
   if (!tgt) { bd = range; for (const m of S.minions) if (m.alive && m.team !== b.team) { const d = Math.hypot(m.x - b.x, m.z - b.z); if (d < bd) { bd = d; tgt = m; } } }
   if (!tgt) for (const o of S.structs) if (o.alive && o.team !== b.team && !lanesShielded(o) && Math.hypot(o.x - b.x, o.z - b.z) < range + o.r && ours.some((m) => Math.hypot(m.x - o.x, m.z - o.z) < R.tower.range)) { tgt = o; break; }
   if (!tgt && goal.camp && Math.hypot(goal.camp.x - b.x, goal.camp.z - b.z) < range) tgt = goal.camp;
@@ -19027,7 +19027,7 @@ function openLanesResult() {
     ${r.chest ? `<div class="list"><div class="item">${caseArt(r.chest)}<div class="meta"><div class="slot">Earned</div><div class="nm">${CFG.cases[r.chest].name}</div><div class="st">Open it in your Inventory</div></div></div></div>` : ''}</div>
     <div class="row end"><button class="ghost" data-act="lnHub">Back to the world</button><button class="primary" data-act="lnAgain">Play again</button></div>`, false);
 }
-if (LOCAL_PREVIEW) window.__lanes = { LN, startLanes, leaveLanes, openLanesPanel, lanesRating, lanesBracket, lanesShouldNormalize, lanesGoMsg, lanesTeams, lanesRecv, lanesMirror, get S() { return G.lanes; } };
+if (LOCAL_PREVIEW) window.__lanes = { LN, startLanes, leaveLanes, lanesEnd, lanesSpawnWave, openLanesPanel, lanesRating, lanesBracket, lanesShouldNormalize, lanesGoMsg, lanesTeams, lanesRecv, lanesMirror, get S() { return G.lanes; } };
 // --- end Lanes online
 // ---------------------------------------------------------------------
 // 10. MAIN LOOP — fixed-timestep simulation, render separate
