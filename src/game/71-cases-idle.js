@@ -130,8 +130,10 @@ function vaultState(now) {
     shards: Math.floor(R.shards * mins), cases: Math.floor((mins / 60) * R.casesPerH) };
 }
 function collectVault() {
-  const p = G.profile, v = vaultState(Date.now()); if (v.mins < 1) return null;
-  p.vault.t = Date.now();
+  const p = G.profile, now = Date.now(), v = vaultState(now), kp = typeof kingdomPending === 'function' ? kingdomPending(now) : null;
+  if (v.mins < 1 && !(kp && (kp.gold || kp.gems || kp.mats.length))) return null;
+  if (kp) v.k = kingdomCollect(now); // the Kingdom's buildings pay together with the Treasury (71b-kingdom.js)
+  p.vault.t = now;
   addGold(v.gold, true); if (v.gems) addEssence(v.gems); if (v.shards) dropShards(v.shards, true);
   for (let i = 0; i < v.cases; i++) addCase('treasure', { src: 'vault' });
   if (v.xp) { const keep = p.settings.fastXp; p.settings.fastXp = false; addXp(v.xp, 'vault'); p.settings.fastXp = keep; }
@@ -375,7 +377,8 @@ function openIdle(tab) {
   const p = G.profile, now = Date.now();
   const tabs = ['Vault', 'Expeditions', 'Mining', 'Auto Hunt'].map((t) => `<button class="tab ${t === tab ? 'on' : ''}" data-act="idleTab" data-tab="${t}">${tabName(t)}</button>`).join('');
   let body = '', bar = '';
-  if (tab === 'Vault') {
+  if (tab === 'Vault' && typeof kingdomTabHTML === 'function') { const K = kingdomTabHTML(p, now); body = K.body; bar = K.bar; }
+  else if (tab === 'Vault') {
     const v = vaultState(now), R = vaultRates(p), lv = vaultLv(p), cost = vaultUpCost(p), pct = Math.round(v.mins / v.cap * 100);
     const hm = (m) => `${Math.floor(m / 60)}h ${Math.floor(m % 60)}m`;
     body = `<div class="vaultBox"><div class="vbar"><i style="width:${pct}%"></i><span>${pct}% · ${hm(v.mins)} of ${vaultCapH(p)}h${v.full ? ' · FULL' : ''}</span></div>
@@ -408,7 +411,7 @@ function openIdle(tab) {
     body = `<label class="tgl"><input type="checkbox" data-set="autoHunt" ${p.settings.autoHunt ? 'checked' : ''}><span class="sw"></span><span><b>Auto Hunt</b><small>Your hero walks to monsters at your level, fights, dashes away when hurt and uses supers. Touch the move stick to take over; it resumes after a moment.</small></span></label>
       <p class="fine">Auto Hunt works in the open world (not in the Rift or Showdown). Monsters more than 3 levels above you are skipped, so it stays safe. Turn it on, put the phone down, and check back.</p>`;
   }
-  openModal(dock(`<div class="npcHead">${gi('m_idle', 'hd')}<h3>Bank &amp; Camp</h3><span class="cnt">${vaultState(now).full ? 'Bank full' : ''}</span></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar));
+  openModal(dock(`<div class="npcHead">${gi('m_idle', 'hd')}<h3>Kingdom &amp; Camp</h3><span class="cnt">${vaultState(now).full ? 'Bank full' : ''}</span></div><div class="tabs">${tabs}</div>`, `<div class="tabBody">${body}</div>`, bar));
 }
 function idleAlert() { const p = G.profile, now = Date.now(); return vaultState(now).mins >= 60 || p.exp.some((e) => expDone(e, now)); }
 

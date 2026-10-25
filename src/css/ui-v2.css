@@ -820,3 +820,24 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .mgate { position: absolute; z-index: 2; pointer-events: none; background: #ff4d5a; box-shadow: 0 0 0 2px var(--og-ink); transform: translate(-50%, -50%); }
 .mgate.v { width: 5px; height: 14px; } .mgate.h { width: 14px; height: 5px; }
 .mgate.open { background: #58e08a; }
+/* Kingdom (Bank & Camp › Kingdom, 71b-kingdom.js): the stored pile, villagers, a card per building */
+.kVil { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; font-size: 13px; }
+.kVil span { flex: 1; } .kVil b { color: #ffcf1f; }
+.kAmt { display: flex; gap: 4px; margin: 4px 0 8px; }
+.kAmt button { flex: 1; min-height: 44px; font-size: 13px; color: #fff; background: var(--og-stone2); box-shadow: 0 0 0 2px var(--og-ink); }
+.kAmt button.on { background: var(--og-stone); color: #ffcf1f; box-shadow: 0 0 0 2px var(--og-ink), inset 0 0 0 2px #ffcf1f; }
+.kList { display: flex; flex-direction: column; gap: 6px; }
+.kCard { display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--og-stone); box-shadow: 0 0 0 2px var(--og-ink); }
+.kCard.lk { opacity: .6; }
+.kCard > .gi.pxi { flex: 0 0 auto; width: 40px; height: 40px; background-image: var(--pf) !important; }
+.kCard.lk > .gi.pxi { filter: grayscale(1) !important; }
+.kMeta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.kMeta > b { font-size: 14px; } .kMeta > b em { font-style: normal; color: #ffcf1f; margin-left: 4px; }
+.kMeta > small { font-size: 12px; opacity: .9; } .kMeta .mi { width: 14px; height: 14px; vertical-align: -2px; }
+.kMs { position: relative; display: block; height: 12px; background: var(--og-ink); }
+.kMs b { position: absolute; left: 0; top: 0; bottom: 0; background: #ffcf1f; }
+.kMs small { position: relative; display: block; text-align: center; font-size: 10px; line-height: 12px; color: #fff; text-shadow: 1px 1px 0 #000; }
+.kW { display: flex; align-items: center; gap: 6px; } .kW small { flex: 1; font-size: 11px; text-align: center; }
+.kW button { min-width: 44px; min-height: 32px; padding: 0; font-size: 16px; }
+.kBuy { flex: 0 0 auto; min-width: 84px; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.kBuy small { font-size: 11px; }

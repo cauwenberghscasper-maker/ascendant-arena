@@ -231,8 +231,9 @@ function processEvents() {
         break;
       }
       case 'caseGot': { const K = CFG.cases[e.k]; Feed.add(`${gi('m_case')} <b style="color:${K.col}">${K.name}</b> found · open it in your Journal › Treasure Chests`, 'case'); Sfx.play('unlock'); UI.caseFlash = 1.2; break; }
-      case 'vault': showToast(`Bank collected: +${fmtK(e.v.gold)} coins, +${e.v.gems} gems${e.v.cases ? `, ${e.v.cases} chest${e.v.cases > 1 ? 's' : ''}` : ''}`, 'good'); Sfx.play('coin'); break;
-      case 'vaultUp': showToast(`Vault level ${e.lv}`, 'good'); Sfx.play('unlock'); break;
+      case 'kingdomBuy': if (e.milestone) { showBanner(`${escapeHTML(e.name)} ×2!`, `${e.own} owned · output doubled`, 'gold'); Sfx.play('radiant'); } break;
+      case 'vault': showToast(`Kingdom collected: +${fmtK(e.v.gold + ((e.v.k && e.v.k.gold) || 0))} coins, +${e.v.gems + ((e.v.k && e.v.k.gems) || 0)} gems${e.v.cases ? `, ${e.v.cases} chest${e.v.cases > 1 ? 's' : ''}` : ''}`, 'good'); Sfx.play('coin'); break;
+      case 'vaultUp': showToast(`Treasury level ${e.lv}`, 'good'); Sfx.play('unlock'); break;
       case 'expStart': showToast(`${CFG.brawlers[e.b].name} left on a ${e.d >= 60 ? e.d / 60 + 'h' : e.d + 'm'} expedition`); break;
       case 'expDone': showToast(`${CFG.brawlers[e.b].name} is back: +${fmtK(e.r.gold)} coins, +${e.r.gems} gems${e.r.cases ? `, ${e.r.cases} chest${e.r.cases > 1 ? 's' : ''}` : ''}`, 'good'); Sfx.play('win'); break;
       case 'achievement': Feed.add(`${gi('m_feats')} Feat: <b>${e.name}</b>`, 'feat'); Sfx.play('job'); break;

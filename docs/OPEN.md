@@ -56,6 +56,8 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [ ] Rewarding feel, a home farm, a non-linear world: research done (24 Oct,
       `docs/RESEARCH_REWARD_AND_WORLD.md`); Casper picks what to build first.
 
+- [ ] Kingdom (idle buildings, 25 Oct, `docs/log/2026-10-25-idle-kingdom.md`): judge the pace on a real phone (`CFG.kingdom` grow, outputs), painted building art for the cards and a small 3D kingdom scene to look at instead of a list.
+
 ## Release (audit/PHASE1.md)
 - [ ] Native iOS/Android projects, app icon and splash, privacy policy URL, store accounts, final `appId`.
 
