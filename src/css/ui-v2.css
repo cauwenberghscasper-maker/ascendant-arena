@@ -450,6 +450,10 @@
 .cbonus { margin: 6px auto; padding: 6px 10px; text-align: center; font-size: 14px; background: var(--og-stone); box-shadow: 0 0 0 2px var(--og-ink); }
 .cbonus b { color: #ffcf1f; margin-right: 6px; } .cbonus.hero { background: var(--og-pur); animation: reelFlash .5s steps(2) 6; } .cbonus.hero b { color: #fff; }
 .cbonus.mats { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+/* party dungeon grade on the end chest (S A B C, from hits per hall, perfect dodges and falls) */
+.dgrade { display: flex; align-items: center; gap: 10px; margin: 8px auto; padding: 6px 10px; max-width: 360px; background: var(--og-stone); box-shadow: 0 0 0 2px var(--og-ink), inset 0 0 0 2px color-mix(in srgb, var(--gc) 45%, transparent); }
+.dgrade .dgL { flex: 0 0 44px; height: 44px; display: grid; place-items: center; font-size: 30px; color: var(--og-ink); background: var(--gc); box-shadow: 0 0 0 2px var(--og-ink), 0 0 12px color-mix(in srgb, var(--gc) 60%, transparent); }
+.dgrade .dgT { font-size: 14px; color: var(--gc); } .dgrade .dgS { font-size: 12px; opacity: .85; }
 .bonusOdds { margin-top: 6px; }
 /* ---- full-page hub screens (all but the Hero showcase) ---- */
 #modal.full { padding: var(--sat) var(--sar) var(--sab) var(--sal); place-items: stretch; background: var(--og-stone2); }

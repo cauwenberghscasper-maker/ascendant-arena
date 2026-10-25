@@ -190,6 +190,10 @@ function processEvents() {
       case 'delveCurse': showToast('Cursed: your health is capped, the final chest is richer', 'bad'); burst(e.x, 1, e.z, 30, 0x9b3dff, 4, 0.9, 0.4, -1, 2); Sfx.play('lose'); break;
       case 'delveHeal': showToast('The moonwell restores you', 'good'); burst(e.x, 1, e.z, 30, 0x9fe8ff, 4, 0.9, 0.4, -1, 2); Sfx.play('level'); break;
       case 'delveRevived': showToast(`You pulled ${e.who || 'your ally'} back up!`, 'good'); ringFx(e.x, e.z, 2.5, 0x6cff8a, 0.8); break;
+      case 'delveDodge': showToast(`Perfect dodge · super +${Math.round(CFG.delve.skill.dodgeSuper * 100)}%`, 'good', 1.2); burst(e.x, 1.1, e.z, 14, 0x9fe8ff, 4, 0.6, 0.3, 3, 1.5); Sfx.play('pickup'); break;
+      case 'delveFlawless': showToast(`Flawless ${e.boss ? 'boss' : 'hall'}! +${fmtK(e.gold)} gold`, 'good'); Sfx.play('coin'); break;
+      case 'delveUnique': G.slowT = 1; Sfx.play('radiant'); showBanner('Dungeon treasure!', `${escapeHTML(e.name)} · only from ${escapeHTML(e.where)}`, 'gold'); break;
+      case 'delveOath': showToast(`Oath of ${escapeHTML(e.name)} · ${e.have}/${e.need}`, 'good'); break;
       case 'delveSet': G.slowT = 1; Sfx.play('radiant'); showBanner('Set piece!', `${escapeHTML(e.name)} · ${escapeHTML(e.set)} set`, 'gold'); break;
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
       case 'dungeonBoss': Feed.remove('dungeon'); Feed.remove('dlvEvent'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;

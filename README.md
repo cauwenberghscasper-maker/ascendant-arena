@@ -311,8 +311,14 @@ checks all 32 bodies, the Panther's three contacts, and all 43 hero models (27 a
   mural order, the echo (repeat a light show), the race (beat the clock), the balance (lights-out), the twins (find
   rune pairs), the wisp (catch it where it lands) and the riddle (the mural's rune, round after round). Side rooms off
   the main halls (some behind a cracked wall you smash open): a guarded treasure room, a champion's den or a hidden
-  rare vein. Every phone in a party sees the same run (rule 8).
-- **Dungeons** with Dungeon Keys (tier + affixes, par time) and **Legendary Trials** (sigils, Radiant 1/500 drops).
+  rare vein. Every phone in a party sees the same run (rule 8). The first hall is safe (no monsters). Skill pays:
+  monsters hit hard but are not sponges, a dash through an attack is a Perfect Dodge (super charge back), a hall cleared
+  without a hit is Flawless, and the end chest's grade (S/A/B/C from hits per hall and falls) adds items, rarity and
+  gold (`CFG.delve.skill`). Every dungeon chest (here and in the world dungeons) rolls a treasure: gear (with a shot at
+  one of the dungeon's two named treasures), ore (biome materials and the dungeon's gem) or a hero (oaths for the
+  biome's hidden hero, or a locked hero from a boss chest) (`CFG.delve.treasure`). Garo's Craft tab has a Dungeon forge
+  per biome: two named pieces from the dungeon's gem (`CFG.delve.gear`).
+- **Dungeons** (a safe first hall, then guarded halls) with Dungeon Keys (tier + affixes, par time) and **Legendary Trials** (sigils, Radiant 1/500 drops).
 - **Mining:** ore, pickaxe, geodes for the Museum, a 1/10,000 pet.
 - **Daily:** 7-day calendar that never resets, weekly Colossus chest (Journal › Daily; it never opens by itself, the Menu
   button glows while a reward waits).

@@ -1860,6 +1860,10 @@ body, button, input, select, textarea, .panel, .panel * { font-family: var(--bod
 .cbonus { margin: 6px auto; padding: 6px 10px; text-align: center; font-size: 14px; background: var(--og-stone); box-shadow: 0 0 0 2px var(--og-ink); }
 .cbonus b { color: #ffcf1f; margin-right: 6px; } .cbonus.hero { background: var(--og-pur); animation: reelFlash .5s steps(2) 6; } .cbonus.hero b { color: #fff; }
 .cbonus.mats { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+/* party dungeon grade on the end chest (S A B C, from hits per hall, perfect dodges and falls) */
+.dgrade { display: flex; align-items: center; gap: 10px; margin: 8px auto; padding: 6px 10px; max-width: 360px; background: var(--og-stone); box-shadow: 0 0 0 2px var(--og-ink), inset 0 0 0 2px color-mix(in srgb, var(--gc) 45%, transparent); }
+.dgrade .dgL { flex: 0 0 44px; height: 44px; display: grid; place-items: center; font-size: 30px; color: var(--og-ink); background: var(--gc); box-shadow: 0 0 0 2px var(--og-ink), 0 0 12px color-mix(in srgb, var(--gc) 60%, transparent); }
+.dgrade .dgT { font-size: 14px; color: var(--gc); } .dgrade .dgS { font-size: 12px; opacity: .85; }
 .bonusOdds { margin-top: 6px; }
 /* ---- full-page hub screens (all but the Hero showcase) ---- */
 #modal.full { padding: var(--sat) var(--sar) var(--sab) var(--sal); place-items: stretch; background: var(--og-stone2); }
@@ -3669,7 +3673,8 @@ function sanitizeProfile(p) {
   for (const k of ['secrets', 'pois', 'dungeons', 'runes', 'trials', 'petFinds']) if (!out[k] || typeof out[k] !== 'object' || Array.isArray(out[k])) out[k] = {};
   // party dungeons: clears and best difficulty per dungeon, this week's first clears, set pieces found
   { const o = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {}), d = o(out.delve);
-    out.delve = { clears: o(d.clears), best: o(d.best), wk: { w: +o(d.wk).w || 0, done: o(o(d.wk).done) }, pieces: o(d.pieces) }; }
+    out.delve = { clears: o(d.clears), best: o(d.best), wk: { w: +o(d.wk).w || 0, done: o(o(d.wk).done) }, pieces: o(d.pieces),
+      found: o(d.found), upity: Math.max(0, +d.upity | 0), s: Math.max(0, +d.s | 0) }; } // found: dungeon treasures logged; upity: chests since one; s: S-rank clears
   // Dungeon Keys (CFG.dungeon loads later; the cap of 12 matches CFG.dungeon.keys.max)
   out.keys = (Array.isArray(out.keys) ? out.keys : []).filter((k) => k && k.t >= 1 && Array.isArray(k.a)).slice(0, 12)
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));
@@ -4210,7 +4215,10 @@ function stepProjectiles(dt) {
     forEachTarget((t) => {
       if (hitT || !t.alive || t.team === p.team || p.hits.includes(t.id)) return;
       if(p.pet && t.kind!=='enemy' && t.kind!=='boss')return;
-      if (t.kind === 'fighter' && t.invulnT > 0) return; // dodged!
+      if (t.kind === 'fighter' && t.invulnT > 0) { // dodged! (through a dash in a dungeon: a Perfect Dodge, 36b-delve.js)
+        if (t.isPlayer && p.team === 'mob' && typeof delveDodge === 'function') { const dx = t.x - p.x, dz = t.z - p.z, rr = t.r + p.r; if (dx * dx + dz * dz < rr * rr) delveDodge(t); }
+        return;
+      }
       const dx = t.x - p.x, dz = t.z - p.z, rr = t.r + p.r;
       if (dx * dx + dz * dz < rr * rr) hitT = t;
     }, p.team);
@@ -4269,7 +4277,7 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
   o = o || {};
   forEachTarget((t) => {
     if (!t.alive || t.team === team || t === o.exclude) return;
-    if (t.kind === 'fighter' && t.invulnT > 0) return;
+    if (t.kind === 'fighter' && t.invulnT > 0) { if (team === 'mob' && t.isPlayer && typeof delveDodge === 'function' && (t.x - x) ** 2 + (t.z - z) ** 2 <= (r + t.r) ** 2) delveDodge(t); return; }
     const dx = t.x - x, dz = t.z - z;
     if (dx * dx + dz * dz <= (r + t.r) * (r + t.r)) {
       dealDamage(t, dmg, owner, { charge: o.charge || 0, canCrit: false, slow: o.slow || 0, knockX: dx, knockZ: dz, knock: o.knock || 0, burn: o.burn || 0, burnT: o.burnT || 0, proc: !!o.proc });
@@ -4285,7 +4293,7 @@ function dealDamage(t, amount, srcId, o) {
     if (dealt > 0 && o && o.charge) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
     return dealt;
   }
-  if (t.invulnT > 0) return 0;
+  if (t.invulnT > 0) { if (t.isPlayer && typeof delveDodge === 'function') { const s0 = G.ents.get(srcId); if (s0 && (s0.kind === 'enemy' || s0.kind === 'boss')) delveDodge(t); } return 0; }
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
   if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot && !t.delveBot) return 0; // hub bots are bystanders (dungeon bots fight)
@@ -4314,6 +4322,7 @@ function dealDamage(t, amount, srcId, o) {
   if (t.kind === 'boss' && typeof bossDamageMod === 'function') amt *= bossDamageMod(t); // warded: nearly immune until the team holds every ward; exposed after
   const hpBefore = Math.max(0, t.hp);
   t.hp -= amt; t.flashT = CFG.combat.hitFlash; t.lastHurt = G.time;
+  if (t.isPlayer && amt > 0 && typeof delveSkillHit === 'function') delveSkillHit(t, amt); // dungeon grade (36b-delve.js)
   // lobby: send our hit to whoever runs this monster or the world boss (70-multiplayer.js; absent in the node checks)
   if (t.own && t.kind === 'enemy' && src && src.isPlayer) mpMobHit(t, amt);
   if (t.mirror && src && src.isPlayer) siegeMpMobHit(t, amt);
@@ -4716,7 +4725,7 @@ function stepFighter(f, dt, ctx) {
     let dx = mx, dz = mz;
     if (Math.hypot(dx, dz) < 0.2) { dx = Math.sin(f.facing); dz = Math.cos(f.facing); }
     const d = Math.hypot(dx, dz) || 1;
-    f.dashX = dx / d; f.dashZ = dz / d; f.dashT = C.dash.time; f.dashHit.length = 0; f.invulnT = Math.max(f.invulnT, C.dash.invuln); f.dashCd = C.dash.cd;
+    f.dashX = dx / d; f.dashZ = dz / d; f.dashT = C.dash.time; f.dashHit.length = 0; f.invulnT = Math.max(f.invulnT, C.dash.invuln); f.dashCd = C.dash.cd; f.dashAt = G.time;
     if (f.keys.aftershock) f.ks.afterT = 2;
     ev({ t: 'dash', x: f.x, z: f.z, isPlayer: f.isPlayer });
   }
@@ -6114,7 +6123,9 @@ function stepPendingAoE(dt) {
       // through aoeHits first
       if (!a.inner && !a.cone && !a.grp && !a.pct) aoeDamage(a.x, a.z, a.r, a.dmg, a.team, a.owner, { knock: 6, charge: 0, slow: a.slow || 0, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
       else forEachTarget((t) => {
-        if (!t.alive || t.team === a.team || (t.kind === 'fighter' && t.invulnT > 0) || !aoeHits(a, t)) return;
+        if (!t.alive || t.team === a.team) return;
+        if (t.kind === 'fighter' && t.invulnT > 0) { if (a.team === 'mob' && t.isPlayer && typeof delveDodge === 'function' && aoeCovers(a, t.x, t.z, t.r)) delveDodge(t); return; }
+        if (!aoeHits(a, t)) return;
         dealDamage(t, a.pct ? t.maxHp * a.pct : a.dmg, a.owner, { charge: 0, canCrit: false, slow: a.slow || 0, knockX: t.x - a.x, knockZ: t.z - a.z, knock: 6, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
       }, a.team);
       if (a.kind === 'zap') ev({ t: 'bolt', x: a.x, z: a.z });
@@ -6619,6 +6630,8 @@ const TestTools = {
 const DC = { x: 0, z: -1800 }; // dungeon instance centre (arena −1000, rift −1400)
 CFG.dungeon = {
   room: 18, corridor: 8, corW: 5, bossR: 16, wallR: 0.5,
+  // a safe first hall (Bart, 25 Oct): you arrive in an empty hall and its gate opens by itself; the guarded halls follow
+  safeStart: true,
   lvlAdd: 4, hpMul: 1.5, dmgMul: 1.25, boss: { dmg: 1.5, adds: 2, lvlAdd: 2 },
   // poi n picks the variant: hall sizes, elite share, boss affixes and HP, par time in seconds
   variants: [
@@ -6632,7 +6645,9 @@ CFG.dungeon = {
   // monster type multiplies that chance by 1 + chain/chainStep, up to chainMax.
   trial: { runes: 4, sigilCost: 50, radiant: 500, chainStep: 25, chainMax: 4 },
   interactR: 3.6, bossBlock: 30,
-  chest: { items: 2, ilvlAdd: 4, epicFrom: 15, gems: [6, 10], shards: [3, 5], caseChance: 0.1, xpFrac: 0.35, gold: [40, 8] },
+  // the chest pays more (Bart, 25 Oct: was items 2, gems [6, 10], caseChance 0.1, xpFrac 0.35, gold [40, 8]) and rolls a
+  // treasure: gear, ore or a hero (CFG.delve.treasure, 36b-delve.js)
+  chest: { items: 3, ilvlAdd: 4, epicFrom: 15, gems: [8, 14], shards: [3, 5], caseChance: 0.15, xpFrac: 0.5, gold: [60, 12] },
   // Dungeon Keys: +1 monster level per tier. Clear under par: the key comes back 1-3 tiers higher; fall or leave: one tier lower.
   keys: { max: 12, affixes: {
     bulwark: { name: 'Bulwark', d: 'Monsters +40% HP', bad: true }, brutal: { name: 'Brutal', d: 'Monsters +30% damage', bad: true }, swift: { name: 'Swift', d: 'Monsters +20% speed', bad: true },
@@ -6669,7 +6684,7 @@ function dungeonReq(poi) { return (CFG.world.zones[poi.zone] || {}).minLevel || 
 function strSeed(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }
 // Deterministic per POI id: rooms walk north/east/west (never south, so the path cannot fold back onto itself).
 function dungeonLayout(id) {
-  const C = CFG.dungeon, rng = mulberry32(strSeed(id)), rooms = [], cors = [], walls = [], doors = [], last = dungeonVariant(id).counts.length;
+  const C = CFG.dungeon, rng = mulberry32(strSeed(id)), rooms = [], cors = [], walls = [], doors = [], last = dungeonVariant(id).counts.length + dungeonSafe(id);
   const rect = (x, z, hx, hz) => ({ x0: x - hx, x1: x + hx, z0: z - hz, z1: z + hz });
   for (let i = 0; i <= last; i++) {
     const h = i === last ? C.bossR : C.room / 2;
@@ -6709,6 +6724,8 @@ function dungeonLayout(id) {
   const r0 = rooms[0], b = rooms[last];
   return { rooms, cors, walls, doors, start: { x: r0.x, z: r0.z0 + 4 }, exit: { x: r0.x - 4, z: r0.z0 + 2.2 }, chest: { x: b.x, z: b.z }, exit2: { x: b.x, z: b.z + 5 } };
 }
+// 1 when the dungeon opens with the safe empty hall (every dungeon with guarded halls; a Trial is one sealed arena)
+function dungeonSafe(id) { return CFG.dungeon.safeStart && dungeonVariant(id).counts.length ? 1 : 0; }
 // walls and locked doors as obstacle circles (rebuilt when a door opens: the Grid has no remove)
 function dungeonGrid(D) {
   const C = CFG.dungeon, g = new Grid(6), r = C.wallR;
@@ -6763,11 +6780,12 @@ function startDungeon(poi, keyIdx) {
   pl.x = D.start.x; pl.z = D.start.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
   G.zoneIdx = poi.zone;
   const roster = () => (Z.alt && Math.random() < 0.4 ? Z.alt : Z.enemy);
+  const safe = dungeonSafe(poi.id);
   D.rooms.forEach((m, i) => {
     m.mobs = []; m.cleared = false;
     if (m.boss) return;
-    for (let k = 0; k < V.counts[i]; k++) {
-      // the first hall keeps its southern half free: you arrive there
+    for (let k = 0, n = i < safe ? 0 : V.counts[i - safe]; k < n; k++) {
+      // a first hall with monsters (no safe hall) keeps its southern half free: you arrive there
       const x = rand(m.x0 + 3, m.x1 - 3), z = rand(i ? m.z0 + 3 : m.z + 1, m.z1 - 3), elite = Math.random() < V.elite;
       m.mobs.push(dungeonMob(D, roster(), lvl, i, { elite, x, z }));
     }
@@ -6786,12 +6804,13 @@ function stepDungeon(dt) {
     const m = D.rooms[d.room];
     if (d.open || m.mobs.some((e) => e.alive)) continue;
     d.open = m.cleared = true; dungeonGrid(D);
+    if (d.room < dungeonSafe(D.id)) continue; // the safe first hall opens quietly
     ev({ t: 'dungeonRoom', i: d.room + 1, n: D.rooms.length - 1, boss: d.room + 1 === D.rooms.length - 1 });
   }
   const b = D.boss;
   if (b.alive && !D.addsDone && b.hp < b.maxHp * 0.5) {
     D.addsDone = true; const Z = CFG.world.zones[D.zone];
-    for (let k = 0; k < C.boss.adds; k++) { const a = (k / C.boss.adds) * Math.PI * 2; D.rooms.at(-1).mobs.push(dungeonMob(D, Z.alt || Z.enemy, D.lvl, 3, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, chase: true })); }
+    for (let k = 0; k < C.boss.adds; k++) { const a = (k / C.boss.adds) * Math.PI * 2; D.rooms.at(-1).mobs.push(dungeonMob(D, Z.alt || Z.enemy, D.lvl, D.rooms.length - 1, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, chase: true })); }
     ev({ t: 'dungeonAdds', x: b.x, z: b.z });
   }
   if (!b.alive && !D.bossDead) {
@@ -6828,6 +6847,8 @@ function claimDungeonChest() {
     res.gems = Math.round((randInt(K.gems[0], K.gems[1]) + Math.floor(L / 10)) * tierMul(curTier()).gems * (1 + 0.1 * t)); addEssence(res.gems);
     res.shards = randInt(K.shards[0], K.shards[1]); dropShards(res.shards);
     if (Math.random() < Math.min(0.6, K.caseChance + 0.02 * t) + (keyHas(D, 'lucky') ? 0.25 : 0)) { res.case = true; addCase('treasure', { l: L + K.ilvlAdd + t, src: 'dungeon' }); }
+    // treasure: gear, ore or oaths for the biome's hidden hero (36b-delve.js)
+    if (!D.variant.trial && typeof rollDungeonTreasure === 'function') res.treasure = rollDungeonTreasure('world', { biome: zoneBiome(D.zone), def: null, L: L + K.ilvlAdd + t, di: Math.floor(t / 5), floor, zone: D.zone, luck: keyHas(D, 'lucky') ? 1.5 : 1, uniqueRar: rarIdx(floor) >= 3 ? 'legendary' : 'epic' });
     rec.t = Date.now();
   }
   if (D.variant.trial) {
@@ -6919,7 +6940,25 @@ CFG.delve = {
     kinds: [{ k: 'treasure', w: 3, guards: 3 }, { k: 'den', w: 2, guards: 2 }, { k: 'vein', w: 2, guards: 2 }],
     names: { treasure: 'Treasure Room', den: "Champion's Den", vein: 'Hidden Vein' }, denHp: 0.45 },
   spread: { area: 65, n: [8, 22], gap: 6, entry: 8, puzzleShare: 0.4, miniShare: 0.35, alert: 9, cover: 9, patrol: 0.2, roam: 12, captain: 8 },
-  tough: { hp: 1.3, dmg: 1.1 }, // more monsters per hall (spread.area 95 → 65), so each is a little less tough
+  // skill over stats (Bart, 25 Oct): dungeon monsters have less health and hit harder. Every attack already shows its
+  // red wind-up, so dodging is what keeps you alive, not soaking hits (was hp 1.3, dmg 1.1)
+  tough: { hp: 1.05, dmg: 1.3 },
+  // the first hall is safe (Bart, 25 Oct): no monsters, you arrive, look round and its gate opens by itself
+  safeStart: true,
+  // skill pays: a hall cleared without taking a hit is Flawless (a little gold on the spot); a dash through an attack is
+  // a Perfect Dodge (super charge back, and it cancels half a hit on the grade). The run's grade comes from the hits you
+  // took per hall (`hits` = most allowed for that grade), one grade lower per fall, and it scales the end chest:
+  // extra items, a higher rarity floor (`rar` steps), more gold and better odds on its treasure (`luck`)
+  skill: { flawlessGold: 0.2, dodgeSuper: 0.2, dodgeGap: 0.35, hitGap: 0.3, dodgeHits: 0.5,
+    grades: [{ g: 'S', hits: 1, items: 2, rar: 1, gold: 1.6, luck: 2, col: '#ffe27a' }, { g: 'A', hits: 2.5, items: 1, rar: 0, gold: 1.3, luck: 1.5, col: '#c77dff' },
+      { g: 'B', hits: 5, items: 0, rar: 0, gold: 1.1, luck: 1.2, col: '#58b4ff' }, { g: 'C', hits: 1e9, items: 0, rar: 0, gold: 1, luck: 1, col: '#9aa3b5' }] },
+  // treasure (Bart, 25 Oct: "chests can have heroes, ores or gear"): every dungeon chest rolls one of three on top of its
+  // gold and items. Gear: extra pieces a rarity up and a shot at a dungeon treasure (named, below). Ore: a stack of the
+  // biome's ore, parts and cores plus the dungeon's own gem. Hero: oaths for the biome's hidden hero, or, once that one
+  // is yours, a locked hero joins outright (boss chest only; side chests give oaths). Weights per chest kind; `luck`
+  // from the grade multiplies the hero weight.
+  treasure: { boss: { gear: 50, ore: 38, hero: 12 }, side: { gear: 55, ore: 40, hero: 5 }, cache: { gear: 60, ore: 40, hero: 0 }, world: { gear: 55, ore: 39, hero: 6 },
+    gearItems: 2, uniqueChance: 0.3, uniquePity: 12, oaths: [2, 3], ore: { ore: [24, 0.3], part: [8, 0.1], core: [1, 0.5], gem: [3, 1] } },
   // halfway through, a hall holds the dungeon's mini-boss with guards; the boss fights in three phases (adds at 66% and
   // 33%, then it gets faster and hits harder)
   mini: { hp: 0.55, guards: 3 }, boss: { hp: 2.4, phases: [0.66, 0.33], rage: { spd: 1.25, atk: 1.2 } },
@@ -6948,11 +6987,45 @@ CFG.delve = {
       pairs: { name: 'The Twins', hint: 'The runes hide in pairs: wake one seal, then its twin', peek: 1.1 },
       wisp: { name: 'The Wisp', hint: 'Catch the wisp: stand on the seal it lands on', hop: 1.8, faster: 0.88, hold: 0.35 },
       match: { name: 'The Riddle', hint: 'Wake the seal whose rune the mural shows, round after round' } } },
-  chest: { xpFrac: 0.5, gold: [60, 10], gems: [8, 14], shards: [3, 6], ilvlAdd: 4, caseChance: 0.15 },
+  // the end chest pays more (Bart, 25 Oct: was xpFrac 0.5, gold [60, 10], gems [8, 14], caseChance 0.15)
+  chest: { xpFrac: 0.75, gold: [90, 15], gems: [12, 20], shards: [4, 7], ilvlAdd: 4, caseChance: 0.25 },
   bonus: { gold: 0.4, items: 1 },
   reviveT: 3, reviveR: 2.6, wipeT: 2,
 };
-const DV = CFG.delve, DV_RAR = ['rare', 'epic', 'legendary', 'mythic', 'ancient', 'divine'];
+// dungeon treasures (Bart, 25 Oct: more gear to find and craft). `found`: two named pieces per dungeon that only drop from
+// its chests (a gear treasure roll, or now and then any chest). `forged`: two pieces per dungeon crafted at Garo's Forge
+// from the dungeon's own gem (its rare veins), the biome's core and ore. Fixed affixes like the relics, a little above a
+// normal roll; the rarity follows the difficulty (found) or the dungeon (forged).
+CFG.delve.gear = {
+  crypt: { found: [{ id: 'gravelantern', name: "Gravekeeper's Amulet", slot: 'accessory', aff: { lifesteal: 0.06, hp: 0.14, superGain: 0.1 } },
+      { id: 'rootsplitter', name: 'Rootsplitter Fang', slot: 'weapon', aff: { dmg: 0.12, atkSpeed: 0.1, crit: 0.05 } }],
+    forged: [{ id: 'amberheart', name: 'Amberheart Plate', slot: 'chest', aff: { hp: 0.15, armor: 0.07, lifesteal: 0.04 } },
+      { id: 'barkstride', name: 'Barkstride Boots', slot: 'boots', aff: { move: 0.06, hp: 0.1, cdr: 0.07 } }] },
+  frostvault: { found: [{ id: 'rimeveil', name: "Queen Rime's Hood", slot: 'helmet', aff: { armor: 0.08, critDmg: 0.28, hp: 0.1 } },
+      { id: 'winterless', name: 'The Winterless Treads', slot: 'boots', aff: { move: 0.07, cdr: 0.09, armor: 0.05 } }],
+    forged: [{ id: 'glasswinter', name: 'Glasswinter Fang', slot: 'weapon', aff: { dmg: 0.11, critDmg: 0.27, crit: 0.06 } },
+      { id: 'rimecrown', name: 'Rimeglass Helm', slot: 'helmet', aff: { superGain: 0.12, cdr: 0.09, hp: 0.1 } }] },
+  cinder: { found: [{ id: 'forgetongue', name: "Forgemaw's Fang", slot: 'weapon', aff: { dmg: 0.13, critDmg: 0.3, crit: 0.07 } },
+      { id: 'bellowsplate', name: 'Bellows Plate', slot: 'chest', aff: { hp: 0.15, armor: 0.08, atkSpeed: 0.08 } }],
+    forged: [{ id: 'emberknuckle', name: 'Emberheart Ring', slot: 'accessory', aff: { atkSpeed: 0.11, crit: 0.07, lifesteal: 0.04 } },
+      { id: 'slagwalkers', name: 'Slagwalker Striders', slot: 'boots', aff: { move: 0.06, dmg: 0.09, armor: 0.05 } }] },
+  archive: { found: [{ id: 'unreadcodex', name: 'Unread Page Charm', slot: 'accessory', aff: { cdr: 0.11, superGain: 0.13, dmg: 0.08 } },
+      { id: 'librarianquill', name: "Last Quill Focus", slot: 'weapon', aff: { dmg: 0.12, cdr: 0.09, crit: 0.06 } }],
+    forged: [{ id: 'inkbound', name: 'Inkbound Robe', slot: 'chest', aff: { hp: 0.13, cdr: 0.1, superGain: 0.1 } },
+      { id: 'pearlmonocle', name: 'Ink Pearl Hood', slot: 'helmet', aff: { crit: 0.07, critDmg: 0.28, cdr: 0.07 } }] },
+  grotto: { found: [{ id: 'motherspearl', name: "Mother's Pearl Amulet", slot: 'accessory', aff: { hp: 0.15, lifesteal: 0.06, move: 0.05 } },
+      { id: 'undertow', name: 'Undertow Striders', slot: 'boots', aff: { move: 0.07, atkSpeed: 0.1, hp: 0.09 } }],
+    forged: [{ id: 'tidebreaker', name: 'Tidebreaker Edge', slot: 'weapon', aff: { dmg: 0.12, atkSpeed: 0.11, lifesteal: 0.04 } },
+      { id: 'tidestonehelm', name: 'Tidestone Helm', slot: 'helmet', aff: { armor: 0.08, hp: 0.14, superGain: 0.09 } }] },
+  starfall: { found: [{ id: 'lastfeather', name: "Seraph's Feather Helm", slot: 'helmet', aff: { crit: 0.08, critDmg: 0.32, superGain: 0.12 } },
+      { id: 'fallenaegis', name: 'Starfallen Plate', slot: 'chest', aff: { hp: 0.16, armor: 0.08, dmg: 0.1 } }],
+    forged: [{ id: 'starshardedge', name: 'Starshard Edge', slot: 'weapon', aff: { dmg: 0.14, crit: 0.08, critDmg: 0.3 } },
+      { id: 'cometsigil', name: 'Comet Ring', slot: 'accessory', aff: { superGain: 0.14, atkSpeed: 0.1, crit: 0.06 } }] },
+  // forged rarity per dungeon (Crypt … Starfall) and the cost: gem, core and ore of the biome, gold like a crafted set piece
+  forgedRarity: ['epic', 'legendary', 'legendary', 'mythic', 'mythic', 'ancient'],
+  forgedCost: { gem: [12, 4], core: [3, 1], ore: [60, 1.3], gold: 8 },
+};
+const DV = CFG.delve, DV_RAR = ['rare', 'epic', 'legendary', 'mythic', 'ancient', 'divine'], DV_ALLRAR = ['common', 'uncommon', ...DV_RAR];
 function diffDef(i) {
   i = Math.max(0, i | 0); if (i < DV.diffs.length) return Object.assign({ i }, DV.diffs[i]);
   const r = i - DV.diffs.length + 1; // Ascendant rank
@@ -6987,7 +7060,7 @@ function delveGate(def, di, powers) {
   const req = delveReq(def, di), avg = powers.length ? powers.reduce((a, b) => a + b, 0) / powers.length : 0, min = Math.round(req * DV.floor);
   return { req, avg: Math.round(avg), min, ok: avg >= req && powers.every((p) => p >= min), weak: powers.filter((p) => p < min).length };
 }
-function delveRec() { const p = G.profile; return p.delve || (p.delve = { clears: {}, best: {}, wk: { w: 0, done: {} }, pieces: {} }); }
+function delveRec() { const p = G.profile, R = p.delve || (p.delve = { clears: {}, best: {}, wk: { w: 0, done: {} }, pieces: {} }); if (!R.found) R.found = {}; return R; }
 // highest difficulty open on a dungeon: one past the best you cleared there
 const delveTop = (def) => ((delveRec().best[def.id] ?? -1) + 1);
 const delveOpen = (def) => G.profile.level >= delveMinLevel(def);
@@ -7063,6 +7136,8 @@ function delveLayout(seed, def, di) {
   const pzKinds = seededShuffle(Object.keys(C.puzzle.kinds), rng); let pzAt = 0;
   for (const m of rooms) {
     if (m.boss) { m.fight = 'boss'; continue; }
+    // the safe first hall: no monsters, its gate opens as soon as the run starts
+    if (!m.i && C.safeStart) { m.fight = 'safe'; m.count = 0; m.waves = 1; m.spots = []; m.entry = { x: m.x, z: m.z - m.hz }; continue; }
     const SP = C.spread, full = clamp(Math.round(4 * m.hx * m.hz / SP.area), SP.n[0], SP.n[1]);
     // puzzle and champion halls are guarded too, at a share of a full hall (they used to be nearly empty)
     if (m.puzzle) { m.fight = 'puzzle'; m.count = Math.max(C.puzzle.guards[Math.min(di, C.puzzle.guards.length - 1)], Math.round(full * SP.puzzleShare)); m.waves = 1; }
@@ -7189,7 +7264,8 @@ function startDelve(id, di, seed, n, lead = true) {
   const D = G.dungeon = Object.assign(L, { id: poi.id, poi, zone: zi, variant: { name: def.name, counts: [], par: 600, hp: 14, mods: diff.i >= 3 ? 4 : 3, trial: false }, key: null, lvl, t0: G.time, clearT: 0, newKey: null,
     room: 0, mobs: [], boss: null, bossDead: false, chestOpen: false, addsDone: false, enterPos: { x: pl.x, z: pl.z } });
   const humans = clamp(n | 0 || 1, 1, DV.maxParty);
-  D.delve = { def, diff, di, seed, humans, n: DV.bots && DV.bots.on ? DV.maxParty : humans, bots: [], roster: delveRoster(def), slots: new Map(), cursed: false, bonus: {}, used: {}, downT: 0, wipeT: 0, revive: null, plates: {}, ev: {}, pz: {}, emit: [], mined: {}, claimed: {} };
+  D.delve = { def, diff, di, seed, humans, n: DV.bots && DV.bots.on ? DV.maxParty : humans, bots: [], roster: delveRoster(def), slots: new Map(), cursed: false, bonus: {}, used: {}, downT: 0, wipeT: 0, revive: null, plates: {}, ev: {}, pz: {}, emit: [], mined: {}, claimed: {},
+    hits: 0, dodges: 0, falls: 0, flawless: 0, been: {}, hallHits: {} }; // skill: what the grade is made of
   dungeonGrid(D); clearProjectiles();
   pl.x = D.start.x; pl.z = D.start.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
   G.zoneIdx = zi;
@@ -7226,9 +7302,10 @@ function fleeStep(e, dt) {
 function stepDelve(dt) {
   const D = G.dungeon, X = D.delve, pl = G.player, E = DV.events;
   if (Math.hypot(pl.x - DC.x, pl.z - DC.z) > (D.span || 260)) { endDungeon('away'); return; }
-  D.rooms.forEach((m, i) => { if (pl.alive && inRoom(m, pl.x, pl.z)) D.room = i; });
-  // a fall: wait for a teammate; when everyone is down the run fails
+  D.rooms.forEach((m, i) => { if (pl.alive && inRoom(m, pl.x, pl.z)) { D.room = i; X.been[i] = 1; } });
+  // a fall: wait for a teammate; when everyone is down the run fails. Each fall costs a grade.
   const party = delveParty(), up = party.filter((f) => f.alive !== false);
+  if (!pl.alive && !X.down) X.falls++; X.down = !pl.alive;
   if (!pl.alive) {
     G.respawnT = 1e9;
     if (!up.length) { if ((X.wipeT += dt) >= DV.wipeT) { endDungeon('down'); return; } } else X.wipeT = 0;
@@ -7269,13 +7346,13 @@ function stepDelve(dt) {
     if (last) { b.spd = (b.spd || 1) * DV.boss.rage.spd; b.atk *= DV.boss.rage.atk; b.raged = true; }
     ev({ t: 'dungeonAdds', x: b.x, z: b.z }); ev({ t: 'delvePhase', n: ph + 1, of: PH.length + 1, rage: last, name: X.def.boss, adds: (CFG.delve.bossKit.unlock[ph] || []).map((k) => CFG.delve.bossKit.names[k]), x: b.x, z: b.z });
   }
-  if (!b.alive && !D.bossDead) { D.bossDead = D.rooms.at(-1).cleared = true; D.clearT = G.time - D.t0; ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: X.def.name, secs: Math.round(D.clearT), par: 0, key: 0, up: 0, delve: true }); }
+  if (!b.alive && !D.bossDead) { D.bossDead = D.rooms.at(-1).cleared = true; D.clearT = G.time - D.t0; delveFlawless(D, D.rooms.at(-1)); ev({ t: 'dungeonBoss', x: D.chest.x, z: D.chest.z, name: X.def.name, secs: Math.round(D.clearT), par: 0, key: 0, up: 0, delve: true }); }
 }
 // the first game that sees a room done opens its door and tells the party ('ddoor'), so the gate opens on every
 // phone at the same moment instead of whenever each one hears the last monster fall
 function delveDoorOpen(D, k, send) {
   const d = D.doors[k], m = D.rooms[d.room]; d.open = m.cleared = true; dungeonGrid(D);
-  ev({ t: 'dungeonRoom', i: d.room + 1, n: D.rooms.length - 1, boss: d.room + 1 === D.rooms.length - 1 });
+  if (m.fight !== 'safe') { ev({ t: 'dungeonRoom', i: d.room + 1, n: D.rooms.length - 1, boss: d.room + 1 === D.rooms.length - 1 }); delveFlawless(D, m); } // the safe first hall opens quietly
   if (send && typeof partySend === 'function') partySend('ddoor', { dr: D.delve.seed, i: k });
 }
 function delveDoorRecv(P) {
@@ -7466,7 +7543,7 @@ function delveUse(kind, room) {
   if (kind === 'delveSecret') { const q = (D.secrets || [])[room | 0]; if (!q || q.open) return null; delveSecretOpen(D, room | 0); if (typeof partySend === 'function') partySend('dsec', { dr: X.seed, i: room | 0 }); return true; }
   if (kind === 'delveTreasure') { // your own chest in a side room (every hero opens their own)
     const m = (D.side || []).find((o) => o.i === (room | 0)); if (!m || X.claimed[m.i] || delveSideGuarded(D, m)) return null;
-    X.claimed[m.i] = true; const r = claimDelveLoot(false); if (m.kind === 'den') { const g = randInt(10, 20) * (1 + X.diff.i); addEssence(g); r.gems = (r.gems || 0) + g; } return r;
+    X.claimed[m.i] = true; const r = claimDelveLoot(false, 'side'); if (m.kind === 'den') { const g = randInt(10, 20) * (1 + X.diff.i); addEssence(g); r.gems = (r.gems || 0) + g; } return r;
   }
   if (kind === 'delveVein') { // your own share of a rare vein (each hero mines their own)
     const v = (D.veins || [])[room | 0], V = DV.veins, gem = X.def.gem; if (!v || X.mined[room | 0] || !gem) return null;
@@ -7475,7 +7552,7 @@ function delveUse(kind, room) {
   }
   if (kind === 'delveAltar' && !X.used.altar) { X.used.altar = X.cursed = true; pl.hp = Math.min(pl.hp, pl.maxHp * DV.events.altar.hpCap); ev({ t: 'delveCurse', x: pl.x, z: pl.z }); return true; }
   if (kind === 'delveFountain' && !X.used.fountain) { X.used.fountain = true; pl.hp = X.cursed ? pl.maxHp * DV.events.altar.hpCap : pl.maxHp; pl.invulnT = 3; pl.ammo = pl.ammoMax; ev({ t: 'delveHeal', x: pl.x, z: pl.z }); return true; }
-  if (kind === 'delveBonus' && X.bonus[room] === 1) { X.bonus[room] = 2; return claimDelveLoot(false); }
+  if (kind === 'delveBonus' && X.bonus[room] === 1) { X.bonus[room] = 2; return claimDelveLoot(false, 'cache'); }
   return null;
 }
 // --- loot: every game rolls its own. full = the boss chest, else an event cache (one item, some gold).
@@ -7488,20 +7565,27 @@ function makeSetPiece(def, diff, L, slot) {
   const R = delveRec(); (R.pieces[def.id] || (R.pieces[def.id] = {}))[slot] = 1; G.dirty = true;
   return it;
 }
-function claimDelveLoot(full) {
+// base chest gold at a level (the end chest pays this times the difficulty and grade; caches a share)
+function delveGoldAt(L) { const K = DV.chest; return (K.gold[0] + K.gold[1] * L) * Math.pow(CFG.enemies.goldGrowth, L - 1) * tierMul(curTier()).gold; }
+function claimDelveLoot(full, kind) {
   const D = G.dungeon, X = D.delve, p = G.profile, K = DV.chest, diff = X.diff, def = X.def, R = delveRec();
-  const L = Math.max(D.lvl, p.level), res = { name: def.name, diff: diff.name, full, xp: 0, gold: 0, items: [], set: [], gems: 0, shards: 0, case: false, weekly: false };
-  const gold = Math.round((K.gold[0] + K.gold[1] * L) * Math.pow(CFG.enemies.goldGrowth, L - 1) * tierMul(curTier()).gold * (1 + 0.15 * diff.i) * (full ? 1 : DV.bonus.gold));
+  const L = Math.max(D.lvl, p.level), res = { name: def.name, diff: diff.name, full, xp: 0, gold: 0, items: [], set: [], gems: 0, shards: 0, case: false, weekly: false, grade: null, treasure: null };
+  // the grade (end chest only): more items, a higher floor, more gold and a luckier treasure for clean play
+  const gr = full ? delveGrade(X, D.rooms.length - 1) : null; res.grade = gr;
+  const gold = Math.round(delveGoldAt(L) * (1 + 0.15 * diff.i) * (full ? gr.gold : DV.bonus.gold));
   res.gold = gold; addGold(gold);
-  const curse = X.cursed ? DV.events.altar : null, n = full ? diff.items + (curse ? curse.items : 0) : DV.bonus.items;
+  const curse = X.cursed ? DV.events.altar : null, n = full ? diff.items + (curse ? curse.items : 0) + gr.items : DV.bonus.items;
+  const floor = DV_RAR[clamp(DV_RAR.indexOf(diff.floor) + (gr ? gr.rar : 0), 0, DV_RAR.length - 1)];
   for (let i = 0; i < n; i++) {
-    let r = rollLoot(D.zone, true); if (rarIdx(r) < rarIdx(diff.floor)) r = diff.floor;
+    let r = rollLoot(D.zone, true); if (rarIdx(r) < rarIdx(floor)) r = floor;
     const it = makeItem(pick(CFG.gear.slots), r, L + K.ilvlAdd + diff.i * 2); res.items.push(it); grantItem(it, 'shrine', { zone: D.zone });
   }
   // the dungeon's own set: a chance per chest (better on harder runs, after the curse), sure on the weekly first clear
-  let chance = diff.unique * (curse ? curse.unique : 1) * (full ? 1 : 0.5);
+  let chance = diff.unique * (curse ? curse.unique : 1) * (full ? gr.luck : 0.5);
   if (full && delveWeekly(def, diff.i)) { res.weekly = true; chance = 1; R.wk.done[def.id + ':' + diff.i] = 1; }
   if (Math.random() < chance) { const it = makeSetPiece(def, diff, L + K.ilvlAdd + diff.i * 2); res.set.push(it); giveItem(it); ev({ t: 'delveSet', name: it.name, set: def.set.name }); }
+  // treasure: gear, ore or a hero
+  res.treasure = rollDungeonTreasure(full ? 'boss' : kind || 'cache', { biome: def.biome, def, L: L + K.ilvlAdd + diff.i * 2, di: diff.i, floor, zone: D.zone, luck: gr ? gr.luck : 1, uniqueRar: setPieceRarity(diff) });
   if (full) {
     if (p.level < P.cap) { res.xp = Math.round(xpToNext(p.level) * K.xpFrac); addXp(res.xp, 'dungeon'); }
     res.gems = Math.round((randInt(K.gems[0], K.gems[1]) + Math.floor(L / 8)) * tierMul(curTier()).gems * (1 + 0.2 * diff.i)); addEssence(res.gems);
@@ -7510,10 +7594,96 @@ function claimDelveLoot(full) {
     const C = R.clears[def.id] || (R.clears[def.id] = {}); C[diff.i] = (C[diff.i] | 0) + 1;
     R.best[def.id] = Math.max(R.best[def.id] ?? -1, diff.i);
     p.records.bestDelve = Math.max(p.records.bestDelve || 0, diff.i + 1);
+    if (gr.g === 'S') R.s = (R.s | 0) + 1; // S-rank clears, for the Dungeons page
   }
   G.dirty = true;
-  ev(Object.assign({ t: 'delveLoot' }, res, { items: res.items.length, set: res.set.length }));
+  ev(Object.assign({ t: 'delveLoot' }, res, { items: res.items.length, set: res.set.length, grade: gr ? gr.g : null, treasure: res.treasure ? res.treasure.kind : null }));
   return res;
+}
+// --- skill: hits taken, Flawless halls, Perfect Dodges and the run's grade (Bart, 25 Oct: more skill based)
+// the local hero took a monster's hit (from dealDamage); a burst of shots or a burn tick within `hitGap` counts once
+function delveSkillHit(t, amt) {
+  if (!t || !t.isPlayer || !(amt > 0) || !delveOn()) return;
+  const X = G.dungeon.delve; if (G.time - (X.hitAt ?? -9) < DV.skill.hitGap) return;
+  X.hitAt = G.time; X.hits++; X.hallHits[G.dungeon.room] = (X.hallHits[G.dungeon.room] | 0) + 1;
+}
+// a monster's attack passed through the hero during a dash's safe moment: a Perfect Dodge (super charge back)
+function delveDodge(t) {
+  if (!t || !t.isPlayer || !delveOn() || !(G.time - (t.dashAt ?? -9) <= CFG.combat.dash.invuln + 0.02)) return;
+  const X = G.dungeon.delve, K = DV.skill; if (G.time - (X.dodgeAt ?? -9) < K.dodgeGap) return;
+  X.dodgeAt = G.time; X.dodges++; t.superCharge = Math.min(1, (t.superCharge || 0) + K.dodgeSuper);
+  ev({ t: 'delveDodge', x: t.x, z: t.z, n: X.dodges });
+}
+// a hall you fought in without taking a hit: Flawless, a little gold at once
+function delveFlawless(D, m) {
+  const X = D.delve, pl = G.player; if (!m || !m.i || !X.been[m.i] || X.hallHits[m.i] || !pl.alive || !(m.count || m.boss || m.pz || m.event)) return;
+  X.flawless++; const g = Math.max(1, Math.round(delveGoldAt(Math.max(D.lvl, G.profile.level)) * DV.skill.flawlessGold)); addGold(g);
+  ev({ t: 'delveFlawless', x: pl.x, z: pl.z, gold: g, n: X.flawless, boss: !!m.boss });
+}
+// the grade: hits per hall you walked into (Perfect Dodges cancel some), one grade lower per fall. Someone who walked
+// into fewer than half the halls (left the fighting to the party) gets B at best.
+function delveGrade(X, total) {
+  const K = DV.skill, been = Object.keys(X.been).filter((i) => +i > 0).length, halls = Math.max(1, been), hits = Math.max(0, X.hits - X.dodges * K.dodgeHits), per = hits / halls;
+  let gi = K.grades.findIndex((g) => per <= g.hits); if (gi < 0) gi = K.grades.length - 1;
+  if (been < (total || 0) / 2) gi = Math.max(gi, 2);
+  gi = Math.min(K.grades.length - 1, gi + X.falls);
+  return Object.assign({ i: gi, per: Math.round(per * 10) / 10, halls, hits: X.hits, dodges: X.dodges, flawless: X.flawless, falls: X.falls }, K.grades[gi]);
+}
+// --- treasure: every dungeon chest rolls gear, ore or a hero (party dungeons here, and the world dungeons' chests).
+// kind: boss / side / cache (party dungeons) or world (Caves, Warrens, Sanctum). o: { biome, def, L (item level), di,
+// floor (rarity), zone, luck, uniqueRar }
+const delveOfBiome = (bi) => DV.dungeons.find((d) => d.biome === bi) || null;
+function rollDungeonTreasure(kind, o) {
+  const T = DV.treasure, w = Object.assign({}, T[kind] || T.cache), p = G.profile, bi = clamp(o.biome | 0, 0, 5), out = { kind: null, items: [], unique: null, mats: [], hero: null, oath: null };
+  const cb = typeof CB !== 'undefined' ? CB[bi] : null, hid = cb && cb.hero, cs = cb ? craftState() : null, own = (p.unlocked && p.unlocked.attacks) || [];
+  const oathOpen = !!(hid && CFG.brawlers[hid] && !own.includes(hid) && hid !== STARTER_HERO && (cs.sig[hid] | 0) < CFG.craft.sigil.need);
+  const locked = kind === 'boss' ? CFG.brawlerOrder.filter((id) => id !== STARTER_HERO && !own.includes(id) && CFG.attacks[id] && !(CFG.attacks[id].unlock && CFG.attacks[id].unlock.sigils != null)) : [];
+  if (!oathOpen && !locked.length) w.hero = 0; // nothing left to give: the hero share goes to the others
+  w.hero *= o.luck || 1; if (!cb) w.ore = 0;
+  let r = Math.random() * (w.gear + w.ore + w.hero); const k = (r -= w.gear) < 0 ? 'gear' : (r -= w.ore) < 0 ? 'ore' : 'hero';
+  out.kind = k;
+  if (k === 'hero' && oathOpen) { // oaths toward the biome's hidden hero
+    const S = CFG.craft.sigil, n = Math.min(S.need - (cs.sig[hid] | 0), randInt(T.oaths[0], T.oaths[1]));
+    cs.sig[hid] = (cs.sig[hid] | 0) + n; out.oath = { id: hid, name: CFG.brawlers[hid].name, n, have: cs.sig[hid], need: S.need };
+    if (cs.sig[hid] >= S.need && typeof checkUnlocks === 'function') checkUnlocks();
+    ev({ t: 'delveOath', name: out.oath.name, have: out.oath.have, need: S.need });
+  } else if (k === 'hero') { // the biome's hero is yours: a locked hero joins outright (boss chest only)
+    const id = pick(locked); own.push(id); if (!p.unlocked) p.unlocked = { attacks: own }; (p.newUnlocks || (p.newUnlocks = [])).push('a:' + id); out.hero = { id, name: CFG.brawlers[id].name };
+    ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: CFG.attacks[id].name });
+  } else if (k === 'ore') { // a stack of the biome's materials and the dungeon's own gem
+    const O = T.ore, di = o.di | 0, L = o.L, gem = o.def && o.def.gem && delveOpen(o.def) ? o.def.gem.id : null, fm = typeof findMul === 'function' ? findMul() : 1;
+    const list = [[cb.ore, (O.ore[0] + O.ore[1] * L) * fm], [cb.part, (O.part[0] + O.part[1] * L) * fm], [cb.core, O.core[0] + O.core[1] * di]];
+    if (gem) list.push([gem, O.gem[0] + O.gem[1] * di]);
+    out.mats = addMats(list, true);
+  } else { // gear: extra pieces a rarity up, and a shot at one of the dungeon's own named treasures
+    const up = DV_ALLRAR[Math.min(DV_ALLRAR.length - 1, DV_ALLRAR.indexOf(o.floor || 'rare') + 1)];
+    for (let i = 0; i < T.gearItems; i++) { let rr = rollLoot(o.zone, true); if (rarIdx(rr) < rarIdx(up)) rr = up; const it = makeItem(pick(CFG.gear.slots), rr, o.L); out.items.push(it); grantItem(it, 'shrine', { zone: o.zone }); }
+    const def = o.def || delveOfBiome(bi), R = delveRec(), pity = (R.upity | 0) + 1;
+    if (def && CFG.delve.gear[def.id] && (Math.random() < T.uniqueChance * (o.luck || 1) || pity >= T.uniquePity)) {
+      R.upity = 0; const ur = DV_ALLRAR.indexOf(o.uniqueRar) > DV_ALLRAR.indexOf(up) ? o.uniqueRar : up; // never below the pieces beside it
+      out.unique = makeDungeonTreasure(def, pick(CFG.delve.gear[def.id].found), ur, o.L); giveItem(out.unique);
+      ev({ t: 'delveUnique', name: out.unique.name, where: def.name });
+    } else R.upity = pity;
+  }
+  G.dirty = true; return out;
+}
+// a named dungeon treasure: fixed name and affixes, its own icon by slot; logged in profile.delve.found
+function makeDungeonTreasure(def, g, rarity, ilvl) {
+  const it = makeItem(g.slot, rarity, ilvl, g.name, { aff: Object.assign({}, g.aff) }); it.duq = g.id; it.dq = def.id;
+  const R = delveRec(); R.found[g.id] = (R.found[g.id] | 0) + 1; G.dirty = true; return it;
+}
+// --- dungeon forge (Garo's Craft tab): two pieces per dungeon from its gem, the biome's core and ore, and gold
+function forgedCost(def) {
+  const F = CFG.delve.gear.forgedCost, bi = def.biome, b = CB[bi];
+  return { mats: [[def.gem.id, F.gem[0] + F.gem[1] * bi], [b.core, F.core[0] + F.core[1] * bi], [b.ore, Math.round(F.ore[0] * Math.pow(F.ore[1], bi))]],
+    gold: Math.round(CFG.forge.base * Math.pow(CFG.forge.growth, Math.max(delveBase(def), G.profile.level) - 1) * F.gold) };
+}
+const forgedRarity = (def) => CFG.delve.gear.forgedRarity[clamp(def.biome, 0, 5)];
+function craftForged(id, gid) {
+  const def = DV.dungeons.find((d) => d.id === id), g = def && (CFG.delve.gear[def.id] || {}).forged?.find((x) => x.id === gid); if (!g || !delveOpen(def)) return null;
+  const cost = forgedCost(def); if (!canPay(cost)) return null; pay(cost);
+  const it = makeDungeonTreasure(def, g, forgedRarity(def), Math.max(delveBase(def), G.profile.level) + 2); it.forged = true;
+  giveItem(it); ev({ t: 'crafted', name: it.name }); return it;
 }
 function claimDelveChest() { const D = G.dungeon; if (!D || !D.bossDead || D.chestOpen) return null; D.chestOpen = true; return claimDelveLoot(true); }
 // set bonuses: pieces of one dungeon's set worn together (2 and 4 pieces); read by gearTotals
@@ -14138,6 +14308,14 @@ function craftTabHTML(p) {
       <button class="${can ? 'primary' : 'disabled'}" data-act="craftPiece" data-b="${bi}" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div>`;
   }).join('');
   const hero = CFG.brawlers[b.hero], heroHave = p.unlocked.attacks.includes(b.hero), relicN = craftState(p).relics[bi] | 0;
+  // the dungeon forge: pieces made from this biome's party dungeon gem (its rare veins), core and ore (36b-delve.js)
+  const dd = delveOfBiome(bi), dg = dd && CFG.delve.gear[dd.id], dOpen = dd && delveOpen(dd), fr = dd && forgedRarity(dd), found = delveRec().found;
+  const forged = dg ? `<div class="card craftSet" style="--mc:${hex6(dd.gem.color)}"><h4>Dungeon forge · ${escapeHTML(dd.name)}</h4>
+      <p>${dOpen ? `Made from ${escapeHTML(dd.gem.name)}, mined in its rare veins.` : `Opens at level ${delveMinLevel(dd)}, with the ${escapeHTML(dd.name)}.`}</p></div>
+    <div class="list">${dg.forged.map((g) => { const cost = forgedCost(dd), can = dOpen && canPay(cost, p), pv = { slot: g.slot, rarity: fr, ilvl: 1, up: 0, aff: g.aff, name: g.name, duq: g.id };
+      return `<div class="item ${fr} craftRow"><span class="thw ${fr}"><img class="thumb ${fr}" src="${thumbFor(pv)}" alt=""></span><div class="meta"><div class="slot">${SLOT_LABEL[g.slot]} · item level ${Math.max(delveBase(dd), p.level) + 2}${found[g.id] ? ` · made ${found[g.id]}×` : ''}</div><div class="nm">${escapeHTML(g.name)} ${rarityChip(fr)}</div><div class="st aff">${affixText(pv)}</div><div class="mats">${costChips(cost, p)}</div></div>
+      <button class="${can ? 'primary' : 'disabled'}" data-act="craftForged" data-d="${dd.id}" data-g="${g.id}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div>`; }).join('')}</div>
+    <p class="fine">Treasures found only in its chests: ${dg.found.map((g) => `<b>${escapeHTML(g.name)}</b>${found[g.id] ? ' (found)' : ''}`).join(' · ')}</p>` : '';
   return `
     <div class="bpicks">${picks}</div>
     <div class="card craftSet" style="--mc:${hex6(b.color)}"><h4>${b.set} set · ${BIOMES[bi].name}</h4>
@@ -14145,6 +14323,7 @@ function craftTabHTML(p) {
       <div class="mats">${matChip(b.ore, null, p)}${matChip(b.part, null, p)}${matChip(b.core, null, p)}${matChip(C.titan.id, null, p)}</div>
     </div>
     <div class="list">${rows}</div>
+    ${forged}
     <div class="card secret"><h4>Hidden in ${BIOMES[bi].name} dungeons</h4>
       <p>${hero ? (heroHave ? `<b>${hero.name}</b> fights for you.` : `<b>${hero.name}</b> cannot be recruited any other way. Their oaths drop from this biome’s dungeon chests (Sanctums and Trials more often, higher keys more): <b>${sigilHave(b.hero, p)}/${C.sigil.need}</b>.`) : ''}</p>
       <p>Relic: <b>${b.relic.name}</b> ${rarityChip(b.relic.rarity)} · a rare chest find here (twice as likely in the Sanctum, certain after ${C.relic.pity} chests without one) · found ${relicN}×</p></div>`;
@@ -14539,7 +14718,7 @@ function openDungeonChest() {
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
     ${r.radiant ? `<h2 class="center">RADIANT</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
-    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}${craftChestHTML(r.craft)}
+    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}${typeof treasureHTML === 'function' ? treasureHTML(r.treasure) : ''}${craftChestHTML(r.craft)}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
 function openRiftResult(r) {
@@ -14685,6 +14864,7 @@ function handlePanelClick(e) {
     case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast(matCount(runeId()) < enchantRunes(G.profile.gear[b.dataset.slot] || { rarity: 'common' }) ? 'Not enough Rune Shards' : 'Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
     case 'craftPiece': if (craftSetPiece(+b.dataset.b, b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
+    case 'craftForged': if (craftForged(b.dataset.d, b.dataset.g)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
     case 'buyUpg': if (buyUpgrade(b.dataset.id)) Sfx.play('unlock'); openSmith('Masterwork'); break;
     case 'queue': queueArena(); break;
     case 'hub': UI.close(); leaveArena(); break;
@@ -14992,6 +15172,10 @@ function processEvents() {
       case 'delveCurse': showToast('Cursed: your health is capped, the final chest is richer', 'bad'); burst(e.x, 1, e.z, 30, 0x9b3dff, 4, 0.9, 0.4, -1, 2); Sfx.play('lose'); break;
       case 'delveHeal': showToast('The moonwell restores you', 'good'); burst(e.x, 1, e.z, 30, 0x9fe8ff, 4, 0.9, 0.4, -1, 2); Sfx.play('level'); break;
       case 'delveRevived': showToast(`You pulled ${e.who || 'your ally'} back up!`, 'good'); ringFx(e.x, e.z, 2.5, 0x6cff8a, 0.8); break;
+      case 'delveDodge': showToast(`Perfect dodge · super +${Math.round(CFG.delve.skill.dodgeSuper * 100)}%`, 'good', 1.2); burst(e.x, 1.1, e.z, 14, 0x9fe8ff, 4, 0.6, 0.3, 3, 1.5); Sfx.play('pickup'); break;
+      case 'delveFlawless': showToast(`Flawless ${e.boss ? 'boss' : 'hall'}! +${fmtK(e.gold)} gold`, 'good'); Sfx.play('coin'); break;
+      case 'delveUnique': G.slowT = 1; Sfx.play('radiant'); showBanner('Dungeon treasure!', `${escapeHTML(e.name)} · only from ${escapeHTML(e.where)}`, 'gold'); break;
+      case 'delveOath': showToast(`Oath of ${escapeHTML(e.name)} · ${e.have}/${e.need}`, 'good'); break;
       case 'delveSet': G.slowT = 1; Sfx.play('radiant'); showBanner('Set piece!', `${escapeHTML(e.name)} · ${escapeHTML(e.set)} set`, 'gold'); break;
       case 'dungeonAdds': ringFx(e.x, e.z, 4, 0xff5d8f, 0.8); showToast('The boss calls for help!', 'bad'); break;
       case 'dungeonBoss': Feed.remove('dungeon'); Feed.remove('dlvEvent'); showBanner(`${e.name} cleared!`, `${Math.floor(e.secs / 60)}:${String(e.secs % 60).padStart(2, '0')} · ${!e.key ? '' : e.up ? `beat par: key +${e.up} → Tier ${e.key} · ` : `Tier ${e.key} key · `}open the chest`, 'gold'); Sfx.play('win'); burst(e.x, 1, e.z, 30, 0xffc94a, 6, 0.9, 0.3, 3, 1.5); break;
@@ -17589,12 +17773,30 @@ function partyAction(act, b) {
   if (UI.current === 'delve') openDelvePanel();
 }
 // the boss chest of a party dungeon (each player's own roll)
+// the treasure a dungeon chest rolled (gear, ore or a hero), shared by both chest screens
+function treasureHTML(t) {
+  if (!t) return '';
+  const head = (w) => `<div class="cbonus${t.kind === 'hero' ? ' hero' : ''}"><b>${w}</b>${t.kind === 'gear' ? 'Gear treasure' : t.kind === 'ore' ? 'Ore treasure' : 'Hero treasure'}</div>`;
+  if (t.kind === 'hero') return head('HERO!') + (t.hero ? `<p class="say center"><b>${escapeHTML(t.hero.name)}</b> joins you</p>` : t.oath ? `<p class="say center">+${t.oath.n} oaths of <b>${escapeHTML(t.oath.name)}</b> · ${t.oath.have}/${t.oath.need}${t.oath.have >= t.oath.need ? ' · they join you!' : ''}</p>` : '');
+  if (t.kind === 'ore') return head('ORE') + `<div class="cbonus mats">${(t.mats || []).map(([id, n]) => matChip(id, null, G.profile).replace(/<b>.*?<\/b>/, `<b>+${n}</b>`)).join('')}</div>`;
+  const uq = t.unique ? `<h2 class="center">Dungeon treasure!</h2><div class="list">${itemRow(t.unique, '', `Treasure · only from ${escapeHTML(delveDef(t.unique.dq).name)}`)}</div>` : '';
+  return head('GEAR') + uq + (t.items.length ? `<div class="list">${t.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('')}</div>` : '');
+}
+// the run's grade: the letter, then hits per hall, Perfect Dodges and Flawless halls
+function gradeHTML(g) {
+  if (!g) return '';
+  const what = [g.items ? `+${g.items} item${g.items > 1 ? 's' : ''}` : '', g.rar ? 'rarity up' : '', g.gold > 1 ? `+${Math.round((g.gold - 1) * 100)}% gold` : ''].filter(Boolean).join(' · ');
+  return `<div class="dgrade" style="--gc:${g.col}"><b class="dgL">${g.g}</b><div><div class="dgT">Grade ${g.g}${what ? ` · ${what}` : ''}</div>
+    <div class="dgS">${g.per} hits per hall · ${g.dodges} perfect dodges · ${g.flawless} flawless${g.falls ? ` · ${g.falls} fall${g.falls > 1 ? 's' : ''}` : ''}</div></div></div>`;
+}
 function openDelveChest(r) {
   if (!r) return; UI.current = 'dungeonChest'; Sfx.play('win');
   const rows = r.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('');
   const set = r.set.map((it) => itemRow(it, '', `${escapeHTML(delveDef(it.dset).set.name)} set · only from ${escapeHTML(r.name)}`)).join('');
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} · ${escapeHTML(r.diff)}</div><h2>${r.full ? 'Dungeon chest' : 'Hidden cache'}</h2></div>
+    ${gradeHTML(r.grade)}
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems || 0}</b><span>Gems</span></div></div>
+    ${treasureHTML(r.treasure)}
     ${set ? `<h2 class="center">Set piece!</h2><div class="list">${set}</div>` : ''}${r.weekly ? '<p class="say">Weekly first clear: a sure set piece.</p>' : ''}
     ${rows ? `<div class="list">${rows}</div>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Inventory.</p>' : ''}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
