@@ -199,7 +199,8 @@ function autoHuntNode(f, level, maxD) {
   }
   return best;
 }
-function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && !G.siege && G.started); }
+// never in dungeons (Casper, 25 Oct): only the open world, not the Rift, the fort or any dungeon / party dungeon
+function autoHuntOn() { const p = G.profile; return !!(p && p.settings.autoHunt && G.mode === 'hub' && !G.rift && !G.siege && !G.dungeon && G.started); }
 function autoHuntIntent(f, it, manual, dt) {
   if (manual) { AH.manualT = 1.5; return; }
   if ((AH.manualT -= dt) > 0 || !f.alive) return;

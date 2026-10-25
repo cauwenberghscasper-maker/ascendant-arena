@@ -219,4 +219,10 @@ check('Radiant: 1 in 500 base, kill chain raises it to at most x4; the drop is a
   S.sig = T.sigilCost - 1; assert.equal(c.forgeTrialRelic(zi), null);
   S.sig = T.sigilCost + 3; const it = c.forgeTrialRelic(zi); assert.equal(it.rarity, 'mythic'); assert.equal(S.sig, 3); assert(it.name.startsWith(tp.landmark));
 });
+check('Auto Hunt never runs inside a dungeon, the Rift or the fort (Casper, 25 Oct)', () => {
+  const src = html.match(/function autoHuntOn\(\) \{[^\n]*\}/)[0], ctx = { G: null }; vm.createContext(ctx); vm.runInContext(src + '\nthis.autoHuntOn = autoHuntOn;', ctx);
+  const base = { profile: { settings: { autoHunt: true } }, mode: 'hub', started: true };
+  ctx.G = { ...base }; assert.equal(ctx.autoHuntOn(), true, 'on in the open world');
+  for (const k of ['dungeon', 'rift', 'siege']) { ctx.G = { ...base, [k]: {} }; assert.equal(ctx.autoHuntOn(), false, 'off in ' + k); }
+});
 console.log(`${passed} dungeon checks passed.`);

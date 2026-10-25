@@ -220,7 +220,7 @@ function updateHUD(dt) {
   if (G.started && !inArena) {
     const nc = G.profile.cases.length; setHidden('caseChip', !nc); if (nc) setText('caseChip', String(nc));
     UI.caseFlash = Math.max(0, (UI.caseFlash || 0) - dt); $('caseChip').classList.toggle('flash', UI.caseFlash > 0);
-    setHidden('autoChip', G.mode !== 'hub' || !!G.rift || !!G.siege); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
+    setHidden('autoChip', G.mode !== 'hub' || !!G.rift || !!G.siege || !!G.dungeon); setText('autoChip', 'AUTO'); $('autoChip').classList.toggle('on', !!G.profile.settings.autoHunt);
     setHidden('fortBuildBtn', !G.siege || !!G.builder);
     { const F = G.siege && fortState(); setHidden('fortChip', !F || !F.go); if (F && F.go) { setText('fortChip', F.hold ? 'WAVES PAUSED' : 'AUTO WAVES'); $('fortChip').classList.toggle('on', !F.hold); } }
     setHidden('pvpChip', G.mode !== 'hub' || inInstance()); setText('pvpChip', G.profile.settings.pvp ? (pvpOffWait() > 0 ? 'FIGHT · ' + pvpOffWait() + 's' : 'FIGHT') : 'NORMAL'); $('pvpChip').classList.toggle('on', !!G.profile.settings.pvp);
