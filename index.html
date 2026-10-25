@@ -2287,7 +2287,7 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .panel .row.lnSides button { min-height: 44px; }
 .tag.obj.foe .tb i { background: var(--hpLow); } .tag.obj.ally .tb i { background: #5dd6ff; }
 /* Lanes: buttons that open with the match level (locked: greyed with the level), and a flash when one opens */
-.cbtn.lnLock { filter: grayscale(1) brightness(.55); pointer-events: none; }
+.cbtn.lnLock { filter: grayscale(1) brightness(.5) !important; opacity: .75; pointer-events: none; }
 .cbtn.lnLock::after { content: attr(data-lv); position: absolute; left: 50%; bottom: -2px; transform: translateX(-50%); padding: 1px 4px; font: 10px/1 var(--body); color: #f2ead2; background: #14111c; box-shadow: 0 0 0 2px var(--og-ink, #0b0c1f); white-space: nowrap; }
 .cbtn.lnNew { animation: lnNew .6s steps(2) 4; }
 @keyframes lnNew { 50% { filter: brightness(1.9) drop-shadow(0 0 8px #ffe08a); } }
@@ -6631,8 +6631,9 @@ function arenaBotThink(b, dt) {
 // ---------------------------------------------------------------------
 const LC = { x: 0, z: -2600 }; // Lanes map centre (arena −1000, rift −1400, dungeon −1800, siege −2200)
 CFG.lanes = {
+  // towers: the outer tower (nearer the middle) first, then the inner one
   unlock: 5, sizes: [1, 2, 3], half: { x: 19, z: 64 }, wide3: 23, // field half-size (3v3 is a little wider)
-  core: 54, towers: [21, 38], // outer tower (nearer the middle) first, inner tower second fountain: 60, fountainR: 6, campX: 15, campZ: 0,
+  core: 54, towers: [21, 38], fountain: 60, fountainR: 6, campX: 15, campZ: 0,
   wave: 22, firstWave: 4, melee: 3, ranged: 2, maxMinions: 40, time: 600, countdown: 3,
   respawn: [6, 1, 18], // base seconds, +per minute, cap
   // stats in units of the match's reference hero (a level-L hero in level-L Rare gear): hp in hero shots, dmg in hero HP
@@ -13693,6 +13694,8 @@ function buildLanesView() {
   // team rings under every minion (they also show the minion while its model is still loading)
   const rg = new THREE.RingGeometry(0.45, 0.68, 20).rotateX(-Math.PI / 2), rm = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.85, depthWrite: false });
   lanesParts.rings = new THREE.InstancedMesh(rg, rm, LN_MIN_POOL * 4); for (let i = 0; i < LN_MIN_POOL * 4; i++) lanesParts.rings.setColorAt(i, _col.set(0xffffff)); lanesParts.rings.count = 0; lanesParts.rings.frustumCulled = false; lanesGroup.add(lanesParts.rings);
+  // a team ring under every building: it reads from the top camera and stands in while the model streams in
+  for (const st of S.structs) { const m = new THREE.Mesh(new THREE.RingGeometry(st.r + 0.2, st.r + 0.7, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: LN_COL[st.team], transparent: true, opacity: 0.7, depthWrite: false })); m.position.set(st.x, 0.04, st.z); lanesGroup.add(m); st.ringMesh = m; }
   // enemy tower reach: a faint red ring that shows when you walk close
   for (const s of S.structs) if (s.sk === 'tower') { const m = new THREE.Mesh(new THREE.RingGeometry(R.tower.range - 0.25, R.tower.range, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: LN_COL[s.team], transparent: true, opacity: 0, depthWrite: false })); m.position.set(s.x, 0.05, s.z); lanesGroup.add(m); lanesParts.reach.push({ s, m }); }
 }
@@ -13713,7 +13716,7 @@ function updateLanesView(dt, t) {
   hubGroup.visible = false;
   lanesParts.t += dt;
   // buildings: a fallen one disappears in a cloud of rubble
-  for (const q of lanesParts.structs) { const dead = !q.s.alive; if (dead !== !!q.it.hidden) { q.it.hidden = dead; q.h.dirty = true; if (dead) burst(q.s.x, 2, q.s.z, 50, 0x6a5a4a, 8, 1.3, 0.5, 4, 2.4); } }
+  for (const q of lanesParts.structs) { if (q.s.ringMesh) q.s.ringMesh.visible = q.s.alive; const dead = !q.s.alive; if (dead !== !!q.it.hidden) { q.it.hidden = dead; q.h.dirty = true; if (dead) burst(q.s.x, 2, q.s.z, 50, 0x6a5a4a, 8, 1.3, 0.5, 4, 2.4); } }
   // minions: alive ones take the pool's slots in order, the rest hide
   const rings = lanesParts.rings; let rn = 0;
   for (const team of LN_TEAMS) for (const mk of ['melee', 'ranged']) {
@@ -13765,12 +13768,12 @@ function drawLanesMinimap(g, W2, H2, dpr) {
 }
 function lanesEvent(e) {
   switch (e.t) {
-    case 'lanesStart': enterLanesView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5;
+    case 'lanesStart': if (!G.lanes || lanesGroup.visible) break; enterLanesView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5;
       SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`Ascendant Lanes · ${e.size}v${e.size}`, `Everyone starts at level 1 · destroy the enemy Core${e.bonus ? ` · your bonus +${e.bonus}%` : ''}`, 'gold'); break;
     case 'lanesFight': Sfx.play('horn'); if (e.ot) showBanner('Overtime', 'Minions grow stronger every minute', 'red'); else showBanner('Fight!', 'Push your lane with the minions', 'gold'); break;
-    case 'lanesLeave': enterLanesView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('lanes'); break;
+    case 'lanesLeave': if (G.lanes) break; enterLanesView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('lanes'); break;
     case 'lanesEnd': if (e.win) { Sfx.play('win'); showBanner('Victory!', e.why === 'time' ? 'More of your base still stands' : 'The enemy Core has fallen', 'gold'); } else { Sfx.play('lose'); showBanner('Defeat', e.why === 'time' ? 'Time is up' : 'Your Core has fallen', 'red'); } break;
-    case 'lanesKill': Feed.add(`${gi('m_arena')} ${e.mine ? `<b>${escapeHTML(e.name)}</b> fell` : `<b>${escapeHTML(e.name)}</b> was defeated`} · Blue ${G.lanes.kills.blue} · ${G.lanes.kills.red} Red`, e.mine ? 'boss' : 'rift', null, 4); break;
+    case 'lanesKill': Feed.add(`${gi('m_arena')} ${e.mine ? `<b>${escapeHTML(e.name)}</b> fell` : `<b>${escapeHTML(e.name)}</b> was defeated`} ${G.lanes ? ` · Blue ${G.lanes.kills.blue} · ${G.lanes.kills.red} Red` : ''}`, e.mine ? 'boss' : 'rift', null, 4); break;
     case 'lanesStructDown': Cam.shake = Math.max(Cam.shake, 0.6); Sfx.play(e.mine ? 'lose' : 'job'); SpriteFX.play('pillar', e.mine ? 'blood' : 'gold', e.x, 0, e.z, 7);
       showBanner(e.sk === 'core' ? (e.mine ? 'Your Core fell' : 'Enemy Core destroyed') : e.mine ? 'We lost a tower' : 'Enemy tower destroyed', '', e.mine ? 'red' : 'gold', 1.8); break;
     case 'lanesBuff': toast(e.mine ? `Guardian's might: +${Math.round(CFG.lanes.camp.buff * 100)}% damage for your team` : 'The enemy took the Lane Guardian', e.mine ? 'good' : 'bad'); break;
