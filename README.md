@@ -316,8 +316,14 @@ checks all 32 bodies, the Panther's three contacts, and all 43 hero models (27 a
 - **Mining:** ore, pickaxe, geodes for the Museum, a 1/10,000 pet.
 - **Daily:** 7-day calendar that never resets, weekly Colossus chest (Journal › Daily; it never opens by itself, the Menu
   button glows while a reward waits).
-- **Idle:** Vault (fills while away), Expeditions (benched heroes fetch loot), Auto Hunt (walks, fights and mines by
-  itself, calmer and weaker than playing yourself: `CFG.autoHunt`), offline rewards.
+- **Idle:** the **Kingdom** (Kingdom & Camp › Kingdom, level 8; the old Bank is its Treasury): buy buildings that fill
+  the Treasury while you play and while you are away, up to its storage hours. Gold makers (Market Stall, Tavern, Trade
+  Guild, Royal Mint) and material makers (Mine, Hunter's Lodge, Gem Cutter, Rune Workshop) open by level; each copy
+  costs 40% more, 25/50/100 copies double a building's output, Cottages house villagers who add 5% each to the
+  building they work in (one per copy, ten at most). Everything is priced in the Bank's gold unit at your level, so
+  it stays in step with Forge prices (`CFG.kingdom`, `71b-kingdom.js`, `tools/check_kingdom.cjs`). Expeditions
+  (benched heroes fetch loot), Auto Hunt (walks, fights and mines by itself, calmer and weaker than playing yourself:
+  `CFG.autoHunt`), offline rewards.
 - **Pets and prestige companions:** world bonuses only, never in the arena.
 - **Multiplayer:** shared open world (one Supabase Realtime lobby), shared monsters and world bosses, opt-in PvP.
 - **Saves:** local cache plus cloud save (Supabase). ×100 test mode (`?test=100`) for testing late content.
@@ -477,7 +483,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Dungeons, keys, Legendary Trials / Mining, Museum / Daily, Colossus / Crafting / Lair bosses / PvP | `36-dungeon.js` / `37-mining.js` / `38-daily.js` / `39-crafting.js` / `39b-lair-bosses.js` / `72-pvp.js` |
 | Open world: Warden Gates, danger warning, routes through passes, the Main Path quest (`CFG.openWorld`) | `src/game/39d-open-world.js`; layout (area squares, passes, roads, walls, POI placement) in `11-world-data.js`; walls, gates, skull posts and the quest beacon in `44-world-view.js`; check `tools/check_open_world.cjs` |
 | Items, rarities, merge, salvage, forge | `src/game/21-items.js`; inventory and loot rolls: `32-progression.js` |
-| Cases, Vault, Expeditions, Auto Hunt | `src/game/71-cases-idle.js`; named collection drops: `assets/data/loot-collection.js` |
+| Cases, Vault (Treasury), Expeditions, Auto Hunt / the Kingdom's buildings and villagers | `src/game/71-cases-idle.js` / `71b-kingdom.js` (`CFG.kingdom`); named collection drops: `assets/data/loot-collection.js` |
 | Pets, prestige | `assets/data/companions.js`, `assets/data/prestige.js`; pet models: `assets/art/pet-companions.js` |
 | Save format and migrations | `src/game/22-profile.js` (`defaultProfile`, `sanitizeProfile`) |
 | Cloud save (Supabase) | `src/game/81-cloud-save.js` |

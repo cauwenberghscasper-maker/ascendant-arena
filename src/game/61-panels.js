@@ -24,7 +24,7 @@ function interact() {
 }
 // Systems open slowly with level: a locked button shows its level; a newly opened one glows until you tap it
 const UNLOCK_AT = { mArtifacts: 2, mDaily: 2, mSmith: 3, mCollection: 4, mSkills: 5, Forge: 6, mIdle: 8, mBrawlers: 9, Masterwork: 10, mArena: 10, Enchant: 12, mDelve: CFG.delve.unlock, Craft: 15 };
-const UNLOCK_NAME = { mArtifacts: 'Relics', mDaily: 'Daily rewards', mSmith: 'Forge', mCollection: 'Collection Log', mSkills: 'Talents', Forge: 'Forge › Buy gear', mIdle: 'Bank & Camp',
+const UNLOCK_NAME = { mArtifacts: 'Relics', mDaily: 'Daily rewards', mSmith: 'Forge', mCollection: 'Collection Log', mSkills: 'Talents', Forge: 'Forge › Buy gear', mIdle: 'Kingdom & Camp',
   mBrawlers: 'Heroes', Masterwork: 'Forge › Masterwork', mArena: 'Showdown', mDelve: 'Dungeons', Enchant: 'Forge › Enchant', Craft: 'Forge › Craft' };
 const unlockOpen = (k) => !G.profile || G.profile.level >= (UNLOCK_AT[k] || 0);
 const unlockNew = (k) => !!UNLOCK_AT[k] && unlockOpen(k) && !(G.profile.uiSeen || {})[k];
@@ -208,7 +208,7 @@ function statLine(it) {
 }
 function perkLine(it) { const t = perkText(it); return t ? `<div class="perk">${t}</div>` : ''; }
 // RuneScape-style display names for tabs whose keys stay the same in code
-const TAB_NAME = { Mining: 'Mining & Museum', Gear: 'Inventory', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Bank', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
+const TAB_NAME = { Mining: 'Mining & Museum', Gear: 'Inventory', Road: 'Level Road', Records: 'Hiscores', Feats: 'Achievements', Vault: 'Kingdom', Upgrade: 'Reforge', Gems: 'Gem trade', Equip: 'Socket', 'Auto Hunt': 'Auto-hunt' };
 const tabName = (t) => TAB_NAME[t] || t;
 const wearWord = (slot) => (slot === 'weapon' ? 'Wield' : 'Wear');
 const SLOT_LABEL = { weapon: 'Weapon', helmet: 'Helmet', chest: 'Armor', boots: 'Boots', accessory: 'Accessory' };
@@ -893,6 +893,10 @@ function handlePanelClick(e) {
     case 'pickUp': if (upgradePick()) { Sfx.play('unlock'); openIdle('Mining'); } break;
     case 'vaultCollect': if (collectVault()) openIdle('Vault'); break;
     case 'vaultUp': if (upgradeVault()) openIdle('Vault'); break;
+    case 'kBuy': if (buyBuilding(b.dataset.id, UI.kAmt || 1)) { Sfx.play('coin'); openIdle('Vault'); } break;
+    case 'kAmt': UI.kAmt = b.dataset.n === 'max' ? 'max' : +b.dataset.n; openIdle('Vault'); break;
+    case 'kVil': if (assignVillager(b.dataset.id, +b.dataset.d)) openIdle('Vault'); break;
+    case 'kAuto': if (autoAssign()) { Sfx.play('unlock'); openIdle('Vault'); } break;
     case 'expGo': { const sel = $('expB'); if (sel && startExped(sel.value, +b.dataset.d)) openIdle('Expeditions'); break; }
     case 'expClaim': if (claimExped(+b.dataset.i)) openIdle('Expeditions'); break;
     case 'mArena': openArenaPanel(); break;

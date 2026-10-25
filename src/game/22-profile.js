@@ -81,6 +81,10 @@ function sanitizeProfile(p) {
   if (!Array.isArray(out.cases)) out.cases = [];
   if (!Array.isArray(out.exp)) out.exp = [];
   if (!out.vault || typeof out.vault !== 'object' || !out.vault.t) out.vault = { t: Date.now(), lv: (out.vault && out.vault.lv) || 0 };
+  // the Kingdom (71b-kingdom.js): copies owned and villagers per building, the uncollected pile and when it was last brought up to date
+  { const o = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {}), k = o(out.kingdom), cnt = (m) => { const r = {}; for (const id in o(m)) { const n = Math.floor(+m[id]); if (n > 0 && n < 1e6) r[id] = n; } return r; };
+    const pos = (x) => (Number.isFinite(+x) && +x > 0 ? +x : 0), acc = o(k.acc), mats = {}; for (const id in o(acc.mats)) if (pos(acc.mats[id])) mats[id] = pos(acc.mats[id]);
+    out.kingdom = { b: cnt(k.b), w: cnt(k.w), acc: { gold: pos(acc.gold), gems: pos(acc.gems), rune: pos(acc.rune), mats }, at: pos(k.at) || out.vault.t }; }
   if (!out.caseLuck) out.caseLuck = { legendary: 0, mythic: 0 };
 
   if (!Array.isArray(out.waypoints)) out.waypoints = [0];
