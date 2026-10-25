@@ -2208,14 +2208,14 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 #panel p.fine, #panel p.say { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
 #panel p.fine.open, #panel p.say.open { -webkit-line-clamp: unset; display: block; }
 
-/* Pages are only as tall as their content (Casper, 22 Oct: no big empty pages): a short page sits at the bottom like a
+/* (old rule, 22 Oct) a short page sat at the bottom like a
    sheet over the dimmed game, a long one still fills the screen and scrolls. Its close button then sits in its own corner. */
 #modal.full { place-items: end stretch; background: rgba(8, 9, 22, .62); }
 #modal.full .panel { height: auto; max-height: 100% !important; }
 #modal.full.fits .panel > .x { position: absolute !important; top: 12px !important; right: 12px !important; }
 #modal.full .hubTiles { min-height: 0; grid-template-rows: none; }
 #modal.full .panel .hubTile { min-height: 150px; }
-/* the talent tree, the world map and travel always fill the whole screen (Casper, 24 Oct) */
+/* every page inside a menu fills the whole screen, short or not (Casper, 25 Oct); popups keep fitting their content */
 #modal.full.tall .panel { height: 100%; }
 
 /* World map v11 (open world): the area squares as they lie round Base Camp, gates on their borders */
@@ -13973,7 +13973,7 @@ function hubNav() {
   const sub = (HUB_SUB[hub] || []).map(([k, n, act]) => `<button class="tab ${k === UI.current ? 'on' : ''}${gate(act)}" data-act="${act}">${lockLabel(act, n)}</button>`).join('');
   return `<div class="hubTop"><button class="ghost hubBack" data-act="mMenu" aria-label="Back to the menu">Menu</button>${sub ? `<div class="tabs hubSub">${sub}</div>` : ''}</div>`;
 }
-// pages that always take the whole screen (a canvas or map to pan around); every other page is only as tall as its content
+// every page inside a menu fills the whole screen (Casper, 25 Oct); popups (anything that is not a menu page) only fit their content
 const FULL_PAGES = new Set(['skills', 'worldmap', 'waypoints', 'reel']);
 function openModal(html, closable, showcase) {
   G.modal = true; UI.closable = closable !== false;
@@ -13985,8 +13985,9 @@ function openModal(html, closable, showcase) {
   setShowcase(!!showcase);
   $('modal').classList.toggle('room', !!showcase);
   // every hub screen except the Hero (3D showcase) fills the whole page
-  $('modal').classList.toggle('full', !showcase && (UI.current === 'hubs' || UI.current === 'reel' || UI.current === 'worldmap' || UI.current === 'waypoints' || !!HUB_OF[UI.current]));
-  $('modal').classList.toggle('tall', FULL_PAGES.has(UI.current)); // these always fill the screen, short or not
+  const menuPage = !showcase && (UI.current === 'hubs' || FULL_PAGES.has(UI.current) || !!HUB_OF[UI.current]);
+  $('modal').classList.toggle('full', menuPage);
+  $('modal').classList.toggle('tall', menuPage); // menu pages always fill the screen, short or not
   if (!showcase) UI.sheetFull = false;
   $('modal').classList.toggle('sheetFull', !!showcase && !!UI.sheetFull);
   const full = hubNav() + html + (UI.closable ? '<button class="x" data-act="close" aria-label="Close">×</button>' : '');

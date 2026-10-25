@@ -101,9 +101,9 @@ The game is played on phones. Every change must work there.
 - **No walls of text in tabs** (Casper, 22 Oct). A tab shows pictures, numbers and a word or two per card; never an
   explanation paragraph or a long list. Any `p.fine` / `p.say` note shows one line and opens on tap (`ui-v2.css`),
   so keep its first words meaningful. Nothing opens by itself in the player's face (no auto popups at startup):
-  waiting rewards light a dot or a glow on the button instead. Pages are only as tall as their content: a short page
-  sits at the bottom over the dimmed game, never a full screen with empty space below. Exception: the talent tree,
-  world map, travel and chest reel always fill the screen (`FULL_PAGES` in `61-panels.js`).
+  waiting rewards light a dot or a glow on the button instead. Every page inside a menu (hub pages and their
+  sub-tabs, the talent tree, world map, travel, chest reel) fills the whole screen, short or not (Casper, 25 Oct);
+  popups (confirmations, item inspect, rewards) only fit their content (`openModal` in `61-panels.js`).
 - Menus are pages with a Menu/back button and sub-tabs. New screens follow the existing hub layout
   (Hero / Forge / Gear / Journal).
 - `src/css/ui-v2.css` is loaded last and holds the current look. Add new UI styling there (or next to its feature),
