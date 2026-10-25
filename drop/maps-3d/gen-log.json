@@ -1,0 +1,96 @@
+{
+ "batch": "maps-3d",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "tile_forest_d7",
+   "ok": true,
+   "file": "tile_forest_d7.webp",
+   "sec": 8.9
+  },
+  {
+   "name": "tile_forest_d59",
+   "ok": true,
+   "file": "tile_forest_d59.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "tile_sand_d7",
+   "ok": true,
+   "file": "tile_sand_d7.webp",
+   "sec": 5.6
+  },
+  {
+   "name": "tile_sand_d59",
+   "ok": true,
+   "file": "tile_sand_d59.webp",
+   "sec": 15.7
+  },
+  {
+   "name": "tile_lanes_grass_d7",
+   "ok": true,
+   "file": "tile_lanes_grass_d7.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "tile_lanes_grass_d59",
+   "ok": true,
+   "file": "tile_lanes_grass_d59.webp",
+   "sec": 6.9
+  },
+  {
+   "name": "lanes_altar",
+   "ok": true,
+   "file": "lanes_altar.glb",
+   "sec": 49.4
+  },
+  {
+   "name": "lanes_spawn",
+   "ok": true,
+   "file": "lanes_spawn.glb",
+   "sec": 25.1
+  },
+  {
+   "name": "lanes_statue",
+   "ok": true,
+   "file": "lanes_statue.glb",
+   "sec": 17.7
+  },
+  {
+   "name": "lanes_tree",
+   "ok": true,
+   "file": "lanes_tree.glb",
+   "sec": 40.1
+  },
+  {
+   "name": "lanes_wall",
+   "ok": true,
+   "file": "lanes_wall.glb",
+   "sec": 20.4
+  },
+  {
+   "name": "rift_floor",
+   "ok": true,
+   "file": "rift_floor.glb",
+   "sec": 34.0
+  },
+  {
+   "name": "rift_gate",
+   "ok": true,
+   "file": "rift_gate.glb",
+   "sec": 53.4
+  },
+  {
+   "name": "rift_pylon",
+   "ok": true,
+   "file": "rift_pylon.glb",
+   "sec": 14.9
+  },
+  {
+   "name": "rift_shard",
+   "ok": true,
+   "file": "rift_shard.glb",
+   "sec": 24.3
+  }
+ ]
+}
