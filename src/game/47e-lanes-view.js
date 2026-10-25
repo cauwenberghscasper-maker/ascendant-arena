@@ -95,8 +95,8 @@ function updateLanesView(dt, t) {
 function lanesTags(put, near) {
   const S = G.lanes, my = G.player.team;
   for (const s of S.structs) if (s.alive && near(s, 60)) { const sh = lanesShielded(s); put(s.x, s.sk === 'core' ? 6.8 : 9, s.z, `${s.sk === 'core' ? 'Core' : 'Tower'}${sh ? ' · shielded' : ''}`, s.hp / s.maxHp, `obj${s.sk === 'core' ? ' main' : ''}${s.hurtT > 0 ? ' hurt' : ''}${s.team === my ? ' ally' : ' foe'}`); }
-  for (const f of S.fighters) if (!f.isPlayer && f.alive && near(f, 40)) put(f.x, 2.5 * growthScale(f), f.z, `${f.nick || f.name}${f.lanesBot ? ' · bot' : ''}`, f.hp / f.maxHp, f.team === my ? 'peer' : 'foe arena');
-  for (const e of lanesMpPeers()) if (e.alive && near(e, 40)) put(e.x, 2.5 * growthScale(e), e.z, `${e.nick} · ${e.level}`, e.hp, e.team === my ? 'peer' : 'foe arena');
+  for (const f of S.fighters) if (!f.isPlayer && f.alive && near(f, 40)) put(f.x, 2.5 * growthScale(f), f.z, `${f.nick || f.name} · Lv ${f.lnLvl || 1}${f.lanesBot ? ' · bot' : ''}`, f.hp / f.maxHp, f.team === my ? 'peer' : 'foe arena');
+  for (const e of lanesMpPeers()) if (e.alive && near(e, 40)) put(e.x, 2.5 * growthScale(e), e.z, `${e.nick} · Lv ${e.lv || 1}`, e.hp, e.team === my ? 'peer' : 'foe arena');
   for (const m of S.minions) if (m.alive && m.hp < m.maxHp && near(m, 24)) put(m.x, m.mk === 'ranged' ? 2.4 : 2.1, m.z, '', m.hp / m.maxHp, m.team === my ? 'peer' : 'foe arena');
   for (const c of S.camps) if (c.alive && near(c, 30)) put(c.x, 3, c.z, `Lane Guardian · ${Math.round(CFG.lanes.camp.buff * 100)}% damage`, c.hp / c.maxHp, 'mob elite');
 }

@@ -167,7 +167,7 @@ function lanesMirror(P) {
     m.sx = x; m.sz = z; m.sf = mpNum(r[6], 0) / 100; if (r[7]) m.attackAnim = 1;
     if (f * m.maxHp < m.hp - 1) m.flashT = 0.1; m.hp = Math.max(1, f * m.maxHp);
   }
-  for (const m of S.minions) if (m.alive && m.hid != null && !seen.has(m.hid)) { m.alive = false; m.deadAt = G.time; ev({ t: 'die', x: m.x, z: m.z, kind: 'minion' }); G.ents.delete(m.id); }
+  for (const m of S.minions) if (m.alive && m.hid != null && !seen.has(m.hid)) { m.alive = false; m.deadAt = G.time; lanesShareXp(lanesEnemy(m.team), m.x, m.z, m.mk === 'ranged' ? CFG.lanes.xp.ranged : CFG.lanes.xp.melee); ev({ t: 'die', x: m.x, z: m.z, kind: 'minion' }); G.ents.delete(m.id); }
   S.minions = S.minions.filter((m) => m.alive || G.time - m.deadAt < 2);
   for (const r of Array.isArray(P.b) ? P.b : []) {
     if (!Array.isArray(r) || r.length < 9 || typeof r[0] !== 'string') continue;

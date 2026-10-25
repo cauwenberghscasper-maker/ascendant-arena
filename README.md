@@ -285,10 +285,12 @@ checks all 32 bodies, the Panther's three contacts, and all 43 hero models (27 a
 - **Forge (Garo):** Reforge, Masterwork ranks, Craft (biome ore + monster parts + dungeon cores + Titan Souls;
   5-piece sets with glowing set auras), Forge shop, Enchant.
 - **Showdown arena:** 10 fighters vs bots, closing gas, power cubes, trophies. **The Rift.**
-- **Ascendant Lanes** (Journal, level 10): a small MOBA, 1v1 / 2v2 / 3v3 with your own hero as built. One lane between
-  two bases (a Core and two towers each), minion waves, Lane Guardian camps in 2v2/3v3, bots fill empty places. Party
-  code (Together or Versus) or quick match per level bracket; rank points and a play-earned chest. Level matching hooks:
-  `lanesRating`, `CFG.lanes.brackets`, `CFG.lanes.normalize`.
+- **Ascendant Lanes** (the main mode: PLAY on the title from level 5, Farm World beside it; `CFG.lanes.mainMode`): a
+  small MOBA, 1v1 / 2v2 / 3v3 with your own hero. Everyone starts each match at level 1 and levels to 18 (skill at 3,
+  special at 5, super at 6), all on one shared build plus a gear bonus capped at 12%. One lane between two bases (a Core
+  and two towers each), minion waves, Lane Guardian camps in 2v2/3v3, Overtime from 4:00, bots fill empty places.
+  Party code (Together or Versus) or quick match by trophies; trophies and a play-earned chest. Lanes gear (Relic,
+  Charm, Banner, ranks 1-5) is crafted at the Forge from farm materials and only works in matches.
 - **Bastion Siege** (level 20, the Bastion house west of the plaza): endless waves from 1-4 random sides attack The
   Keep and two wagons, Clash of Clans meets Balloons TD. Build in builder mode (the Build button: the field from above
   with its grid, pan and pinch-zoom, a shop with tabs (Defences, Resources, Walls, Traps) whose strip you swipe sideways; drag a building up out of it and its see-through
@@ -499,7 +501,7 @@ The game is one shared script cut into files by system. `node tools/build.cjs` j
 | Cloud save (Supabase) | `src/game/81-cloud-save.js` |
 | Combat, projectiles, damage | `src/game/31-combat.js` |
 | Arena (Showdown), Rift | `src/game/34-arena.js`, `33-world-sim.js` |
-| Ascendant Lanes (MOBA mode): match, minions, towers, bots, rating (`CFG.lanes`) / field and models / online, lobby, results | `src/game/34b-lanes.js` / `47e-lanes-view.js` / `76-lanes-mp.js`; models `assets/world/lanes_*`; check `tools/check_lanes.cjs`; notes `docs/log/2026-10-25-lanes-mode.md` |
+| Ascendant Lanes (main mode): match, levels and unlocks, minions, towers, bots, trophies (`CFG.lanes`) / Lanes gear (`CFG.lanesGear`) / field and models / title, online, lobby, results | `src/game/34b-lanes.js` / `34c-lanes-gear.js` / `47e-lanes-view.js` / `76-lanes-mp.js`; models `assets/world/lanes_*`; check `tools/check_lanes.cjs`; notes `docs/log/2026-10-25-lanes-mode.md` |
 | Dungeon mode (party dungeons): dungeons, difficulties, power gate, rooms, events, loot, set bonuses | `src/game/36b-delve.js` (`CFG.delve`); event-room props: `47b-delve-view.js`; parties, random match, the Dungeons panel and HUD: `73-party.js`; bots that fill a party up to four: `36d-delve-bots.js` (`CFG.delve.bots`); boss attack kits per phase: `36e-delve-boss.js` (`CFG.delve.bossKit`); banners `assets/ui/delve/`, set pieces `assets/world/delve_*` |
 | Bastion Siege (tower defense from the Bastion house in town): the grid, building, walls and pathing, waves and sides, objectives, builders, the permanent fort save | `src/game/36c-siege.js` (`CFG.siege`); looks: `47c-siege-view.js`; builder mode: `75-siege-builder.js`; menu pictures: `tools/fort_icons.mjs` + `.py` → `assets/ui/fort/`; save: `profile.fort` via `sanitizeFort` in `22-profile.js`; shared worlds (codes, host, sync): `74-siege-mp.js` + `supabase/bastion_worlds.sql`; checks: `tools/check_siege.cjs` |
 | Multiplayer lobby (Supabase Realtime), future partitioning (`mpRoomKey`) | `src/game/70-multiplayer.js`; notes in `docs/UNFINISHED.md` |

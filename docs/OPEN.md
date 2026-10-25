@@ -45,8 +45,8 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [ ] More painted ground tiles per area (darker forest floor, sand, marble).
 
 ## Game
-- [ ] Ascendant Lanes (PR #56, `docs/log/2026-10-25-lanes-mode.md`): test party/Versus/quick match on two phones, tune
-      match length (`CFG.lanes`), finish level matching (wider bracket search by rating, server queue), own pixel icon.
+- [ ] Ascendant Lanes, the main mode (PR #56, `docs/log/2026-10-25-lanes-mode.md`): party/Versus/trophy quick match on
+      two phones, match length and XP pace (`CFG.lanes`), level-9 upgrade choice, pictures/icons for the 10 Lanes gear pieces.
 - [ ] Open world map (PR #51, `docs/log/2026-10-25-open-world-map.md`): merge after review; check FPS near area walls on a phone, tune `CFG.openWorld` (warden HP, kills per step, danger gap) and maybe `AREA_CELL`.
 - [x] Dungeon treasures have a recipe: the Dungeon forge crafts two pieces per dungeon from its gem (25 Oct, `docs/log/2026-10-25-dungeon-skill-loot.md`). Secret weapons (one recipe per biome from chest ore + a Titan Soul) still open.
 - [ ] Dungeons: judge the skill tuning (monster hp 1.05 / dmg 1.3, grade thresholds) and the boss chest hero share on a real phone; painted icons for the 24 dungeon pieces; a hit counter on the dungeon HUD (PR #55).
