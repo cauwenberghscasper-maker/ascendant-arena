@@ -1,0 +1,198 @@
+{
+ "batch": "maps-c",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "lanes_wall_c23",
+   "ok": true,
+   "file": "lanes_wall_c23.webp",
+   "sec": 7.0
+  },
+  {
+   "name": "lanes_wall_c41",
+   "ok": true,
+   "file": "lanes_wall_c41.webp",
+   "sec": 6.1
+  },
+  {
+   "name": "lanes_spawn_c23",
+   "ok": true,
+   "file": "lanes_spawn_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "lanes_spawn_c41",
+   "ok": true,
+   "file": "lanes_spawn_c41.webp",
+   "sec": 9.3
+  },
+  {
+   "name": "lanes_altar_c23",
+   "ok": true,
+   "file": "lanes_altar_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "lanes_altar_c41",
+   "ok": true,
+   "file": "lanes_altar_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_statue_c23",
+   "ok": true,
+   "file": "lanes_statue_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lanes_statue_c41",
+   "ok": true,
+   "file": "lanes_statue_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lanes_tree_c23",
+   "ok": true,
+   "file": "lanes_tree_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_tree_c41",
+   "ok": true,
+   "file": "lanes_tree_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "rift_gate_c23",
+   "ok": true,
+   "file": "rift_gate_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "rift_gate_c41",
+   "ok": true,
+   "file": "rift_gate_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "rift_pylon_c23",
+   "ok": true,
+   "file": "rift_pylon_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "rift_pylon_c41",
+   "ok": true,
+   "file": "rift_pylon_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "rift_floor_c23",
+   "ok": true,
+   "file": "rift_floor_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "rift_floor_c41",
+   "ok": true,
+   "file": "rift_floor_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "rift_shard_c23",
+   "ok": true,
+   "file": "rift_shard_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "rift_shard_c41",
+   "ok": true,
+   "file": "rift_shard_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "tile_lanes_grass_c23",
+   "ok": true,
+   "file": "tile_lanes_grass_c23.webp",
+   "sec": 10.7
+  },
+  {
+   "name": "tile_lanes_grass_c41",
+   "ok": true,
+   "file": "tile_lanes_grass_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "tile_lanes_path_c23",
+   "ok": true,
+   "file": "tile_lanes_path_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "tile_lanes_path_c41",
+   "ok": true,
+   "file": "tile_lanes_path_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "tile_rift_c23",
+   "ok": true,
+   "file": "tile_rift_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "tile_rift_c41",
+   "ok": true,
+   "file": "tile_rift_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "tile_forest_c23",
+   "ok": true,
+   "file": "tile_forest_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "tile_forest_c41",
+   "ok": true,
+   "file": "tile_forest_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "tile_sand_c23",
+   "ok": true,
+   "file": "tile_sand_c23.webp",
+   "sec": 6.2
+  },
+  {
+   "name": "tile_sand_c41",
+   "ok": true,
+   "file": "tile_sand_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "tile_marble_c23",
+   "ok": true,
+   "file": "tile_marble_c23.webp",
+   "sec": 8.5
+  },
+  {
+   "name": "tile_marble_c41",
+   "ok": true,
+   "file": "tile_marble_c41.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "tile_lava_c23",
+   "ok": true,
+   "file": "tile_lava_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "tile_lava_c41",
+   "ok": true,
+   "file": "tile_lava_c41.webp",
+   "sec": 6.0
+  }
+ ]
+}
