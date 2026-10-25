@@ -377,6 +377,13 @@ function buildHub() {
   const townMesh = new THREE.Mesh(mergeParts(tParts), worldArt.material); townMesh.castShadow = true; townMesh.receiveShadow = true; hubGroup.add(townMesh);
   // per-area art: gate trims, lair ring, skyline and this area's points of interest (their colliders join the grid first)
   W.zones.forEach((zn, zi) => { for (const o of worldArt.zoneLandmarks(hubGroup, W, zi, REGION_ART[zn.theme])) grid.add(o); });
+  // a model's footprint (box half-sizes hx, hz before rotation ry) as a row of circles along its long side
+  const poiColliders = (x, z, ry, hx, hz) => {
+    const long = Math.max(hx, hz), short = Math.min(hx, hz), r = Math.max(0.6, short * 0.85), n = Math.max(1, Math.round(long / Math.max(0.8, r)));
+    const ax = hx >= hz ? 1 : 0, az = 1 - ax, c = Math.cos(ry), sn = Math.sin(ry), out = [];
+    for (let i = 0; i < n; i++) { const t = n === 1 ? 0 : (i / (n - 1) * 2 - 1) * (long - r); const lx = ax * t, lz = az * t; out.push({ x: x + lx * c + lz * sn, z: z - lx * sn + lz * c, r }); }
+    return out;
+  };
   // landmark, runestone and minor-POI models (sized to their clearing), and the walled secret pockets as boulders and trees
   { const PM = new Map(), add = (n, it, o) => { if (!PM.has(n)) PM.set(n, { items: [], o }); PM.get(n).items.push(it); };
     for (const q of W.pois) {
@@ -386,6 +393,7 @@ function buildHub() {
         continue; }
       const pm = POI_MODEL[q.art]; if (!pm || !hasWM(pm[0])) continue;
       const b = WORLD_MODEL_BOX[pm[0]], sc = Math.min(pm[1], 2 * q.r * 0.95 / Math.max(b[0], b[1]));
+      if (q.kind === 'landmark' || q.kind === 'rune') poiColliders(q.x, q.z, poiRotation(q), b[0] * sc / 2, b[1] * sc / 2).forEach((o) => grid.add(o)); // solid: no walking through a ribcage or windmill
       add(pm[0], { x: q.x, z: q.z, ry: poiRotation(q), s: sc }, q.kind === 'rune' || /crystal|star|moon|brazier|altar|rod/.test(pm[0]) ? { glow: 0x9fdcff, glowK: 0.1 } : {});
     }
     for (const [n, v] of PM) WorldModels.place(hubGroup, n, v.items, v.o); }
