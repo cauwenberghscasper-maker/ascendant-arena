@@ -87,9 +87,9 @@ The game is played on phones. Every change must work there.
 ### 1.3 One style
 
 #### UI (menus, HUD, icons)
-- **Pixel-art UI over a graded 3D world.** One font: Tiny5 (`var(--body)`, `var(--og-font)`; served as the family
+- **Pixel-art UI over a graded 3D world.** One font: VT323 (`var(--body)`, `var(--og-font)`; served as the family
   'Arena Numerals' in `src/css/main.css`, never faked bold). Pixelify Sans is only its fallback: it drew 5 like S, 2 like
-  Z, B like 8 and C like O (Casper, 25 Oct). No other fonts, no emoji.
+  Z, B like 8 and C like O; Tiny5 (the font before VT323) had too few pixels (Casper, 25 Oct). No other fonts, no emoji.
 - Dark stone pixel panels with bevels, stepped corners and a 2-3 px ink outline (`--og-ink`); bone-white highlights.
   No gold gradients, medallions or Greek borders.
 - Buttons: the "deep neon" look in `src/css/ui-v2.css` (light-to-dark gradient over the button colour, soft glow in
@@ -470,7 +470,7 @@ and ignore GitHub's "Compare & pull request" banner for them.
 ### Licences we ship (keep this list true)
 
 TRELLIS.2 MIT · Z-Image Turbo Apache-2.0 · KayKit CC0 · Quaternius CC0 · game-icons.net CC BY 3.0 (named on the
-Credits screen) · fonts Tiny5, Pixelify Sans, Rubik OFL 1.1 (`assets/fonts/OFL-*.txt`). Anything new gets added here, to `assets/world/CREDITS.md`, and to the Credits screen if its licence
+Credits screen) · fonts VT323, Tiny5, Pixelify Sans, Rubik OFL 1.1 (`assets/fonts/OFL-*.txt`). Anything new gets added here, to `assets/world/CREDITS.md`, and to the Credits screen if its licence
 needs attribution. Keep concepts, `tools/.gen/`, rejected meshes and zips out of the shipped `www/`.
 
 ## 4. Where to change what
