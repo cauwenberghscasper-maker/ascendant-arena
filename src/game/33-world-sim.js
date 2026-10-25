@@ -1053,7 +1053,9 @@ function stepPendingAoE(dt) {
       // through aoeHits first
       if (!a.inner && !a.cone && !a.grp && !a.pct) aoeDamage(a.x, a.z, a.r, a.dmg, a.team, a.owner, { knock: 6, charge: 0, slow: a.slow || 0, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
       else forEachTarget((t) => {
-        if (!t.alive || t.team === a.team || (t.kind === 'fighter' && t.invulnT > 0) || !aoeHits(a, t)) return;
+        if (!t.alive || t.team === a.team) return;
+        if (t.kind === 'fighter' && t.invulnT > 0) { if (a.team === 'mob' && t.isPlayer && typeof delveDodge === 'function' && aoeCovers(a, t.x, t.z, t.r)) delveDodge(t); return; }
+        if (!aoeHits(a, t)) return;
         dealDamage(t, a.pct ? t.maxHp * a.pct : a.dmg, a.owner, { charge: 0, canCrit: false, slow: a.slow || 0, knockX: t.x - a.x, knockZ: t.z - a.z, knock: 6, burn: a.burn || 0, burnT: a.burn ? 2 : 0 });
       }, a.team);
       if (a.kind === 'zap') ev({ t: 'bolt', x: a.x, z: a.z });

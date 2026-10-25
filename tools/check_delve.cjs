@@ -18,7 +18,7 @@ vm.runInContext(section('const CFG = {', '// 2. UTIL') + section('const clamp ='
   section('class Grid {', '// --- entities') + section('function patrolCountFor(', 'function rewardEnemyKill(') + section('const PELLET_COLORS', '// --- hub step') +
   section('function separate(', '// --- world boss') + section('// --- world boss', 'function spawnBoss(') + section('function boundFighter(', '// --- progression') +
   section('// --- Dungeons:', '// --- end dungeons') + section('// --- Dungeon mode', '// --- end dungeon mode') + section('// Dungeon bots:', '// --- end dungeon bots') + section('// Dungeon bosses fight with', '// --- end delve boss') +
-  '\nthis.CFG = CFG; this.Grid = Grid; this.DC = DC; this.DV = DV; this.SET_SLOTS = SET_SLOTS; Object.assign(this, { delveOpen, delveTop, delveOn, delveDef, inInstance, delveLayout, delveInteract, delveUse, delvePzRecv, delvePzMask, delvePzWisp, delveSecretRecv, delveBossTick, delveBossRecv, delveBossPool, BK });', c);
+  '\nthis.CFG = CFG; this.Grid = Grid; this.DC = DC; this.DV = DV; this.SET_SLOTS = SET_SLOTS; Object.assign(this, { delveGrade, delveSkillHit, delveDodge, delveFlawless, rollDungeonTreasure, delveOpen, delveTop, delveOn, delveDef, inInstance, delveLayout, delveInteract, delveUse, delvePzRecv, delvePzMask, delvePzWisp, delveSecretRecv, delveBossTick, delveBossRecv, delveBossPool, BK });', c);
 const DV = c.DV, defs = DV.dungeons;
 DV.bots.on = false; // these checks run real-player parties; the bots (36d-delve-bots.js) need the full fighter code and are checked in the browser
 function check(name, fn) { fn(); passed++; console.log('PASS ' + name); }
@@ -107,7 +107,8 @@ check('shared monsters: same seed → same slots, types, spots and HP in every p
 check('rooms: doors open as rooms clear, swarm rooms send waves, the boss calls adds, then the chest and the exit', () => {
   for (let s = 1; s <= 30; s++) {
     reset(); c.startDelve(defs[s % 6].id, 2, s * 31337, 2); const D = c.G.dungeon, X = D.delve, pl = c.G.player;
-    for (let k = 0; k < 5; k++) c.stepDungeon(1 / 60); assert(D.doors.every((d) => !d.open), 'no door opens while the first room still fights');
+    assert(!D.rooms[0].mobs.length && D.rooms[0].fight === 'safe', 'the first hall is safe: no monsters');
+    for (let k = 0; k < 5; k++) c.stepDungeon(1 / 60); assert(D.doors[0].open && D.doors.slice(1).every((d) => !d.open), 'the safe hall opens by itself; no other door opens while its hall still fights');
     for (let i = 0; i < D.rooms.length - 1; i++) {
       const m = D.rooms[i]; Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60);
       for (let k = 0; k < 6 && !D.doors[i].open; k++) {
@@ -332,17 +333,20 @@ check('side rooms: off middle halls, never overlapping, reachable (cracked walls
 });
 check('gates: the first game to see a room done tells the party, and every game opens that gate at once', () => {
   const sent = []; c.partySend = (event, P) => sent.push([event, P]); c.mpNum = (v, d) => (Number.isFinite(+v) ? +v : d);
-  reset(); c.startDelve(defs[0].id, 1, 4242, 2); const D = c.G.dungeon, pl = c.G.player, m = D.rooms[0];
+  // the safe first hall opens on its own and tells the party too; the first fight hall (room 1) is the real test
+  reset(); c.startDelve(defs[0].id, 1, 4242, 2); const D = c.G.dungeon, pl = c.G.player, m = D.rooms[1];
+  c.stepDungeon(1 / 60); assert(D.doors[0].open && sent.some(([e, P]) => e === 'ddoor' && P.i === 0), 'the safe hall gate is shared');
   Object.assign(pl, { x: m.x, z: m.z }); for (const e of m.mobs) e.alive = false; c.stepDungeon(1 / 60); c.stepDungeon(1 / 60);
-  if (m.waves > 1) for (let k = 0; k < m.waves; k++) { for (const e of m.mobs) e.alive = false; c.stepDungeon(1 / 60); }
-  assert(D.doors[0].open); const msg = sent.find(([e]) => e === 'ddoor'); assert(msg && msg[1].i === 0 && msg[1].dr === D.delve.seed, 'sends ddoor');
+  for (let k = 0; k < 8 && !D.doors[1].open; k++) { for (const e of m.mobs) e.alive = false; if (m.pz && !(D.delve.pz[m.i] || {}).done) walkSeals(D, m, solution(m)); if (m.event === 'vault' && D.delve.ev[m.i] && D.delve.ev[m.i].mob) D.delve.ev[m.i].mob.alive = false; if (m.event === 'mimic') Object.assign(pl, { x: m.x, z: m.z }); c.stepDungeon(1 / 60); }
+  assert(D.doors[1].open); const msg = sent.find(([e, P]) => e === 'ddoor' && P.i === 1); assert(msg && msg[1].dr === D.delve.seed, 'sends ddoor');
   c.endDungeon('leave');
   // the other phone: its copies of the monsters still stand (their deaths have not come in yet)
-  reset(); c.startDelve(defs[0].id, 1, 4242, 2); const D2 = c.G.dungeon, m2 = D2.rooms[0]; sent.length = 0;
-  c.delveDoorRecv({ dr: D2.delve.seed + 1, i: 0 }); assert(!D2.doors[0].open, 'another run is ignored');
-  c.delveDoorRecv(msg[1]); assert(D2.doors[0].open && m2.cleared && m2.mobs.every((e) => !e.alive), 'gate opens, stale monsters go');
-  c.stepDungeon(1 / 60); assert(!m2.mobs.some((e) => e.alive), 'no new wave after a remote open'); assert(!sent.some(([e, P]) => e === 'ddoor' && P.i === 0), 'no echo back of the gate it heard about');
-  c.delveDoorRecv({ dr: D2.delve.seed, i: 1 }); assert(D2.doors[1].open); c.delveDoorRecv({ dr: D2.delve.seed, i: 999 }); assert(D2.doors.every((d) => d.open), 'a late message opens every gate before it');
+  reset(); c.startDelve(defs[0].id, 1, 4242, 2); const D2 = c.G.dungeon, m2 = D2.rooms[1]; sent.length = 0;
+  assert(m2.mobs.some((e) => e.alive), 'hall 1 still fights here');
+  c.delveDoorRecv({ dr: D2.delve.seed + 1, i: 1 }); assert(!D2.doors[1].open, 'another run is ignored');
+  c.delveDoorRecv(msg[1]); assert(D2.doors[0].open && D2.doors[1].open && m2.cleared && m2.mobs.every((e) => !e.alive), 'gate opens (and every gate before it), stale monsters go');
+  c.stepDungeon(1 / 60); assert(!m2.mobs.some((e) => e.alive), 'no new wave after a remote open'); assert(!sent.some(([e, P]) => e === 'ddoor' && P.i === 1), 'no echo back of the gate it heard about');
+  c.delveDoorRecv({ dr: D2.delve.seed, i: 2 }); assert(D2.doors[2].open); c.delveDoorRecv({ dr: D2.delve.seed, i: 999 }); assert(D2.doors.every((d) => d.open), 'a late message opens every gate before it');
   delete c.partySend; c.endDungeon('leave');
 });
 check('events: goblin escapes on time, plates need every hero, altar curse caps health, moonwell heals once, caches pay once', () => {
@@ -383,6 +387,43 @@ check('loot: the chest scales with difficulty, the weekly first clear is a sure 
   // set bonuses: 2 and 4 pieces of one set add its affixes
   const gear = {}; c.SET_SLOTS.slice(0, 4).forEach((s) => { gear[s] = { slot: s, dset: def.id }; }); const aff = {}; const cnt = c.delveSetBonus(gear, aff);
   assert.equal(cnt[def.id], 4); for (const [k, v] of Object.entries(def.set.b2)) assert(aff[k] >= v); for (const [k, v] of Object.entries(def.set.b4)) assert(aff[k] >= v);
+});
+check('skill: hits per hall set the grade (S A B C), perfect dodges cancel hits, a fall costs a grade, sitting out caps at B; flawless halls pay', () => {
+  reset(); c.startDelve(defs[0].id, 0, 21, 1); const D = c.G.dungeon, X = D.delve, pl = c.G.player, n = D.rooms.length - 1;
+  for (let i = 1; i <= n; i++) X.been[i] = 1;
+  const g = () => c.delveGrade(X, n).g;
+  assert.equal(g(), 'S', 'no hits: S');
+  X.hits = 2 * n; assert.equal(g(), 'A'); X.hits = 4 * n; assert.equal(g(), 'B'); X.hits = 9 * n; assert.equal(g(), 'C');
+  X.hits = 2 * n; X.dodges = 2 * n; assert.equal(g(), 'S', 'two perfect dodges cancel one hit');
+  X.falls = 1; assert.equal(g(), 'A', 'a fall costs a grade'); X.falls = 9; assert.equal(g(), 'C', 'never below C');
+  X.hits = X.dodges = X.falls = 0; X.been = { 0: 1, 1: 1 }; assert.equal(g(), 'B', 'left the halls to the party: B at best');
+  // a monster's hit counts once per moment, and only for your own hero
+  X.been = {}; c.G.time = 10; D.room = 2; c.delveSkillHit(pl, 50); c.delveSkillHit(pl, 50); assert.equal(X.hits, 1); assert.equal(X.hallHits[2], 1);
+  c.G.time = 11; c.delveSkillHit(pl, 50); c.delveSkillHit({ isPlayer: false }, 50); c.delveSkillHit(pl, 0); assert.equal(X.hits, 2);
+  // perfect dodge: only inside a dash's safe moment, once per gap, gives super charge
+  pl.superCharge = 0; pl.dashAt = 20; c.G.time = 20.1; c.delveDodge(pl); c.delveDodge(pl); assert.equal(X.dodges, 1); assert(Math.abs(pl.superCharge - DV.skill.dodgeSuper) < 1e-9);
+  c.G.time = 21; c.delveDodge(pl); assert.equal(X.dodges, 1, 'no dash, no perfect dodge'); assert(events.some((e) => e.t === 'delveDodge'));
+  // flawless: a hall you walked into and cleared without a hit
+  const m = D.rooms.find((r) => r.i > 0 && r.count && !X.hallHits[r.i]); X.been[m.i] = 1; const g0 = grants.gold; c.delveFlawless(D, m);
+  assert.equal(X.flawless, 1); assert(grants.gold > g0); X.hallHits[m.i] = 1; c.delveFlawless(D, m); assert.equal(X.flawless, 1, 'a hit spoils it');
+  c.endDungeon('leave');
+});
+check('treasure: every chest rolls gear, ore or a hero; a gear roll can hold the dungeon\'s own named treasure (sure after the pity count); S pays more', () => {
+  reset(); c.G.profile.unlocked = { attacks: [] }; const kinds = {}; let uniques = 0;
+  c.startDelve(defs[2].id, 1, 31, 1); const D = c.G.dungeon;
+  for (let i = 0; i < 400; i++) { const t = c.rollDungeonTreasure('boss', { biome: 2, def: defs[2], L: 100, di: 1, floor: 'epic', zone: D.zone, luck: 1, uniqueRar: 'legendary' }); kinds[t.kind] = (kinds[t.kind] | 0) + 1;
+    if (t.kind === 'gear') { assert.equal(t.items.length, DV.treasure.gearItems); assert(t.items.every((it) => c.rarIdx(it.rarity) >= c.rarIdx('legendary')), 'gear treasure is a rarity up'); }
+    if (t.unique) { uniques++; assert(DV.gear[defs[2].id].found.some((g) => g.id === t.unique.duq && g.name === t.unique.name)); assert.equal(t.unique.dq, defs[2].id); } }
+  assert(kinds.gear > 120 && kinds.hero > 0, JSON.stringify(kinds)); assert(uniques > 0 && Object.keys(c.G.profile.delve.found).length > 0, 'treasures logged');
+  // pity: no named treasure for uniquePity-1 gear rolls in a row → the next gear roll has one
+  const R = c.G.profile.delve; R.upity = DV.treasure.uniquePity - 1; const keep = DV.treasure.uniqueChance; DV.treasure.uniqueChance = 0;
+  let t; do t = c.rollDungeonTreasure('cache', { biome: 2, def: defs[2], L: 100, di: 1, floor: 'epic', zone: D.zone }); while (t.kind !== 'gear'); DV.treasure.uniqueChance = keep;
+  assert(t.unique && R.upity === 0, 'pity treasure');
+  c.endDungeon('leave');
+  // the end chest carries its grade and treasure; S adds items over a plain grade
+  const run = (hits) => { reset(); c.G.profile.unlocked = { attacks: [] }; c.startDelve(defs[0].id, 0, 41, 1); const E = c.G.dungeon; for (let i = 1; i < E.rooms.length; i++) E.delve.been[i] = 1; E.delve.hits = hits; killAll(E); c.stepDungeon(1 / 60); const r = c.claimDelveChest(); c.endDungeon('leave'); return r; };
+  const S = run(0), C = run(400); assert.equal(S.grade.g, 'S'); assert.equal(C.grade.g, 'C'); assert(S.treasure && ['gear', 'ore', 'hero'].includes(S.treasure.kind));
+  assert.equal(S.items.length, c.diffDef(0).items + DV.skill.grades[0].items); assert.equal(C.items.length, c.diffDef(0).items); assert(S.gold > C.gold);
 });
 check('a fall: waits for the party while a teammate stands; alone or all down the run fails and the hero respawns outside', () => {
   reset(); c.startDelve(defs[0].id, 0, 11, 2); const D = c.G.dungeon, pl = c.G.player;

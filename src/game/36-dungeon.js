@@ -4,6 +4,8 @@
 const DC = { x: 0, z: -1800 }; // dungeon instance centre (arena −1000, rift −1400)
 CFG.dungeon = {
   room: 18, corridor: 8, corW: 5, bossR: 16, wallR: 0.5,
+  // a safe first hall (Bart, 25 Oct): you arrive in an empty hall and its gate opens by itself; the guarded halls follow
+  safeStart: true,
   lvlAdd: 4, hpMul: 1.5, dmgMul: 1.25, boss: { dmg: 1.5, adds: 2, lvlAdd: 2 },
   // poi n picks the variant: hall sizes, elite share, boss affixes and HP, par time in seconds
   variants: [
@@ -17,7 +19,9 @@ CFG.dungeon = {
   // monster type multiplies that chance by 1 + chain/chainStep, up to chainMax.
   trial: { runes: 4, sigilCost: 50, radiant: 500, chainStep: 25, chainMax: 4 },
   interactR: 3.6, bossBlock: 30,
-  chest: { items: 2, ilvlAdd: 4, epicFrom: 15, gems: [6, 10], shards: [3, 5], caseChance: 0.1, xpFrac: 0.35, gold: [40, 8] },
+  // the chest pays more (Bart, 25 Oct: was items 2, gems [6, 10], caseChance 0.1, xpFrac 0.35, gold [40, 8]) and rolls a
+  // treasure: gear, ore or a hero (CFG.delve.treasure, 36b-delve.js)
+  chest: { items: 3, ilvlAdd: 4, epicFrom: 15, gems: [8, 14], shards: [3, 5], caseChance: 0.15, xpFrac: 0.5, gold: [60, 12] },
   // Dungeon Keys: +1 monster level per tier. Clear under par: the key comes back 1-3 tiers higher; fall or leave: one tier lower.
   keys: { max: 12, affixes: {
     bulwark: { name: 'Bulwark', d: 'Monsters +40% HP', bad: true }, brutal: { name: 'Brutal', d: 'Monsters +30% damage', bad: true }, swift: { name: 'Swift', d: 'Monsters +20% speed', bad: true },
@@ -54,7 +58,7 @@ function dungeonReq(poi) { return (CFG.world.zones[poi.zone] || {}).minLevel || 
 function strSeed(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }
 // Deterministic per POI id: rooms walk north/east/west (never south, so the path cannot fold back onto itself).
 function dungeonLayout(id) {
-  const C = CFG.dungeon, rng = mulberry32(strSeed(id)), rooms = [], cors = [], walls = [], doors = [], last = dungeonVariant(id).counts.length;
+  const C = CFG.dungeon, rng = mulberry32(strSeed(id)), rooms = [], cors = [], walls = [], doors = [], last = dungeonVariant(id).counts.length + dungeonSafe(id);
   const rect = (x, z, hx, hz) => ({ x0: x - hx, x1: x + hx, z0: z - hz, z1: z + hz });
   for (let i = 0; i <= last; i++) {
     const h = i === last ? C.bossR : C.room / 2;
@@ -94,6 +98,8 @@ function dungeonLayout(id) {
   const r0 = rooms[0], b = rooms[last];
   return { rooms, cors, walls, doors, start: { x: r0.x, z: r0.z0 + 4 }, exit: { x: r0.x - 4, z: r0.z0 + 2.2 }, chest: { x: b.x, z: b.z }, exit2: { x: b.x, z: b.z + 5 } };
 }
+// 1 when the dungeon opens with the safe empty hall (every dungeon with guarded halls; a Trial is one sealed arena)
+function dungeonSafe(id) { return CFG.dungeon.safeStart && dungeonVariant(id).counts.length ? 1 : 0; }
 // walls and locked doors as obstacle circles (rebuilt when a door opens: the Grid has no remove)
 function dungeonGrid(D) {
   const C = CFG.dungeon, g = new Grid(6), r = C.wallR;
@@ -148,11 +154,12 @@ function startDungeon(poi, keyIdx) {
   pl.x = D.start.x; pl.z = D.start.z; pl.facing = 0; pl.hp = pl.maxHp; pl.invulnT = 1.5; pl.ammo = pl.ammoMax;
   G.zoneIdx = poi.zone;
   const roster = () => (Z.alt && Math.random() < 0.4 ? Z.alt : Z.enemy);
+  const safe = dungeonSafe(poi.id);
   D.rooms.forEach((m, i) => {
     m.mobs = []; m.cleared = false;
     if (m.boss) return;
-    for (let k = 0; k < V.counts[i]; k++) {
-      // the first hall keeps its southern half free: you arrive there
+    for (let k = 0, n = i < safe ? 0 : V.counts[i - safe]; k < n; k++) {
+      // a first hall with monsters (no safe hall) keeps its southern half free: you arrive there
       const x = rand(m.x0 + 3, m.x1 - 3), z = rand(i ? m.z0 + 3 : m.z + 1, m.z1 - 3), elite = Math.random() < V.elite;
       m.mobs.push(dungeonMob(D, roster(), lvl, i, { elite, x, z }));
     }
@@ -171,12 +178,13 @@ function stepDungeon(dt) {
     const m = D.rooms[d.room];
     if (d.open || m.mobs.some((e) => e.alive)) continue;
     d.open = m.cleared = true; dungeonGrid(D);
+    if (d.room < dungeonSafe(D.id)) continue; // the safe first hall opens quietly
     ev({ t: 'dungeonRoom', i: d.room + 1, n: D.rooms.length - 1, boss: d.room + 1 === D.rooms.length - 1 });
   }
   const b = D.boss;
   if (b.alive && !D.addsDone && b.hp < b.maxHp * 0.5) {
     D.addsDone = true; const Z = CFG.world.zones[D.zone];
-    for (let k = 0; k < C.boss.adds; k++) { const a = (k / C.boss.adds) * Math.PI * 2; D.rooms.at(-1).mobs.push(dungeonMob(D, Z.alt || Z.enemy, D.lvl, 3, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, chase: true })); }
+    for (let k = 0; k < C.boss.adds; k++) { const a = (k / C.boss.adds) * Math.PI * 2; D.rooms.at(-1).mobs.push(dungeonMob(D, Z.alt || Z.enemy, D.lvl, D.rooms.length - 1, { x: b.x + Math.sin(a) * 3, z: b.z + Math.cos(a) * 3, chase: true })); }
     ev({ t: 'dungeonAdds', x: b.x, z: b.z });
   }
   if (!b.alive && !D.bossDead) {
@@ -213,6 +221,8 @@ function claimDungeonChest() {
     res.gems = Math.round((randInt(K.gems[0], K.gems[1]) + Math.floor(L / 10)) * tierMul(curTier()).gems * (1 + 0.1 * t)); addEssence(res.gems);
     res.shards = randInt(K.shards[0], K.shards[1]); dropShards(res.shards);
     if (Math.random() < Math.min(0.6, K.caseChance + 0.02 * t) + (keyHas(D, 'lucky') ? 0.25 : 0)) { res.case = true; addCase('treasure', { l: L + K.ilvlAdd + t, src: 'dungeon' }); }
+    // treasure: gear, ore or oaths for the biome's hidden hero (36b-delve.js)
+    if (!D.variant.trial && typeof rollDungeonTreasure === 'function') res.treasure = rollDungeonTreasure('world', { biome: zoneBiome(D.zone), def: null, L: L + K.ilvlAdd + t, di: Math.floor(t / 5), floor, zone: D.zone, luck: keyHas(D, 'lucky') ? 1.5 : 1, uniqueRar: rarIdx(floor) >= 3 ? 'legendary' : 'epic' });
     rec.t = Date.now();
   }
   if (D.variant.trial) {

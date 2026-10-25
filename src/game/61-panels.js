@@ -378,6 +378,14 @@ function craftTabHTML(p) {
       <button class="${can ? 'primary' : 'disabled'}" data-act="craftPiece" data-b="${bi}" data-slot="${s}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div>`;
   }).join('');
   const hero = CFG.brawlers[b.hero], heroHave = p.unlocked.attacks.includes(b.hero), relicN = craftState(p).relics[bi] | 0;
+  // the dungeon forge: pieces made from this biome's party dungeon gem (its rare veins), core and ore (36b-delve.js)
+  const dd = delveOfBiome(bi), dg = dd && CFG.delve.gear[dd.id], dOpen = dd && delveOpen(dd), fr = dd && forgedRarity(dd), found = delveRec().found;
+  const forged = dg ? `<div class="card craftSet" style="--mc:${hex6(dd.gem.color)}"><h4>Dungeon forge · ${escapeHTML(dd.name)}</h4>
+      <p>${dOpen ? `Made from ${escapeHTML(dd.gem.name)}, mined in its rare veins.` : `Opens at level ${delveMinLevel(dd)}, with the ${escapeHTML(dd.name)}.`}</p></div>
+    <div class="list">${dg.forged.map((g) => { const cost = forgedCost(dd), can = dOpen && canPay(cost, p), pv = { slot: g.slot, rarity: fr, ilvl: 1, up: 0, aff: g.aff, name: g.name, duq: g.id };
+      return `<div class="item ${fr} craftRow"><span class="thw ${fr}"><img class="thumb ${fr}" src="${thumbFor(pv)}" alt=""></span><div class="meta"><div class="slot">${SLOT_LABEL[g.slot]} · item level ${Math.max(delveBase(dd), p.level) + 2}${found[g.id] ? ` · made ${found[g.id]}×` : ''}</div><div class="nm">${escapeHTML(g.name)} ${rarityChip(fr)}</div><div class="st aff">${affixText(pv)}</div><div class="mats">${costChips(cost, p)}</div></div>
+      <button class="${can ? 'primary' : 'disabled'}" data-act="craftForged" data-d="${dd.id}" data-g="${g.id}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div>`; }).join('')}</div>
+    <p class="fine">Treasures found only in its chests: ${dg.found.map((g) => `<b>${escapeHTML(g.name)}</b>${found[g.id] ? ' (found)' : ''}`).join(' · ')}</p>` : '';
   return `
     <div class="bpicks">${picks}</div>
     <div class="card craftSet" style="--mc:${hex6(b.color)}"><h4>${b.set} set · ${BIOMES[bi].name}</h4>
@@ -385,6 +393,7 @@ function craftTabHTML(p) {
       <div class="mats">${matChip(b.ore, null, p)}${matChip(b.part, null, p)}${matChip(b.core, null, p)}${matChip(C.titan.id, null, p)}</div>
     </div>
     <div class="list">${rows}</div>
+    ${forged}
     <div class="card secret"><h4>Hidden in ${BIOMES[bi].name} dungeons</h4>
       <p>${hero ? (heroHave ? `<b>${hero.name}</b> fights for you.` : `<b>${hero.name}</b> cannot be recruited any other way. Their oaths drop from this biome’s dungeon chests (Sanctums and Trials more often, higher keys more): <b>${sigilHave(b.hero, p)}/${C.sigil.need}</b>.`) : ''}</p>
       <p>Relic: <b>${b.relic.name}</b> ${rarityChip(b.relic.rarity)} · a rare chest find here (twice as likely in the Sanctum, certain after ${C.relic.pity} chests without one) · found ${relicN}×</p></div>`;
@@ -779,7 +788,7 @@ function openDungeonChest() {
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} cleared${r.tier ? ` · Tier ${r.tier}` : ''}</div><h2>${r.full ? 'Dungeon chest' : 'Plain run'}</h2></div>
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems}</b><span>Gems</span></div></div>
     ${r.radiant ? `<h2 class="center">RADIANT</h2><div class="list">${itemRow(r.radiant, '', `Radiant · 1 in ${fmt(r.odds)}`)}</div>` : ''}${r.sigils != null ? `<p class="say">Trial Sigil earned · ${r.sigils}/${CFG.dungeon.trial.sigilCost} toward the relic · Radiant chance was 1 in ${fmt(r.odds)}</p>` : ''}
-    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}${craftChestHTML(r.craft)}
+    ${rows ? `<div class="list">${rows}</div>` : r.sigils != null ? '' : '<p class="fine">Use a Dungeon Key for gear, gems and shards.</p>'}${r.key ? `<p class="say">Key earned: <b>${escapeHTML(keyName(r.key))}</b></p>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Journal.</p>' : ''}${typeof treasureHTML === 'function' ? treasureHTML(r.treasure) : ''}${craftChestHTML(r.craft)}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);
 }
 function openRiftResult(r) {
@@ -921,6 +930,7 @@ function handlePanelClick(e) {
     case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast(matCount(runeId()) < enchantRunes(G.profile.gear[b.dataset.slot] || { rarity: 'common' }) ? 'Not enough Rune Shards' : 'Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
     case 'craftPiece': if (craftSetPiece(+b.dataset.b, b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
+    case 'craftForged': if (craftForged(b.dataset.d, b.dataset.g)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
     case 'buyUpg': if (buyUpgrade(b.dataset.id)) Sfx.play('unlock'); openSmith('Masterwork'); break;
     case 'queue': queueArena(); break;
     case 'hub': UI.close(); leaveArena(); break;

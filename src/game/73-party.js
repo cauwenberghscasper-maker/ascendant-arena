@@ -204,12 +204,30 @@ function partyAction(act, b) {
   if (UI.current === 'delve') openDelvePanel();
 }
 // the boss chest of a party dungeon (each player's own roll)
+// the treasure a dungeon chest rolled (gear, ore or a hero), shared by both chest screens
+function treasureHTML(t) {
+  if (!t) return '';
+  const head = (w) => `<div class="cbonus${t.kind === 'hero' ? ' hero' : ''}"><b>${w}</b>${t.kind === 'gear' ? 'Gear treasure' : t.kind === 'ore' ? 'Ore treasure' : 'Hero treasure'}</div>`;
+  if (t.kind === 'hero') return head('HERO!') + (t.hero ? `<p class="say center"><b>${escapeHTML(t.hero.name)}</b> joins you</p>` : t.oath ? `<p class="say center">+${t.oath.n} oaths of <b>${escapeHTML(t.oath.name)}</b> · ${t.oath.have}/${t.oath.need}${t.oath.have >= t.oath.need ? ' · they join you!' : ''}</p>` : '');
+  if (t.kind === 'ore') return head('ORE') + `<div class="cbonus mats">${(t.mats || []).map(([id, n]) => matChip(id, null, G.profile).replace(/<b>.*?<\/b>/, `<b>+${n}</b>`)).join('')}</div>`;
+  const uq = t.unique ? `<h2 class="center">Dungeon treasure!</h2><div class="list">${itemRow(t.unique, '', `Treasure · only from ${escapeHTML(delveDef(t.unique.dq).name)}`)}</div>` : '';
+  return head('GEAR') + uq + (t.items.length ? `<div class="list">${t.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('')}</div>` : '');
+}
+// the run's grade: the letter, then hits per hall, Perfect Dodges and Flawless halls
+function gradeHTML(g) {
+  if (!g) return '';
+  const what = [g.items ? `+${g.items} item${g.items > 1 ? 's' : ''}` : '', g.rar ? 'rarity up' : '', g.gold > 1 ? `+${Math.round((g.gold - 1) * 100)}% gold` : ''].filter(Boolean).join(' · ');
+  return `<div class="dgrade" style="--gc:${g.col}"><b class="dgL">${g.g}</b><div><div class="dgT">Grade ${g.g}${what ? ` · ${what}` : ''}</div>
+    <div class="dgS">${g.per} hits per hall · ${g.dodges} perfect dodges · ${g.flawless} flawless${g.falls ? ` · ${g.falls} fall${g.falls > 1 ? 's' : ''}` : ''}</div></div></div>`;
+}
 function openDelveChest(r) {
   if (!r) return; UI.current = 'dungeonChest'; Sfx.play('win');
   const rows = r.items.map((it) => itemRow(it, '', `${CFG.gear.rarity[it.rarity].name} · item level ${it.ilvl}`)).join('');
   const set = r.set.map((it) => itemRow(it, '', `${escapeHTML(delveDef(it.dset).set.name)} set · only from ${escapeHTML(r.name)}`)).join('');
   openModal(`<div class="center"><div class="eyebrow">${escapeHTML(r.name)} · ${escapeHTML(r.diff)}</div><h2>${r.full ? 'Dungeon chest' : 'Hidden cache'}</h2></div>
+    ${gradeHTML(r.grade)}
     <div class="stats3"><div><b>${r.xp ? '+' + fmtK(r.xp) : '—'}</b><span>XP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${ICON.ess}${r.gems || 0}</b><span>Gems</span></div></div>
+    ${treasureHTML(r.treasure)}
     ${set ? `<h2 class="center">Set piece!</h2><div class="list">${set}</div>` : ''}${r.weekly ? '<p class="say">Weekly first clear: a sure set piece.</p>' : ''}
     ${rows ? `<div class="list">${rows}</div>` : ''}${r.case ? '<p class="fine">A treasure chest was found too: open it in your Inventory.</p>' : ''}
     <div class="row end"><button class="primary big" data-act="close">Nice</button></div>`);

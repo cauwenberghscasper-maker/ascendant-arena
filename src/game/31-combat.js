@@ -108,7 +108,10 @@ function stepProjectiles(dt) {
     forEachTarget((t) => {
       if (hitT || !t.alive || t.team === p.team || p.hits.includes(t.id)) return;
       if(p.pet && t.kind!=='enemy' && t.kind!=='boss')return;
-      if (t.kind === 'fighter' && t.invulnT > 0) return; // dodged!
+      if (t.kind === 'fighter' && t.invulnT > 0) { // dodged! (through a dash in a dungeon: a Perfect Dodge, 36b-delve.js)
+        if (t.isPlayer && p.team === 'mob' && typeof delveDodge === 'function') { const dx = t.x - p.x, dz = t.z - p.z, rr = t.r + p.r; if (dx * dx + dz * dz < rr * rr) delveDodge(t); }
+        return;
+      }
       const dx = t.x - p.x, dz = t.z - p.z, rr = t.r + p.r;
       if (dx * dx + dz * dz < rr * rr) hitT = t;
     }, p.team);
@@ -167,7 +170,7 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
   o = o || {};
   forEachTarget((t) => {
     if (!t.alive || t.team === team || t === o.exclude) return;
-    if (t.kind === 'fighter' && t.invulnT > 0) return;
+    if (t.kind === 'fighter' && t.invulnT > 0) { if (team === 'mob' && t.isPlayer && typeof delveDodge === 'function' && (t.x - x) ** 2 + (t.z - z) ** 2 <= (r + t.r) ** 2) delveDodge(t); return; }
     const dx = t.x - x, dz = t.z - z;
     if (dx * dx + dz * dz <= (r + t.r) * (r + t.r)) {
       dealDamage(t, dmg, owner, { charge: o.charge || 0, canCrit: false, slow: o.slow || 0, knockX: dx, knockZ: dz, knock: o.knock || 0, burn: o.burn || 0, burnT: o.burnT || 0, proc: !!o.proc });
@@ -183,7 +186,7 @@ function dealDamage(t, amount, srcId, o) {
     if (dealt > 0 && o && o.charge) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
     return dealt;
   }
-  if (t.invulnT > 0) return 0;
+  if (t.invulnT > 0) { if (t.isPlayer && typeof delveDodge === 'function') { const s0 = G.ents.get(srcId); if (s0 && (s0.kind === 'enemy' || s0.kind === 'boss')) delveDodge(t); } return 0; }
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
   if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot && !t.delveBot) return 0; // hub bots are bystanders (dungeon bots fight)
@@ -212,6 +215,7 @@ function dealDamage(t, amount, srcId, o) {
   if (t.kind === 'boss' && typeof bossDamageMod === 'function') amt *= bossDamageMod(t); // warded: nearly immune until the team holds every ward; exposed after
   const hpBefore = Math.max(0, t.hp);
   t.hp -= amt; t.flashT = CFG.combat.hitFlash; t.lastHurt = G.time;
+  if (t.isPlayer && amt > 0 && typeof delveSkillHit === 'function') delveSkillHit(t, amt); // dungeon grade (36b-delve.js)
   // lobby: send our hit to whoever runs this monster or the world boss (70-multiplayer.js; absent in the node checks)
   if (t.own && t.kind === 'enemy' && src && src.isPlayer) mpMobHit(t, amt);
   if (t.mirror && src && src.isPlayer) siegeMpMobHit(t, amt);
@@ -614,7 +618,7 @@ function stepFighter(f, dt, ctx) {
     let dx = mx, dz = mz;
     if (Math.hypot(dx, dz) < 0.2) { dx = Math.sin(f.facing); dz = Math.cos(f.facing); }
     const d = Math.hypot(dx, dz) || 1;
-    f.dashX = dx / d; f.dashZ = dz / d; f.dashT = C.dash.time; f.dashHit.length = 0; f.invulnT = Math.max(f.invulnT, C.dash.invuln); f.dashCd = C.dash.cd;
+    f.dashX = dx / d; f.dashZ = dz / d; f.dashT = C.dash.time; f.dashHit.length = 0; f.invulnT = Math.max(f.invulnT, C.dash.invuln); f.dashCd = C.dash.cd; f.dashAt = G.time;
     if (f.keys.aftershock) f.ks.afterT = 2;
     ev({ t: 'dash', x: f.x, z: f.z, isPlayer: f.isPlayer });
   }
