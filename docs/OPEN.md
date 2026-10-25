@@ -47,7 +47,7 @@ and change only your own line here: tick it when it is merged, add what you foun
 ## Game
 - [ ] Open world map (PR #51, `docs/log/2026-10-25-open-world-map.md`): merge after review; check FPS near area walls on a phone, tune `CFG.openWorld` (warden HP, kills per step, danger gap) and maybe `AREA_CELL`.
 - [x] Dungeon treasures have a recipe: the Dungeon forge crafts two pieces per dungeon from its gem (25 Oct, `docs/log/2026-10-25-dungeon-skill-loot.md`). Secret weapons (one recipe per biome from chest ore + a Titan Soul) still open.
-- [ ] Dungeons: judge the skill tuning (monster hp 1.05 / dmg 1.3, grade thresholds) and the boss chest hero share on a real phone; painted icons for the 24 dungeon pieces; a hit counter on the dungeon HUD (PR #53).
+- [ ] Dungeons: judge the skill tuning (monster hp 1.05 / dmg 1.3, grade thresholds) and the boss chest hero share on a real phone; painted icons for the 24 dungeon pieces; a hit counter on the dungeon HUD (PR #55).
 - [ ] Party dungeons: rejoin after a disconnect, party chat, Collection Log for set pieces, full-screen dungeon map.
 - [ ] Multiplayer: first-play name prompt + name filter, room partitioning (`mpRoomKey`) past ~60 players, sharing
       shrines/XP orbs/Rift/dungeons, elites' moves for non-owners.

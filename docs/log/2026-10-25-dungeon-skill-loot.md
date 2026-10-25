@@ -1,4 +1,4 @@
-# Dungeons: safe first hall, skill grades, treasure chests, dungeon gear (25 Oct 2026, PR #53)
+# Dungeons: safe first hall, skill grades, treasure chests, dungeon gear (25 Oct 2026, PR #55; #53 was merged with only its claim commit)
 
 Asked by Bart: "make dungeons more skill based, first room no enemies, more rewarding rewards. Chest can have heroes,
 ores or gear. Also add more custom findable and craftable gear."
