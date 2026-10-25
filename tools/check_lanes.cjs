@@ -15,6 +15,11 @@ check('1v1, 2v2 and 3v3, Play-from level, levels to 18, a capped bonus and play-
   assert(L.trophies.loss < 0 && L.trophies.win > 0 && L.trophies.botLoss < 0 && L.trophies.botWin > 0);
   assert(L.unlocks.dash <= L.unlocks.skill && L.unlocks.skill < L.unlocks.special && L.unlocks.special < L.unlocks.super && L.unlocks.super <= 6, 'LoL ladder: skill, special, then the super at 6');
 });
+check('every field position the match needs is a real number (a setting hidden in a comment made the spawn NaN and the match black)', () => {
+  for (const k of ['core', 'fountain', 'fountainR', 'campX', 'campZ', 'wave', 'firstWave']) assert(Number.isFinite(L[k]), 'CFG.lanes.' + k + ' = ' + L[k]);
+  assert(L.towers.every(Number.isFinite) && Number.isFinite(L.half.x) && Number.isFinite(L.half.z));
+  assert(L.core < L.fountain && L.fountain < L.half.z, 'the fountain sits behind the Core, inside the field');
+});
 check('XP: each level needs more, and 18 takes most of a match', () => {
   let tot = 0; for (let l = 1; l < 18; l++) { assert(c.lanesXpNeed(l + 1) > c.lanesXpNeed(l)); tot += c.lanesXpNeed(l); }
   assert(tot > 10000 && tot < 30000, 'total XP to 18: ' + tot);

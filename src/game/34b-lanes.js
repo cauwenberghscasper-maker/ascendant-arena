@@ -20,7 +20,8 @@
 const LC = { x: 0, z: -2600 }; // Lanes map centre (arena −1000, rift −1400, dungeon −1800, siege −2200)
 CFG.lanes = {
   unlock: 5, sizes: [1, 2, 3], half: { x: 19, z: 64 }, wide3: 23, // field half-size (3v3 is a little wider)
-  core: 54, towers: [21, 38], // outer tower (nearer the middle) first, inner tower second fountain: 60, fountainR: 6, campX: 15, campZ: 0,
+  core: 54, towers: [21, 38], // outer tower (nearer the middle) first, inner tower second
+  fountain: 60, fountainR: 6, campX: 15, campZ: 0, // the base's fountain (spawn and heal) and the Lane Guardian camps
   wave: 22, firstWave: 4, melee: 3, ranged: 2, maxMinions: 40, time: 600, countdown: 3,
   respawn: [6, 1, 18], // base seconds, +per minute, cap
   // stats in units of the match's reference hero (a level-L hero in level-L Rare gear): hp in hero shots, dmg in hero HP

@@ -105,6 +105,7 @@ function buildWorldAreas() {
 const AREA_AT = new Int8Array(AREA_COLS * AREA_ROWS_N);
 AREA_CELLS.forEach(([c, r], i) => { AREA_AT[r * AREA_COLS + c] = i; });
 function zoneAt(x, z) {
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return 0; // a broken position must never stop the HUD (it did: Lanes' NaN spawn, 25 Oct)
   const c = Math.max(0, Math.min(AREA_COLS - 1, Math.floor((cellCX(0) + AREA_CELL / 2 - x) / AREA_CELL)));
   const r = Math.max(0, Math.min(AREA_ROWS_N - 1, Math.floor((z - (cellCZ(0) - AREA_CELL / 2)) / AREA_CELL)));
   return AREA_AT[r * AREA_COLS + c];
