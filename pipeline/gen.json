@@ -1,14 +1,14 @@
 {
- "batch": "maps-c",
+ "batch": "maps-3d",
  "jobs": [
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_wall_c23",
+   "name": "tile_forest_d7",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A long low ruined castle wall segment of mossy grey stone blocks, broken uneven top, ivy and small ferns growing on it, wider than tall, flat bottom, seen from the side at three-quarter angle.",
+    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Dark forest floor: brown earth covered in scattered fallen autumn leaves, pine needles, small twigs and soft moss patches.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
+    "seed": 7,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -17,11 +17,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_wall_c41",
+   "name": "tile_forest_d59",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A long low ruined castle wall segment of mossy grey stone blocks, broken uneven top, ivy and small ferns growing on it, wider than tall, flat bottom, seen from the side at three-quarter angle.",
+    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Dark forest floor: brown earth covered in scattered fallen autumn leaves, pine needles, small twigs and soft moss patches.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
+    "seed": 59,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -30,11 +30,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_spawn_c23",
+   "name": "tile_sand_d7",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A round raised stone platform for heroes to gather on: three wide carved stone steps up to a circular flagstone floor, a bronze sun emblem inlaid in the centre, four short stone pillars with bronze caps around the rim.",
+    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Warm golden desert sand dunes with soft wavy wind ripples running across and a few small pebbles.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
+    "seed": 7,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -43,11 +43,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_spawn_c41",
+   "name": "tile_sand_d59",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A round raised stone platform for heroes to gather on: three wide carved stone steps up to a circular flagstone floor, a bronze sun emblem inlaid in the centre, four short stone pillars with bronze caps around the rim.",
+    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Warm golden desert sand dunes with soft wavy wind ripples running across and a few small pebbles.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
+    "seed": 59,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -56,11 +56,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_altar_c23",
+   "name": "tile_lanes_grass_d7",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A forest guardian altar: a mossy round stone dais with a big gnarled tree stump in the middle, a carved stone animal skull set into the stump, mushrooms and roots around it, two small standing stones beside it.",
+    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Lush short green meadow grass with clover patches and a few tiny yellow and white flowers.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
+    "seed": 7,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -69,353 +69,186 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "lanes_altar_c41",
+   "name": "tile_lanes_grass_d59",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A forest guardian altar: a mossy round stone dais with a big gnarled tree stump in the middle, a carved stone animal skull set into the stump, mushrooms and roots around it, two small standing stones beside it.",
+    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Lush short green meadow grass with clover patches and a few tiny yellow and white flowers.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
+    "seed": 59,
     "random_seed": false,
     "steps": 8,
     "shift": 3
    }
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "lanes_statue_c23",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "lanes_altar",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A tall stone statue of a hooded knight guardian holding a huge sword point down in front of him with both hands, weathered grey stone with green moss, on a square stone plinth.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_altar_c23.webp"
+   },
+   "files": [
+    "image"
+   ]
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "lanes_statue_c41",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "lanes_spawn",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A tall stone statue of a hooded knight guardian holding a huge sword point down in front of him with both hands, weathered grey stone with green moss, on a square stone plinth.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_spawn_c23.webp"
+   },
+   "files": [
+    "image"
+   ]
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "lanes_tree_c23",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "lanes_statue",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A large old fantasy tree with a thick twisted trunk and a wide rounded canopy of rich green leaves, a few warm paper lanterns hanging from its lower branches, roots spreading at its foot.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_statue_c41.webp"
+   },
+   "files": [
+    "image"
+   ]
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "lanes_tree_c41",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "lanes_tree",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A large old fantasy tree with a thick twisted trunk and a wide rounded canopy of rich green leaves, a few warm paper lanterns hanging from its lower branches, roots spreading at its foot.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_tree_c23.webp"
+   },
+   "files": [
+    "image"
+   ]
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "rift_gate_c23",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "lanes_wall",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A large standing portal ring made of jagged black obsidian rock, the ring is open with an empty hole in the middle, crimson red crystals growing along the rim, carved violet runes on the stone, a cracked stone base under it.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_wall_c41.webp"
+   },
+   "files": [
+    "image"
+   ]
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "rift_gate_c41",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "rift_floor",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A large standing portal ring made of jagged black obsidian rock, the ring is open with an empty hole in the middle, crimson red crystals growing along the rim, carved violet runes on the stone, a cracked stone base under it.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/rift_floor_c41.webp"
+   },
+   "files": [
+    "image"
+   ]
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "rift_pylon_c23",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "rift_gate",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A tall obsidian pylon: a twisted spire of black volcanic glass rising from a cracked stone base, violet carved runes along its sides, a big faceted crimson crystal held in claws at its top.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/rift_gate_c23.webp"
+   },
+   "files": [
+    "image"
+   ]
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "rift_pylon_c41",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "rift_pylon",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A tall obsidian pylon: a twisted spire of black volcanic glass rising from a cracked stone base, violet carved runes along its sides, a big faceted crimson crystal held in claws at its top.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/rift_pylon_c23.webp"
+   },
+   "files": [
+    "image"
+   ]
   },
   {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "rift_floor_c23",
+   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
+   "api": "/generate_3d",
+   "pre": [
+    "/start_session"
+   ],
+   "ext": ".glb",
+   "name": "rift_shard",
    "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A round floating island platform of black obsidian rock seen from above at a steep angle, its flat top paved with dark violet hexagonal stone tiles and a ring of carved runes, jagged rock hanging underneath.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "rift_floor_c41",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A round floating island platform of black obsidian rock seen from above at a steep angle, its flat top paved with dark violet hexagonal stone tiles and a ring of carved runes, jagged rock hanging underneath.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "rift_shard_c23",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A floating jagged shard of black obsidian rock with crimson red crystal veins running through it, pointed at both ends.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "rift_shard_c41",
-   "args": {
-    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A floating jagged shard of black obsidian rock with crimson red crystal veins running through it, pointed at both ends.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_lanes_grass_c23",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Lush short meadow grass with small clover patches and a few tiny yellow flowers, rich warm greens.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_lanes_grass_c41",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Lush short meadow grass with small clover patches and a few tiny yellow flowers, rich warm greens.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_lanes_path_c23",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. An old cobblestone road of rounded grey and tan stones with moss between the stones.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_lanes_path_c41",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. An old cobblestone road of rounded grey and tan stones with moss between the stones.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_rift_c23",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Dark violet and black hexagonal obsidian floor tiles with thin glowing crimson cracks between them.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_rift_c41",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Dark violet and black hexagonal obsidian floor tiles with thin glowing crimson cracks between them.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_forest_c23",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Dark forest floor of brown soil covered in fallen leaves, pine needles, small twigs and moss patches.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_forest_c41",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Dark forest floor of brown soil covered in fallen leaves, pine needles, small twigs and moss patches.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_sand_c23",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Warm golden desert sand with soft wind ripples and a few small pebbles.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_sand_c41",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Warm golden desert sand with soft wind ripples and a few small pebbles.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_marble_c23",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Pale cream marble temple floor tiles with thin gold seams and light weathering.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_marble_c41",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Pale cream marble temple floor tiles with thin gold seams and light weathering.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_lava_c23",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Black cracked basalt rock with bright orange molten lava flowing in the cracks.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 23,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
-  },
-  {
-   "space": "mcp-tools/Z-Image-Turbo",
-   "api": "/generate",
-   "name": "tile_lava_c41",
-   "args": {
-    "prompt": "Seamless tileable square ground texture for a hand-painted fantasy MMORPG like World of Warcraft 2004, seen straight from above, flat even lighting, no shadows, no perspective, bold painterly brush strokes, stylized, repeating pattern that fills the whole square edge to edge, no objects, no text. Black cracked basalt rock with bright orange molten lava flowing in the cracks.",
-    "resolution": "1024x1024 ( 1:1 )",
-    "seed": 41,
-    "random_seed": false,
-    "steps": 8,
-    "shift": 3
-   }
+    "resolution": "1024",
+    "decimation_target": 100000,
+    "texture_size": 1024,
+    "seed": 7,
+    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/rift_shard_c41.webp"
+   },
+   "files": [
+    "image"
+   ]
   }
  ]
 }
