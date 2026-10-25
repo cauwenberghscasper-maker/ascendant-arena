@@ -2,7 +2,7 @@
 const PROJ_MAX = 520;
 const projectiles = [];
 function blankProj() { return { active: false, x: 0, z: 0, vx: 0, vz: 0, life: 0, total: 0, r: 0, dmg: 0, team: '', owner: 0, pet: false, kind: 'bolt', aoe: 0, aoeMult: 0, slow: 0, charge: 0, color: 0xffffff, y: 1,
-  burn: 0, burnT: 0, homing: 0, pierce: 0, hits: [], bounce: 0, split: null, lob: false, lobH: 0, boomerang: false, returning: false, vamp: 0, speed: 0, chain: 0 }; }
+  burn: 0, burnT: 0, homing: 0, pierce: 0, hits: [], bounce: 0, split: null, lob: false, lobH: 0, boomerang: false, returning: false, vamp: 0, speed: 0, chain: 0, weave: 0, wf: 0, curve: 0, accel: 0 }; }
 for (let i = 0; i < PROJ_MAX; i++) projectiles.push(blankProj());
 let projCursor = 0;
 // the species of the monster that fired a shot, so it flies and lands in that monster's own look (45b-mob-fx.js)
@@ -16,6 +16,7 @@ function spawnProjectile(o) {
       p.slow = o.slow || 0; p.charge = o.charge || 0; p.color = o.color; p.y = o.y || 1.0; p.burn = o.burn || 0; p.burnT = o.burnT || 0;
       p.homing = o.homing || 0; p.pierce = o.pierce || 0; p.hits.length = 0; p.bounce = o.bounce || 0; p.split = o.split || null;
       p.mt = o.team === 'mob' ? mobTypeOf(o.owner) : null; p.hx = o.hx || null; p.hv = o.hv || 0; p.hf = null; p.shape = o.shape || null; p.stun = o.stun || 0; p.knock = o.knock || 1.5; p.ghost = !!o.ghost; p.lob = !!o.lob && !o.ghost; p.lobH = o.lobH || 0; p.boomerang = !!o.boomerang; p.returning = false; p.vamp = o.vamp || 0; p.speed = Math.hypot(o.vx, o.vz); p.chain = o.chain || 0;
+      p.weave = o.weave || 0; p.wf = o.wf || 2; p.curve = o.curve || 0; p.accel = o.accel || 0; p.wnx = o.vz / (p.speed || 1); p.wnz = -o.vx / (p.speed || 1); // hero shot patterns
       return p;
     }
   }
@@ -36,6 +37,7 @@ let HeroFXRef = null;
 
 // team 'mob' (monster and boss attacks) in the open world can only hurt your own hero: skip the scan over every monster
 function forEachTarget(fn, team) {
+  if (G.mode === 'lanes' && G.lanes) { lanesTargets(fn); return; } // Ascendant Lanes: heroes, minions, buildings, camps (34b-lanes.js)
   if (team === 'mob' && G.mode !== 'arena') { fn(G.player); if (G.dungeon && G.dungeon.delve) for (const b of G.dungeon.delve.bots) fn(b); return; }
   if (G.mode === 'arena') { const a = G.arena.fighters; for (let i = 0; i < a.length; i++) fn(a[i]); return; }
   fn(G.player);
@@ -78,7 +80,11 @@ function stepProjectiles(dt) {
         if (d < 0.9 || p.life < -p.total) { p.active = false; continue; }
       }
     }
+    // hero shot patterns: curve (turns as it flies), accel (picks up speed), weave (sways side to side)
+    if (p.curve && !p.returning) { const a = Math.atan2(p.vx, p.vz) + p.curve * dt; p.vx = Math.sin(a) * p.speed; p.vz = Math.cos(a) * p.speed; }
+    if (p.accel && !p.returning) { const k = 1 + p.accel * dt; p.vx *= k; p.vz *= k; p.speed *= k; }
     p.x += p.vx * dt; p.z += p.vz * dt;
+    if (p.weave && !p.returning) { const age = p.total - p.life, w = p.wf * 6.283, lat = p.weave * w * Math.cos(w * age) * dt; p.x += p.wnx * lat; p.z += p.wnz * lat; }
     // another player's shot: looks the same, hits nothing here
     if (p.ghost) { if (p.life <= 0 || (!G.siege && obstacleAt(p.x, p.z, p.r * 0.5))) p.active = false; continue; }
     // lobbed shells arc over everything and only explode on landing
@@ -181,12 +187,13 @@ function aoeDamage(x, z, r, dmg, team, owner, o) {
 function dealDamage(t, amount, srcId, o) {
   if (!t || !t.alive) return 0;
   if (t.isPeer) { // only your own shots, the victim decides; your hits on players still fill your super
-    if (srcId !== G.player.id) return 0;
-    const dealt = pvpHit(t, amount), s = G.player;
-    if (dealt > 0 && o && o.charge) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
+    if (srcId !== G.player.id && !(G.mode === 'lanes' && typeof lanesMpRuns === 'function' && lanesMpRuns(srcId))) return 0;
+    const dealt = G.mode === 'lanes' ? lanesMpHeroHit(t, amount, srcId) : pvpHit(t, amount), s = G.player;
+    if (dealt > 0 && o && o.charge && srcId === s.id) s.superCharge = Math.min(1, s.superCharge + CFG.combat.superPerHit * o.charge * (1 + s.mods.superGain + s.gearSuper));
     return dealt;
   }
   if (t.invulnT > 0) { if (t.isPlayer && typeof delveDodge === 'function') { const s0 = G.ents.get(srcId); if (s0 && (s0.kind === 'enemy' || s0.kind === 'boss')) delveDodge(t); } return 0; }
+  if (G.mode === 'lanes' && G.lanes) { amount = lanesDmgMod(t, srcId, amount); if (!(amount > 0)) return 0; } // shields, backdoor, tower aggro (34b-lanes.js)
   if (t.isPlayer && G.mode === 'hub' && G.menuSafe > 0) return 0; // safe while a menu is open
   if (t.isPlayer && G.rift && amount > t.maxHp * 0.1) t.riftIframe = true; // big rift hits give a short safety window (set after the hit lands)
   if (G.mode === 'hub' && t.kind === 'fighter' && t.isBot && !t.delveBot) return 0; // hub bots are bystanders (dungeon bots fight)
@@ -300,6 +307,7 @@ function stepKeystones(f, dt) {
 }
 function killEntity(t, src, pet = false) {
   t.alive = false;
+  if (G.mode === 'lanes' && G.lanes) { lanesOnKill(t, src); return; } // Ascendant Lanes counts its own falls (34b-lanes.js)
   if (t.kind === 'fighter') {
     ev({ t: 'die', x: t.x, z: t.z, kind: 'fighter', isPlayer: t.isPlayer });
     if (G.mode === 'arena') onArenaDeath(t, src);
@@ -400,7 +408,8 @@ function spawnBullet(f, w, a, lobDist, scale) {
   const dbase = f.dmgAlt;
   const base = dbase * mult;
   const sx = Math.sin(a), sz = Math.cos(a);
-  let life = w.range / speed, lobH = 0;
+  let life = w.accel ? Math.log(1 + w.accel * w.range / speed) / w.accel : w.range / speed, lobH = 0;
+  const curve = w.curve ? w.curve * ((f.volleyN = (f.volleyN | 0) + 1) % 2 ? 1 : -1) : 0;
   if (w.lob) { const d = clamp(lobDist || w.range * 0.8, 3, w.range); life = d / speed; lobH = 1.6 + d * 0.22; }
   const per = 1 / (w.count * (w.burst || 1));
   let split = null;
@@ -413,7 +422,7 @@ function spawnBullet(f, w, a, lobDist, scale) {
   const shot = spawnProjectile({ x: f.x + sx * 0.7, z: f.z + sz * 0.7, vx: sx * speed, vz: sz * speed, life, r, dmg: base, team: f.team, owner: f.id, kind: w.kind,
     aoe, aoeMult, charge: per, color: projColor(f), homing: (w.homing || 0) + (A.seekerChip ? artVal('seekerChip', A.seekerChip) : 0), pierce: (w.pierce || 0) + (A.pierce ? artVal('pierce', A.pierce) : 0),
     bounce: (w.bounce || 0) + (A.rubber ? artVal('rubber', A.rubber) : 0), split, lob: !!w.lob, lobH, boomerang: !!w.boomerang, chain: w.chain || 0,
-    burn, burnT: burn ? 2.5 : 0, slow: (A.frost ? artVal('frost', A.frost) : 0) + (w.slow || 0), vamp: A.vamp ? artVal('vamp', A.vamp) : 0 });
+    burn, burnT: burn ? 2.5 : 0, weave: w.weave || 0, wf: w.weaveHz || 2, curve, accel: w.accel || 0, slow: (A.frost ? artVal('frost', A.frost) : 0) + (w.slow || 0), vamp: A.vamp ? artVal('vamp', A.vamp) : 0 });
   if (w.hero && shot) HeroSupers.decorateBullet(shot, w, f);
   return shot;
 }
@@ -602,7 +611,7 @@ function stepFighter(f, dt, ctx) {
       });
     }
   } else {
-    const sp = f.speed * (f.slowT > 0 ? 0.55 : 1) * (f.swiftT > 0 ? CFG.skills.swift.speed : 1) * (f.ks.phaseT > 0 ? 1.4 : 1);
+    const sp = f.speed * (G.dungeon && f.kind === 'fighter' ? CFG.dungeon.walk : 1) * (f.slowT > 0 ? 0.55 : 1) * (f.swiftT > 0 ? CFG.skills.swift.speed : 1) * (f.ks.phaseT > 0 ? 1.4 : 1);
     f.x += mx * sp * dt; f.z += mz * sp * dt;
     f.moveAmt = lerp(f.moveAmt, Math.min(1, ml), 1 - Math.exp(-dt * 12));
   }
@@ -643,6 +652,7 @@ function stepFighter(f, dt, ctx) {
 }
 
 function boundFighter(f, ctx) {
+  if (G.lanes) { lanesClamp(f); return; }
   if (G.rift && f.isPlayer) { riftClamp(f, f.r); return; }
   if (G.dungeon && (f.isPlayer || f.delveBot)) { dungeonClamp(f, f.r); return; }
   if (G.siege && f.isPlayer) { siegeClamp(f, f.r); return; }

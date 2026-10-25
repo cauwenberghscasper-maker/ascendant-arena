@@ -4,6 +4,7 @@ function simStep(dt) {
   if (G.started && G.profile) { const R = G.profile.records; R.time = (R.time || 0) + dt; if (G.profile.gemBuys > 0) G.profile.gemBuys = Math.max(0, G.profile.gemBuys - dt / 600); }
   if (G.mode === 'hub') stepHub(dt);
   else if (G.mode === 'arena' && G.arena) stepArena(dt);
+  else if (G.mode === 'lanes' && G.lanes) stepLanes(dt);
   stepPendingAoE(dt);
   stepClouds(dt);
   HeroSupers.step(dt);

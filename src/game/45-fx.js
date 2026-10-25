@@ -63,22 +63,27 @@ function fxPalFor(kind, pal) {
 let GEN_FX = {};
 fetch('assets/fx/gen/index.json').then((r) => (r.ok ? r.json() : {})).then((j) => { GEN_FX = j || {}; }).catch(() => {});
 const GEN_SIZE = { explosion: 0.82, poof: 0.8, flame: 0.75 };
+// particle effects (tools/bake_fx_particles.py): fire simulated from hundreds of embers, sparks and flame wisps, 32
+// frames (8x4) per effect, drawn additively so overlapping particles glow hotter. They win over gen/ for that colour.
+let PFX = {};
+fetch('assets/fx/pfx/index.json').then((r) => (r.ok ? r.json() : {})).then((j) => { PFX = j || {}; }).catch(() => {});
 const SpriteFX = {
   tex: new Map(), items: [], loader: new THREE.TextureLoader(),
   sheet(kind, pal, gen) {
-    const k = (gen ? 'gen/' : '') + kind + '_' + pal; let t = this.tex.get(k);
+    const k = (gen === 'pfx' ? 'pfx/' : gen ? 'gen/' : '') + kind + '_' + pal; let t = this.tex.get(k);
     if (!t) { t = this.loader.load('assets/fx/' + k + '.png'); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; this.tex.set(k, t); }
     return t;
   },
-  item(flat) {
-    let it = this.items.find((o) => !o.on && o.flat === flat);
+  item(flat, add) {
+    add = !!add; let it = this.items.find((o) => !o.on && o.flat === flat && o.add === add);
     if (!it) {
       if (this.items.length > 140) return null;
-      const mat = flat ? new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, alphaTest: 0.4, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -20 })
-        : new THREE.SpriteMaterial({ transparent: true, depthWrite: false, alphaTest: 0.4, toneMapped: false });
+      const glow = add ? { blending: THREE.AdditiveBlending, alphaTest: 0.02 } : { alphaTest: 0.4 };
+      const mat = flat ? new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -20, ...glow })
+        : new THREE.SpriteMaterial({ transparent: true, depthWrite: false, toneMapped: false, ...glow });
       const obj = flat ? new THREE.Mesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), mat) : new THREE.Sprite(mat);
       obj.frustumCulled = false; obj.renderOrder = 6; dynGroup.add(obj);
-      it = { obj, mat, flat, on: false }; this.items.push(it);
+      it = { obj, mat, flat, add, on: false }; this.items.push(it);
     }
     return it;
   },
@@ -86,15 +91,18 @@ const SpriteFX = {
     const S = FX_SHEETS[kind]; if (!S) return;
     const G2 = GEN_FX[kind], gen = G2 && (G2.includes(pal) ? pal : G2.includes(fxPalFor(kind, pal)) ? fxPalFor(kind, pal) : null);
     pal = gen || fxPalFor(kind, pal);
-    const it = this.item(!!S.flat); if (!it) return;
-    const base = this.sheet(kind, pal, !!gen);
-    if (!it.map || it.map.source !== base.source) { if (it.map) it.map.dispose(); it.map = base.clone(); it.map.repeat.set(gen ? 0.25 : 1 / S.n, gen ? 0.25 : 1); it.mat.map = it.map; it.mat.needsUpdate = true; }
+    const P = PFX[kind] && PFX[kind][pal]; // particle sheet for this colour: cols x rows grid of square frames
+    const it = this.item(!!S.flat, !!P); if (!it) return;
+    const base = this.sheet(kind, pal, P ? 'pfx' : !!gen);
+    const cols = P ? P.cols : gen ? 4 : S.n, rows = P ? P.rows : gen ? 4 : 1;
+    if (!it.map || it.map.source !== base.source) { if (it.map) it.map.dispose(); it.map = base.clone(); it.map.repeat.set(1 / cols, 1 / rows); it.mat.map = it.map; it.mat.needsUpdate = true; }
     it.on = true; it.obj.visible = true; it.kind = kind; it.t = -(opts && opts.delay || 0); it.speed = (opts && opts.speed) || 1;
-    it.gen = !!gen; it.fps = gen ? 16 / (S.n / S.fps) : S.fps; it.n = gen ? 16 : S.n; // a painted sheet plays as long as the old one did
-    const h = gen ? size * (GEN_SIZE[kind] || 1) : size, w = gen ? h : size * S.w / S.h;
+    it.cols = cols; it.rows = rows; it.n = P ? P.n : gen ? 16 : S.n; it.fps = it.n / (S.n / S.fps); // every sheet plays as long as the old one did
+    it.gen = !!(gen || P); const sq = !!(gen || P);
+    const h = sq ? size * (GEN_SIZE[kind] || 1) : size, w = sq ? h : size * S.w / S.h;
     if (it.flat) { it.obj.position.set(x, 0.32, z); it.obj.scale.set(w, 1, h); it.obj.rotation.y = Math.random() * 6.28; }
     else { it.obj.position.set(x, y, z); it.obj.scale.set(w, h, 1); it.obj.center.set(0.5, S.base === 'bottom' ? 0.06 : 0.5); it.mat.rotation = opts && opts.rot != null ? opts.rot : 0; }
-    if (gen) it.map.offset.set(0, 0.75); else it.map.offset.set(0, 0); it.obj.visible = it.t >= 0;
+    it.map.offset.set(0, 1 - 1 / rows); it.obj.visible = it.t >= 0;
   },
   update(dt) {
     for (const it of this.items) {
@@ -103,7 +111,7 @@ const SpriteFX = {
       const f = Math.floor(it.t * it.fps);
       if (f >= it.n) { it.on = false; it.obj.visible = false; continue; }
       it.obj.visible = true;
-      if (it.gen) it.map.offset.set((f % 4) * 0.25, 0.75 - Math.floor(f / 4) * 0.25); else it.map.offset.set(f / it.n, 0);
+      it.map.offset.set((f % it.cols) / it.cols, 1 - (Math.floor(f / it.cols) + 1) / it.rows);
     }
   },
 };

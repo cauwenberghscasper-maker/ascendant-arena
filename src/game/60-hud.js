@@ -84,6 +84,7 @@ function updateTags() {
     if (delveOn()) for (const e of mpVisible()) if (e.alive === false) put(e.x, 1.6, e.z, `${e.nick} is down · stand close to revive`, null, 'peer down');
     for (const e of mpVisible()) if (near(e, 40) && e.alive) put(e.x, 2.5 * growthScale(e), e.z, `${e.pvp ? 'PvP · ' : ''}${e.nick} · ${e.level}`, e.hp, e.pvp ? 'peer pvp' : 'peer');
     for (const nn of shownNpcs()) if (near(nn, 28)) put(nn.x, 3.35, nn.z, nn.def.name, null, 'npc');
+    if (G.lanes) lanesTags(put, near);
     if (G.siege) {
       // fort objectives: always shown, big bars that flash while under attack
       for (const o of G.siege.objs) put(o.x, o.def.h, o.z, o.alive ? `${o.name} · ${Math.ceil(clamp(o.hp / o.maxHp, 0, 1) * 100)}%` : `${o.name} · destroyed`, o.alive ? o.hp / o.maxHp : 0, `obj${o.def.main ? ' main' : ''}${o.hurtT > 0 ? ' hurt' : ''}${o.alive ? '' : ' down'}`);
@@ -269,6 +270,7 @@ function updateHUD(dt) {
   setHidden('bSpecial', !spc);
   if (spc) { const E = CFG.elements[spc]; setText('bSpecialLbl', E.short); setBtnIcon('bSpecial', BTN_ICON[spc] || 'k_storm'); setStyle('bSpecial', '--cd', clamp(f.specialCd / E.cd, 0, 1).toFixed(2)); setStyle('bSpecial', '--el', '#' + E.color.toString(16).padStart(6, '0')); }
   setHidden('bSkill', !sk);
+  if (G.lanes) lanesHud(f, sk, spc); // in-match level, XP and locked buttons (47e-lanes-view.js)
   if (sk) { setStyle('bSkill', '--cd', clamp(f.skillCd / (CFG.skills[sk].cd * (1 - f.mods.skillCd) * (1 - (f.cdr || 0))), 0, 1).toFixed(2)); setText('bSkillLbl', CFG.skills[sk].short); setBtnIcon('bSkill', BTN_ICON[sk] || 'k_tempo'); }
   // interact
   const act = !inArena && G.interact && G.started;
@@ -283,7 +285,8 @@ function updateHUD(dt) {
     setText('aGas', ar.phase === 'countdown' ? 'Showdown' : gasIn > 0 ? `Gas in ${Math.ceil(gasIn)}s` : 'Gas closing in');
     const cd = ar.phase === 'countdown' ? String(Math.ceil(ar.cd)) : '';
     setHidden('countdown', !cd); if (cd) setText('countdown', cd);
-  } else setHidden('countdown', true);
+  } else if (G.lanes && G.lanes.phase === 'countdown') { setHidden('countdown', false); setText('countdown', String(Math.ceil(G.lanes.cd))); }
+  else setHidden('countdown', true);
   // objective tracker
   updateObjective();
   updateBossTracker();
@@ -305,6 +308,7 @@ function updateObjective() {
   if (G.mode === 'arena') { setHidden('objective', true); return; }
   const shr = activeShrine();
   if (G.rift) { const r = G.rift; text = r.phase === 'intro' ? `Rift floor ${r.floor} · get ready` : r.phase === 'clear' ? `Floor ${r.floor} cleared! Next floor…` : `Rift floor ${r.floor} · ${riftLeft()} left · ${Math.ceil(r.t)}s`; }
+  else if (G.lanes) text = lanesObjText();
   else if (G.siege) { const S = G.siege, k = S.objs[0];
     const F = fortState();
     text = S.phase === 'build' ? (!F.go ? `Wave ${S.wave} · press Start when ready` : F.hold ? `Paused · wave ${S.wave} from ${siegeSideNames(S.sides)}` : `Wave ${S.wave} in ${Math.ceil(S.t)}s · from ${siegeSideNames(S.sides)}`) : S.phase === 'clear' ? `Wave ${S.wave} held!` : `Wave ${S.wave} · ${siegeLeft()} left · Keep ${Math.ceil(clamp(k.hp / k.maxHp, 0, 1) * 100)}%`; }

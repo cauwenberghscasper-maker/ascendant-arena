@@ -1,0 +1,65 @@
+{
+ "explosion": {
+  "fire": {
+   "cols": 8,
+   "rows": 4,
+   "n": 32
+  }
+ },
+ "hit": {
+  "fire": {
+   "cols": 8,
+   "rows": 4,
+   "n": 32
+  }
+ },
+ "impact": {
+  "fire": {
+   "cols": 8,
+   "rows": 4,
+   "n": 32
+  }
+ },
+ "crit": {
+  "fire": {
+   "cols": 8,
+   "rows": 4,
+   "n": 32
+  }
+ },
+ "nova": {
+  "fire": {
+   "cols": 8,
+   "rows": 4,
+   "n": 32
+  }
+ },
+ "ring": {
+  "fire": {
+   "cols": 8,
+   "rows": 4,
+   "n": 32
+  }
+ },
+ "flame": {
+  "fire": {
+   "cols": 8,
+   "rows": 4,
+   "n": 32
+  }
+ },
+ "poof": {
+  "fire": {
+   "cols": 8,
+   "rows": 4,
+   "n": 32
+  }
+ },
+ "slash": {
+  "fire": {
+   "cols": 8,
+   "rows": 4,
+   "n": 32
+  }
+ }
+}

@@ -171,6 +171,7 @@ function openMenu() {
     ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
     ${big('mGear', 'm_case', 'Inventory', p.cases.length ? `${p.cases.length} chest${p.cases.length > 1 ? 's' : ''} to open` : `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
     ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()))}
+    ${CFG.lanes.mainMode ? big('mLanes', 'm_lanes', 'Ascendant Lanes', G.lanes ? 'Match on' : `${fmt(lanesRec().trophies)} trophies · play a match`, false).replace('class="hubTile', 'class="hubTile wide lnHub') : ''}
     ${big('mDelve', 'm_portal', 'Dungeons', PARTY.code ? `Party ${PARTY.code} · ${partyMembers().length}/${CFG.delve.maxParty}` : PARTY.q ? 'Looking for heroes…' : 'Party up · loot & sets', false).replace('class="hubTile', 'class="hubTile wide')}
   </div>`);
 }
@@ -185,6 +186,7 @@ function openJournal() {
     tile('mIdle', 'm_idle', 'Bank & Camp', 'Coffers & expeditions', idleAlert()),
     tile('mPlayers', 'm_players', 'Fellow Adventurers', mpSummary()),
     tile('mArena', 'm_arena', 'Showdown', 'Duel 9 rival champions', false),
+    tile('mLanes', 'm_lanes', 'Ascendant Lanes', G.lanes ? 'Match on' : '1v1 · 2v2 · 3v3 lane battles', false),
     tile('mDelve', 'm_portal', 'Dungeons', 'Party dungeons, sets & loot', false),
   ];
   openModal(`<div class="mtiles">${adventure.join('')}</div>${comingUpHtml(3)}`);
