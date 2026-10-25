@@ -876,7 +876,7 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .panel .row.lnSides button { min-height: 44px; }
 .tag.obj.foe .tb i { background: var(--hpLow); } .tag.obj.ally .tb i { background: #5dd6ff; }
 /* Lanes: buttons that open with the match level (locked: greyed with the level), and a flash when one opens */
-.cbtn.lnLock { filter: grayscale(1) brightness(.55); pointer-events: none; }
+.cbtn.lnLock { filter: grayscale(1) brightness(.5) !important; opacity: .75; pointer-events: none; }
 .cbtn.lnLock::after { content: attr(data-lv); position: absolute; left: 50%; bottom: -2px; transform: translateX(-50%); padding: 1px 4px; font: 10px/1 var(--body); color: #f2ead2; background: #14111c; box-shadow: 0 0 0 2px var(--og-ink, #0b0c1f); white-space: nowrap; }
 .cbtn.lnNew { animation: lnNew .6s steps(2) 4; }
 @keyframes lnNew { 50% { filter: brightness(1.9) drop-shadow(0 0 8px #ffe08a); } }

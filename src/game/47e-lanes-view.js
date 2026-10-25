@@ -50,6 +50,8 @@ function buildLanesView() {
   // team rings under every minion (they also show the minion while its model is still loading)
   const rg = new THREE.RingGeometry(0.45, 0.68, 20).rotateX(-Math.PI / 2), rm = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.85, depthWrite: false });
   lanesParts.rings = new THREE.InstancedMesh(rg, rm, LN_MIN_POOL * 4); for (let i = 0; i < LN_MIN_POOL * 4; i++) lanesParts.rings.setColorAt(i, _col.set(0xffffff)); lanesParts.rings.count = 0; lanesParts.rings.frustumCulled = false; lanesGroup.add(lanesParts.rings);
+  // a team ring under every building: it reads from the top camera and stands in while the model streams in
+  for (const st of S.structs) { const m = new THREE.Mesh(new THREE.RingGeometry(st.r + 0.2, st.r + 0.7, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: LN_COL[st.team], transparent: true, opacity: 0.7, depthWrite: false })); m.position.set(st.x, 0.04, st.z); lanesGroup.add(m); st.ringMesh = m; }
   // enemy tower reach: a faint red ring that shows when you walk close
   for (const s of S.structs) if (s.sk === 'tower') { const m = new THREE.Mesh(new THREE.RingGeometry(R.tower.range - 0.25, R.tower.range, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: LN_COL[s.team], transparent: true, opacity: 0, depthWrite: false })); m.position.set(s.x, 0.05, s.z); lanesGroup.add(m); lanesParts.reach.push({ s, m }); }
 }
@@ -70,7 +72,7 @@ function updateLanesView(dt, t) {
   hubGroup.visible = false;
   lanesParts.t += dt;
   // buildings: a fallen one disappears in a cloud of rubble
-  for (const q of lanesParts.structs) { const dead = !q.s.alive; if (dead !== !!q.it.hidden) { q.it.hidden = dead; q.h.dirty = true; if (dead) burst(q.s.x, 2, q.s.z, 50, 0x6a5a4a, 8, 1.3, 0.5, 4, 2.4); } }
+  for (const q of lanesParts.structs) { if (q.s.ringMesh) q.s.ringMesh.visible = q.s.alive; const dead = !q.s.alive; if (dead !== !!q.it.hidden) { q.it.hidden = dead; q.h.dirty = true; if (dead) burst(q.s.x, 2, q.s.z, 50, 0x6a5a4a, 8, 1.3, 0.5, 4, 2.4); } }
   // minions: alive ones take the pool's slots in order, the rest hide
   const rings = lanesParts.rings; let rn = 0;
   for (const team of LN_TEAMS) for (const mk of ['melee', 'ranged']) {
