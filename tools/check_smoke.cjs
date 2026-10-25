@@ -57,7 +57,8 @@ function serve() {
       await page.waitForFunction(() => window.__gameBooted, null, { timeout: 120000 });
       // remember where the first geometry with broken (NaN) coordinates came from, to name it if it shows up
       await page.evaluate(() => { const B = __THREE.BufferGeometry.prototype, o = B.computeBoundingSphere, sa = B.setAttribute; B.setAttribute = function (n, a) { if (n === 'position' && a && a.array && a.array.some && a.array.some(Number.isNaN)) this.userData.made = 'made with NaN at ' + new Error().stack.split('\n').slice(2, 7).join(' < '); return sa.call(this, n, a); }; B.computeBoundingSphere = function () { o.call(this); if (this.boundingSphere && Number.isNaN(this.boundingSphere.radius) && !window.__nanAt) window.__nanAt = this.type + ' ' + (this.userData.made || new Error().stack.split('\n').slice(2, 7).join(' < ')); }; });
-      await page.locator('#playBtn').click();
+      // with Ascendant Lanes as the main mode, Play opens Lanes for players past the tutorial; the world has its own button
+      const wb = page.locator('#worldBtn'); if (await wb.isVisible()) await wb.click(); else await page.locator('#playBtn').click();
       await page.waitForFunction(() => window.__game && __game.started && __game.player && __game.player.alive, null, { timeout: 60000 });
       await page.waitForTimeout(1500);
       assert.deepEqual(errors, []);
@@ -297,6 +298,20 @@ function serve() {
         return { pages: seen.length, bad, level: __game.profile.level };
       });
       assert.deepEqual(r.bad, []); assert(r.pages >= 8, 'only ' + r.pages + ' pages opened'); assert.deepEqual(errors, []); return { pages: r.pages, level: r.level };
+    });
+
+    await step('an Ascendant Lanes match with bots runs, levels the hero and returns to the world', async () => {
+      const r = await page.evaluate(() => {
+        const pl = __game.player, back = { x: pl.x, z: pl.z }; if (!__lanes.startLanes({ size: 2 })) return { started: false };
+        const S = __game.lanes; for (let i = 0; i < 60 * 45; i++) { pl.intent.mz = S.myTeam === 'blue' ? 0.4 : -0.4; pl.intent.autoFire = true; __dbg.simStep(1 / 60); }
+        const out = { started: true, fighters: S.fighters.length, minions: S.minions.filter((m) => m.alive).length, waves: S.waveN, lvl: pl.lnLvl, phase: S.phase, mode: __game.mode };
+        __lanes.lanesEnd(S.myTeam, 'core'); for (let i = 0; i < 200; i++) __dbg.simStep(1 / 60); __lanes.leaveLanes();
+        out.after = [__game.mode, pl.team, Math.round(pl.x - back.x), Math.round(pl.z - back.z), !!__game.lanes]; return out;
+      });
+      await page.waitForTimeout(1500);
+      assert(r.started, 'the match did not start'); assert.equal(r.fighters, 4); assert(r.waves >= 2 && r.lvl >= 2, 'waves came and the hero levelled: ' + JSON.stringify(r));
+      assert.deepEqual(r.after, ['hub', 'ally', 0, 0, false]); assert.deepEqual(errors, []);
+      return { waves: r.waves, lvl: r.lvl };
     });
 
     if (shots) await page.screenshot({ path: path.join(shots, 'smoke-end.png') });

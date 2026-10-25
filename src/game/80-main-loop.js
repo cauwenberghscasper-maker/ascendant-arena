@@ -17,7 +17,7 @@ function frame(now) {
   if (G.paused) return;
   buildPlayerIntent(dt);
   // the open world keeps running behind menus (you are safe while one is open); Showdown pauses
-  if (!G.modal || (G.mode === 'hub' && G.started)) {
+  if (!G.modal || (G.mode === 'hub' && G.started) || G.mode === 'lanes') { // a Lanes match runs on behind menus too
     simAcc += G.slowT > 0 ? dt * 0.3 : dt; G.slowT -= dt; // a Radiant drop slows the world for a moment
     let n = 0;
     while (simAcc >= CFG.sim.step && n < CFG.sim.maxSteps) { if (hz120) Interp.snap(); simStep(CFG.sim.step); simAcc -= CFG.sim.step; n++; }
@@ -27,6 +27,7 @@ function frame(now) {
   // modal queue: class choice, boss loot, arena results
   if (!G.modal) {
     if (G.mode === 'arena' && G.arena && G.arena.result && G.arena.phase === 'over' && G.arena.overT <= 0) openResults();
+    else if (G.mode === 'lanes' && G.lanes && G.lanes.result && G.lanes.overT <= 0 && !G.lanes.shown) { G.lanes.shown = true; openLanesResult(); }
     else if (G.mode === 'hub' && G.pendingClassChoice && !G.profile.cls) openClassChoice();
     else if (G.mode === 'hub' && G.lootQueue.length) openLoot(G.lootQueue.shift());
     else if (G.mode === 'hub' && G.riftResult) { const rr = G.riftResult; G.riftResult = null; openRiftResult(rr); }
@@ -37,7 +38,7 @@ function frame(now) {
   if (hz120) Interp.apply(simAcc / CFG.sim.step);
   syncViews(dt, t);
   updateGearAura(dt); updateProjectileMeshes(dt); HeroFX.update(dt, HeroSupers.marked); updateParticles(dt); updateRings(dt); updateAim(dt);
-  if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else updateArenaProps(t);
+  if (G.mode === 'hub') { updateHubProps(t); updateRiftProps(t); } else if (G.mode === 'lanes') updateLanesView(dt, t); else updateArenaProps(t);
   updateCamera(dt);
   updateCompanion(dt,t);
   // the sun's shadow map at most 60 times a second: the world steps at 60 Hz, so at 120 Hz every other redraw was the same
@@ -61,6 +62,7 @@ const Interp = {
   steps: 0, saved: [],
   bodies(fn) {
     if (G.mode === 'arena' && G.arena) { for (const f of G.arena.fighters) fn(f); }
+    else if (G.mode === 'lanes' && G.lanes) { for (const f of G.lanes.fighters) fn(f); for (const m of G.lanes.minions) if (m.alive) fn(m); }
     else { for (const f of G.hubFighters) fn(f); for (const e of G.enemies) fn(e); if (G.boss) fn(G.boss); }
     for (let i = 0; i < PROJ_MAX; i++) { const p = projectiles[i]; if (p && p.active) fn(p); }
   },

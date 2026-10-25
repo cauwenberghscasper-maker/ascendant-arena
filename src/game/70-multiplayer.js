@@ -59,7 +59,7 @@ async function mpInit() {
 // 'hit' share the monsters (see the shared monsters section below).
 const MP_ROOM_CAP = 60;
 // a party (or a matchmaking queue) has its own channel instead of the lobby (73-party.js)
-function mpRoomKey() { const fk = G.siege && G.siege.code ? 'fort-' + G.siege.code : '', pk = typeof partyRoomKey === 'function' ? partyRoomKey() : ''; return (LOCAL_PREVIEW ? 'dev-' : '') + (fk || pk || 'lobby-w11'); } // World v11 moved every monster slot: old clients stay in their old lobby
+function mpRoomKey() { const fk = G.siege && G.siege.code ? 'fort-' + G.siege.code : '', lk = typeof lanesRoomKey === 'function' ? lanesRoomKey() : '', pk = typeof partyRoomKey === 'function' ? partyRoomKey() : ''; return (LOCAL_PREVIEW ? 'dev-' : '') + (fk || lk || pk || 'lobby-w11'); } // lk: an Ascendant Lanes party, queue or match (76-lanes-mp.js) // World v11 moved every monster slot: old clients stay in their old lobby
 const RT = { ws: null, state: 'none', topic: '', key: '', joinRef: '', ref: 0, retry: 0, backoff: 1, hbT: 25, sendT: 0, beatT: 0, last: '', tracked: '', present: 0, sent: 0 };
 function rtSend(topic, event, payload, joinRef) {
   if (!RT.ws || RT.ws.readyState !== 1) return false;
@@ -112,6 +112,7 @@ function rtMessage(d) {
       if (P.event === 'phit' && P.payload && P.payload.to === MP.sid) { pvpRecv(P.payload); break; }
       if (P.event === 'pdie' && P.payload && P.payload.to === MP.sid) { pvpDieRecv(P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^(dgo|drev|mmgo|pfull|dbot|dask|dans|ddoor|dpz|dbs|dsec)$/.test(P.event)) { partyRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
+      if (P.payload && typeof P.payload.sid === 'string' && /^l[a-z]+$/.test(P.event) && typeof lanesRecv === 'function') { lanesRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; } // Ascendant Lanes (76-lanes-mp.js)
       if (P.payload && typeof P.payload.sid === 'string' && /^f[a-z]+$/.test(P.event) && typeof siegeMpRecv === 'function') { siegeMpRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.payload && typeof P.payload.sid === 'string' && /^b/.test(P.event)) { bossRecv(P.event, P.payload.sid.slice(0, 16), P.payload); break; }
       if (P.event === 'st' && P.payload && typeof P.payload.sid === 'string') { mpApply(P.payload.sid.slice(0, 16), P.payload, 'rt', false); if (!MP.list.includes(MP.peers.get(P.payload.sid.slice(0, 16)))) mpRebuild(); } break;
@@ -120,7 +121,7 @@ function rtMessage(d) {
 }
 // presence holds the slow-changing card (nick, hero, level, mode); it is re-sent only when one of those changes
 function rtTrack() {
-  const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al, s.pv, s.pc, s.rd, s.dg, s.df, s.dr, s.pw, s.qk, s.fc, s.ft].join('|'); if (card === RT.tracked) return;
+  const s = mpState(), card = [s.n, s.c, s.l, s.md, s.al, s.pv, s.pc, s.rd, s.dg, s.df, s.dr, s.pw, s.qk, s.fc, s.ft, s.lc, s.lt, s.lq, s.lrd, s.ls].join('|'); if (card === RT.tracked) return;
   const now = performance.now(); if (now - (RT.trackAt || 0) < 1000) return; // the server limits presence updates per client
   RT.trackAt = now; RT.tracked = card; s.t = Date.now(); rtSend(RT.topic, 'presence', { type: 'presence', event: 'track', payload: s });
 }
@@ -327,7 +328,7 @@ function mpApply(key, s, via, guest) {
   const t = mpNum(s.t, Date.now());
   let e = MP.peers.get(key);
   if (e && t < e.t - 50) return e; // older than what we already have
-  const cls = CFG.brawlerOrder.includes(s.c) ? s.c : STARTER_HERO, x = clamp(mpNum(s.x, 0), -2000, 2000), z = clamp(mpNum(s.z, 0), -2000, 2000);
+  const cls = CFG.brawlerOrder.includes(s.c) ? s.c : STARTER_HERO, x = clamp(mpNum(s.x, 0), -3000, 3000), z = clamp(mpNum(s.z, 0), -3000, 3000); // instances sit far out (Lanes at z −2600)
   if (!e) {
     e = { id: 'peer:' + key, key, kind: 'fighter', isPeer: true, team: 'peer', cls, x, z, tx: x, tz: z, facing: 0, tf: 0, moveAmt: 0, alive: true, level: 1, r: 0.55,
       hp: 1, maxHp: 1, nick: 'Hero', md: 'hub', seq: mpNum(s.s, 0), guest: !!guest, attackAnim: 0, t: 0 };
@@ -337,14 +338,15 @@ function mpApply(key, s, via, guest) {
   { const pdt = (t - (e.t || t)) / 1000; if (pdt > 0.02 && pdt < 1) { e.vx = clamp((x - e.tx) / pdt, -20, 20); e.vz = clamp((z - e.tz) / pdt, -20, 20); } if (!(mpNum(s.m, 0) > 0)) e.vx = e.vz = 0; }
   e.t = t; e.seenAt = Date.now(); e.via = via; e.rcv = performance.now();
   e.cls = cls; e.tx = x; e.tz = z; e.tf = mpNum(s.f, 0); e.moveAmt = clamp(mpNum(s.m, 0), 0, 1);
-  e.level = clamp(Math.floor(mpNum(s.l, 1)), 1, 100000); e.nick = cleanNick(s.n) || 'Hero'; e.md = s.md === 'hub' ? 'hub' : s.md === 'rift' ? 'rift' : s.md === 'delve' ? 'delve' : s.md === 'siege' ? 'siege' : 'away';
+  e.level = clamp(Math.floor(mpNum(s.l, 1)), 1, 100000); e.nick = cleanNick(s.n) || 'Hero'; e.md = s.md === 'hub' ? 'hub' : s.md === 'rift' ? 'rift' : s.md === 'delve' ? 'delve' : s.md === 'siege' ? 'siege' : s.md === 'lanes' ? 'lanes' : 'away';
+  if (typeof lanesApplyPeer === 'function') lanesApplyPeer(e, s);
   e.fc = typeof s.fc === 'string' ? s.fc.slice(0, 12) : ''; e.ft = mpNum(s.ft, 0); // Bastion world code and when they came in
   // party card: code, join time, Power, ready, the leader's dungeon and difficulty, the run seed, the queue
   e.pc = typeof s.pc === 'string' ? s.pc.slice(0, 8) : ''; e.jt = mpNum(s.jt, 0); e.pw = Math.max(0, mpNum(s.pw, 0)); e.rd = s.rd === 1; e.dg = typeof s.dg === 'string' ? s.dg.slice(0, 12) : '';
   e.df = clamp(Math.floor(mpNum(s.df, 0)), 0, 999); e.dr = mpNum(s.dr, 0) >>> 0; e.qk = typeof s.qk === 'string' ? s.qk.slice(0, 32) : '';
   e.pvp = s.pv === 1; e.alive = s.al !== 0; e.hp = clamp(mpNum(s.h, 1), 0, 1); e.maxHp = 1; e.aim = mpNum(s.a, 0);
   const sq = mpNum(s.s, 0);
-  if (sq !== e.seq) { if (sq > e.seq && sq - e.seq < 6 && (e.md === 'hub' || e.md === 'delve' || e.md === 'siege')) mpGhostShot(e); e.seq = sq; }
+  if (sq !== e.seq) { if (sq > e.seq && sq - e.seq < 6 && (e.md === 'hub' || e.md === 'delve' || e.md === 'siege' || e.md === 'lanes')) mpGhostShot(e); e.seq = sq; }
   return e;
 }
 function mpRebuild() {
@@ -384,7 +386,7 @@ function mpDbPeers(snap) {
 }
 // another player's shot: same look as theirs, but it never hits anything here
 function mpGhostShot(e) {
-  const pl = G.player; if (!pl || Math.hypot(e.x - pl.x, e.z - pl.z) > 45 || G.rift || G.mode !== 'hub') return;
+  const pl = G.player; if (!pl || Math.hypot(e.x - pl.x, e.z - pl.z) > 45 || G.rift || (G.mode !== 'hub' && G.mode !== 'lanes')) return;
   const w = CFG.attacks[e.cls] || CFG.attacks.bolt, n = Math.min(5, w.count || 1), base = e.aim;
   for (let i = 0; i < n; i++) {
     const a = n > 1 ? base + (i / (n - 1) - 0.5) * (w.spread || 0.3) : base, sp = Math.min(w.speed, 30);
@@ -395,12 +397,12 @@ function mpGhostShot(e) {
 // visible peers: in the open world, while you are too
 // in a party dungeon: the party members in this run
 function mpVisible() { if (G.siege) return G.siege.code ? MP.list.filter((e) => e.md === 'siege' && e.fc === G.siege.code) : []; if (G.mode !== 'hub' || G.rift) return []; if (delveOn()) { const seed = G.dungeon.delve.seed; return MP.list.filter((e) => e.md === 'delve' && e.dr === seed); } return MP.list.filter((e) => e.md === 'hub'); }
-function mpOnShot(f, dx, dz) { if (f.isPlayer && G.mode === 'hub') { MP.seq++; MP.aim = Math.atan2(dx, dz); } }
+function mpOnShot(f, dx, dz) { if (f.isPlayer && (G.mode === 'hub' || G.mode === 'lanes')) { MP.seq++; MP.aim = Math.atan2(dx, dz); } }
 function mpState() {
   const p = G.profile, pl = G.player, r1 = (v) => Math.round(v * 10) / 10;
   return { v: 8, sid: MP.sid, n: mpNick(p), c: p.cls, l: p.level, x: r1(pl.x), z: r1(pl.z), f: Math.round(pl.facing * 100) / 100, m: r1(pl.moveAmt || 0), s: MP.seq, a: Math.round(MP.aim * 100) / 100,
     h: Math.round(clamp(pl.hp / pl.maxHp, 0, 1) * 100) / 100, al: pl.alive ? 1 : 0, md: G.rift ? 'rift' : delveOn() ? 'delve' : G.dungeon ? 'dungeon' : G.siege ? 'siege' : G.mode, pv: typeof pvpOn === 'function' && pvpOn() ? 1 : 0,
-    ...(typeof partyCard === 'function' ? partyCard() : {}), ...(G.siege && G.siege.code ? { fc: G.siege.code, ft: FW.ft } : {}) };
+    ...(typeof partyCard === 'function' ? partyCard() : {}), ...(typeof lanesCard === 'function' ? lanesCard() : {}), ...(G.siege && G.siege.code ? { fc: G.siege.code, ft: FW.ft } : {}) };
 }
 function mpUpdate(dt) {
   // smooth other players toward where they said they are
@@ -415,6 +417,7 @@ function mpUpdate(dt) {
   rtUpdate(dt);
   if (typeof pvpFlush === 'function') pvpFlush(dt);
   if (typeof partyUpdate === 'function') partyUpdate(dt);
+  if (typeof lanesUpdate === 'function') lanesUpdate(dt);
   if (!G.started) return;
   MP.sendT -= dt; MP.dbT -= dt; MP.dbBeat -= dt;
   // room: ~8 times a second, only when something changed

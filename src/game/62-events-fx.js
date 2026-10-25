@@ -291,6 +291,7 @@ function processEvents() {
       case 'respawn': showToast('Back in town. Watch your health!'); break;
       case 'spawn': break;
       case 'classChosen': showBanner(`You are a ${CFG.classes[e.cls].name}`, 'New super, skill and skill tree unlocked', 'gold'); Sfx.play('level'); break;
+      case 'lanesStart': case 'lanesLeave': case 'lanesEnd': case 'lanesKill': case 'lanesStructDown': case 'lanesBuff': case 'lanesRespawn': case 'lanesTowerShot': case 'lanesFight': lanesEvent(e); break; // 47e-lanes-view.js
       case 'arenaStart': Cam.yaw = 0; { const f0 = G.arena.fighters[0]; Cam.pos.set(f0.x, 30, f0.z - 14); Cam.look.set(f0.x, 0, f0.z + 1.5); Cam.fx = f0.x; Cam.fz = f0.z + 1.5; } hubGroup.visible = false; arenaGroup.visible = true; scene.fog.near = 60; scene.fog.far = 160; scene.fog.color.set(PALETTE.fog); paintSky(new THREE.Color(PALETTE.skyTop), new THREE.Color(PALETTE.skyHorizon)); Coach.render(); break;
       case 'arenaEnd': Cam.yaw = 0; Cam.pos.set(G.player.x, 30, G.player.z - 14); Cam.fx = G.player.x; Cam.fz = G.player.z + 1.5; hubGroup.visible = true; arenaGroup.visible = false; scene.fog.near = 50; scene.fog.far = Q.lowTier ? 95 : 140; Coach.render(); break;
       case 'fightStart': Sfx.play('tick'); showBanner('Fight!', 'Last one standing wins', 'gold'); break;
@@ -532,6 +533,7 @@ function drawMinimap() {
     const f = ar.fighters[0]; if (f.alive) { g.fillStyle = '#3fa9ff'; g.beginPath(); g.arc(ax(f.x), ay(f.z), 4 * dpr, 0, Math.PI * 2); g.fill(); }
     return;
   }
+  if (G.mode === 'lanes' && G.lanes) { drawLanesMinimap(g, W2, H2, dpr); return; } // 47e-lanes-view.js
   if (G.siege) {
     // the land from above: buildings (walls grey), objectives with their health, monsters, friends and you
     // a big land shows the 120 m around you

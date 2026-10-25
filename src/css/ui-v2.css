@@ -845,3 +845,30 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .kW button { min-width: 44px; min-height: 32px; padding: 0; font-size: 16px; }
 .kBuy { flex: 0 0 auto; min-width: 84px; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
 .kBuy small { font-size: 11px; }
+/* Ascendant Lanes page (76-lanes-mp.js): size cards reuse the dungeon cards; two team columns of slots */
+.lnTeams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 6px 0 8px; }
+.lnTeam { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lnTeam > b { font-size: 12px; letter-spacing: .04em; text-shadow: 1px 1px 0 #000; }
+.lnTeam.blue > b { color: #7fd0ff; } .lnTeam.red > b { color: #ff7a7a; }
+.lnTeam .dlvSlot.empty { min-height: 44px; }
+.panel .row.lnSides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.panel .row.lnSides button { min-height: 44px; }
+.tag.obj.foe .tb i { background: var(--hpLow); } .tag.obj.ally .tb i { background: #5dd6ff; }
+/* Lanes: buttons that open with the match level (locked: greyed with the level), and a flash when one opens */
+.cbtn.lnLock { filter: grayscale(1) brightness(.55); pointer-events: none; }
+.cbtn.lnLock::after { content: attr(data-lv); position: absolute; left: 50%; bottom: -2px; transform: translateX(-50%); padding: 1px 4px; font: 10px/1 var(--body); color: #f2ead2; background: #14111c; box-shadow: 0 0 0 2px var(--og-ink, #0b0c1f); white-space: nowrap; }
+.cbtn.lnNew { animation: lnNew .6s steps(2) 4; }
+@keyframes lnNew { 50% { filter: brightness(1.9) drop-shadow(0 0 8px #ffe08a); } }
+/* Lanes gear: loadout slots in the lobby, picks and the Forge rows */
+.lnLoadout { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 4px 0 6px; }
+.lnSlot { position: relative; display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 4px 6px; background: rgba(20,16,28,.8); box-shadow: 0 0 0 2px var(--og-ink, #0b0c1f), inset 0 0 0 1px var(--mc); }
+.lnSlot small { font-size: 10px; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; } .lnSlot b { position: absolute; right: 4px; top: 2px; font-size: 10px; color: #ffe08a; }
+.lnSlot:not(.on) { opacity: .6; }
+.lnPicks { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-bottom: 8px; }
+.panel .lnPick, .panel .lnTrailBtn { min-height: 44px; display: flex; align-items: center; gap: 6px; text-align: left; font-size: 11px; }
+.panel .lnPick.on, .panel .lnTrailBtn.on { box-shadow: 0 0 0 2px var(--og-ink), inset 0 0 0 2px var(--mc) !important; }
+.lnGearIc { display: grid; place-items: center; width: 44px; height: 44px; background: rgba(0,0,0,.3); box-shadow: inset 0 0 0 2px var(--mc); }
+/* title: Play starts Ascendant Lanes; the Farm World button sits under it (76-lanes-mp.js lanesTitle) */
+#worldBtn { display: block; margin: 10px auto 0; min-height: 44px; min-width: 200px; padding: 0 18px; font: 15px/1 var(--body); letter-spacing: .04em; color: #f2ead2; background: rgba(20,16,28,.85); border: 0; border-radius: 10px; box-shadow: 0 0 0 2px var(--og-ink, #0b0c1f), inset 0 0 0 2px #6f8a7f; cursor: pointer; }
+#worldBtn[hidden] { display: none; }
+#worldBtn:active { transform: translateY(2px); }
