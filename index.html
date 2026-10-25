@@ -2256,6 +2256,27 @@ body.builderOn #controls, body.builderOn #stickBase, body.builderOn #hubShortcut
 .kW button { min-width: 44px; min-height: 32px; padding: 0; font-size: 16px; }
 .kBuy { flex: 0 0 auto; min-width: 84px; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
 .kBuy small { font-size: 11px; }
+
+/* Chest reel (Casper, 25 Oct): pixel particles over the page, prize cards for gold / resources / heroes, a pop on big wins */
+.panel .chestFx { position: absolute; left: 0; top: 0; width: 100%; pointer-events: none; image-rendering: pixelated; z-index: 6; }
+.rcard.pz img { width: 62px; height: 62px; image-rendering: pixelated; }
+.rcard.pz.hero img { width: 84px; height: 84px; border-radius: 0; object-fit: cover; image-rendering: auto; }
+.rcard.pz.gold { background: radial-gradient(circle at 50% 40%, rgba(255, 201, 74, .35), transparent 70%), var(--og-stone) !important; }
+.rcard.pz.res { background: radial-gradient(circle at 50% 40%, rgba(127, 227, 196, .3), transparent 70%), var(--og-stone) !important; }
+.rcard.pz.hero { background: conic-gradient(from 0deg, #ff4d6d, #ffb347, #fff3a0, #8ee06a, #58b4ff, #c77dff, #ff4d6d) !important; }
+.rcard.pz.hero::after { content: 'HERO'; position: absolute; top: 3px; left: 0; right: 0; text-align: center; font: 11px/1 var(--body); color: #fff; text-shadow: 0 1px 0 #000, 0 0 4px #000; }
+.reel .marker { animation: markerPulse .5s ease-in-out infinite alternate; }
+@keyframes markerPulse { from { filter: drop-shadow(0 0 2px #ffe08a); } to { filter: drop-shadow(0 0 9px #ffe08a); } }
+.reelHead .caseArt.shake img { animation: chestRattle .18s steps(2) infinite; }
+@keyframes chestRattle { 0% { transform: translate(-1px, 0) rotate(-2deg); } 100% { transform: translate(1px, -1px) rotate(2deg); } }
+.panel.chestPop { animation: chestPop .45s steps(6); }
+@keyframes chestPop { 0% { transform: scale(1); } 30% { transform: scale(1.025); } 100% { transform: scale(1); } }
+.pzWin { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border: 2px solid var(--og-ink); background: var(--og-stone2); }
+.pzWin img { width: 64px; height: 64px; flex: none; image-rendering: pixelated; }
+.pzWin.hero img { object-fit: cover; image-rendering: auto; border: 2px solid #fff3a0; }
+.pzWin b { display: block; font: 20px/1.1 var(--body); color: #ffe08a; } .pzWin.res b { color: #7fe3c4; } .pzWin.hero b { color: #fff3a0; font-size: 24px; }
+.pzWin span { display: block; font: 13px/1.3 var(--body); color: var(--muted, #b8b4a8); } .pzWin .cbonus.mats { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.od.pz-hero { --rc: #fff3a0; } .od.pz-gold { --rc: #ffc94a; } .od.pz-res { --rc: #7fe3c4; }
 /* ---- title / loading screen v4: one painted battle (Hespera and Kallix against Aurvan and Ophira on a ruined bridge) ----
    The scene box keeps the painting's aspect ratio and covers the screen, so the magic glows stay pinned to the art.
    Phones use the tall painting (assets/ui/title-battle-tall.webp), wide screens the wide one. */
@@ -16926,18 +16947,22 @@ function openPlayers() {
 // They are never sold for money or for any currency, and every case shows its odds.
 // ---------------------------------------------------------------------
 // w: rarity weights at full level (see caseTable: low-level chests roll lower), hi: endgame weight scale,
-// named: chance the gear piece is a named collection item, res: size of the resource bundle, hero: chance of a hero
+// named: chance the gear piece is a named collection item, res: size of the resource bundle
+// prize: what the reel lands on (gear, a gold hoard, a resource haul or a hero; the rolled rarity sets its size), fx: its particles
 CFG.cases = {
-  hunter: { name: 'Hunter’s Chest', sub: 'Dropped by monsters, elites, dens and shrines', col: '#58b4ff', w: { common: 26, uncommon: 32, rare: 27, epic: 12, legendary: 3 }, hi: 3, named: 0.3, res: 1, hero: 0.002 },
-  treasure: { name: 'Treasure Chest', sub: 'From the Vault, expeditions and level-ups', col: '#ffc94a', w: { uncommon: 24, rare: 36, epic: 28, legendary: 12 }, hi: 6, named: 0.4, res: 1.6, hero: 0.004 },
-  boss: { name: 'Colossus Chest', sub: 'World boss loot', col: '#ff7a45', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
-  rift: { name: 'Rift Chest', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 44, legendary: 46 }, hi: 16, named: 0.65, res: 3.5, hero: 0.01 },
-  milestone: { name: 'Milestone Chest', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0, named: 0.5, res: 2, hero: 0.005 },
-  frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
-  ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
-  celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, hero: 0.008 },
-  geode: { name: 'Geode', sub: 'Cracked from ore veins (Mining) · also holds a Museum mineral', col: '#7fe3c4', w: { common: 22, uncommon: 34, rare: 28, epic: 13, legendary: 3 }, hi: 2, named: 0.3, res: 1, hero: 0.002 },
+  hunter: { name: 'Hunter’s Chest', sub: 'Dropped by monsters, elites, dens and shrines', col: '#58b4ff', w: { common: 26, uncommon: 32, rare: 27, epic: 12, legendary: 3 }, hi: 3, named: 0.3, res: 1, prize: { gear: 58, gold: 22, res: 19.6, hero: 0.4 }, fx: 'sparks' },
+  treasure: { name: 'Treasure Chest', sub: 'From the Vault, expeditions and level-ups', col: '#ffc94a', w: { uncommon: 24, rare: 36, epic: 28, legendary: 12 }, hi: 6, named: 0.4, res: 1.6, prize: { gear: 48, gold: 28, res: 23, hero: 1 }, fx: 'coins' },
+  boss: { name: 'Colossus Chest', sub: 'World boss loot', col: '#ff7a45', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, prize: { gear: 50, gold: 22, res: 25, hero: 3 }, fx: 'embers' },
+  rift: { name: 'Rift Chest', sub: 'Rift Lord loot · deeper floors roll higher', col: '#ff5d8f', w: { epic: 44, legendary: 46 }, hi: 16, named: 0.65, res: 3.5, prize: { gear: 52, gold: 20, res: 24, hero: 4 }, fx: 'void' },
+  milestone: { name: 'Milestone Chest', sub: 'Level Road chest · guaranteed minimum rarity', col: '#c77dff', w: null, hi: 0, named: 0.5, res: 2, prize: { gear: 55, gold: 22, res: 21, hero: 2 }, fx: 'stars' },
+  frost: { name: 'Frostbound Chest', sub: 'Frost Colossus · Mountain Peaks · level 30+', col: '#8cecff', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, prize: { gear: 50, gold: 22, res: 25, hero: 3 }, fx: 'snow' },
+  ember: { name: 'Cinderforge Chest', sub: 'Magma Titan · Volcanic Underworld · level 60+', col: '#ff913b', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, prize: { gear: 50, gold: 22, res: 25, hero: 3 }, fx: 'embers' },
+  celestial: { name: 'Seraphic Chest', sub: 'Celestial Colossus · Celestial Ascension · level 160+', col: '#fff0aa', w: { rare: 22, epic: 44, legendary: 34 }, hi: 12, named: 0.55, res: 3, prize: { gear: 50, gold: 22, res: 25, hero: 3 }, fx: 'stars' },
+  // rare: cracked from ore veins and long expeditions, and far better than a normal chest (Casper, 25 Oct)
+  geode: { name: 'Geode', sub: 'Rare · cracked from ore veins and expeditions · also holds a Museum mineral', col: '#7fe3c4', w: { rare: 20, epic: 42, legendary: 30, mythic: 8 }, hi: 14, named: 0.6, res: 4, prize: { gear: 40, gold: 22, res: 32, hero: 6 }, fx: 'crystals' },
 };
+// how big a gold hoard / resource haul is per rarity (common .. divine)
+const PRIZE_SIZE = [0.6, 1, 1.6, 2.6, 4, 6, 9, 13];
 CFG.caseOrder = ['milestone', 'rift', 'boss', 'treasure', 'hunter', 'frost', 'ember', 'celestial', 'geode'];
 const CASE_LUCK = { legendary: 30, mythic: 120 };
 // these drop sources hand out a case instead of the item itself (Epic and up, or always for big loot)
@@ -16959,6 +16984,7 @@ function caseTable(c) {
   for (const r in w) if (rarIdx(r) >= 3) w[r] *= Math.pow(g, rarIdx(r) - 2);
   if (c.k === 'rift') { const n = c.n || 0; if (n >= 25) w.mythic = 6 + Math.min(20, (n - 25) * 0.4); if (n >= 50) w.ancient = 2 + Math.min(10, (n - 50) * 0.15); if (n >= 100) w.divine = 0.6 + Math.min(4, (n - 100) * 0.05); }
   else { const H = highWeights(c.t || 0, c.z || 0); for (const h of HIGH_RAR) if (H[h] > 0) w[h] = H[h] * K.hi; }
+  if (w.mythic && (c.l || 1) < 80 && c.k !== 'rift') delete w.mythic; // Mythic stays an endgame rarity
   if (c.f) for (const r in w) if (rarIdx(r) < rarIdx(c.f)) delete w[r];
   return w;
 }
@@ -16987,11 +17013,6 @@ function rollCase(c) {
 const CASE_JACKPOT = 0.04;
 function caseLoot(c) {
   const p = G.profile, K = CFG.cases[c.k] || CFG.cases.hunter, m = K.res || 1, L = Math.max(1, c.l || p.level), out = { gold: 0, gems: 0, mats: [], fort: null, hero: null, jackpot: false };
-  const locked = CFG.brawlerOrder.filter((id) => id !== STARTER_HERO && !p.unlocked.attacks.includes(id) && !(CFG.attacks[id].unlock && CFG.attacks[id].unlock.sigils != null));
-  if (locked.length && Math.random() < (K.hero || 0)) {
-    const id = pick(locked); p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); out.hero = { id, name: CFG.brawlers[id].name };
-    ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: CFG.attacks[id].name });
-  }
   const hour = 6 * Math.pow(CFG.enemies.goldGrowth, L - 1) * 60; // an hour of Bank income at the chest's level
   out.jackpot = Math.random() < CASE_JACKPOT; out.gold = Math.max(1, Math.round(hour * (out.jackpot ? 6 : 0.3 * m))); addGold(out.gold, true);
   if (m >= 1.5 || Math.random() < 0.3) { out.gems = Math.round((5 + L / 10) * m); addEssence(out.gems); }
@@ -17003,6 +17024,29 @@ function caseLoot(c) {
   }
   return out;
 }
+// heroes a chest can still hand out (not the starter, not owned, not oath/dungeon-only)
+const caseHeroPool = (p) => CFG.brawlerOrder.filter((id) => id !== STARTER_HERO && !p.unlocked.attacks.includes(id) && !(CFG.attacks[id].unlock && CFG.attacks[id].unlock.sigils != null));
+function rollPrizeKind(K) { const W = K.prize || { gear: 1, gold: 0, res: 0, hero: 0 }; let t = W.gear + W.gold + W.res + W.hero, x = Math.random() * t;
+  for (const k of ['gear', 'gold', 'res', 'hero']) { if ((x -= W[k]) < 0) return k; } return 'gear'; }
+// the prize itself for gold / res / hero (gear is a normal item); granted here, the reel only shows it
+function grantPrize(c, kind, r) {
+  const p = G.profile, K = CFG.cases[c.k] || CFG.cases.hunter, L = Math.max(1, c.l || p.level), sz = PRIZE_SIZE[rarIdx(r)] || 1, m = Math.sqrt(K.res || 1);
+  if (kind === 'hero') {
+    const pool = caseHeroPool(p);
+    if (pool.length) { const id = pick(pool); p.unlocked.attacks.push(id); p.newUnlocks.push('a:' + id); ev({ t: 'unlock', what: 'brawler', id, name: CFG.brawlers[id].name, role: CFG.attacks[id].name });
+      return { prize: 'hero', rarity: r, id, name: CFG.brawlers[id].name }; }
+    kind = 'gold2'; // every hero owned: a double hoard instead
+  }
+  if (kind === 'gold' || kind === 'gold2') { const hour = 6 * Math.pow(CFG.enemies.goldGrowth, L - 1) * 60, g = Math.max(1, Math.round(hour * sz * m * (kind === 'gold2' ? 2 : 1))); addGold(g, true); return { prize: 'gold', rarity: r, gold: g }; }
+  const out = { prize: 'res', rarity: r, gems: Math.round((5 + L / 10) * sz * m), mats: [], fort: null };
+  addEssence(out.gems);
+  if (typeof CB !== 'undefined') { const B = CB[zoneBiome(highestZone(p.level))]; out.mats = addMats([[B.ore, Math.round((6 + L / 12) * sz * m * 2)], [B.part, Math.round((2 + L / 30) * sz * m * 2)]], true); out.icon = B.ore; }
+  if (typeof myFort !== 'undefined' && p.level >= CFG.siege.unlock) { const M = myFort(); out.fort = { wood: Math.round((10 + L / 10) * sz * m * 2), stones: Math.round((5 + L / 20) * sz * m * 2), iron: Math.round((1 + L / 60) * sz * m) };
+    for (const q of CFG.siege.res) M[q] = (M[q] || 0) + (out.fort[q] || 0); }
+  return out;
+}
+const PRIZE_NAME = { gear: 'Gear', gold: 'Gold hoard', res: 'Resource haul', hero: 'Hero' };
+function prizeOdds(K) { const W = K.prize || { gear: 1, gold: 0, res: 0, hero: 0 }, t = W.gear + W.gold + W.res + W.hero; return ['gear', 'gold', 'res', 'hero'].map((k) => [k, W[k] / t]); }
 // one line of chips for the resources (several chests are added together first)
 function lootSum(list) {
   const t = { gold: 0, gems: 0, mats: {}, fort: null, hero: [], jackpot: false };
@@ -17020,21 +17064,24 @@ function lootHTML(list) {
   return `${t.hero.map((n) => `<div class="cbonus hero"><b>HERO!</b> ${escapeHTML(n)} joins you</div>`).join('')}${t.jackpot ? '<div class="cbonus gold"><b>JACKPOT</b> six hours of gold</div>' : ''}<div class="cbonus mats">${chips.join('')}</div>`;
 }
 // opening grants the item at once (so closing mid-spin never loses it); the reel only shows it
-function openCase(id) {
+function openCase(id, force) {
   const p = G.profile, i = p.cases.findIndex((c) => c.id === id); if (i < 0) return null;
   // Case rewards are always kept: when the bag is full they overflow it instead of blocking the case.
-  const c = p.cases.splice(i, 1)[0], { r, lucky } = rollCase(c);
-  const it = makeItem(pick(CFG.gear.slots), r, c.l);
-  // better chests turn their gear into a named collection item more often (the bag roll below still counts too)
-  const K = CFG.cases[c.k] || CFG.cases.hunter;
-  if (K.named > COLLECTION_CHANCE) rollCollectionItem(p, it, () => Math.random() * COLLECTION_CHANCE / K.named);
+  const c = p.cases.splice(i, 1)[0], { r, lucky } = rollCase(c), K = CFG.cases[c.k] || CFG.cases.hunter;
+  const kind = force || rollPrizeKind(K); let it = null, prize = null;
+  if (kind === 'gear') {
+    it = makeItem(pick(CFG.gear.slots), r, c.l);
+    // better chests turn their gear into a named collection item more often (the bag roll below still counts too)
+    if (K.named > COLLECTION_CHANCE) rollCollectionItem(p, it, () => Math.random() * COLLECTION_CHANCE / K.named);
+    grantItem(it, 'case');
+  } else prize = grantPrize(c, kind, r);
   p.stats.cases = (p.stats.cases || 0) + 1;
   p.records.bestCase = Math.max(p.records.bestCase || 0, rarIdx(r));
-  grantItem(it, 'case');
   const mineral = c.k === 'geode' ? crackGeode() : null, loot = caseLoot(c);
+  if (prize && prize.prize === 'hero') loot.hero = { id: prize.id, name: prize.name };
   G.dirty = true; checkAchievements();
   saveNow(true); // Persist the case removal and exact reward together, before the reel.
-  return { item: it, lucky, c, mineral, loot, kept: p.bag.some((b) => b.id === it.id) };
+  return { item: it, prize, rarity: r, lucky, c, mineral, loot, kept: it ? p.bag.some((b) => b.id === it.id) : true };
 }
 
 // --- Vault: fills while you play or are away; collect any time ---------------------------------
@@ -17194,7 +17241,8 @@ function openCases(sel) {
     const c = groups[sel][0], odds = caseOdds(c), L = p.caseLuck || { legendary: 0, mythic: 0 };
     body = `<div class="caseHero" style="--cc:${CFG.cases[sel].col}">${caseArt(sel, 'big')}<div><b>${CFG.cases[sel].name}</b><small>${CFG.cases[sel].sub} · item level ${c.l}${c.f ? ` · at least ${CFG.gear.rarity[c.f].name}` : ''}</small></div></div>
       <div class="odds">${odds.map(([r, x]) => `<div class="od ${r}"><span>${CFG.gear.rarity[r].name}</span><b>${x >= 0.01 ? (x * 100).toFixed(1) : (x * 100).toFixed(2)}%</b></div>`).join('')}</div>
-      <div class="odds bonusOdds"><div class="od"><span>Hero</span><b>${(CFG.cases[sel].hero * 100).toFixed(1)}%</b></div><div class="od"><span>Named item</span><b>${Math.round(Math.max(COLLECTION_CHANCE, CFG.cases[sel].named || 0) * 100)}%+</b></div><div class="od"><span>Gold jackpot</span><b>${CASE_JACKPOT * 100}%</b></div></div>
+      <div class="odds bonusOdds">${prizeOdds(CFG.cases[sel]).map(([k, x]) => `<div class="od pz-${k}"><span>${PRIZE_NAME[k]}</span><b>${(x * 100).toFixed(1)}%</b></div>`).join('')}</div>
+      <div class="odds bonusOdds"><div class="od"><span>Named item</span><b>${Math.round(Math.max(COLLECTION_CHANCE, CFG.cases[sel].named || 0) * 100)}%+</b></div><div class="od"><span>Gold jackpot</span><b>${CASE_JACKPOT * 100}%</b></div></div>
       <p class="fine">Every chest also holds gold, crafting materials${p.level >= CFG.siege.unlock ? `, Bastion wood and stone${CFG.cases[sel].res >= 1.5 ? ' and iron' : ''}` : ''}${CFG.cases[sel].res >= 1.5 ? ' and gems' : ''}.</p>
       <p class="fine">${casePity(caseTable(c)) ? `Legendary guaranteed within ${Math.max(1, CASE_LUCK.legendary - L.legendary)} chests` : 'Low-level chests roll lower rarities'}${caseTable(c).mythic ? ` · Mythic within ${Math.max(1, CASE_LUCK.mythic - L.mythic)}` : ''}. Chests are won in play only and can never be bought.</p>`;
     bar = selBar('', `${groups[sel].length > 1 ? `<button class="ghost boost big5" data-act="caseFast" data-k="${sel}"><b>×${Math.min(5, groups[sel].length)}</b><small>Open ${Math.min(5, groups[sel].length)}</small></button>` : ''}<button class="primary big" data-act="caseOpen" data-id="${c.id}">Open ${CFG.cases[sel].name}${groups[sel].length > 1 ? ` (${groups[sel].length})` : ''}</button>`);
@@ -17204,20 +17252,40 @@ function openCases(sel) {
 }
 // the CS:GO-style reel: a long strip of items slides past a golden marker and slows down on your item
 const Reel = { raf: 0, done: true, res: null };
-function reelCard(it) { return `<div class="rcard ${it.rarity}"><img src="${thumbFor(it)}" alt=""><i></i></div>`; }
+function prizeSrc(P) {
+  if (P.prize === 'gold') return PixelIcons.url('m_coin');
+  if (P.prize === 'hero') return brawlerThumb(P.id);
+  const ore = P.icon || (typeof CB !== 'undefined' ? CB[zoneBiome(highestZone(G.profile.level))].ore : null);
+  return ore ? matIcon(ore) : PixelIcons.url('m_case');
+}
+function reelCard(it) { return it.prize ? `<div class="rcard ${it.rarity} pz ${it.prize}"><img src="${prizeSrc(it)}" alt=""><i></i></div>` : `<div class="rcard ${it.rarity}"><img src="${thumbFor(it)}" alt=""><i></i></div>`; }
+// the winning card and the look-alike cards around it (decoys roll their kind from the same odds)
+const reelWinCard = (res) => res.item || res.prize;
+function reelDecoy(c, r) {
+  const K = CFG.cases[c.k] || CFG.cases.hunter, k = rollPrizeKind(K);
+  if (k === 'gear') return makeItem(pick(CFG.gear.slots), r, c.l);
+  return k === 'hero' ? { prize: 'hero', rarity: r, id: pick(CFG.brawlerOrder) } : { prize: k, rarity: r };
+}
+function prizeWinHTML(P) {
+  if (P.prize === 'hero') return `<div class="pzWin hero"><img src="${prizeSrc(P)}" alt=""><div><b>HERO!</b><span>${escapeHTML(P.name)} joins you</span></div></div>`;
+  if (P.prize === 'gold') return `<div class="pzWin gold"><img src="${prizeSrc(P)}" alt=""><div><b>+${fmtK(P.gold)} gold</b><span>${CFG.gear.rarity[P.rarity].name} gold hoard</span></div></div>`;
+  const chips = [`<span class="mat">${ICON.ess}<b>+${fmtK(P.gems)}</b></span>`].concat((P.mats || []).map(([id, n]) => matChip(id, null, G.profile).replace(/<b>.*?<\/b>/, `<b>+${fmtK(n)}</b>`)));
+  if (P.fort) { const ic = { wood: ICON.wood, stones: ICON.stone, iron: ICON.iron }; for (const q in P.fort) if (P.fort[q]) chips.push(`<span class="mat">${ic[q]}<b>+${fmtK(P.fort[q])}</b></span>`); }
+  return `<div class="pzWin res"><img src="${prizeSrc(P)}" alt=""><div><b>${CFG.gear.rarity[P.rarity].name} resource haul</b><span class="cbonus mats">${chips.join('')}</span></div></div>`;
+}
 function spinCase(id) {
   const res = openCase(id); if (!res) return;
   const p = G.profile, w = caseTable(res.c), N = 52, WIN = 44, cards = [];
   for (let i = 0; i < N; i++) {
-    let r = i === WIN ? res.item.rarity : rollRarity(w);
-    if (i === WIN + 1 && Math.random() < 0.45) { const hi = RARITIES.filter((x) => w[x] && rarIdx(x) > rarIdx(res.item.rarity)); if (hi.length) r = hi[0]; } // the classic near miss
-    cards.push(i === WIN ? res.item : makeItem(pick(CFG.gear.slots), r, res.c.l));
+    let r = i === WIN ? res.rarity : rollRarity(w);
+    if (i === WIN + 1 && Math.random() < 0.45) { const hi = RARITIES.filter((x) => w[x] && rarIdx(x) > rarIdx(res.rarity)); if (hi.length) r = hi[0]; } // the classic near miss
+    cards.push(i === WIN ? reelWinCard(res) : reelDecoy(res.c, r));
   }
   UI.current = 'reel'; Reel.res = res; Reel.done = false;
   openModal(`<div class="reelHead" style="--cc:${CFG.cases[res.c.k].col}">${caseArt(res.c.k, 'shake')}<b>${CFG.cases[res.c.k].name}</b></div>
     <div class="reel"><div class="strip" id="reelStrip">${cards.map(reelCard).join('')}</div><div class="marker"></div></div>
     <div id="reelOut" class="reelOut"><button class="ghost sm" data-act="reelSkip">Skip</button></div>`, false);
-  $('panel').classList.add('wide');
+  $('panel').classList.add('wide'); ChestFX.start(res.c.k);
   // measured in the reel's own layout pixels: menus are drawn zoomed (Menu size), and getBoundingClientRect would
   // return zoomed sizes while translateX moves in unzoomed ones, so the reel used to stop several cards early
   const strip = $('reelStrip'), box = strip.parentNode, win = strip.children[WIN], cw = strip.children[1].offsetLeft - strip.firstChild.offsetLeft, vw = box.clientWidth;
@@ -17227,8 +17295,8 @@ function spinCase(id) {
   const step = (now) => {
     if (UI.current !== 'reel') return;
     const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4), x = end * (Reel.skip ? 1 : e);
-    strip.style.transform = `translateX(${-x}px)`;
-    const idx = Math.floor((x + vw / 2) / cw); if (idx !== lastIdx) { lastIdx = idx; Sfx.play('tick', { gap: 0.025 }); }
+    strip.style.transform = `translateX(${-x}px)`; ChestFX.tension(Reel.skip ? 1 : k);
+    const idx = Math.floor((x + vw / 2) / cw); if (idx !== lastIdx) { lastIdx = idx; Sfx.play('tick', { gap: 0.025 }); ChestFX.tick(box.querySelector('.marker')); }
     if (k >= 1 || Reel.skip) { Reel.skip = false; reelFinish(strip.children[WIN]); return; }
     Reel.raf = requestAnimationFrame(step);
   };
@@ -17237,12 +17305,13 @@ function spinCase(id) {
 function reelFinish(card) {
   const res = Reel.res; Reel.done = true; UI.closable = true;
   if (card) card.classList.add('win');
-  const it = res.item, ri = rarIdx(it.rarity), p = G.profile, better = res.kept && isBetter(it, p.gear[it.slot]);
-  Sfx.play(ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
-  if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[it.rarity], 7, 1.1, 0.32, 3, 1.6); }
+  const it = res.item, ri = rarIdx(res.rarity), p = G.profile, better = !!it && res.kept && isBetter(it, p.gear[it.slot]);
+  Sfx.play(res.prize && res.prize.prize === 'hero' ? 'radiant' : ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
+  ChestFX.land(res.rarity, res.prize && res.prize.prize, card);
+  if (ri >= 4) { burst(G.player.x, 1.4, G.player.z, 40 + ri * 6, RAR_HEX[res.rarity], 7, 1.1, 0.32, 3, 1.6); }
   const left = p.cases.filter((c) => c.k === res.c.k), over = p.bag.length > CFG.gear.bagMax;
-  $('reelOut').innerHTML = `${lootHTML([res.loot])}${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${it.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[it.rarity].name}</span>${itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better })}</div>
-    <div class="row end">${res.kept ? `${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">${wearWord(it.slot)}</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
+  $('reelOut').innerHTML = `${lootHTML([res.loot])}${over ? `<p class="fine">Bag ${p.bag.length}/${CFG.gear.bagMax}: this reward was kept anyway. Reforge with older gear so normal drops are kept too.</p>` : ''}<div class="reelWin ${res.rarity}"><span class="rname">${res.lucky ? 'Luck guarantee · ' : ''}${CFG.gear.rarity[res.rarity].name}</span>${it ? itemRow(it, '', `${SLOT_LABEL[it.slot]} · item level ${it.ilvl}`, { better }) : prizeWinHTML(res.prize)}</div>
+    <div class="row end">${!it ? '' : res.kept ? `${better ? `<button class="primary" data-act="equip2" data-id="${it.id}">${wearWord(it.slot)}</button>` : ''}` : '<span class="tagged">Salvaged (bag full)</span>'}
     ${left.length ? `<button class="primary gold" data-act="caseOpen" data-id="${left[0].id}">Open next (${left.length})</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
 // up to five chests at once: five reels stacked, each stopping a little later than the one above;
@@ -17255,15 +17324,15 @@ function openCasesFast(k) {
   const N = 40, WIN = 32;
   const strips = out.map((res) => { const w = caseTable(res.c), cards = [];
     for (let i = 0; i < N; i++) {
-      let r = i === WIN ? res.item.rarity : rollRarity(w);
-      if ((i === WIN + 1 || i === WIN - 1) && Math.random() < 0.4) { const hi = RARITIES.filter((x) => w[x] && rarIdx(x) > rarIdx(res.item.rarity)); if (hi.length) r = hi[hi.length - 1]; } // near misses on both sides
-      cards.push(i === WIN ? res.item : makeItem(pick(CFG.gear.slots), r, res.c.l));
+      let r = i === WIN ? res.rarity : rollRarity(w);
+      if ((i === WIN + 1 || i === WIN - 1) && Math.random() < 0.4) { const hi = RARITIES.filter((x) => w[x] && rarIdx(x) > rarIdx(res.rarity)); if (hi.length) r = hi[hi.length - 1]; } // near misses on both sides
+      cards.push(i === WIN ? reelWinCard(res) : reelDecoy(res.c, r));
     } return cards; });
   UI.current = 'reel'; Reel.done = false; Reel.skip = false;
   openModal(`<div class="reelHead" style="--cc:${CFG.cases[k].col}">${caseArt(k, 'shake')}<b>${out.length}× ${CFG.cases[k].name}</b></div>
     <div class="reels">${strips.map((cards, j) => `<div class="reel mini" id="reel${j}"><div class="strip">${cards.map(reelCard).join('')}</div><div class="marker"></div></div>`).join('')}</div>
     <div id="reelOut" class="reelOut"><button class="ghost sm" data-act="reelSkip">Skip</button></div>`, false);
-  $('panel').classList.add('wide');
+  $('panel').classList.add('wide'); ChestFX.start(k);
   const R = strips.map((_, j) => { const box = $('reel' + j), strip = box.firstChild, win = strip.children[WIN], cw = strip.children[1].offsetLeft - strip.firstChild.offsetLeft, vw = box.clientWidth;
     return { box, strip, cw, vw, end: win.offsetLeft - strip.firstChild.offsetLeft + win.offsetWidth / 2 - vw / 2 + (Math.random() - 0.5) * (win.offsetWidth - 18),
       dur: 2600 + j * 700 + (j === strips.length - 1 ? 1400 : 0), last: -1, done: false }; });
@@ -17274,7 +17343,8 @@ function openCasesFast(k) {
     R.forEach((r, j) => { if (r.done) return;
       const k2 = Math.min(1, (now - t0) / r.dur), x = r.end * (Reel.skip ? 1 : 1 - Math.pow(1 - k2, 4));
       r.strip.style.transform = `translateX(${-x}px)`;
-      const idx = Math.floor((x + r.vw / 2) / r.cw); if (idx !== r.last) { r.last = idx; Sfx.play('tick', { gap: 0.03 }); }
+      const idx = Math.floor((x + r.vw / 2) / r.cw); if (idx !== r.last) { r.last = idx; Sfx.play('tick', { gap: 0.03 }); if (j === R.length - 1) ChestFX.tick(r.box.querySelector('.marker')); }
+      if (j === R.length - 1) ChestFX.tension(Reel.skip ? 1 : k2);
       if (k2 >= 1 || Reel.skip) { r.done = true; reelLand(r, out[j], WIN); } else left++; });
     if (!left) { Reel.skip = false; reelManyFinish(out, k); return; }
     Reel.raf = requestAnimationFrame(step);
@@ -17283,15 +17353,15 @@ function openCasesFast(k) {
 }
 // one reel stops: its card lights up, rarer pulls flash the reel and shake the screen
 function reelLand(r, res, WIN) {
-  const ri = rarIdx(res.item.rarity); r.strip.children[WIN].classList.add('win'); r.box.classList.add('landed', res.item.rarity);
+  const ri = rarIdx(res.rarity); r.strip.children[WIN].classList.add('win'); r.box.classList.add('landed', res.rarity); ChestFX.land(res.rarity, res.prize && res.prize.prize, r.strip.children[WIN], true);
   if (ri >= 3 || res.loot.hero || res.loot.jackpot) { r.box.classList.add('jackpot'); if (!G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, 0.25 + 0.1 * ri); }
   Sfx.play(res.loot.hero ? 'radiant' : ri >= 4 ? 'win' : ri >= 3 ? 'unlock' : 'pickup');
 }
 function reelManyFinish(out, k) {
   Reel.done = true; UI.closable = true;
-  const p = G.profile, left = p.cases.filter((c) => c.k === k).length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.item.rarity)), 0);
+  const p = G.profile, left = p.cases.filter((c) => c.k === k).length, best = out.reduce((a, r) => Math.max(a, rarIdx(r.rarity)), 0);
   if (best >= 4) burst(G.player.x, 1.4, G.player.z, 50 + best * 6, RAR_HEX[RARITIES[best]], 7, 1.1, 0.32, 3, 1.6);
-  $('reelOut').innerHTML = `<div class="reelSum">${out.map((r) => `<div class="rcard ${r.item.rarity}"><img src="${thumbFor(r.item)}" alt=""><i></i></div>`).join('')}</div>
+  $('reelOut').innerHTML = `<div class="reelSum">${out.map((r) => reelCard(reelWinCard(r))).join('')}</div>${out.filter((r) => r.prize).map((r) => prizeWinHTML(r.prize)).join('')}
     ${lootHTML(out.map((r) => r.loot))}
     <div class="row end">${left ? `<button class="primary" data-act="caseFast" data-k="${k}">Open ${Math.min(5, left)} more</button>` : ''}<button class="ghost" data-act="cases">Back</button></div>`;
 }
@@ -17520,6 +17590,89 @@ setInterval(() => {
   const S = kStored(Date.now()); g.innerHTML = `${ICON.coin}${fmtK(S.gold)}`; if (e) e.innerHTML = `${ICON.ess}${fmtK(S.gems)}`;
 }, 1000);
 // --- end kingdom
+// ---------------------------------------------------------------------
+// Chest reel particles (Casper, 25 Oct: "fancy, a gambling feeling, a lot of unique particles").
+// A pixel canvas over the reel page: every chest kind has its own particles (CFG.cases[k].fx) that drift while the reel
+// spins and thicken as it slows down; the winning card then explodes in its rarity's colours. Gold and better shake the
+// screen and flash; a hero pull adds rainbow rays. All pixels: a low-res canvas scaled up with no smoothing.
+// ---------------------------------------------------------------------
+const CHEST_PX = 3; // one particle pixel = 3 CSS px
+const CHEST_THEME = {
+  sparks: { cols: ['#58b4ff', '#bfe6ff', '#ffffff'], from: 'bottom', shape: 'dot', g: -14, rate: 26 },
+  coins: { cols: ['#ffc94a', '#ffe08a', '#b07a12'], from: 'top', shape: 'coin', g: 26, rate: 18 },
+  embers: { cols: ['#ff7a45', '#ffb347', '#ffe08a', '#c23b1a'], from: 'bottom', shape: 'dot', g: -20, rate: 30, wob: 14 },
+  void: { cols: ['#ff5d8f', '#c77dff', '#7a3fd0', '#ffd0f0'], from: 'ring', shape: 'dot', g: 0, rate: 30 },
+  stars: { cols: ['#fff0aa', '#c77dff', '#ffffff'], from: 'any', shape: 'star', g: -4, rate: 16 },
+  snow: { cols: ['#ffffff', '#c8f2ff', '#8cecff'], from: 'top', shape: 'flake', g: 10, rate: 22, wob: 10 },
+  crystals: { cols: ['#7fe3c4', '#2fffd0', '#d4fff4', '#4aa88a'], from: 'bottom', shape: 'shard', g: -18, rate: 26 },
+};
+const RAR_COLS = { common: ['#cfd6e0', '#ffffff'], uncommon: ['#8ee06a', '#d4ffb0'], rare: ['#58b4ff', '#bfe6ff'], epic: ['#c77dff', '#efcfff'], legendary: ['#ffb347', '#ffe08a', '#fff6d8'],
+  mythic: ['#ff4d6d', '#ffb0bd', '#ffe08a'], ancient: ['#2fffd0', '#d4fff4', '#ffffff'], divine: ['#fff3a0', '#ffffff', '#ffd34a'] };
+const ChestFX = {
+  cv: null, g: null, ps: [], theme: null, raf: 0, t: 0, k: 0, flash: 0, rays: 0, last: 0, w: 0, h: 0,
+  start(caseKind) {
+    this.stop(); const panel = $('panel'); if (!panel) return;
+    const cv = document.createElement('canvas'); cv.className = 'chestFx'; panel.appendChild(cv);
+    this.cv = cv; this.g = cv.getContext('2d'); this.resize();
+    this.theme = CHEST_THEME[(CFG.cases[caseKind] || {}).fx] || CHEST_THEME.sparks; this.ps.length = 0; this.k = 0; this.flash = 0; this.rays = 0;
+    this.last = performance.now(); const loop = (now) => { if (!this.cv || !this.cv.isConnected || UI.current !== 'reel') { this.stop(); return; } this.step(Math.min(0.05, (now - this.last) / 1000)); this.last = now; this.raf = requestAnimationFrame(loop); };
+    this.raf = requestAnimationFrame(loop);
+  },
+  stop() { cancelAnimationFrame(this.raf); if (this.cv) this.cv.remove(); this.cv = null; this.ps.length = 0; },
+  resize() { const P = $('panel'); if (!this.cv || !P) return; this.w = Math.max(40, Math.round(P.clientWidth / CHEST_PX)); this.h = Math.max(40, Math.round(P.scrollHeight / CHEST_PX)); this.cv.width = this.w; this.cv.height = this.h; this.cv.style.height = this.h * CHEST_PX + 'px'; },
+  tension(k) { this.k = k; }, // 0 at the start of a spin, 1 when the reel stops
+  add(x, y, vx, vy, life, col, shape, g, sz) { if (this.ps.length < 700) this.ps.push({ x, y, vx, vy, life, max: life, col, shape, g: g || 0, sz: sz || 1, ph: Math.random() * 6.28 }); },
+  // where a card sits on the canvas
+  at(el) { const P = $('panel'); if (!el || !P) return [this.w / 2, this.h / 2]; const a = el.getBoundingClientRect(), b = P.getBoundingClientRect(), z = b.width / (P.clientWidth || b.width) || 1;
+    return [((a.left + a.width / 2 - b.left) / z) / CHEST_PX, ((a.top + a.height / 2 - b.top) / z + P.scrollTop) / CHEST_PX]; },
+  ambient(dt) {
+    const T = this.theme, n = T.rate * (0.4 + 2.2 * this.k * this.k) * dt; let c = Math.floor(n) + (Math.random() < n % 1 ? 1 : 0);
+    while (c-- > 0) {
+      const col = pick(T.cols), W = this.w, H = this.h;
+      if (T.from === 'top') this.add(Math.random() * W, -2, (Math.random() - 0.5) * 6, 8 + Math.random() * 10, 3 + Math.random() * 2, col, T.shape, T.g, 1);
+      else if (T.from === 'bottom') this.add(Math.random() * W, H * (0.55 + Math.random() * 0.45), (Math.random() - 0.5) * 6, -6 - Math.random() * 10, 1.6 + Math.random() * 1.6, col, T.shape, T.g, 1);
+      else if (T.from === 'ring') { const a = Math.random() * 6.28, R = Math.max(W, H) * 0.45, cx = W / 2, cy = H * 0.32; this.add(cx + Math.cos(a) * R, cy + Math.sin(a) * R * 0.6, -Math.cos(a) * R * 0.5, -Math.sin(a) * R * 0.3, 1.8, col, T.shape, 0, 1); }
+      else this.add(Math.random() * W, Math.random() * H, 0, -2, 0.8 + Math.random(), col, T.shape, T.g, 1);
+    }
+  },
+  tick(markerEl) { if (!this.cv || Math.random() > 0.35 + this.k * 0.6) return; const [x, y] = this.at(markerEl); for (let i = 0; i < 2 + this.k * 4; i++) this.add(x + (Math.random() - 0.5) * 4, y - 14, (Math.random() - 0.5) * 30, -10 - Math.random() * 25, 0.35, pick(this.theme.cols), 'dot', 60, 1); },
+  // the win: a burst in the rarity's colours, sized by rarity; legendary+ flashes and shakes, a hero adds rainbow rays
+  land(rarity, prize, cardEl, small) {
+    if (!this.cv) return; const ri = rarIdx(rarity), cols = RAR_COLS[rarity] || RAR_COLS.common, [x, y] = this.at(cardEl), T = this.theme;
+    const n = (small ? 14 : 30) + ri * (small ? 10 : 26);
+    for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, s = 20 + Math.random() * (40 + ri * 14); this.add(x, y, Math.cos(a) * s, Math.sin(a) * s - 10, 0.7 + Math.random() * (0.6 + ri * 0.15), pick(cols), Math.random() < 0.3 ? T.shape : i % 5 ? 'dot' : 'star', 50, Math.random() < 0.25 ? 2 : 1); }
+    if (prize === 'gold' || (ri >= 4 && !small)) for (let i = 0; i < 20 + ri * 10; i++) this.add(Math.random() * this.w, -4 - Math.random() * 30, (Math.random() - 0.5) * 10, 10 + Math.random() * 20, 3, pick(['#ffc94a', '#ffe08a', '#b07a12']), 'coin', 40, 1);
+    if (prize === 'res') for (let i = 0; i < 24; i++) { const a = Math.random() * 6.28; this.add(x, y, Math.cos(a) * 34, Math.sin(a) * 34 - 20, 1.4, pick(CHEST_THEME.crystals.cols), 'shard', 50, 1); }
+    if (ri >= 3 || prize === 'hero') { this.flash = Math.max(this.flash, prize === 'hero' ? 1 : 0.35 + ri * 0.1); this.fx = x; this.fy = y; }
+    if (prize === 'hero' || ri >= 5) this.rays = small ? 1.2 : 2.6;
+    if ((ri >= 4 || prize === 'hero') && !G.profile.settings.calm) Cam.shake = Math.max(Cam.shake, small ? 0.3 : 0.5 + 0.1 * ri);
+    if ($('panel')) { $('panel').classList.remove('chestPop'); void $('panel').offsetWidth; if (ri >= 3 || prize === 'hero') $('panel').classList.add('chestPop'); }
+  },
+  step(dt) {
+    const g = this.g; if (!g) return; this.t += dt;
+    if (this.cv.height !== Math.round(($('panel').scrollHeight || 0) / CHEST_PX)) this.resize();
+    if (!Reel.done) this.ambient(dt); else this.ambient(dt * 0.25);
+    g.clearRect(0, 0, this.w, this.h);
+    // god rays behind a hero / mythic+ win
+    if (this.rays > 0) { this.rays -= dt; const a0 = this.t * 0.8, cx = this.fx, cy = this.fy; g.globalAlpha = Math.min(1, this.rays) * 0.35;
+      for (let i = 0; i < 12; i++) { const a = a0 + i * 0.5236; g.fillStyle = `hsl(${(i * 30 + this.t * 120) % 360} 100% 70%)`; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a) * 400, cy + Math.sin(a) * 400); g.lineTo(cx + Math.cos(a + 0.12) * 400, cy + Math.sin(a + 0.12) * 400); g.fill(); }
+      g.globalAlpha = 1; }
+    const T = this.theme;
+    for (let i = this.ps.length - 1; i >= 0; i--) {
+      const p = this.ps[i]; p.life -= dt; if (p.life <= 0 || p.y > this.h + 6) { this.ps.splice(i, 1); continue; }
+      p.vy += p.g * dt; p.x += (p.vx + (T.wob ? Math.sin(p.ph + this.t * 3) * T.wob : 0)) * dt; p.y += p.vy * dt; p.vx *= 1 - 0.6 * dt;
+      const a = Math.min(1, p.life / p.max * 2.2), tw = p.shape === 'star' ? 0.5 + 0.5 * Math.sin(p.ph + this.t * 14) : 1, X = Math.round(p.x), Y = Math.round(p.y), s = p.sz;
+      g.globalAlpha = a * tw; g.fillStyle = p.col;
+      if (p.shape === 'coin') { const w = Math.max(1, Math.round(Math.abs(Math.cos(p.ph + this.t * 6)) * 3)); g.fillStyle = '#7a4e08'; g.fillRect(X - w / 2 - 0.5, Y - 2, w + 1, 4); g.fillStyle = p.col; g.fillRect(X - w / 2, Y - 1.5, w, 3); }
+      else if (p.shape === 'star') { g.fillRect(X - s, Y, 2 * s + 1, 1); g.fillRect(X, Y - s, 1, 2 * s + 1); if (tw > 0.8) { g.fillStyle = '#fff'; g.fillRect(X, Y, 1, 1); } }
+      else if (p.shape === 'flake') { g.fillRect(X - 1, Y, 3, 1); g.fillRect(X, Y - 1, 1, 3); }
+      else if (p.shape === 'shard') { g.fillRect(X, Y - 1, 1, 3); g.fillRect(X - 1, Y, 3, 1); g.fillStyle = '#ffffff'; g.fillRect(X, Y - 1, 1, 1); }
+      else g.fillRect(X, Y, s, s);
+    }
+    g.globalAlpha = 1;
+    if (this.flash > 0) { this.flash -= dt * 1.6; g.globalAlpha = Math.max(0, this.flash) * 0.5; g.fillStyle = '#fff6d8'; g.fillRect(0, 0, this.w, this.h); g.globalAlpha = 1; }
+  },
+};
 // ---------------------------------------------------------------------
 // PvP in the open world (opt-in). Only players who switched PvP on (Settings) can hit each other, outside town.
 // Every client is untrusted, so the VICTIM decides: it checks the attacker is a PvP player nearby within 10 levels,

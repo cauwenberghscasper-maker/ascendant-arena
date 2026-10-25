@@ -77,17 +77,25 @@ check('case conversion and preview rolls cannot create phantom collection discov
 check('opening a saved regional case consumes it once and grants the actual named winner',()=>{
   const p=fresh();p.cases=[{id:'saved-regional',k:'frost',l:40,t:0,z:2,f:'rare'}];
   for(const rarity of ['rare','epic','legendary'])for(const slot of ctx.config.gear.slots)p.collectionLuck[slot+'|'+rarity]=3;
-  const r=ctx.openCase('saved-regional');assert(r);assert.equal(p.cases.length,0);assert.equal(p.stats.cases,1);assert(ctx.collectionItem(r.item));assert.equal(Object.keys(p.collection).length,1);assert.equal(r.kept,true);assert.equal(ctx.openCase('saved-regional'),null);
+  const r=ctx.openCase('saved-regional','gear');assert(r);assert.equal(p.cases.length,0);assert.equal(p.stats.cases,1);assert(ctx.collectionItem(r.item));assert.equal(Object.keys(p.collection).length,1);assert.equal(r.kept,true);assert.equal(ctx.openCase('saved-regional'),null);
+});
+check('chests can land on gear, a gold hoard, a resource haul or a hero; geodes are far better than hunter chests',()=>{
+  const p=fresh();const seen={gear:0,gold:0,res:0,hero:0};const g0=p.gold;
+  for(let i=0;i<400;i++){p.cases=[{id:'pz'+i,k:'boss',l:60,t:0,z:2}];const r=ctx.openCase('pz'+i);assert(r);const k=r.item?'gear':r.prize.prize;seen[k]++;
+    if(k==='hero')assert(p.unlocked.attacks.includes(r.prize.id));if(k==='res')assert(r.prize.gems>0);if(k==='gold')assert(r.prize.gold>0);}
+  assert(seen.gear>0&&seen.gold>0&&seen.res>0,JSON.stringify(seen));
+  const avg=(k)=>{const w=ctx.caseTable({k,l:60,t:0,z:2});let t=0,s=0;for(const r in w){t+=w[r];s+=w[r]*['common','uncommon','rare','epic','legendary','mythic','ancient','divine'].indexOf(r);}return s/t;};
+  assert(avg('geode')>avg('hunter')+1,'geode should roll well above a hunter chest');
 });
 check('full bag still opens a case and keeps the reward (overflow, nothing lost)',()=>{
   const p=fresh();p.bag=Array.from({length:ctx.config.gear.bagMax},(_,i)=>make('full'+i));const ids=p.bag.map(i=>i.id);
   p.cases=[{id:'full-case',k:'treasure',l:40,t:0,z:2,f:'rare'}];savedRewardProfile=null;
-  const r=ctx.openCase('full-case');assert(r&&r.kept);assert.equal(p.cases.length,0);assert.equal(p.bag.length,ctx.config.gear.bagMax+1);
+  const r=ctx.openCase('full-case','gear');assert(r&&r.kept);assert.equal(p.cases.length,0);assert.equal(p.bag.length,ctx.config.gear.bagMax+1);
   assert(ids.every(id=>p.bag.some(i=>i.id===id)));assert(savedRewardProfile);
 });
 check('case reward and consumption survive an immediate save reload',()=>{
   const p=fresh();p.settings.autoSalvage=3;p.cases=[{id:'reload-case',k:'treasure',l:40,t:0,z:2,f:'rare'}];
-  const result=ctx.openCase('reload-case');assert(result.kept);assert(savedRewardProfile);
+  const result=ctx.openCase('reload-case','gear');assert(result.kept);assert(savedRewardProfile);
   const reloaded=ctx.sanitizeProfile(savedRewardProfile);
   assert.equal(reloaded.cases.length,0);assert(reloaded.bag.some(i=>i.id===result.item.id));assert.equal(reloaded.stats.cases,1);
   ctx.G.profile=reloaded;assert.equal(ctx.openCase('reload-case'),null);
@@ -95,7 +103,7 @@ check('case reward and consumption survive an immediate save reload',()=>{
 check('fast opening never stops on a full bag and later drops cannot evict its rewards',()=>{
   const p=fresh();p.bag=Array.from({length:ctx.config.gear.bagMax-1},(_,i)=>make('existing'+i));
   p.cases=['one','two','three'].map(id=>({id,k:'treasure',l:10,t:0,z:0}));
-  const a=ctx.openCase('one'),b=ctx.openCase('two'),c=ctx.openCase('three');assert(a.kept&&b.kept&&c.kept);assert.equal(p.cases.length,0);
+  const a=ctx.openCase('one','gear'),b=ctx.openCase('two','gear'),c=ctx.openCase('three','gear');assert(a.kept&&b.kept&&c.kept);assert.equal(p.cases.length,0);
   const ids=p.bag.map(i=>i.id);ctx.grantItem(make('powerful','weapon','divine',300),'test');
   assert.deepEqual(p.bag.map(i=>i.id),ids);
 });
