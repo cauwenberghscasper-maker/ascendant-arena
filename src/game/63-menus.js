@@ -171,6 +171,7 @@ function openMenu() {
     ${big('mSmith', 'm_smith', 'Forge', 'Upgrade gear', UI.anyAlert)}
     ${big('mGear', 'm_case', 'Inventory', p.cases.length ? `${p.cases.length} chest${p.cases.length > 1 ? 's' : ''} to open` : `Score ${fmt(Math.round(gearTotals(p.gear).score))}`, gearDot)}
     ${big('mJournal', 'm_progress', 'Journal', loginReady(Date.now()) ? 'Reward ready!' : 'World & log', loginReady(Date.now()))}
+    ${CFG.lanes.mainMode ? big('mLanes', 'm_lanes', 'Ascendant Lanes', G.lanes ? 'Match on' : `${fmt(lanesRec().trophies)} trophies · play a match`, false).replace('class="hubTile', 'class="hubTile wide lnHub') : ''}
     ${big('mDelve', 'm_portal', 'Dungeons', PARTY.code ? `Party ${PARTY.code} · ${partyMembers().length}/${CFG.delve.maxParty}` : PARTY.q ? 'Looking for heroes…' : 'Party up · loot & sets', false).replace('class="hubTile', 'class="hubTile wide')}
   </div>`);
 }

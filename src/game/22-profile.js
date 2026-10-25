@@ -111,9 +111,12 @@ function sanitizeProfile(p) {
   { const o = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {}), d = o(out.delve);
     out.delve = { clears: o(d.clears), best: o(d.best), wk: { w: +o(d.wk).w || 0, done: o(o(d.wk).done) }, pieces: o(d.pieces),
       found: o(d.found), upity: Math.max(0, +d.upity | 0), s: Math.max(0, +d.s | 0) }; } // found: dungeon treasures logged; upity: chests since one; s: S-rank clears
-  // Ascendant Lanes: rank points, best, wins, losses, matches (34b-lanes.js)
-  { const l = out.lanes && typeof out.lanes === 'object' && !Array.isArray(out.lanes) ? out.lanes : {}, n = (v) => Math.max(0, Math.floor(+v || 0));
-    out.lanes = { rp: n(l.rp), best: n(l.best), w: n(l.w), l: n(l.l), n: n(l.n) }; }
+  // Ascendant Lanes: trophies (early test saves had rank points), best, wins, losses, matches, crafted Lanes gear
+  // (id -> rank 1-5), the equipped loadout (slot -> id) and the chosen match trail (34b-lanes.js, 34c-lanes-gear.js)
+  { const o = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {}), l = o(out.lanes), n = (v) => Math.max(0, Math.floor(+v || 0)), gear = {}, eq = {};
+    for (const k in o(l.gear)) { const r = Math.min(5, n(l.gear[k])); if (r > 0 && /^[a-z0-9_]{1,24}$/.test(k)) gear[k] = r; }
+    for (const k of ['relic', 'charm', 'banner']) if (typeof o(l.eq)[k] === 'string' && gear[l.eq[k]]) eq[k] = l.eq[k];
+    out.lanes = { trophies: n(l.trophies != null ? l.trophies : l.rp), best: n(l.best), w: n(l.w), l: n(l.l), n: n(l.n), gear, eq, fx: typeof l.fx === 'string' && gear[l.fx] ? l.fx : '' }; }
   // Dungeon Keys (CFG.dungeon loads later; the cap of 12 matches CFG.dungeon.keys.max)
   out.keys = (Array.isArray(out.keys) ? out.keys : []).filter((k) => k && k.t >= 1 && Array.isArray(k.a)).slice(0, 12)
     .map((k) => ({ t: Math.min(9999, k.t | 0), a: k.a.filter((a) => !CFG.dungeon || CFG.dungeon.keys.affixes[a]).slice(0, 3) }));

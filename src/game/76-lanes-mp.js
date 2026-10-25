@@ -1,11 +1,12 @@
 // ---------------------------------------------------------------------
 // Ascendant Lanes online, lobby and results (34b-lanes.js runs the match, 47e-lanes-view.js draws it).
 // Party: a 5-letter code, its own Realtime channel 'lanes-<code>' (mpRoomKey). Presence carries each player's Lanes
-// card (code, join time, team, rating bracket, Power, mode size). The leader (earliest in) picks 1v1/2v2/3v3 and
-// "together" (friends against bots) or "versus" (friends split into two teams, balanced by Power) and sends 'lgo';
-// every named player starts the same match. Quick match waits in 'lq-<size>-<bracket>' (only players of the same
-// level bracket meet: the level-matching hook); the earliest there forms a match when it is full, or after
-// LANES_WAIT seconds with two or more, and sends 'lmm'. Empty places are bots.
+// card (code, join time, team, trophies, bonus, mode size, match level). The leader (earliest in) picks 1v1/2v2/3v3
+// and "together" (friends against bots) or "versus" (friends split into two teams, balanced by trophies) and sends
+// 'lgo'; every named player starts the same match. Quick match waits in 'lq-<size>': the earliest player there takes
+// the players closest to its trophies inside a range that widens while it waits (lanesPickByTrophies), forms a match
+// when it is full or after CFG.lanes.mm.wait seconds with two or more, and sends 'lmm'. Empty places are bots playing
+// at the humans' average trophies.
 // In a match the host (the first listed player still present) runs minions, towers, Cores, camps and bots and sends
 // them 6 times a second ('lst'). Everyone runs their own hero. Hits: on host-run bodies they go to the host as a share
 // of max HP ('lhit'); on a human hero they go to that hero's own game, which applies them ('lph', victim decides, like
@@ -13,46 +14,44 @@
 // Test mode and local previews play alone with bots (no Realtime there).
 // ---------------------------------------------------------------------
 const LN = { code: '', jt: 0, ready: false, size: 1, sides: 'together', q: '', qT: 0, joinT: 0, uiT: 0, sendT: 0, hits: new Map(), hitT: 0, m: null, uiHtml: '' };
-const LANES_WAIT = 30;
 GI.m_lanes = GI.m_shard; PX_KEY_FAM.m_lanes = 'ice'; // the Core's crystal, in frost blue (Showdown keeps the red swords)
 const lanesOnline = () => !TEST_MODE && typeof RT !== 'undefined' && (RT.state === 'on' || RT.state === 'joining' || RT.state === 'connecting');
 function lanesRoomKey() { if (G.lanes && G.lanes.code) return 'lanes-' + G.lanes.code; return LN.q ? 'lq-' + LN.q : LN.code ? 'lanes-' + LN.code : ''; }
 function lanesCard() {
-  const r = lanesRating(G.profile, typeof playerPower === 'function' ? playerPower() : 0);
-  return { lc: G.lanes ? G.lanes.code : LN.code, lj: LN.jt, lt: G.lanes ? G.player.team : '', lr: r.br, lw: r.pw, lm: r.mmr, ls: LN.size, lq: LN.q, lrd: LN.ready ? 1 : 0 };
+  return { lc: G.lanes ? G.lanes.code : LN.code, lj: LN.jt, lt: G.lanes ? G.player.team : '', ltr: (G.profile.lanes || {}).trophies || 0, lv: G.lanes ? G.player.lnLvl || 1 : 0, ls: LN.size, lq: LN.q, lrd: LN.ready ? 1 : 0 };
 }
 // presence → peer (70-multiplayer.js mpApply)
 function lanesApplyPeer(e, s) {
   e.lc = typeof s.lc === 'string' ? s.lc.slice(0, 8) : ''; e.lj = mpNum(s.lj, 0); e.lt = s.lt === 'red' ? 'red' : s.lt === 'blue' ? 'blue' : '';
-  e.lr = clamp(mpNum(s.lr, 0) | 0, 0, 20); e.lw = Math.max(0, mpNum(s.lw, 0)); e.lm = mpNum(s.lm, 1000); e.ls = clamp(mpNum(s.ls, 1) | 0, 1, 3); e.lq = typeof s.lq === 'string' ? s.lq.slice(0, 16) : ''; e.lrd = s.lrd === 1;
+  e.ltr = clamp(mpNum(s.ltr, 0) | 0, 0, 1e6); e.lv = clamp(mpNum(s.lv, 0) | 0, 0, 30); e.ls = clamp(mpNum(s.ls, 1) | 0, 1, 3); e.lq = typeof s.lq === 'string' ? s.lq.slice(0, 16) : ''; e.lrd = s.lrd === 1;
   if (e.md === 'lanes') e.team = e.lt || 'peer';
 }
 function lanesSend(event, payload) { return typeof RT !== 'undefined' && RT.state === 'on' && rtSend(RT.topic, 'broadcast', { type: 'broadcast', event, payload: Object.assign({ sid: MP.sid }, payload) }); }
 // human players in my match (other games)
 function lanesMpPeers() { const S = G.lanes; if (!S || !S.code || typeof MP === 'undefined') return []; return MP.list.filter((e) => e.via === 'rt' && e.md === 'lanes' && e.lc === S.code && (e.lt === 'blue' || e.lt === 'red')); }
 function lanesMembers() {
-  const r = lanesRating(G.profile, playerPower()), me = { key: MP.sid, me: true, nick: mpNick(G.profile), cls: G.profile.cls, level: G.profile.level, pw: r.pw, br: r.br, lj: LN.jt, rd: LN.ready };
+  const me = { key: MP.sid, me: true, nick: mpNick(G.profile), cls: G.profile.cls, level: G.profile.level, tr: lanesRec().trophies, lj: LN.jt, rd: LN.ready };
   if (!LN.code) return [me];
-  return [me, ...MP.list.filter((e) => e.via === 'rt' && e.lc === LN.code && e.md === 'hub').map((e) => ({ key: e.key, nick: e.nick, cls: e.cls, level: e.level, pw: e.lw, br: e.lr, lj: e.lj, rd: e.lrd }))]
+  return [me, ...MP.list.filter((e) => e.via === 'rt' && e.lc === LN.code && e.md === 'hub').map((e) => ({ key: e.key, nick: e.nick, cls: e.cls, level: e.level, tr: e.ltr, lj: e.lj, rd: e.lrd }))]
     .sort((a, b) => a.lj - b.lj || (a.key < b.key ? -1 : 1)).slice(0, LN.size * 2);
 }
 const lanesLeads = () => !LN.code || lanesMembers()[0].me;
-// teams: together = every human on blue; versus = snake by Power (strongest blue, next two red, ...) for even sides
+// teams: together = every human on blue; versus = snake by trophies (best blue, next two red, ...) for even sides
 function lanesTeams(members, sides) {
   if (sides !== 'versus') return members.map((m) => ['blue', m]);
-  const s = members.slice().sort((a, b) => b.pw - a.pw || (a.key < b.key ? -1 : 1));
+  const s = members.slice().sort((a, b) => (b.tr || 0) - (a.tr || 0) || (a.key < b.key ? -1 : 1));
   return s.map((m, i) => [(i % 4 === 0 || i % 4 === 3) ? 'blue' : 'red', m]);
 }
 function lanesGoMsg(members, sides, size, code) {
-  const levels = members.map((m) => m.level || 1), T = lanesTeams(members, sides);
-  return { code, size, seed: (Math.random() * 4294967295) >>> 0, norm: lanesShouldNormalize(levels) ? 1 : 0, m: T.map(([team, m]) => [m.key, team, m.level | 0, String(m.nick || 'Hero').slice(0, 14), m.cls]) };
+  const T = lanesTeams(members, sides), tr = Math.round(members.reduce((a, m) => a + (m.tr || 0), 0) / Math.max(1, members.length));
+  return { code, size, tr, seed: (Math.random() * 4294967295) >>> 0, m: T.map(([team, m]) => [m.key, team, m.tr | 0, String(m.nick || 'Hero').slice(0, 14), m.cls]) };
 }
 function lanesStartFrom(msg) {
   const mine = msg.m.find((r) => r[0] === MP.sid); if (!mine) return false;
-  const humans = msg.m.filter((r) => r[0] !== MP.sid).map((r) => ({ key: r[0], team: r[1] === 'red' ? 'red' : 'blue', level: r[2] | 0 || 1, nick: cleanNick(r[3]) || 'Hero', cls: r[4] }));
+  const humans = msg.m.filter((r) => r[0] !== MP.sid).map((r) => ({ key: r[0], team: r[1] === 'red' ? 'red' : 'blue', tr: r[2] | 0, nick: cleanNick(r[3]) || 'Hero', cls: r[4] }));
   if (G.modal) UI.close();
   LN.m = msg.m.map((r) => r[0]); LN.ready = false;
-  const ok = startLanes({ size: clamp(msg.size | 0, 1, 3), team: mine[1], seed: msg.seed >>> 0, humans, host: msg.m[0][0] === MP.sid, code: String(msg.code || '').slice(0, 8), normalize: !!msg.norm });
+  const ok = startLanes({ size: clamp(msg.size | 0, 1, 3), team: mine[1], seed: msg.seed >>> 0, humans, host: msg.m[0][0] === MP.sid, code: String(msg.code || '').slice(0, 8), trophies: Math.max(0, mpNum(msg.tr, 0)) });
   if (!ok) toast('Your Lanes match started, but finish what you are doing first', 'bad');
   return ok;
 }
@@ -74,11 +73,24 @@ function lanesJoin(code) {
 }
 function lanesQueue() {
   if (!lanesOnline()) return toast('Quick match needs the online game (the public site or the app)', 'bad');
-  LN.code = ''; LN.q = `${LN.size}-${lanesBracket(G.profile.level)}`; LN.qT = 0; LN.jt = Date.now();
+  LN.code = ''; LN.q = String(LN.size); LN.qT = 0; LN.jt = Date.now();
 }
+// --- the title: with CFG.lanes.mainMode, Play starts Ascendant Lanes (the world loads as always, then the Lanes page
+// opens) and a second button goes to the Farm World. New players (below CFG.lanes.mainFrom) get the world first.
+const lanesMainOn = () => CFG.lanes.mainMode && G.profile && G.profile.level >= CFG.lanes.mainFrom;
+function lanesTitle() {
+  const btn = $('playBtn'), wb = $('worldBtn'); if (!btn || !wb || G.started) return;
+  const on = lanesMainOn() && !btn.hidden && !btn.disabled, key = on ? 'on' + G.profile.level : 'off';
+  if (LN.titleKey === key) return; LN.titleKey = key;
+  wb.hidden = !on; if (on) { btn.textContent = 'PLAY'; btn.setAttribute('aria-label', 'Play Ascendant Lanes'); wb.textContent = `Farm World · Level ${G.profile.level}`; }
+}
+if ($('playBtn')) $('playBtn').addEventListener('click', () => { LN.afterStart = lanesMainOn(); }, true); // runs before startGame (90-boot.js)
+if ($('worldBtn')) $('worldBtn').addEventListener('click', () => { LN.afterStart = false; $('playBtn').click(); LN.afterStart = false; });
 // --- every frame (from mpUpdate): party upkeep and the quick-match queue
 function lanesUpdate(dt) {
-  if (!G.started || typeof RT === 'undefined') return;
+  if (!G.started) { lanesTitle(); return; }
+  if (LN.afterStart && !G.modal && G.mode === 'hub') { LN.afterStart = false; openLanesPanel(); }
+  if (typeof RT === 'undefined') return;
   if (LN.code && !G.lanes && RT.state === 'on' && RT.key === mpRoomKey()) {
     const M = lanesMembers();
     if (!M.some((m) => m.me)) { LN.code = ''; toast('That Lanes party is full', 'bad'); }
@@ -87,8 +99,11 @@ function lanesUpdate(dt) {
   }
   if (LN.q && !G.lanes && RT.state === 'on' && RT.key === mpRoomKey()) {
     LN.qT += dt; const need = LN.size * 2;
-    const Q = [lanesMembers()[0], ...MP.list.filter((e) => e.via === 'rt' && e.lq === LN.q && e.md === 'hub' && e.alive).map((e) => ({ key: e.key, nick: e.nick, cls: e.cls, level: e.level, pw: e.lw, lj: e.lj }))].sort((a, b) => a.lj - b.lj || (a.key < b.key ? -1 : 1));
-    if (Q[0].me && (Q.length >= need || (LN.qT >= LANES_WAIT && Q.length >= 2))) { const msg = Object.assign(lanesGoMsg(Q.slice(0, need), 'versus', LN.size, newCode()), { q: LN.q }); lanesSend('lmm', msg); lanesRecv('lmm', MP.sid, msg); }
+    const me = lanesMembers()[0], others = MP.list.filter((e) => e.via === 'rt' && e.lq === LN.q && e.md === 'hub' && e.alive).map((e) => ({ key: e.key, nick: e.nick, cls: e.cls, level: e.level, tr: e.ltr, lj: e.lj }));
+    // the earliest in the queue forms the match, with the players closest to its trophies (the range widens as it waits)
+    const first = [me, ...others].sort((a, b) => a.lj - b.lj || (a.key < b.key ? -1 : 1))[0];
+    if (first.me) { const pick = lanesPickByTrophies(me, others, need - 1, LN.qT);
+      if (pick.length >= need - 1 || (LN.qT >= CFG.lanes.mm.wait && pick.length >= 1)) { const msg = Object.assign(lanesGoMsg([me, ...pick], 'versus', LN.size, newCode()), { q: LN.q }); lanesSend('lmm', msg); lanesRecv('lmm', MP.sid, msg); } }
   }
   if (UI.current === 'lanes' && G.modal && (LN.uiT -= dt) <= 0) { LN.uiT = 1; const a = document.activeElement; if (!a || a.id !== 'lnCode') openLanesPanel(); }
 }
@@ -186,32 +201,35 @@ function lanesFindNid(k) { const S = G.lanes, i = parseInt(k.slice(1), 10); if (
 // --- the Lanes page: pick 1v1/2v2/3v3, solo with bots or a party, quick match per bracket
 function openLanesPanel() {
   const live = UI.current === 'lanes' && G.modal && !$('modal').hidden; UI.current = 'lanes';
-  const p = G.profile, rec = lanesRec(), r = lanesRating(p, playerPower()), online = lanesOnline(), lead = lanesLeads(), M = lanesMembers();
+  const p = G.profile, rec = lanesRec(), bonus = G.lanes ? G.lanes.bonus : lanesMyBonus(), online = lanesOnline(), lead = lanesLeads(), M = lanesMembers();
   let body;
   if (G.lanes) body = `<div class="riftCard"><p>A match is on: ${G.lanes.size}v${G.lanes.size}.</p></div><div class="row end"><button class="ghost" data-act="close">Back to the match</button><button class="primary" data-act="lnForfeit">Leave match</button></div>`;
   else {
     const sizes = CFG.lanes.sizes.map((n) => `<button class="dlvCard lnSize${LN.size === n ? ' on' : ''}" style="--art:url(assets/ui/lanes/${n}v${n}.webp);--bc:#7fd8ff" data-act="lnSize" data-n="${n}" ${lead ? '' : 'aria-disabled="true"'}><b>${n}v${n}</b><small>${n === 1 ? 'One lane, no camps' : n === 2 ? 'Lane + 2 camps' : 'Wide lane + 2 camps'}</small></button>`).join('');
-    const T = lanesTeams(M, LN.sides), slot = (m) => m ? `<div class="dlvSlot rd"><i>${gi(m.me ? 'm_hero' : 'm_players')}</i><b>${escapeHTML(m.nick)}${m.me ? ' (you)' : ''}</b><small>Lv ${fmt(m.level)} · ${fmtK(m.pw)} Power</small></div>` : `<div class="dlvSlot empty"><small>Bot</small></div>`;
+    const T = lanesTeams(M, LN.sides), slot = (m) => m ? `<div class="dlvSlot rd"><i>${gi(m.me ? 'm_hero' : 'm_players')}</i><b>${escapeHTML(m.nick)}${m.me ? ' (you)' : ''}</b><small>${ICON.trophy}${fmt(m.tr || 0)} · ${escapeHTML(lanesRank(m.tr || 0))}</small></div>` : `<div class="dlvSlot empty"><small>Bot</small></div>`;
     const team = (name) => { const ms = T.filter(([t]) => t === name).map(([, m]) => m); return Array.from({ length: LN.size }, (_, i) => slot(ms[i])).join(''); };
     let buttons;
-    if (LN.q) buttons = `<div class="dlvQueue"><div class="spin"></div><b>Looking for heroes · ${lanesBracketName(r.br)}</b><small>${Math.floor(LN.qT)}s · bots fill the rest</small></div><div class="row end"><button class="ghost" data-act="lnCancelQ">Cancel</button><button class="primary" data-act="lnSolo">Play with bots</button></div>`;
+    if (LN.q) buttons = `<div class="dlvQueue"><div class="spin"></div><b>Looking for heroes · ${ICON.trophy}${fmt(rec.trophies)} ± ${Math.round(lanesTrophyWindow(LN.qT))}</b><small>${Math.floor(LN.qT)}s · bots fill the rest</small></div><div class="row end"><button class="ghost" data-act="lnCancelQ">Cancel</button><button class="primary" data-act="lnSolo">Play with bots</button></div>`;
     else if (LN.code) buttons = `<div class="dlvCode">Party code <b>${LN.code}</b><small>Friends type it in Lanes › Join</small></div>
       <div class="row lnSides"><button class="${LN.sides === 'together' ? 'primary' : 'ghost'}" data-act="lnSides" data-s="together" ${lead ? '' : 'aria-disabled="true"'}>Together</button><button class="${LN.sides === 'versus' ? 'primary' : 'ghost'}" data-act="lnSides" data-s="versus" ${lead ? '' : 'aria-disabled="true"'}>Versus</button></div>
       <div class="row end"><button class="ghost" data-act="lnLeave">Leave party</button>${lead ? `<button class="primary big" data-act="lnStart">Start ${LN.size}v${LN.size}</button>` : `<button class="${LN.ready ? 'ghost' : 'primary'} big" data-act="lnReady">${LN.ready ? 'Not ready' : 'Ready'}</button>`}</div>`;
     else buttons = `<div class="row dlvJoin"><input id="lnCode" maxlength="5" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" ${online ? '' : 'disabled'}><button class="ghost" data-act="lnJoin" ${online ? '' : 'aria-disabled="true"'}>Join</button><button class="ghost" data-act="lnCreate" ${online ? '' : 'aria-disabled="true"'}>Party</button></div>
       <div class="row end"><button class="ghost" data-act="lnQueue" ${online ? '' : 'aria-disabled="true"'}>Quick match</button><button class="primary big" data-act="lnSolo">Play with bots</button></div>
+      ${CFG.lanes.mainMode ? `<div class="row end"><button class="ghost" data-act="lnWorld">Farm World</button></div>` : ''}
       ${online ? '' : `<p class="fine">${TEST_MODE ? 'Test mode plays with bots.' : 'Parties and quick match work on the public site and in the app.'}</p>`}`;
     body = `<div class="dlvCards lnSizes">${sizes}</div>
-      <p class="fine">Your own hero, gear and talents. Minions march, towers guard, destroy the enemy Core to win.</p>
+      <p class="fine">Everyone starts at level 1 and levels up in the match: skill at 3, special at 5, super at 6. Destroy the enemy Core.</p>
       <div class="lnTeams"><div class="lnTeam blue"><b>Blue</b>${team('blue')}</div><div class="lnTeam red"><b>Red</b>${team('red')}</div></div>
-      <div class="dlvGate ok">Bracket <b>${lanesBracketName(r.br)}</b> · ${fmtK(r.pw)} Power · rating ${fmt(r.mmr)}</div>
+      <div class="dlvGate ok">${ICON.trophy}<b>${fmt(rec.trophies)}</b> · ${escapeHTML(lanesRank(rec.trophies))} · Gear bonus <b>+${Math.round(bonus.total * 100)}%</b> <small>(max ${Math.round(CFG.lanes.gearCap * 100)}%)</small></div>
+      ${typeof lanesLoadoutHtml === 'function' ? lanesLoadoutHtml() : ''}
       ${buttons}`;
   }
-  const html = `<div class="npcHead">${gi('m_lanes', 'hd')}<h3>Ascendant Lanes</h3><span class="cnt">${lanesRank(rec.rp)} · ${fmt(rec.rp)} RP · ${rec.w}W ${rec.l}L</span></div>${body}`;
+  const html = `<div class="npcHead">${gi('m_lanes', 'hd')}<h3>Ascendant Lanes</h3><span class="cnt">${ICON.trophy}${fmt(rec.trophies)} · ${rec.w}W ${rec.l}L</span></div>${body}`;
   if (live && html === LN.uiHtml) return;
   LN.uiHtml = html; openModal(html); $('panel').classList.add('menuPanel');
 }
 function lanesAction(act, b) {
+  if (/^lnG/.test(act)) return lanesGearAction(act, b); // Lanes gear (34c-lanes-gear.js)
   switch (act) {
     case 'lnSize': if (lanesLeads()) LN.size = clamp(+b.dataset.n | 0, 1, 3); break;
     case 'lnSides': if (lanesLeads()) LN.sides = b.dataset.s === 'versus' ? 'versus' : 'together'; break;
@@ -225,6 +243,7 @@ function lanesAction(act, b) {
     case 'lnStart': lanesPlay(false); return;
     case 'lnForfeit': UI.close(); if (G.lanes && !G.lanes.result) { const S = G.lanes; S.peers = S.peers || []; lanesFinish(lanesEnemy(S.myTeam), 'left'); } leaveLanes(); return;
     case 'lnHub': UI.close(); leaveLanes(); return;
+    case 'lnWorld': UI.close(); return; // the farm world is where you already stand
     case 'lnAgain': UI.close(); leaveLanes(); setTimeout(() => { if (!G.modal && G.mode === 'hub') openLanesPanel(); }, 300); return;
   }
   if (UI.current === 'lanes') openLanesPanel();
@@ -233,10 +252,10 @@ function openLanesResult() {
   const r = G.lanes && G.lanes.result; if (!r) return;
   UI.current = 'lanesResult';
   openModal(`<div class="results ${r.win ? 'win' : ''}"><div class="place">${r.win ? 'WIN' : 'LOSS'}</div><h2>${r.win ? 'Victory!' : 'Defeat'}</h2>
-    <div class="stats3"><div><b class="${r.rp >= 0 ? 'up' : 'down'}">${r.rp >= 0 ? '+' : ''}${r.rp}</b><span>${escapeHTML(r.rank)} · ${fmt(r.rpTotal)} RP</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${r.kills}/${r.deaths}</b><span>Takedowns / falls</span></div></div>
-    <div class="stats3"><div><b>${r.structs}</b><span>Buildings</span></div><div><b>${r.minions}</b><span>Minions</span></div><div><b>${Math.floor(r.t / 60)}:${String(Math.floor(r.t % 60)).padStart(2, '0')}</b><span>Match</span></div></div>
+    <div class="stats3"><div><b class="${r.rp >= 0 ? 'up' : 'down'}">${r.rp >= 0 ? '+' : ''}${r.rp}</b><span>Trophies · ${fmt(r.rpTotal)} · ${escapeHTML(r.rank)}</span></div><div><b>${ICON.coin}+${fmtK(r.gold)}</b><span>Gold</span></div><div><b>${r.kills}/${r.deaths}</b><span>Takedowns / falls</span></div></div>
+    <div class="stats3"><div><b>${r.lvl}</b><span>Hero level</span></div><div><b>${r.structs}</b><span>Buildings</span></div><div><b>${Math.floor(r.t / 60)}:${String(Math.floor(r.t % 60)).padStart(2, '0')}</b><span>Match</span></div></div>
     ${r.chest ? `<div class="list"><div class="item">${caseArt(r.chest)}<div class="meta"><div class="slot">Earned</div><div class="nm">${CFG.cases[r.chest].name}</div><div class="st">Open it in your Inventory</div></div></div></div>` : ''}</div>
     <div class="row end"><button class="ghost" data-act="lnHub">Back to the world</button><button class="primary" data-act="lnAgain">Play again</button></div>`, false);
 }
-if (LOCAL_PREVIEW) window.__lanes = { LN, startLanes, leaveLanes, lanesEnd, lanesSpawnWave, openLanesPanel, lanesRating, lanesBracket, lanesShouldNormalize, lanesGoMsg, lanesTeams, lanesRecv, lanesMirror, get S() { return G.lanes; } };
+if (LOCAL_PREVIEW) window.__lanes = { LN, startLanes, leaveLanes, lanesEnd, lanesSpawnWave, openLanesPanel, lanesPickByTrophies, lanesBotBonus, lanesGearBonus, lanesMyBonus, lanesGiveXp, lanesGoMsg, lanesTeams, lanesRecv, lanesMirror, get S() { return G.lanes; } };
 // --- end Lanes online

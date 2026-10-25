@@ -10,68 +10,117 @@
 // and the inner tower and the Core stay shielded until the structure in front of them has fallen.
 // The game that runs the match (you alone, or the earliest player in an online party: 76-lanes-mp.js) simulates the
 // minions, towers, Cores, camps and bots; every human always runs their own hero (victim-authoritative, like 72-pvp).
-// Level matching (to be finished later): every player has a Lanes rating card (`lanesRating`: level, Power, bracket);
-// quick match queues per bracket, and CFG.lanes.normalize scales every hero to the match level so a level 20 and a
-// level 150 can play fairly. See docs/log/2026-10-25-lanes-mode.md.
+// Fair by design (Casper, 25 Oct: "Play starts Lanes", "level your character in-game", "match on trophies"): every hero
+// starts each match at level 1 and levels to 18 from minion, hero, tower and camp XP, with its buttons unlocking on the
+// way (CFG.lanes.unlocks: dash at 1, skill at 3, elemental special at 5, the hero's super at 6, stronger at 9/12/15).
+// All heroes share one reference build (CFG.lanes.statLevel); farm gear, talents, level and the crafted Lanes loadout
+// (34c-lanes-gear.js) add a small bonus capped at CFG.lanes.gearCap. Quick match pairs the closest Lanes trophies,
+// widening the range while you wait; bots play at the strength of the humans' trophies. See docs/log/2026-10-25-lanes-mode.md.
 // ---------------------------------------------------------------------
 const LC = { x: 0, z: -2600 }; // Lanes map centre (arena −1000, rift −1400, dungeon −1800, siege −2200)
 CFG.lanes = {
-  unlock: 10, sizes: [1, 2, 3], half: { x: 19, z: 64 }, wide3: 23, // field half-size (3v3 is a little wider)
-  core: 54, towers: [38, 21], fountain: 60, fountainR: 6, campX: 15, campZ: 0,
+  unlock: 5, sizes: [1, 2, 3], half: { x: 19, z: 64 }, wide3: 23, // field half-size (3v3 is a little wider)
+  core: 54, towers: [21, 38], // outer tower (nearer the middle) first, inner tower second fountain: 60, fountainR: 6, campX: 15, campZ: 0,
   wave: 22, firstWave: 4, melee: 3, ranged: 2, maxMinions: 40, time: 600, countdown: 3,
   respawn: [6, 1, 18], // base seconds, +per minute, cap
   // stats in units of the match's reference hero (a level-L hero in level-L Rare gear): hp in hero shots, dmg in hero HP
   minion: { melee: { hp: 1.7, dmg: 0.055, cd: 1.1, range: 1.7, speed: 3.4, r: 0.6 }, ranged: { hp: 1.2, dmg: 0.05, cd: 1.5, range: 7, speed: 3.4, r: 0.5 } },
   tower: { hp: 34, dmg: 0.17, minionDmg: 0.42, cd: 1.15, range: 11, r: 1.6, aggro: 2.5 },
-  coreHp: 50, coreR: 2.4, structDmg: 0.75, backdoor: 0.35, sight: 7.5, pvp: 0.8, push: 0.12, // push: each tower a team has lost makes the other side's minions 12% sturdier
+  coreHp: 50, coreR: 2.4, structDmg: 0.75, backdoor: 0.35, sight: 7.5, pvp: 0.8, push: 0.12, lead: 0.15, leadMax: 4, overtime: 240, otGrow: 0.3, otStruct: 0.6, // lead: each takedown ahead makes your waves 15% sturdier (+1 golem per 2); overtime: from 4:00 minions grow 30% and hit buildings 60% harder per minute // push: each tower a team has lost makes the other side's minions 12% sturdier
   camp: { hp: 22, dmg: 0.09, cd: 1.3, range: 2.4, leash: 9, respawn: 75, buff: 0.15, buffT: 60, type: 'boar' },
   heal: 0.18, // fountain heal per second (share of max HP)
   zoom: 1.12,
   // rank points per win / loss (never below 0), the Lanes ranks, and play-earned chests (never sold, odds in Inventory)
-  rp: { win: 20, loss: -8, bot: 0.5 }, ranks: [[0, 'Bronze'], [100, 'Silver'], [250, 'Gold'], [450, 'Platinum'], [700, 'Diamond'], [1000, 'Ascendant']],
+  ranks: [[0, 'Bronze'], [100, 'Silver'], [300, 'Gold'], [600, 'Platinum'], [1000, 'Diamond'], [1500, 'Ascendant']],
   chest: { win: 'treasure', loss: 'hunter' },
-  // level matching: brackets by player level (quick match only queues inside one), and stat normalisation
-  brackets: [1, 20, 40, 70, 100, 150, 210], normalize: 'auto', normalizeGap: 15, normalizeSoft: 0.5,
+  // in-match levels: everyone shares a level-statLevel reference build in Rare gear, then grows per match level
+  statLevel: 40, maxLvl: 18, perLvl: { hp: 0.085, dmg: 0.065 }, gearCap: 0.12,
+  xp: { base: 160, per: 90, melee: 60, ranged: 45, hero: 220, heroPer: 30, tower: 180, camp: 240, passive: 4, share: 14 },
+  unlocks: { dash: 1, skill: 3, special: 5, super: 6 }, steps: [9, 12, 15], stepCdr: 0.08, stepSuper: 0.15, // each step: shorter cooldowns, a bigger super
+  // trophies: what quick match matches on and what bots play at
+  trophies: { win: 30, loss: -15, botWin: 20, botLoss: -10 }, mm: { window: 80, widen: 12, wait: 30 }, botBonus: [-0.08, 0.12, 2000],
+  mainMode: true, mainFrom: 5, // Play on the title starts Lanes from this player level (new players get the world tutorial first)
 };
 const LN_TEAMS = ['blue', 'red'];
-const lanesRec = () => { const p = G.profile; if (!p.lanes) p.lanes = { rp: 0, best: 0, w: 0, l: 0, n: 0 }; return p.lanes; };
-const lanesRank = (rp) => { let r = CFG.lanes.ranks[0][1]; for (const [k, n] of CFG.lanes.ranks) if (rp >= k) r = n; return r; };
-// --- Lanes rating: the card a player brings to matchmaking (sent in the lobby presence) ---
-function lanesBracket(level) { const B = CFG.lanes.brackets; let i = 0; while (i < B.length - 1 && level >= B[i + 1]) i++; return i; }
-function lanesBracketName(i) { const B = CFG.lanes.brackets; return i >= B.length - 1 ? `Lv ${B[B.length - 1]}+` : `Lv ${B[i]}-${B[i + 1] - 1}`; }
-// mmr: rank points plus a little for level and Power, so a later queue can widen its search step by step
-function lanesRating(p, power) { const L = (p && p.level) || 1, rp = ((p && p.lanes) || {}).rp || 0; return { lvl: L, pw: Math.round(power || 0), br: lanesBracket(L), mmr: Math.round(1000 + rp + 2 * Math.min(L, 210)) }; }
-// should this match scale everyone to its level? 'auto': only when the humans' levels are far apart
-function lanesShouldNormalize(levels) { const N = CFG.lanes.normalize; if (N === true || N === false) return N; return levels.length > 1 && Math.max(...levels) - Math.min(...levels) > CFG.lanes.normalizeGap; }
+const lanesRec = () => { const p = G.profile; if (!p.lanes) p.lanes = { trophies: 0, best: 0, w: 0, l: 0, n: 0, gear: {}, eq: {}, fx: '' }; return p.lanes; };
+const lanesRank = (tr) => { let r = CFG.lanes.ranks[0][1]; for (const [k, n] of CFG.lanes.ranks) if (tr >= k) r = n; return r; };
+// --- Lanes rating: trophies decide who meets whom (quick match) and how strong the bots are ---
+// the trophy range a queue accepts after waiting `sec` seconds (it widens so nobody waits forever)
+const lanesTrophyWindow = (sec) => CFG.lanes.mm.window + CFG.lanes.mm.widen * Math.max(0, sec);
+// pick the players closest in trophies to `me` from a queue list [{ tr, ... }], within the window, at most n
+function lanesPickByTrophies(me, list, n, sec) { const w = lanesTrophyWindow(sec); return list.filter((q) => Math.abs((q.tr || 0) - (me.tr || 0)) <= w).sort((a, b) => Math.abs(a.tr - me.tr) - Math.abs(b.tr - me.tr)).slice(0, n); }
+// bots play at the humans' average trophies: a small bonus or malus on the same reference build
+function lanesBotBonus(tr) { const [lo, hi, at] = CFG.lanes.botBonus; return lo + (hi - lo) * Math.min(1, Math.max(0, tr || 0) / at); }
+// your capped bonus: how far your farm build is ahead (gear, talents vs a Rare-geared hero of your level) plus your
+// progression (level), plus what your crafted Lanes loadout adds; never more than gearCap
+function lanesGearBonus(build, level, loadout) { const cap = CFG.lanes.gearCap, a = Math.min(1, Math.max(0, (build - 0.8) / 1.2)), b = Math.min(1, Math.max(0, level / 210)); return Math.min(cap, cap * (0.35 * a + 0.35 * b) + (loadout || 0)); }
+const lanesXpNeed = (lvl) => CFG.lanes.xp.base + CFG.lanes.xp.per * (lvl - 1);
 // --- end Lanes rating
 
-// the reference hero of a match level: what minion, tower and bot numbers are measured in
+// the reference hero: every hero in a match shares this build (a level-statLevel hero in Rare gear); minion, tower and
+// camp numbers are measured in it too
 function lanesRef(L) {
   const f = makeFighter({ name: 'ref', team: 'ref', cls: STARTER_HERO, x: 0, z: 0 }); applyLoadout(f, STARTER_HERO, []);
   applyStats(f, 'hub', { level: L, gear: refGear(L) }); G.ents.delete(f.id);
   return { hp: f.maxHp, dmg: f.dmg * (CFG.attacks[STARTER_HERO].mult || 1), power: powerOf(f) };
 }
-// scale a hero so its Power matches the match level, keeping a softened share of how good its build is for its own level
-function lanesNormalize(f, L, ownL) {
-  const R = CFG.lanes, mine = powerOf(f), refOwn = lanesRef(ownL).power, refL = lanesRef(L).power;
-  const build = clamp(mine / Math.max(1, refOwn), 0.6, 1.6), target = refL * Math.pow(build, R.normalizeSoft), s = target / Math.max(1, mine);
-  const k = f.maxHp > 0 ? f.hp / f.maxHp : 1; f.maxHp = Math.round(f.maxHp * s); f.dmg *= s; f.dmgAlt *= s; f.hp = f.maxHp * k;
+// a hero's elemental special in a match: the element on its own gear if it has one, else one that suits the hero
+const lanesElem = (cls, gearElem) => { if (gearElem && CFG.elements[gearElem]) return gearElem; const ks = Object.keys(CFG.elements); let h = 0; for (const ch of String(cls)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return ks[h % ks.length]; };
+// make a fighter a level-1 Lanes hero: the shared build, its own hero kit, its capped bonus
+function lanesHero(f, cls, bonus, gearElem) {
+  const R = CFG.lanes;
+  applyLoadout(f, cls, []); applyStats(f, 'hub', { level: R.statLevel, gear: refGear(R.statLevel) });
+  f.perks.special = lanesElem(cls, gearElem); f.perks.specialPow = 1;
+  f.lnBase = { hp: f.maxHp, dmg: f.dmg, dmgAlt: f.dmgAlt, cdr: f.cdr || 0, sp: f.mods.superPow || 0 };
+  f.lnLvl = 1; f.lnXp = 0; f.lnBonus = bonus || 0; f.superCharge = 0; f.level = 1;
+  lanesApplyLevel(f, true);
+}
+// stats for the hero's match level: +HP and damage per level, and at each step (9, 12, 15) shorter cooldowns and a bigger super
+function lanesApplyLevel(f, full) {
+  const R = CFG.lanes, B = f.lnBase, L = f.lnLvl, k = 1 + (f.lnBonus || 0), steps = R.steps.filter((x) => L >= x).length;
+  const frac = f.maxHp > 1 ? f.hp / f.maxHp : 1, before = f.maxHp;
+  f.maxHp = Math.round(B.hp * (1 + R.perLvl.hp * (L - 1)) * k); f.dmg = B.dmg * (1 + R.perLvl.dmg * (L - 1)) * k; f.dmgAlt = B.dmgAlt * (1 + R.perLvl.dmg * (L - 1)) * k;
+  f.cdr = Math.min(0.5, B.cdr + R.stepCdr * steps); f.mods.superPow = B.sp + R.stepSuper * steps; f.level = L;
+  f.hp = full ? f.maxHp : Math.min(f.maxHp, f.maxHp * frac + Math.max(0, f.maxHp - before));
+}
+const lanesUnlocked = (f, what) => !f.lnLvl || f.lnLvl >= (CFG.lanes.unlocks[what] || 1);
+function lanesGiveXp(f, amt) {
+  const R = CFG.lanes; if (!f || !f.lnLvl || !(amt > 0) || f.lnLvl >= R.maxLvl) return;
+  f.lnXp += amt * (1 + ((f.lnGear && f.lnGear.xp) || 0));
+  while (f.lnLvl < R.maxLvl && f.lnXp >= lanesXpNeed(f.lnLvl)) {
+    f.lnXp -= lanesXpNeed(f.lnLvl); f.lnLvl++; lanesApplyLevel(f, false);
+    const U = R.unlocks, opened = Object.keys(U).filter((k) => U[k] === f.lnLvl), step = R.steps.includes(f.lnLvl);
+    if (f.isPlayer) ev({ t: 'lanesLevel', lvl: f.lnLvl, opened, step, x: f.x, z: f.z });
+  }
+  if (f.lnLvl >= R.maxLvl) f.lnXp = 0;
+}
+// XP to the heroes of `team` near (x, z): shared like LoL (a little more in total when several are there)
+function lanesShareXp(team, x, z, amt, all) {
+  const S = G.lanes, R = CFG.lanes, near = S.fighters.filter((f) => f.alive && f.team === team && f.lnLvl && (all || Math.hypot(f.x - x, f.z - z) < R.xp.share));
+  const each = near.length > 1 ? amt * 1.3 / near.length : amt; for (const f of near) lanesGiveXp(f, each);
+}
+// buttons open with the match level: gate what the hero (you or a bot) may press
+function lanesGate(f) {
+  const it = f.intent; if (!it || !f.lnLvl) return;
+  if (!lanesUnlocked(f, 'super')) { it.super = false; f.superCharge = Math.min(f.superCharge, 0.99); }
+  if (!lanesUnlocked(f, 'skill')) it.skill = false;
+  if (!lanesUnlocked(f, 'special')) it.special = false;
+  if (!lanesUnlocked(f, 'dash')) it.dash = false;
 }
 const lanesSide = (team) => (team === 'blue' ? -1 : 1); // blue base in the south (−z), red in the north
 const lanesEnemy = (team) => (team === 'blue' ? 'red' : 'blue');
 const lanesHalfX = () => (G.lanes && G.lanes.size >= 3 ? CFG.lanes.wide3 : CFG.lanes.half.x);
 function lanesSpawnPoint(team, i) { const s = lanesSide(team), R = CFG.lanes; return { x: LC.x + ((i || 0) - 1) * 2.4, z: LC.z + s * (R.fountain - 1) }; }
-// opts: { size, team, seed, humans: [{ key, team, nick, cls, level }], host, code, normalize }
+// opts: { size, team, seed, humans: [{ key, team, nick, cls, tr }], host, code, trophies (the humans' average, sets bot strength) }
 function startLanes(opts) {
   const p = G.profile, pl = G.player, R = CFG.lanes;
   if (G.mode !== 'hub' || G.rift || G.dungeon || G.siege || G.lanes || !pl.alive) return false;
   opts = opts || {};
   const size = clamp(opts.size | 0 || 1, 1, 3), myTeam = opts.team === 'red' ? 'red' : 'blue';
   const humans = (opts.humans || []).filter((h) => h && h.key !== MP.sid);
-  const levels = [p.level, ...humans.map((h) => h.level || p.level)], L = Math.max(1, Math.round(levels.reduce((a, b) => a + b, 0) / levels.length));
-  const norm = opts.normalize != null ? !!opts.normalize : lanesShouldNormalize(levels);
+  const L = R.statLevel, tr = opts.trophies != null ? opts.trophies : lanesRec().trophies;
   clearProjectiles();
-  const S = G.lanes = { size, t: 0, phase: 'countdown', cd: R.countdown, L, ref: lanesRef(L), norm, myTeam, code: opts.code || '', host: opts.host !== false, seed: opts.seed || 1,
+  const S = G.lanes = { size, t: 0, phase: 'countdown', cd: R.countdown, L, ref: lanesRef(L), tr, botBonus: lanesBotBonus(tr), myTeam, code: opts.code || '', host: opts.host !== false, seed: opts.seed || 1,
     waveT: R.firstWave, waveN: 0, fighters: [], bots: [], minions: [], structs: [], camps: [], peers: humans, kills: { blue: 0, red: 0 }, buff: { blue: 0, red: 0 },
     result: null, overT: 0, back: { x: pl.x, z: pl.z, team: pl.team }, stats: { kills: 0, deaths: 0, structs: 0, minions: 0 }, mid: 0 };
   G.mode = 'lanes'; G.obstacles = S.grid = new Grid(6);
@@ -82,13 +131,15 @@ function startLanes(opts) {
     S.structs.push(lanesStruct(team, 'core', LC.x, LC.z + s * R.core, R.coreHp, R.coreR, 'core'));
   }
   if (size >= 2) for (const sx of [-1, 1]) S.camps.push(lanesCamp(LC.x + sx * (lanesHalfX() - 4), LC.z + R.campZ));
-  // your hero, as you built it (stats normalised to the match level when asked)
-  pl.team = myTeam; refreshPlayerStats(true); if (norm) lanesNormalize(pl, L, p.level);
+  // your hero: the shared level-1 build plus your capped bonus (farm build, level, crafted Lanes loadout)
+  pl.team = myTeam; refreshPlayerStats(true);
+  const bonus = lanesMyBonus(); lanesHero(pl, resolvedAttack(p), bonus.total, gearPerks(p.gear).special); S.bonus = bonus;
   const sp = lanesSpawnPoint(myTeam, 1); pl.x = sp.x; pl.z = sp.z; pl.facing = myTeam === 'blue' ? 0 : Math.PI; pl.hp = pl.maxHp; pl.invulnT = 2; pl.ammo = pl.ammoMax; pl.superCharge = 0; pl.intent = newIntent();
   S.fighters.push(pl);
   // empty places: bots (only the game that runs the match makes them; 76-lanes-mp.js sends them to the others)
   if (S.host) lanesFillBots(S, humans);
-  ev({ t: 'lanesStart', size, team: myTeam, x: pl.x, z: pl.z, norm, L });
+  if (typeof lanesLoadoutStart === 'function') lanesLoadoutStart(pl);
+  ev({ t: 'lanesStart', size, team: myTeam, x: pl.x, z: pl.z, bonus: Math.round(bonus.total * 100) });
   return true;
 }
 function lanesStruct(team, kind, x, z, hpK, r, tier) {
@@ -102,12 +153,17 @@ function lanesCamp(x, z) {
     lvl: S.L, hp: 1, maxHp: 1, atk: 1, alive: true, state: 'idle', atkCd: 0, flashT: 0, slowT: 0, invulnT: 0, armorT: 0, respawnT: 0, facing: 0, moveAmt: 0, attackAnim: 0, lungeT: 0, windT: 0, lastHurt: -99, tgt: null };
   e.maxHp = e.hp = Math.round(S.ref.dmg * C.hp); e.atk = S.ref.hp * C.dmg; G.ents.set(e.id, e); return e;
 }
-// bots: heroes of the match level in Rare gear (lanes are fair: a bot is as strong as the reference hero)
+// your bonus right now (also shown in the lobby): farm build vs a Rare-geared hero of your level, level, Lanes loadout
+function lanesMyBonus() {
+  const p = G.profile, pl = G.player, build = typeof refPower === 'function' ? powerOf(pl) / Math.max(1, refPower(p.level)) : 1, load = typeof lanesLoadoutBonus === 'function' ? lanesLoadoutBonus(p) : 0;
+  return { total: lanesGearBonus(build, p.level, load), build, load };
+}
+// bots: the same shared build at the strength of the humans' trophies
 function lanesBot(team, i, cls, name) {
   const S = G.lanes, sp = lanesSpawnPoint(team, i);
   const b = makeFighter({ name, team, isBot: true, cls, x: sp.x, z: sp.z, level: S.L, facing: team === 'blue' ? 0 : Math.PI,
     ai: { role: 'lane', t: 0, tgt: null, stuck: 0, lx: sp.x, lz: sp.z, side: Math.random() < 0.5 ? 1 : -1, sideT: 1, fireT: 0, back: false } });
-  applyLoadout(b, cls, []); applyStats(b, 'hub', { level: S.L, gear: refGear(S.L) }); b.hp = b.maxHp;
+  lanesHero(b, cls, S.botBonus || 0, null);
   b.lanesBot = true; b.nick = name; b.slot = i; b.key = 'lbot:' + S.seed + ':' + team + i;
   return b;
 }
@@ -144,10 +200,10 @@ function lanesDmgMod(t, srcId, amount) {
   const S = G.lanes, R = CFG.lanes, src = G.ents.get(srcId);
   if (t.kind === 'structure') {
     if (!t.alive || lanesShielded(t)) return 0;
-    if (src && src.kind === 'fighter') { const near = S.minions.some((m) => m.alive && m.team !== t.team && Math.hypot(m.x - t.x, m.z - t.z) < R.tower.range + 2); if (!near) amount *= R.backdoor; }
+    if (src && src.kind === 'fighter') { const near = S.minions.some((m) => m.alive && m.team !== t.team && Math.hypot(m.x - t.x, m.z - t.z) < R.tower.range + 2); if (!near) amount *= R.backdoor; if (src.lnGear && src.lnGear.tower) amount *= 1 + src.lnGear.tower; }
     t.hurtT = 1.2;
   }
-  if (src && src.team && src.team !== 'neutral' && S.buff[src.team] > 0) amount *= 1 + R.camp.buff;
+  if (src && src.team && src.team !== 'neutral' && S.buff[src.team] > 0) amount *= 1 + R.camp.buff + ((S.buffK || {})[src.team] || 0);
   if (t.kind === 'fighter' && src && src.kind === 'fighter') {
     amount *= R.pvp;
     for (const s of S.structs) if (s.alive && s.sk === 'tower' && s.team === t.team && Math.hypot(src.x - s.x, src.z - s.z) < R.tower.range) { s.aggro = src; s.aggroT = R.tower.aggro; }
@@ -162,29 +218,32 @@ function lanesOnKill(t, src) {
   const S = G.lanes, R = CFG.lanes;
   ev({ t: 'die', x: t.x, z: t.z, kind: t.kind === 'enemy' ? t.type : t.kind === 'structure' ? 'boss' : t.kind, isPlayer: !!t.isPlayer });
   if (t.kind === 'fighter') {
-    const min = S.t / 60; t.respawnT = Math.min(R.respawn[2], R.respawn[0] + R.respawn[1] * min);
+    const min = S.t / 60; t.respawnT = Math.max(2, Math.min(R.respawn[2], R.respawn[0] + R.respawn[1] * min) - ((t.lnGear && t.lnGear.respawn) || 0));
     const by = lanesEnemy(t.team); S.kills[by]++;
     if (t.isPlayer) { S.stats.deaths++; toast(`You fell · back in ${Math.ceil(t.respawnT)}s`, 'bad'); }
     if (src && src.isPlayer) { S.stats.kills++; ev({ t: 'ko', name: t.nick || t.name }); }
+    const X = R.xp, gain = X.hero + X.heroPer * ((t.lnLvl || 1) - 1); if (src && src.kind === 'fighter' && src.lnLvl) { lanesGiveXp(src, gain * 0.6); if (src.lnGear && src.lnGear.healTake && src.alive) src.hp = Math.min(src.maxHp, src.hp + src.maxHp * src.lnGear.healTake); } lanesShareXp(by, t.x, t.z, gain * 0.6);
     ev({ t: 'lanesKill', team: by, name: t.nick || t.name, mine: t.team === S.myTeam });
   } else if (t.kind === 'structure') {
     if (src && src.team === S.myTeam) S.stats.structs++;
+    if (t.sk === 'tower') lanesShareXp(lanesEnemy(t.team), t.x, t.z, R.xp.tower, true);
     ev({ t: 'lanesStructDown', sk: t.sk, team: t.team, mine: t.team === S.myTeam, x: t.x, z: t.z });
     if (t.sk === 'core' && S.host) lanesEnd(lanesEnemy(t.team), 'core');
-  } else if (t.kind === 'minion') { t.deadAt = G.time; if (src && src.isPlayer) S.stats.minions++; }
-  else if (t.lanesCamp) { t.respawnT = R.camp.respawn; const team = src && src.team; if (team === 'blue' || team === 'red') { S.buff[team] = R.camp.buffT; ev({ t: 'lanesBuff', team, mine: team === S.myTeam }); } }
+  } else if (t.kind === 'minion') { t.deadAt = G.time; if (src && src.isPlayer) S.stats.minions++; lanesShareXp(lanesEnemy(t.team), t.x, t.z, t.mk === 'ranged' ? R.xp.ranged : R.xp.melee); }
+  else if (t.lanesCamp) { t.respawnT = R.camp.respawn; const team = src && src.team; if (team === 'blue' || team === 'red') { const cb = (src.lnGear && src.lnGear.campBuff) || 0; S.buff[team] = R.camp.buffT * (1 + cb); S.buffK = S.buffK || {}; S.buffK[team] = cb / 2; lanesShareXp(team, t.x, t.z, R.xp.camp); ev({ t: 'lanesBuff', team, mine: team === S.myTeam }); } }
 }
 function lanesSpawnWave() {
   const S = G.lanes, R = CFG.lanes; S.waveN++;
   for (const team of LN_TEAMS) {
     const s = lanesSide(team), z0 = LC.z + s * (R.core - 3);
-    const kinds = []; for (let i = 0; i < R.melee; i++) kinds.push('melee'); for (let i = 0; i < R.ranged; i++) kinds.push('ranged');
+    const lead = clamp(S.kills[team] - S.kills[lanesEnemy(team)], 0, R.leadMax), kinds = []; for (let i = 0; i < R.melee + Math.floor(lead / 2); i++) kinds.push('melee'); for (let i = 0; i < R.ranged; i++) kinds.push('ranged');
     kinds.forEach((k, i) => { if (S.minions.filter((m) => m.alive).length < R.maxMinions) S.minions.push(lanesMinion(team, k, LC.x + ((i % 3) - 1) * 1.6, z0 + s * Math.floor(i / 3) * 1.8)); });
   }
   S.minions = S.minions.filter((m) => m.alive || G.time - m.deadAt < 2);
 }
 function lanesMinion(team, mk, x, z) {
-  const S = G.lanes, M = CFG.lanes.minion[mk], lost = S.structs.filter((o) => o.team !== team && !o.alive).length, grow = (1 + 0.04 * S.waveN) * (1 + CFG.lanes.push * lost); // each wave a little sturdier, and more so for the side that is ahead
+  const S = G.lanes, R = CFG.lanes, M = R.minion[mk], lost = S.structs.filter((o) => o.team !== team && !o.alive).length, lead = clamp(S.kills[team] - S.kills[lanesEnemy(team)], 0, R.leadMax), ot = Math.max(0, S.t - R.overtime) / 60;
+  const grow = (1 + 0.04 * S.waveN) * (1 + R.push * lost) * (1 + R.lead * lead) * (1 + R.otGrow * ot); // each wave a little sturdier, and more so for the side that is ahead
   const m = { id: nextId++, kind: 'minion', mk, team, x, z, r: M.r, hp: Math.round(S.ref.dmg * M.hp * grow), maxHp: 0, dmg: S.ref.hp * M.dmg * grow, alive: true, facing: team === 'blue' ? 0 : Math.PI,
     atkCd: Math.random(), flashT: 0, slowT: 0, invulnT: 0, armorT: 0, moveAmt: 0, attackAnim: 0, tgt: null, tgtT: 0, lastHurt: -99, deadAt: 0 };
   m.maxHp = m.hp; G.ents.set(m.id, m); return m;
@@ -200,7 +259,10 @@ function stepLanes(dt) {
     if (!f.alive) { if ((f.respawnT -= dt) <= 0 && S.phase !== 'over') lanesRespawn(f); continue; }
     if (f.lanesBot && !guest && S.phase === 'fight') lanesBotThink(f, dt);
     if (f.lanesBot && guest) { lanesMirrorBot(f, dt); continue; }
+    if (S.phase === 'fight' && (!guest || f.isPlayer)) lanesGiveXp(f, CFG.lanes.xp.passive * dt);
+    lanesGate(f);
     stepFighter(f, dt, 'lanes');
+    if (f.lnGear && f.lnGear.dashSlow && f.dashT > 0) lanesTargets((t) => { if (t.alive && t.team !== f.team && t.team !== 'neutral' && t.kind !== 'structure' && Math.hypot(t.x - f.x, t.z - f.z) < 2.4) t.slowT = Math.max(t.slowT || 0, f.lnGear.dashSlow); });
     // the fountain heals fast and keeps enemies out
     const sp = lanesSpawnPoint(f.team, 1);
     if (Math.hypot(f.x - sp.x, f.z - sp.z) < R.fountainR) f.hp = Math.min(f.maxHp, f.hp + f.maxHp * R.heal * dt);
@@ -214,7 +276,7 @@ function stepLanes(dt) {
   const push = (e) => { for (const s of S.structs) { if (!s.alive) continue; const dx = e.x - s.x, dz = e.z - s.z, d = Math.hypot(dx, dz), min = s.r + (e.r || 0.5); if (d < min && d > 1e-4) { e.x = s.x + dx / d * min; e.z = s.z + dz / d * min; } } };
   for (const f of S.fighters) if (f.alive) push(f);
   if (guest) { for (const m of S.minions) push(m); return; }
-  if (S.phase === 'fight') { if ((S.waveT -= dt) <= 0) { S.waveT = R.wave; lanesSpawnWave(); } }
+  if (S.phase === 'fight') { if ((S.waveT -= dt) <= 0) { S.waveT = R.wave; lanesSpawnWave(); } if (!S.otSaid && S.t >= R.overtime) { S.otSaid = true; ev({ t: 'lanesFight', ot: true }); } }
   for (const m of S.minions) if (m.alive) { lanesStepMinion(m, dt); push(m); }
   for (let i = 0; i < S.minions.length; i++) for (let j = i + 1; j < S.minions.length; j++) { const a = S.minions[i], b = S.minions[j]; if (a.alive && b.alive) lanesSeparate(a, b); }
   for (const s of S.structs) if (s.alive && s.sk === 'tower') lanesStepTower(s, dt);
@@ -226,6 +288,7 @@ function lanesRespawn(f) {
   const sp = lanesSpawnPoint(f.team, f.isPlayer ? 1 : (f.slot || 0));
   f.alive = true; f.x = sp.x; f.z = sp.z; f.hp = f.maxHp; f.invulnT = 2; f.ammo = f.ammoMax; f.burnT = 0; f.slowT = 0;
   if (f.ai) { f.ai.back = false; f.ai.tgt = null; }
+  if (f.lnGear && f.lnGear.shield) { f.shieldHp = f.maxHp * f.lnGear.shield; f.shieldT = 6; f.shieldCol = f.lnTrail || 0x5dd6ff; }
   if (f.isPlayer) ev({ t: 'lanesRespawn' });
 }
 // nearest enemy body for a minion or tower: minions first, then heroes, then buildings
@@ -251,12 +314,14 @@ function lanesStepMinion(m, dt) {
     if (d > reach) { mx = dx / d; mz = dz / d; }
     else { mx = mz = 0; if (m.atkCd <= 0) { m.atkCd = M.cd; m.attackAnim = 1; lanesMinionHit(m, t); } }
   } else { mx = (LC.x - m.x) * 0.15; m.facing = Math.atan2(mx, mz); } // drift back to the lane's middle
+  // a building in the way (not the one it is hitting): step round it instead of pushing into it
+  for (const o of S.structs) { if (!o.alive || o === t) continue; const ox = o.x - m.x, oz = o.z - m.z, od = Math.hypot(ox, oz); if (od < o.r + m.r + 1.6 && (ox * mx + oz * mz) > 0) { const side = m.x >= o.x ? 1 : -1; mx += side * 1.4; } }
   const l = Math.hypot(mx, mz); if (l > 0.01) { m.x += mx / l * sp * dt; m.z += mz / l * sp * dt; }
   m.moveAmt = lerp(m.moveAmt, l > 0.01 ? 1 : 0, 1 - Math.exp(-dt * 8));
   lanesClamp(m);
 }
 function lanesMinionHit(m, t) {
-  const R = CFG.lanes, dmg = t.kind === 'structure' ? G.lanes.ref.dmg * R.structDmg : m.dmg;
+  const R = CFG.lanes, S = G.lanes, aura = S.fighters.reduce((a, f) => (f.alive && f.team === m.team && f.lnGear && f.lnGear.minionAura && Math.hypot(f.x - m.x, f.z - m.z) < 8 ? Math.max(a, f.lnGear.minionAura) : a), 0), dmg = (1 + aura) * (t.kind === 'structure' ? S.ref.dmg * R.structDmg * (1 + R.otStruct * Math.max(0, S.t - R.overtime) / 60) : m.dmg);
   if (m.mk === 'ranged') { const a = Math.atan2(t.x - m.x, t.z - m.z), sp = 16, d = Math.hypot(t.x - m.x, t.z - m.z); spawnProjectile({ x: m.x, z: m.z, vx: Math.sin(a) * sp, vz: Math.cos(a) * sp, life: (d + 1) / sp, r: 0.3, dmg, team: m.team, owner: m.id, kind: 'orb', color: m.team === 'blue' ? 0x7fd8ff : 0xff8a6a, y: 1.1 }); }
   else dealDamage(t, dmg, m.id, { knock: 0 });
 }
@@ -324,7 +389,11 @@ function lanesBotThink(b, dt) {
   if (b.dashCd <= 0 && Math.random() < dt * 4) for (let i = 0; i < PROJ_MAX; i++) { const p = projectiles[i]; if (!p.active || p.team === b.team || p.ghost) continue; const rx = b.x - p.x, rz = b.z - p.z, dd = Math.hypot(rx, rz); if (dd > 4) continue; const sp = Math.hypot(p.vx, p.vz) || 1; if ((rx * p.vx + rz * p.vz) / (dd * sp) > 0.92) { it.dash = true; it.mx = -p.vz / sp * ai.side; it.mz = p.vx / sp * ai.side; break; } }
   ai.stuck += dt; if (ai.stuck > 1) { if (Math.hypot(b.x - ai.lx, b.z - ai.lz) < 0.4) ai.side = -ai.side; ai.stuck = 0; ai.lx = b.x; ai.lz = b.z; }
 }
-function lanesMoveTo(b, x, z) { const dx = x - b.x, dz = z - b.z, d = Math.hypot(dx, dz); if (d > 1) { b.intent.mx = dx / d; b.intent.mz = dz / d; } }
+function lanesMoveTo(b, x, z) {
+  const dx = x - b.x, dz = z - b.z, d = Math.hypot(dx, dz); if (d <= 1) return; let mx = dx / d, mz = dz / d;
+  for (const o of G.lanes.structs) { if (!o.alive) continue; const ox = o.x - b.x, oz = o.z - b.z, od = Math.hypot(ox, oz); if (od < o.r + 2.2 && ox * mx + oz * mz > 0) mx += (b.x >= o.x ? 1 : -1) * 1.4; } // walk round buildings
+  const l = Math.hypot(mx, mz); b.intent.mx = mx / l; b.intent.mz = mz / l;
+}
 // a guest draws the host's bots where it says they are (76-lanes-mp.js fills sx/sz)
 function lanesMirrorBot(b, dt) {
   if (b.sx == null) return; const k = 1 - Math.exp(-dt * 10);
@@ -339,13 +408,12 @@ function lanesEnd(winner, why) {
 // pay this player for the match (each game pays its own): rank points, gold, a chest earned in play, mastery
 function lanesFinish(winner, why) {
   const S = G.lanes, R = CFG.lanes, p = G.profile; if (!S || S.result) return;
-  const win = winner === S.myTeam, rec = lanesRec(), humansVs = S.peers.some((h) => h.team !== S.myTeam);
-  const k = humansVs ? 1 : R.rp.bot, rp0 = rec.rp;
-  rec.rp = Math.max(0, Math.round(rec.rp + (win ? R.rp.win : R.rp.loss) * k)); rec.best = Math.max(rec.best || 0, rec.rp); rec.n++; if (win) rec.w++; else rec.l++;
-  const gold = Math.round((win ? 60 : 25) * (1 + S.t / 300) * Math.pow(CFG.enemies.goldGrowth, Math.min(S.L, p.level) - 1)); addGold(gold, true);
+  const win = winner === S.myTeam, rec = lanesRec(), humansVs = S.peers.some((h) => h.team !== S.myTeam), T = R.trophies, tr0 = rec.trophies || 0;
+  rec.trophies = Math.max(0, tr0 + (humansVs ? (win ? T.win : T.loss) : (win ? T.botWin : T.botLoss))); rec.best = Math.max(rec.best || 0, rec.trophies); rec.n++; if (win) rec.w++; else rec.l++;
+  const gold = Math.round((win ? 60 : 25) * (1 + S.t / 300) * Math.pow(CFG.enemies.goldGrowth, p.level - 1)); addGold(gold, true);
   const chest = win ? R.chest.win : S.t > 120 ? R.chest.loss : null; if (chest && typeof addCase === 'function') addCase(chest, { src: 'lanes' });
   addMastery('w:' + G.player.attackId, 20 + Math.round(S.t / 15));
-  S.result = { win, why, rp: rec.rp - rp0, rank: lanesRank(rec.rp), rpTotal: rec.rp, gold, chest, t: S.t, kills: S.stats.kills, deaths: S.stats.deaths, structs: S.stats.structs, minions: S.stats.minions, score: { blue: S.kills.blue, red: S.kills.red }, size: S.size };
+  S.result = { win, why, rp: rec.trophies - tr0, rank: lanesRank(rec.trophies), rpTotal: rec.trophies, lvl: G.player.lnLvl || 1, gold, chest, t: S.t, kills: S.stats.kills, deaths: S.stats.deaths, structs: S.stats.structs, minions: S.stats.minions, score: { blue: S.kills.blue, red: S.kills.red }, size: S.size };
   S.phase = 'over'; S.overT = 2.6; checkAchievements(); G.dirty = true;
   ev({ t: 'lanesEnd', win, why });
 }

@@ -87,6 +87,7 @@ function updateLanesView(dt, t) {
   }
   rings.count = rn; if (rn) { rings.instanceMatrix.needsUpdate = true; if (rings.instanceColor) rings.instanceColor.needsUpdate = true; }
   const pl = G.player;
+  if (pl.lnTrail && pl.alive && (pl.moveAmt || 0) > 0.3 && (lanesParts.trT = (lanesParts.trT || 0) - dt) <= 0) { lanesParts.trT = 0.06; burst(pl.x, 0.25, pl.z, 2, pl.lnTrail, 0.6, 0.6, 0.18, 0.4, 0.3); } // crafted trail colour
   for (const r of lanesParts.reach) { const d = Math.hypot(pl.x - r.s.x, pl.z - r.s.z), on = r.s.alive && r.s.team !== pl.team && d < CFG.lanes.tower.range + 6; r.m.material.opacity += ((on ? 0.45 + Math.sin(t * 5) * 0.12 : 0) - r.m.material.opacity) * Math.min(1, dt * 6); }
   WorldModels.update();
 }
@@ -122,15 +123,29 @@ function drawLanesMinimap(g, W2, H2, dpr) {
 function lanesEvent(e) {
   switch (e.t) {
     case 'lanesStart': enterLanesView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5;
-      SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`Ascendant Lanes · ${e.size}v${e.size}`, `Destroy the enemy Core${e.norm ? ` · heroes scaled to level ${e.L}` : ''}`, 'gold'); break;
-    case 'lanesFight': Sfx.play('horn'); showBanner('Fight!', 'Push your lane with the minions', 'gold'); break;
+      SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`Ascendant Lanes · ${e.size}v${e.size}`, `Everyone starts at level 1 · destroy the enemy Core${e.bonus ? ` · your bonus +${e.bonus}%` : ''}`, 'gold'); break;
+    case 'lanesFight': Sfx.play('horn'); if (e.ot) showBanner('Overtime', 'Minions grow stronger every minute', 'red'); else showBanner('Fight!', 'Push your lane with the minions', 'gold'); break;
     case 'lanesLeave': enterLanesView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('lanes'); break;
     case 'lanesEnd': if (e.win) { Sfx.play('win'); showBanner('Victory!', e.why === 'time' ? 'More of your base still stands' : 'The enemy Core has fallen', 'gold'); } else { Sfx.play('lose'); showBanner('Defeat', e.why === 'time' ? 'Time is up' : 'Your Core has fallen', 'red'); } break;
     case 'lanesKill': Feed.add(`${gi('m_arena')} ${e.mine ? `<b>${escapeHTML(e.name)}</b> fell` : `<b>${escapeHTML(e.name)}</b> was defeated`} · Blue ${G.lanes.kills.blue} · ${G.lanes.kills.red} Red`, e.mine ? 'boss' : 'rift', null, 4); break;
     case 'lanesStructDown': Cam.shake = Math.max(Cam.shake, 0.6); Sfx.play(e.mine ? 'lose' : 'job'); SpriteFX.play('pillar', e.mine ? 'blood' : 'gold', e.x, 0, e.z, 7);
       showBanner(e.sk === 'core' ? (e.mine ? 'Your Core fell' : 'Enemy Core destroyed') : e.mine ? 'We lost a tower' : 'Enemy tower destroyed', '', e.mine ? 'red' : 'gold', 1.8); break;
     case 'lanesBuff': toast(e.mine ? `Guardian's might: +${Math.round(CFG.lanes.camp.buff * 100)}% damage for your team` : 'The enemy took the Lane Guardian', e.mine ? 'good' : 'bad'); break;
+    case 'lanesLevel': { Sfx.play('level', { gap: 0.2 }); SpriteFX.play('pillar', 'gold', e.x, 0, e.z, 3.5);
+      const N = { skill: 'SKILL', special: 'SPECIAL', super: 'SUPER', dash: 'DASH' }, ids = { skill: 'bSkill', special: 'bSpecial', super: 'bSuper', dash: 'bDash' };
+      dmgNumberPlayer(e.opened.length ? `NEW: ${e.opened.map((k) => N[k]).join(' + ')}` : e.step ? `Level ${e.lvl} · stronger` : `Level ${e.lvl}`, 'xp');
+      for (const k of e.opened) { const b = $(ids[k]); if (b) { b.classList.remove('lnNew'); void b.offsetWidth; b.classList.add('lnNew'); setTimeout(() => b.classList.remove('lnNew'), 2400); } }
+      break; }
     case 'lanesRespawn': SpriteFX.play('pillar', 'frost', G.player.x, 0, G.player.z, 4); break;
     case 'lanesTowerShot': if (near(e, 30)) { burst(e.x, 8.4, e.z, 6, e.team === 'blue' ? 0x9fe8ff : 0xffa070, 3, 0.35, 0.22, 1, 0.5); Sfx.play('zap', { x: e.x, z: e.z, gap: 0.25 }); } break;
+  }
+}
+// the HUD inside a match: the level badge and XP bar show your match level, locked buttons show the level they open at
+function lanesHud(f, sk, spc) {
+  const R = CFG.lanes, L = f.lnLvl || 1, need = lanesXpNeed(L), U = R.unlocks;
+  setText('hLvl', String(L)); setStyle('hXp', 'width', (L >= R.maxLvl ? 100 : clamp(f.lnXp / need, 0, 1) * 100).toFixed(1) + '%'); setText('hXpTxt', L >= R.maxLvl ? 'Max level' : `Lv ${L} · ${Math.floor(f.lnXp)} / ${need} XP`);
+  for (const [id, k] of [['bSuper', 'super'], ['bSkill', 'skill'], ['bSpecial', 'special'], ['bDash', 'dash']]) {
+    const lock = L < (U[k] || 1), key = 'lnl' + id + (lock ? U[k] : 0);
+    if (hudCache[id + 'lnl'] !== key) { hudCache[id + 'lnl'] = key; const b = $(id); b.classList.toggle('lnLock', lock); if (lock) b.dataset.lv = 'Lv ' + U[k]; else delete b.dataset.lv; }
   }
 }
