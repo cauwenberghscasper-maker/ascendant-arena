@@ -602,7 +602,7 @@ function stepFighter(f, dt, ctx) {
       });
     }
   } else {
-    const sp = f.speed * (f.slowT > 0 ? 0.55 : 1) * (f.swiftT > 0 ? CFG.skills.swift.speed : 1) * (f.ks.phaseT > 0 ? 1.4 : 1);
+    const sp = f.speed * (G.dungeon && f.kind === 'fighter' ? CFG.dungeon.walk : 1) * (f.slowT > 0 ? 0.55 : 1) * (f.swiftT > 0 ? CFG.skills.swift.speed : 1) * (f.ks.phaseT > 0 ? 1.4 : 1);
     f.x += mx * sp * dt; f.z += mz * sp * dt;
     f.moveAmt = lerp(f.moveAmt, Math.min(1, ml), 1 - Math.exp(-dt * 12));
   }

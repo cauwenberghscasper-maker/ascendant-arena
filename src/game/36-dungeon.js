@@ -4,6 +4,7 @@
 const DC = { x: 0, z: -1800 }; // dungeon instance centre (arena −1000, rift −1400)
 CFG.dungeon = {
   room: 18, corridor: 8, corW: 5, bossR: 16, wallR: 0.5,
+  walk: 0.82, // heroes walk slower inside dungeons: an exploring pace (Casper, 25 Oct); dashes are unchanged
   // a safe first hall (Bart, 25 Oct): you arrive in an empty hall and its gate opens by itself; the guarded halls follow
   safeStart: true,
   lvlAdd: 4, hpMul: 1.5, dmgMul: 1.25, boss: { dmg: 1.5, adds: 2, lvlAdd: 2 },
@@ -105,6 +106,7 @@ function dungeonGrid(D) {
   const C = CFG.dungeon, g = new Grid(6), r = C.wallR;
   for (const w of D.walls) { const n = Math.max(1, Math.ceil(Math.hypot(w.x1 - w.x0, w.z1 - w.z0) / (r * 1.6))); for (let k = 0; k <= n; k++) g.add({ x: lerp(w.x0, w.x1, k / n), z: lerp(w.z0, w.z1, k / n), r }); }
   for (const q of D.props || []) g.add({ x: q.x, z: q.z, r: q.r }); // pillars in party-dungeon halls
+  for (const q of D.decor || []) g.add(q); // barrels, statues, carts by the walls (47-dungeon-view.js)
   for (const d of [...D.doors, ...(D.secrets || [])]) if (!d.open) for (let k = -3; k <= 3; k++) { /* gates and party-dungeon cracked walls */ const o = (k / 3) * d.w; g.add(d.ax === 'x' ? { x: d.x + o, z: d.z, r: 0.6 } : { x: d.x, z: d.z + o, r: 0.6 }); }
   G.dungeonObstacles = g; if (G.dungeon === D) G.obstacles = g;
   return g;

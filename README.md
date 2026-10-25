@@ -318,7 +318,7 @@ checks all 32 bodies, the Panther's three contacts, and all 43 hero models (27 a
   one of the dungeon's two named treasures), ore (biome materials and the dungeon's gem) or a hero (oaths for the
   biome's hidden hero, or a locked hero from a boss chest) (`CFG.delve.treasure`). Garo's Craft tab has a Dungeon forge
   per biome: two named pieces from the dungeon's gem (`CFG.delve.gear`).
-- **Dungeons** (a safe first hall, then guarded halls) with Dungeon Keys (tier + affixes, par time) and **Legendary Trials** (sigils, Radiant 1/500 drops).
+- **Dungeons** (a safe first hall, then guarded halls; every hall is dressed along its walls with biome props, the big ones solid (`dressDungeon` in `47-dungeon-view.js`), and heroes walk at an exploring pace inside, `CFG.dungeon.walk`) with Dungeon Keys (tier + affixes, par time) and **Legendary Trials** (sigils, Radiant 1/500 drops).
 - **Mining:** ore, pickaxe, geodes for the Museum, a 1/10,000 pet.
 - **Daily:** 7-day calendar that never resets, weekly Colossus chest (Journal › Daily; it never opens by itself, the Menu
   button glows while a reward waits).

@@ -32,6 +32,49 @@ function dungeonPalette(zn) {
 }
 // one dressing prop per biome: [world model, height in m]
 const DUNGEON_THEME_PROP = [['delve_sarcophagus', 1.3], ['delve_icecoffin', 1.4], ['delve_slagcart', 1.6], ['delve_bookshelf', 3.0], ['delve_coralshrine', 3.0], ['delve_meteor', 1.8]];
+// wall dressing per biome (Casper, 25 Oct: "rooms too empty, different models"): [model, height m, collider radius or 0]
+// clusters of these hug the walls of every hall; small floor details (coins, mushrooms, rubble) are scattered inside
+const DUNGEON_DRESS = [
+  [['barrel_1', 1.1, 0.5], ['crate_1', 1.0, 0.55], ['crate_2', 1.0, 0.55], ['bone_pile', 0.8, 0], ['graves', 1.4, 0.7], ['cage', 2.2, 0.8], ['weapon_rack', 1.8, 0.6], ['statue', 3.2, 0.8], ['ruin_pillar', 3.0, 0.7], ['stump', 0.9, 0.5]],
+  [['crystal', 2.2, 0.6], ['rock_a_1', 1.2, 0.7], ['rock_a_2', 1.1, 0.7], ['barrel_1', 1.1, 0.5], ['crate_1', 1.0, 0.55], ['bone_pile', 0.8, 0], ['weapon_rack', 1.8, 0.6], ['standing_stone', 2.6, 0.6], ['cage', 2.2, 0.8]],
+  [['ore_pile', 1.0, 0.6], ['mine_cart', 1.3, 0.7], ['anvil', 1.0, 0.6], ['kettle', 1.0, 0.5], ['barrel_1', 1.1, 0.5], ['crate_2', 1.0, 0.55], ['rock_a_3', 1.2, 0.7], ['bone_pile', 0.8, 0], ['weapon_rack', 1.8, 0.6]],
+  [['rune_obelisk', 2.8, 0.6], ['arcane_lectern', 1.6, 0.5], ['statue', 3.2, 0.8], ['crystal', 2.2, 0.6], ['ruin_block', 1.3, 0.7], ['ruin_pillar', 3.0, 0.7], ['crate_1', 1.0, 0.55], ['standing_stone', 2.6, 0.6]],
+  [['pearl_clam', 1.0, 0.6], ['tree_coral_1', 2.4, 0.6], ['tree_coral_2', 2.2, 0.6], ['rock_a_1', 1.2, 0.7], ['barrel_1', 1.1, 0.5], ['crate_2', 1.0, 0.55], ['bone_pile', 0.8, 0], ['ruin_block', 1.3, 0.7]],
+  [['standing_stone', 2.6, 0.6], ['statue', 3.2, 0.8], ['sun_lantern', 2.2, 0.5], ['crystal', 2.2, 0.6], ['ruin_pillar', 3.0, 0.7], ['rune_obelisk', 2.8, 0.6], ['crate_1', 1.0, 0.55]],
+];
+const DUNGEON_FLOOR_BITS = [['loot_coins', 0.35], ['mushrooms_1', 0.5], ['bone_pile', 0.45], ['rock_a_3', 0.35], ['loot_pouch', 0.35]];
+function dressDungeon(D, braz) {
+  const rng = mulberry32(strSeed(D.id) ^ 0x51ed), pool = (DUNGEON_DRESS[areaBiome(D.zone)] || DUNGEON_DRESS[0]).filter(([n]) => hasWM(n)), bits = DUNGEON_FLOOR_BITS.filter(([n]) => hasWM(n));
+  if (!pool.length) return;
+  D.decor = []; // the bigger props are solid: dungeonGrid (36-dungeon.js) adds these to the walls
+  const by = new Map(), put = (n, it) => { if (!by.has(n)) by.set(n, []); by.get(n).push(it); };
+  const nearBraz = (x, z) => braz.some((b) => Math.abs(b.x - x) < 2.4 && Math.abs(b.z - z) < 2.4);
+  const nearDoor = (x, z) => D.doors.some((d) => Math.hypot(d.x - x, d.z - z) < d.w + 3.5);
+  const rooms = D.side ? [...D.rooms, ...D.side] : D.rooms, last = D.rooms.at(-1);
+  for (const m of rooms) {
+    const boss = m === last, sides = [[m.x0, m.z0, m.x1, m.z0, 0, 1], [m.x0, m.z1, m.x1, m.z1, 0, -1], [m.x0, m.z0, m.x0, m.z1, 1, 0], [m.x1, m.z0, m.x1, m.z1, -1, 0]];
+    for (const [ax, az, bx, bz, nx, nz] of sides) {
+      const len = Math.hypot(bx - ax, bz - az); let t = 2.5 + rng() * 2;
+      while (t < len - 2.5) {
+        // a cluster of 1-3 props, 1.2-1.8 m off the wall, facing into the hall
+        const k = 1 + Math.floor(rng() * (boss ? 2 : 3)), f = t / len, cx = ax + (bx - ax) * f, cz = az + (bz - az) * f;
+        for (let j = 0; j < k; j++) {
+          const [n, h, cr] = pool[Math.floor(rng() * pool.length)], off = 1.2 + rng() * 0.6 + (h > 2 ? 0.4 : 0), along = (j - (k - 1) / 2) * 1.5;
+          const x = cx + nx * off + (nz ? 0 : 0) + (bx - ax) / len * along, z = cz + nz * off + (bz - az) / len * along;
+          if (nearDoor(x, z) || nearBraz(x, z) || (D.chest && Math.hypot(D.chest.x - x, D.chest.z - z) < 4)) continue;
+          put(n, { x, z, ry: Math.atan2(-nx, -nz) + Math.PI + (rng() - 0.5) * 0.9, s: h * (0.85 + rng() * 0.3) });
+          if (cr) D.decor.push({ x, z, r: cr });
+        }
+        t += (boss ? 7 : 4.2) + rng() * 3.5;
+      }
+    }
+    // small things on the floor you can walk over
+    if (bits.length) { const n = Math.round(((m.x1 - m.x0) * (m.z1 - m.z0)) / 70); for (let i = 0; i < n; i++) { const [b, h] = bits[Math.floor(rng() * bits.length)];
+      put(b, { x: m.x0 + 2.5 + rng() * (m.x1 - m.x0 - 5), z: m.z0 + 2.5 + rng() * (m.z1 - m.z0 - 5), ry: rng() * 6.28, s: h * (0.8 + rng() * 0.5) }); } }
+  }
+  for (const [n, items] of by) dungeonParts.sets.push(WorldModels.place(dungeonGroup, n, items, { cell: 24, bright: 1.1 }));
+  if (G.dungeon === D) dungeonGrid(D);
+}
 function buildDungeonView(D) {
   disposeDungeonView();
   const zn = CFG.world.zones[D.zone], pal = dungeonPalette(zn), rng = mulberry32(strSeed(D.id) ^ 0x9e37), parts = [];
@@ -74,6 +117,7 @@ function buildDungeonView(D) {
     for (const [x, z] of spots) if (rng() < 0.85) theme.push({ x, z, ry: Math.atan2(m.x - x, m.z - z) + (rng() - 0.5) * 0.5, s: themeS * (0.9 + rng() * 0.2) });
   });
   if (theme.length) dungeonParts.sets.push(WorldModels.place(dungeonGroup, themeId, theme, { bright: 1.15, cell: 24 }));
+  dressDungeon(D, braz);
   // brazier flames share one additive mesh so the flicker is a single opacity change
   const fp = braz.map((b) => part(GEO.ico0, 0xffa040, [b.x, b.s * 0.98, b.z], null, [0.32, 0.5, 0.32]));
   if (fp.length) { dungeonParts.flame = new THREE.Mesh(mergeParts(fp), new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); dungeonGroup.add(dungeonParts.flame); }
