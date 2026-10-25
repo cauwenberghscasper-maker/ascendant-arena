@@ -368,7 +368,7 @@ function aimDir(f, it) {
   const w = weaponOf(f);
   if (it.autoFire) {
     const strong = !!f.isPlayer; // your own taps and held fire get the strong aimbot: wider reach, sticky lock, full lead on movers
-    const t = autoTarget(f, w.range * (strong ? 1.25 : 1.1), strong);
+    const t = autoTarget(f, w.range, strong); // only what a shot can really reach (a wider lock fired shots that fell short)
     if (t) {
       f.lockId = t.id; f.lockT = G.time;
       const [lx, lz] = leadPoint(f, t, w.speed, strong ? 1 : 0.85), dx = lx - f.x, dz = lz - f.z, d = Math.hypot(dx, dz) || 1;

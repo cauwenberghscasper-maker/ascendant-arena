@@ -4475,7 +4475,7 @@ function aimDir(f, it) {
   const w = weaponOf(f);
   if (it.autoFire) {
     const strong = !!f.isPlayer; // your own taps and held fire get the strong aimbot: wider reach, sticky lock, full lead on movers
-    const t = autoTarget(f, w.range * (strong ? 1.25 : 1.1), strong);
+    const t = autoTarget(f, w.range, strong); // only what a shot can really reach (a wider lock fired shots that fell short)
     if (t) {
       f.lockId = t.id; f.lockT = G.time;
       const [lx, lz] = leadPoint(f, t, w.speed, strong ? 1 : 0.85), dx = lx - f.x, dz = lz - f.z, d = Math.hypot(dx, dz) || 1;
@@ -11599,7 +11599,7 @@ function updateAim(dt) {
   // auto-aim reticle: shows who a tap will shoot (and smoothly follows the lock)
   const w = weaponOf(f);
   AimFX.tick -= dt;
-  if (AimFX.tick <= 0) { AimFX.tick = 0.1; AimFX.lock = aimingMain || sup ? null : autoTarget(f, w.range * 1.1); }
+  if (AimFX.tick <= 0) { AimFX.tick = 0.1; AimFX.lock = aimingMain || sup ? null : autoTarget(f, w.range); }
   const lk = AimFX.lock;
   if (lk && lk.alive) {
     T.visible = true; const r = (lk.r || 0.7) * (lk.kind === 'boss' ? 1.1 : 1.6);
@@ -17142,7 +17142,7 @@ function autoHuntIntent(f, it, manual, dt) {
     const dx = e.x - f.x, dz = e.z - f.z, d = Math.hypot(dx, dz) || 1, want = range * 0.7, los = !losBlocked(f.x, f.z, e.x, e.z);
     if (!los) { tx = dx / d; tz = dz / d; } // a prop is in the way: walk round it instead of firing into it
     else if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * AC.strafe * AH.side; tz = dx / d * AC.strafe * AH.side; }
-    if (d < range + 1 && los) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
+    if (d < range + (e.r || 0.5) * 0.5 && los) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
     if (f.superCharge >= 1 && d < range && los) it.super = true;
     if (f.hp < f.maxHp * 0.35 && d < 5 && AH.dashT <= 0) { it.dash = true; AH.dashT = 3; it.mx = -dx / d; it.mz = -dz / d; return; }
     if (f.hp < f.maxHp * 0.2) { tx = -dx / d; tz = -dz / d; }

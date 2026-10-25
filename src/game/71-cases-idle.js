@@ -230,7 +230,7 @@ function autoHuntIntent(f, it, manual, dt) {
     const dx = e.x - f.x, dz = e.z - f.z, d = Math.hypot(dx, dz) || 1, want = range * 0.7, los = !losBlocked(f.x, f.z, e.x, e.z);
     if (!los) { tx = dx / d; tz = dz / d; } // a prop is in the way: walk round it instead of firing into it
     else if (d > want) { tx = dx / d; tz = dz / d; } else if (d < want * 0.45) { tx = -dx / d; tz = -dz / d; } else { tx = -dz / d * AC.strafe * AH.side; tz = dx / d * AC.strafe * AH.side; }
-    if (d < range + 1 && los) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
+    if (d < range + (e.r || 0.5) * 0.5 && los) { it.autoFire = true; it.ax = dx / d; it.az = dz / d; }
     if (f.superCharge >= 1 && d < range && los) it.super = true;
     if (f.hp < f.maxHp * 0.35 && d < 5 && AH.dashT <= 0) { it.dash = true; AH.dashT = 3; it.mx = -dx / d; it.mz = -dz / d; return; }
     if (f.hp < f.maxHp * 0.2) { tx = -dx / d; tz = -dz / d; }

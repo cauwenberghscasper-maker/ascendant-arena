@@ -388,7 +388,7 @@ function updateAim(dt) {
   // auto-aim reticle: shows who a tap will shoot (and smoothly follows the lock)
   const w = weaponOf(f);
   AimFX.tick -= dt;
-  if (AimFX.tick <= 0) { AimFX.tick = 0.1; AimFX.lock = aimingMain || sup ? null : autoTarget(f, w.range * 1.1); }
+  if (AimFX.tick <= 0) { AimFX.tick = 0.1; AimFX.lock = aimingMain || sup ? null : autoTarget(f, w.range); }
   const lk = AimFX.lock;
   if (lk && lk.alive) {
     T.visible = true; const r = (lk.r || 0.7) * (lk.kind === 'boss' ? 1.1 : 1.6);
