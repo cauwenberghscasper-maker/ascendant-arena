@@ -10,6 +10,7 @@ vm.runInContext(section('CFG.lanes = {', 'const LN_TEAMS') + section('// --- Lan
   '\nthis.lanesTrophyWindow = lanesTrophyWindow; this.lanesPickByTrophies = lanesPickByTrophies; this.lanesBotBonus = lanesBotBonus; this.lanesGearBonus = lanesGearBonus; this.lanesXpNeed = lanesXpNeed; this.lanesTeams = lanesTeams;', c);
 const L = c.CFG.lanes;
 check('1v1, 2v2 and 3v3, Play-from level, levels to 18, a capped bonus and play-earned chests only', () => {
+  for (const k of ['core', 'fountain', 'fountainR', 'campX', 'campZ', 'wave', 'firstWave', 'melee', 'ranged', 'maxMinions', 'time', 'countdown']) assert(Number.isFinite(L[k]), 'CFG.lanes.' + k + ' is a number');
   assert.deepEqual([...L.sizes], [1, 2, 3]); assert(L.unlock >= 1 && L.unlock <= 20); assert(L.maxLvl === 18);
   assert(['treasure', 'hunter'].includes(L.chest.win) && ['treasure', 'hunter'].includes(L.chest.loss), 'chests from the existing case system');
   assert(L.trophies.loss < 0 && L.trophies.win > 0 && L.trophies.botLoss < 0 && L.trophies.botWin > 0);
