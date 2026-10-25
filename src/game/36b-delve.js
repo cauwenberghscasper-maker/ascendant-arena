@@ -777,7 +777,8 @@ function rollDungeonTreasure(kind, o) {
     for (let i = 0; i < T.gearItems; i++) { let rr = rollLoot(o.zone, true); if (rarIdx(rr) < rarIdx(up)) rr = up; const it = makeItem(pick(CFG.gear.slots), rr, o.L); out.items.push(it); grantItem(it, 'shrine', { zone: o.zone }); }
     const def = o.def || delveOfBiome(bi), R = delveRec(), pity = (R.upity | 0) + 1;
     if (def && CFG.delve.gear[def.id] && (Math.random() < T.uniqueChance * (o.luck || 1) || pity >= T.uniquePity)) {
-      R.upity = 0; out.unique = makeDungeonTreasure(def, pick(CFG.delve.gear[def.id].found), o.uniqueRar || up, o.L); giveItem(out.unique);
+      R.upity = 0; const ur = DV_ALLRAR.indexOf(o.uniqueRar) > DV_ALLRAR.indexOf(up) ? o.uniqueRar : up; // never below the pieces beside it
+      out.unique = makeDungeonTreasure(def, pick(CFG.delve.gear[def.id].found), ur, o.L); giveItem(out.unique);
       ev({ t: 'delveUnique', name: out.unique.name, where: def.name });
     } else R.upity = pity;
   }
