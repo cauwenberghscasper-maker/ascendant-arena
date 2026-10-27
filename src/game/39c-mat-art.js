@@ -119,4 +119,8 @@ const MAT_ART = (() => {
   }
   return { ids: Object.keys(D), url: (id) => cache[id] || (cache[id] = svg(id)) };
 })();
-const matIcon = (id) => MAT_ART.url(id) || '';
+// Materials with a 3D model get a 64 px icon rendered from it (tools/mat_icons.mjs + .py -> assets/ui/mats/<id>.webp,
+// 4x the detail of the 16 px drawings); the rest (frostfang: its model is a thin sliver from above, the dungeon gems)
+// keep the drawn icon.
+const MAT_RENDERED = new Set(["abyssal", "arcdust", "copper", "emberscale", "glacial", "iron", "magma", "mithril", "obsidian", "pearl", "solar", "starfeather", "starsteel", "thornhide", "tidal", "titansoul", "verdant", "void"]);
+const matIcon = (id) => (MAT_RENDERED.has(id) ? `assets/ui/mats/${id}.webp` : MAT_ART.url(id)) || '';

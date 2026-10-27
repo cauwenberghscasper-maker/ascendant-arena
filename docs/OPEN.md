@@ -5,7 +5,7 @@ and `docs/log/` (since). Pick an item, check `npm run team` that nobody has it, 
 and change only your own line here: tick it when it is merged, add what you found. Newest details: the linked log.
 
 ## Needs a real phone or two (Casper)
-- [ ] FPS check on a mid-range phone (Options > Show FPS): town, woods, the Bastion fort, a full dungeon hall
+- [ ] FPS check on a mid-range phone (Options > Show FPS; phones now render at 2x, `docs/log/2026-10-27-crisp-pixels.md`): town, woods, the Bastion fort, a full dungeon hall
       (~1.5 M triangles with monster models). 30 FPS + "screen 30 Hz" earlier was likely Low Power Mode.
 - [ ] Party dungeons, PvP and shared Bastion worlds on two real phones (Realtime lobby, codes, revive).
 - [ ] Touch feel of the Bastion builder (pinch, drag, swipe the shop), dungeon minimap and puzzle runes at phone size.
@@ -41,6 +41,8 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [ ] World and dungeon bosses' attack art in the same per-boss style; monster sounds per species.
 - [x] Hero ammo as pixel sprites for 23 heroes (27 Oct, `docs/log/2026-10-27-hero-ammo-sprites.md`); Wrenna, Corrin, Tychon, Kerberon keep their liked 3D shapes.
 - [ ] Crafting materials as inventory icons (render + pixelize the 3D models).
+- [ ] Hero ammo still built from shapes for most heroes (vials, apples, coins…): pixel sprites like the nine in `AMMO_PIXEL`.
+- [x] Crafting materials as inventory icons, rendered from their 3D models (27 Oct, `docs/log/2026-10-27-item-icons.md`); Frost Fang and the 6 dungeon gems still drawn.
 - [ ] Unique item icons (96-128 px painted), hub page banners, a tall title image (outpaint failed before).
 - [ ] More painted ground tiles per area (darker forest floor, sand, marble).
 

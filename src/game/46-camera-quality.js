@@ -238,7 +238,8 @@ const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.qualit
 // and on weak ones no cinematic post pass at all (the adaptive steps below can still go further)
 const DEVICE = (() => { const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches, mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8;
   return { touch, weak: touch && (mem <= 4 || cores <= 4) }; })();
-if (DEVICE.touch) { CFG.quality.maxDpr = DEVICE.weak ? 1.25 : 1.6; sun.shadow.mapSize.set(1024, 1024); AssetLibrary.maxActive = 2; }
+if (DEVICE.touch) { CFG.quality.maxDpr = DEVICE.weak ? 1.25 : 2; // 2 (was 1.6, Casper 27 Oct: the world looked soft); adaptive quality still steps down below 50 FPS
+  sun.shadow.mapSize.set(1024, 1024); AssetLibrary.maxActive = 2; }
 if (DEVICE.weak) Q.noPost = true;
 function setDpr(d) { Q.dpr = clamp(d, CFG.quality.minDpr, Math.min(window.devicePixelRatio || 1, CFG.quality.maxDpr)); renderer.setPixelRatio(Q.dpr); resize(); Q.lastChange = performance.now(); }
 function qualityTick(dt) {
@@ -317,10 +318,12 @@ const Pixel = {
     this.init();
     const dpr = window.devicePixelRatio || 1, wd = Math.round(w * dpr), hd = Math.round(h * dpr);
     // whole-number scale in device pixels so every art pixel is the same size
-    // the fort shows a wide field of small buildings from far up: about 1.6x the art pixels there, so it stays readable
+    // about 1.6x the old art pixels everywhere (the fort's finer look, Casper 19 + 27 Oct: heroes and items read as smudges
+    // at ~390 art pixels): ~585 on a 3x phone. Outside the fort an art pixel stays at least Q.dpr-sized, so a 2x phone keeps
+    // the pixel look at 390 instead of rendering at full native size, and adaptive quality (lower Q.dpr) still coarsens it.
     this.fine = typeof G !== 'undefined' && !!G.siege;
-    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr) * (this.fine ? 1.6 : 1); // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
-    this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target));
+    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr) * 1.6; // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
+    this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target), this.fine || Showcase.on ? 1 : Math.ceil(dpr / Math.max(0.5, Q.dpr) - 0.05));
     this.w = Math.ceil(wd / this.scale); this.h = Math.ceil(hd / this.scale);
     renderer.setPixelRatio(1); renderer.setSize(this.w, this.h, false);
     const el = renderer.domElement; el.style.width = (this.w * this.scale / dpr) + 'px'; el.style.height = (this.h * this.scale / dpr) + 'px'; el.style.imageRendering = 'pixelated';

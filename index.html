@@ -2032,13 +2032,14 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 @keyframes chestTab { 50% { box-shadow: 0 0 0 2px #ffc94a, 0 0 12px rgba(255,201,74,.7); } }
 .invChestGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin: 6px 0 10px; }
 .invChestGrid .ctile { min-height: 150px; }
-.rgrid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)) !important; gap: 14px 8px !important; margin-bottom: 30px; }
+.rgrid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)) !important; gap: 34px 8px !important; margin-bottom: 40px !important; } /* room for a two-line name under each tile, so it never runs into the next heading */
 .rtile { position: relative; aspect-ratio: 1; border: 1px solid #000; border-radius: 7px; padding: 4px; background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--rc) 26%, transparent), rgba(0,0,0,.4)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rc) 55%, #000); }
 .rtile img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; display: block; }
 .rtile .rn { position: absolute; right: 3px; bottom: 2px; font: 700 12px/1 var(--body); color: #fff3cf; text-shadow: 0 1px 0 #000, 0 0 3px #000; }
 .rtile small { position: absolute; left: 0; right: 0; top: 100%; margin-top: 2px; text-align: center; font: 600 10px/1.1 var(--body); color: #c9cde0; white-space: normal; }
 .rtile.none { opacity: .45; filter: grayscale(.6); }
 .mat img.mi { width: 18px; height: 18px; image-rendering: pixelated; flex: none; } .mat.missing img.mi { opacity: .55; }
+img.mi[src*="ui/mats/"] { image-rendering: auto; } /* rendered 64 px material icons shrink smoothly into small recipe chips; big tiles keep hard pixels */
 .sellLine { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 8px 0 2px; }
 .sellBtn { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; font: 700 15px/1 var(--display); color: #2b1a00; background: linear-gradient(#ffd96a, #d99a1c); border: 2px solid #000; border-radius: 8px; box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 3px 0 #000; }
 .sellBtn .sp { display: inline-flex; align-items: center; gap: 3px; } .sellBtn .sp svg { width: 16px; height: 16px; }
@@ -9673,7 +9674,11 @@ const MAT_ART = (() => {
   }
   return { ids: Object.keys(D), url: (id) => cache[id] || (cache[id] = svg(id)) };
 })();
-const matIcon = (id) => MAT_ART.url(id) || '';
+// Materials with a 3D model get a 64 px icon rendered from it (tools/mat_icons.mjs + .py -> assets/ui/mats/<id>.webp,
+// 4x the detail of the 16 px drawings); the rest (frostfang: its model is a thin sliver from above, the dungeon gems)
+// keep the drawn icon.
+const MAT_RENDERED = new Set(["abyssal", "arcdust", "copper", "emberscale", "glacial", "iron", "magma", "mithril", "obsidian", "pearl", "solar", "starfeather", "starsteel", "thornhide", "tidal", "titansoul", "verdant", "void"]);
+const matIcon = (id) => (MAT_RENDERED.has(id) ? `assets/ui/mats/${id}.webp` : MAT_ART.url(id)) || '';
 // ---------------------------------------------------------------------
 // OPEN WORLD (World v11, Casper 25 Oct 2026): the areas sit around Base Camp like a Zelda map instead of one road
 // north (layout in 11-world-data.js). This file holds what the open map needs on top of it:
@@ -12772,7 +12777,8 @@ const Q = { dpr: 1, frames: 0, acc: 0, fps: 60, slowWindows: 0, cull: CFG.qualit
 // and on weak ones no cinematic post pass at all (the adaptive steps below can still go further)
 const DEVICE = (() => { const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches, mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8;
   return { touch, weak: touch && (mem <= 4 || cores <= 4) }; })();
-if (DEVICE.touch) { CFG.quality.maxDpr = DEVICE.weak ? 1.25 : 1.6; sun.shadow.mapSize.set(1024, 1024); AssetLibrary.maxActive = 2; }
+if (DEVICE.touch) { CFG.quality.maxDpr = DEVICE.weak ? 1.25 : 2; // 2 (was 1.6, Casper 27 Oct: the world looked soft); adaptive quality still steps down below 50 FPS
+  sun.shadow.mapSize.set(1024, 1024); AssetLibrary.maxActive = 2; }
 if (DEVICE.weak) Q.noPost = true;
 function setDpr(d) { Q.dpr = clamp(d, CFG.quality.minDpr, Math.min(window.devicePixelRatio || 1, CFG.quality.maxDpr)); renderer.setPixelRatio(Q.dpr); resize(); Q.lastChange = performance.now(); }
 function qualityTick(dt) {
@@ -12851,10 +12857,12 @@ const Pixel = {
     this.init();
     const dpr = window.devicePixelRatio || 1, wd = Math.round(w * dpr), hd = Math.round(h * dpr);
     // whole-number scale in device pixels so every art pixel is the same size
-    // the fort shows a wide field of small buildings from far up: about 1.6x the art pixels there, so it stays readable
+    // about 1.6x the old art pixels everywhere (the fort's finer look, Casper 19 + 27 Oct: heroes and items read as smudges
+    // at ~390 art pixels): ~585 on a 3x phone. Outside the fort an art pixel stays at least Q.dpr-sized, so a 2x phone keeps
+    // the pixel look at 390 instead of rendering at full native size, and adaptive quality (lower Q.dpr) still coarsens it.
     this.fine = typeof G !== 'undefined' && !!G.siege;
-    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr) * (this.fine ? 1.6 : 1); // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
-    this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target));
+    const target = Showcase.on ? 1e9 : (Math.min(wd, hd) < 700 ? 300 : 380) * Math.min(1, Q.dpr) * 1.6; // the hero studio renders at full resolution (high-detail model); combat keeps the pixel look
+    this.scale = Math.max(1, Math.round(Math.min(wd, hd) / target), this.fine || Showcase.on ? 1 : Math.ceil(dpr / Math.max(0.5, Q.dpr) - 0.05));
     this.w = Math.ceil(wd / this.scale); this.h = Math.ceil(hd / this.scale);
     renderer.setPixelRatio(1); renderer.setSize(this.w, this.h, false);
     const el = renderer.domElement; el.style.width = (this.w * this.scale / dpr) + 'px'; el.style.height = (this.h * this.scale / dpr) + 'px'; el.style.imageRendering = 'pixelated';
