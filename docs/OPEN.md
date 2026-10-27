@@ -40,7 +40,7 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [ ] Painted effects: look at them on a real phone (size, readability in big fights); per-hero hit pictures still use the drawn bursts.
 - [ ] World and dungeon bosses' attack art in the same per-boss style; monster sounds per species.
 - [ ] Hero ammo still built from shapes for most heroes (vials, apples, coins…): pixel sprites like the nine in `AMMO_PIXEL`.
-- [ ] Crafting materials as inventory icons (render + pixelize the 3D models).
+- [x] Crafting materials as inventory icons, rendered from their 3D models (27 Oct, `docs/log/2026-10-27-item-icons.md`); Frost Fang and the 6 dungeon gems still drawn.
 - [ ] Unique item icons (96-128 px painted), hub page banners, a tall title image (outpaint failed before).
 - [ ] More painted ground tiles per area (darker forest floor, sand, marble).
 

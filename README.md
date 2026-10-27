@@ -463,6 +463,8 @@ automatically.
 `assets/hero-v6/<id>/`, then portraits (`v6_portraits.mjs`). Register it in `assets/data/heroes-v6.js`.
 Intermediates go in `tools/.gen/` (not shipped).
 
+**Craft material icons:** `node tools/mat_icons.mjs PORT` (repo served on PORT) renders each `assets/world/mat_<id>` from eight angles, then `python3 tools/mat_icons.py tools/.gen/mat-icons` keeps the fullest view and pixelizes it to a 64 px icon in `assets/ui/mats/` (list in `MAT_RENDERED`, `39c-mat-art.js`; materials without a good model keep their drawn 16 px icon).
+
 **Monsters / pets:** same as heroes when they fit the humanoid skeleton; otherwise pack them static and animate with
 the existing bob/sway code until a rigged version exists. Look at how `assets/enemy/` is laid out.
 
