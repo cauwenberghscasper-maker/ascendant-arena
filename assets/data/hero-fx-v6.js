@@ -162,7 +162,7 @@ export function createHeroFX(api) {
     return sheets.get(k);
   };
   // a few dozen KB each, loaded up front so they are ready for the first shot; only what the baker listed
-  fetch('assets/fx/hero/index.json').then((r) => (r.ok ? r.json() : {})).then((ix) => { for (const kind in ix) for (const id of ix[kind]) if (HERO_V6[id]) sheet(kind, id, true); }).catch(() => {});
+  fetch('assets/fx/hero/index.json').then((r) => (r.ok ? r.json() : {})).then((ix) => { for (const kind in ix) for (const id of ix[kind]) if (HERO_V6[id] || HERO_V6[id.replace(/\d+$/, '')]) sheet(kind, id, true); }).catch(() => {});
   const sheetBySpawn = (H) => H.super.ops.some((op) => SHEET_DECOR.has(op.fx));
   function flipbook(H, x, z, o = {}) {
     const base = sheet('super', H.id); if (!base) return false;
@@ -197,15 +197,18 @@ export function createHeroFX(api) {
     for (const h of hits) { if (!h.on) continue; h.t += dt; const f = Math.floor(h.t / 0.36 * 16);
       if (f >= 16) { h.on = false; h.spr.visible = false; continue; } h.tex.offset.set((f % 4) * 0.25, 0.75 - Math.floor(f / 4) * 0.25); }
   }
-  // projectiles drawn as the hero's tumbling pixel sprite (ammo_<id>: 4 quarter turns), only for the heroes whose
-  // shape-kit ammo reads poorly; the good ones (Wrenna's vial, Corrin's apple, Tychon's die, Kerberon's hound...) stay
-  const AMMO_PIXEL = new Set(['ione', 'unwritten', 'lysandra', 'oko', 'ysolt', 'halven', 'sleeper', 'camedown', 'ourax']);
+  // projectiles drawn as the hero's tumbling pixel sprite (ammo_<id>: 4 quarter turns). Casper liked four shape-kit
+  // ones, so Wrenna's vial, Corrin's apple, Tychon's die and Kerberon's hound stay 3D; the other 23 fly as pixel sprites
+  // (27 Oct: 14 more from Hugging Face batch hf-art-c1). Vell throws one of four lost things: ammo_vell0..3.
+  const AMMO_PIXEL = new Set(['ione', 'unwritten', 'lysandra', 'oko', 'ysolt', 'halven', 'sleeper', 'camedown', 'ourax',
+    'aurvan', 'fenwick', 'hespera', 'hob', 'jory', 'kallix', 'moss', 'mott', 'nyssa', 'ophira', 'pyrrhos', 'sena', 'thimble', 'vell']);
   const ammoSpr = new Map();
   function ammoSprite(H, p, i) {
     if (!AMMO_PIXEL.has(H.id)) return false;
-    const base = sheet('ammo', H.id); if (!base) return false;
-    let A = ammoSpr.get(H.id);
-    if (!A) { A = { list: [], n: 0, tex: base.clone() }; A.tex.repeat.set(0.25, 1); ammoSpr.set(H.id, A); }
+    const sid = H.ammo.shape === 'lost' ? H.id + ((p.hv || 0) % 4) : H.id;
+    const base = sheet('ammo', sid); if (!base) return false;
+    let A = ammoSpr.get(sid);
+    if (!A) { A = { list: [], n: 0, tex: base.clone() }; A.tex.repeat.set(0.25, 1); ammoSpr.set(sid, A); }
     let spr = A.list[A.n];
     if (!spr) { if (A.n >= 64) return true; spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: A.tex, transparent: true, alphaTest: 0.5, depthWrite: true, fog: false })); spr.frustumCulled = false; root.add(spr); A.list.push(spr); }
     A.n++; const age = p.total - p.life, sc = p.r * (H.ammo.small ? 2.1 : 2.6) * 1.15;
