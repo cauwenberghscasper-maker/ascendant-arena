@@ -621,7 +621,7 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 @keyframes chestTab { 50% { box-shadow: 0 0 0 2px #ffc94a, 0 0 12px rgba(255,201,74,.7); } }
 .invChestGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin: 6px 0 10px; }
 .invChestGrid .ctile { min-height: 150px; }
-.rgrid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)) !important; gap: 14px 8px !important; margin-bottom: 30px; }
+.rgrid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)) !important; gap: 34px 8px !important; margin-bottom: 40px !important; } /* room for a two-line name under each tile, so it never runs into the next heading */
 .rtile { position: relative; aspect-ratio: 1; border: 1px solid #000; border-radius: 7px; padding: 4px; background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--rc) 26%, transparent), rgba(0,0,0,.4)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rc) 55%, #000); }
 .rtile img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; display: block; }
 .rtile .rn { position: absolute; right: 3px; bottom: 2px; font: 700 12px/1 var(--body); color: #fff3cf; text-shadow: 0 1px 0 #000, 0 0 3px #000; }
