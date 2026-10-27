@@ -39,7 +39,7 @@ and change only your own line here: tick it when it is merged, add what you foun
 - [x] Painted combat effects and monster bursts from generated pictures (24 Oct, `docs/log/2026-10-24-painted-effects.md`).
 - [ ] Painted effects: look at them on a real phone (size, readability in big fights); per-hero hit pictures still use the drawn bursts.
 - [ ] World and dungeon bosses' attack art in the same per-boss style; monster sounds per species.
-- [ ] Hero ammo still built from shapes for most heroes (vials, apples, coins…): pixel sprites like the nine in `AMMO_PIXEL`.
+- [x] Hero ammo as pixel sprites for 23 heroes (27 Oct, `docs/log/2026-10-27-hero-ammo-sprites.md`); Wrenna, Corrin, Tychon, Kerberon keep their liked 3D shapes.
 - [ ] Crafting materials as inventory icons (render + pixelize the 3D models).
 - [ ] Unique item icons (96-128 px painted), hub page banners, a tall title image (outpaint failed before).
 - [ ] More painted ground tiles per area (darker forest floor, sand, marble).
