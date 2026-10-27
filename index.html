@@ -2039,6 +2039,7 @@ img[src*="ui/sets/"] { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px var
 .rtile small { position: absolute; left: 0; right: 0; top: 100%; margin-top: 2px; text-align: center; font: 600 10px/1.1 var(--body); color: #c9cde0; white-space: normal; }
 .rtile.none { opacity: .45; filter: grayscale(.6); }
 .mat img.mi { width: 18px; height: 18px; image-rendering: pixelated; flex: none; } .mat.missing img.mi { opacity: .55; }
+img.mi[src*="ui/mats/"] { image-rendering: auto; } /* rendered 64 px material icons shrink smoothly into small recipe chips; big tiles keep hard pixels */
 .sellLine { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 8px 0 2px; }
 .sellBtn { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; font: 700 15px/1 var(--display); color: #2b1a00; background: linear-gradient(#ffd96a, #d99a1c); border: 2px solid #000; border-radius: 8px; box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 3px 0 #000; }
 .sellBtn .sp { display: inline-flex; align-items: center; gap: 3px; } .sellBtn .sp svg { width: 16px; height: 16px; }
@@ -9673,7 +9674,11 @@ const MAT_ART = (() => {
   }
   return { ids: Object.keys(D), url: (id) => cache[id] || (cache[id] = svg(id)) };
 })();
-const matIcon = (id) => MAT_ART.url(id) || '';
+// Materials with a 3D model get a 64 px icon rendered from it (tools/mat_icons.mjs + .py -> assets/ui/mats/<id>.webp,
+// 4x the detail of the 16 px drawings); the rest (frostfang: its model is a thin sliver from above, the dungeon gems)
+// keep the drawn icon.
+const MAT_RENDERED = new Set(["abyssal", "arcdust", "copper", "emberscale", "glacial", "iron", "magma", "mithril", "obsidian", "pearl", "solar", "starfeather", "starsteel", "thornhide", "tidal", "titansoul", "verdant", "void"]);
+const matIcon = (id) => (MAT_RENDERED.has(id) ? `assets/ui/mats/${id}.webp` : MAT_ART.url(id)) || '';
 // ---------------------------------------------------------------------
 // OPEN WORLD (World v11, Casper 25 Oct 2026): the areas sit around Base Camp like a Zelda map instead of one road
 // north (layout in 11-world-data.js). This file holds what the open map needs on top of it:
