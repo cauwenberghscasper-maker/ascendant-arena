@@ -1,12 +1,688 @@
 {
- "batch": "maps-3d",
+ "batch": "hf-art-c1",
  "jobs": [
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "tile_forest_d7",
+   "name": "secret_woodlands_c23",
    "args": {
-    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Dark forest floor: brown earth covered in scattered fallen autumn leaves, pine needles, small twigs and soft moss patches.",
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Thornheart: a great sword whose blade is carved from pale living oak wood, a green thorny vine winding up the blade, small fresh leaves, a mossy agate stone set in a gnarled root crossguard.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_woodlands_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Thornheart: a great sword whose blade is carved from pale living oak wood, a green thorny vine winding up the blade, small fresh leaves, a mossy agate stone set in a gnarled root crossguard.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_peaks_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Avalanche Fang: a heavy two-handed war axe with a broad blade of pale blue frost steel crusted with ice, a curled grey mountain ram horn as the back spike, a leather wrapped handle with white fur.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_peaks_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Avalanche Fang: a heavy two-handed war axe with a broad blade of pale blue frost steel crusted with ice, a curled grey mountain ram horn as the back spike, a leather wrapped handle with white fur.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_volcanic_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Magmaforge Maul: a huge war hammer with a head of black obsidian rock split by bright painted orange lava veins, iron bands, a long iron handle wrapped in red leather.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_volcanic_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Magmaforge Maul: a huge war hammer with a head of black obsidian rock split by bright painted orange lava veins, iron bands, a long iron handle wrapped in red leather.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_arcane_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Leystaff: a tall wizard staff of silver metal and violet crystal, a floating violet prism held inside an open silver ring at the top, small carved runes along the shaft.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_arcane_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Leystaff: a tall wizard staff of silver metal and violet crystal, a floating violet prism held inside an open silver ring at the top, small carved runes along the shaft.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_ocean_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Deepcaller Trident: a trident of teal coral and polished abalone shell, three barbed prongs, a large white pearl at the base of the prongs, a gold band and a kelp green wrap on the shaft.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_ocean_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Deepcaller Trident: a trident of teal coral and polished abalone shell, three barbed prongs, a large white pearl at the base of the prongs, a gold band and a kelp green wrap on the shaft.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_celestial_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Dawnbringer: a long sword of bright starsteel with a pale gold blade edge, a golden sun disc as the crossguard, white star feathers on the pommel.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "secret_celestial_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy legendary weapon for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single weapon shown whole from end to end, lying diagonally across the picture, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Dawnbringer: a long sword of bright starsteel with a pale gold blade edge, a golden sun disc as the crossguard, white star feathers on the pommel.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_wrenna_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small corked glass bottle vial seen from the side, filled with sea-green seawater, a brown cork, a little cream paper label tied to its neck with string, sea-green teal, brass and cream, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_wrenna_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small corked glass bottle vial seen from the side, filled with sea-green seawater, a brown cork, a little cream paper label tied to its neck with string, sea-green teal, brass and cream, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_corrin_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a glossy round red-gold apple with one green leaf and a short brown stem, the same apple shape as a classic RPG health apple, apple red, gold and leaf green, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_corrin_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a glossy round red-gold apple with one green leaf and a short brown stem, the same apple shape as a classic RPG health apple, apple red, gold and leaf green, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_tychon_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a single ivory six-sided die seen from a corner, three faces visible, round deep royal purple pips on every face, thin gold edges, ivory white, deep purple and gold, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_tychon_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a single ivory six-sided die seen from a corner, three faces visible, round deep royal purple pips on every face, thin gold edges, ivory white, deep purple and gold, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_kerberon_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small black hound dog running to the right in side view, glowing amber eyes, a pink tongue out, pointed ears, a wisp of blue-grey smoke behind its tail, black, amber and blue-grey, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_kerberon_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small black hound dog running to the right in side view, glowing amber eyes, a pink tongue out, pointed ears, a wisp of blue-grey smoke behind its tail, black, amber and blue-grey, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_hob_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a single thin bronze ring of sound, a round hoop of bell bronze with small green verdigris chips flying off it, bronze, verdigris green and toll gold, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_hob_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a single thin bronze ring of sound, a round hoop of bell bronze with small green verdigris chips flying off it, bronze, verdigris green and toll gold, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_mott_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a round red wax seal stamp disc with a cross pressed into it, a drop of golden hot wax and a tiny candle flame on top, seal red, wax cream and flame gold, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_mott_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a round red wax seal stamp disc with a cross pressed into it, a drop of golden hot wax and a tiny candle flame on top, seal red, wax cream and flame gold, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_nyssa_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a tarnished old bronze coin with a green verdigris rim, a tiny ferry boat stamped on its face, seen at a slight angle, bronze, verdigris green and pale silver, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_nyssa_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a tarnished old bronze coin with a green verdigris rim, a tiny ferry boat stamped on its face, seen at a slight angle, bronze, verdigris green and pale silver, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_pyrrhos_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a curved bronze crescent swipe arc, a solid sweep of polished bronze metal with a warm golden edge and a few small barnacles, bronze, warm gold and verdigris, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_pyrrhos_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a curved bronze crescent swipe arc, a solid sweep of polished bronze metal with a warm golden edge and a few small barnacles, bronze, warm gold and verdigris, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_moss_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a fist-sized round ball of wound red thread yarn, one loose red thread end curling away from it, hero's thread red and brown, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_moss_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a fist-sized round ball of wound red thread yarn, one loose red thread end curling away from it, hero's thread red and brown, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_fenwick_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: three parallel curved pale silver claw swipe marks side by side, with small tufts of grey wolf fur, moon silver and wolf grey, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_fenwick_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: three parallel curved pale silver claw swipe marks side by side, with small tufts of grey wolf fur, moon silver and wolf grey, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_thimble_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a large round carved wooden sweater button with four holes, a short strand of mustard yellow yarn through the holes, warm wood brown, button red and mustard yellow, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_thimble_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a large round carved wooden sweater button with four holes, a short strand of mustard yellow yarn through the holes, warm wood brown, button red and mustard yellow, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_kallix_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a single stolen ember: a sharp teardrop shaped flame with a white-hot yellow core, orange outer flame and a coal red base, spark gold, ember orange and coal red, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_kallix_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a single stolen ember: a sharp teardrop shaped flame with a white-hot yellow core, orange outer flame and a coal red base, spark gold, ember orange and coal red, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_sena_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a long thin golden sewing needle trailing a fine red thread that ends in a small round red knot, shears gold and thread red, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_sena_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a long thin golden sewing needle trailing a fine red thread that ends in a small round red knot, shears gold and thread red, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_jory_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a heavy round iron key ring holding five old iron keys with pale bone handles, fanned out like a wheel, iron grey, bone white and pale ice blue, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_jory_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a heavy round iron key ring holding five old iron keys with pale bone handles, fanned out like a wheel, iron grey, bone white and pale ice blue, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_vell_key_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small old brass key with a cream paper luggage tag tied to it with string, brass gold, cream and soft lilac, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_vell_glove_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a single lost knitted wool mitten glove with a cream paper luggage tag tied to it with string, dusty blue wool, cream and soft lilac, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_vell_umbrella_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small closed black umbrella with a curved wooden handle and a cream paper luggage tag tied to it with string, black, wood brown, cream and soft lilac, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_vell_watch_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a round brass pocket watch with a white clock face and a short chain, a cream paper luggage tag tied to it, brass gold, white, cream and soft lilac, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_hespera_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a cracked lump of black volcanic rock with bright orange glowing cracks across it, a few small orange sparks, charcoal black, ember orange and sun gold, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_hespera_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a cracked lump of black volcanic rock with bright orange glowing cracks across it, a few small orange sparks, charcoal black, ember orange and sun gold, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_ophira_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a thin sharp sliver of mirror glass shaped like a long diamond shard, bright silver front with a pale cyan shine, a green tinted edge, mirror silver, glass cyan and verdigris green, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_ophira_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a thin sharp sliver of mirror glass shaped like a long diamond shard, bright silver front with a pale cyan shine, a green tinted edge, mirror silver, glass cyan and verdigris green, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_aurvan_c23",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small curved crescent moon made of pale silver frost with tiny ice crystals and two little stars beside it, moon cream, ice white and navy blue, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "ammo_aurvan_c41",
+   "args": {
+    "prompt": "retro 16-bit pixel art, chunky visible square pixels, limited colour palette, crisp thick black pixel outline, classic fantasy adventure RPG game sprite, a single projectile sprite: a small curved crescent moon made of pale silver frost with tiny ice crystals and two little stars beside it, moon cream, ice white and navy blue, one object only, large and centered, isolated on a plain flat solid magenta background, no text, no ground",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "volcano_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A big volcano mountain: a wide rocky cone of brown and grey stone with steep ridged slopes, a broken open crater at the top, painted orange lava streams running down the slopes in a few thin lines, solid rock all the way, no glow, no smoke, no clouds, flat bottom.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "volcano_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A big volcano mountain: a wide rocky cone of brown and grey stone with steep ridged slopes, a broken open crater at the top, painted orange lava streams running down the slopes in a few thin lines, solid rock all the way, no glow, no smoke, no clouds, flat bottom.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "volcano_c7",
+   "args": {
+    "prompt": "Hand-painted fantasy game asset for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, isolated single solid object, three-quarter view from slightly above, plain flat light grey background, soft even light, no glow effects, no smoke, no sparkles, no particles, no text, no people. A big volcano mountain: a wide rocky cone of brown and grey stone with steep ridged slopes, a broken open crater at the top, painted orange lava streams running down the slopes in a few thin lines, solid rock all the way, no glow, no smoke, no clouds, flat bottom.",
     "resolution": "1024x1024 ( 1:1 )",
     "seed": 7,
     "random_seed": false,
@@ -17,11 +693,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "tile_forest_d59",
+   "name": "boss_z01_vespa_c23",
    "args": {
-    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Dark forest floor: brown earth covered in scattered fallen autumn leaves, pine needles, small twigs and soft moss patches.",
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Vespa, the Hornet Queen: a giant queen hornet standing on her four back legs, amber gold and deep brown striped body, big translucent amber wings folded up, a crown of honeycomb wax on her head, long curved stinger, compound eyes.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 59,
+    "seed": 23,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -30,11 +706,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "tile_sand_d7",
+   "name": "boss_z01_vespa_c41",
    "args": {
-    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Warm golden desert sand dunes with soft wavy wind ripples running across and a few small pebbles.",
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Vespa, the Hornet Queen: a giant queen hornet standing on her four back legs, amber gold and deep brown striped body, big translucent amber wings folded up, a crown of honeycomb wax on her head, long curved stinger, compound eyes.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
+    "seed": 41,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -43,11 +719,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "tile_sand_d59",
+   "name": "boss_z02_oldmorel_c23",
    "args": {
-    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Warm golden desert sand dunes with soft wavy wind ripples running across and a few small pebbles.",
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Old Morel, the Mushroom King: a huge old walking morel mushroom with a tall wrinkled honeycomb cap for a head, a kind wrinkled face, a long grey moss beard, a short stocky stalk body, thick root feet, small pink and teal toadstools growing on his shoulders.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 59,
+    "seed": 23,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -56,11 +732,11 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "tile_lanes_grass_d7",
+   "name": "boss_z02_oldmorel_c41",
    "args": {
-    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Lush short green meadow grass with clover patches and a few tiny yellow and white flowers.",
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Old Morel, the Mushroom King: a huge old walking morel mushroom with a tall wrinkled honeycomb cap for a head, a kind wrinkled face, a long grey moss beard, a short stocky stalk body, thick root feet, small pink and teal toadstools growing on his shoulders.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 7,
+    "seed": 41,
     "random_seed": false,
     "steps": 8,
     "shift": 3
@@ -69,186 +745,705 @@
   {
    "space": "mcp-tools/Z-Image-Turbo",
    "api": "/generate",
-   "name": "tile_lanes_grass_d59",
+   "name": "boss_z03_barkbone_c23",
    "args": {
-    "prompt": "Hand-painted ground texture for a fantasy MMORPG like World of Warcraft 2004, one continuous surface seen straight from above filling the whole picture, no grid, no squares, no tiles, no borders, no frame, flat even lighting, bold painterly brush strokes, stylized, no objects, no text. Lush short green meadow grass with clover patches and a few tiny yellow and white flowers.",
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Barkbone, the Hollow Oak: a hunched giant treant of gnarled grey-brown oak bark, a hollow open cavity in its chest, pale bone-white branches growing from its head like antlers, long root arms, a few dry autumn leaves.",
     "resolution": "1024x1024 ( 1:1 )",
-    "seed": 59,
+    "seed": 23,
     "random_seed": false,
     "steps": 8,
     "shift": 3
    }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "lanes_altar",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z03_barkbone_c41",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_altar_c23.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Barkbone, the Hollow Oak: a hunched giant treant of gnarled grey-brown oak bark, a hollow open cavity in its chest, pale bone-white branches growing from its head like antlers, long root arms, a few dry autumn leaves.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "lanes_spawn",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z04_nightmaw_c23",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_spawn_c23.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Nightmaw: a huge four-legged panther beast with midnight blue fur, an oversized wide jaw full of teeth, a thorny bramble mane around its neck, moss green eyes, a long tail ending in thorns.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "lanes_statue",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z04_nightmaw_c41",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_statue_c41.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Nightmaw: a huge four-legged panther beast with midnight blue fur, an oversized wide jaw full of teeth, a thorny bramble mane around its neck, moss green eyes, a long tail ending in thorns.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "lanes_tree",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z05_ramhorn_c23",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_tree_c23.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Ramhorn, the Cairn Keeper: a giant bipedal ram warrior with huge curled horns, thick shaggy grey wool, hooves, stacked flat cairn stones strapped to his shoulders as armour, a leather belt with carved runestones.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "lanes_wall",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z05_ramhorn_c41",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/lanes_wall_c41.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Ramhorn, the Cairn Keeper: a giant bipedal ram warrior with huge curled horns, thick shaggy grey wool, hooves, stacked flat cairn stones strapped to his shoulders as armour, a leather belt with carved runestones.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "rift_floor",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z06_gravelgrin_c23",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/rift_floor_c41.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Gravelgrin, the Boulder King: a big round boulder golem made of grey and tan rocks, a wide toothy grin of jagged gravel stones, small glowing yellow eyes, a crown of stacked pebbles, stubby rock arms and legs, moss patches.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "rift_gate",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z06_gravelgrin_c41",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/rift_gate_c23.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Gravelgrin, the Boulder King: a big round boulder golem made of grey and tan rocks, a wide toothy grin of jagged gravel stones, small glowing yellow eyes, a crown of stacked pebbles, stubby rock arms and legs, moss patches.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "rift_pylon",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z09_glacius_c23",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/rift_pylon_c23.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Glacius, the Troll King: a huge frost troll king with pale blue-white skin, a big jaw with tusks, a crown of jagged ice shards, a thick white fur cloak over his shoulders, a huge ice club, long arms, bare feet.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   },
   {
-   "space": "prithivMLmods/TRELLIS.2-Text-to-3D",
-   "api": "/generate_3d",
-   "pre": [
-    "/start_session"
-   ],
-   "ext": ".glb",
-   "name": "rift_shard",
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z09_glacius_c41",
    "args": {
-    "resolution": "1024",
-    "decimation_target": 100000,
-    "texture_size": 1024,
-    "seed": 7,
-    "image": "https://raw.githubusercontent.com/cauwenberghscasper-maker/ascendant-arena/asset-drop/drop/maps-c/rift_shard_c41.webp"
-   },
-   "files": [
-    "image"
-   ]
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Glacius, the Troll King: a huge frost troll king with pale blue-white skin, a big jaw with tusks, a crown of jagged ice shards, a thick white fur cloak over his shoulders, a huge ice club, long arms, bare feet.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z10_echomother_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Echo Mother: a giant cave bat mother with huge pointed ears, wide leathery brown-grey wings spread open, a furry body, small baby bats clinging to her chest, glowing orange eyes, standing on clawed feet.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z10_echomother_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Echo Mother: a giant cave bat mother with huge pointed ears, wide leathery brown-grey wings spread open, a furry body, small baby bats clinging to her chest, glowing orange eyes, standing on clawed feet.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z14_pyrewyrm_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Pyrewyrm: a long fire serpent wyrm coiled upright, red-orange scales, painted bright lava cracks between the scales, a horned dragon head, small wings, a cream belly, curled tail.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z14_pyrewyrm_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Pyrewyrm: a long fire serpent wyrm coiled upright, red-orange scales, painted bright lava cracks between the scales, a horned dragon head, small wings, a cream belly, curled tail.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z15_coldflame_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Coldflame Colossus: a giant golem made of deep blue sapphire crystal rocks, cold blue painted flames on its shoulders, a heavy rocky body, crystal spikes on its back, big fists.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z15_coldflame_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Coldflame Colossus: a giant golem made of deep blue sapphire crystal rocks, cold blue painted flames on its shoulders, a heavy rocky body, crystal spikes on its back, big fists.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z19_astronomer_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized, adult proportions, hand-painted textures, one single character, full body from head to feet, front view, A-pose with arms held slightly away from the body, empty hands, plain flat light grey background, soft even light, no glow effects, no particles, no ground, no text. The Last Astronomer: an old bearded star mage in a long navy blue robe painted with constellations, a brass orrery ring of planets on his back, a tall pointed hat with brass stars, a brass monocle.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z19_astronomer_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized, adult proportions, hand-painted textures, one single character, full body from head to feet, front view, A-pose with arms held slightly away from the body, empty hands, plain flat light grey background, soft even light, no glow effects, no particles, no ground, no text. The Last Astronomer: an old bearded star mage in a long navy blue robe painted with constellations, a brass orrery ring of planets on his back, a tall pointed hat with brass stars, a brass monocle.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z20_nebulaqueen_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Nebula Queen: a giant floating jellyfish queen, a large violet and indigo bell dome painted like a starry nebula, a small golden crown on top, long trailing violet tentacles.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z20_nebulaqueen_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Nebula Queen: a giant floating jellyfish queen, a large violet and indigo bell dome painted like a starry nebula, a small golden crown on top, long trailing violet tentacles.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z24_heartbeat_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Heartbeat, the Leviathan Calf: a young sea serpent leviathan coiled upright, smooth teal and deep blue scales, a frilled fin crest, big gentle eyes, a glowing teal heart shape painted on its chest, fins along its back.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z24_heartbeat_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Heartbeat, the Leviathan Calf: a young sea serpent leviathan coiled upright, smooth teal and deep blue scales, a frilled fin crest, big gentle eyes, a glowing teal heart shape painted on its chest, fins along its back.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z25_boilshell_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Boilshell, the Crab King: a giant armoured crab king, a rough grey-red shell with rocky hot spring vents on its back, two huge claws held up, a coral crown, eye stalks, six legs.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z25_boilshell_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Boilshell, the Crab King: a giant armoured crab king, a rough grey-red shell with rocky hot spring vents on its back, two huge claws held up, a coral crown, eye stalks, six legs.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z29_archon_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized, adult proportions, hand-painted textures, one single character, full body from head to feet, front view, A-pose with arms held slightly away from the body, empty hands, plain flat light grey background, soft even light, no glow effects, no particles, no ground, no text. The Archon of Dawn: a tall celestial angelic warrior in white and gold plate armour, four great feathered white wings, a golden sun halo disc behind the head, a calm masked golden face, a cream cloak.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "boss_z29_archon_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized, adult proportions, hand-painted textures, one single character, full body from head to feet, front view, A-pose with arms held slightly away from the body, empty hands, plain flat light grey background, soft even light, no glow effects, no particles, no ground, no text. The Archon of Dawn: a tall celestial angelic warrior in white and gold plate armour, four great feathered white wings, a golden sun halo disc behind the head, a calm masked golden face, a cream cloak.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "pet_crystal_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Crystal Dragon pet: a small friendly baby dragon with deep blue scales, a cream belly, teal crystal spikes along its back, small wings, short horns, big golden eyes, sitting upright.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "pet_crystal_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Crystal Dragon pet: a small friendly baby dragon with deep blue scales, a cream belly, teal crystal spikes along its back, small wings, short horns, big golden eyes, sitting upright.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "pet_bull_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Ember Bull pet: a small sturdy young bull with red-orange fur, a cream muzzle, short cream horns, painted ember orange patterns on its shoulders, a little gold ring in its nose, standing on four legs.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "pet_bull_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Ember Bull pet: a small sturdy young bull with red-orange fur, a cream muzzle, short cream horns, painted ember orange patterns on its shoulders, a little gold ring in its nose, standing on four legs.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "pet_sprout_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Stone Sprout pet: a small round stone golem made of grey-green mossy rocks, two big friendly eyes, a fresh green leaf sprout growing from the top of its head, stubby rock feet.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "pet_sprout_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Stone Sprout pet: a small round stone golem made of grey-green mossy rocks, two big friendly eyes, a fresh green leaf sprout growing from the top of its head, stubby rock feet.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "pet_slime_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Jade Slime pet: a small round jade green slime blob creature, glossy painted jelly, two big friendly eyes, a small leaf stuck on top, a few tiny pebbles inside its body.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "pet_slime_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game character for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, hand-painted textures, one single creature, full body from head to feet, front view facing the viewer, symmetrical neutral standing pose, plain flat light grey background, soft even light, no glow effects, no smoke, no particles, no ground, no text, no people. Jade Slime pet: a small round jade green slime blob creature, glossy painted jelly, two big friendly eyes, a small leaf stuck on top, a few tiny pebbles inside its body.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_oakseed_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Oakheart Seed: a large golden acorn seed with a green oak leaf and a tiny green sprout, wrapped in a thin silver wire.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_oakseed_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Oakheart Seed: a large golden acorn seed with a green oak leaf and a tiny green sprout, wrapped in a thin silver wire.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_wolffang_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Mossy Wolf Fang: a long curved white wolf fang with green moss on its root, hanging on a leather cord with two wooden beads.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_wolffang_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Mossy Wolf Fang: a long curved white wolf fang with green moss on its root, hanging on a leather cord with two wooden beads.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_greenbanner_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Greenwood Standard: a small war banner of green cloth with a white oak tree emblem, on a wooden pole with a brass spear tip.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_greenbanner_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Greenwood Standard: a small war banner of green cloth with a white oak tree emblem, on a wooden pole with a brass spear tip.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_frostsigil_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Frostbound Sigil: a round silver amulet disc with a pale blue frost crystal set in the middle and icy snowflake engravings.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_frostsigil_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Frostbound Sigil: a round silver amulet disc with a pale blue frost crystal set in the middle and icy snowflake engravings.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_rimecharm_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Rimeglass Charm: a small pale blue ice crystal charm in a silver claw setting, hanging from a thin silver chain.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_rimecharm_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Rimeglass Charm: a small pale blue ice crystal charm in a silver claw setting, hanging from a thin silver chain.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_cinderbanner_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Cinder Warbanner: a small war banner of deep red cloth with an orange flame emblem, frayed edges, on an iron pole with a spiked top.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_cinderbanner_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Cinder Warbanner: a small war banner of deep red cloth with an orange flame emblem, frayed edges, on an iron pole with a spiked top.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_embercrown_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Ember Crown Shard: a broken piece of a golden crown with an orange fire gem set in it, painted orange ember edges.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_embercrown_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Ember Crown Shard: a broken piece of a golden crown with an orange fire gem set in it, painted orange ember edges.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_voidprism_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Void Prism: a violet crystal prism held in a silver frame with small floating violet shards around it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_voidprism_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Void Prism: a violet crystal prism held in a silver frame with small floating violet shards around it.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_tidepearl_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Tidecaller Pearl: a large shining white pearl in an open teal scallop shell with a gold rim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_tidepearl_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Tidecaller Pearl: a large shining white pearl in an open teal scallop shell with a gold rim.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_starbanner_c23",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Starfall Banner: a small war banner of pale cream cloth with a golden star emblem, on a white and gold pole with a star tip.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 23,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
+  },
+  {
+   "space": "mcp-tools/Z-Image-Turbo",
+   "api": "/generate",
+   "name": "lanes_starbanner_c41",
+   "args": {
+    "prompt": "Hand-painted fantasy game item icon art for a classic MMORPG like World of Warcraft 2004 and RuneScape 3, bold painterly brush strokes, stylized chunky readable shapes, one single item, centered, filling most of the picture, three-quarter view, plain flat light grey background, soft even light, no hands, no people, no text, no frame. Starfall Banner: a small war banner of pale cream cloth with a golden star emblem, on a white and gold pole with a star tip.",
+    "resolution": "1024x1024 ( 1:1 )",
+    "seed": 41,
+    "random_seed": false,
+    "steps": 8,
+    "shift": 3
+   }
   }
- ]
+ ],
+ "wait": 2400
 }

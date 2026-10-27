@@ -19,7 +19,16 @@ def files_in(x):
     if isinstance(x, (list, tuple)): return sum((files_in(v) for v in x), [])
     return []
 
-for job in spec['jobs']:
+import re
+def quota_wait(err):
+    """seconds until the ZeroGPU quota frees up, from 'Try again in H:MM:SS', or None when it is no quota error"""
+    if 'ZeroGPU quota' not in err: return None
+    m = re.search(r'Try again in (\d+):(\d+):(\d+)', err)
+    return int(m.group(1)) * 3600 + int(m.group(2)) * 60 + int(m.group(3)) if m else None
+# "wait": seconds a batch pushed just before the daily reset may sleep on a quota refusal, then it retries that job
+WAIT, retried, i = spec.get('wait', 0), set(), 0
+while i < len(spec['jobs']):
+    job = spec['jobs'][i]; i += 1
     name, t0 = job['name'], time.time()
     try:
         if job['space'] not in clients:
@@ -76,6 +85,9 @@ for job in spec['jobs']:
         shutil.copy(hit, dst); done[name] = dst
         log.append({'name': name, 'ok': True, 'file': os.path.basename(dst), 'sec': round(time.time() - t0, 1)})
     except Exception as e:
+        w = quota_wait(str(e))
+        if w is not None and w <= WAIT and name not in retried:
+            retried.add(name); print('quota frees up in', w, 's: waiting, then retrying', name); time.sleep(w + 20); i -= 1; continue
         log.append({'name': name, 'ok': False, 'error': str(e)[:800], 'sec': round(time.time() - t0, 1)})
     print(json.dumps(log[-1]))
     json.dump({'batch': spec.get('batch'), 'user': me.get('name'), 'jobs': log}, open(os.path.join(out, 'gen-log.json'), 'w'), indent=1)
