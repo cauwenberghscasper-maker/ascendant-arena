@@ -1,0 +1,672 @@
+{
+ "batch": "hf-art-c1",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "secret_woodlands_c23",
+   "ok": true,
+   "file": "secret_woodlands_c23.webp",
+   "sec": 6.9
+  },
+  {
+   "name": "secret_woodlands_c41",
+   "ok": true,
+   "file": "secret_woodlands_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_peaks_c23",
+   "ok": true,
+   "file": "secret_peaks_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_peaks_c41",
+   "ok": true,
+   "file": "secret_peaks_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_volcanic_c23",
+   "ok": true,
+   "file": "secret_volcanic_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_volcanic_c41",
+   "ok": true,
+   "file": "secret_volcanic_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_arcane_c23",
+   "ok": true,
+   "file": "secret_arcane_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_arcane_c41",
+   "ok": true,
+   "file": "secret_arcane_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_ocean_c23",
+   "ok": true,
+   "file": "secret_ocean_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_ocean_c41",
+   "ok": true,
+   "file": "secret_ocean_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_celestial_c23",
+   "ok": true,
+   "file": "secret_celestial_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "secret_celestial_c41",
+   "ok": true,
+   "file": "secret_celestial_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_wrenna_c23",
+   "ok": true,
+   "file": "ammo_wrenna_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_wrenna_c41",
+   "ok": true,
+   "file": "ammo_wrenna_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_corrin_c23",
+   "ok": true,
+   "file": "ammo_corrin_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_corrin_c41",
+   "ok": true,
+   "file": "ammo_corrin_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_tychon_c23",
+   "ok": true,
+   "file": "ammo_tychon_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_tychon_c41",
+   "ok": true,
+   "file": "ammo_tychon_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_kerberon_c23",
+   "ok": true,
+   "file": "ammo_kerberon_c23.webp",
+   "sec": 6.3
+  },
+  {
+   "name": "ammo_kerberon_c41",
+   "ok": true,
+   "file": "ammo_kerberon_c41.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "ammo_hob_c23",
+   "ok": true,
+   "file": "ammo_hob_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_hob_c41",
+   "ok": true,
+   "file": "ammo_hob_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_mott_c23",
+   "ok": true,
+   "file": "ammo_mott_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_mott_c41",
+   "ok": true,
+   "file": "ammo_mott_c41.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "ammo_nyssa_c23",
+   "ok": true,
+   "file": "ammo_nyssa_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_nyssa_c41",
+   "ok": true,
+   "file": "ammo_nyssa_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_pyrrhos_c23",
+   "ok": true,
+   "file": "ammo_pyrrhos_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_pyrrhos_c41",
+   "ok": true,
+   "file": "ammo_pyrrhos_c41.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "ammo_moss_c23",
+   "ok": true,
+   "file": "ammo_moss_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "ammo_moss_c41",
+   "ok": true,
+   "file": "ammo_moss_c41.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "ammo_fenwick_c23",
+   "ok": true,
+   "file": "ammo_fenwick_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "ammo_fenwick_c41",
+   "ok": true,
+   "file": "ammo_fenwick_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_thimble_c23",
+   "ok": true,
+   "file": "ammo_thimble_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "ammo_thimble_c41",
+   "ok": true,
+   "file": "ammo_thimble_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_kallix_c23",
+   "ok": true,
+   "file": "ammo_kallix_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "ammo_kallix_c41",
+   "ok": true,
+   "file": "ammo_kallix_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_sena_c23",
+   "ok": true,
+   "file": "ammo_sena_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_sena_c41",
+   "ok": true,
+   "file": "ammo_sena_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_jory_c23",
+   "ok": true,
+   "file": "ammo_jory_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_jory_c41",
+   "ok": true,
+   "file": "ammo_jory_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_vell_key_c23",
+   "ok": true,
+   "file": "ammo_vell_key_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_vell_glove_c23",
+   "ok": true,
+   "file": "ammo_vell_glove_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "ammo_vell_umbrella_c23",
+   "ok": true,
+   "file": "ammo_vell_umbrella_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_vell_watch_c23",
+   "ok": true,
+   "file": "ammo_vell_watch_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_hespera_c23",
+   "ok": true,
+   "file": "ammo_hespera_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "ammo_hespera_c41",
+   "ok": true,
+   "file": "ammo_hespera_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_ophira_c23",
+   "ok": true,
+   "file": "ammo_ophira_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_ophira_c41",
+   "ok": true,
+   "file": "ammo_ophira_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "ammo_aurvan_c23",
+   "ok": true,
+   "file": "ammo_aurvan_c23.webp",
+   "sec": 5.7
+  },
+  {
+   "name": "ammo_aurvan_c41",
+   "ok": true,
+   "file": "ammo_aurvan_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "volcano_c23",
+   "ok": true,
+   "file": "volcano_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "volcano_c41",
+   "ok": true,
+   "file": "volcano_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "volcano_c7",
+   "ok": true,
+   "file": "volcano_c7.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "boss_z01_vespa_c23",
+   "ok": true,
+   "file": "boss_z01_vespa_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z01_vespa_c41",
+   "ok": true,
+   "file": "boss_z01_vespa_c41.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z02_oldmorel_c23",
+   "ok": true,
+   "file": "boss_z02_oldmorel_c23.webp",
+   "sec": 6.2
+  },
+  {
+   "name": "boss_z02_oldmorel_c41",
+   "ok": true,
+   "file": "boss_z02_oldmorel_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "boss_z03_barkbone_c23",
+   "ok": true,
+   "file": "boss_z03_barkbone_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "boss_z03_barkbone_c41",
+   "ok": true,
+   "file": "boss_z03_barkbone_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "boss_z04_nightmaw_c23",
+   "ok": true,
+   "file": "boss_z04_nightmaw_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "boss_z04_nightmaw_c41",
+   "ok": true,
+   "file": "boss_z04_nightmaw_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "boss_z05_ramhorn_c23",
+   "ok": true,
+   "file": "boss_z05_ramhorn_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "boss_z05_ramhorn_c41",
+   "ok": true,
+   "file": "boss_z05_ramhorn_c41.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z06_gravelgrin_c23",
+   "ok": true,
+   "file": "boss_z06_gravelgrin_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z06_gravelgrin_c41",
+   "ok": true,
+   "file": "boss_z06_gravelgrin_c41.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z09_glacius_c23",
+   "ok": true,
+   "file": "boss_z09_glacius_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z09_glacius_c41",
+   "ok": true,
+   "file": "boss_z09_glacius_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "boss_z10_echomother_c23",
+   "ok": true,
+   "file": "boss_z10_echomother_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "boss_z10_echomother_c41",
+   "ok": true,
+   "file": "boss_z10_echomother_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "boss_z14_pyrewyrm_c23",
+   "ok": true,
+   "file": "boss_z14_pyrewyrm_c23.webp",
+   "sec": 6.1
+  },
+  {
+   "name": "boss_z14_pyrewyrm_c41",
+   "ok": true,
+   "file": "boss_z14_pyrewyrm_c41.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z15_coldflame_c23",
+   "ok": true,
+   "file": "boss_z15_coldflame_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z15_coldflame_c41",
+   "ok": true,
+   "file": "boss_z15_coldflame_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "boss_z19_astronomer_c23",
+   "ok": true,
+   "file": "boss_z19_astronomer_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z19_astronomer_c41",
+   "ok": true,
+   "file": "boss_z19_astronomer_c41.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z20_nebulaqueen_c23",
+   "ok": true,
+   "file": "boss_z20_nebulaqueen_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "boss_z20_nebulaqueen_c41",
+   "ok": true,
+   "file": "boss_z20_nebulaqueen_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "boss_z24_heartbeat_c23",
+   "ok": true,
+   "file": "boss_z24_heartbeat_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "boss_z24_heartbeat_c41",
+   "ok": true,
+   "file": "boss_z24_heartbeat_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "boss_z25_boilshell_c23",
+   "ok": true,
+   "file": "boss_z25_boilshell_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z25_boilshell_c41",
+   "ok": true,
+   "file": "boss_z25_boilshell_c41.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z29_archon_c23",
+   "ok": true,
+   "file": "boss_z29_archon_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "boss_z29_archon_c41",
+   "ok": true,
+   "file": "boss_z29_archon_c41.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "pet_crystal_c23",
+   "ok": true,
+   "file": "pet_crystal_c23.webp",
+   "sec": 6.0
+  },
+  {
+   "name": "pet_crystal_c41",
+   "ok": true,
+   "file": "pet_crystal_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "pet_bull_c23",
+   "ok": true,
+   "file": "pet_bull_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "pet_bull_c41",
+   "ok": true,
+   "file": "pet_bull_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "pet_sprout_c23",
+   "ok": true,
+   "file": "pet_sprout_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "pet_sprout_c41",
+   "ok": true,
+   "file": "pet_sprout_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "pet_slime_c23",
+   "ok": true,
+   "file": "pet_slime_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "pet_slime_c41",
+   "ok": true,
+   "file": "pet_slime_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_oakseed_c23",
+   "ok": true,
+   "file": "lanes_oakseed_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_oakseed_c41",
+   "ok": true,
+   "file": "lanes_oakseed_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_wolffang_c23",
+   "ok": true,
+   "file": "lanes_wolffang_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_wolffang_c41",
+   "ok": true,
+   "file": "lanes_wolffang_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_greenbanner_c23",
+   "ok": true,
+   "file": "lanes_greenbanner_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_greenbanner_c41",
+   "ok": true,
+   "file": "lanes_greenbanner_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_frostsigil_c23",
+   "ok": true,
+   "file": "lanes_frostsigil_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_frostsigil_c41",
+   "ok": true,
+   "file": "lanes_frostsigil_c41.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_rimecharm_c23",
+   "ok": true,
+   "file": "lanes_rimecharm_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_rimecharm_c41",
+   "ok": true,
+   "file": "lanes_rimecharm_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lanes_cinderbanner_c23",
+   "ok": true,
+   "file": "lanes_cinderbanner_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_cinderbanner_c41",
+   "ok": true,
+   "file": "lanes_cinderbanner_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lanes_embercrown_c23",
+   "ok": true,
+   "file": "lanes_embercrown_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_embercrown_c41",
+   "ok": true,
+   "file": "lanes_embercrown_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lanes_voidprism_c23",
+   "ok": true,
+   "file": "lanes_voidprism_c23.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lanes_voidprism_c41",
+   "ok": true,
+   "file": "lanes_voidprism_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lanes_tidepearl_c23",
+   "ok": true,
+   "file": "lanes_tidepearl_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_tidepearl_c41",
+   "ok": true,
+   "file": "lanes_tidepearl_c41.webp",
+   "sec": 5.8
+  },
+  {
+   "name": "lanes_starbanner_c23",
+   "ok": true,
+   "file": "lanes_starbanner_c23.webp",
+   "sec": 5.9
+  },
+  {
+   "name": "lanes_starbanner_c41",
+   "ok": true,
+   "file": "lanes_starbanner_c41.webp",
+   "sec": 5.8
+  }
+ ]
+}
