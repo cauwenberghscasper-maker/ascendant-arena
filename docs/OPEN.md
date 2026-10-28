@@ -15,11 +15,11 @@ and change only your own line here: tick it when it is merged, add what you foun
 ## 3D models (README 3: real models only)
 - [x] The 7 area landmarks without a model, the challenge shrine and the celestial `sky_temple` horizon (21 Oct,
       `docs/log/2026-10-21-landmark-models.md`).
-- [ ] Horizon `volcano`: the 21 Oct mesh came out with flat black walls (lava glow); repaint the concept as a plain
-      rock cone with painted lava, no glow (volcanic biome uses a tinted mountain meanwhile).
+- [x] Horizon `volcano`: a painted rock cone (28 Oct, `docs/log/2026-10-28-volcano-pets.md`).
 - [ ] Hero ammo/supers: the smoke test casts only the starter's super (TIDE); cast every hero's super in it too.
 - [ ] Rift `rift_gate` reads as a black block; `rift_pylon`, `arena_wall`, `dungeon_tile`.
 - [ ] Lair bosses: 29 named bosses use their area's monster ×1.8 (`39b-lair-bosses.js`); per-dungeon boss models.
+      15 TRELLIS models are ready on `asset-drop:drop/hf-3d-c2/` (28 Oct); they need rigging first (Casper: keep animated ones meanwhile).
 - [ ] Bastion: the 56 tier looks in `tools/bastion_tiers.json` (t2-t7 tint the base model today); Keep-matched remodels
       of ballista, mage tower, barracks, mines, huts; a lumber mill and iron mine model (they borrow hut/mine);
       a rigged soldier (uses Smith Garo).

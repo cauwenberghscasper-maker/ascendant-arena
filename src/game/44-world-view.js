@@ -650,7 +650,7 @@ function buildHub() {
       const outs = [[zn.x1 >= W.maxX - 1, 1, 0], [zn.x0 <= W.minX + 1, -1, 0], [zn.z1 >= W.maxZ - 1, 0, 1], [zn.z0 <= W.minZ + 1, 0, -1]].filter((o) => o[0]);
       for (const [, ox, oz] of outs) for (let j = 0; j < 2; j++) { const u = (j - 0.5) * zn.hw + (hashf(zi, j) - 0.5) * 30, d = zn.hw + 48 + ((zi + j) % 2) * 16;
         const x = zn.cx + (ox ? ox * d : u), z = zn.cz + (oz ? oz * d : u);
-        hz.get(nm).push({ x, z, y: nm === 'floating_isle' || nm === 'sky_temple' ? 14 + hashf(z, x) * 10 : -1, ry: hashf(x, z) * 6, s: 34 + hashf(z, zi) * 14, color: zn.theme === 3 ? 0x8a5a4a : zn.theme === 6 ? 0xfff0d0 : 0xffffff }); } });
+        hz.get(nm).push({ x, z, y: nm === 'floating_isle' || nm === 'sky_temple' ? 14 + hashf(z, x) * 10 : -1, ry: hashf(x, z) * 6, s: (34 + hashf(z, zi) * 14) * (nm === 'volcano' ? 0.62 : 1), color: nm === 'volcano' ? 0xffffff : zn.theme === 3 ? 0x8a5a4a : zn.theme === 6 ? 0xfff0d0 : 0xffffff }); } }); // the volcano (28 Oct, TRELLIS.2) is ~2.5x as wide as the mountain and painted already
     for (const [nm, items] of hz) WorldModels.place(hubGroup, nm, items, { shadow: false, horizon: true, far: 230, glow: nm === 'volcano' ? 0xff6a2a : 0, glowK: 0.25 }); }
 
   // challenge shrines: stone rings (static) + floating crystals (state colour)
