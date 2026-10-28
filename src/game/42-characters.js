@@ -134,6 +134,7 @@ const ITEM_ICONS = [];
 function setArtUrl(bi, slot) { return G.profile && G.profile.settings.pixel ? `assets/ui/sets/px/${bi}-${slot}.png` : `assets/ui/sets/${bi}-${slot}.webp`; }
 function thumbFor(it) {
   if (!it) return '';
+  if (it.sw != null && it.sw >= 0 && it.sw < 6) return 'assets/ui/secret/' + it.sw + '.webp'; // secret weapons (39-crafting.js)
   if (it.set != null && it.set >= 0 && it.set < 6) return setArtUrl(it.set, it.slot);
   const collectible = collectionIcon(it);
   if (collectible) return collectible;

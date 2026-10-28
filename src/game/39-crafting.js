@@ -110,6 +110,36 @@ function makeRelic(bi, ilvl) {
   it.relic = bi; const c = craftState(); c.relics[bi] = (c.relics[bi] | 0) + 1;
   giveItem(it); ev({ t: 'relic', name: it.name, n: c.relics[bi] }); return it;
 }
+// --- secret weapons (Casper, 27 Oct: more items): one per biome, forged at Garo's from chest ore, the biome's core and
+// Titan Souls. Each is the weapon of that biome's world boss story; fixed affixes a little above its relic, a picture of
+// its own (assets/ui/secret/<biome>.webp, Hugging Face batch hf-art-c1). Not sold, not dropped: forged only.
+CFG.craft.secret = {
+  rarity: ['mythic', 'mythic', 'mythic', 'ancient', 'ancient', 'divine'],
+  cost: { ore: [60, 1.35], core: [6, 2], soul: [1, 0.5], gold: 4 }, // ore n × growth^biome · core a + b·biome · souls 1 + biome/2
+  weapons: [
+    { name: 'Thornheart Blade', say: "Grown from the Ancient Golem's heartwood; the vines still drink.", aff: { dmg: 0.14, lifesteal: 0.08, hp: 0.14, atkSpeed: 0.1 } },
+    { name: 'Rimecleaver', say: "Cut from the Frost Colossus's tusk; it never thaws.", aff: { dmg: 0.15, critDmg: 0.38, armor: 0.08, crit: 0.07 } },
+    { name: 'Magmaheart Maul', say: "The Magma Titan's cooling heart, bound to an iron haft.", aff: { dmg: 0.17, critDmg: 0.42, atkSpeed: 0.12, crit: 0.08 } },
+    { name: 'Voidwhisper Sceptre', say: 'A shard of the Void Colossus that hums the names of lost things.', aff: { dmg: 0.16, cdr: 0.15, superGain: 0.18, crit: 0.08 } },
+    { name: "Leviathan's Trident", say: 'The Abyssal Leviathan wore it as a crown of spines.', aff: { dmg: 0.17, atkSpeed: 0.15, lifesteal: 0.08, move: 0.07 } },
+    { name: 'Dawnbringer', say: "Forged in the Celestial Colossus's first light; it burns brighter on every crit.", aff: { dmg: 0.19, crit: 0.12, critDmg: 0.48, superGain: 0.15 } },
+  ],
+};
+function secretCost(bi) {
+  const S = CFG.craft.secret.cost, b = CB[bi];
+  return { mats: [[b.ore, Math.round(S.ore[0] * Math.pow(S.ore[1], bi))], [b.core, S.core[0] + S.core[1] * bi], [CFG.craft.titan.id, Math.floor(S.soul[0] + S.soul[1] * bi)]],
+    gold: Math.round(CFG.forge.base * Math.pow(CFG.forge.growth, Math.max(biomeTop(bi), G.profile.level) - 1) * S.gold) };
+}
+function makeSecretWeapon(bi, ilvl) {
+  const W = CFG.craft.secret.weapons[bi], it = makeItem('weapon', CFG.craft.secret.rarity[bi], ilvl, W.name, { aff: Object.assign({}, W.aff) });
+  it.sw = bi; return it;
+}
+function craftSecret(bi) {
+  bi = bi | 0; if (!CB[bi] || !biomeReached(bi, G.profile)) return null;
+  const cost = secretCost(bi); if (!canPay(cost)) return null; pay(cost);
+  const it = makeSecretWeapon(bi, Math.max(biomeTop(bi), G.profile.level) + 3);
+  giveItem(it); ev({ t: 'crafted', name: it.name }); return it;
+}
 // straight into the bag (crafted and relic items never become cases or get auto-salvaged)
 function giveItem(it) {
   const p = G.profile; p.bag.push(it); G.dirty = true;

@@ -368,6 +368,14 @@ const hex6 = (c) => '#' + c.toString(16).padStart(6, '0');
 function matChip(id, need, p) { const M = MATS[id], have = matCount(id, p), ok = need == null || have >= need;
   return `<span class="mat k-${M.kind}${ok ? '' : ' missing'}"><img class="mi" src="${matIcon(id)}" alt="">${M.name} <b>${need == null ? fmtK(have) : `${fmtK(have)}/${fmtK(need)}`}</b></span>`; }
 function costChips(cost, p) { return cost.mats.map(([id, n]) => matChip(id, n, p)).join('') + `<span class="mat gold${p.gold >= cost.gold ? '' : ' missing'}">${ICON.coin}<b>${fmtK(cost.gold)}</b></span>`; }
+// the biome's secret weapon (39-crafting.js): one card with its picture, recipe and Craft
+function secretHTML(bi, open, p) {
+  const W = CFG.craft.secret.weapons[bi], r = CFG.craft.secret.rarity[bi], cost = secretCost(bi), can = open && canPay(cost, p);
+  const pv = { slot: 'weapon', rarity: r, ilvl: 1, up: 0, aff: W.aff, name: W.name, sw: bi };
+  return `<div class="card craftSet secretW" style="--mc:${hex6(CB[bi].color)}"><h4>Secret weapon</h4><p class="fine">${escapeHTML(W.say)}</p></div>
+    <div class="list"><div class="item ${r} craftRow"><span class="setWrap" style="--sc:${hex6(CB[bi].color)}"><i class="rays"></i><i class="rays r2"></i><img class="setArt" src="${thumbFor(pv)}" alt=""></span><div class="meta"><div class="slot">Weapon · item level ${Math.max(biomeTop(bi), p.level) + 3}</div><div class="nm">${escapeHTML(W.name)} ${rarityChip(r)}</div><div class="st aff">${affixText(pv)}</div><div class="mats">${costChips(cost, p)}</div></div>
+      <button class="${can ? 'primary' : 'disabled'}" data-act="craftSecret" data-b="${bi}" ${can ? '' : 'aria-disabled="true"'}>Craft</button></div></div>`;
+}
 function craftTabHTML(p) {
   const C = CFG.craft, bi = clamp(UI.craftBiome == null ? Math.max(0, CB.findIndex((b, i) => !biomeReached(i + 1, p))) : UI.craftBiome, 0, 5), b = CB[bi], open = biomeReached(bi, p);
   const minL = Math.min(...CFG.world.zones.filter((z) => z.biome === bi).map((z) => z.minLevel || 1));
@@ -394,6 +402,7 @@ function craftTabHTML(p) {
       <div class="mats">${matChip(b.ore, null, p)}${matChip(b.part, null, p)}${matChip(b.core, null, p)}${matChip(C.titan.id, null, p)}</div>
     </div>
     <div class="list">${rows}</div>
+    ${secretHTML(bi, open, p)}
     ${forged}
     ${typeof lanesCraftHTML === 'function' ? lanesCraftHTML(bi, p) : ''}
     <div class="card secret"><h4>Hidden in ${BIOMES[bi].name} dungeons</h4>
@@ -938,6 +947,7 @@ function handlePanelClick(e) {
     case 'enchUp': if (empowerAffix(b.dataset.slot, b.dataset.k)) Sfx.play('job'); else toast(matCount(runeId()) < enchantRunes(G.profile.gear[b.dataset.slot] || { rarity: 'common' }) ? 'Not enough Rune Shards' : 'Not enough gems', 'bad'); openSmith('Enchant'); break;
     case 'craftBiome': UI.craftBiome = +b.dataset.b; openSmith('Craft'); break;
     case 'craftPiece': if (craftSetPiece(+b.dataset.b, b.dataset.slot)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
+    case 'craftSecret': if (craftSecret(+b.dataset.b)) { Sfx.play('radiant'); Showcase.spin = 0; } openSmith('Craft'); break;
     case 'craftForged': if (craftForged(b.dataset.d, b.dataset.g)) { Sfx.play('coin'); Showcase.spin = 0; } openSmith('Craft'); break;
     case 'buyUpg': if (buyUpgrade(b.dataset.id)) Sfx.play('unlock'); openSmith('Masterwork'); break;
     case 'queue': queueArena(); break;

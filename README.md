@@ -283,7 +283,9 @@ checks all 32 bodies, the Panther's three contacts, and all 43 hero models (27 a
   chests and a tiny hero chance; better chests roll higher rarities and more named items, low-level chests roll lower
   (`CFG.cases` in `71-cases-idle.js`). Open 5 opens five of the selected kind only.
 - **Forge (Garo):** Reforge, Masterwork ranks, Craft (biome ore + monster parts + dungeon cores + Titan Souls;
-  5-piece sets with glowing set auras), Forge shop, Enchant.
+  5-piece sets with glowing set auras; one **secret weapon** per biome, the weapon of its world boss's story, from the
+  biome's ore, core and Titan Souls: `CFG.craft.secret`, pictures `assets/ui/secret/`, `tools/secret_art.py`,
+  `tools/check_secret.cjs`), Forge shop, Enchant.
 - **Showdown arena:** 10 fighters vs bots, closing gas, power cubes, trophies. **The Rift.**
 - **Ascendant Lanes** (the main mode: PLAY on the title from level 5, Farm World beside it; `CFG.lanes.mainMode`): a
   small MOBA, 1v1 / 2v2 / 3v3 with your own hero. Everyone starts each match at level 1 and levels to 18 (skill at 3,
@@ -351,7 +353,7 @@ Current list: `docs/OPEN.md`. The big directions:
    section 3 of this README.
 2. **Higher-detail art:** unique item icons (96-128 px painted), an icon per craft material, art banners for the hub
    pages, a tall title image.
-3. **Secret weapons:** one craft recipe per biome from chest ore + a Titan Soul.
+3. **Secret weapons:** done (28 Oct); next, a special effect each (today: fixed affixes).
 4. **Heroes holding their weapon** (generated as one mesh), then weapons come back on heroes.
 5. **Multiplayer growth:** test PvP on two real devices, a first-play name prompt and name filter, room partitioning
    (`mpRoomKey`) when the lobby gets full, sharing shrines, XP orbs, Rift and dungeons.
