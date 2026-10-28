@@ -377,11 +377,11 @@ These exist today and should be swapped for real models. Pick one up if you're l
 
 | What | Where |
 |---|---|
-| Pets and prestige companions (bull, crystal dragon, …) | `assets/art/pet-companions.js`, `assets/art/crystal-dragon.js` |
+| Pets and prestige companions (bull, crystal dragon and sprout have models in `assets/pet/` since 28 Oct; the rest) | `assets/art/pet-companions.js`, `assets/art/crystal-dragon.js` |
 | Menu thumbnails of gear, chests and daily rewards | `assets/art/premium-models.js` |
 | Lava pools, dungeon floor, volcanic horizon (procedural fallbacks) | `src/game/44-world-view.js`, `47-dungeon-view.js` |
 | Lair bosses (today: the area's monster scaled ×1.8) | `src/game/39b-lair-bosses.js` |
-| Landmarks still to (re)make: volcano (horizon; TRELLIS meshed its lava glow as flat walls, 21 Oct), rift_pylon, rift_gate, arena_wall, dungeon_tile | `assets/world/<name>/` |
+| Landmarks still to (re)make: rift_pylon, rift_gate, arena_wall, dungeon_tile | `assets/world/<name>/` |
 
 ### The look a model must have
 

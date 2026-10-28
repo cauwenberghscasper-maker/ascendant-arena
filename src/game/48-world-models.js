@@ -37,9 +37,9 @@ const WORLD_MODEL_BOX = {
   tree_ember_lod_1: [0.48, 0.48], tree_ember_lod_2: [0.62, 0.6], tree_gold_1: [0.43, 0.45], tree_gold_2: [0.52, 0.6], tree_gold_lod_1: [0.43, 0.45], tree_gold_lod_2: [0.52, 0.6],
   tree_oak_1: [0.43, 0.45], tree_oak_2: [0.41, 0.4], tree_oak_3: [0.52, 0.6], tree_oak_lod_1: [0.43, 0.45], tree_oak_lod_2: [0.41, 0.4], tree_oak_lod_3: [0.52, 0.6],
   tree_snow_1: [0.78, 0.71], tree_snow_2: [0.57, 0.53], tree_snow_3: [0.74, 0.71], tree_snow_lod_1: [0.78, 0.71], tree_snow_lod_2: [0.57, 0.53], tree_snow_lod_3: [0.74, 0.71],
-  tuft_1: [0.48, 0.55], tuft_2: [1.23, 1.13], upside_tower: [0.77, 0.56], wagon: [1.28, 2.63], war_tent: [0.9, 0.94], warden_gate: [1.13, 0.61],
-  warden_gate_open: [1.25, 0.6], waterwheel: [1.17, 1.14], weapon_rack: [1.25, 0.89], well: [0.68, 0.74], wind_arch: [1.45, 0.72], windmill: [0.99, 0.68],
-  workbench: [2.26, 1.15],
+  tuft_1: [0.48, 0.55], tuft_2: [1.23, 1.13], upside_tower: [0.77, 0.56], volcano: [1.98, 1.83], wagon: [1.28, 2.63], war_tent: [0.9, 0.94],
+  warden_gate: [1.13, 0.61], warden_gate_open: [1.25, 0.6], waterwheel: [1.17, 1.14], weapon_rack: [1.25, 0.89], well: [0.68, 0.74], wind_arch: [1.45, 0.72],
+  windmill: [0.99, 0.68], workbench: [2.26, 1.15],
 };
 // </world-boxes>
 for (const k in WORLD_MODEL_BOX) ASSET_MANIFEST['world.' + k] = { dir: 'assets/world/' + k + '/', size: 1, world: true,

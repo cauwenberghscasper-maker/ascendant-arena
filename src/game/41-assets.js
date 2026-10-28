@@ -71,6 +71,10 @@ const GENERATED_ASSETS = {
 };
 // </asset-manifest>
 const ASSET_MANIFEST = Object.assign({}, GENERATED_ASSETS, {
+  // companions: generated models replace the code-built prototypes in 46-camera-quality.js (updateCompanion) once loaded
+  'pet.bull': { dir: 'assets/pet/bull/', size: 0.95, tris: 5870, source: 'TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, seed 7, batch hf-3d-c2, 28 Oct 2026' },
+  'pet.crystal': { dir: 'assets/pet/crystal/', size: 0.95, tris: 5872, source: 'TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, seed 7, batch hf-3d-c2, 28 Oct 2026' },
+  'pet.sprout': { dir: 'assets/pet/sprout/', size: 1.1, tris: 5861, source: 'TRELLIS.2 (MIT) from a Z-Image-Turbo (Apache-2.0) concept, seed 7, batch hf-3d-c2, 28 Oct 2026' },
   'gear.weapon.dragonsoul.focus': { dir: 'assets/gear/weapon/dragonsoul-focus/', size: 1.78, at: [0, -0.62, 0.1], glow: 1.6, tris: 5811,
     source: 'TRELLIS.2-4B (MIT) from a Z-Image-Turbo (Apache-2.0) concept, seed 7, 4 Oct 2026' },
 });
