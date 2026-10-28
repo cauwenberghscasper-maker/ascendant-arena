@@ -1,0 +1,126 @@
+{
+ "batch": "hf-3d-c2",
+ "user": "Casper565",
+ "jobs": [
+  {
+   "name": "volcano",
+   "ok": true,
+   "file": "volcano.glb",
+   "sec": 40.1
+  },
+  {
+   "name": "boss_z01_vespa",
+   "ok": true,
+   "file": "boss_z01_vespa.glb",
+   "sec": 58.4
+  },
+  {
+   "name": "boss_z02_oldmorel",
+   "ok": true,
+   "file": "boss_z02_oldmorel.glb",
+   "sec": 25.0
+  },
+  {
+   "name": "boss_z03_barkbone",
+   "ok": true,
+   "file": "boss_z03_barkbone.glb",
+   "sec": 37.1
+  },
+  {
+   "name": "boss_z04_nightmaw",
+   "ok": true,
+   "file": "boss_z04_nightmaw.glb",
+   "sec": 46.1
+  },
+  {
+   "name": "boss_z05_ramhorn",
+   "ok": true,
+   "file": "boss_z05_ramhorn.glb",
+   "sec": 34.0
+  },
+  {
+   "name": "boss_z06_gravelgrin",
+   "ok": true,
+   "file": "boss_z06_gravelgrin.glb",
+   "sec": 44.5
+  },
+  {
+   "name": "boss_z09_glacius",
+   "ok": true,
+   "file": "boss_z09_glacius.glb",
+   "sec": 43.1
+  },
+  {
+   "name": "boss_z10_echomother",
+   "ok": true,
+   "file": "boss_z10_echomother.glb",
+   "sec": 25.2
+  },
+  {
+   "name": "boss_z14_pyrewyrm",
+   "ok": true,
+   "file": "boss_z14_pyrewyrm.glb",
+   "sec": 30.6
+  },
+  {
+   "name": "boss_z15_coldflame",
+   "ok": true,
+   "file": "boss_z15_coldflame.glb",
+   "sec": 29.8
+  },
+  {
+   "name": "pet_bull",
+   "ok": true,
+   "file": "pet_bull.glb",
+   "sec": 35.5
+  },
+  {
+   "name": "pet_crystal",
+   "ok": true,
+   "file": "pet_crystal.glb",
+   "sec": 26.5
+  },
+  {
+   "name": "pet_slime",
+   "ok": true,
+   "file": "pet_slime.glb",
+   "sec": 24.5
+  },
+  {
+   "name": "pet_sprout",
+   "ok": true,
+   "file": "pet_sprout.glb",
+   "sec": 34.3
+  },
+  {
+   "name": "boss_z19_astronomer",
+   "ok": true,
+   "file": "boss_z19_astronomer.glb",
+   "sec": 23.8
+  },
+  {
+   "name": "boss_z20_nebulaqueen",
+   "ok": true,
+   "file": "boss_z20_nebulaqueen.glb",
+   "sec": 41.0
+  },
+  {
+   "name": "boss_z24_heartbeat",
+   "ok": true,
+   "file": "boss_z24_heartbeat.glb",
+   "sec": 32.4
+  },
+  {
+   "name": "boss_z25_boilshell",
+   "ok": true,
+   "file": "boss_z25_boilshell.glb",
+   "sec": 33.0
+  },
+  {
+   "name": "boss_z29_archon",
+   "ok": true,
+   "file": "boss_z29_archon.glb",
+   "sec": 24.4
+  }
+ ]
+}
