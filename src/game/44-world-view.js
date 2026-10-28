@@ -581,7 +581,7 @@ function buildHub() {
     const TM = TREE_MODEL[tree];
     if (TM && hasWM(TM[0])) {
       // one tree model per theme; near cells draw the full mesh, far cells its light LOD (when generated)
-      const [full, lod, shade] = treeSet(TM[0]), glowT = tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {};
+      const [full, lod, shade] = treeSet(TM[0]), glowT = Object.assign(tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {}, tree === 'crystal' || tree === 'dead' ? {} : { sway: tree === 'coral' ? 0.05 : 0.03 }); // crowns sway in the wind (coral in the current); crystals and dead trees stand still
       tops.forEach((t) => { const it = { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: TM[1] * t.s, color: soft(t.c, 0.1) };
         mput(TM[0], it, Object.assign({}, glowT, full)); if (lod) mput(TM[0] + '_lod', it, Object.assign({}, glowT, lod)); if (shade) mput(TM[0] + '_lod', it, shade, TM[0] + '_lod_shadow'); });
     } else {
@@ -593,8 +593,8 @@ function buildHub() {
       spikes.forEach((r) => mput(hasWM('rock_b') ? 'rock_b' : 'rock_a', { x: r.x, z: r.z, ry: hashf(r.z, r.x) * 6, s: 1.3 * r.s, sy: hasWM('rock_b') ? 1 : 1.9, color: soft(r.c, 0.55) }, { far: 120 })); }
     else { bat(rockGeo, rocks, true, { receive: true }); bat(spikeGeo, spikes, true); }
     // grass and flowers: a third as many model clumps (each covers more ground), close range only
-    if (hasWM('tuft')) { tufts.forEach((t, i) => { if (i % 3 === 0) mput('tuft', { x: t.x, z: t.z, ry: t.ry, s: 0.55 * t.s, color: soft(t.c, 0.5) }, { far: 60, shadow: false }); });
-      flowers.forEach((f, i) => { if (i % 3 === 0) mput(hasWM('flower') ? 'flower' : 'tuft', { x: f.x, z: f.z, ry: hashf(f.x, f.z) * 6, s: 0.6 * f.s }, { far: 60, shadow: false }, 'flowers'); }); }
+    if (hasWM('tuft')) { tufts.forEach((t, i) => { if (i % 3 === 0) mput('tuft', { x: t.x, z: t.z, ry: t.ry, s: 0.55 * t.s, color: soft(t.c, 0.5) }, { far: 60, shadow: false, sway: 0.14 }); });
+      flowers.forEach((f, i) => { if (i % 3 === 0) mput(hasWM('flower') ? 'flower' : 'tuft', { x: f.x, z: f.z, ry: hashf(f.x, f.z) * 6, s: 0.6 * f.s }, { far: 60, shadow: false, sway: 0.14 }, 'flowers'); }); }
     else { bat(tuftGeo, tufts, true, { shadow: false }); bat(flowerGeo, flowers, true, { shadow: false }); }
   });
   for (const b of batches.values()) inst(b.geo, b.list, b.useColor, b.opts);

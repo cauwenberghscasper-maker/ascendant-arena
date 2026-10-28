@@ -72,6 +72,7 @@ let fxBudget = 6;
 function processEvents() {
   fxBudget = 6;
   const evs = G.events;
+  try { // the queue always empties, even if one event's handler throws (28 Oct: a throw replayed the same events every frame)
   for (let i = 0; i < evs.length; i++) {
     const e = evs[i];
     if (e.t.length > 4 && e.t.startsWith('hero')) { HeroFX.event(e); continue; }
@@ -301,7 +302,7 @@ function processEvents() {
       case 'defeat': Sfx.play('lose'); showBanner(`#${e.place}`, 'Knocked out', 'red'); break;
     }
   }
-  evs.length = 0;
+  } finally { evs.length = 0; }
   if (G.dungeon) { if (G.dungeon.delve) delveHud(); else dungeonHud(); }
   else if ($('partyBar') && !$('partyBar').hidden) $('partyBar').hidden = true;
 }

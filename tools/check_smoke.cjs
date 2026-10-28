@@ -49,7 +49,10 @@ function serve() {
     while (g - g0 < gameSec && Date.now() - t0 < 40000) { for (const b of await nanScan()) bad.add(b); const r = await page.evaluate(() => [(__game.player.superCharge || 0) < 1e5, __game.time]); cast = cast || r[0]; g = r[1]; await page.waitForTimeout(100); }
     assert(cast, 'the super did not go off'); assert.deepEqual([...bad], [], 'effects with broken coordinates');
   };
-  const step = async (name, fn) => { const t0 = Date.now(); try { const r = await fn(); console.log(`PASS ${name}` + (r ? ' ' + JSON.stringify(r) : '') + ` (${((Date.now() - t0) / 1000).toFixed(1)}s)`); } catch (e) { console.error(`FAIL ${name}: ${e.message}`); throw e; } };
+  const step = async (name, fn) => { const t0 = Date.now(); try { const r = await fn(); console.log(`PASS ${name}` + (r ? ' ' + JSON.stringify(r) : '') + ` (${((Date.now() - t0) / 1000).toFixed(1)}s)`); } catch (e) { console.error(`FAIL ${name}: ${e.message}`);
+    // on GitHub Actions the failure also becomes an annotation, readable on the run page and through the API without the log
+    if (process.env.GITHUB_ACTIONS) console.log(`::error title=smoke: ${name.replace(/[\r\n:,]/g, ' ')}::${String(e.message).slice(0, 900).replace(/%/g, '%25').replace(/\r/g, '').replace(/\n/g, '%0A')}`);
+    throw e; } };
   const shots = process.env.SMOKE_SHOTS; if (shots) fs.mkdirSync(shots, { recursive: true });
   try {
     await step('boots and Play starts a run', async () => {
@@ -306,6 +309,8 @@ function serve() {
         const S = __game.lanes; for (let i = 0; i < 60 * 45; i++) { pl.intent.mz = S.myTeam === 'blue' ? 0.4 : -0.4; pl.intent.autoFire = true; __dbg.simStep(1 / 60); }
         const out = { started: true, fighters: S.fighters.length, minions: S.minions.filter((m) => m.alive).length, waves: S.waveN, lvl: pl.lnLvl, phase: S.phase, mode: __game.mode };
         __lanes.lanesEnd(S.myTeam, 'core'); for (let i = 0; i < 200; i++) __dbg.simStep(1 / 60); __lanes.leaveLanes();
+        // events of a match already left are still handled next frame: a kill always among them (28 Oct: it read the gone match)
+        __game.events.push({ t: 'lanesKill', name: 'Bot', mine: false }, { t: 'lanesStructDown', sk: 'tower', mine: false, x: pl.x, z: pl.z });
         out.after = [__game.mode, pl.team, Math.round(pl.x - back.x), Math.round(pl.z - back.z), !!__game.lanes]; return out;
       });
       await page.waitForTimeout(1500);
