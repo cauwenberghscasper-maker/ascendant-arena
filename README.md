@@ -353,7 +353,7 @@ Current list: `docs/OPEN.md`. The big directions:
    section 3 of this README.
 2. **Higher-detail art:** unique item icons (96-128 px painted), an icon per craft material, art banners for the hub
    pages, a tall title image.
-3. **Secret weapons:** done (27 Oct); next, a special effect each (today: fixed affixes).
+3. **Secret weapons:** done (28 Oct); next, a special effect each (today: fixed affixes).
 4. **Heroes holding their weapon** (generated as one mesh), then weapons come back on heroes.
 5. **Multiplayer growth:** test PvP on two real devices, a first-play name prompt and name filter, room partitioning
    (`mpRoomKey`) when the lobby gets full, sharing shrines, XP orbs, Rift and dungeons.
