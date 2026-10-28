@@ -309,6 +309,8 @@ function serve() {
         const S = __game.lanes; for (let i = 0; i < 60 * 45; i++) { pl.intent.mz = S.myTeam === 'blue' ? 0.4 : -0.4; pl.intent.autoFire = true; __dbg.simStep(1 / 60); }
         const out = { started: true, fighters: S.fighters.length, minions: S.minions.filter((m) => m.alive).length, waves: S.waveN, lvl: pl.lnLvl, phase: S.phase, mode: __game.mode };
         __lanes.lanesEnd(S.myTeam, 'core'); for (let i = 0; i < 200; i++) __dbg.simStep(1 / 60); __lanes.leaveLanes();
+        // events of a match already left are still handled next frame: a kill always among them (28 Oct: it read the gone match)
+        __game.events.push({ t: 'lanesKill', name: 'Bot', mine: false }, { t: 'lanesStructDown', sk: 'tower', mine: false, x: pl.x, z: pl.z });
         out.after = [__game.mode, pl.team, Math.round(pl.x - back.x), Math.round(pl.z - back.z), !!__game.lanes]; return out;
       });
       await page.waitForTimeout(1500);

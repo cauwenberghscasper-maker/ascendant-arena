@@ -18,7 +18,9 @@ Fixed (works as intended):
   existed ("Cannot read properties of null (reading 'structs')"). Because the event queue was only emptied after
   every handler ran, the throw replayed the same events every frame (no more effects or sounds until reload). Now
   the Lanes view skips an ended match (`47e-lanes-view.js`), and `processEvents` always empties the queue
-  (`try/finally` in `62-events-fx.js`). A player could hit this when a match ended as it started.
+  (`try/finally` in `62-events-fx.js`). A player could hit this when a match ended as it started. The kill feed
+  read the gone match's score too (only when someone died, so the check failed now and then): it shows the score only
+  while the match exists, and the smoke test now always queues a kill and a tower event after leaving.
 - Smoke test failures are also written as GitHub annotations (`tools/check_smoke.cjs`), so a red check says which
   step failed without opening the log. `Companion` is on the local-preview `__dbg` hooks for tests.
 
