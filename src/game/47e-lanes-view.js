@@ -23,6 +23,7 @@ function lanesGround(HX, HZ) {
   lane.position.set(LC.x, 0.02, LC.z); lanesGroup.add(lane);
 }
 function buildLanesView() {
+  if (!G.lanes) return; // the match already ended before its start event was handled (28 Oct: this threw every frame)
   const S = G.lanes, R = CFG.lanes, HX = lanesHalfX(), HZ = R.half.z, rng = mulberry32(4242);
   lanesGround(HX, HZ);
   const L = {}, add = (n, it) => (L[n] || (L[n] = [])).push(it);
@@ -122,7 +123,7 @@ function drawLanesMinimap(g, W2, H2, dpr) {
 }
 function lanesEvent(e) {
   switch (e.t) {
-    case 'lanesStart': enterLanesView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5;
+    case 'lanesStart': if (!G.lanes || G.mode !== 'lanes') break; enterLanesView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5;
       SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`Ascendant Lanes · ${e.size}v${e.size}`, `Everyone starts at level 1 · destroy the enemy Core${e.bonus ? ` · your bonus +${e.bonus}%` : ''}`, 'gold'); break;
     case 'lanesFight': Sfx.play('horn'); if (e.ot) showBanner('Overtime', 'Minions grow stronger every minute', 'red'); else showBanner('Fight!', 'Push your lane with the minions', 'gold'); break;
     case 'lanesLeave': enterLanesView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('lanes'); break;

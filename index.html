@@ -11535,7 +11535,7 @@ function buildHub() {
     const TM = TREE_MODEL[tree];
     if (TM && hasWM(TM[0])) {
       // one tree model per theme; near cells draw the full mesh, far cells its light LOD (when generated)
-      const [full, lod, shade] = treeSet(TM[0]), glowT = tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {};
+      const [full, lod, shade] = treeSet(TM[0]), glowT = Object.assign(tree === 'crystal' || tree === 'coral' ? { glow: tree === 'crystal' ? 0xb49cff : 0x5fffe0, glowK: 0.18 } : {}, tree === 'crystal' || tree === 'dead' ? {} : { sway: tree === 'coral' ? 0.05 : 0.03 }); // crowns sway in the wind (coral in the current); crystals and dead trees stand still
       tops.forEach((t) => { const it = { x: t.x, z: t.z, ry: hashf(t.x, t.z) * 6, s: TM[1] * t.s, color: soft(t.c, 0.1) };
         mput(TM[0], it, Object.assign({}, glowT, full)); if (lod) mput(TM[0] + '_lod', it, Object.assign({}, glowT, lod)); if (shade) mput(TM[0] + '_lod', it, shade, TM[0] + '_lod_shadow'); });
     } else {
@@ -11547,8 +11547,8 @@ function buildHub() {
       spikes.forEach((r) => mput(hasWM('rock_b') ? 'rock_b' : 'rock_a', { x: r.x, z: r.z, ry: hashf(r.z, r.x) * 6, s: 1.3 * r.s, sy: hasWM('rock_b') ? 1 : 1.9, color: soft(r.c, 0.55) }, { far: 120 })); }
     else { bat(rockGeo, rocks, true, { receive: true }); bat(spikeGeo, spikes, true); }
     // grass and flowers: a third as many model clumps (each covers more ground), close range only
-    if (hasWM('tuft')) { tufts.forEach((t, i) => { if (i % 3 === 0) mput('tuft', { x: t.x, z: t.z, ry: t.ry, s: 0.55 * t.s, color: soft(t.c, 0.5) }, { far: 60, shadow: false }); });
-      flowers.forEach((f, i) => { if (i % 3 === 0) mput(hasWM('flower') ? 'flower' : 'tuft', { x: f.x, z: f.z, ry: hashf(f.x, f.z) * 6, s: 0.6 * f.s }, { far: 60, shadow: false }, 'flowers'); }); }
+    if (hasWM('tuft')) { tufts.forEach((t, i) => { if (i % 3 === 0) mput('tuft', { x: t.x, z: t.z, ry: t.ry, s: 0.55 * t.s, color: soft(t.c, 0.5) }, { far: 60, shadow: false, sway: 0.14 }); });
+      flowers.forEach((f, i) => { if (i % 3 === 0) mput(hasWM('flower') ? 'flower' : 'tuft', { x: f.x, z: f.z, ry: hashf(f.x, f.z) * 6, s: 0.6 * f.s }, { far: 60, shadow: false, sway: 0.14 }, 'flowers'); }); }
     else { bat(tuftGeo, tufts, true, { shadow: false }); bat(flowerGeo, flowers, true, { shadow: false }); }
   });
   for (const b of batches.values()) inst(b.geo, b.list, b.useColor, b.opts);
@@ -12767,6 +12767,20 @@ function updateCompanion(dt,t) {
   const yaw=Showcase.on?Showcase.yaw:PetCombat.pose>0?PetCombat.facing:f;
   v.root.rotation.y+=angDiff(v.root.rotation.y,yaw)*(1-Math.exp(-dt*7));
   v.root.scale.setScalar(progress.size*(Showcase.on?1: .85));v.animate(t,calm);
+  if(Companion.model)animateCompanionModel(Companion.model,dt,t,calm);
+}
+// generated pet models have no skeleton: breathe when idle, hop and lean forward while following, rear back then lunge
+// on an attack, squash on landing (28 Oct, Casper: more animations). Speed from how far the pet moved this frame.
+function animateCompanionModel(m,dt,t,calm){
+  const C=Companion;let moved=C.lx==null?0:Math.hypot(C.x-C.lx,C.z-C.lz)/Math.max(dt,1e-3);C.lx=C.x;C.lz=C.z;if(moved>25)moved=0; // a snap (travel, showcase) is not running
+  C.run=lerp(C.run||0,Math.min(1,moved/3),1-Math.exp(-dt*8));
+  if(calm){m.position.y=0;m.rotation.set(0,0,0);m.scale.setScalar(1);return;}
+  const run=C.run, ph=(C.ph=(C.ph||0)+dt*(6+run*6)), hop=Math.abs(Math.sin(ph))*run;
+  const atk=PetCombat.pose>0?Math.sin(PetCombat.pose/.24*Math.PI):0, breathe=Math.sin(t*2.4)*.035*(1-run);
+  const land=run*Math.max(0,.18-hop)*1.2; // squashed for a moment at the bottom of each hop
+  m.position.y=hop*.16;
+  m.rotation.x=run*.16+atk*.32-hop*.05;m.rotation.z=Math.sin(ph*.5)*.06*run;
+  m.scale.set(1+breathe*.6+land,1-breathe-land*1.4+hop*.06,1+breathe*.6+land);
 }
 
 // --- adaptive quality ----------------------------------------------------------------------------
@@ -13676,6 +13690,7 @@ function lanesGround(HX, HZ) {
   lane.position.set(LC.x, 0.02, LC.z); lanesGroup.add(lane);
 }
 function buildLanesView() {
+  if (!G.lanes) return; // the match already ended before its start event was handled (28 Oct: this threw every frame)
   const S = G.lanes, R = CFG.lanes, HX = lanesHalfX(), HZ = R.half.z, rng = mulberry32(4242);
   lanesGround(HX, HZ);
   const L = {}, add = (n, it) => (L[n] || (L[n] = [])).push(it);
@@ -13775,7 +13790,7 @@ function drawLanesMinimap(g, W2, H2, dpr) {
 }
 function lanesEvent(e) {
   switch (e.t) {
-    case 'lanesStart': enterLanesView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5;
+    case 'lanesStart': if (!G.lanes || G.mode !== 'lanes') break; enterLanesView(true); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5;
       SpriteFX.play('pillar', 'frost', e.x, 0, e.z, 6); Sfx.play('super'); showBanner(`Ascendant Lanes · ${e.size}v${e.size}`, `Everyone starts at level 1 · destroy the enemy Core${e.bonus ? ` · your bonus +${e.bonus}%` : ''}`, 'gold'); break;
     case 'lanesFight': Sfx.play('horn'); if (e.ot) showBanner('Overtime', 'Minions grow stronger every minute', 'red'); else showBanner('Fight!', 'Push your lane with the minions', 'gold'); break;
     case 'lanesLeave': enterLanesView(false); Cam.yaw = 0; Cam.pos.set(e.x, 30, e.z - 14); Cam.look.set(e.x, 0, e.z + 1.5); Cam.fx = e.x; Cam.fz = e.z + 1.5; Feed.remove('lanes'); break;
@@ -13858,6 +13873,27 @@ function worldVariants(name) {
 const hasWorldModel = (name) => worldVariants(name).length > 0;
 // which variant an item gets: stable per position, so a tree and its far LOD always pick the same shape
 const variantIndex = (it, n) => Math.min(n - 1, Math.floor((((Math.sin(it.x * 12.9898 + it.z * 78.233) * 43758.5453) % 1) + 1) % 1 * n));
+// wind (28 Oct): tree crowns, grass and flowers lean and bob a little, more towards the top, every instance in its own
+// phase, on the same clock as the ground's grass wind (matGround uTime). Vertex math only; the shadow stays still.
+function swayMaterial(mat, geo, amp) {
+  if (!geo.boundingBox) geo.computeBoundingBox();
+  const bb = geo.boundingBox, hgt = Math.max(1e-3, bb.max.y - bb.min.y), prev = mat.onBeforeCompile, key = mat.customProgramCacheKey;
+  const u = { uSwayT: matGround.userData.u.uTime, uSway: { value: new THREE.Vector3(amp * hgt, bb.min.y, 1 / hgt) } };
+  mat.onBeforeCompile = (sh, r) => {
+    if (prev) prev.call(mat, sh, r); Object.assign(sh.uniforms, u);
+    sh.vertexShader = 'uniform float uSwayT; uniform vec3 uSway;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      { float f = clamp((transformed.y - uSway.y) * uSway.z, 0.0, 1.0); f *= f;
+      #ifdef USE_INSTANCING
+        vec2 ph = instanceMatrix[3].xz;
+      #else
+        vec2 ph = vec2(0.0);
+      #endif
+        float w = uSwayT * 1.6 + ph.x * 0.23 + ph.y * 0.19;
+        transformed.x += (sin(w) + 0.35 * sin(w * 2.7 + 0.6)) * uSway.x * f;
+        transformed.z += cos(w * 0.8 + 1.3) * uSway.x * 0.6 * f; }`);
+  };
+  mat.customProgramCacheKey = () => 'sway|' + (key ? key.call(mat) : '');
+}
 const WorldModels = {
   sets: [],
   // items: [{ x, y, z, ry, s (uniform) or sx/sy/sz, color }] -> a handle whose items can be moved or hidden later
@@ -13888,6 +13924,7 @@ const WorldModels = {
       if (h.opts.glow) { mat.emissive = new THREE.Color(h.opts.glow); mat.emissiveIntensity = h.opts.glowK || 0.35; if (mat.map) mat.emissiveMap = mat.map; }
       if (h.opts.bright) mat.color.multiplyScalar(h.opts.bright);
       if (h.opts.tint) mat.color.multiply(new THREE.Color(h.opts.tint));
+      if (h.opts.sway) swayMaterial(mat, o.geometry, h.opts.sway);
       if (h.opts.ghost) { mat.transparent = true; mat.opacity = 0.55; mat.depthWrite = false; mat.emissive = new THREE.Color(0x58e08a); mat.emissiveIntensity = 0.5; } // a see-through preview (Bastion placing)
       h.mats.push(mat);
       for (const items of bands.values()) {
@@ -15865,6 +15902,7 @@ let fxBudget = 6;
 function processEvents() {
   fxBudget = 6;
   const evs = G.events;
+  try { // the queue always empties, even if one event's handler throws (28 Oct: a throw replayed the same events every frame)
   for (let i = 0; i < evs.length; i++) {
     const e = evs[i];
     if (e.t.length > 4 && e.t.startsWith('hero')) { HeroFX.event(e); continue; }
@@ -16094,7 +16132,7 @@ function processEvents() {
       case 'defeat': Sfx.play('lose'); showBanner(`#${e.place}`, 'Knocked out', 'red'); break;
     }
   }
-  evs.length = 0;
+  } finally { evs.length = 0; }
   if (G.dungeon) { if (G.dungeon.delve) delveHud(); else dungeonHud(); }
   else if ($('partyBar') && !$('partyBar').hidden) $('partyBar').hidden = true;
 }
@@ -19720,7 +19758,7 @@ function boot(hotData) {
   if ('serviceWorker' in navigator && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
   if (LOCAL_PREVIEW) window.__ui = { UI, heroTab, openMerge, openBrawlers, openCases, openSmith, openArtifacts, openPrestige, openPrestigeReview, openIdle, openSettings, openWaypoints, openCollection, openMenu, openProgress, openSkills };
   if (LOCAL_PREVIEW) window.__delve = { startDelve, delveBots, delveBotsRecv, delveHumanLevel, partyRecv, partyUpdate, delveLayout, delveGate, delveReq, diffDef, playerPower, refPower, claimDelveChest, openDelvePanel, PARTY, partyMembers, get D() { return G.dungeon; } };
-  if (LOCAL_PREVIEW) window.__dbg = { hubParts, OW, questStep, questTarget, startWarden, routeNext, AssetSlots, enemyBase, MobFX, mobTypeOf, makeEnemy, matGround, bossAttack, bossPlan, bossPlanMech, bossKit, bossDamageMod, BOSS_KITS, BOSS_TEAM, bossPartySize, MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, pvpRecv, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, SpriteFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
+  if (LOCAL_PREVIEW) window.__dbg = { hubParts, OW, questStep, questTarget, startWarden, routeNext, AssetSlots, enemyBase, MobFX, mobTypeOf, makeEnemy, matGround, bossAttack, bossPlan, bossPlanMech, bossKit, bossDamageMod, BOSS_KITS, BOSS_TEAM, bossPartySize, MP, RT, mpApply, mpRebuild, pvpTargets, pvpOn, pvpRecv, forEachTarget, THREE, CFG, WorldModels, craft: { addMats, craftSetPiece, buyUpgrade, craftDungeonLoot, craftState, makeRelic, setBonuses, craftBonuses }, Post, renderer, scene, openMenu, openBrawlers, openSkills, openArtifacts, openProgress, TreeView, Feed, setBrawler, spendNode, views, dynGroup, camera, openWaypoints, openOffline, openSettings, Cloud, saveNow, TestTools, travelTo, chooseKeystone, computeOffline, claimOffline, autoTarget, AimFX, SpriteFX, masteryLevel, rollLoot, updateAim, checkAchievements, availableAttacks, refresh: () => refreshPlayerStats(false), Showcase, Companion, setShowcase, buyForge, forgeOffer, arenaBotThink, simStep, startArena, leaveArena, chooseClass, acceptJob, turnInJob, addXp, spawnBoss, endBoss, openResults, heroTab, openSmith, upgradeItem, interact, UI, Input, Cam, Q, openRiftPanel, openRiftResult, tierPicker, riftGroup, hubGroup, enterRiftView, openCases, openCasesFast, spinCase, openIdle, openPlayers, buildPlayerIntent };
   $('loading').hidden = true; $('playBtn').hidden = false;
   // wait briefly for the cloud save before letting the player start, so progress is never overwritten
   const btn = $('playBtn'), label = btn.textContent;

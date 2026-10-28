@@ -228,6 +228,20 @@ function updateCompanion(dt,t) {
   const yaw=Showcase.on?Showcase.yaw:PetCombat.pose>0?PetCombat.facing:f;
   v.root.rotation.y+=angDiff(v.root.rotation.y,yaw)*(1-Math.exp(-dt*7));
   v.root.scale.setScalar(progress.size*(Showcase.on?1: .85));v.animate(t,calm);
+  if(Companion.model)animateCompanionModel(Companion.model,dt,t,calm);
+}
+// generated pet models have no skeleton: breathe when idle, hop and lean forward while following, rear back then lunge
+// on an attack, squash on landing (28 Oct, Casper: more animations). Speed from how far the pet moved this frame.
+function animateCompanionModel(m,dt,t,calm){
+  const C=Companion;let moved=C.lx==null?0:Math.hypot(C.x-C.lx,C.z-C.lz)/Math.max(dt,1e-3);C.lx=C.x;C.lz=C.z;if(moved>25)moved=0; // a snap (travel, showcase) is not running
+  C.run=lerp(C.run||0,Math.min(1,moved/3),1-Math.exp(-dt*8));
+  if(calm){m.position.y=0;m.rotation.set(0,0,0);m.scale.setScalar(1);return;}
+  const run=C.run, ph=(C.ph=(C.ph||0)+dt*(6+run*6)), hop=Math.abs(Math.sin(ph))*run;
+  const atk=PetCombat.pose>0?Math.sin(PetCombat.pose/.24*Math.PI):0, breathe=Math.sin(t*2.4)*.035*(1-run);
+  const land=run*Math.max(0,.18-hop)*1.2; // squashed for a moment at the bottom of each hop
+  m.position.y=hop*.16;
+  m.rotation.x=run*.16+atk*.32-hop*.05;m.rotation.z=Math.sin(ph*.5)*.06*run;
+  m.scale.set(1+breathe*.6+land,1-breathe-land*1.4+hop*.06,1+breathe*.6+land);
 }
 
 // --- adaptive quality ----------------------------------------------------------------------------

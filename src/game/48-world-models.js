@@ -54,6 +54,27 @@ function worldVariants(name) {
 const hasWorldModel = (name) => worldVariants(name).length > 0;
 // which variant an item gets: stable per position, so a tree and its far LOD always pick the same shape
 const variantIndex = (it, n) => Math.min(n - 1, Math.floor((((Math.sin(it.x * 12.9898 + it.z * 78.233) * 43758.5453) % 1) + 1) % 1 * n));
+// wind (28 Oct): tree crowns, grass and flowers lean and bob a little, more towards the top, every instance in its own
+// phase, on the same clock as the ground's grass wind (matGround uTime). Vertex math only; the shadow stays still.
+function swayMaterial(mat, geo, amp) {
+  if (!geo.boundingBox) geo.computeBoundingBox();
+  const bb = geo.boundingBox, hgt = Math.max(1e-3, bb.max.y - bb.min.y), prev = mat.onBeforeCompile, key = mat.customProgramCacheKey;
+  const u = { uSwayT: matGround.userData.u.uTime, uSway: { value: new THREE.Vector3(amp * hgt, bb.min.y, 1 / hgt) } };
+  mat.onBeforeCompile = (sh, r) => {
+    if (prev) prev.call(mat, sh, r); Object.assign(sh.uniforms, u);
+    sh.vertexShader = 'uniform float uSwayT; uniform vec3 uSway;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      { float f = clamp((transformed.y - uSway.y) * uSway.z, 0.0, 1.0); f *= f;
+      #ifdef USE_INSTANCING
+        vec2 ph = instanceMatrix[3].xz;
+      #else
+        vec2 ph = vec2(0.0);
+      #endif
+        float w = uSwayT * 1.6 + ph.x * 0.23 + ph.y * 0.19;
+        transformed.x += (sin(w) + 0.35 * sin(w * 2.7 + 0.6)) * uSway.x * f;
+        transformed.z += cos(w * 0.8 + 1.3) * uSway.x * 0.6 * f; }`);
+  };
+  mat.customProgramCacheKey = () => 'sway|' + (key ? key.call(mat) : '');
+}
 const WorldModels = {
   sets: [],
   // items: [{ x, y, z, ry, s (uniform) or sx/sy/sz, color }] -> a handle whose items can be moved or hidden later
@@ -84,6 +105,7 @@ const WorldModels = {
       if (h.opts.glow) { mat.emissive = new THREE.Color(h.opts.glow); mat.emissiveIntensity = h.opts.glowK || 0.35; if (mat.map) mat.emissiveMap = mat.map; }
       if (h.opts.bright) mat.color.multiplyScalar(h.opts.bright);
       if (h.opts.tint) mat.color.multiply(new THREE.Color(h.opts.tint));
+      if (h.opts.sway) swayMaterial(mat, o.geometry, h.opts.sway);
       if (h.opts.ghost) { mat.transparent = true; mat.opacity = 0.55; mat.depthWrite = false; mat.emissive = new THREE.Color(0x58e08a); mat.emissiveIntensity = 0.5; } // a see-through preview (Bastion placing)
       h.mats.push(mat);
       for (const items of bands.values()) {

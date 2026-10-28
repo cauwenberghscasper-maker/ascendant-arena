@@ -37,6 +37,7 @@ and change only your own line here: tick it when it is merged, add what you foun
       Details: `docs/log/2026-10-23-character-animation-fix.md`.
 - [x] Monster attacks: every species' own projectiles, particles, bursts and death (22 Oct, `docs/log/2026-10-22-monster-attack-art.md`).
 - [x] Painted combat effects and monster bursts from generated pictures (24 Oct, `docs/log/2026-10-24-painted-effects.md`).
+- [ ] Wind sway on trees/grass and moving pet models (28 Oct, `docs/log/2026-10-28-animations.md`): judge the strength on a phone.
 - [ ] Painted effects: look at them on a real phone (size, readability in big fights); per-hero hit pictures still use the drawn bursts.
 - [ ] World and dungeon bosses' attack art in the same per-boss style; monster sounds per species.
 - [x] Hero ammo as pixel sprites for 23 heroes (27 Oct, `docs/log/2026-10-27-hero-ammo-sprites.md`); Wrenna, Corrin, Tychon, Kerberon keep their liked 3D shapes.
