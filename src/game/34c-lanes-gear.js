@@ -24,6 +24,8 @@ CFG.lanesGear = {
   ],
 };
 const LG_BY_ID = Object.fromEntries(CFG.lanesGear.items.map((it) => [it.id, it]));
+// painted picture of each piece (Hugging Face batch hf-art-c1, tools/cutout_art.py -> assets/ui/lanes/gear/<id>.webp)
+const lgArt = (it) => 'assets/ui/lanes/gear/' + it.id + '.webp';
 const lanesGearRank = (p, id) => (((p || G.profile).lanes || {}).gear || {})[id] | 0;
 // what a rank costs: the biome's ore, monster parts, dungeon cores from rank 2, Titan Souls from rank 4 in the later
 // biomes, and gold at the biome's level (recipe table in docs/log/2026-10-25-lanes-mode.md)
@@ -60,7 +62,7 @@ function lanesCraftHTML(bi, p) {
   const rows = list.map((it) => {
     const r = lanesGearRank(p, it.id), max = r >= CFG.lanesGear.maxRank, cost = max ? null : lanesGearCost(it, r + 1), can = open && !max && canPay(cost, p);
     const need = cost ? cost.mats.map(([id, n]) => `${fmtK(n)} ${escapeHTML((MATS[id] || {}).name || id)}`).join(' · ') + ` · ${fmtK(cost.gold)} gold` : 'Fully ranked';
-    return `<div class="item craftRow lnGear" style="--mc:${hex6(it.col)}"><span class="lnGearIc">${gi(it.icon)}</span><div class="meta"><div class="slot">Lanes ${it.slot} · rank ${r}/${CFG.lanesGear.maxRank}${eq[it.slot] === it.id ? ' · equipped' : ''}</div>
+    return `<div class="item craftRow lnGear" style="--mc:${hex6(it.col)}"><span class="lnGearIc"><img src="${lgArt(it)}" alt=""></span><div class="meta"><div class="slot">Lanes ${it.slot} · rank ${r}/${CFG.lanesGear.maxRank}${eq[it.slot] === it.id ? ' · equipped' : ''}</div>
       <div class="nm">${escapeHTML(it.name)}</div><div class="st">${escapeHTML(it.d(it.v * Math.max(1, r), Math.max(1, r)))}</div><div class="st fine">${need}</div></div>
       <button class="${can ? 'primary' : 'disabled'}" data-act="lnGCraft" data-id="${it.id}" ${can ? '' : 'aria-disabled="true"'}>${r ? 'Rank up' : 'Craft'}</button></div>`;
   }).join('');
@@ -68,8 +70,8 @@ function lanesCraftHTML(bi, p) {
 }
 function lanesLoadoutHtml() {
   const p = G.profile, eq = ((p.lanes || {}).eq) || {}, have = CFG.lanesGear.items.filter((it) => lanesGearRank(p, it.id)), fx = (p.lanes || {}).fx;
-  const slot = (s) => { const it = LG_BY_ID[eq[s]]; return `<div class="lnSlot${it ? ' on' : ''}" style="--mc:${it ? hex6(it.col) : '#555'}">${it ? gi(it.icon) : gi('m_lock')}<small>${it ? escapeHTML(it.name) : s[0].toUpperCase() + s.slice(1)}</small>${it ? `<b>${lanesGearRank(p, it.id)}</b>` : ''}</div>`; };
-  const picks = have.length ? `<div class="lnPicks">${have.map((it) => `<button class="ghost lnPick${eq[it.slot] === it.id ? ' on' : ''}" data-act="lnGEquip" data-id="${it.id}" style="--mc:${hex6(it.col)}">${gi(it.icon)}<span>${escapeHTML(it.name)}</span></button><button class="ghost lnTrailBtn${fx === it.id ? ' on' : ''}" data-act="lnGTrail" data-id="${it.id}" style="--mc:${hex6(it.col)}" aria-label="Trail colour">Trail</button>`).join('')}</div>` : `<p class="fine">Craft Lanes gear at Garo's Forge › Craft from what you farm in the world.</p>`;
+  const slot = (s) => { const it = LG_BY_ID[eq[s]]; return `<div class="lnSlot${it ? ' on' : ''}" style="--mc:${it ? hex6(it.col) : '#555'}">${it ? `<img class="lgIc" src="${lgArt(it)}" alt="">` : gi('m_lock')}<small>${it ? escapeHTML(it.name) : s[0].toUpperCase() + s.slice(1)}</small>${it ? `<b>${lanesGearRank(p, it.id)}</b>` : ''}</div>`; };
+  const picks = have.length ? `<div class="lnPicks">${have.map((it) => `<button class="ghost lnPick${eq[it.slot] === it.id ? ' on' : ''}" data-act="lnGEquip" data-id="${it.id}" style="--mc:${hex6(it.col)}"><img class="lgIc" src="${lgArt(it)}" alt=""><span>${escapeHTML(it.name)}</span></button><button class="ghost lnTrailBtn${fx === it.id ? ' on' : ''}" data-act="lnGTrail" data-id="${it.id}" style="--mc:${hex6(it.col)}" aria-label="Trail colour">Trail</button>`).join('')}</div>` : `<p class="fine">Craft Lanes gear at Garo's Forge › Craft from what you farm in the world.</p>`;
   return `<div class="lnLoadout">${CFG.lanesGear.slots.map(slot).join('')}</div>${G.lanes ? '' : picks}`;
 }
 function lanesGearAction(act, b) {
